@@ -658,7 +658,6 @@ module.exports = function() {
 	
 	/* Cache Public Votes */
 	this.getVotes = function() {
-		if(stats.gamephase != 2) return;
 		sql("SELECT id,public_value FROM players", result => {
 				publicValues = result;
 		}, () => {
