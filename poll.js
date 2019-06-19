@@ -203,7 +203,7 @@ module.exports = function() {
 		// Find duplicate votes
 		let duplicates = ([].concat.apply([], reactions.map(el => el.users.array()))).filter((el, index, array) => array.indexOf(el) != index).filter((el, index, array) => array.indexOf(el) === index);
 		// Create message
-		let votesMessage = reactions.filter(el => el.users.array().length > 1 || (emojiToID(el.emoji) && publicVotes && publicVotes.find(el2 => el2.id === emojiToID(el.emoji)).public_votes > 0)).map(el => {
+		let votesMessage = reactions.filter(el => el.users.array().length > 1 || (emojiToID(el.emoji) && publicVotes.find(el2 => el2.id === emojiToID(el.emoji)).public_votes > 0)).map(el => {
 			// Get non duplicate voters
 			let votersList = el.users.array().filter(el => !duplicates.includes(el)).map(el3 => channel.guild.members.find(el2 => el2.id === el3.id));
 			if(!votersList.length && (!emojiToID(el.emoji) || publicVotes.find(el2 => el2.id === emojiToID(el.emoji)).public_votes <= 0)) return { valid: false };
