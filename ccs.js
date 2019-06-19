@@ -1,5 +1,5 @@
 /*
-	Module for CCs
+	Module for CCs 
 		- Creates ccs
 		- Checks if something is a cc
 		
