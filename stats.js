@@ -279,7 +279,7 @@ module.exports = function() {
 		if(!args[1]) { 
 			channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `gamephase set <phase>`"); 
 			return; 
-		} else if(args[1] >= 0 && args[1] <= 4) {
+		} else if(args[1] >= 0 && args[1] <= 3) {
 			// Saved verified gamephase
 			sqlSetStat(1, args[1], result => {
 				let phase = getPhaseName(args[1]);
