@@ -529,7 +529,7 @@ module.exports = function() {
 				channel.send("⛔ Database error. Coult not find any matching SCs!");
 				return;
 			}
-			result.forEach(el => channel.send("**" + toTitleCase(el.name) + "** [" + toTitleCase(el.type) + "]\nCondition: " + toTitleCase(el.cond.replace(/,/g,", ")) + "\nMembers: " + toTitleCase(el.members.replace(/,/g,", ")) + "\nSetup Commands: " + (el.length > 0 ? "`" + el.setup.replace(/,/g,"`, `") + "`" : "")));
+			result.forEach(el => channel.send("**" + toTitleCase(el.name) + "** [" + toTitleCase(el.type) + "]\nCondition: " + toTitleCase(el.cond.replace(/,/g,", ")) + "\nMembers: " + toTitleCase(el.members.replace(/,/g,", ")) + "\nSetup Commands: " + (el.setup.length > 0 ? "`" + el.setup.replace(/,/g,"`, `") + "`" : "")));
 		}, () => {
 			// Couldn't delete from database
 			channel.send("⛔ Database error. Coult not get values from SC database!");
