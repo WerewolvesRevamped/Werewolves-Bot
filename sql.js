@@ -10,28 +10,7 @@ module.exports = function() {
 	/* Variables */
 	this.connection = null;
 	this.mysql = require("mysql");
-	
-	/* Old Sql Function */
-	this.sqlOld = function(query, callback) {
-		connection.query(query, function(err, result, fields) {
-			if(!err) { 
-				callback(result);
-			} else { 
-				logO(err);
-				callback(false);
-			}
-		});
-	}
-	
-	/* Old Set Stat */
-	this.sqlSetStatOld = function(id, value, callback) {
-		sqlOld("UPDATE stats SET value = " + connection.escape(value) + " WHERE id = " + connection.escape(id), callback);
-	}
 
-	/* Old Get Stat */
-	this.sqlGetStatOld = function(id, callback) {
-		sqlOld("SELECT value,name FROM stats WHERE id = " + connection.escape(id), callback);
-	}
 	
 	/* Create Connection */
 	this.sqlSetup = function() {
@@ -50,7 +29,7 @@ module.exports = function() {
 		});
 	}
 
-	/* Does a sql query and calls one with result callback on success and logs an error and calls another callback on failure */
+	/* Does a sql query and calls one callback with result on success and logs an error and calls another callback on failure */
 	this.sql = function(q, rC, eC) {
 		sqlQuery(q, rC, eC, 0)
 	}
