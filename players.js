@@ -648,7 +648,6 @@ module.exports = function() {
 	
 	/* Cache emojis */
 	this.getEmojis = function() {
-		if(stats.gamephase != 2) return;
 		sql("SELECT id,emoji FROM players", result => {
 				emojiIDs = result;
 		}, () => {
