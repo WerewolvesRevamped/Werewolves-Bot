@@ -199,8 +199,6 @@ module.exports = function() {
 	
 	/* Sets a stat in the database */
 	this.cmdOptionsSet = function(channel, args, stat) {
-		// Get channel id
-		if(args[1] === "%c") args[1] = channel.id;
 		// Set value
 		sqlSetStat(stat, args[1], result => {
 			channel.send("✅ Successfully updated `" + args[0] + "` to `" + args[1] + "`!"); 
