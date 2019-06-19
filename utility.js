@@ -26,6 +26,7 @@ module.exports = function() {
 		return str.replace(/[a-zA-Z0-9][^\s-_]*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
 	}
 	
+	/* Chunks an array into chunks of the same size */ 
 	this.chunkArray = function(inArray, size) {
 	  var outArray = [];
 	  for(let i = 0; i < inArray.length; i += size) {
