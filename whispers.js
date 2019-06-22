@@ -140,7 +140,7 @@ module.exports = function() {
 	
 	/* Copies over messages */
 	this.connectionExecute = function(message) {
-		if(!message.author.bot && message.content.indexOf(stats.prefix) !== 0) {
+		if(connection && !message.author.bot && message.content.indexOf(stats.prefix) !== 0) {
 			// Find connection id(s)
 			sql("SELECT id, name FROM connected_channels WHERE channel_id = " + connection.escape(message.channel.id), result => {
 				// For each connection id, find each connected channel
@@ -173,12 +173,12 @@ module.exports = function() {
 						});
 					}, () => {
 						// Database error
-						message.channel.send("⛔ Database error. Could not access connected channels via id!");
+						log("⛔ Database error. Could not access connected channels via id!");
 					});
 				});
 			}, () => {
 				// Database error
-				message.channel.send("⛔ Database error. Could not access connected channels via channel!");
+				log("⛔ Database error. Could not access connected channels via channel!");
 			});
 		}
 	}
