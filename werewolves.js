@@ -215,7 +215,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
 	// Handle reaction ingame
 	} else if(stats.gamephase == 2) {
 		// Remove unallowed reactions
-		if(!isParticipant(reaction.message.guild.members.find(el => el.id === user.id)) && !isGameMaster(reaction.message.guild.members.find(el => el.id === user.id))) {
+		if(isSpectator(reaction.message.guild.members.find(el => el.id === user.id)) || isDeadParticipant(reaction.message.guild.members.find(el => el.id === user.id))) {
 			if(reaction.emoji == client.emojis.get(stats.no_emoji) || reaction.emoji == client.emojis.get(stats.yes_emoji)) return;
 			reaction.remove(user);
 		// Automatic pinning
