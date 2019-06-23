@@ -640,6 +640,11 @@ module.exports = function() {
 	this.isDeadParticipant = function(member) {
 		return member.roles.find(el => el.id === stats.dead_participant);
 	}
+	
+	/* Check if a member is a dead participant */
+	this.isSpectator = function(member) {
+		return member.roles.find(el => el.id === stats.spectator);
+	}
 
 	/* Check if a member is signed up */
 	this.isSignedUp = function(member) {
