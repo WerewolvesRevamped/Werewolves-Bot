@@ -183,7 +183,7 @@ client.on("message", async message => {
 		if(loadedModuleGame) cmdSpectate(message.channel, message.member);
 	break;
 	/* Make me Ts */
-	case "makemets":
+	case "iamts":
 		message.member.setNickname("Ts");
 		message.channel.send("✅ You are now Ts!");
 	break;
