@@ -345,7 +345,7 @@ module.exports = function() {
 			return;
 		}
 		if(args.length <= 1) {
-			helpCCs(message.member, ["cc", "create"]);	
+			helpCCs(member, ["cc", "create"]);	
 		}
 		players = getUserList(channel, args, 2);
 		if(isParticipant(member) || players.length > 0) {
