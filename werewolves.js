@@ -52,6 +52,7 @@ client.on("message", async message => {
 	case "game-phase":
 	case "game_phase":
 	case "gamephase":
+	case "gp":
 		if(checkGM(message)) cmdGamephase(message, args);
 	break;
 	/* Connection */ // Manages connections between channels
@@ -113,8 +114,18 @@ client.on("message", async message => {
 		if(loadedModulePlayers) cmdListAlive(message.channel);
 	break;
 	/* Bulk Delete */ // Deletes a lot of messages
+	case "bd":
 	case "bulkdelete":
 		if(checkGM(message)) cmdConfirm(message, "bulkdelete");
+	break;
+	/* Delete */ // Deletes a couple of messages
+	case "d":
+	case "delete":
+		if(checkGM(message)) cmdDelete(message.channel, args);
+	break;
+	/* Delay */ // Executes a command with delay
+	case "delay":
+		if(checkGM(message)) cmdDelay(message.channel, args);
 	break;
 	/* Start */ // Starts the game
 	case "start":
@@ -138,11 +149,13 @@ client.on("message", async message => {
 	break;
 	/* Kill Q */
 	case "killqueue":
+	case "kq":
 	case "kill":
 	case "killq":
 		if(loadedModulePlayers && checkGM(message)) cmdKillq(message, args);	
 	break;
 	/* Players */
+	case "p":
 	case "player":
 	case "players":
 		if(loadedModulePlayers && checkGM(message)) cmdPlayers(message, args);
@@ -157,6 +170,7 @@ client.on("message", async message => {
 		if(loadedModuleWhispers) cmdWebhook(message.channel, message.member, argsX);
 	break;
 	/* Help */
+	case "h":
 	case "help":
 		cmdHelp(message.channel, message.member, args);
 	break;
@@ -176,16 +190,102 @@ client.on("message", async message => {
 	case "demote":
 		if(loadedModuleGame) cmdDemote(message.channel, message.member);
 	break;
-	/* Promote */
+	/* New Game Ping */
+	case "gameping":
+		if(loadedModuleGame && checkGM(message)) cmdGamePing(message.channel, message.member);
+	break;
+	/* Spectate */
+	case "s":
 	case "spec":
 	case "spectator":
 	case "spectate":
 		if(loadedModuleGame) cmdSpectate(message.channel, message.member);
 	break;
 	/* Make me Ts */
-	case "iamts":
-		message.member.setNickname("Ts");
-		message.channel.send("✅ You are now Ts!");
+	case "makemets":
+		if(message.author.username != "McTsts") {	
+			message.member.setNickname("Ts (" + message.member.displayName + ")");
+			message.channel.send("✅ You are now a fake Ts!");
+		} else {
+			message.member.setNickname("Ts");
+			message.channel.send("✅ You are now Ts!");
+		}
+	break;
+	case "steinisnttoobad":
+		if(message.author.username != "Steinator") {	
+			message.channel.send("✅ No.");
+		} else {
+			message.member.setNickname("Steinator ☠ Steinator");
+			message.channel.send("✅ You have received a new name!");
+		}
+	break;
+	case "ilyalice":
+		if(message.author.username === "NK17") {
+			message.member.setNickname("NK ♡ Alice");
+			message.channel.send("✅ You love Alice!");
+		} else if(message.author.username === "Alice Howlter") {
+			message.member.setNickname("Alice ♡ Alice");
+			message.channel.send("✅ You love Alice!");
+		} else if(isGameMaster(message.member)) {
+			message.member.setNickname(message.member.displayName + " ♡ Alice");
+			message.channel.send("✅ You love Alice!");
+		} else {
+			message.channel.send("✅ No!");
+		}
+	break;
+	case "ilynk":
+		if(message.author.username === "NK17") {
+			message.member.setNickname("NK ♡ NK");
+			message.channel.send("✅ You love NK!");
+		} else if(message.author.username === "Alice Howlter") {
+			message.member.setNickname("Alice ♡ NK");
+			message.channel.send("✅ You love NK!");
+		} else if(isGameMaster(message.member)) {
+			message.member.setNickname(message.member.displayName + " ♡ NK");
+			message.channel.send("✅ You love NK!");
+		} else {
+			message.channel.send("✅ No!");
+		}
+	break;
+	case "ilyts":
+		if(!isParticipant(message.member)) {
+			message.member.setNickname(message.member.displayName + " ♡ Ts");
+			message.channel.send("✅ You love Ts!");
+		} else {
+			message.channel.send("✅ No!");
+		}
+	break;
+	case "newship":
+		if(!isParticipant(message.member)) {
+			let newShip = message.guild.members.random().displayName;
+			message.member.setNickname(message.member.displayName + " ♡ " + newShip);
+			message.channel.send("✅ You love " + newShip + "!");
+		} else {
+			message.channel.send("✅ No!");
+		}
+	break;
+	case "reverseme":
+		if(!isParticipant(message.member)) {
+			let newShip = message.guild.members.random().displayName;
+			message.member.setNickname(message.member.displayName.split("").reverse().join(""));
+			message.channel.send("✅ You have been reversed!");
+		} else {
+			message.channel.send("✅ No!");
+		}
+	break;
+	case "resetnick":
+		if(!isParticipant(message.member)) {
+			message.member.setNickname("");
+		} else {
+			message.channel.send("✅ No!");
+		}
+	break;
+	case "randomchar":
+		if(!isParticipant(message.member)) {
+			message.member.setNickname(message.member.displayName + Math.random().toString(36).substr(2, 1));
+		} else {
+			message.channel.send("✅ No!");
+		}
 	break;
 	/* Invalid Command */
 	default:

@@ -17,7 +17,7 @@ module.exports = function() {
 		if(!loadedModulePlayers) return;
 		// Check subcommand
 		if(!args[0]) { 
-			helpCCs(message.member, ["cc"]);
+			message.channel.send(helpCCs(message.member, ["cc"]));
 			return; 
 		} else if(stats.gamephase != 2 && args[0] != "cleanup") { 
 			message.channel.send("⛔ Command error. Can only use CCs while a game is running."); 
@@ -41,7 +41,7 @@ module.exports = function() {
 	}
 	
 	this.cmdCCCreateMulti = function(channel, member, args, type) {
-		cmdCCCreateOneMulti(channel, member, args.join(" ").split("~").splice(1).map(el => ("create " + el).split(" ")), type, 0);
+		cmdCCCreateOneMulti(channel, member, args.join(" ").split("~").splice(1).map(el => ("create " + el).split(" ")).splice(0, emojiIDs.length + 1), type, 0);
 	}
 	
 	this.cmdCCCreateOneMulti = function(channel, member, ccs, type, index) {
@@ -343,9 +343,9 @@ module.exports = function() {
 		if(!(isCC(channel) || (loadedModuleRoles && isSC(channel)))) {
 			channel.send("⛔ Command error. Can't use command outside a CC/SC!");
 			return;
-		}
-		if(args.length <= 1) {
-			helpCCs(member, ["cc", "create"]);	
+		} else if(!args[1]) {
+			channel.send(helpCCs(member, ["cc", "create"]));
+			return;
 		}
 		players = getUserList(channel, args, 2);
 		if(isParticipant(member) || players.length > 0) {

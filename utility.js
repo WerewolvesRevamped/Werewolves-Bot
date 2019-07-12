@@ -95,8 +95,36 @@ module.exports = function() {
 			});
 		}).catch(err => {
 			logO(err); 
-			sendError(messsage.channel, err, "Could not perform bulk delete");
+			sendError(channel, err, "Could not perform bulk delete");
 		});
+	}
+	
+	this.cmdDelete = function(channel, args) {
+		if(!args[0] || isNaN(args[0]) || args[0] > 5) {
+			channel.send("⛔ Syntax error. Requires a number (<=5) as parameter!"); 
+			return; 
+		}
+		channel.fetchMessages().then(messages => {
+			channel.bulkDelete(args[0]).then(messages => {
+			  channel.send("✅ Deleted " + messages.size + " messages.").then(msg => msg.delete(500));
+			});
+		}).catch(err => {
+			logO(err); 
+			sendError(channel, err, "Could not perform delete");
+		});
+	}
+	
+	this.cmdDelay = function(channel, args) {
+		if(!args[0] || isNaN(args[0]) || args[0] >= 93600) {
+			channel.send("⛔ Syntax error. Requires a number as parameter!"); 
+			return; 
+		} else if(!args[1]) {
+			channel.send("⛔ Syntax error. Needs a command to run after the delay!"); 
+		}
+		setTimeout(() => { 
+			if(args[1] != "delay") channel.send(stats.prefix + args.splice(1).join(" "));
+			else channel.send("```" + stats.prefix + args.splice(1).join(" ") + "```");
+		}, args[0] * 1000);
 	}
 	
 	/* Handles help command */
@@ -121,8 +149,8 @@ module.exports = function() {
 		if(loadedModulePlayers) msgB += helpPlayers(member, args);
 		if(loadedModulePoll) msgB += helpPoll(member, args);
 		// Print
-		if(!args[0]) { 
-			msgC = msgB.match(/(.|[\r\n]){1,1800}/g).map(el => "```\n" + el + "\n```");
+		if(args[0] === "") { 
+			msgC = chunkArray(msgB.split("\n"), 25).map(el => "```\n" + el.join("\n") + "\n```");
 			msgC[0] = msgA + msgC[0];
 			msgC.forEach(el => channel.send(el));
 		} else {
@@ -139,6 +167,8 @@ module.exports = function() {
 			case "":
 				help += stats.prefix + "ping - Tests the bot\n";
 				if(isGameMaster(member)) help += stats.prefix + "bulkdelete - Deletes webhook & user messages in bulk\n";
+				if(isGameMaster(member)) help += stats.prefix + "delete - Deletes a couple of messages\n";
+				if(isGameMaster(member)) help += stats.prefix + "delay - Executes a command with delay\n";
 			break;
 			case "ping":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "ping\n```";
@@ -149,6 +179,16 @@ module.exports = function() {
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "bulkdelete\n```";
 				help += "```\nFunctionality\n\nDeletes webhook/user messages (but not bot messages) in bulk from a channel.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "bulkdelete\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "bulkdelete!\n< ✅ Deleted 17 messages.```";
+			break;
+			case "delete": 
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "delete [0-5]\n```";
+				help += "```\nFunctionality\n\nDeletes the last up to five messages from a channel.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "delete 3\n< ✅ Deleted 3 messages.```";
+			break;
+			case "delay": 
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "delay <Delay> <Command>\n```";
+				help += "```\nFunctionality\n\nExecutes a command with delay in seconds.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "delay 5 ping\n< ✅ Pong! Latency is 990ms. API Latency is 114ms```";
 			break;
 		}
 		return help;

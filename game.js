@@ -53,6 +53,7 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "end - Ends a game\n";
 				if(isGameMaster(member)) help += stats.prefix + "demote - Removes Game Master and Admin roles\n";
 				if(isGameMaster(member)) help += stats.prefix + "promote - Reassigns Game Master and Admin roles\n";
+				if(isGameMaster(member)) help += stats.prefix + "gameping - Notifies players with the New Game Ping role about a new game\n";
 				help += stats.prefix + "spectate - Makes you a spectator\n";
 			break;
 			case "start":
@@ -96,6 +97,12 @@ module.exports = function() {
 				help += "```\nFunctionality\n\nReplaces GM Ingame and Admin Ingame roles with Game Master and Admin roles.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "promote\n< ✅ Attempting to promote you, McTsts!\n```";
 			break;
+			case "gameping":
+				if(!isGameMaster(member)) break;
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "gameping\n```";
+				help += "```\nFunctionality\n\nMakes New Game Ping role mentionable, pings it and then makes it unmentionable again.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "gameping\n< Ts is going to start a new game! @New Game Ping\n```";
+			break;
 			case "sheet":
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
@@ -136,12 +143,14 @@ module.exports = function() {
 			}).catch(err => { 
 				// Missing permissions
 				logO(err); 
-				sendError(channel, err, "Could not remove signed up role from " + members[index]);
+				sendError(channel, err, "Could not remove signed up role from " + members[index] + "! Trying again");
+				startOnePlayer(channel, members, index);
 			});
 		}).catch(err => { 
 			// Missing permissions
 			logO(err); 
-			sendError(channel, err, "Could not add role to" + members[index]);
+			sendError(channel, err, "Could not add role to" + members[index]  + "! Trying again");
+			startOnePlayer(channel, members, index);
 		});
 	}
 	
@@ -318,6 +327,7 @@ module.exports = function() {
 		// Cleanup channels
 		if(loadedModuleCCs) cmdCCCleanup(channel);
 		if(loadedModuleRoles) cmdRolesScCleanup(channel);
+		if(loadedModulePlayers) cmdKillqClear(channel);
 		sqlGetStat(15, result => {
 			cleanupCat(channel, result, "public");
 		}, () => {
@@ -365,7 +375,8 @@ module.exports = function() {
 		}).catch(err => { 
 			// Missing permissions
 			logO(err); 
-			sendError(channel, err, "Could not reset nickname!");
+			sendError(channel, err, "Could not reset nickname from " + members[index].displayName);
+			removeNicknameOnce(channel, members, ++index);
 		});
 	}
 	
@@ -446,6 +457,26 @@ module.exports = function() {
 		} else {
 			m.edit(m.content + "\n	⛔ Command error. Role `" + el[3] + "` does not exist!");
 		}
+	}
+	
+	this.cmdGamePing = function(channel, member) {
+		channel.guild.roles.find(el => el.id === stats.new_game_ping).setMentionable(true).then(u => {
+			channel.send("**" + member.displayName + "** is going to start a new game! <@&" + stats.new_game_ping + ">").then(m => {
+				channel.guild.roles.find(el => el.id === stats.new_game_ping).setMentionable(false).catch(err => {
+					// Message Error
+					logO(err); 
+					sendError(channel, err, "Could not reset new game ping role");
+				});
+			}).catch(err => {
+				// Message Error
+				logO(err); 
+				sendError(channel, err, "Could not ping new game ping role");
+			});
+		}).catch(err => {
+			// Message Error
+			logO(err); 
+			sendError(channel, err, "Could not prepare new game ping role");
+		});
 	}
 	
 }

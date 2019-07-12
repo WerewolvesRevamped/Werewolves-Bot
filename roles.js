@@ -136,7 +136,11 @@ module.exports = function() {
 				channel.send(result[0].info.replace(/~/g,"\n")).then(m => {
 					// Pin if pin is true
 					if(pin) {
-						m.pin().catch(err => { 
+						m.pin().then(mp => {
+							mp.channel.fetchMessages().then(messages => {
+								mp.channel.bulkDelete(messages.filter(el => el.type === "PINS_ADD"));
+							});	
+						}).catch(err => { 
 							logO(err); 
 							sendError(channel, err, "Could not pin SC info message");
 						});
@@ -834,7 +838,11 @@ module.exports = function() {
 				channel.send(result[0].description.replace(/~/g,"\n")).then(m => {
 					// Pin if pin is true
 					if(pin) {
-						m.pin().catch(err => { 
+						m.pin().then(mp => {
+							mp.channel.fetchMessages().then(messages => {
+								mp.channel.bulkDelete(messages.filter(el => el.type === "PINS_ADD"));
+							});	
+						}).catch(err => { 
 							logO(err); 
 							sendError(channel, err, "Could not pin info message");
 						});

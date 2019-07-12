@@ -1,9 +1,0 @@
-{
-	"token": "BOT TOKEN",
-	"db": {
-		"host": "localhost",
-		"user": "USER",
-		"password": "PASSWORD",
-		"database": "DATABASE"
-	}
-}

@@ -250,7 +250,7 @@ module.exports = function() {
 		// Check end of list
 		if(index > 20 || index >= list.length) return;
 		// React to message
-		message.react(list[index][0]).then(r => {
+		message.react(list[index][0].replace(/<|>/g,"")).then(r => {
 			// Recursively continue
 			pollReact(message, list, ++index);
 		}).catch(err => { 

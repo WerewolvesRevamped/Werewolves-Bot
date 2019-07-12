@@ -142,6 +142,12 @@ module.exports = function() {
 		}, () => {
 			log("Stats > ❗❗❗ Unable to cache no emoji!")
 		});
+		sqlGetStat(26,  result => { 
+			stats.new_game_ping = result; 
+			if(doLog) log("Stats > Cached new game ping as `" + result + "`!")
+		}, () => {
+			log("Stats > ❗❗❗ Unable to cache new game ping!")
+		});
 	}
 	
 	/* Gets the name of a gamephase by id */
@@ -186,6 +192,7 @@ module.exports = function() {
 				case "admin_ingame": stat = 23; break;
 				case "yes_emoji": stat = 24; break;
 				case "no_emoji": stat = 25; break;
+				case "new_game_ping": stat = 26; break;
 				default: message.channel.send("⛔ Syntax error. Invalid parameter!"); return;
 			}
 		} else {

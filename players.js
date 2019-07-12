@@ -140,7 +140,7 @@ module.exports = function() {
 	
 	/* Handles Emoji Get command */
 	this.cmdEmojis = function(channel) {
-		channel.send("```\n" + emojiIDs.map(el =>  el.emoji + " " + el.id).join("\n") + "\n``````\n" + emojiIDs.map(el =>  el.emoji).join(" ") + "\n```");
+		channel.send("```\n" + emojiIDs.map(el =>  el.emoji + " " + el.id).join("\n") + "\n``` ```\n" + emojiIDs.map(el =>  el.emoji).join(" ") + "\n```");
 	}
 	
 	/* Handles killq command */
@@ -473,10 +473,10 @@ module.exports = function() {
 		} else if(!isSignedUp(member)) {
 			// Sign Up
 			channel.send("✳ Attempting to sign you up").then(message => {
-				message.react(args[0]).then(r => {
+				message.react(args[0].replace(/<|>/g,"")).then(r => {
 					sql("SELECT id FROM players WHERE emoji = " + connection.escape(args[0]), result => {
 						// Check if somebody is already signed up with this emoji
-						if(result.length > 0 || args[0] === "⛔") { 
+						if(result.length > 0 || args[0] === "⛔" || args[0] === "❌") { 
 							// Signup error
 							channel.send("⛔ Database error. Emoji " + args[0] + " is already being used!");
 							message.clearReactions().catch(err => { 
@@ -509,7 +509,7 @@ module.exports = function() {
 					});
 				}).catch(err => { 
 					// Invalid emoji
-					message.edit("⛔ Invalid emoji. Could not sign you up!");
+					message.edit("⛔ Invalid emoji. Couldn't use emoji. Could not sign you up!");
 					logO(err); 
 				});
 			}).catch(err => { 
@@ -520,7 +520,7 @@ module.exports = function() {
 		} else {
 		// Change Emoji 
 			channel.send("✳ Attempting to sign you up").then(message => {
-				message.react(args[0]).then(r => {
+				message.react(args[0].replace(/<|>/g,"")).then(r => {
 					sql("SELECT id FROM players WHERE emoji = " + connection.escape(args[0]), result => {
 						// Check if somebody already has this emoji
 						if(result.length > 0 || args[0] === "⛔") { 
