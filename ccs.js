@@ -17,7 +17,7 @@ module.exports = function() {
 		if(!loadedModulePlayers) return;
 		// Check subcommand
 		if(!args[0]) { 
-			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `cc [add|remove|create|create_hidden|promote|leave|list|owners]`"); 
+			helpCCs(message.member, ["cc"]);
 			return; 
 		} else if(stats.gamephase != 2 && args[0] != "cleanup") { 
 			message.channel.send("⛔ Command error. Can only use CCs while a game is running."); 
@@ -343,6 +343,9 @@ module.exports = function() {
 		if(!(isCC(channel) || (loadedModuleRoles && isSC(channel)))) {
 			channel.send("⛔ Command error. Can't use command outside a CC/SC!");
 			return;
+		}
+		if(args.length <= 1) {
+			helpCCs(message.member, ["cc", "create"]);	
 		}
 		players = getUserList(channel, args, 2);
 		if(isParticipant(member) || players.length > 0) {
