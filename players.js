@@ -299,7 +299,7 @@ module.exports = function() {
 	this.cmdPlayersList = function(channel, args) {
 		// Get a list of players
 		sql("SELECT id,emoji,role,alive FROM players", result => {
-			let playerList = result.map(el => el.emoji + " - " + channel.guild.members.find(el2 => el2.id === el.id) + " (" + toTitleCase(el.role) + "); Alive: " + el.alive).join("\n");
+			let playerList = result.map(el => el.emoji + " - " + channel.guild.members.find(el2 => el2.id === el.id) + " (" + el.role.split(",").map(role => toTitleCase(role)).join(" + ") + "); Alive: " + el.alive).join("\n");
 			// Print message
 			channel.send("✳ Listing all players").then(m => {
 				m.edit("**Players** | Total: " +  result.length + "\n" + playerList)
@@ -375,7 +375,7 @@ module.exports = function() {
 			// Get info
 			sql("SELECT " + args[1] + " FROM players WHERE id = " + connection.escape(user), result => {
 				let playerName = channel.guild.members.find(el => el.id === user).displayName;
-				channel.send("✅ `" + playerName + "`'s " + args[1] + " value is `" + result[0][args[1]] + "`!");
+				channel.send("✅ `" + playerName + "`'s " + args[1] + " is `" + (args[1] === "role" ? result[0][args[1]].split(",").join("` + `") : result[0][args[1]]) + "`!");
 			}, () => {
 				// Database error
 				channel.send("⛔ Database error. Could not get player information!");

@@ -194,6 +194,10 @@ client.on("message", async message => {
 	case "gameping":
 		if(loadedModuleGame && checkGM(message)) cmdGamePing(message.channel, message.member);
 	break;
+	/* New Game Ping */
+	case "open":
+		if(loadedModuleGame && checkGM(message)) cmdOpen(message);
+	break;
 	/* Spectate */
 	case "s":
 	case "spec":

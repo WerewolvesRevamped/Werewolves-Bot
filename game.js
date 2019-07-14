@@ -46,7 +46,7 @@ module.exports = function() {
 		let help = "";
 		switch(args[0]) {
 			case "":
-				if(isGameMaster(member)) help += stats.prefix + "sheet [prepare|prepare_|import] - Prepares a game\n";
+				if(isGameMaster(member)) help += stats.prefix + "sheet [prepare|prepare_|import|mprepare|mimport] - Prepares a game\n";
 				if(isGameMaster(member)) help += stats.prefix + "start - Starts a game\n";
 				if(isGameMaster(member)) help += stats.prefix + "start_debug - Starts a game, without sending out the role messages\n";
 				if(isGameMaster(member)) help += stats.prefix + "reset - Resets a game\n";
@@ -54,6 +54,7 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "demote - Removes Game Master and Admin roles\n";
 				if(isGameMaster(member)) help += stats.prefix + "promote - Reassigns Game Master and Admin roles\n";
 				if(isGameMaster(member)) help += stats.prefix + "gameping - Notifies players with the New Game Ping role about a new game\n";
+				if(isGameMaster(member)) help += stats.prefix + "open - Opens signups and notifies players\n";
 				help += stats.prefix + "spectate - Makes you a spectator\n";
 			break;
 			case "start":
@@ -103,11 +104,17 @@ module.exports = function() {
 				help += "```\nFunctionality\n\nMakes New Game Ping role mentionable, pings it and then makes it unmentionable again.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "gameping\n< Ts is going to start a new game! @New Game Ping\n```";
 			break;
+			case "gameping":
+				if(!isGameMaster(member)) break;
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "open\n```";
+				help += "```\nFunctionality\n\nOpens signups, then makes New Game Ping role mentionable, pings it and then makes it unmentionable again.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "open\n```";
+			break;
 			case "sheet":
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
 					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "sheet [prepare|prepare_|import]\n```";
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "sheet [prepare|prepare_|import|mprepare|mimport]\n```";
 						help += "```\nFunctionality\n\nGroup of commands to handle google sheets used for the game. " + stats.prefix + "help sheet <sub-command> for detailed help.```";
 					break;
 					case "prepare":
@@ -120,10 +127,20 @@ module.exports = function() {
 						help += "```\nFunctionality\n\nSame as " + stats.prefix + "sheet prepare, but returns the information in a slightly different format, which works in some countries.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "sheet prepare_\n```";	
 					break;
+					case "mprepare":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "sheet mprepare\n```";
+						help += "```\nFunctionality\n\nReturns the names and ids of all players seperated with commans. Can be used in combination with " + stats.prefix + "sheet mimport on mobile.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "sheet mprepare\n```";	
+					break;
 					case "import":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "sheet import\n  <Sheet Information>\n```";
-						help += "```\nFunctionality\n\nSets nicknames and roles of players by pasting in the first four columns of a google sheet for the game (First Column: Name, Second Column: Id, Third Column: Nickname (can be empty), Fourth Column: Role)\n```";
+						help += "```\nFunctionality\n\nSets nicknames and roles of players by pasting in the first four columns of a google sheet for the game (First Column: Name, Second Column: Id, Third Column: Nickname (can be empty), Fourth Column: Role)\nOptionally, more columns with extra roles can be provided for double (or more) role games.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "sheet import\n  Fl1nt5t0n3	334066065112039425	The Artist	Stalker\n  Alice Howlter	277156693765390337	The Hooker	Angel\n  sav	437289420899745795	The Clown	Dog\n  SuperbWolfPack	309072997950554113	The Dancer	Citizen\n  Chopper2112	271399293372334081	The Chopper	Scared Wolf```";	
+					break;
+					case "mimport":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "sheet mimport\n  <Sheet Information>\n```";
+						help += "```\nFunctionality\n\n" + stats.prefix + "sheet import variation that can be more easily handwritten. Different values are comma seperated (First Column: Name, Second Column: Id, Third Column: Nickname (can be empty), Fourth Column: Role)\nOptionally, more columns with extra roles can be provided for double (or more) role games.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "sheet import\n  Fl1nt5t0n3,334066065112039425,The Artist,Stalker\n  Alice Howlter,277156693765390337,The Hooker,Angel\n  sav,437289420899745795,The Clown,Dog\n  SuperbWolfPack,309072997950554113,The Dancer,Citizen\n  Chopper2112,271399293372334081,The Chopper,Scared Wolf```";	
 					break;
 				}
 			break;
@@ -322,6 +339,7 @@ module.exports = function() {
 			});
 		}
 		removeNicknameOnce(channel, channel.guild.roles.find(el => el.id === stats.participant).members.array(), 0);
+		removeNicknameOnce(channel, channel.guild.roles.find(el => el.id === stats.dead_participant).members.array(), 0);
 		// Remove Roles & Nicknames
 		removeRoles(channel, [stats.signed_up, stats.participant, stats.dead_participant, stats.spectator, stats.mayor, stats.reporter, stats.guardian], ["signed up", "participant", "dead participant", "spectator", "mayor", "reporter", "guardian"])
 		// Cleanup channels
@@ -390,15 +408,17 @@ module.exports = function() {
 		// Find Subcommand
 		switch(args[0]) {
 			// Prepare Sheet
-			case "prepare": cmdSheetPrepare(message.channel, ","); break;
-			case "prepare_": cmdSheetPrepare(message.channel, ";"); break;
-			case "import": cmdSheetImport(message, message.channel, args); break;
+			case "prepare": cmdSheetPrepare(message.channel, ",", 1); break;
+			case "prepare_": cmdSheetPrepare(message.channel, ";", 1); break;
+			case "mprepare": cmdSheetPrepare(message.channel, ",", 2); break;
+			case "import": cmdSheetImport(message, message.channel, args, 1); break;
+			case "mimport": cmdSheetImport(message, message.channel, args, 2); break;
 			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
 		}
 	}
 	
 	/* Prepare info for sheet */
-	this.cmdSheetPrepare = function(channel, seperator) {
+	this.cmdSheetPrepare = function(channel, seperator, mode) {
 		// Check gamephase
 		if(stats.gamephase > 1) { 
 			channel.send("⛔ Command error. Can't prepare an already started game."); 
@@ -407,8 +427,17 @@ module.exports = function() {
 		// Get all players
 		sql("SELECT id,emoji FROM players", result => {
 			// Print all players
-			let playerList = result.map(el => "=SPLIT(\"" + channel.guild.members.find(el2 => el2.id === el.id).user.username + "," + el.id + "\"" + seperator + "\",\")").join("\n");
-			channel.send("**Copy this into a google sheet to have all names & ids**\n*Make sure to paste in with ctrl+shift+v\nColumns needed by `" + stats.prefix + "sheet import`: Name, Id, Nickname, Role*");
+			let playerList;
+			switch(mode) {
+				case 1:
+					playerList = result.map(el => "=SPLIT(\"" + channel.guild.members.find(el2 => el2.id === el.id).user.username + "," + el.id + "\"" + seperator + "\",\")").join("\n");
+					channel.send("**Copy this into a google sheet to have all names & ids**\n*Make sure to paste in with ctrl+shift+v\nColumns needed by `" + stats.prefix + "sheet import`: Name, Id, Nickname, Role*");
+				break;
+				case 2:
+					playerList = result.map(el => channel.guild.members.find(el2 => el2.id === el.id).user.username + "," + el.id).join("\n");
+					channel.send("**Use this to have all names & ides**\n*Values needed by `" + stats.prefix + "sheet mimport`: Name,Id,Nickname,Role*");
+				break;
+			}
 			channel.send("```\n" + playerList + "\n```");
 		}, () => {
 			// db error
@@ -417,14 +446,19 @@ module.exports = function() {
 	}
 	
 	/* Import info from sheet */
-	this.cmdSheetImport = function(message, channel, args) {
+	this.cmdSheetImport = function(message, channel, args, mode) {
 		// Check gamephase
 		if(stats.gamephase > 1) { 
 			channel.send("⛔ Command error. Can't import into an already started game."); 
 			return; 
 		}
 		// Split info
-		message.content.slice(stats.prefix.length).trim().replace(/\n/g,"~").split("~").slice(1).map(el => el.split(/\s\s\s\s/g)).forEach(async el => { 
+		let playerInfo;
+		switch(mode) {
+			case 1: playerInfo = message.content.slice(stats.prefix.length).trim().replace(/\n/g,"~").split("~").slice(1).map(el => el.split(/\s\s\s\s/g)); break;
+			case 2: playerInfo = message.content.slice(stats.prefix.length).trim().replace(/\n/g,"~").split("~").slice(1).map(el => el.split(/,/g)); break;
+		}
+		playerInfo.forEach(async el => { 
 			// Prepare a user
 			channel.send("▶ Preparing `" + el[0] + "`!").then(m => {
 				// Set Nickname
@@ -445,20 +479,30 @@ module.exports = function() {
 		});
 	}
 	
+	/* Imports one players' roles via a pasted sheet */
 	this.cmdSheetImportRole = function(m, el) {
-		el[3] = parseRole(el[3]);
+		// Find the roles and which are valid/invalid
+		let roleList = el.splice(3).map(role => parseRole(role));
+		let validRoles = roleList.filter(role => verifyRole(role));
+		let invalidRoles = roleList.filter(role => !verifyRole(role));
 		// Set Role
-		if(verifyRole(el[3])) {
-			sql("UPDATE players SET role = " + connection.escape(el[3]) + " WHERE id = " + connection.escape(el[1]), result => {
-				m.edit(m.content + "\n	✅ Set role to `" + el[3] + "`!");
+		if(!invalidRoles.length) {
+			// All roles are valid -> Set it
+			sql("UPDATE players SET role = " + connection.escape(validRoles.join(",")) + " WHERE id = " + connection.escape(el[1]), result => {
+				m.edit(m.content + "\n	✅ Set role to `" + validRoles.join("` + `") + "`!").then(m => {
+				});
 			}, () => {
-				m.edit(m.content + "\n	⛔ Database error. Could not set role!");
+				m.edit(m.content + "\n	⛔ Database error. Could not set role!").then(m => {
+				});
 			});
 		} else {
-			m.edit(m.content + "\n	⛔ Command error. Role `" + el[3] + "` does not exist!");
+			// One or more invalid roles
+			m.edit(m.content + "\n	⛔ Command error. Role `" + invalidRoles.join("` + `") + "` does not exist!").then(m => {
+			});
 		}
 	}
 	
+	/* Pings all players with the New Game Ping role */
 	this.cmdGamePing = function(channel, member) {
 		channel.guild.roles.find(el => el.id === stats.new_game_ping).setMentionable(true).then(u => {
 			channel.send("**" + member.displayName + "** is going to start a new game! <@&" + stats.new_game_ping + ">").then(m => {
@@ -477,6 +521,12 @@ module.exports = function() {
 			logO(err); 
 			sendError(channel, err, "Could not prepare new game ping role");
 		});
+	}
+	
+	/* Opens signups & Pings players */
+	this.cmdOpen = function(message) {
+		cmdGamephase(message, ["set", "1"]);
+		cmdGamePing(message.channel, message.member);
 	}
 	
 }

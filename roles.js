@@ -263,11 +263,13 @@ module.exports = function() {
 			channel.send("✅ Finished creating SCs!");
 			return;
 		}
-		let sqlCond = multi[index].cond.split(",").map(el => "role = " + connection.escape(el)).join(" OR ");
-		sql("SELECT id FROM players WHERE " + sqlCond + "ORDER BY role ASC", result => {
+		// Check if multi sc condition is met
+		sql("SELECT id,role FROM players ORDER BY role ASC", result => {
+			result = result.filter(el => el.role.split(",").some(el => multi[index].cond.split(",").includes(el)));
 			if(result.length > 0 || multi[index].cond === " ") {
-				let sqlCond2 = multi[index].members.split(",").map(el => "role = " + connection.escape(el)).join(" OR ");
-				sql("SELECT id FROM players WHERE " + sqlCond2 + "ORDER BY role ASC", result2 => {
+				// Find members of multisc
+				sql("SELECT id,role FROM players ORDER BY role ASC", result2 => {
+					result2 = result2.filter(el => el.role.split(",").some(el => multi[index].members.split(",").includes(el)));
 					// Create permissions
 					let ccPerms = getCCCatPerms(channel.guild);
 					if(result2.length > 0) {
@@ -317,7 +319,8 @@ module.exports = function() {
 			createOneExtraSC(channel, category, extra, ++index);
 		}
 		// Get players with that role
-		sql("SELECT id FROM players WHERE role = " + connection.escape(parseRole(extra[index].cond)) + "ORDER BY role ASC", result => {
+		sql("SELECT id,role FROM players ORDER BY role ASC", result => {
+			result = result.filter(el => el.role.split(",").includes(parseRole(extra[index].cond)));
 			if(result.length > 0) {
 				// Create SCs
 				createOneOneExtraSC(channel, category, extra, index, result, 0);
@@ -365,18 +368,26 @@ module.exports = function() {
 			createSCStartExtra(channel, category);
 			return;
 		}
-		sql("SELECT ind_sc FROM roles WHERE name = " + connection.escape(players[index].role), result => {
+		let roleList = players[index].role.split(",").map(el => "name = " + connection.escape(el)).join(" OR ");
+		sql("SELECT name,ind_sc FROM roles WHERE " + roleList, result => {	
+			if(!debug) { 
+				channel.guild.members.find(el => el.id === players[index].id).user.send("This message is giving you your role" + (result.length != 1 ? "s" : "") + " for the next game of Werewolves: Revamped!\n\n\nYour role" + (result.length != 1 ? "s are" : " is") + " `" + result.map(el => toTitleCase(el.name)).join("` + `") + "`.\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.\n\nIf you're confused about your role at all, then check #announcements on the discord, which contains a role book with information on all the roles in this game.").catch(err => { 
+					logO(err); 
+					sendError(channel, err, "Could not send role message to " + 	channel.guild.members.find(el => el.id === players[index].id).displayName);
+				});	
+			}
+			let indscRoles = result.filter(el => el.ind_sc).map(el => el.name);
 			// Check if ind sc
-			if(result[0] && result[0].ind_sc) { 
-				channel.send("✅ Creating `" + toTitleCase(players[index].role) + "` Ind SC for `" + channel.guild.members.find(el => el.id === players[index].id).displayName + "` (`" + toTitleCase(players[index].role) + "`)!");
+			if(indscRoles.length) { 
+				channel.send("✅ Creating `" + toTitleCase(indscRoles.join("-")) + "` Ind SC for `" + channel.guild.members.find(el => el.id === players[index].id).displayName + "` (`" + result.map(el => toTitleCase(el.name)).join("` + `") + "`)!");
 				// Create permissions
 				let ccPerms = getCCCatPerms(channel.guild);
 				ccPerms.push(getPerms(players[index].id, ["history", "read"], []));
 				// Create channel
-				channel.guild.createChannel(players[index].role, { type: "text",  permissionOverwrites: ccPerms })
+				channel.guild.createChannel(indscRoles.join("-").substr(0, 100), { type: "text",  permissionOverwrites: ccPerms })
 				.then(sc => {
 					// Send info message
-					cmdInfo(sc, [ players[index].role ], true);
+					indscRoles.forEach(el => cmdInfo(sc, [ el ], true));
 					// Move into sc category
 					sc.setParent(category).then(m => {
 						createOneIndSC(channel, category, players, ++index, debug);
@@ -391,19 +402,13 @@ module.exports = function() {
 				});
 			} else { 
 				// No ind sc
-				channel.send("✅ Skipping `" + channel.guild.members.find(el => el.id === players[index].id).displayName + "` (`" + toTitleCase(players[index].role) + "`)!");
+				channel.send("✅ Skipping `" + channel.guild.members.find(el => el.id === players[index].id).displayName + "` (`" + result.map(el => toTitleCase(el.name)).join("` + `") + "`)!");
 				createOneIndSC(channel, category, players, ++index, debug);
 			}
 		}, () => {
 			// Couldn't delete
 			channel.send("⛔ Database error. Could not get role info!");
 		});
-		if(!debug) { 
-			channel.guild.members.find(el => el.id === players[index].id).user.send("This message is giving you your role for the next game of Werewolves: Revamped!\n\n\nYour role is `" + toTitleCase(players[index].role) + "`.\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.\n\nIf you're confused about your role at all, then check #announcements on the discord, which contains a role book with information on all the roles in this game.").catch(err => { 
-				logO(err); 
-				sendError(channel, err, "Could not send role message to " + 	channel.guild.members.find(el => el.id === players[index].id).displayName);
-			});	
-		}
 	}
 	
 	/* Cache Role Info */
@@ -442,6 +447,7 @@ module.exports = function() {
 	
 	/* Converts a role/alias to role */
 	this.parseRole = function(input) {
+		console.log(input);
 		input = input.toLowerCase();
 		let alias = cachedAliases.find(el => el.alias === input);
 		if(alias) return parseRole(alias.name);
