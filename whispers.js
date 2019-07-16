@@ -38,6 +38,7 @@ module.exports = function() {
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "webhook <Message>\n```";
 				help += "```\nFunctionality\n\nRepeats a message as a webhook pretending to be you.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "webhook Does this work?\n< Does this work?\n```";
+				help += "```diff\nAliases\n\n- bot\n```";
 			break;
 			case "connection":
 				if(!isGameMaster(member)) break;

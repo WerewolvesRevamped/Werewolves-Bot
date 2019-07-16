@@ -78,6 +78,8 @@ client.on("message", async message => {
 		if(loadedModuleRoles && checkGM(message)) cmdInfo(message.channel, args, true);
 	break;
 	/* Options */ // Modify options such as role ids and prefix
+	case "stat":
+	case "stats":
 	case "option":
 	case "options": 
 		if(checkGM(message)) cmdOptions(message, args);
@@ -95,6 +97,7 @@ client.on("message", async message => {
 		if(loadedModulePlayers) cmdSignup(message.channel, message.member, args, true);
 	break;
 	/* List Signedup */ // Lists all signedup players
+	case "l":
 	case "list":
 	case "signedup":
 	case "signedup_list":
@@ -105,6 +108,7 @@ client.on("message", async message => {
 		if(loadedModulePlayers) cmdListSignedup(message.channel);
 	break;
 	/* List Alive */ // Lists all alive players
+	case "a":
 	case "alive":
 	case "alive_list":
 	case "alive-list":
@@ -144,6 +148,8 @@ client.on("message", async message => {
 		if(loadedModuleGame && checkGM(message)) cmdConfirm(message, "end");
 	break;
 	/* Sheet */ // Simplifies game managment via sheet
+	case "sh":
+	case "game":
 	case "sheet":
 		if(loadedModuleGame && checkGM(message)) cmdSheet(message, args);
 	break;
@@ -161,6 +167,7 @@ client.on("message", async message => {
 		if(loadedModulePlayers && checkGM(message)) cmdPlayers(message, args);
 	break;
 	/* CCs */
+	case "c":
 	case "cc":
 		if(loadedModuleCCs) cmdCC(message, args, argsX);
 	break;
@@ -175,10 +182,13 @@ client.on("message", async message => {
 		cmdHelp(message.channel, message.member, args);
 	break;
 	/* Emoji */
+	case "e":
 	case "emojis":
 		if(loadedModulePlayers) cmdEmojis(message.channel);
 	break;
 	/* Poll */
+	case "pl":
+	case "polls":
 	case "poll":
 		if(loadedModulePoll && checkGM(message)) cmdPoll(message, args);
 	break;

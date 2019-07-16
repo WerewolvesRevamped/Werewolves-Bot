@@ -66,6 +66,7 @@ module.exports = function() {
 					default:
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc [create|create_hidden|create_multi|create_multi_hidden|add|remove|promote|leave|list|owners" + (isGameMaster(member) ? "|cleanup"  : "") + "]\n```";
 						help += "```\nFunctionality\n\nGroup of commands to handle CCs. " + stats.prefix + "help cc <sub-command> for detailed help.\n```";
+						help += "```diff\nAliases\n\n- c\n```";
 					break;
 					case "create":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc create <CC Name> <Player List>\n```";

@@ -148,6 +148,12 @@ module.exports = function() {
 		}, () => {
 			log("Stats > ❗❗❗ Unable to cache new game ping!")
 		});
+		sqlGetStat(27,  result => { 
+			stats.game_status = result; 
+			if(doLog) log("Stats > Cached game status vc as `" + result + "`!")
+		}, () => {
+			log("Stats > ❗❗❗ Unable to cache game status vc!")
+		});
 	}
 	
 	/* Gets the name of a gamephase by id */
@@ -193,6 +199,7 @@ module.exports = function() {
 				case "yes_emoji": stat = 24; break;
 				case "no_emoji": stat = 25; break;
 				case "new_game_ping": stat = 26; break;
+				case "game_status": stat = 27; break;
 				default: message.channel.send("⛔ Syntax error. Invalid parameter!"); return;
 			}
 		} else {
@@ -228,6 +235,7 @@ module.exports = function() {
 					help += "```yaml\nSyntax\n\n" + stats.prefix + "options <Option Name> <New Value>\n```";
 					help += "```\nFunctionality\n\nReturns or sets (if <New Value> is set) the value of a bot option <Option Name>. A bot option can be a numeric id, or an option name.\n\nList of Option Names:\nprefix: The prefix the bot uses for commands\nparticipant: The id of the participant role\ngamemaster: The id of the gamemaster role\nspectator: The id of the spectator role\nsigned_up: The id of the signed up role\ndead_participant: The id of the dead participant role\nbot: The id of the bot role\nlog_guild: The id of the guild to use for logs\nlog_channel: The id of the channel to use for logs\nmayor: The id of the mayor role\nreporter: The id of the reporter role\nguardian: The id of the guardian role\ngame: The name of the game\nreporter_channel: The id of the reporter channel\ngamemaster_ingame: The id of the gamemaster ingame role\nadmin: The id of the admin role\nadmin_ingame: The id of the admin ingame role\nyes_emoji: The id of the yes emoji\nno_emoji: The id of the no emoji\n```";
 					help += "```fix\nUsage\n\n> " + stats.prefix + "options mayor\n< ✅ mayor currently is set to 588125889611431946!\n\n> " + stats.prefix + "options mayor 588125889611431946\n< ✅ Successfully updated mayor to 588125889611431946!```";
+					help += "```diff\nAliases\n\n- stat\n- stats\n- option\n```";
 			break;
 			case "gamephase":
 				if(!isGameMaster(member)) break;
@@ -235,6 +243,7 @@ module.exports = function() {
 					default:
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "gamephase [get|set]\n```";
 						help += "```\nFunctionality\n\nGroup of commands to handle the gamephase. " + stats.prefix + "help gamephase <sub-command> for detailed help. Also serves as an alias for " + stats.prefix + "gamephase get\n\nList of Gamephases:\nNothing, Signups, Ingame, Postgame```";
+						help += "```diff\nAliases\n\n- gp\n- game-phase\n- game_phase\n```";
 					break;
 					case "get":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "gamephase get\n```";
@@ -293,6 +302,7 @@ module.exports = function() {
 				channel.send("✅ Game Phase is now `" + phase + "` (" + args[1] + ")!"); 
 				log("GP > Set gamephase to `" + phase + "`!");
 				getStats();
+				updateGameStatus(channel.guild);
 			}, () => {
 				// Database didn't update gamephase
 				channel.send("⛔ Database error. Game Phase could not be set to `" + args[1] + "`!");
@@ -312,6 +322,18 @@ module.exports = function() {
 		}, () => {
 			// Couldn't get gamephase value
 			channel.send("⛔ Database error. Could not find gamephase.");
+		});
+	}
+	
+	this.updateGameStatus = function(guild) {
+		sql("SELECT alive FROM players", result => {
+			let gameStatus = guild.channels.find(el => el.id === stats.game_status);
+			switch(+stats.gamephase) {
+				case 0: gameStatus.setName("⛔ No Game"); break;
+				case 1: gameStatus.setName("📰 Signups Open (" + result.length + ")"); break;
+				case 2: gameStatus.setName("🔁 Game Running (" + result.filter(el => el.alive).length + "/" + result.length + ")"); break;
+				case 3: gameStatus.setName("✅ Game Concluded"); break;
+			}
 		});
 	}
 	

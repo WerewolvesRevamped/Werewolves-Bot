@@ -85,6 +85,7 @@ module.exports = function() {
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "spectate\n```";
 				help += "```\nFunctionality\n\nMakes you a spectator, if you are not a participant and a game is running.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "spectate\n< ✅ Attempting to make you a spectator, McTsts!\n```";
+				help += "```diff\nAliases\n\n\n- s\n- spec\n- spectator\n```";
 			break;
 			case "demote":
 				if(!isGameMaster(member)) break;
@@ -104,7 +105,7 @@ module.exports = function() {
 				help += "```\nFunctionality\n\nMakes New Game Ping role mentionable, pings it and then makes it unmentionable again.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "gameping\n< Ts is going to start a new game! @New Game Ping\n```";
 			break;
-			case "gameping":
+			case "open":
 				if(!isGameMaster(member)) break;
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "open\n```";
 				help += "```\nFunctionality\n\nOpens signups, then makes New Game Ping role mentionable, pings it and then makes it unmentionable again.\n```";
@@ -116,6 +117,7 @@ module.exports = function() {
 					default:
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "sheet [prepare|prepare_|import|mprepare|mimport]\n```";
 						help += "```\nFunctionality\n\nGroup of commands to handle google sheets used for the game. " + stats.prefix + "help sheet <sub-command> for detailed help.```";
+						help += "```diff\nAliases\n\n- sh\n- game\n```";
 					break;
 					case "prepare":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "sheet prepare\n```";
@@ -434,7 +436,7 @@ module.exports = function() {
 					channel.send("**Copy this into a google sheet to have all names & ids**\n*Make sure to paste in with ctrl+shift+v\nColumns needed by `" + stats.prefix + "sheet import`: Name, Id, Nickname, Role*");
 				break;
 				case 2:
-					playerList = result.map(el => channel.guild.members.find(el2 => el2.id === el.id).user.username + "," + el.id).join("\n");
+					playerList = result.map(el => channel.guild.members.find(el2 => el2.id === el.id).user.username + "," + el.id + ",").join("\n");
 					channel.send("**Use this to have all names & ides**\n*Values needed by `" + stats.prefix + "sheet mimport`: Name,Id,Nickname,Role*");
 				break;
 			}

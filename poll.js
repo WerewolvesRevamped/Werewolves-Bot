@@ -60,6 +60,7 @@ module.exports = function() {
 					default:
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "poll [new|close]\n```";
 						help += "```\nFunctionality\n\nGroup of commands to handle polls. " + stats.prefix + "help poll <sub-command> for detailed help.```";
+						help += "```diff\nAliases\n\n- pl\n- polls\n```";
 					break;
 					case "new":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "poll new <Poll Type>\n```";

@@ -21,12 +21,13 @@ module.exports = function() {
 	this.cmdPlayers = function(message, args) {
 		// Check subcommands
 		if(!args[0] || (!args[1] && args[0] != "list")) { 
-			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `players [get|set|resurrect|signup|list]`!"); 
+			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `players [get|get_clean|set|resurrect|signup|list]`!"); 
 			return; 
 		}
 		//Find subcommand
 		switch(args[0]) {
-			case "get": cmdPlayersGet(message.channel, args); break;
+			case "get": cmdPlayersGet(message.channel, args, false); break;
+			case "get_clean": cmdPlayersGet(message.channel, args, true); break;
 			case "set": cmdPlayersSet(message.channel, args); break;
 			case "resurrect": cmdPlayersResurrect(message.channel, args); break;
 			case "signup": cmdPlayersSignup(message.channel, args); break;
@@ -39,7 +40,7 @@ module.exports = function() {
 		let help = "";
 		switch(args[0]) {
 			case "":
-				if(isGameMaster(member)) help += stats.prefix + "players [get|set|resurrect|signup|list] - Manages players\n";
+				if(isGameMaster(member)) help += stats.prefix + "players [get|get_clean|set|resurrect|signup|list] - Manages players\n";
 				if(isGameMaster(member)) help += stats.prefix + "killq [add|remove|killall|list|clear] - Manages kill queue\n";
 				help += stats.prefix + "list - Lists signed up players\n";
 				help += stats.prefix + "alive - Lists alive players\n";
@@ -50,32 +51,42 @@ module.exports = function() {
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "list\n```";
 				help += "```\nFunctionality\n\nLists all signed up players\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "list\n< Signed Up Players | Total: 3\n  🛠 - McTsts (@McTsts)\n  🤔 - marhjo (@marhjo)\n  👌 - federick (@federick)\n```";
+				help += "```diff\nAliases\n\n- l\n- signedup\n- signedup_list\n- signedup-list\n- listsignedup\n- list-signedup\n- list_signedup\n```";
 			break;
 			case "alive":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "alive\n```";
 				help += "```\nFunctionality\n\nLists all alive players\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "list\n< Alive Players | Total: 3\n  🛠 - McTsts (@McTsts)\n  🤔 - marhjo (@marhjo)\n  👌 - federick (@federick)\n```";
+				help += "```diff\nAliases\n\n- a\n- alive_list\n- alive-list\n- listalive\n- list-alive\n- list_alive\n```";
 			break;
 			case "emojis":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "emojis\n```";
 				help += "```\nFunctionality\n\nGives you a list of emojis and player ids as well as a list of all emojis. Can be used for CC creation.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "emojis\n< 🛠 242983689921888256\n  🤔 102036304845377536\n  👌 203091600283271169\n  🛠 🤔 👌\n```";
+				help += "```diff\nAliases\n\n- e\n```";
 			break;
 			case "signup":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "signup <Emoji>\n```";
 				help += "```\nFunctionality\n\nSigns you up for the next game with emoji <Emoji>, which has to be a valid, not custom, emoji, that is not used by another player yet. If you have already signedup the command changes your emoji. If no emoji is provided, you are signed out.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "signup 🛠\n< ✅ @McTsts signed up with emoji 🛠!\n\n> " + stats.prefix + "signup\n< ✅ Successfully signed out, @McTsts. You will no longer participate in the next game!\n```";
+				help += "```diff\nAliases\n\n- join\n- sign-up\n- sign_up\n- unsignup\n- signout\n- participate\n- sign-out\n- sign_out\n```";
 			break;
 			case "players":
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
 					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "players [get|set|resurrect|signup|list]\n```";
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "players [get|get_clean|set|resurrect|signup|list]\n```";
 						help += "```\nFunctionality\n\nGroup of commands to handle players. " + stats.prefix + "help players <sub-command> for detailed help.\n\nList of Player Properties:\nalive: Whether the player is alive`\nemoji: The emoji the player uses\nrole: The role of the player\npublic_value: The value of the players vote on public polls (Typically 1)\nprivate_value: The value of the players vote on private polls (Typically 1)\npublic_votes: The base value of votes the player has against them on public votes (Typically 0)```";
+						help += "```diff\nAliases\n\n- p\n- player\n```";
 					break;
 					case "get":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players get <Player Property> <Player>\n```";
 						help += "```\nFunctionality\n\nReturns the value of <Player Property> for a player indentified with <Player>. For a list of player properties see " + stats.prefix + "help players.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "players get alive mctsts\n< ✅ McTsts's alive value is 1!\n```";
+					break;
+					case "get_clean":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "players get_clean <Player Property> <Player>\n```";
+						help += "```\nFunctionality\n\nSame as get, but shows roles in a more player friendly way.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "players get alive mctsts\n< ✅ McTsts's alive value is 1!\n```";
 					break;
 					case "set":
@@ -105,7 +116,8 @@ module.exports = function() {
 				switch(args[1]) {
 					default:
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "killq [add|remove|killall|list|clear]\n```";
-						help += "```\nFunctionality\n\nGroup of commands to handle killing. " + stats.prefix + "help players <sub-command> for detailed help.```";
+						help += "```\nFunctionality\n\nGroup of commands to handle killing. " + stats.prefix + "help killq <sub-command> for detailed help.```";
+						help += "```diff\nAliases\n\n- killq\n- killqueue\n- kq\n```";
 					break;
 					case "add":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "killq add <Player List>\n```";
@@ -242,13 +254,14 @@ module.exports = function() {
 				});	
 				sql("UPDATE players SET alive = 0 WHERE id = " + connection.escape(el), result => {
 					channel.send("✅ Killed `" +  channel.guild.members.find(el2 => el2.id === el).displayName + "`!");
+					updateGameStatus(channel.guild);
 				}, () => {
 					channel.send("⛔ Database error. Could not kill `" +  channel.guild.members.find(el2 => el2.id === el).displayName + "`!");
 				});	
 				// Send reporter message
 				let reporterChannel = channel.guild.channels.find(el2 => el2.id === stats.reporter_channel);
 				if(reporterChannel) {
-					reporterChannel.send(stats.prefix + "players get role " + channel.guild.members.find(el2 => el2.id === el)).catch(err => { 
+					reporterChannel.send(stats.prefix + "players get_clean role " + channel.guild.members.find(el2 => el2.id === el)).catch(err => { 
 						// Discord error
 						logO(err); 
 						sendError(channel, err, "Could not send reporter message");
@@ -355,7 +368,7 @@ module.exports = function() {
 	}
 	
 	/* Get information about a player */
-	this.cmdPlayersGet = function(channel, args) {
+	this.cmdPlayersGet = function(channel, args, mode) {
 		// Check arguments
 		if(!args[2]) { 
 			channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "players get <value name> <player>`!"); 
@@ -375,7 +388,7 @@ module.exports = function() {
 			// Get info
 			sql("SELECT " + args[1] + " FROM players WHERE id = " + connection.escape(user), result => {
 				let playerName = channel.guild.members.find(el => el.id === user).displayName;
-				channel.send("✅ `" + playerName + "`'s " + args[1] + " is `" + (args[1] === "role" ? result[0][args[1]].split(",").join("` + `") : result[0][args[1]]) + "`!");
+				channel.send("✅ `" + playerName + "`'s " + args[1] + " is `" + (args[1] === "role" ? (mode ? result[0][args[1]].split(",").filter(role => verifyRoleVisible(role)).join("` + `") : result[0][args[1]].split(",").join(", ")) : result[0][args[1]]) + "`!");
 			}, () => {
 				// Database error
 				channel.send("⛔ Database error. Could not get player information!");
@@ -404,6 +417,7 @@ module.exports = function() {
 		sql("UPDATE players SET " + args[1] + " = " + connection.escape(args[3]) + " WHERE id = " + connection.escape(user), result => {
 			let playerName = channel.guild.members.find(el => el.id === user).displayName;
 			channel.send("✅ `" + playerName + "`'s " + args[1] + " value now is `" + args[3] + "`!");
+			updateGameStatus(channel.guild);
 		}, () => {
 			channel.send("⛔ Database error. Could not update player information!");
 		});
@@ -461,6 +475,7 @@ module.exports = function() {
 			// Sign out player
 			sql("DELETE FROM players WHERE id = " + connection.escape(member.id), result => {			
 				channel.send("✅ Successfully signed out, " + member.user + ". You will no longer participate in the next game!"); 
+				updateGameStatus(channel.guild);
 				member.removeRole(stats.signed_up).catch(err => { 
 					// Missing permissions
 					logO(err); 
@@ -488,6 +503,7 @@ module.exports = function() {
 							// Signup emoji
 							sql("INSERT INTO players (id, emoji, role) VALUES (" + connection.escape(member.id) + "," + connection.escape("" + args[0]) + "," + connection.escape("none") + ")", result => {
 								message.edit("✅ " + member.user + " signed up with emoji " + args[0] + "!");
+								updateGameStatus(message.guild);
 								message.clearReactions().catch(err => { 
 									// Couldn't clear reactions
 									logO(err);

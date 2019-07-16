@@ -179,16 +179,24 @@ module.exports = function() {
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "bulkdelete\n```";
 				help += "```\nFunctionality\n\nDeletes webhook/user messages (but not bot messages) in bulk from a channel.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "bulkdelete\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "bulkdelete!\n< ✅ Deleted 17 messages.```";
+				help += "```diff\nAliases\n\n- bd\n```";
 			break;
 			case "delete": 
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "delete [0-5]\n```";
 				help += "```\nFunctionality\n\nDeletes the last up to five messages from a channel.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "delete 3\n< ✅ Deleted 3 messages.```";
+				help += "```diff\nAliases\n\n- d\n```";
 			break;
 			case "delay": 
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "delay <Delay> <Command>\n```";
 				help += "```\nFunctionality\n\nExecutes a command with delay in seconds.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "delay 5 ping\n< ✅ Pong! Latency is 990ms. API Latency is 114ms```";
+			break;
+			case "help":
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "help <Command> [Sub-Command(s)]\n```";
+				help += "```\nFunctionality\n\nProvides help for a command (with subcommands)\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "help help\n```";
+				help += "```diff\nAliases\n\n- h\n```";
 			break;
 		}
 		return help;
