@@ -57,6 +57,7 @@ module.exports = function() {
 			case "set_multi": cmdRolesAddSc(message.channel, "multi", args, argsX); break;
 			case "set_public": cmdRolesAddSc(message.channel, "public", args, argsX); break;
 			case "get": cmdRolesGetSc(message.channel, args); break;
+			case "raw": cmdRolesRawSc(message.channel, args); break;
 			case "remove": cmdRolesRemoveSc(message.channel, args); break;
 			case "list": cmdRolesListSc(message.channel); break;
 			case "elected": cmdRolesElectedSc(message.channel, args); break;
@@ -81,7 +82,7 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "roles [set|get|remove|list|list_names|clear] - Manages roles\n";
 				if(isGameMaster(member)) help += stats.prefix + "roles [set_alias|remove_alias|list_alias|clear_alias] - Manages role aliases\n";
 				if(isGameMaster(member)) help += stats.prefix + "channels [set_ind|get_ind|list_ind] - Manages individual SCs\n";
-				if(isGameMaster(member)) help += stats.prefix + "channels [set_extra|set_multi|set_public|get|remove|list|elected] - Manages Extra/Public/Multi SCs\n";
+				if(isGameMaster(member)) help += stats.prefix + "channels [set_extra|set_multi|set_public|get|raw|remove|list|elected] - Manages Extra/Public/Multi SCs\n";
 				if(isGameMaster(member)) help += stats.prefix + "channels [info|infopin|info_set|info_get|info_remove|info_list] - Manages SC Info\n";
 				if(isGameMaster(member)) help += stats.prefix + "channels cleanup - Cleans up SCs\n";
 				if(isGameMaster(member)) help += stats.prefix + "infopin - Returns role info & pins the message\n";
@@ -162,7 +163,7 @@ module.exports = function() {
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
 					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "channels [set_ind|get_ind|list_ind]\n" + stats.prefix + "channels [set_extra|set_multi|set_public|get|remove|list|elected]\n" + stats.prefix + "channels [info|infopin|info_set|info_get|info_remove|info_list]\n```";
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "channels [set_ind|get_ind|list_ind]\n" + stats.prefix + "channels [set_extra|set_multi|set_public|get|raw|remove|list|elected]\n" + stats.prefix + "channels [info|infopin|info_set|info_get|info_remove|info_list]\n```";
 						help += "```\nFunctionality\n\nGroup of commands to handle individual, extra, multi and public channels as well as channel information. " + stats.prefix + "help channels <sub-command> for detailed help.```";
 						help += "```diff\nAliases\n\n- channel\n```";
 					break;
@@ -200,6 +201,11 @@ module.exports = function() {
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "channels get <Channel Name>\n```";
 						help += "```\nFunctionality\n\nReturns information about a channel by channel name.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "channels get flute_players\n\n< Flute_Players [Multi]\n  Condition: Flute Player\n  Members: Flute Player\n  Setup Commands: infopin flute_player\n```";
+					break;
+					case "raw":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "channels raw <Channel Name>\n```";
+						help += "```\nFunctionality\n\nReturns information about a channel in the same way as it was inputted.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "channels raw flute_players\n```";
 					break;
 					case "remove":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "channels remove <Channel Name>\n```";
@@ -707,6 +713,26 @@ module.exports = function() {
 				return;
 			}
 			result.forEach(el => channel.send("**" + toTitleCase(el.name) + "** [" + toTitleCase(el.type) + "]\nCondition: " + toTitleCase(el.cond.replace(/,/g,", ")) + "\nMembers: " + toTitleCase(el.members.replace(/,/g,", ")) + "\nSetup Commands: " + (el.setup.length > 0 ? "`" + el.setup.replace(/,/g,"`, `") + "`" : "")));
+		}, () => {
+			// Couldn't delete from database
+			channel.send("⛔ Database error. Coult not get values from SC database!");
+		});
+	}
+	
+	/* Gets a SC */
+	this.cmdRolesRawSc = function(channel, args) {
+		// Check arguments
+		if(!args[1]) { 
+			channel.send("⛔ Syntax error. Not enough parameters!"); 
+			return; 
+		} 
+		// Remove entries with same name
+		sql("SELECT name,type,cond,members,setup FROM sc WHERE name = " + connection.escape(args[1]), result => {
+			if(result.length <= 0) {
+				channel.send("⛔ Database error. Coult not find any matching SCs!");
+				return;
+			}
+			result.forEach(el => channel.send("```" + stats.prefix + "channels set_" + el.type + " \"" + el.name + "\" \"" + el.cond + "\" \"" + el.members + "\" \"" + el.setup + "\"```"));
 		}, () => {
 			// Couldn't delete from database
 			channel.send("⛔ Database error. Coult not get values from SC database!");
