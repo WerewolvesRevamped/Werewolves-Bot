@@ -147,7 +147,7 @@ client.on("message", async message => {
 	case "end":
 		if(loadedModuleGame && checkSafe(message)) cmdConfirm(message, "end");
 	break;
-	case "end_confirmed"
+	case "end_confirmed":
 		if(loadedModuleGame && checkSafe(message)) cmdEnd(message.channel); 
 	break;
 	/* Sheet */ // Simplifies game managment via sheet
