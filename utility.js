@@ -246,6 +246,18 @@ module.exports = function() {
 		return true;
 	}
 	
+	/* Commands for only GMSAFE channels */
+	this.checkSafe = function(message) {
+		if(!message.member || checkGM(message)) {
+			if(message.channel.topic != "GMSAFE") { 
+				message.channel.send("❌ This command can only be executed in game master channels! Make a channel a game master channel by setting its topic to `GMSAFE`!"); 
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+	
 	/* Cleanup a category */
 	this.cleanupCat = function(channel, categoryID, name) {
 		// Category deleted

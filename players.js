@@ -169,6 +169,7 @@ module.exports = function() {
 			case "remove": cmdKillqRemove(message.channel, args); break;
 			case "clear": cmdKillqClear(message.channel); break;
 			case "killall": cmdKillqList(message.channel); cmdConfirm(message, "killq killall"); break;
+			case "killall_confirmed": cmdKillqKillall(message.channel); break;
 			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
 		}
 	}

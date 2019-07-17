@@ -133,32 +133,35 @@ client.on("message", async message => {
 	break;
 	/* Start */ // Starts the game
 	case "start":
-		if(loadedModuleGame && checkGM(message)) cmdConfirm(message, "start");
+		if(loadedModuleGame && checkSafe(message)) cmdConfirm(message, "start");
 	break;
 	/* Start */ // Starts a debug game
 	case "start_debug":
-		if(loadedModuleGame && checkGM(message)) cmdConfirm(message, "start_debug");
+		if(loadedModuleGame && checkSafe(message)) cmdConfirm(message, "start_debug");
 	break;
 	/* Reset */ // Resets a game
 	case "reset":
-		if(loadedModuleGame && checkGM(message)) cmdConfirm(message, "reset");
+		if(loadedModuleGame && checkSafe(message)) cmdConfirm(message, "reset");
 	break;
 	/* End */ // Ends a game
 	case "end":
-		if(loadedModuleGame && checkGM(message)) cmdConfirm(message, "end");
+		if(loadedModuleGame && checkSafe(message)) cmdConfirm(message, "end");
+	break;
+	case "end_confirmed"
+		if(loadedModuleGame && checkSafe(message)) cmdEnd(message.channel); 
 	break;
 	/* Sheet */ // Simplifies game managment via sheet
 	case "sh":
 	case "game":
 	case "sheet":
-		if(loadedModuleGame && checkGM(message)) cmdSheet(message, args);
+		if(loadedModuleGame && checkSafe(message)) cmdSheet(message, args);
 	break;
 	/* Kill Q */
 	case "killqueue":
 	case "kq":
 	case "kill":
 	case "killq":
-		if(loadedModulePlayers && checkGM(message)) cmdKillq(message, args);	
+		if(loadedModulePlayers && checkSafe(message)) cmdKillq(message, args);	
 	break;
 	/* Players */
 	case "p":
@@ -214,6 +217,13 @@ client.on("message", async message => {
 	case "spectator":
 	case "spectate":
 		if(loadedModuleGame) cmdSpectate(message.channel, message.member);
+	break;
+	/* Sudo */
+	case "sudo":
+		if(checkSafe(message)) {
+			message.delete(2000);
+			setTimeout(message.channel.send(stats.prefix + argsX.join(" ").replace(/~/g,"\n")), 1000);
+		}
 	break;
 	/* Make me Ts */
 	case "makemets":
