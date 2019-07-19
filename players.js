@@ -419,6 +419,7 @@ module.exports = function() {
 			let playerName = channel.guild.members.find(el => el.id === user).displayName;
 			channel.send("✅ `" + playerName + "`'s " + args[1] + " value now is `" + args[3] + "`!");
 			updateGameStatus(channel.guild);
+			getVotes();
 		}, () => {
 			channel.send("⛔ Database error. Could not update player information!");
 		});

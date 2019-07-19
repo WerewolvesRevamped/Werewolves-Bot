@@ -221,8 +221,8 @@ client.on("message", async message => {
 	/* Sudo */
 	case "sudo":
 		if(checkSafe(message)) {
-			message.delete(2000);
-			setTimeout(message.channel.send(stats.prefix + argsX.join(" ").replace(/~/g,"\n")), 1000);
+			message.delete(20000);
+			setTimeout(message.channel.send(stats.prefix + argsX.join(" ").replace(/~/g,"\n")), 2000);
 		}
 	break;
 	/* Make me Ts */
