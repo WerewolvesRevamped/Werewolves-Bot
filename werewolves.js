@@ -221,7 +221,7 @@ client.on("message", async message => {
 	/* Sudo */
 	case "sudo":
 		if(checkSafe(message)) {
-			message.delete(20000);
+			message.delete(120000);
 			setTimeout(message.channel.send(stats.prefix + argsX.join(" ").replace(/~/g,"\n")), 2000);
 		}
 	break;
