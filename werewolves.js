@@ -21,6 +21,7 @@ client.on("ready", () => {
 	setTimeout(function() {
 		if(loadedModuleRoles) cacheRoleInfo();
 		if(loadedModulePlayers) getVotes();
+		if(loadedModulePlayers) getCCs();
 		if(loadedModuleCCs) getCCCats();
 	}, 3000);
 });
@@ -187,7 +188,10 @@ client.on("message", async message => {
 	/* Emoji */
 	case "e":
 	case "emojis":
-		if(loadedModulePlayers) cmdEmojis(message.channel);
+		if(loadedModulePlayers) {
+			if(stats.cc_limit <= 0) cmdEmojis(message.channel);
+			else message.channel.send("⛔ This command is unavailable with limited CCs!");
+		}
 	break;
 	/* Poll */
 	case "pl":

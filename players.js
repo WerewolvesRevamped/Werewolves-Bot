@@ -16,6 +16,7 @@ module.exports = function() {
 	this.publicValues = null;
 	this.privateValues = null;
 	this.publicVotes = null;
+	this.ccs = null;
 	
 	/* Handle players command */
 	this.cmdPlayers = function(message, args) {
@@ -410,7 +411,7 @@ module.exports = function() {
 			// Invalid user
 			channel.send("⛔ Syntax error. `" + args[2] + "` is not a valid player!"); 
 			return; 
-		} else if(args[1] != "emoji" && args[1] != "role" && args[1] != "alive" && args[1] != "public_value" && args[1] != "private_value" && args[1] != "public_votes") { 
+		} else if(args[1] != "emoji" && args[1] != "role" && args[1] != "alive" && args[1] != "public_value" && args[1] != "private_value" && args[1] != "public_votes" && args[1] != "ccs") { 
 			// Invalid parameter
 			channel.send("⛔ Syntax error. Invalid parameter `" + args[1] + "`!"); 
 			return; 
@@ -420,6 +421,7 @@ module.exports = function() {
 			channel.send("✅ `" + playerName + "`'s " + args[1] + " value now is `" + args[3] + "`!");
 			updateGameStatus(channel.guild);
 			getVotes();
+			getCCs();
 		}, () => {
 			channel.send("⛔ Database error. Could not update player information!");
 		});
@@ -694,6 +696,14 @@ module.exports = function() {
 				publicVotes = result;
 		}, () => {
 			log("Players > ❗❗❗ Unable to cache public votes!");
+		});
+	}
+	
+	this.getCCs = function() {
+		sql("SELECT id,ccs FROM players", result => {
+				ccs = result;
+		}, () => {
+			log("Players > ❗❗❗ Unable to cache ccs!");
 		});
 	}
 	

@@ -27,8 +27,6 @@ module.exports = function() {
 		switch(args[0]) {
 			case "create": cmdCCCreate(message.channel, message.member, args, 0, () => {}); break;
 			case "create_hidden": cmdCCCreate(message.channel, message.member, args, 1, () => {}); break;
-			case "create_multi": cmdCCCreateMulti(message.channel, message.member, argsX, 0); break;
-			case "create_multi_hidden": cmdCCCreateMulti(message.channel, message.member, argsX, 1); break;
 			case "add": cmdCCAdd(message.channel, message.member, args); break;
 			case "remove": cmdCCRemove(message.channel, message.member, args); break;
 			case "promote": cmdCCPromote(message.channel, message.member, args); break;
@@ -36,6 +34,14 @@ module.exports = function() {
 			case "list": cmdCCList(message.channel, 2); break;
 			case "owners": cmdCCList(message.channel, 3); break;
 			case "cleanup": if(checkGM(message)) cmdConfirm(message, "cc cleanup"); break;
+			case "create_multi": 
+				if(stats.cc_limit <= 0) cmdCCCreateMulti(message.channel, message.member, argsX, 0); 
+				else message.channel.send("⛔ This subcommand is unavailable with limited CCs!");
+			break;
+			case "create_multi_hidden": 
+				if(stats.cc_limit <= 0) cmdCCCreateMulti(message.channel, message.member, argsX, 1);
+				else message.channel.send("⛔ This subcommand is unavailable with limited CCs!");
+			break;
 			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
 		}
 	}
@@ -347,7 +353,15 @@ module.exports = function() {
 		} else if(!args[1]) {
 			channel.send(helpCCs(member, ["cc", "create"]));
 			return;
+		} else if(stats.cc_limit >= 1 && ccs.find(el => el.id == member.id).ccs >= stats.cc_limit) {
+			channel.send("⛔ You have hit the CC limit of `" + stats.cc_limit + "` CCs!");
+			return;
 		}
+		sql("UPDATE players SET ccs = ccs + 1 WHERE id = " + connection.escape(member.id), result => {
+			getCCs();
+		}, () => {
+			channel.send("⛔ Database error. Could not increase the CC amount!");
+		});
 		players = getUserList(channel, args, 2);
 		if(isParticipant(member) || players.length > 0) {
 			sqlGetStat(9, result => {
@@ -378,6 +392,7 @@ module.exports = function() {
 										sql("UPDATE stats SET value = value + 1 WHERE id = 9", result => {
 											channel.send("✅ Created " + updated + "!"); 
 											cmdCCList(updated, mode);
+											getCCs();
 											callback();
 										}, () => {
 											channel.send("⛔ Database error. Could not increment CC count!"); 
@@ -426,6 +441,7 @@ module.exports = function() {
 									// Increment cc count
 									sql("UPDATE stats SET value = value + 1 WHERE id = 9", result => {
 										channel.send("✅ Created " + updated + "!"); 
+										getCCs();
 										cmdCCList(updated, mode);
 										callback();
 									}, () => {
