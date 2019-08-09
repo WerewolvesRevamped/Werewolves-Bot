@@ -300,7 +300,9 @@ module.exports = function() {
 		}
 		sql("SELECT info FROM sc_info WHERE name = " + connection.escape(args[1]), result => {
 			if(result.length > 0) { 
-				channel.send(result[0].info.replace(/~/g,"\n")).then(m => {
+				var desc = result[0].info.replace(/~/g,"\n");
+				cachedTheme.forEach(el => desc = desc.replace(new RegExp(el.original, "g"), el.new));
+				channel.send(desc).then(m => {
 					// Pin if pin is true
 					if(pin) {
 						m.pin().then(mp => {
@@ -445,7 +447,9 @@ module.exports = function() {
 						result2.forEach(el =>  ccPerms.push(getPerms(el.id, ["history", "read"], [])));
 					}
 					// Create channel
-					channel.guild.createChannel(multi[index].name, { type: "text",  permissionOverwrites: ccPerms })
+					var name = multi[index].name;
+					cachedTheme.forEach(el => name = name.replace(new RegExp(el.original, "g"), el.new));
+					channel.guild.createChannel(name, { type: "text",  permissionOverwrites: ccPerms })
 					.then(sc => {
 						// Send info message
 						multi[index].setup.split(",").forEach(el => sc.send(stats.prefix + el));
@@ -511,7 +515,9 @@ module.exports = function() {
 		let ccPerms = getCCCatPerms(channel.guild);
 		if(extra[index].members === "%r") ccPerms.push(getPerms(result[resultIndex].id, ["history", "read"], []));
 		// Create channel
-		channel.guild.createChannel(extra[index].name, { type: "text",  permissionOverwrites: ccPerms })
+		var name = extra[index].name;
+		cachedTheme.forEach(el => name = name.replace(new RegExp(el.original, "g"), el.new));
+		channel.guild.createChannel(name, { type: "text",  permissionOverwrites: ccPerms })
 		.then(sc => {
 			// Send info message
 			if(extra[index].setup.length > 1) extra[index].setup.replace(/%r/g, result[resultIndex].id + "").replace(/%n/g, resultIndex).split(",").forEach(el => sc.send(stats.prefix + el));
@@ -539,7 +545,9 @@ module.exports = function() {
 		sql("SELECT name,ind_sc FROM roles WHERE " + roleList, result => {	
 			result = result.filter(role => verifyRoleVisible(role.name));
 			if(!debug) { 
-				channel.guild.members.find(el => el.id === players[index].id).user.send("This message is giving you your role" + (result.length != 1 ? "s" : "") + " for the next game of Werewolves: Revamped!\n\n\nYour role" + (result.length != 1 ? "s are" : " is") + " `" + result.map(el => toTitleCase(el.name)).join("` + `") + "`.\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.\n\nIf you're confused about your role at all, then check #announcements on the discord, which contains a role book with information on all the roles in this game.").catch(err => { 
+				var roles = result.map(el => toTitleCase(el.name)).join("` + `");
+				cachedTheme.forEach(el => roles = roles.replace(new RegExp(el.original, "g"), el.new));
+				channel.guild.members.find(el => el.id === players[index].id).user.send("This message is giving you your role" + (result.length != 1 ? "s" : "") + " for the next game of Werewolves: Revamped!\n\n\nYour role" + (result.length != 1 ? "s are" : " is") + " `" + roles + "`.\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.\n\nIf you're confused about your role at all, then check #announcements on the discord, which contains a role book with information on all the roles in this game.").catch(err => { 
 					logO(err); 
 					sendError(channel, err, "Could not send role message to " + 	channel.guild.members.find(el => el.id === players[index].id).displayName);
 				});	
@@ -552,7 +560,10 @@ module.exports = function() {
 				let ccPerms = getCCCatPerms(channel.guild);
 				ccPerms.push(getPerms(players[index].id, ["history", "read"], []));
 				// Create channel
-				channel.guild.createChannel(indscRoles.join("-").substr(0, 100), { type: "text",  permissionOverwrites: ccPerms })
+				
+				var name = indscRoles.join("-");
+				cachedTheme.forEach(el => name = name.replace(new RegExp(el.original, "g"), el.new));
+				channel.guild.createChannel(name.substr(0, 100), { type: "text",  permissionOverwrites: ccPerms })
 				.then(sc => {
 					// Send info message
 					indscRoles.forEach(el => cmdInfo(sc, [ el ], true));
@@ -688,7 +699,7 @@ module.exports = function() {
 		// Remove entries with same name
 		sql("SELECT name,type,cond,members,setup FROM sc", result => {
 			if(result.length <= 0) {
-				channel.send("⛔ Database error. Coult not find any SCs!");
+				channel.send("⛔ Database error. Could not find any SCs!");
 				return;
 			}
 			channel.send("✳ Sending a list of currently existing multi/extra SCs:");
@@ -782,9 +793,8 @@ module.exports = function() {
 			channel.send("⛔ Syntax error. Not enough parameters!"); 
 			return; 
 		}
-		// Remove entries with same name
-		sql("DELETE FROM roles WHERE name = " + connection.escape(args[1]), result => {
-			// Insert Entry & Preview it
+		// Insert Entry & Preview it
+		if(!verifyRole(args[1])) {
 			sql("INSERT INTO roles (name, description) VALUES (" + connection.escape(args[1]) + "," + connection.escape(argsX[2]) + ")", result => {
 				channel.send("✅ Set `" + toTitleCase(args[1]) + "`! Preview:\n" + argsX[2].replace(/~/g,"\n") + "\n---------------------------------------------------------------------------------"); 
 				getRoles();
@@ -792,10 +802,15 @@ module.exports = function() {
 				// Couldn't add to database
 				channel.send("⛔ Database error. Could not set role!");
 			});		
-		}, () => {
-			// Couldn't delete from database
-			channel.send("⛔ Database error. Coult not prepare setting role!");
-		});
+		} else {
+			sql("UPDATE roles SET description = " + connection.escape(argsX[2]) + " WHERE name = " + connection.escape(parseRole(args[1])), result => {
+				channel.send("✅ Set `" + toTitleCase(args[1]) + "`! Preview:\n" + argsX[2].replace(/~/g,"\n") + "\n---------------------------------------------------------------------------------"); 
+				getRoles();
+			}, () => {
+				// Couldn't add to database
+				channel.send("⛔ Database error. Could not update role!");
+			});	
+		}
 	}
 	
 	/* Gets the raw descripton of a role */
@@ -1034,7 +1049,9 @@ module.exports = function() {
 		}
 		sql("SELECT description FROM roles WHERE name = " + connection.escape(parseRole(args[0])), result => {
 			if(result.length > 0) { 
-				channel.send(result[0].description.replace(/~/g,"\n")).then(m => {
+				var desc = result[0].description.replace(/~/g,"\n");
+				cachedTheme.forEach(el => desc = desc.replace(new RegExp(el.original, "g"), el.new));
+				channel.send(desc).then(m => {
 					// Pin if pin is true
 					if(pin) {
 						m.pin().then(mp => {

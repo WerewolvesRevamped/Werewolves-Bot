@@ -160,6 +160,13 @@ module.exports = function() {
 		}, () => {
 			log("Stats > ❗❗❗ Unable to cache game status vc!")
 		});
+		sqlGetStat(29,  result => { 
+			stats.theme = result; 
+			if(doLog) log("Stats > Cached theme as `" + result + "`!");
+			cacheTheme();
+		}, () => {
+			log("Stats > ❗❗❗ Unable to cache theme!")
+		});
 	}
 	
 	/* Gets the name of a gamephase by id */
@@ -207,6 +214,7 @@ module.exports = function() {
 				case "new_game_ping": stat = 26; break;
 				case "game_status": stat = 27; break;
 				case "cc_limit": stat = 28; break;
+				case "theme": stat = 29; break;
 				default: message.channel.send("⛔ Syntax error. Invalid parameter!"); return;
 			}
 		} else {

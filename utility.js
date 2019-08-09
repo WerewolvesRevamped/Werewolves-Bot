@@ -148,6 +148,7 @@ module.exports = function() {
 		if(loadedModuleWhispers) msgB += helpWhispers(member, args);
 		if(loadedModulePlayers) msgB += helpPlayers(member, args);
 		if(loadedModulePoll) msgB += helpPoll(member, args);
+		if(loadedModuleTheme) msgB += helpTheme(member, args);
 		// Print
 		if(args[0] === "") { 
 			msgC = chunkArray(msgB.split("\n"), 25).map(el => "```\n" + el.join("\n") + "\n```");

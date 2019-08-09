@@ -13,6 +13,7 @@ require("./whispers.js")();
 require("./roles.js")();
 require("./game.js")();
 require("./poll.js")();
+require("./theme.js")();
 
 /* Setup */
 client.on("ready", () => {
@@ -206,6 +207,11 @@ client.on("message", async message => {
 	/* Promote */
 	case "demote":
 		if(loadedModuleGame) cmdDemote(message.channel, message.member);
+	break;
+	/* Theme */
+	case "themes":
+	case "theme":
+		if(loadedModuleTheme) cmdTheme(message, args);
 	break;
 	/* New Game Ping */
 	case "gameping":
