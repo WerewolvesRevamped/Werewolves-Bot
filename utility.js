@@ -26,6 +26,10 @@ module.exports = function() {
 		return str.replace(/[a-zA-Z0-9][^\s-_]*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
 	}
 	
+	this.toSentenceCase = function(str) {
+		return str.split(". ").map(el => el.length > 1 ? el.charAt(0).toUpperCase() + el.substr(1): el).join(". ");
+	}
+	
 	/* Chunks an array into chunks of the same size */ 
 	this.chunkArray = function(inArray, size) {
 	  var outArray = [];
@@ -149,6 +153,7 @@ module.exports = function() {
 		if(loadedModulePlayers) msgB += helpPlayers(member, args);
 		if(loadedModulePoll) msgB += helpPoll(member, args);
 		if(loadedModuleTheme) msgB += helpTheme(member, args);
+		msgB += helpConfirm(member, args);
 		// Print
 		if(args[0] === "") { 
 			msgC = chunkArray(msgB.split("\n"), 25).map(el => "```\n" + el.join("\n") + "\n```");

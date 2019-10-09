@@ -541,18 +541,30 @@ module.exports = function() {
 			createSCStartExtra(channel, category);
 			return;
 		}
-		let roleList = players[index].role.split(",").map(el => "name = " + connection.escape(el)).join(" OR ");
+		let roleListD = players[index].role.split(",");
+		var customRole = false;
+		if(roleListD[0] === "custom") customRole = JSON.parse(roleListD[1].replace(/'/g,"\"").replace(/;/g,","));
+		let roleList = roleListD.map(el => "name = " + connection.escape(el)).join(" OR ");
 		sql("SELECT name,ind_sc FROM roles WHERE " + roleList, result => {	
 			result = result.filter(role => verifyRoleVisible(role.name));
+			var roles = result.map(el => toTitleCase(el.name));
 			if(!debug) { 
-				var roles = result.map(el => toTitleCase(el.name)).join("` + `");
-				cachedTheme.forEach(el => roles = roles.replace(new RegExp(el.original, "g"), el.new));
-				channel.guild.members.find(el => el.id === players[index].id).user.send("This message is giving you your role" + (result.length != 1 ? "s" : "") + " for the next game of Werewolves: Revamped!\n\n\nYour role" + (result.length != 1 ? "s are" : " is") + " `" + roles + "`.\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.\n\nIf you're confused about your role at all, then check #announcements on the discord, which contains a role book with information on all the roles in this game.").catch(err => { 
-					logO(err); 
-					sendError(channel, err, "Could not send role message to " + 	channel.guild.members.find(el => el.id === players[index].id).displayName);
-				});	
+				if(!customRole) {
+					roles = roles.join("` + `");
+					cachedTheme.forEach(el => roles = roles.replace(new RegExp(el.original, "g"), el.new));
+					channel.guild.members.find(el => el.id === players[index].id).user.send("This message is giving you your role" + (result.length != 1 ? "s" : "") + " for the next game of Werewolves: Revamped!\n\n\nYour role" + (result.length != 1 ? "s are" : " is") + " `" + roles + "`.\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.\n\nIf you're confused about your role at all, then check #announcements on the discord, which contains a role book with information on all the roles in this game.").catch(err => { 
+						logO(err); 
+						sendError(channel, err, "Could not send role message to " + 	channel.guild.members.find(el => el.id === players[index].id).displayName);
+					});	
+				} else {
+					channel.guild.members.find(el => el.id === players[index].id).user.send("This message is giving you your custom role for the next game of Werewolves: Revamped!\n\n\nYour role is `" + toTitleCase(customRole.name) + "` (" + customRole.id + ").\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.").catch(err => { 
+						logO(err); 
+						sendError(channel, err, "Could not send role message to " + 	channel.guild.members.find(el => el.id === players[index].id).displayName);
+					});	
+				}
 			}
 			let indscRoles = result.filter(el => el.ind_sc).map(el => el.name);
+			if(customRole) indscRoles = [ customRole.name ];
 			// Check if ind sc
 			if(indscRoles.length) { 
 				channel.send("✅ Creating `" + toTitleCase(indscRoles.join("-")) + "` Ind SC for `" + channel.guild.members.find(el => el.id === players[index].id).displayName + "` (`" + result.map(el => toTitleCase(el.name)).join("` + `") + "`)!");
@@ -566,7 +578,30 @@ module.exports = function() {
 				channel.guild.createChannel(name.substr(0, 100), { type: "text",  permissionOverwrites: ccPerms })
 				.then(sc => {
 					// Send info message
-					indscRoles.forEach(el => cmdInfo(sc, [ el ], true));
+					if(!customRole) indscRoles.forEach(el => cmdInfo(sc, [ el ], true));
+					else {
+						var desc = "";
+						desc += "**" + toTitleCase(customRole.name) + "** | " + toTitleCase(customRole.team);
+						desc += "\n__Basics__\n" + toSentenceCase(customRole.basics.replace(/%n/g,toTitleCase(customRole.name)));
+						desc += "\n__Details__\n" + toSentenceCase(customRole.details.replace(/%n/g,toTitleCase(customRole.name)));
+						desc += "\n__Win Condition__\n" + toSentenceCase(customRole.win.replace(/%n/g,toTitleCase(customRole.name)));
+						cachedTheme.forEach(el => desc = desc.replace(new RegExp(el.original, "g"), el.new));
+						sc.send(desc).then(m => {
+							m.pin().then(mp => {
+								mp.channel.fetchMessages().then(messages => {
+									mp.channel.bulkDelete(messages.filter(el => el.type === "PINS_ADD"));
+								});	
+							}).catch(err => { 
+								logO(err); 
+								sendError(channel, err, "Could not pin info message");
+							});
+						// Couldnt send message
+						}).catch(err => { 
+							logO(err); 
+							sendError(channel, err, "Could not send info message");
+						});	
+						if(customRole.setup != "") customRole.setup.replace(/%p/g,players[index].id).replace(/%c/g,sc.id).split(",").forEach(el => sc.send(stats.prefix + el));
+					}
 					// Move into sc category
 					sc.setParent(category).then(m => {
 						createOneIndSC(channel, category, players, ++index, debug);

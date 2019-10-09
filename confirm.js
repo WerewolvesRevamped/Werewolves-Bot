@@ -16,21 +16,7 @@ module.exports = function() {
 			message.edit("✳ Executing `" + stats.prefix + data.action + "`!")
 			message.delete(5000);
 			// Runs the command
-			switch(data.action) {
-				case "connection reset": if(loadedModuleWhispers) cmdConnectionReset(message.channel); break;
-				case "roles clear": if(loadedModuleRole) cmdRolesClear(message.channel); break;
-				case "roles clear_alias": if(loadedModuleRole) cmdRolesClearAlias(message.channel); break;
-				case "start": if(loadedModuleGame) cmdStart(message.channel, false); break;
-				case "start_debug": if(loadedModuleGame) cmdStart(message.channel, true); break;
-				case "reset": if(loadedModuleGame) cmdReset(message.channel); break;
-				case "end": if(loadedModuleGame) cmdEnd(message.channel); break;
-				case "killq killall": if(loadedModulePlayers) cmdKillqKillall(message.channel); break;
-				case "players list": if(loadedModulePlayers) cmdPlayersList(message.channel); break;
-				case "cc cleanup": if(loadedModuleCCs) cmdCCCleanup(message.channel); break;
-				case "roles sc_cleanup": if(loadedModuleRoles) cmdRolesScCleanup(message.channel); break;
-				case "bulkdelete": cmdBulkDelete(message.channel); break;
-				default: message.edit("⛔ Syntax error. Tried to confirm unknown command!"); break;
-			}
+			confirmActionExecute(data.action, message, true);
 		} else {
 			// Too late
 			message.edit("❌ Too late. Not executing `" + stats.prefix + data.action + "`!");
@@ -40,6 +26,45 @@ module.exports = function() {
 			logO(err); 
 			sendError(messsage.channel, err, "Could not clear reactions");
 		});
+	}
+	
+	this.confirmActionExecute = function(command, message, messageSent) {
+		switch(command) {
+			case "connection reset": if(loadedModuleWhispers) cmdConnectionReset(message.channel); break;
+			case "roles clear": if(loadedModuleRole) cmdRolesClear(message.channel); break;
+			case "roles clear_alias": if(loadedModuleRole) cmdRolesClearAlias(message.channel); break;
+			case "start": if(loadedModuleGame) cmdStart(message.channel, false); break;
+			case "start_debug": if(loadedModuleGame) cmdStart(message.channel, true); break;
+			case "reset": if(loadedModuleGame) cmdReset(message.channel); break;
+			case "end": if(loadedModuleGame) cmdEnd(message.channel); break;
+			case "killq killall": cmdKillqKillall(message.channel); break;
+			case "players list": if(loadedModulePlayers) cmdPlayersList(message.channel); break;
+			case "cc cleanup": if(loadedModuleCCs) cmdCCCleanup(message.channel); break;
+			case "roles sc_cleanup": if(loadedModuleRoles) cmdRolesScCleanup(message.channel); break;
+			case "bulkdelete": cmdBulkDelete(message.channel); break;
+			default:	messageSent ? 
+							message.edit("⛔ Syntax error. Tried to confirm unknown command!") : 
+							message.channel.send("⛔ Syntax error. Tried to confirm unknown command!"); 
+							break;
+		}
+	}
+	
+	this.helpConfirm = function(member, args) {
+		let help = "";
+		switch(args[0]) {
+			case "":
+				help += stats.prefix + "ping - Tests the bot\n";
+				if(isGameMaster(member)) help += stats.prefix + "bulkdelete - Deletes webhook & user messages in bulk\n";
+				if(isGameMaster(member)) help += stats.prefix + "delete - Deletes a couple of messages\n";
+				if(isGameMaster(member)) help += stats.prefix + "delay - Executes a command with delay\n";
+			break;
+			case "confirm":
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "confirm <Command>\n```";
+				help += "```\nFunctionality\n\nSkips the confirming stage of a command that requires confirming.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "confirm killq killall```";
+			break;
+		}
+		return help;
 	}
 
 	/* Sends a confirmation message */

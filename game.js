@@ -486,8 +486,13 @@ module.exports = function() {
 	this.cmdSheetImportRole = function(m, el) {
 		// Find the roles and which are valid/invalid
 		let roleList = el.splice(3).map(role => parseRole(role));
-		let validRoles = roleList.filter(role => verifyRole(role));
-		let invalidRoles = roleList.filter(role => !verifyRole(role));
+		if(roleList[0] != "custom") {
+			var validRoles = roleList.filter(role => verifyRole(role));
+			var invalidRoles = roleList.filter(role => !verifyRole(role));
+		} else {
+			var validRoles = roleList;
+			var invalidRoles = [];
+		}
 		// Set Role
 		if(!invalidRoles.length) {
 			// All roles are valid -> Set it

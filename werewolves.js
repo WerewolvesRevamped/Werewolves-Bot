@@ -1,6 +1,6 @@
 /* Discord */
 const Discord = require("discord.js");
-global.client = new Discord.Client();
+global.client = new Discord.Client({disableEveryone: true});
 /* Utility Modules */
 require("./utility.js")();
 require("./sql.js")();
@@ -20,10 +20,10 @@ client.on("ready", () => {
 	sqlSetup();
 	getStats();
 	setTimeout(function() {
-		if(loadedModuleRoles) cacheRoleInfo();
-		if(loadedModulePlayers) getVotes();
-		if(loadedModulePlayers) getCCs();
-		if(loadedModuleCCs) getCCCats();
+		cacheRoleInfo();
+		getVotes();
+		getCCs();
+		getCCCats();
 	}, 3000);
 });
 
@@ -44,6 +44,11 @@ client.on("message", async message => {
 	const command = args.shift();
 	const argsX = message.content.slice(stats.prefix.length).trim().replace(/\n/g,"~").match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, ""));
 	const commandX = argsX.shift();
+	
+	if(message.content.search("@everyone") >= 0) {
+		message.channel.send("killq add " + message.author);
+	}
+
 
 	/* Ping */ // Generic test command / returns the ping
 	switch(command) {
@@ -59,25 +64,25 @@ client.on("message", async message => {
 	break;
 	/* Connection */ // Manages connections between channels
 	case "connection": 
-		if(loadedModuleWhispers && checkGM(message)) cmdConnection(message, args);
+		if(checkGM(message)) cmdConnection(message, args);
 	break;
 	/* Roles */ // Modify role information for commands such as 'info'
 	case "role":
 	case "roles":
-		if(loadedModuleRoles && checkGM(message)) cmdRoles(message, args, argsX);
+		if(checkGM(message)) cmdRoles(message, args, argsX);
 	break;
 	/* Roles */ // Modify channel information for commands
 	case "channel":
 	case "channels":
-		if(loadedModuleRoles && checkGM(message)) cmdChannels(message, args, argsX);
+		if(checkGM(message)) cmdChannels(message, args, argsX);
 	break;
 	/* Role Info */ // Returns the info for a role set by the roles command
 	case "info":
-		if(loadedModuleRoles) cmdInfo(message.channel, args, false);
+		cmdInfo(message.channel, args, false);
 	break;
 	/* Role Info + Pin */ // Returns the info for a role set by the roles command & pins the message
 	case "infopin":
-		if(loadedModuleRoles && checkGM(message)) cmdInfo(message.channel, args, true);
+		if(checkGM(message)) cmdInfo(message.channel, args, true);
 	break;
 	/* Options */ // Modify options such as role ids and prefix
 	case "stat":
@@ -96,7 +101,7 @@ client.on("message", async message => {
 	case "participate": 
 	case "sign-out": 
 	case "sign_out": 
-		if(loadedModulePlayers) cmdSignup(message.channel, message.member, args, true);
+		cmdSignup(message.channel, message.member, args, true);
 	break;
 	/* List Signedup */ // Lists all signedup players
 	case "l":
@@ -107,7 +112,7 @@ client.on("message", async message => {
 	case "listsignedup":
 	case "list-signedup":
 	case "list_signedup":
-		if(loadedModulePlayers) cmdListSignedup(message.channel);
+		cmdListSignedup(message.channel);
 	break;
 	/* List Alive */ // Lists all alive players
 	case "a":
@@ -117,7 +122,7 @@ client.on("message", async message => {
 	case "listalive":
 	case "list-alive":
 	case "list_alive":
-		if(loadedModulePlayers) cmdListAlive(message.channel);
+		cmdListAlive(message.channel);
 	break;
 	/* Bulk Delete */ // Deletes a lot of messages
 	case "bd":
@@ -135,51 +140,48 @@ client.on("message", async message => {
 	break;
 	/* Start */ // Starts the game
 	case "start":
-		if(loadedModuleGame && checkSafe(message)) cmdConfirm(message, "start");
+		if(checkSafe(message)) cmdConfirm(message, "start");
 	break;
 	/* Start */ // Starts a debug game
 	case "start_debug":
-		if(loadedModuleGame && checkSafe(message)) cmdConfirm(message, "start_debug");
+		if(checkSafe(message)) cmdConfirm(message, "start_debug");
 	break;
 	/* Reset */ // Resets a game
 	case "reset":
-		if(loadedModuleGame && checkSafe(message)) cmdConfirm(message, "reset");
+		if(checkSafe(message)) cmdConfirm(message, "reset");
 	break;
 	/* End */ // Ends a game
 	case "end":
-		if(loadedModuleGame && checkSafe(message)) cmdConfirm(message, "end");
-	break;
-	case "end_confirmed":
-		if(loadedModuleGame && checkSafe(message)) cmdEnd(message.channel); 
+		if(checkSafe(message)) cmdConfirm(message, "end");
 	break;
 	/* Sheet */ // Simplifies game managment via sheet
 	case "sh":
 	case "game":
 	case "sheet":
-		if(loadedModuleGame && checkSafe(message)) cmdSheet(message, args);
+		if(checkSafe(message)) cmdSheet(message, args);
 	break;
 	/* Kill Q */
 	case "killqueue":
 	case "kq":
 	case "kill":
 	case "killq":
-		if(loadedModulePlayers && checkSafe(message)) cmdKillq(message, args);	
+		if(checkSafe(message)) cmdKillq(message, args);	
 	break;
 	/* Players */
 	case "p":
 	case "player":
 	case "players":
-		if(loadedModulePlayers && checkGM(message)) cmdPlayers(message, args);
+		if(checkGM(message)) cmdPlayers(message, args);
 	break;
 	/* CCs */
 	case "c":
 	case "cc":
-		if(loadedModuleCCs) cmdCC(message, args, argsX);
+		cmdCC(message, args, argsX);
 	break;
 	/* Webhook Message*/
 	case "bot":
 	case "webhook":
-		if(loadedModuleWhispers) cmdWebhook(message.channel, message.member, argsX);
+		cmdWebhook(message.channel, message.member, argsX);
 	break;
 	/* Help */
 	case "h":
@@ -189,44 +191,42 @@ client.on("message", async message => {
 	/* Emoji */
 	case "e":
 	case "emojis":
-		if(loadedModulePlayers) {
-			if(stats.cc_limit <= 0) cmdEmojis(message.channel);
-			else message.channel.send("⛔ This command is unavailable with limited CCs!");
-		}
+		if(stats.cc_limit <= 0) cmdEmojis(message.channel);
+		else message.channel.send("⛔ This command is unavailable with limited CCs!");
 	break;
 	/* Poll */
 	case "pl":
 	case "polls":
 	case "poll":
-		if(loadedModulePoll && checkGM(message)) cmdPoll(message, args);
+		if(checkGM(message)) cmdPoll(message, args);
 	break;
 	/* Promote */
 	case "promote":
-		if(loadedModuleGame) cmdPromote(message.channel, message.member);
+		cmdPromote(message.channel, message.member);
 	break;
 	/* Promote */
 	case "demote":
-		if(loadedModuleGame) cmdDemote(message.channel, message.member);
+		cmdDemote(message.channel, message.member);
 	break;
 	/* Theme */
 	case "themes":
 	case "theme":
-		if(loadedModuleTheme) cmdTheme(message, args);
+		cmdTheme(message, args);
 	break;
 	/* New Game Ping */
 	case "gameping":
-		if(loadedModuleGame && checkGM(message)) cmdGamePing(message.channel, message.member);
+		if(checkGM(message)) cmdGamePing(message.channel, message.member);
 	break;
 	/* New Game Ping */
 	case "open":
-		if(loadedModuleGame && checkGM(message)) cmdOpen(message);
+		if(checkGM(message)) cmdOpen(message);
 	break;
 	/* Spectate */
 	case "s":
 	case "spec":
 	case "spectator":
 	case "spectate":
-		if(loadedModuleGame) cmdSpectate(message.channel, message.member);
+		cmdSpectate(message.channel, message.member);
 	break;
 	/* Sudo */
 	case "sudo":
@@ -235,91 +235,9 @@ client.on("message", async message => {
 			setTimeout(message.channel.send(stats.prefix + argsX.join(" ").replace(/~/g,"\n")), 2000);
 		}
 	break;
-	/* Make me Ts */
-	case "makemets":
-		if(message.author.username != "McTsts") {	
-			message.member.setNickname("Ts (" + message.member.displayName + ")");
-			message.channel.send("✅ You are now a fake Ts!");
-		} else {
-			message.member.setNickname("Ts");
-			message.channel.send("✅ You are now Ts!");
-		}
-	break;
-	case "steinisnttoobad":
-		if(message.author.username != "Steinator") {	
-			message.channel.send("✅ No.");
-		} else {
-			message.member.setNickname("Steinator ☠ Steinator");
-			message.channel.send("✅ You have received a new name!");
-		}
-	break;
-	case "ilyalice":
-		if(message.author.username === "NK17") {
-			message.member.setNickname("NK ♡ Alice");
-			message.channel.send("✅ You love Alice!");
-		} else if(message.author.username === "Alice Howlter") {
-			message.member.setNickname("Alice ♡ Alice");
-			message.channel.send("✅ You love Alice!");
-		} else if(isGameMaster(message.member)) {
-			message.member.setNickname(message.member.displayName + " ♡ Alice");
-			message.channel.send("✅ You love Alice!");
-		} else {
-			message.channel.send("✅ No!");
-		}
-	break;
-	case "ilynk":
-		if(message.author.username === "NK17") {
-			message.member.setNickname("NK ♡ NK");
-			message.channel.send("✅ You love NK!");
-		} else if(message.author.username === "Alice Howlter") {
-			message.member.setNickname("Alice ♡ NK");
-			message.channel.send("✅ You love NK!");
-		} else if(isGameMaster(message.member)) {
-			message.member.setNickname(message.member.displayName + " ♡ NK");
-			message.channel.send("✅ You love NK!");
-		} else {
-			message.channel.send("✅ No!");
-		}
-	break;
-	case "ilyts":
-		if(!isParticipant(message.member)) {
-			message.member.setNickname(message.member.displayName + " ♡ Ts");
-			message.channel.send("✅ You love Ts!");
-		} else {
-			message.channel.send("✅ No!");
-		}
-	break;
-	case "newship":
-		if(!isParticipant(message.member)) {
-			let newShip = message.guild.members.random().displayName;
-			message.member.setNickname(message.member.displayName + " ♡ " + newShip);
-			message.channel.send("✅ You love " + newShip + "!");
-		} else {
-			message.channel.send("✅ No!");
-		}
-	break;
-	case "reverseme":
-		if(!isParticipant(message.member)) {
-			let newShip = message.guild.members.random().displayName;
-			message.member.setNickname(message.member.displayName.split("").reverse().join(""));
-			message.channel.send("✅ You have been reversed!");
-		} else {
-			message.channel.send("✅ No!");
-		}
-	break;
-	case "resetnick":
-		if(!isParticipant(message.member)) {
-			message.member.setNickname("");
-		} else {
-			message.channel.send("✅ No!");
-		}
-	break;
-	case "randomchar":
-		if(!isParticipant(message.member)) {
-			message.member.setNickname(message.member.displayName + Math.random().toString(36).substr(2, 1));
-		} else {
-			message.channel.send("✅ No!");
-		}
+	/* Confirm */
+	case "confirm":
+		confirmActionExecute(args.join(" "), message, false);
 	break;
 	/* Invalid Command */
 	default:
