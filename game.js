@@ -93,12 +93,14 @@ module.exports = function() {
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "demote\n```";
 				help += "```\nFunctionality\n\nReplaces Game Master and Admin roles with GM Ingame and Admin Ingame roles, which have no permisions.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "demote\n< ✅ Attempting to demote you, McTsts!\n```";
+				help += "```diff\nAliases\n\n- v\n```";
 			break;
 			case "promote":
 				if(!isGameMaster(member)) break;
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "promote\n```";
 				help += "```\nFunctionality\n\nReplaces GM Ingame and Admin Ingame roles with Game Master and Admin roles.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "promote\n< ✅ Attempting to promote you, McTsts!\n```";
+				help += "```diff\nAliases\n\n- ^\n```";
 			break;
 			case "gameping":
 				if(!isGameMaster(member)) break;
@@ -111,6 +113,7 @@ module.exports = function() {
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "open\n```";
 				help += "```\nFunctionality\n\nOpens signups, then makes New Game Ping role mentionable, pings it and then makes it unmentionable again.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "open\n```";
+				help += "```diff\nAliases\n\n- @\n```";
 			break;
 			case "sheet":
 				if(!isGameMaster(member)) break;

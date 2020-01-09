@@ -34,8 +34,12 @@ client.on("message", async message => {
 	/* Find Command & Parameters */
 	// Not a command
 	if(message.channel.type === "dm") return;
-	if(message.content.indexOf(stats.prefix) !== 0) return;
+	if(message.content.indexOf(stats.prefix) !== 0 && message.content.length > 3) return;
 	if(message.content.slice(stats.prefix.length).indexOf(stats.prefix) == 0) return;
+	if(message.content.indexOf(stats.prefix) !== 0 && message.content.length <= 3) {
+		cmdInfo(message.channel, message.content.trim().match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()), false, true);
+		return;
+	}
 	// Replace contents
 	if(message.member) message.content = message.content.replace(/%s/, message.member.id)
 	if(message.channel) message.content = message.content.replace(/%c/, message.channel.id);
@@ -49,11 +53,21 @@ client.on("message", async message => {
 		message.channel.send("killq add " + message.author);
 	}
 
+	
+
 
 	/* Ping */ // Generic test command / returns the ping
 	switch(command) {
 	case "ping":
 		cmdPing(message);
+	break;
+	/* Split */
+	case ">":
+	case "say":
+		if(checkGM(message)) message.channel.send(args.join(" "));
+	break;
+	case "split":
+		if(checkGM(message)) args.join(" ").replace(/'/g,'"').split(";").forEach(el => message.channel.send(stats.prefix + el));
 	break;
 	/* Gamephase */ // Commands related to the gamephase
 	case "game-phase":
@@ -77,12 +91,14 @@ client.on("message", async message => {
 		if(checkGM(message)) cmdChannels(message, args, argsX);
 	break;
 	/* Role Info */ // Returns the info for a role set by the roles command
+	case "i":
 	case "info":
-		cmdInfo(message.channel, args, false);
+		cmdInfo(message.channel, args, false, false);
 	break;
 	/* Role Info + Pin */ // Returns the info for a role set by the roles command & pins the message
+	case "ip":
 	case "infopin":
-		if(checkGM(message)) cmdInfo(message.channel, args, true);
+		if(checkGM(message)) cmdInfo(message.channel, args, true, false);
 	break;
 	/* Options */ // Modify options such as role ids and prefix
 	case "stat":
@@ -92,6 +108,7 @@ client.on("message", async message => {
 		if(checkGM(message)) cmdOptions(message, args);
 	break;
 	/* Signup */ // Signs a player up with an emoji
+	case "j":
 	case "join":
 	case "sign-up":
 	case "sign_up":
@@ -102,6 +119,10 @@ client.on("message", async message => {
 	case "sign-out": 
 	case "sign_out": 
 		cmdSignup(message.channel, message.member, args, true);
+	break;
+	/* Signup Tools */
+	case "t":
+		cmdSignup(message.channel, message.member, ["🛠️"], true);
 	break;
 	/* List Signedup */ // Lists all signedup players
 	case "l":
@@ -201,10 +222,12 @@ client.on("message", async message => {
 		if(checkGM(message)) cmdPoll(message, args);
 	break;
 	/* Promote */
+	case "^":
 	case "promote":
 		cmdPromote(message.channel, message.member);
 	break;
 	/* Promote */
+	case "v":
 	case "demote":
 		cmdDemote(message.channel, message.member);
 	break;
@@ -218,6 +241,7 @@ client.on("message", async message => {
 		if(checkGM(message)) cmdGamePing(message.channel, message.member);
 	break;
 	/* New Game Ping */
+	case "@":
 	case "open":
 		if(checkGM(message)) cmdOpen(message);
 	break;

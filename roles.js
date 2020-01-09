@@ -92,12 +92,14 @@ module.exports = function() {
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "info <Role Name>\n```";
 				help += "```\nFunctionality\n\nShows the description of a role.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "info citizen\n< Citizen | Townsfolk\n  Basics\n  The Citizen has no special abilities.\n  All the innocents vote during the day on whomever they suspect to be an enemy,\n  and hope during the night that they won’t get killed.\n```";
+				help += "```diff\nAliases\n\n- i\n```";
 			break;
 			case "infopin":
 				if(!isGameMaster(member)) break;
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "infopin <Role Name>\n```";
 				help += "```\nFunctionality\n\nShows the description of a role, pins it and deletes the pinning message.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "infopin citizen\n< Citizen | Townsfolk\n  Basics\n  The Citizen has no special abilities\n  All the innocents vote during the day on whomever they suspect to be an enemy,\n  and hope during the night that they won’t get killed.\n```";
+				help += "```diff\nAliases\n\n- ip\n```";
 			break;
 			case "roles":
 				if(!isGameMaster(member)) break;
@@ -578,7 +580,7 @@ module.exports = function() {
 				channel.guild.createChannel(name.substr(0, 100), { type: "text",  permissionOverwrites: ccPerms })
 				.then(sc => {
 					// Send info message
-					if(!customRole) indscRoles.forEach(el => cmdInfo(sc, [ el ], true));
+					if(!customRole) indscRoles.forEach(el => cmdInfo(sc, [ el ], true, false));
 					else {
 						var desc = "";
 						desc += "**" + toTitleCase(customRole.name) + "** | " + toTitleCase(customRole.team);
@@ -1072,14 +1074,14 @@ module.exports = function() {
 	}
 	
 	/* Prints info for a role by name or alias */
-	this.cmdInfo = function(channel, args, pin) {
+	this.cmdInfo = function(channel, args, pin, noErr) {
 		// Check arguments
 		if(!args[0]) { 
-			channel.send("⛔ Syntax error. Not enough parameters!"); 
+			if(!noErr) channel.send("⛔ Syntax error. Not enough parameters!"); 
 			return
 		}
 		if(!verifyRoleVisible(args[0])) {
-			channel.send("⛔ Command error. Invalid role `" + args[0] + "`!"); 
+			if(!noErr) channel.send("⛔ Command error. Invalid role `" + args[0] + "`!"); 
 			return; 
 		}
 		sql("SELECT description FROM roles WHERE name = " + connection.escape(parseRole(args[0])), result => {
@@ -1095,21 +1097,21 @@ module.exports = function() {
 							});	
 						}).catch(err => { 
 							logO(err); 
-							sendError(channel, err, "Could not pin info message");
+							if(!noErr) sendError(channel, err, "Could not pin info message");
 						});
 					}
 				// Couldnt send message
 				}).catch(err => { 
 					logO(err); 
-					sendError(channel, err, "Could not send info message");
+					if(!noErr) sendError(channel, err, "Could not send info message");
 				});
 			} else { 
 			// Empty result
-				channel.send("⛔ Database error. Could not find role `" + args[0] + "`!");
+				if(!noErr) channel.send("⛔ Database error. Could not find role `" + args[0] + "`!");
 			}
 		}, () => {
 			// DB error
-			channel.send("⛔ Database error. Couldn't look for role information!");
+			if(!noErr) channel.send("⛔ Database error. Couldn't look for role information!");
 		});	
 	}
 	
