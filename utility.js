@@ -153,6 +153,7 @@ module.exports = function() {
 		if(loadedModulePlayers) msgB += helpPlayers(member, args);
 		if(loadedModulePoll) msgB += helpPoll(member, args);
 		if(loadedModuleTheme) msgB += helpTheme(member, args);
+		msgB += helpBase(member, args);
 		msgB += helpConfirm(member, args);
 		// Print
 		if(args[0] === "") { 
@@ -164,6 +165,30 @@ module.exports = function() {
 			else channel.send(msgA + "```fix\nNot a valid command```");
 		}
 
+	}
+	
+	/* Help for base module */
+	this.helpBase = function(member, args) {
+		let help = "";
+		switch(args[0]) {
+			case "":
+				help += stats.prefix + "ping - Tests the bot\n";
+				if(isGameMaster(member)) help += stats.prefix + "split - Runs a list of semicolon seperated commands\n";
+				if(isGameMaster(member)) help += stats.prefix + "say - Makes the bot repeat a messgae\n";
+			break;
+			case "split":
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "split\n```";
+				help += "```\nFunctionality\n\nRuns a list of commands that are provided as a semicolon seperated list.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "split help;ping```";
+			break;
+			case "say":
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "say\n```";
+				help += "```\nFunctionality\n\nMakes the bot repeat everything after say.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "say Hello!\n< Hello!```";
+				help += "```diff\nAliases\n\n- >\n```";
+			break;
+		}
+		return help;
 	}
 	
 	/* Help for this module */

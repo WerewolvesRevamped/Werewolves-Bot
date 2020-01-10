@@ -109,6 +109,14 @@ client.on("message", async message => {
 	break;
 	/* Signup */ // Signs a player up with an emoji
 	case "j":
+		if(!args[0]) {
+			switch(message.author.id) {
+				case "242983689921888256": cmdSignup(message.channel, message.member, ["🛠️"], true); break;
+				case "277156693765390337": cmdSignup(message.channel, message.member, ["🏹"], true); break;
+				default: cmdSignup(message.channel, message.member, args, true); break;
+			}
+		} else cmdSignup(message.channel, message.member, args, true);
+	break;
 	case "join":
 	case "sign-up":
 	case "sign_up":
@@ -119,10 +127,6 @@ client.on("message", async message => {
 	case "sign-out": 
 	case "sign_out": 
 		cmdSignup(message.channel, message.member, args, true);
-	break;
-	/* Signup Tools */
-	case "t":
-		cmdSignup(message.channel, message.member, ["🛠️"], true);
 	break;
 	/* List Signedup */ // Lists all signedup players
 	case "l":
