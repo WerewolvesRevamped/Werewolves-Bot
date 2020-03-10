@@ -115,13 +115,15 @@ client.on("message", async message => {
 				case "277156693765390337": cmdSignup(message.channel, message.member, ["🏹"], true); break;
 				case "271399293372334081": cmdSignup(message.channel, message.member, ["🚁"], true); break;
 				case "331803222064758786": cmdSignup(message.channel, message.member, ["🥝"], true); break;
-				case "152875086213283841": cmdSignup(message.channel, message.member, ["🐘 "], true); break;
+				case "152875086213283841": cmdSignup(message.channel, message.member, ["🐘"], true); break;
 				case "328035409055449089": cmdSignup(message.channel, message.member, ["💠"], true); break;
 				case "329977469350445069": cmdSignup(message.channel, message.member, ["🐺"], true); break;
 				case "281590363213398016": cmdSignup(message.channel, message.member, ["🍄"], true); break;
 				case "458727748504911884": cmdSignup(message.channel, message.member, ["🦎"], true); break;
 				case "244211825820827648": cmdSignup(message.channel, message.member, ["🐸"], true); break;
 				case "413001114292846612": cmdSignup(message.channel, message.member, ["🐛"], true); break;
+				case "241953256777973760": cmdSignup(message.channel, message.member, ["🤗"], true); break;
+				case "433957826491187202": cmdSignup(message.channel, message.member, ["🦦"], true); break;
 				default: cmdSignup(message.channel, message.member, args, true); break;
 			}
 		} else cmdSignup(message.channel, message.member, args, true);
