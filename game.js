@@ -200,7 +200,7 @@ module.exports = function() {
 		let cPerms;
 		switch(channels[index].members) {
 			case "mayor": 
-				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.mayor, ["read", "write"], []), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.participant, ["read"], ["write"]) ]; 
+				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.mayor, ["read", "write"], []), getPerms(stats.mayor2, ["read", "write"], []), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.participant, ["read"], ["write"]) ]; 
 			break;
 			case "info": 
 				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.participant, ["read"], ["write"]) ]; 
@@ -347,7 +347,7 @@ module.exports = function() {
 		removeNicknameOnce(channel, channel.guild.roles.find(el => el.id === stats.participant).members.array(), 0);
 		removeNicknameOnce(channel, channel.guild.roles.find(el => el.id === stats.dead_participant).members.array(), 0);
 		// Remove Roles & Nicknames
-		removeRoles(channel, [stats.signed_up, stats.participant, stats.dead_participant, stats.spectator, stats.mayor, stats.reporter, stats.guardian], ["signed up", "participant", "dead participant", "spectator", "mayor", "reporter", "guardian"])
+		removeRoles(channel, [stats.signed_up, stats.participant, stats.dead_participant, stats.spectator, stats.mayor, stats.mayor2, stats.reporter, stats.guardian], ["signed up", "participant", "dead participant", "spectator", "mayor", "mayor2", "reporter", "guardian"])
 		// Cleanup channels
 		if(loadedModuleCCs) cmdCCCleanup(channel);
 		if(loadedModuleRoles) cmdRolesScCleanup(channel);

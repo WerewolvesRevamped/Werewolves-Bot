@@ -274,6 +274,10 @@ module.exports = function() {
 					logO(err); 
 					sendError(channel, err, "Could not setup channel permissions");
 				});
+				channel.overwritePermissions(stats.mayor2, { VIEW_CHANNEL: true, SEND_MESSAGES: true }).catch(err => { 
+					logO(err); 
+					sendError(channel, err, "Could not setup channel permissions");
+				});
 			break;
 			case "reporter": 
 				channel.overwritePermissions(stats.reporter, { VIEW_CHANNEL: true, SEND_MESSAGES: true }).catch(err => { 

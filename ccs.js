@@ -35,11 +35,11 @@ module.exports = function() {
 			case "owners": cmdCCList(message.channel, 3); break;
 			case "cleanup": if(checkGM(message)) cmdConfirm(message, "cc cleanup"); break;
 			case "create_multi": 
-				if(stats.cc_limit <= 0) cmdCCCreateMulti(message.channel, message.member, argsX, 0); 
+				if(stats.cc_limit <= -1) cmdCCCreateMulti(message.channel, message.member, argsX, 0); 
 				else message.channel.send("⛔ This subcommand is unavailable with limited CCs!");
 			break;
 			case "create_multi_hidden": 
-				if(stats.cc_limit <= 0) cmdCCCreateMulti(message.channel, message.member, argsX, 1);
+				if(stats.cc_limit <= -1) cmdCCCreateMulti(message.channel, message.member, argsX, 1);
 				else message.channel.send("⛔ This subcommand is unavailable with limited CCs!");
 			break;
 			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
@@ -353,7 +353,7 @@ module.exports = function() {
 		} else if(!args[1]) {
 			channel.send(helpCCs(member, ["cc", "create"]));
 			return;
-		} else if(stats.cc_limit >= 1 && ccs.find(el => el.id == member.id).ccs >= stats.cc_limit) {
+		} else if(stats.cc_limit >= 0 && ccs.find(el => el.id == member.id).ccs >= stats.cc_limit) {
 			channel.send("⛔ You have hit the CC limit of `" + stats.cc_limit + "` CCs!");
 			return;
 		}

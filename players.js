@@ -279,6 +279,11 @@ module.exports = function() {
 					logO(err); 
 					sendError(channel, err, "Could not remove role");
 				});
+				channel.guild.members.find(el2 => el2.id === el).removeRole(stats.mayor2).catch(err => { 
+					// Missing permissions
+					logO(err); 
+					sendError(channel, err, "Could not remove role");
+				});
 				channel.guild.members.find(el2 => el2.id === el).removeRole(stats.reporter).catch(err => { 
 					// Missing permissions
 					logO(err); 
