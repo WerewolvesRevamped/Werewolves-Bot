@@ -23,6 +23,7 @@ client.on("ready", () => {
 		cacheRoleInfo();
 		getVotes();
 		getCCs();
+		getPRoles();
 		getCCCats();
 	}, 3000);
 });

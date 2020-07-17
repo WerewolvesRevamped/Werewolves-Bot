@@ -38,6 +38,7 @@ module.exports = function() {
 		if(loadedModulePlayers) getEmojis();	
 		if(loadedModulePlayers) getVotes();
 		if(loadedModulePlayers) getCCs();
+		if(loadedModulePlayers) getRoles();
 		// Assign roles
 		startOnePlayer(channel, channel.guild.roles.find(el => el.id === stats.signed_up).members.array(), 0);
 		if(loadedModuleRoles) createSCs(channel, debug);

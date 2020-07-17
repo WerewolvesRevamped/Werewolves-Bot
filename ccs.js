@@ -27,9 +27,11 @@ module.exports = function() {
 		switch(args[0]) {
 			case "create": cmdCCCreate(message.channel, message.member, args, 0, () => {}); break;
 			case "create_hidden": cmdCCCreate(message.channel, message.member, args, 1, () => {}); break;
-			case "add": cmdCCAdd(message.channel, message.member, args); break;
-			case "remove": cmdCCRemove(message.channel, message.member, args); break;
-			case "promote": cmdCCPromote(message.channel, message.member, args); break;
+			case "add": cmdCCAdd(message.channel, message.member, args, 0); break;
+			case "remove": cmdCCRemove(message.channel, message.member, args, 0); break;
+			case "rename": cmdCCRename(message.channel, message.member, args, 0); break;
+			case "archive": cmdCCRename(message.channel, message.member, ["", "🔒-" + message.channel.name], 0); break;
+			case "promote": cmdCCPromote(message.channel, message.member, args, 0); break;
 			case "leave": cmdCCLeave(message.channel, message.member); break;
 			case "list": cmdCCList(message.channel, 2); break;
 			case "owners": cmdCCList(message.channel, 3); break;
@@ -70,7 +72,7 @@ module.exports = function() {
 			case "cc":
 				switch(args[1]) {
 					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc [create|create_hidden|create_multi|create_multi_hidden|add|remove|promote|leave|list|owners" + (isGameMaster(member) ? "|cleanup"  : "") + "]\n```";
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc [create|create_hidden|create_multi|create_multi_hidden|add|remove|promote|rename|archive|leave|list|owners" + (isGameMaster(member) ? "|cleanup"  : "") + "]\n```";
 						help += "```\nFunctionality\n\nGroup of commands to handle CCs. " + stats.prefix + "help cc <sub-command> for detailed help.\n```";
 						help += "```diff\nAliases\n\n- c\n```";
 					break;
@@ -108,6 +110,16 @@ module.exports = function() {
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc promote <Player List>\n```";
 						help += "```\nFunctionality\n\nPromotes all players in the <Player List> in the current CC to owner. Only works in CCs, in which you are an owner.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "cc promote federick\n< ✅ Promoted @federick!```";
+					break;
+					case "rename":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc rename <name>\n```";
+						help += "```\nFunctionality\n\nRenames the current cc into <name>.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "cc rename newName\n< ✅ Renamed channel to newName!```";
+					break;
+					case "archive":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc archive\n```";
+						help += "```\nFunctionality\n\nAlias for $cc rename 🔒-<oldName>.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "cc archive\n< ✅ Renamed channel to 🔒-oldName!```";
 					break;
 					case "leave":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc leave\n```";
@@ -216,14 +228,14 @@ module.exports = function() {
 	}
 	
 	/* Adds somebody to a CC */
-	this.cmdCCAdd = function(channel, member, args) {
+	this.cmdCCAdd = function(channel, member, args, mode) {
 		// Check if CC
-		if(!isCC(channel)) {
+		if(!mode && !isCC(channel)) {
 			channel.send("⛔ Command error. Can't use command outside a CC!");
 			return;
 		}
 		let ccOwner = channel.permissionOverwrites.array().filter(el => el.type === "member").filter(el => el.allow === 66560).map(el => el.id);
-		if(ccOwner.includes(member.id)) {
+		if(mode || ccOwner.includes(member.id)) {
 			players = getUserList(channel, args, 1);
 			let playerList = channel.permissionOverwrites.array().filter(el => el.type === "member" && el.allow > 0).map(el => el.id);
 			if(players && players.length > 0) {
@@ -245,14 +257,14 @@ module.exports = function() {
 	}
 	
 	/* Removes somebody to a CC */
-	this.cmdCCRemove = function(channel, member, args) {
+	this.cmdCCRemove = function(channel, member, args, mode) {
 		// Check if CC
-		if(!isCC(channel)) {
+		if(!mode && !isCC(channel)) {
 			channel.send("⛔ Command error. Can't use command outside a CC!");
 			return;
 		}
 		let ccOwner = channel.permissionOverwrites.array().filter(el => el.type === "member").filter(el => el.allow === 66560).map(el => el.id);
-		if(ccOwner.includes(member.id)) {
+		if(mode || ccOwner.includes(member.id)) {
 			players = getUserList(channel, args, 1);
 			let playerList = channel.permissionOverwrites.array().filter(el => el.type === "member" && el.allow > 0).map(el => el.id);
 			players = players.filter(el => playerList.includes(el));
@@ -273,16 +285,39 @@ module.exports = function() {
 		}
 	}
 	
-	/* Promotes somebody to CC Owner */
-	this.cmdCCPromote = function(channel, member, args) {
+	/* Removes somebody to a CC */
+	this.cmdCCRename = function(channel, member, args, mode) {
 		// Check if CC
-		if(!isCC(channel)) {
+		if(!mode && !isCC(channel)) {
+			channel.send("⛔ Command error. Can't use command outside a CC!");
+			return;
+		}
+		let ccOwner = channel.permissionOverwrites.array().filter(el => el.type === "member").filter(el => el.allow === 66560).map(el => el.id);
+		if(mode || ccOwner.includes(member.id)) {
+			channel.edit({ name: args[1] })
+				.then(c => {
+					c.send("✅ Renamed channel to `" + c.name + "`!");
+				})
+				.catch(err => {
+					// Permission error
+					logO(err); 
+					sendError(channel, err, "Could not rename channel");
+				});
+		} else {
+			channel.send("⛔ Command error. You are not an owner of this CC!");
+		}
+	}
+	
+	/* Promotes somebody to CC Owner */
+	this.cmdCCPromote = function(channel, member, args, mode) {
+		// Check if CC
+		if(!mode && !isCC(channel)) {
 			channel.send("⛔ Command error. Can't use command outside a CC!");
 			return;
 		}
 		// Get owner
 		let ccOwner = channel.permissionOverwrites.array().filter(el => el.type === "member").filter(el => el.allow === 66560).map(el => el.id);
-		if(ccOwner.includes(member.id)) {
+		if(mode || ccOwner.includes(member.id)) {
 			// Get members
 			players = getUserList(channel, args, 1);
 			let playerList = channel.permissionOverwrites.array().filter(el => el.type === "member" && el.allow > 0).map(el => el.id);
@@ -316,7 +351,7 @@ module.exports = function() {
 			return;
 		}
 		// Remove permissions
-		channel.overwritePermissions(member.id, {VIEW_CHANNEL: false, READ_MESSAGE_HISTORY: false}).then(c => {
+		channel.overwritePermissions(member.id, {VIEW_CHANNEL: false, READ_MESSAGE_HISTORY: null}).then(c => {
 			channel.send("✅ " + member + " left the CC!");
 		}).catch(err => { 
 			// Permission error
