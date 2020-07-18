@@ -131,6 +131,50 @@ module.exports = function() {
 		}, args[0] * 1000);
 	}
 	
+	this.cmdModify = function(message, args, argsX) {
+		if(!args[0] || !args[1]) {
+			channel.send("⛔ Syntax error. Not enough parameters!"); 
+			return; 
+		} 
+		switch(args[0]) {
+			case "nick":
+			case "nickname":
+				message.guild.members.get(client.user.id).setNickname(argsX[1])
+				 .then(() => {
+					  message.channel.send("✅ Updated bot nickname!");
+				  }).catch(err => {
+					logO(err); 
+					sendError(message.channel, err, "Could not update bot nickname");
+				});
+			break;
+			case "status":
+				if(args[1] != "dnd" && args[1] != "online" && args[1] != "idle") {
+					message.channel.send("⛔ Syntax error. Needs to be `online`, `idle` or `dnd`!"); 
+					return;
+				}
+				client.user.setStatus(args[1])
+				  .then(() => {
+					  message.channel.send("✅ Updated bot status!");
+				  }).catch(err => {
+					logO(err); 
+					sendError(message.channel, err, "Could not update bot status");
+				});
+			break;
+			case "activity":
+				client.user.setPresence({ game: { name: args[1], type: "Playing", url: "https://discord.gg/tuqsMmX" } })
+				.then(() => {
+					  message.channel.send("✅ Updated bot activity!");
+				  }).catch(err => {
+					logO(err); 
+					sendError(message.channel, err, "Could not update bot activity");
+				});
+			break;
+			default:
+				message.channel.send("⛔ Syntax error. This is not a value that can be modified!"); 
+			break;
+		}
+	}
+	
 	/* Handles help command */
 	this.cmdHelp = function(channel, member, args) {
 		// Normal help
@@ -200,6 +244,7 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "bulkdelete - Deletes webhook & user messages in bulk\n";
 				if(isGameMaster(member)) help += stats.prefix + "delete - Deletes a couple of messages\n";
 				if(isGameMaster(member)) help += stats.prefix + "delay - Executes a command with delay\n";
+				if(isGameMaster(member)) help += stats.prefix + "modify - Modifies the bot\n";
 			break;
 			case "ping":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "ping\n```";
@@ -228,6 +273,12 @@ module.exports = function() {
 				help += "```\nFunctionality\n\nProvides help for a command (with subcommands)\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "help help\n```";
 				help += "```diff\nAliases\n\n- h\n```";
+			break;
+			case "modify":
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "modify <attribute> <value>\n```";
+				help += "```\nFunctionality\n\Updates an <attribute> of the bot to <value>. Available attributes: status, nickname, activity.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "modify status dnd!\n< ✅ Updated bot status!```";
+				help += "```diff\nAliases\n\n- >\n```";
 			break;
 		}
 		return help;

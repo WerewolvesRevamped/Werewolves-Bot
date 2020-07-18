@@ -68,6 +68,10 @@ client.on("message", async message => {
 	case "say":
 		if(checkGM(message)) message.channel.send(args.join(" "));
 	break;
+	case "mod":
+	case "modify":
+		if(checkGM(message)) cmdModify(message, args, argsX);
+	break;
 	case "split":
 		if(checkGM(message)) args.join(" ").replace(/'/g,'"').split(";").forEach(el => message.channel.send(stats.prefix + el));
 	break;
