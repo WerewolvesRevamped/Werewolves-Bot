@@ -21,7 +21,7 @@ module.exports = function() {
 		if(!loadedModulePlayers) return;
 		// Check subcommand
 		if(!args[0]) { 
-			message.channel.send("⛔ Syntax error. Not enough parameters!`"); 
+			message.channel.send("⛔ Syntax error. Not enough parameters!"); 
 			return; 
 		}
 		// Find subcommand
@@ -38,7 +38,6 @@ module.exports = function() {
 		switch(args[1]) {
 			case "public": pollCreate(channel, args, "public"); break;
 			case "private": pollCreate(channel, args, "private"); break;
-			case "cancel": pollCreate(channel, args, "cancel"); break;
 			case "dead": pollCreate(channel, args, "dead"); break;
 			default:  
 				if(isCC(channel) || isSC(channel)) pollCreate(channel, args, "private");
@@ -64,7 +63,7 @@ module.exports = function() {
 					break;
 					case "new":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "poll new <Poll Type>\n```";
-						help += "```\nFunctionality\n\nCreates a new poll. If no poll type is provided, and the command is executed in a secret channel, poll type is set to private, otherwise it is set to public. Assigns a sort of random name to each new poll.\n\nList of Poll Types:\npublic: Has all alive players, as well as an Abstain option. Uses public_value player property to evaluate poll results. Adds a players public_votes value to their own result. Only allows alive participants to vote. Mayor get an extra vote, unless they have less than 0 vote, then they get an extra negative vote.\nprivate: Has all alive players. Uses private_value player property to evaluate poll results. Only allows alive participants to vote.\ncancel: `Has all alive players, as well as a Cancel option. Every vote has a value of 1. Only allows alive participants to vote.\ndead: Has Yes/No options. Every vote has a value of 1. Only allows dead participants to vote.```";
+						help += "```\nFunctionality\n\nCreates a new poll. If no poll type is provided, and the command is executed in a secret channel, poll type is set to private, otherwise it is set to public. Assigns a sort of random name to each new poll.\n\nList of Poll Types:\npublic: Has all alive players, as well as an Abstain option. Uses public_value player property to evaluate poll results. Adds a players public_votes value to their own result. Only allows alive participants to vote. Mayor get an extra vote, unless they have less than 0 vote, then they get an extra negative vote.\nprivate: Has all alive players. Uses private_value player property to evaluate poll results. Only allows alive participants to vote.\ndead: Has Yes/No options. Every vote has a value of 1. Only allows dead participants to vote.```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "poll new\n\n> " +  stats.prefix + "poll new public```";
 					break;
 					case "close":
@@ -88,8 +87,8 @@ module.exports = function() {
 				// Get player lists
 				let pollName = Math.random().toString(36).replace(/[^a-z]+/g, "").substr(0, 1) + ((((+pollNum) + 2) * 3)  - 4).toString(36).replace(/[^a-z]+/g, "a") + Math.random().toString(36).replace(/[^a-z]+/g, "").substr(0, 1);
 				let playerLists = [], playerList = result.map(el => [el.emoji, channel.guild.members.find(el2 => el2.id === el.id)]);
-				if(type === "public") playerList.push(["⛔", "*Abstain*"]);
-				else if(type === "cancel") playerList.push(["❌", "*Cancel*"]);
+				if(type === "public" && stats.poll == 0) playerList.push(["⛔", "*Abstain*"]);
+				if(type === "public" && stats.poll == 1) playerList.push(["❌", "*Cancel*"]);
 				else if(type === "dead") playerList = [[client.emojis.get(stats.yes_emoji), "Yes"], [client.emojis.get(stats.no_emoji), "No"]];
 				while(playerList.length > 0) playerLists.push(playerList.splice(0, 20));
 				// Print message

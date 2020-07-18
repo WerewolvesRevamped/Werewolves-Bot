@@ -422,7 +422,7 @@ module.exports = function() {
 									// Put the channel into the correct category
 									ct.setParent(cc.id)
 									.then(updated => {
-										log("CC > Created new CC `" + updated.name + "` in category `" + cc.name + "`!");
+										//log("CC > Created new CC `" + updated.name + "` in category `" + cc.name + "`!");
 										// Increment cc count
 										sql("UPDATE stats SET value = value + 1 WHERE id = 9", result => {
 											channel.send("✅ Created " + updated + "!"); 
@@ -472,7 +472,7 @@ module.exports = function() {
 								// Set category
 								ct.setParent(cc.id)
 								.then(updated => {
-									log("CC > Created new CC `" + updated.name + "` in category `" + cc.name + "`!");
+									//log("CC > Created new CC `" + updated.name + "` in category `" + cc.name + "`!");
 									// Increment cc count
 									sql("UPDATE stats SET value = value + 1 WHERE id = 9", result => {
 										channel.send("✅ Created " + updated + "!"); 

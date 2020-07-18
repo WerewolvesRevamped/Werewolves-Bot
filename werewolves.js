@@ -25,6 +25,7 @@ client.on("ready", () => {
 		getCCs();
 		getPRoles();
 		getCCCats();
+		log("Bot >> Caching completed, Bot is ready!")
 	}, 3000);
 });
 
@@ -38,7 +39,7 @@ client.on("message", async message => {
 	if(message.content.indexOf(stats.prefix) !== 0 && message.content.length > 3) return;
 	if(message.content.slice(stats.prefix.length).indexOf(stats.prefix) == 0) return;
 	if(message.content.indexOf(stats.prefix) !== 0 && message.content.length <= 3) {
-		cmdInfo(message.channel, message.content.trim().match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()), false, true);
+		if(message.content.match(/a-zA-Z_-/)) cmdInfo(message.channel, message.content.trim().match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()), false, true);
 		return;
 	}
 	// Replace contents
