@@ -161,7 +161,7 @@ module.exports = function() {
 				});
 			break;
 			case "activity":
-				client.user.setPresence({ game: { name: args[1], type: "Playing", url: "https://discord.gg/tuqsMmX" } })
+				client.user.setPresence({ game: { name: argsX[1], type: "Playing", url: "https://discord.gg/tuqsMmX" } })
 				.then(() => {
 					  message.channel.send("✅ Updated bot activity!");
 				  }).catch(err => {
@@ -278,7 +278,7 @@ module.exports = function() {
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "modify <attribute> <value>\n```";
 				help += "```\nFunctionality\n\Updates an <attribute> of the bot to <value>. Available attributes: status, nickname, activity.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "modify status dnd!\n< ✅ Updated bot status!```";
-				help += "```diff\nAliases\n\n- >\n```";
+				help += "```diff\nAliases\n\n- mod\n```";
 			break;
 		}
 		return help;

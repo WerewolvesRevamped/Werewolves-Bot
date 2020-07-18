@@ -25,7 +25,7 @@ client.on("ready", () => {
 		getCCs();
 		getPRoles();
 		getCCCats();
-		log("Bot >> Caching completed, Bot is ready!")
+		log("Bot > Caching completed, Bot is ready!")
 	}, 3000);
 });
 

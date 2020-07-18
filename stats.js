@@ -331,7 +331,6 @@ module.exports = function() {
 			sqlSetStat(1, args[1], result => {
 				let phase = getPhaseName(args[1]);
 				channel.send("✅ Game Phase is now `" + phase + "` (" + args[1] + ")!"); 
-				log("GP > Set gamephase to `" + phase + "`!");
 				getStats();
 				updateGameStatus(channel.guild);
 			}, () => {
