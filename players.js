@@ -326,8 +326,8 @@ module.exports = function() {
 	/* Lists all signedup players */
 	this.cmdPlayersList = function(channel, args) {
 		// Get a list of players
-		sql("SELECT id,emoji,role,alive FROM players", result => {
-			let playerList = result.map(el => el.emoji + " - " + channel.guild.members.find(el2 => el2.id === el.id) + " (" + el.role.split(",").map(role => toTitleCase(role)).join(" + ") + "); Alive: " + el.alive).join("\n");
+		sql("SELECT id,emoji,role,alive,public_value,private_value,public_votes,ccs FROM players", result => {
+			let playerList = result.map(el => el.emoji + " - " + channel.guild.members.find(el2 => el2.id === el.id) + " (" + el.role.split(",").map(role => toTitleCase(role)).join(" + ") + "); Alive: " + (el.alive ? client.emojis.get(stats.yes_emoji) : client.emojis.get(stats.no_emoji)) + "; CCs: " + el.ccs + "; Votes: " + el.public_value + "," + el.private_value + "," + el.public_votes).join("\n");
 			// Print message
 			channel.send("✳ Listing all players").then(m => {
 				m.edit("**Players** | Total: " +  result.length + "\n" + playerList)
@@ -475,7 +475,7 @@ module.exports = function() {
 			// Invalid user
 			channel.send("⛔ Syntax error. `" + args[2] + "` is not a valid player!"); 
 			return; 
-		} else if(args[1] != "emoji" && args[1] != "role" && args[1] != "alive" && args[1] != "public_value" && args[1] != "private_value" && args[1] != "public_votes") { 
+		} else if(args[1] != "emoji" && args[1] != "role" && args[1] != "alive" && args[1] != "public_value" && args[1] != "private_value" && args[1] != "public_votes" && args[1] != "id" && args[1] != "ccs") { 
 			// Invalid parameter
 			channel.send("⛔ Syntax error. Invalid parameter `" + args[1] + "`!"); 
 			return; 
@@ -709,12 +709,12 @@ module.exports = function() {
 	}
 
 	/* Convert a List of Users, Into a List of Valid User IDs */
-	this.getUserList = function(channel, args, startIndex) {
+	this.getUserList = function(channel, args, startIndex, executor) {
 		// Cut off entries at the start
 		let players = args.slice(startIndex).map(el => getUser(channel, el));
 		// Filter out non participants
 		players = players.filter((el, index) => {
-			if(el && isParticipant(channel.guild.members.find(el2 => el2.id === el))) {
+			if(el && (isParticipant(channel.guild.members.find(el2 => el2.id === el)) || isGameMaster(executor))) {
 				return true; 
 			}
 			else { 

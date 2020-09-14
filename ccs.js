@@ -30,20 +30,14 @@ module.exports = function() {
 			case "add": cmdCCAdd(message.channel, message.member, args, 0); break;
 			case "remove": cmdCCRemove(message.channel, message.member, args, 0); break;
 			case "rename": cmdCCRename(message.channel, message.member, args, 0); break;
-			case "archive": cmdCCRename(message.channel, message.member, ["", "🔒-" + message.channel.name], 0); break;
+			case "archive": cmdCCArchive(message.channel, message.member, 0); break;
 			case "promote": cmdCCPromote(message.channel, message.member, args, 0); break;
 			case "leave": cmdCCLeave(message.channel, message.member); break;
 			case "list": cmdCCList(message.channel, 2); break;
 			case "owners": cmdCCList(message.channel, 3); break;
 			case "cleanup": if(checkGM(message)) cmdConfirm(message, "cc cleanup"); break;
-			case "create_multi": 
-				if(stats.cc_limit <= -1) cmdCCCreateMulti(message.channel, message.member, argsX, 0); 
-				else message.channel.send("⛔ This subcommand is unavailable with limited CCs!");
-			break;
-			case "create_multi_hidden": 
-				if(stats.cc_limit <= -1) cmdCCCreateMulti(message.channel, message.member, argsX, 1);
-				else message.channel.send("⛔ This subcommand is unavailable with limited CCs!");
-			break;
+			case "create_multi": cmdCCCreateMulti(message.channel, message.member, argsX, 0); break;
+			case "create_multi_hidden": cmdCCCreateMulti(message.channel, message.member, argsX, 1); break;
 			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
 		}
 	}
@@ -67,6 +61,7 @@ module.exports = function() {
 				help += stats.prefix + "cc [create|create_hidden] - Creates a CC\n";
 				help += stats.prefix + "cc [create_multi|create_multi_hidden] - Creates multiple CCs\n";
 				help += stats.prefix + "cc [add|remove|promote|leave|list|owners] - Manages a CC\n";
+				help += stats.prefix + "cc [rename|archive] - Manages a CC\n";
 				if(isGameMaster(member)) help += stats.prefix + "cc cleanup - Cleans up CCs\n";
 			break;
 			case "cc":
@@ -118,7 +113,7 @@ module.exports = function() {
 					break;
 					case "archive":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc archive\n```";
-						help += "```\nFunctionality\n\nAlias for $cc rename 🔒-<oldName>.\n```";
+						help += "```\nFunctionality\n\nRenames a CC to 🔒-<oldName> and locks it.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "cc archive\n< ✅ Renamed channel to 🔒-oldName!```";
 					break;
 					case "leave":
@@ -235,8 +230,8 @@ module.exports = function() {
 			return;
 		}
 		let ccOwner = channel.permissionOverwrites.array().filter(el => el.type === "member").filter(el => el.allow === 66560).map(el => el.id);
-		if(mode || ccOwner.includes(member.id)) {
-			players = getUserList(channel, args, 1);
+		if(mode || isGameMaster(member) || ccOwner.includes(member.id)) {
+			players = getUserList(channel, args, 1, member);
 			let playerList = channel.permissionOverwrites.array().filter(el => el.type === "member" && el.allow > 0).map(el => el.id);
 			if(players && players.length > 0) {
 				players = players.filter(el => !playerList.includes(el));
@@ -264,8 +259,8 @@ module.exports = function() {
 			return;
 		}
 		let ccOwner = channel.permissionOverwrites.array().filter(el => el.type === "member").filter(el => el.allow === 66560).map(el => el.id);
-		if(mode || ccOwner.includes(member.id)) {
-			players = getUserList(channel, args, 1);
+		if(mode || isGameMaster(member) || ccOwner.includes(member.id)) {
+			players = getUserList(channel, args, 1, member);
 			let playerList = channel.permissionOverwrites.array().filter(el => el.type === "member" && el.allow > 0).map(el => el.id);
 			players = players.filter(el => playerList.includes(el));
 			if(players && players.length > 0) {
@@ -292,8 +287,9 @@ module.exports = function() {
 			channel.send("⛔ Command error. Can't use command outside a CC!");
 			return;
 		}
+		args[1] = args[1].replace(/🔒/,"lock");
 		let ccOwner = channel.permissionOverwrites.array().filter(el => el.type === "member").filter(el => el.allow === 66560).map(el => el.id);
-		if(mode || ccOwner.includes(member.id)) {
+		if(mode || isGameMaster(member) || ccOwner.includes(member.id)) {
 			channel.edit({ name: args[1] })
 				.then(c => {
 					c.send("✅ Renamed channel to `" + c.name + "`!");
@@ -302,6 +298,34 @@ module.exports = function() {
 					// Permission error
 					logO(err); 
 					sendError(channel, err, "Could not rename channel");
+				});
+		} else {
+			channel.send("⛔ Command error. You are not an owner of this CC!");
+		}
+	}
+	
+	
+	/* Removes somebody to a CC */
+	this.cmdCCArchive = function(channel, member, mode) {
+		// Check if CC
+		if(!mode && !isCC(channel)) {
+			channel.send("⛔ Command error. Can't use command outside a CC!");
+			return;
+		}
+		let ccOwner = channel.permissionOverwrites.array().filter(el => el.type === "member").filter(el => el.allow === 66560).map(el => el.id);
+		if(mode || isGameMaster(member) || ccOwner.includes(member.id)) {
+			channel.edit({ name: "🔒-" + channel.name })
+				.then(c => {
+					let ccList = c.permissionOverwrites.array().filter(el => el.type === "member").map(el => el.id);
+					ccList.forEach(el => {
+						c.overwritePermissions(el, {VIEW_CHANNEL: true, READ_MESSAGE_HISTORY: null, SEND_MESSAGES: false})
+					});
+					c.send("✅ Archived channel!");
+				})
+				.catch(err => {
+					// Permission error
+					logO(err); 
+					sendError(channel, err, "Could not archive channel");
 				});
 		} else {
 			channel.send("⛔ Command error. You are not an owner of this CC!");
@@ -317,9 +341,9 @@ module.exports = function() {
 		}
 		// Get owner
 		let ccOwner = channel.permissionOverwrites.array().filter(el => el.type === "member").filter(el => el.allow === 66560).map(el => el.id);
-		if(mode || ccOwner.includes(member.id)) {
+		if(mode || isGameMaster(member) || ccOwner.includes(member.id)) {
 			// Get members
-			players = getUserList(channel, args, 1);
+			players = getUserList(channel, args, 1, member);
 			let playerList = channel.permissionOverwrites.array().filter(el => el.type === "member" && el.allow > 0).map(el => el.id);
 			players = players.filter(el => playerList.includes(el));
 			if(players && players.length > 0) {
@@ -370,34 +394,38 @@ module.exports = function() {
 		// Get lists
 		let ccList = shuffleArray(channel.permissionOverwrites.array()).filter(el => el.type === "member").filter(el => el.allow > 0).map(el => channel.guild.members.find(el2 => el2.id === el.id)).join("\n");
 		let ccOwner = shuffleArray(channel.permissionOverwrites.array()).filter(el => el.type === "member").filter(el => el.allow === 66560).map(el => channel.guild.members.find(el2 => el2.id === el.id)).join("\n");
-		// Choose messages
+		// Choose messages		
 		switch(mode) {
 			case 0: channel.send(ccOwner + " has created a new CC!\n\n**CC Members** | Total: " +  ccList.split("\n").length + "\n" + ccList); break;
 			case 1: channel.send("A new CC has been created!\n\n**CC Members** | Total: " +  ccList.split("\n").length + "\n" + ccList); break;
-			case 2: channel.send("**CC Members** | Total: " +  ccList.split("\n").length + "\n" + ccList); break;
-			case 3: channel.send("**CC Owners** | Total: " +  ccOwner.split("\n").length + "\n" + ccOwner); break;
+			case 2: channel.send("✳ Listing CC members").then(m => { m.edit("**CC Members** | Total: " +  ccList.split("\n").length + "\n" + ccList); }).catch(err => {logO(err); sendError(channel, err, "Could not list CC members"); }); break;
+			case 3: channel.send("✳ Listing CC members").then(m => { m.edit("**CC Owners** | Total: " +  ccOwner.split("\n").length + "\n" + ccOwner); }).catch(err => {logO(err); sendError(channel, err, "Could not list CC members"); }); break;
 		}
+		
 	}
 		
 	/* Creates CC */
 	this.cmdCCCreate = function(channel, member, args, mode, callback) {
 		// Get a list of users that need to be in the cc
-		if(!(isCC(channel) || (loadedModuleRoles && isSC(channel)))) {
+		if(!(isCC(channel) || (loadedModuleRoles && isSC(channel)) || isGameMaster(member))) {
 			channel.send("⛔ Command error. Can't use command outside a CC/SC!");
 			return;
 		} else if(!args[1]) {
 			channel.send(helpCCs(member, ["cc", "create"]));
 			return;
-		} else if(stats.cc_limit >= 0 && ccs.find(el => el.id == member.id).ccs >= stats.cc_limit) {
+		} else if(!isGameMaster(member) && stats.cc_limit >= 0 && ccs.find(el => el.id == member.id).ccs >= stats.cc_limit) {
 			channel.send("⛔ You have hit the CC limit of `" + stats.cc_limit + "` CCs!");
 			return;
 		}
-		sql("UPDATE players SET ccs = ccs + 1 WHERE id = " + connection.escape(member.id), result => {
-			getCCs();
-		}, () => {
-			channel.send("⛔ Database error. Could not increase the CC amount!");
-		});
-		players = getUserList(channel, args, 2);
+		if(!isGameMaster(member)) {
+			sql("UPDATE players SET ccs = ccs + 1 WHERE id = " + connection.escape(member.id), result => {
+				getCCs();
+			}, () => {
+				channel.send("⛔ Database error. Could not increase the CC amount!");
+			});
+		}
+		args[1] = args[1].replace(/🔒/,"lock");
+		players = getUserList(channel, args, 2, member);
 		if(isParticipant(member) || players.length > 0) {
 			sqlGetStat(9, result => {
 				// Check if a new category is needed

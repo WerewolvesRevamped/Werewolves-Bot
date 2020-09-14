@@ -39,7 +39,7 @@ client.on("message", async message => {
 	if(message.content.indexOf(stats.prefix) !== 0 && message.content.length > 3) return;
 	if(message.content.slice(stats.prefix.length).indexOf(stats.prefix) == 0) return;
 	if(message.content.indexOf(stats.prefix) !== 0 && message.content.length <= 3) {
-		if(message.content.match(/a-zA-Z_-/)) cmdInfo(message.channel, message.content.trim().match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()), false, true);
+		if(message.content.trim().match(/^[a-zA-Z]*$/) && (isSC(message.channel) | isCC(message.channel))) cmdInfo(message.channel, message.content.trim().match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()), false, true);
 		return;
 	}
 	// Replace contents
@@ -60,6 +60,17 @@ client.on("message", async message => {
 
 	/* Ping */ // Generic test command / returns the ping
 	switch(command) {
+	case "temp":
+		if(!args[0] || !args[1].match(/[0-9]*/) || (args[0] != "c" && args[0] != "f")) {
+			message.channel.send("Not enough/Invalid parameters.");
+			return;
+		}
+		switch(args[0]) {
+			default: message.channel.send("Unknown conversion."); break;
+			case "f": message.channel.send(args[1] + " °C in fahrenheit: "  + Math.round((args[1] * (9/5)) + 32, 2) + " °F"); break;
+			case "c": message.channel.send(args[1] + " °F in celsius: "  + Math.round((args[1] - 32) *  5/9, 2)  + " °C"); break;
+		}
+	break;
 	case "ping":
 		cmdPing(message);
 	break;
@@ -131,7 +142,7 @@ client.on("message", async message => {
 				case "241953256777973760": cmdSignup(message.channel, message.member, ["ğŸ¤—"], true); break;
 				case "433957826491187202": cmdSignup(message.channel, message.member, ["ğŸ¦¦"], true); break;
 				case "334066065112039425": cmdSignup(message.channel, message.member, ["ğŸ”¥"], true); break;
-				default: cmdSignup(message.channel, message.member, args, true); break;
+				default: cmdSignup(message.channel, message.member, args, true); break; 
 			}
 		} else cmdSignup(message.channel, message.member, args, true);
 	break;
@@ -234,8 +245,7 @@ client.on("message", async message => {
 	/* Emoji */
 	case "e":
 	case "emojis":
-		if(stats.cc_limit <= 0) cmdEmojis(message.channel);
-		else message.channel.send("â›” This command is unavailable with limited CCs!");
+		cmdEmojis(message.channel);
 	break;
 	/* Poll */
 	case "pl":
@@ -274,6 +284,11 @@ client.on("message", async message => {
 	case "spectate":
 		cmdSpectate(message.channel, message.member);
 	break;
+	/* Substitute */
+	case "sub":
+	case "substitute":
+		cmdSubstitute(message.channel, message.member);
+	break;
 	/* Sudo */
 	case "sudo":
 		if(checkSafe(message)) {
@@ -296,8 +311,7 @@ client.on("message", async message => {
 
 /* Leave Detection */
 client.on("messageDelete", message => {
-	if(isParticipant(message.member) || isGameMaster(message.member) ||!isCC(message.channel)) return;
-	message.channel.send("a");
+	if(!isDeadParticipant(message.member)) return;
 	cmdWebhook(message.channel, message.member, [ "**[Cached Deleted Message]**", message.content ]);
 });
 

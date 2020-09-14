@@ -58,6 +58,7 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "gameping - Notifies players with the New Game Ping role about a new game\n";
 				if(isGameMaster(member)) help += stats.prefix + "open - Opens signups and notifies players\n";
 				help += stats.prefix + "spectate - Makes you a spectator\n";
+				help += stats.prefix + "substitute - Makes you a substitute player\n";
 			break;
 			case "start":
 				if(!isGameMaster(member)) break;
@@ -88,6 +89,12 @@ module.exports = function() {
 				help += "```\nFunctionality\n\nMakes you a spectator, if you are not a participant and a game is running.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "spectate\n< ✅ Attempting to make you a spectator, McTsts!\n```";
 				help += "```diff\nAliases\n\n\n- s\n- spec\n- spectator\n```";
+			break;
+			case "substitute":
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "substitute\n```";
+				help += "```\nFunctionality\n\nMakes you a substitute player, if you are not a participant and a game is running.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "spectate\n< ✅ Attempting to make you a substitute player, McTsts!\n```";
+				help += "```diff\nAliases\n\n\n- s\n- spec\n- sub\n```";
 			break;
 			case "demote":
 				if(!isGameMaster(member)) break;
@@ -292,7 +299,7 @@ module.exports = function() {
 		if(isParticipant(member)) {
 			channel.send("⛔ Command error. Can't make you a spectator while you're a participant."); 
 			return;
-		} else if(stats.gamephase != 2) {
+		} else if(stats.gamephase < 2) {
 			channel.send("⛔ Command error. Can't make you a spectator while there is no game."); 
 			return;
 		}
@@ -301,6 +308,22 @@ module.exports = function() {
 			// Missing permissions
 			logO(err); 
 			sendError(channel, err, "Could not add spectator role to " + member.displayName);
+		});
+	}
+	
+	this.cmdSubstitute = function(channel, member) {
+		if(isParticipant(member)) {
+			channel.send("⛔ Command error. Can't make you a substitute player while you're a participant."); 
+			return;
+		} else if(stats.gamephase < 2) {
+			channel.send("⛔ Command error. Can't make you a substitute player while there is no game."); 
+			return;
+		}
+		channel.send("✅ Attempting to make you a substitute player, " + member.displayName + "!");
+		member.addRole(stats.sub).catch(err => { 
+			// Missing permissions
+			logO(err); 
+			sendError(channel, err, "Could not add substitute player role to " + member.displayName);
 		});
 	}
 	
@@ -348,7 +371,7 @@ module.exports = function() {
 		removeNicknameOnce(channel, channel.guild.roles.find(el => el.id === stats.participant).members.array(), 0);
 		removeNicknameOnce(channel, channel.guild.roles.find(el => el.id === stats.dead_participant).members.array(), 0);
 		// Remove Roles & Nicknames
-		removeRoles(channel, [stats.signed_up, stats.participant, stats.dead_participant, stats.spectator, stats.mayor, stats.mayor2, stats.reporter, stats.guardian], ["signed up", "participant", "dead participant", "spectator", "mayor", "mayor2", "reporter", "guardian"])
+		removeRoles(channel, [stats.signed_up, stats.participant, stats.dead_participant, stats.spectator, stats.mayor, stats.mayor2, stats.reporter, stats.guardian, stats.sub], ["signed up", "participant", "dead participant", "spectator", "mayor", "mayor2", "reporter", "guardian", "substitute"])
 		// Cleanup channels
 		if(loadedModuleCCs) cmdCCCleanup(channel);
 		if(loadedModuleRoles) cmdRolesScCleanup(channel);
