@@ -88,12 +88,12 @@ module.exports = function() {
 			sqlGetStat(13, pollNum => {
 				// Get player lists
 				let pollName = Math.random().toString(36).replace(/[^a-z]+/g, "").substr(0, 1) + ((((+pollNum) + 2) * 3)  - 4).toString(36).replace(/[^a-z]+/g, "a") + Math.random().toString(36).replace(/[^a-z]+/g, "").substr(0, 1);
-				let playerLists = [], playerList = result.map(el => [el.emoji, channel.guild.members.find(el2 => el2.id === el.id)]);
+				let playerLists = [], playerList = result.map(el => [el.emoji, channel.guild.members.cache.get(el.id)]);
 				if(type === "public" && stats.poll == 0) playerList.push(["⛔", "*Abstain*"]);
 				else if(type === "public" && stats.poll == 1) playerList.push(["❌", "*Cancel*"]);
-				else if(type === "dead") playerList = [[client.emojis.get(stats.yes_emoji), "Yes"], [client.emojis.get(stats.no_emoji), "No"]];
-				else if(type === "yn") playerList = [[client.emojis.get(stats.yes_emoji), "Yes"], [client.emojis.get(stats.no_emoji), "No"]];
-				else if(type === "yna") playerList = [[client.emojis.get(stats.yes_emoji), "Yes"], [client.emojis.get(stats.no_emoji), "No"], ["⛔", "*Abstain*"]];
+				else if(type === "dead") playerList = [[client.emojis.cache.get(stats.yes_emoji), "Yes"], [client.emojis.cache.get(stats.no_emoji), "No"]];
+				else if(type === "yn") playerList = [[client.emojis.cache.get(stats.yes_emoji), "Yes"], [client.emojis.cache.get(stats.no_emoji), "No"]];
+				else if(type === "yna") playerList = [[client.emojis.cache.get(stats.yes_emoji), "Yes"], [client.emojis.cache.get(stats.no_emoji), "No"], ["⛔", "*Abstain*"]];
 				while(playerList.length > 0) playerLists.push(playerList.splice(0, 20));
 				// Print message
 				channel.send("Poll `#" + pollName + "`");
@@ -149,9 +149,9 @@ module.exports = function() {
 			case "public": 
 				if(!isParticipant(member)) return 0;
 				voteValue = + publicValues.find(el => el.id === member.id).public_value;
-				if(member.roles.find(el => el.id === stats.mayor) && voteValue >= 0) {
+				if(member.roles.cache.get(stats.mayor) && voteValue >= 0) {
 					voteValue++;
-				} else if(member.roles.find(el => el.id === stats.mayor) && voteValue < 0) {
+				} else if(member.roles.cache.get(stats.mayor) && voteValue < 0) {
 					voteValue--;
 				}
 			break;
@@ -176,8 +176,11 @@ module.exports = function() {
 			pollGetVoters(channel, reactions, 0, pollType, pollNum, messages);
 			return;
 		} else {
-			channel.fetchMessage(messages[index]).then(m => {
-				let newReactions = reactions.concat(m.reactions.array());
+			channel.messages.fetch(messages[index]).then(m => {
+				let newReactions = reactions.concat(m.reactions.cache.map((data,emoji) => { return {emoji_id: emoji, emoji: emoji.match(/\d+/) ? "<:" + (client.emojis.cache.get(emoji).name).toLowerCase() + ":"  + client.emojis.cache.get(emoji).id + ">" : emoji, users: data.users, count: data.count, messageID: data.messageID}; }));
+				//logO(newReactions);
+				//channel.send("```" + JSON.stringify(newReactions, null, 4) + "```");
+				//channel.send("```" + JSON.stringify(emojiIDs, null, 4) + "```");
 				pollGetReactions(channel, messages, newReactions, ++index, pollType, pollNum);
 			}).catch(err => { 
 				logO(err); 
@@ -192,7 +195,7 @@ module.exports = function() {
 			pollPrintResult(channel, reactions, pollType, pollNum, messages);
 		} else {
 			// Fetch each user
-			reactions[index].fetchUsers().then(u => {
+			reactions[index].users.fetch().then(u => {
 				pollGetVoters(channel, reactions, ++index, pollType, pollNum, messages);
 			}).catch(err => { 
 				// Discord error
@@ -205,11 +208,11 @@ module.exports = function() {
 	/* Prints a poll result */
 	this.pollPrintResult = function(channel, reactions, pollType, pollNum, messages) {
 		// Find duplicate votes
-		let duplicates = ([].concat.apply([], reactions.map(el => el.users.array()))).filter((el, index, array) => array.indexOf(el) != index).filter((el, index, array) => array.indexOf(el) === index);
+		let duplicates = ([].concat.apply([], reactions.map(el => el.users.cache.array()))).filter((el, index, array) => array.indexOf(el) != index).filter((el, index, array) => array.indexOf(el) === index);
 		// Create message
-		let votesMessage = reactions.filter(el => el.users.array().length > 1 || (emojiToID(el.emoji) && publicVotes.find(el2 => el2.id === emojiToID(el.emoji)).public_votes > 0)).map(el => {
+		let votesMessage = reactions.filter(el => el.users.cache.array().length > 1 || (emojiToID(el.emoji) && publicVotes.find(el2 => el2.id === emojiToID(el.emoji)).public_votes > 0)).map(el => {
 			// Get non duplicate voters
-			let votersList = el.users.array().filter(el => !duplicates.includes(el)).map(el3 => channel.guild.members.find(el2 => el2.id === el3.id));
+			let votersList = el.users.cache.array().filter(el => !duplicates.includes(el)).map(el3 => channel.guild.members.cache.get(el3.id));
 			if(!votersList.length && (!emojiToID(el.emoji) || publicVotes.find(el2 => el2.id === emojiToID(el.emoji)).public_votes <= 0)) return { valid: false };
 			// Count votes
 			let votes = 0;
@@ -221,21 +224,21 @@ module.exports = function() {
 			if(pollType != "dead") voters = votersList.filter(el => isParticipant(el)).join(", ");
 			else voters = votersList.filter(el => isDeadParticipant(el)).join(", ");
 			// Get candidate from emoji
-			let candidate;
+			let candidate = "not set";
 			if(el.emoji == "⛔") candidate = "Abstain";
 			else if(el.emoji == "❌") candidate = "Cancel";
-			else if(el.emoji == client.emojis.get(stats.yes_emoji)) candidate = "Yes";
-			else if(el.emoji == client.emojis.get(stats.no_emoji)) candidate = "No";
-			else candidate = channel.guild.members.find(el2 => el2.id === emojiToID(el.emoji));
+			else if(el.emoji_id == stats.yes_emoji) candidate = "Yes";
+			else if(el.emoji_id == stats.no_emoji) candidate = "No";
+			else candidate = channel.guild.members.cache.get(emojiToID(el.emoji));
 			// Return one message line
 			return { valid: true, votes: votes, candidate: candidate, emoji: el.emoji, voters: voters };
-		}).filter(el => el.valid).sort((a, b) => a.votes < b.votes).map(el => "(" + el.votes + ") " +  el.emoji + " " + el.candidate + " **-** " + (el.voters ? el.voters : "*Nobody*")).join("\n");
+	}).filter(el => el.valid).sort((a, b) => a.votes < b.votes).map(el => { let vot = (el.voters ? el.voters : "*Nobody*"); return `(${el.votes}) ${el.emoji} ${el.candidate} **-** ${vot}`;}).join("\n");
 		// Send message
 		if(!votesMessage.length) votesMessage = "*Nobody voted...*";
 		channel.send("Results for Poll `#" + pollNum + "`:\n" + votesMessage);
 		messages.forEach(el => {
-			channel.fetchMessage(el).then(m => {
-				m.clearReactions().catch(err => { 
+			channel.messages.fetch(el).then(m => {
+				m.reactions.removeAll().catch(err => { 
 					// Discord error
 					logO(err); 
 					sendError(channel, err, "Could not clear reactions");

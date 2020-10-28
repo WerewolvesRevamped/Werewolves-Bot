@@ -19,7 +19,7 @@ module.exports = function() {
 		}
 		channel.send("✳ Game is called `" + stats.game + "`");
 		// Create Public Channels
-		channel.guild.createChannel("💬 " + toTitleCase(stats.game) + " Public Channels", { type: "category",  permissionOverwrites: getPublicCatPerms(channel.guild) })
+		channel.guild.channels.create("💬 " + toTitleCase(stats.game) + " Public Channels", { type: "category",  permissionOverwrites: getPublicCatPerms(channel.guild) })
 		.then(cc => {
 			sqlSetStat(15, cc.id, result => {
 				// Create public channels
@@ -40,7 +40,7 @@ module.exports = function() {
 		if(loadedModulePlayers) getCCs();
 		if(loadedModulePlayers) getRoles();
 		// Assign roles
-		startOnePlayer(channel, channel.guild.roles.find(el => el.id === stats.signed_up).members.array(), 0);
+		startOnePlayer(channel, channel.guild.roles.cache.get(stats.signed_up).members.array(), 0);
 		if(loadedModuleRoles) createSCs(channel, debug);
 	}
 	
@@ -167,8 +167,8 @@ module.exports = function() {
 			channel.send("✅ Prepared `" + members.length + "` players!");
 			return;
 		}
-		members[index].addRole(stats.participant).then(m => {
-			members[index].removeRole(stats.signed_up).then(m => {
+		members[index].roles.add(stats.participant).then(m => {
+			members[index].roles.remove(stats.signed_up).then(m => {
 				channel.send("✅ `" + members[index].displayName + "` is now a participant!");
 				startOnePlayer(channel, members, ++index);
 			}).catch(err => { 
@@ -220,10 +220,10 @@ module.exports = function() {
 				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read","write"], []), getPerms(stats.spectator, ["read","write"], []), getPerms(stats.participant, [], ["read"]) ]; 
 			break;
 		}
-		channel.guild.createChannel(channels[index].name, { type: "text",  permissionOverwrites: cPerms })
+		channel.guild.channels.create(channels[index].name, { type: "text",  permissionOverwrites: cPerms })
 		.then(sc => { 
 			if(channels[index].setup.length > 1) channels[index].setup.replace(/%n/g, index).split(",").forEach(el => sc.send(stats.prefix + el));
-			sc.setParent(category).then(m => {
+			sc.setParent(category,{ lockPermissions: false }).then(m => {
 				createOnePublic(channel, category, channels, ++index);
 			}).catch(err => { 
 				logO(err); 
@@ -237,25 +237,25 @@ module.exports = function() {
 	
 	this.cmdDemote = function(channel, member) {
 		channel.send("✅ Attempting to demote you, " + member.displayName + "!");
-		if(member.roles.find(el => el.id === stats.gamemaster)) {
-			member.removeRole(stats.gamemaster).catch(err => { 
+		if(member.roles.cache.get(stats.gamemaster)) {
+			member.roles.remove(stats.gamemaster).catch(err => { 
 				// Missing permissions
 				logO(err); 
 				sendError(channel, err, "Could not remove game master role from " + member.displayName);
 			});
-			member.addRole(stats.gamemaster_ingame).catch(err => { 
+			member.roles.add(stats.gamemaster_ingame).catch(err => { 
 				// Missing permissions
 				logO(err); 
 				sendError(channel, err, "Could not add game master ingame role to " + member.displayName);
 			});
 		}
-		if(member.roles.find(el => el.id === stats.admin)) {
-			member.removeRole(stats.admin).catch(err => { 
+		if(member.roles.cache.get(stats.admin)) {
+			member.roles.remove(stats.admin).catch(err => { 
 				// Missing permissions
 				logO(err); 
 				sendError(channel, err, "Could not remove admin role from " + member.displayName);
 			});
-			member.addRole(stats.admin_ingame).catch(err => { 
+			member.roles.add(stats.admin_ingame).catch(err => { 
 				// Missing permissions
 				logO(err); 
 				sendError(channel, err, "Could not add admin ingame role to " + member.displayName);
@@ -264,30 +264,30 @@ module.exports = function() {
 	}
 	
 	this.cmdPromote = function(channel, member) {
-		if(isParticipant(member) && !member.roles.find(el => el.id === stats.admin_ingame)) {
+		if(isParticipant(member) && !member.roles.cache.get(stats.admin_ingame)) {
 			channel.send("⛔ Command error. Can't promote you while you're a participant."); 
 			return;
 		}
 		channel.send("✅ Attempting to promote you, " + member.displayName + "!");
-		if(member.roles.find(el => el.id === stats.gamemaster_ingame)) {
-			member.removeRole(stats.gamemaster_ingame).catch(err => { 
+		if(member.roles.cache.get(stats.gamemaster_ingame)) {
+			member.roles.remove(stats.gamemaster_ingame).catch(err => { 
 				// Missing permissions
 				logO(err); 
 				sendError(channel, err, "Could not remove game master ingame role from " + member.displayName);
 			});
-			member.addRole(stats.gamemaster).catch(err => { 
+			member.roles.add(stats.gamemaster).catch(err => { 
 				// Missing permissions
 				logO(err); 
 				sendError(channel, err, "Could not add game master role to " + member.displayName);
 			});
 		}
-		if(member.roles.find(el => el.id === stats.admin_ingame)) {
-			member.removeRole(stats.admin_ingame).catch(err => { 
+		if(member.roles.cache.get(stats.admin_ingame)) {
+			member.roles.remove(stats.admin_ingame).catch(err => { 
 				// Missing permissions
 				logO(err); 
 				sendError(channel, err, "Could not remove admin ingame role from " + member.displayName);
 			});
-			member.addRole(stats.admin).catch(err => { 
+			member.roles.add(stats.admin).catch(err => { 
 				// Missing permissions
 				logO(err); 
 				sendError(channel, err, "Could not add admin role to " + member.displayName);
@@ -304,7 +304,7 @@ module.exports = function() {
 			return;
 		}
 		channel.send("✅ Attempting to make you a spectator, " + member.displayName + "!");
-		member.addRole(stats.spectator).catch(err => { 
+		member.roles.add(stats.spectator).catch(err => { 
 			// Missing permissions
 			logO(err); 
 			sendError(channel, err, "Could not add spectator role to " + member.displayName);
@@ -315,12 +315,15 @@ module.exports = function() {
 		if(isParticipant(member)) {
 			channel.send("⛔ Command error. Can't make you a substitute player while you're a participant."); 
 			return;
-		} else if(stats.gamephase < 2) {
+		} else if(stats.gamephase < 1) {
 			channel.send("⛔ Command error. Can't make you a substitute player while there is no game."); 
+			return;
+		}else if(isSignedUp(member)) {
+			channel.send("⛔ Command error. Can't make you a substitute player while being signed-up."); 
 			return;
 		}
 		channel.send("✅ Attempting to make you a substitute player, " + member.displayName + "!");
-		member.addRole(stats.sub).catch(err => { 
+		member.roles.add(stats.sub).catch(err => { 
 			// Missing permissions
 			logO(err); 
 			sendError(channel, err, "Could not add substitute player role to " + member.displayName);
@@ -329,8 +332,8 @@ module.exports = function() {
 	
 	this.cmdEnd = function(channel) {
 		cmdGamephaseSet(channel, ["set", "3"]);
-		channel.guild.roles.find(el => el.id === stats.participant).members.forEach(el => {
-			el.addRole(stats.dead_participant).catch(err => { 
+		channel.guild.roles.cache.get(stats.participant).members.forEach(el => {
+			el.roles.add(stats.dead_participant).catch(err => { 
 				// Missing permissions
 				logO(err); 
 				sendError(channel, err, "Could not add role to" + el);
@@ -368,10 +371,10 @@ module.exports = function() {
 				channel.send("⛔ Database error. Could not reset poll counter!");
 			});
 		}
-		removeNicknameOnce(channel, channel.guild.roles.find(el => el.id === stats.participant).members.array(), 0);
-		removeNicknameOnce(channel, channel.guild.roles.find(el => el.id === stats.dead_participant).members.array(), 0);
+		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.participant).members.array(), 0);
+		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.dead_participant).members.array(), 0);
 		// Remove Roles & Nicknames
-		removeRoles(channel, [stats.signed_up, stats.participant, stats.dead_participant, stats.spectator, stats.mayor, stats.mayor2, stats.reporter, stats.guardian, stats.sub], ["signed up", "participant", "dead participant", "spectator", "mayor", "mayor2", "reporter", "guardian", "substitute"])
+		wroles_remove(channel, [stats.signed_up, stats.participant, stats.dead_participant, stats.spectator, stats.mayor, stats.mayor2, stats.reporter, stats.guardian, stats.sub], ["signed up", "participant", "dead participant", "spectator", "mayor", "mayor2", "reporter", "guardian", "substitute"])
 		// Cleanup channels
 		if(loadedModuleCCs) cmdCCCleanup(channel);
 		if(loadedModuleRoles) cmdRolesScCleanup(channel);
@@ -383,31 +386,32 @@ module.exports = function() {
 		});
 	}
 	
-	this.removeRoles = function(channel, ids, names) {
-		removeRole(channel, ids[0], names[0], () => {
-			if(ids.length > 1) removeRoles(channel, ids.splice(1), names.splice(1));
+	this.wroles_remove = function(channel, ids, names) {
+		wroles_remove2(channel, ids[0], names[0], () => {
+			if(ids.length > 1) wroles_remove(channel, ids.splice(1), names.splice(1));
 			else channel.send("✅ Finished removing roles!");
 		});
 	}
 	
-	this.removeRole = function(channel, id, name, callback) {
+	this.wroles_remove2 = function(channel, id, name, callback) {
 		// Remove spectator role
-		removeRoleOnce(channel, id, name, channel.guild.roles.find(el => el.id === id).members.array(), 0, callback);
+		if(channel.guild.roles.cache.get(id)) wroles_removeOnce(channel, id, name, channel.guild.roles.cache.get(id).members.array(), 0, callback);
+		else channel.send("Invalid role with id " + id);
 	}
 	
-	this.removeRoleOnce = function(channel, id, name, members, index, callback) {
+	this.wroles_removeOnce = function(channel, id, name, members, index, callback) {
 		if(index >= members.length) {
 			callback();
 			channel.send("✅ Removed `" + name + "` role from `" + members.length + "` players!");
 			return;
 		}
-		members[index].removeRole(id).then(m => {
+		members[index].roles.remove(id).then(m => {
 			channel.send("✅ `" + members[index].displayName + "` is no longer a " + name + "!");
-			removeRoleOnce(channel, id, name, members, ++index, callback);
+			wroles_removeOnce(channel, id, name, members, ++index, callback);
 		}).catch(err => { 
 			// Missing permissions
 			logO(err); 
-			removeRoleOnce(channel, id, name, members, index, callback);
+			wroles_removeOnce(channel, id, name, members, index, callback);
 			sendError(channel, err, "Could not remove " + name + " role from " + members[index].displayName + "! Trying again");
 		});
 	}
@@ -460,11 +464,11 @@ module.exports = function() {
 			let playerList;
 			switch(mode) {
 				case 1:
-					playerList = result.map(el => "=SPLIT(\"" + channel.guild.members.find(el2 => el2.id === el.id).user.username + "," + el.id + "\"" + seperator + "\",\")").join("\n");
+					playerList = result.map(el => "=SPLIT(\"" + channel.guild.members.cache.get(el.id).user.username + "," + el.id + "\"" + seperator + "\",\")").join("\n");
 					channel.send("**Copy this into a google sheet to have all names & ids**\n*Make sure to paste in with ctrl+shift+v\nColumns needed by `" + stats.prefix + "sheet import`: Name, Id, Nickname, Role*");
 				break;
 				case 2:
-					playerList = result.map(el => channel.guild.members.find(el2 => el2.id === el.id).user.username + "," + el.id + ",").join("\n");
+					playerList = result.map(el => channel.guild.members.cache.get(el.id).user.username + "," + el.id + ",").join("\n");
 					channel.send("**Use this to have all names & ides**\n*Values needed by `" + stats.prefix + "sheet mimport`: Name,Id,Nickname,Role*");
 				break;
 			}
@@ -492,7 +496,7 @@ module.exports = function() {
 			// Prepare a user
 			channel.send("▶ Preparing `" + el[0] + "`!").then(m => {
 				// Set Nickname
-				channel.guild.members.find(el2 => el2.id === el[1]).setNickname(el[2]).then(u => {
+				channel.guild.members.cache.get(el[1]).setNickname(el[2]).then(u => {
 					m.edit(m.content +  "\n	" + (el[2].length > 0 ? "✅ Set nickname to `" + el[2] + "`" : "✅ Skipped setting nickname") + "!").then(m => {
 						cmdSheetImportRole(m, el);
 					});
@@ -539,9 +543,9 @@ module.exports = function() {
 	
 	/* Pings all players with the New Game Ping role */
 	this.cmdGamePing = function(channel, member) {
-		channel.guild.roles.find(el => el.id === stats.new_game_ping).setMentionable(true).then(u => {
+		channel.guild.roles.cache.get(stats.new_game_ping).setMentionable(true).then(u => {
 			channel.send("**" + member.displayName + "** is going to start a new game! <@&" + stats.new_game_ping + ">").then(m => {
-				channel.guild.roles.find(el => el.id === stats.new_game_ping).setMentionable(false).catch(err => {
+				channel.guild.roles.cache.get(stats.new_game_ping).setMentionable(false).catch(err => {
 					// Message Error
 					logO(err); 
 					sendError(channel, err, "Could not reset new game ping role");

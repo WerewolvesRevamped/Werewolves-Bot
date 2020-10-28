@@ -14,7 +14,7 @@ module.exports = function() {
 		// Check if the reaction was in time
 		if(+data.time + 20 >= getTime()) {
 			message.edit("✳ Executing `" + stats.prefix + data.action + "`!")
-			message.delete(5000);
+			message.delete({timeout: 5000});
 			// Runs the command
 			confirmActionExecute(data.action, message, true);
 		} else {
@@ -22,7 +22,7 @@ module.exports = function() {
 			message.edit("❌ Too late. Not executing `" + stats.prefix + data.action + "`!");
 		}
 		// Clear reactions
-		message.clearReactions().catch(err => {
+		message.reactions.removeAll().catch(err => {
 			logO(err); 
 			sendError(messsage.channel, err, "Could not clear reactions");
 		});
@@ -31,8 +31,8 @@ module.exports = function() {
 	this.confirmActionExecute = function(command, message, messageSent) {
 		switch(command) {
 			case "connection reset": if(loadedModuleWhispers) cmdConnectionReset(message.channel); break;
-			case "roles clear": if(loadedModuleRole) cmdRolesClear(message.channel); break;
-			case "roles clear_alias": if(loadedModuleRole) cmdRolesClearAlias(message.channel); break;
+			case "roles clear": if(loadedModuleRoles) cmdRolesClear(message.channel); break;
+			case "roles clear_alias": if(loadedModuleRoles) cmdRolesClearAlias(message.channel); break;
 			case "start": if(loadedModuleGame) cmdStart(message.channel, false); break;
 			case "start_debug": if(loadedModuleGame) cmdStart(message.channel, true); break;
 			case "reset": if(loadedModuleGame) cmdReset(message.channel); break;
@@ -53,10 +53,7 @@ module.exports = function() {
 		let help = "";
 		switch(args[0]) {
 			case "":
-				help += stats.prefix + "ping - Tests the bot\n";
-				if(isGameMaster(member)) help += stats.prefix + "bulkdelete - Deletes webhook & user messages in bulk\n";
-				if(isGameMaster(member)) help += stats.prefix + "delete - Deletes a couple of messages\n";
-				if(isGameMaster(member)) help += stats.prefix + "delay - Executes a command with delay\n";
+				if(isGameMaster(member)) help += stats.prefix + "confirm - Deletes webhook & user messages in bulk\n";
 			break;
 			case "confirm":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "confirm <Command>\n```";

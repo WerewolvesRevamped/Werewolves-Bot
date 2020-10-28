@@ -156,6 +156,14 @@ module.exports = function() {
 			// Couldn't delete
 			channel.send("⛔ Database error. Could not remove role!");
 		});
+		// Delete info
+		sql("DELETE FROM theme WHERE theme = " + connection.escape(args[1]) + " AND original = " + connection.escape(toTitleCase(args[2])), result => {
+			channel.send("✅ Removed `" + toTitleCase(args[2]) + "` from `" + toTitleCase(parseRole(args[1])) + "`!");
+			getRoles();
+		}, () => {
+			// Couldn't delete
+			channel.send("⛔ Database error. Could not remove role!");
+		});
 	}
 	
 	this.cmdThemeSelect = function(channel, args) {

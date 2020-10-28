@@ -118,18 +118,19 @@ module.exports = function() {
 	this.cmdWebhook = function(channel, member, args) {
 		// Create a webhook for the author
 		let webhookName = member ? member.displayName : client.user.username;
-		let webhookAvatar = member ? member.user.displayAvatarURL : client.user.displayAvatarURL;
-		channel.createWebhook(webhookName, webhookAvatar)
+		let webhookAvatar = member ? member.user.displayAvatarURL() : client.user.displayAvatarURL();
+		channel.createWebhook(webhookName, {avatar: webhookAvatar})
 		.then(webhook => {
 			// Send Message
 			let webhookMsg = args.join(" ");
-			if(webhookMsg.length > 0) webhook.send(webhookMsg);
-			else webhook.send("|| ||");
-			// Delete webhook
-			webhook.delete()
-			.catch(err => { 
-				logO(err); 
-				sendError(channel, err, "Could not delete webhook");
+			if(!(webhookMsg.length > 0)) webhookMsg = "|| ||";
+			webhook.send(webhookMsg).then(msg => {
+				// Delete webhook
+				webhook.delete()
+				.catch(err => { 
+					logO(err); 
+					sendError(channel, err, "Could not delete webhook");
+				});
 			});
 		}) 
 		// Webhook could not be created
@@ -152,18 +153,19 @@ module.exports = function() {
 							// Ignore if it's same channel as source
 							if(destination.channel_id != message.channel.id) { 	
 								// Create webhook
-								let webhookName = source.name != "" ? toTitleCase(source.name) : message.member.displayName
-								let webhookAvatar = source.name != "" ? client.user.displayAvatarURL : message.author.displayAvatarURL
-								message.guild.channels.get(destination.channel_id).createWebhook(webhookName, webhookAvatar)
+								let webhookName = source.name != "" ? toTitleCase(source.name) : message.member.displayName;
+								let webhookAvatar = source.name != "" ? client.user.displayAvatarURL() : message.author.displayAvatarURL();
+								message.guild.channels.cache.get(destination.channel_id).createWebhook(webhookName, {avatar: webhookAvatar})
 								.then(webhook => {
 									// Send webhook
-									webhook.send(message.content);
-									// Delete webhook
-									webhook.delete()
+									webhook.send(message.content).then(m => {
+										// Delete webhook
+										webhook.delete()
 										.catch(err => { 
 											logO(err); 
 											sendError(messsage.channel, err, "Could not delete webhook");
 										});
+									});
 								}) 
 								.catch(err => { 
 									// Webhook couldn't be created

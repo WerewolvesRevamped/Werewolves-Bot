@@ -13,7 +13,6 @@
 */
 module.exports = function() {
 	/* Variables */
-	this.config = require("./config.json");
 	this.loadedModuleCCs = false;
 	this.loadedModulePlayers = false;
 	this.loadedModuleWhispers = false;
@@ -43,7 +42,7 @@ module.exports = function() {
 	this.log = function(txt) {
 		console.log(txt);
 		if(stats.log_guild && stats.log_channel) {
-			client.guilds.get(stats.log_guild).channels.get(stats.log_channel).send(txt);
+			client.guilds.cache.get(stats.log_guild).channels.cache.get(stats.log_channel).send(txt);
 		}
 	}
 
@@ -93,9 +92,9 @@ module.exports = function() {
 	}
 	
 	this.cmdBulkDelete = function(channel) {
-		channel.fetchMessages().then(messages => {
+		channel.messages.fetch().then(messages => {
 			channel.bulkDelete(messages.filter(el => el.member == null || !el.author.bot)).then(messages => {
-			  channel.send("✅ Deleted " + messages.size + " messages.").then(msg => msg.delete(5000));
+			  channel.send("✅ Deleted " + messages.size + " messages.").then(msg => msg.delete({timeout: 5000}));
 			});
 		}).catch(err => {
 			logO(err); 
@@ -108,9 +107,9 @@ module.exports = function() {
 			channel.send("⛔ Syntax error. Requires a number (<=5) as parameter!"); 
 			return; 
 		}
-		channel.fetchMessages().then(messages => {
+		channel.messages.fetch().then(messages => {
 			channel.bulkDelete(args[0]).then(messages => {
-			  channel.send("✅ Deleted " + messages.size + " messages.").then(msg => msg.delete(500));
+			  channel.send("✅ Deleted " + messages.size + " messages.").then(msg => msg.delete({timeout: 500}));
 			});
 		}).catch(err => {
 			logO(err); 
@@ -139,7 +138,7 @@ module.exports = function() {
 		switch(args[0]) {
 			case "nick":
 			case "nickname":
-				message.guild.members.get(client.user.id).setNickname(argsX[1])
+				message.guild.members.cache.get(client.user.id).setNickname(argsX[1])
 				 .then(() => {
 					  message.channel.send("✅ Updated bot nickname!");
 				  }).catch(err => {
@@ -161,7 +160,7 @@ module.exports = function() {
 				});
 			break;
 			case "activity":
-				client.user.setPresence({ game: { name: argsX[1], type: "Playing", url: "https://discord.gg/tuqsMmX" } })
+				client.user.setPresence({ activity: { name: argsX[1], type: "PLAYING" } })
 				.then(() => {
 					  message.channel.send("✅ Updated bot activity!");
 				  }).catch(err => {
@@ -291,7 +290,7 @@ module.exports = function() {
 		.then(m => {
 			// Get values
 			let latency = m.createdTimestamp - message.createdTimestamp;
-			let ping = Math.round(client.ping);
+			let ping = Math.round(client.ws.ping);
 			m.edit("✅ Pong! Latency is " + latency + "ms. API Latency is " + ping + "ms");
 		})
 		.catch(err => { 
@@ -343,12 +342,12 @@ module.exports = function() {
 	/* Cleanup a category */
 	this.cleanupCat = function(channel, categoryID, name) {
 		// Category deleted
-		if(!channel.guild.channels.find(el => el.id === categoryID)) { 
+		if(!channel.guild.channels.cache.get(categoryID)) { 
 		channel.send("⛔ Command error. No " + name + " category found!");
 			return;
 		}
 		// Delete channels in category
-		cleanupOneChannel(channel, categoryID, channel.guild.channels.find(el => el.id === categoryID).children.array(), 0, name);
+		cleanupOneChannel(channel, categoryID, channel.guild.channels.cache.get(categoryID).children.array(), 0, name);
 	}
 	
 	/* Deletes a cc */
@@ -356,7 +355,7 @@ module.exports = function() {
 		if(channels.length <= 0) return;
 		if(index >= channels.length) {
 			// Delete category
-			channel.guild.channels.find(el => el.id === cat).delete().then(c => {
+			channel.guild.channels.cache.get(cat).delete().then(c => {
 				channel.send("✅ Successfully deleted " + name + " category!");
 			}).catch(err => { 
 				logO(err); 
@@ -365,12 +364,12 @@ module.exports = function() {
 			return;
 		}
 		// Deleted channel
-		if(!channels[index] || !channel.guild.channels.find(el => el.id === channels[index].id)) {
+		if(!channels[index] || !channel.guild.channels.cache.get(channels[index].id)) {
 			cleanupOneChannel(channel, cat, channels, ++index, name);
 			return;
 		}
 		// Delete channel
-		channel.guild.channels.find(el => el.id === channels[index].id).delete().then(c => {
+		channel.guild.channels.cache.get(channels[index].id).delete().then(c => {
 			cleanupOneChannel(channel, cat, channels, ++index, name);
 		}).catch(err => { 
 			logO(err); 

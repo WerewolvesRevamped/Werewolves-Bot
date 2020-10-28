@@ -66,7 +66,7 @@ module.exports = function() {
 			case "infopin": cmdRolesScInfo(message.channel, args, true); break;
 			case "info_set": cmdRolesScInfoSet(message.channel, args, argsX); break;
 			case "info_get": cmdRolesScInfoGet(message.channel, args); break;
-			case "info_remove": cmdRolesScInfoSet(message.channel, args); break;
+			case "info_remove": cmdRolesScInfoRemove(message.channel, args); break;
 			case "info_list": cmdRolesScInfoList(message.channel); break;
 			// SC Cleanup Subcommands
 			case "cleanup": cmdConfirm(message, "roles sc_cleanup"); break;
@@ -270,23 +270,23 @@ module.exports = function() {
 		// Find name
 		switch(args[1]) {
 			case "mayor": 
-				channel.overwritePermissions(stats.mayor, { VIEW_CHANNEL: true, SEND_MESSAGES: true }).catch(err => { 
+				channel.createOverwrite(stats.mayor, { VIEW_CHANNEL: true, SEND_MESSAGES: true }).catch(err => { 
 					logO(err); 
 					sendError(channel, err, "Could not setup channel permissions");
 				});
-				channel.overwritePermissions(stats.mayor2, { VIEW_CHANNEL: true, SEND_MESSAGES: true }).catch(err => { 
+				channel.createOverwrite(stats.mayor2, { VIEW_CHANNEL: true, SEND_MESSAGES: true }).catch(err => { 
 					logO(err); 
 					sendError(channel, err, "Could not setup channel permissions");
 				});
 			break;
 			case "reporter": 
-				channel.overwritePermissions(stats.reporter, { VIEW_CHANNEL: true, SEND_MESSAGES: true }).catch(err => { 
+				channel.createOverwrite(stats.reporter, { VIEW_CHANNEL: true, SEND_MESSAGES: true }).catch(err => { 
 					logO(err); 
 					sendError(channel, err, "Could not setup channel permissions");
 				});
 			break;
 			case "guardian": 
-				channel.overwritePermissions(stats.guardian, { VIEW_CHANNEL: true, SEND_MESSAGES: true }).catch(err => { 
+				channel.createOverwrite(stats.guardian, { VIEW_CHANNEL: true, SEND_MESSAGES: true }).catch(err => { 
 					logO(err); 
 					sendError(channel, err, "Could not setup channel permissions");
 				});
@@ -312,7 +312,7 @@ module.exports = function() {
 					// Pin if pin is true
 					if(pin) {
 						m.pin().then(mp => {
-							mp.channel.fetchMessages().then(messages => {
+							mp.channel.messages.fetch().then(messages => {
 								mp.channel.bulkDelete(messages.filter(el => el.type === "PINS_ADD"));
 							});	
 						}).catch(err => { 
@@ -386,7 +386,7 @@ module.exports = function() {
 	
 	/* Creates secret channels */
 	this.createSCs = function(channel, debug) {
-		channel.guild.createChannel("🕵 " + toTitleCase(stats.game) + " Secret Channels", { type: "category",  permissionOverwrites: getSCCatPerms(channel.guild) })
+		channel.guild.channels.create("🕵 " + toTitleCase(stats.game) + " Secret Channels", { type: "category",  permissionOverwrites: getSCCatPerms(channel.guild) })
 		.then(cc => {
 			sqlSetStat(14, cc.id, result => {
 				createSCStartInd(channel, cc, debug);
@@ -448,19 +448,19 @@ module.exports = function() {
 					// Create permissions
 					let ccPerms = getCCCatPerms(channel.guild);
 					if(result2.length > 0) {
-						let members = result2.map(el => channel.guild.members.find(el2 => el2.id === el.id).displayName).join(", ");
+						let members = result2.map(el => channel.guild.members.cache.get(el.id).displayName).join(", ");
 						channel.send("✅ Creating `" + toTitleCase(multi[index].name) + "` Multi SC for `" + (members ? members : "❌")  + "`!");
 						result2.forEach(el =>  ccPerms.push(getPerms(el.id, ["history", "read"], [])));
 					}
 					// Create channel
 					var name = multi[index].name;
 					cachedTheme.forEach(el => name = name.replace(new RegExp(el.original, "g"), el.new));
-					channel.guild.createChannel(name, { type: "text",  permissionOverwrites: ccPerms })
+					channel.guild.channels.create(name, { type: "text",  permissionOverwrites: ccPerms })
 					.then(sc => {
 						// Send info message
 						multi[index].setup.split(",").forEach(el => sc.send(stats.prefix + el));
 						// Move into sc category
-						sc.setParent(category).then(m => {
+						sc.setParent(category,{ lockPermissions: false }).then(m => {
 							createOneMultiSC(channel, category, multi, ++index);
 						}).catch(err => { 
 							logO(err); 
@@ -516,19 +516,19 @@ module.exports = function() {
 			createOneExtraSC(channel, category, extra, ++index);
 			return;
 		}
-		channel.send("✅ Creating `" + toTitleCase(extra[index].name) + "` Extra SC for `" + channel.guild.members.find(el => el.id === result[resultIndex].id).displayName + "` (`" + toTitleCase(extra[index].cond) + "`)!");
+		channel.send("✅ Creating `" + toTitleCase(extra[index].name) + "` Extra SC for `" + channel.guild.members.cache.get(result[resultIndex].id).displayName + "` (`" + toTitleCase(extra[index].cond) + "`)!");
 		// Create permissions
 		let ccPerms = getCCCatPerms(channel.guild);
 		if(extra[index].members === "%r") ccPerms.push(getPerms(result[resultIndex].id, ["history", "read"], []));
 		// Create channel
 		var name = extra[index].name;
 		cachedTheme.forEach(el => name = name.replace(new RegExp(el.original, "g"), el.new));
-		channel.guild.createChannel(name, { type: "text",  permissionOverwrites: ccPerms })
+		channel.guild.channels.create(name, { type: "text",  permissionOverwrites: ccPerms })
 		.then(sc => {
 			// Send info message
 			if(extra[index].setup.length > 1) extra[index].setup.replace(/%r/g, result[resultIndex].id + "").replace(/%n/g, resultIndex).split(",").forEach(el => sc.send(stats.prefix + el));
 			// Move into sc category
-			sc.setParent(category).then(m => {
+			sc.setParent(category,{ lockPermissions: false }).then(m => {
 				createOneOneExtraSC(channel, category, extra, index, result, ++resultIndex);
 			}).catch(err => { 
 				logO(err); 
@@ -558,14 +558,14 @@ module.exports = function() {
 				if(!customRole) {
 					roles = roles.join("` + `");
 					cachedTheme.forEach(el => roles = roles.replace(new RegExp(el.original, "g"), el.new));
-					channel.guild.members.find(el => el.id === players[index].id).user.send("This message is giving you your role" + (result.length != 1 ? "s" : "") + " for the next game of Werewolves: Revamped!\n\n\nYour role" + (result.length != 1 ? "s are" : " is") + " `" + roles + "`.\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.\n\nIf you're confused about your role at all, then check #announcements on the discord, which contains a role book with information on all the roles in this game.").catch(err => { 
+					channel.guild.members.cache.get(players[index].id).user.send("This message is giving you your role" + (result.length != 1 ? "s" : "") + " for the next game of Werewolves: Revamped!\n\n\nYour role" + (result.length != 1 ? "s are" : " is") + " `" + roles + "`.\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.\n\nIf you're confused about your role at all, then check #announcements on the discord, which contains a role book with information on all the roles in this game.").catch(err => { 
 						logO(err); 
-						sendError(channel, err, "Could not send role message to " + 	channel.guild.members.find(el => el.id === players[index].id).displayName);
+						sendError(channel, err, "Could not send role message to " + 	channel.guild.members.cache.get(players[index].id).displayName);
 					});	
 				} else {
-					channel.guild.members.find(el => el.id === players[index].id).user.send("This message is giving you your custom role for the next game of Werewolves: Revamped!\n\n\nYour role is `" + toTitleCase(customRole.name) + "` (" + customRole.id + ").\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.").catch(err => { 
+					channel.guild.members.cache.get(players[index].id).user.send("This message is giving you your custom role for the next game of Werewolves: Revamped!\n\n\nYour role is `" + toTitleCase(customRole.name) + "` (" + customRole.id + ").\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.").catch(err => { 
 						logO(err); 
-						sendError(channel, err, "Could not send role message to " + 	channel.guild.members.find(el => el.id === players[index].id).displayName);
+						sendError(channel, err, "Could not send role message to " + 	channel.guild.members.cache.get(players[index].id).displayName);
 					});	
 				}
 			}
@@ -573,7 +573,7 @@ module.exports = function() {
 			if(customRole) indscRoles = [ customRole.name ];
 			// Check if ind sc
 			if(indscRoles.length) { 
-				channel.send("✅ Creating `" + toTitleCase(indscRoles.join("-")) + "` Ind SC for `" + channel.guild.members.find(el => el.id === players[index].id).displayName + "` (`" + result.map(el => toTitleCase(el.name)).join("` + `") + "`)!");
+				channel.send("✅ Creating `" + toTitleCase(indscRoles.join("-")) + "` Ind SC for `" + channel.guild.members.cache.get(players[index].id).displayName + "` (`" + result.map(el => toTitleCase(el.name)).join("` + `") + "`)!");
 				// Create permissions
 				let ccPerms = getCCCatPerms(channel.guild);
 				ccPerms.push(getPerms(players[index].id, ["history", "read"], []));
@@ -581,7 +581,7 @@ module.exports = function() {
 				
 				var name = indscRoles.join("-");
 				cachedTheme.forEach(el => name = name.replace(new RegExp(el.original, "g"), el.new));
-				channel.guild.createChannel(name.substr(0, 100), { type: "text",  permissionOverwrites: ccPerms })
+				channel.guild.channels.create(name.substr(0, 100), { type: "text",  permissionOverwrites: ccPerms })
 				.then(sc => {
 					// Send info message
 					if(!customRole) indscRoles.forEach(el => cmdInfo(sc, [ el ], true, false));
@@ -594,7 +594,7 @@ module.exports = function() {
 						cachedTheme.forEach(el => desc = desc.replace(new RegExp(el.original, "g"), el.new));
 						sc.send(desc).then(m => {
 							m.pin().then(mp => {
-								mp.channel.fetchMessages().then(messages => {
+								mp.channel.messages.fetch().then(messages => {
 									mp.channel.bulkDelete(messages.filter(el => el.type === "PINS_ADD"));
 								});	
 							}).catch(err => { 
@@ -609,7 +609,7 @@ module.exports = function() {
 						if(customRole.setup != "") customRole.setup.replace(/%p/g,players[index].id).replace(/%c/g,sc.id).split(",").forEach(el => sc.send(stats.prefix + el));
 					}
 					// Move into sc category
-					sc.setParent(category).then(m => {
+					sc.setParent(category,{ lockPermissions: false }).then(m => {
 						createOneIndSC(channel, category, players, ++index, debug);
 					}).catch(err => { 
 						logO(err); 
@@ -622,7 +622,7 @@ module.exports = function() {
 				});
 			} else { 
 				// No ind sc
-				channel.send("✅ Skipping `" + channel.guild.members.find(el => el.id === players[index].id).displayName + "` (`" + result.map(el => toTitleCase(el.name)).join("` + `") + "`)!");
+				channel.send("✅ Skipping `" + channel.guild.members.cache.get(players[index].id).displayName + "` (`" + result.map(el => toTitleCase(el.name)).join("` + `") + "`)!");
 				createOneIndSC(channel, category, players, ++index, debug);
 			}
 		}, () => {
@@ -820,7 +820,7 @@ module.exports = function() {
 				channel.send("⛔ Database error. Coult not find any matching SC Info!");
 				return;
 			}
-			result.forEach(el => channel.send("```**__" + toTitleCase(el.name) + "__**:\n" + el.info.replace(/~/g,"\n")) + "```");
+			result.forEach(el => channel.send("```**__" + toTitleCase(el.name) + "__**:\n" + el.info.replace(/~/g,"\n") + "```"));
 		}, () => {
 			// Couldn't delete from database
 			channel.send("⛔ Database error. Coult not get values from SC Info database!");
@@ -1096,7 +1096,7 @@ module.exports = function() {
 					// Pin if pin is true
 					if(pin) {
 						m.pin().then(mp => {
-							mp.channel.fetchMessages().then(messages => {
+							mp.channel.messages.fetch().then(messages => {
 								mp.channel.bulkDelete(messages.filter(el => el.type === "PINS_ADD"));
 							});	
 						}).catch(err => { 

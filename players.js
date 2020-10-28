@@ -189,7 +189,7 @@ module.exports = function() {
 		sql("SELECT id FROM killq", result => {
 			// Print killq
 			result = removeDuplicates(result.map(el => el.id));
-			let playerList = result.map(el => idToEmoji(el) + " - " + channel.guild.members.find(el2 => el2.id === el).displayName + " (" + channel.guild.members.find(el2 => el2.id === el).user.username + ")").join("\n");
+			let playerList = result.map(el => idToEmoji(el) + " - " + channel.guild.members.cache.get(el).displayName + " (" + channel.guild.members.cache.get(el).user.username + ")").join("\n");
 			channel.send("**Kill Queue** | Total: " +  result.length + "\n" + playerList);
 		}, () => {
 			// Db error
@@ -207,15 +207,15 @@ module.exports = function() {
 		// Get users 
 		players = getUserList(channel, args, 1);
 		if(players)  {
-			let playerList = players.map(el => "`" + channel.guild.members.find(el2 => el2.id === el).displayName + "`").join(", ");
+			let playerList = players.map(el => "`" + channel.guild.members.cache.get(el).displayName + "`").join(", ");
 			// Add to killq
 			channel.send("✳ Adding " + players.length + " player" + (players.length != 1 ? "s" : "") + " (" + playerList  + ") to the kill queue!");
 			players.forEach(el => {
 				sql("INSERT INTO killq (id) VALUES (" + connection.escape(el) + ")", result => {
-					channel.send("✅ Added `" +  channel.guild.members.find(el2 => el2.id === el).displayName + "` to the kill queue!");
+					channel.send("✅ Added `" +  channel.guild.members.cache.get(el).displayName + "` to the kill queue!");
 				}, () => {
 					// DB Error
-					channel.send("⛔ Database error. Could not add " +  channel.guild.members.find(el2 => el2.id === el) + " to the kill queue!");
+					channel.send("⛔ Database error. Could not add " +  channel.guild.members.cache.get(el) + " to the kill queue!");
 				});	
 			});
 		} else {
@@ -235,14 +235,14 @@ module.exports = function() {
 		players = getUserList(channel, args, 1);
 		if(players) { 
 			// Remove from killq
-			let playerList = players.map(el =>"`" + channel.guild.members.find(el2 => el2.id === el).displayName + "`").join(", ");
+			let playerList = players.map(el =>"`" + channel.guild.members.cache.get(el).displayName + "`").join(", ");
 			channel.send("✳ Removing " + players.length + " player" + (players.length != 1 ? "s" : "") + " (" + playerList + ") from the kill queue!");
 			players.forEach(el => {
 				sql("DELETE FROM killq WHERE id = " + connection.escape(el), result => {
-					channel.send("✅ Removed `" +  channel.guild.members.find(el2 => el2.id === el).displayName + "` from the kill queue!");
+					channel.send("✅ Removed `" +  channel.guild.members.cache.get(el).displayName + "` from the kill queue!");
 				}, () => {
 					// DB error
-					channel.send("⛔ Database error. Could not remove " +  channel.guild.members.find(el2 => el2.id === el) + " from the kill queue!");
+					channel.send("⛔ Database error. Could not remove " +  channel.guild.members.cache.get(el) + " from the kill queue!");
 				});	
 			});
 		}  else {
@@ -260,50 +260,50 @@ module.exports = function() {
 				// Update DB
 				sql("DELETE FROM killq WHERE id = " + connection.escape(el), result => {
 				}, () => {
-					channel.send("⛔ Database error. Could not remove `" +  channel.guild.members.find(el2 => el2.id === el).displayName + "` from the kill queue!");
+					channel.send("⛔ Database error. Could not remove `" +  channel.guild.members.cache.get(el).displayName + "` from the kill queue!");
 				});	
 				sql("UPDATE players SET alive = 0 WHERE id = " + connection.escape(el), result => {
-					channel.send("✅ Killed `" +  channel.guild.members.find(el2 => el2.id === el).displayName + "`!");
+					channel.send("✅ Killed `" +  channel.guild.members.cache.get(el).displayName + "`!");
 					updateGameStatus(channel.guild);
 				}, () => {
-					channel.send("⛔ Database error. Could not kill `" +  channel.guild.members.find(el2 => el2.id === el).displayName + "`!");
+					channel.send("⛔ Database error. Could not kill `" +  channel.guild.members.cache.get(el).displayName + "`!");
 				});	
 				// Send reporter message
-				let reporterChannel = channel.guild.channels.find(el2 => el2.id === stats.reporter_channel);
+				let reporterChannel = channel.guild.channels.cache.get(stats.reporter_channel);
 				if(reporterChannel) {
-					reporterChannel.send(stats.prefix + "players get_clean role " + channel.guild.members.find(el2 => el2.id === el)).catch(err => { 
+					reporterChannel.send(stats.prefix + "players get_clean role " + channel.guild.members.cache.get(el)).catch(err => { 
 						// Discord error
 						logO(err); 
 						sendError(channel, err, "Could not send reporter message");
 					});
 				}
 				// Remove roles
-				channel.guild.members.find(el2 => el2.id === el).removeRole(stats.participant).catch(err => { 
+				channel.guild.members.cache.get(el).roles.remove(stats.participant).catch(err => { 
 					// Missing permissions
 					logO(err); 
 					sendError(channel, err, "Could not remove role");
 				});
-				channel.guild.members.find(el2 => el2.id === el).removeRole(stats.mayor).catch(err => { 
+				channel.guild.members.cache.get(el).roles.remove(stats.mayor).catch(err => { 
 					// Missing permissions
 					logO(err); 
 					sendError(channel, err, "Could not remove role");
 				});
-				channel.guild.members.find(el2 => el2.id === el).removeRole(stats.mayor2).catch(err => { 
+				channel.guild.members.cache.get(el).roles.remove(stats.mayor2).catch(err => { 
 					// Missing permissions
 					logO(err); 
 					sendError(channel, err, "Could not remove role");
 				});
-				channel.guild.members.find(el2 => el2.id === el).removeRole(stats.reporter).catch(err => { 
+				channel.guild.members.cache.get(el).roles.remove(stats.reporter).catch(err => { 
 					// Missing permissions
 					logO(err); 
 					sendError(channel, err, "Could not remove role");
 				});
-				channel.guild.members.find(el2 => el2.id === el).removeRole(stats.guardian).catch(err => { 
+				channel.guild.members.cache.get(el).roles.remove(stats.guardian).catch(err => { 
 					// Missing permissions
 					logO(err); 
 					sendError(channel, err, "Could not remove role");
 				});
-				channel.guild.members.find(el2 => el2.id === el).addRole(stats.dead_participant).catch(err => { 
+				channel.guild.members.cache.get(el).roles.add(stats.dead_participant).catch(err => { 
 					// Missing permissions
 					logO(err); 
 					sendError(channel, err, "Could not remove role");
@@ -327,7 +327,7 @@ module.exports = function() {
 	this.cmdPlayersList = function(channel, args) {
 		// Get a list of players
 		sql("SELECT id,emoji,role,alive,public_value,private_value,public_votes,ccs FROM players", result => {
-			let playerList = result.map(el => el.emoji + " - " + channel.guild.members.find(el2 => el2.id === el.id) + " (" + el.role.split(",").map(role => toTitleCase(role)).join(" + ") + "); Alive: " + (el.alive ? client.emojis.get(stats.yes_emoji) : client.emojis.get(stats.no_emoji)) + "; CCs: " + el.ccs + "; Votes: " + el.public_value + "," + el.private_value + "," + el.public_votes).join("\n");
+			let playerList = result.map(el => `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"} (${el.role.split(",").map(role => toTitleCase(role)).join(" + ")}); Alive: ${channel.guild.members.cache.get(el.id) ? (el.alive ? client.emojis.cache.get(stats.yes_emoji) : client.emojis.cache.get(stats.no_emoji)) : "⚠️"}; CCs: ${el.ccs}; Votes: ${el.public_value},${el.private_value},${el.public_votes}`).join("\n");
 			// Print message
 			channel.send("✳ Listing all players").then(m => {
 				m.edit("**Players** | Total: " +  result.length + "\n" + playerList)
@@ -345,7 +345,7 @@ module.exports = function() {
 	this.cmdListSignedup = function(channel) {
 		// Get a list of players
 		sql("SELECT id,emoji FROM players", result => {
-			let playerList = result.map(el => el.emoji + " - " + channel.guild.members.find(el2 => el2.id === el.id).user.username + " (" + channel.guild.members.find(el2 => el2.id === el.id) + ")").join("\n");
+			let playerList = result.map(el => `${el.emoji}  - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username : "*user left*"} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
 			// Print message
 			channel.send("✳ Listing signed up players").then(m => {
 				m.edit("**Signed Up Players** | Total: " +  result.length + "\n" + playerList)
@@ -368,7 +368,7 @@ module.exports = function() {
 		}
 		// Get a list of players
 		sql("SELECT id,emoji FROM players WHERE alive = 1", result => {
-			let playerList = result.map(el => el.emoji + " - " + channel.guild.members.find(el2 => el2.id === el.id).user.username + " (" + channel.guild.members.find(el2 => el2.id === el.id) + ")").join("\n");
+			let playerList = result.map(el => `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username : "*user left*"} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
 			// Print message
 			channel.send("✳ Listing alive players").then(m => {
 				m.edit("**Alive Players** | Total: " +  result.length + "\n" + playerList)
@@ -424,12 +424,12 @@ module.exports = function() {
 			return;
 		}
 		// Category deleted
-		if(!channel.guild.channels.find(el => el.id === ccCats[index])) { 
+		if(!channel.guild.channels.cache.get(ccCats[index])) { 
 			substituteChannels(channel, ccCats, ++index, subPlayerFrom, subPlayerTo);
 			return;
 		}
 		// SUB channels in category
-		substituteOneChannel(channel, ccCats, index, channel.guild.channels.find(el => el.id === ccCats[index]).children.array(), 0, subPlayerFrom, subPlayerTo);
+		substituteOneChannel(channel, ccCats, index, channel.guild.channels.cache.get(ccCats[index]).children.array(), 0, subPlayerFrom, subPlayerTo);
 	}
 	
 	/* Subs a channel */
@@ -441,18 +441,18 @@ module.exports = function() {
 			return;
 		}
 		// Deleted channel
-		if(!channels[channelIndex] || !channel.guild.channels.find(el => el.id === channels[channelIndex].id)) {
+		if(!channels[channelIndex] || !channel.guild.channels.cache.get(channels[channelIndex].id)) {
 			substituteOneChannel(channel, ccCats, index, channels, ++channelIndex, subPlayerFrom, subPlayerTo);
 			return;
 		} else {
-			let channelMembers = channel.guild.channels.find(el => el.id === channels[channelIndex].id).permissionOverwrites.array().filter(el => el.type === "member").map(el => el.id);
-			let channelOwners = channel.guild.channels.find(el => el.id === channels[channelIndex].id).permissionOverwrites.array().filter(el => el.type === "member").filter(el => el.allow === 66560).map(el => el.id);
+			let channelMembers = channel.guild.channels.cache.get(channels[channelIndex].id).permissionOverwrites.array().filter(el => el.type === "member").map(el => el.id);
+			let channelOwners = channel.guild.channels.cache.get(channels[channelIndex].id).permissionOverwrites.array().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
 			if(channelMembers.includes(subPlayerFrom)) {
-				cmdCCAdd(channel.guild.channels.find(el => el.id === channels[channelIndex].id), {}, ["add", subPlayerTo], 1);
+				cmdCCAdd(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["add", subPlayerTo], 1);
 			}
 			if(channelOwners.includes(subPlayerFrom)) {
 				setTimeout(function() {
-					cmdCCPromote(channel.guild.channels.find(el => el.id === channels[channelIndex].id), {}, ["promote", subPlayerTo], 1);
+					cmdCCPromote(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["promote", subPlayerTo], 1);
 					substituteOneChannel(channel, ccCats, index, channels, ++channelIndex, subPlayerFrom, subPlayerTo);
 				}, 500);
 			} else {
@@ -482,7 +482,7 @@ module.exports = function() {
 		} else {
 			// Get info
 			sql("SELECT " + args[1] + " FROM players WHERE id = " + connection.escape(user), result => {
-				let playerName = channel.guild.members.find(el => el.id === user).displayName;
+				let playerName = channel.guild.members.cache.get(user).displayName;
 				channel.send("✅ `" + playerName + "`'s " + args[1] + " is `" + (args[1] === "role" ? (mode ? result[0][args[1]].split(",").filter(role => verifyRoleVisible(role)).join("` + `") : result[0][args[1]].split(",").join(", ")) : result[0][args[1]]) + "`!");
 			}, () => {
 				// Database error
@@ -510,7 +510,7 @@ module.exports = function() {
 			return; 
 		}
 		sql("UPDATE players SET " + args[1] + " = " + connection.escape(args[3]) + " WHERE id = " + connection.escape(user), result => {
-			let playerName = channel.guild.members.find(el => el.id === user).displayName;
+			let playerName = channel.guild.members.cache.get(user).displayName;
 			channel.send("✅ `" + playerName + "`'s " + args[1] + " value now is `" + args[3] + "`!");
 			updateGameStatus(channel.guild);
 			getVotes();
@@ -531,14 +531,14 @@ module.exports = function() {
 			return; 
 		} else {
 			// Send resurrect message
-			let playerName = channel.guild.members.find(el => el.id === user).displayName;
+			let playerName = channel.guild.members.cache.get(user).displayName;
 			channel.send("✳ Resurrecting " + playerName + "!");
 			// Set Roles
-			channel.guild.members.find(el => el.id === user).addRole(stats.participant).catch(err => {
+			channel.guild.members.cache.get(user).roles.add(stats.participant).catch(err => {
 				logO(err); 
 				sendError(channel, err, "Could not add role");
 			});
-			channel.guild.members.find(el => el.id === user).removeRole(stats.dead_participant).catch(err => {
+			channel.guild.members.cache.get(user).roles.remove(stats.dead_participant).catch(err => {
 				logO(err); 
 				sendError(channel, err, "Could not remove role");
 			});
@@ -555,7 +555,7 @@ module.exports = function() {
 			channel.send("⛔ Syntax error. `" + args[1] + "` is not a valid player!"); 
 			return; 
 		} else {
-			cmdSignup(channel, channel.guild.members.find(el => el.id === user), args.slice(2), false);
+			cmdSignup(channel, channel.guild.members.cache.get(user), args.slice(2), false);
 		}
 	}
 	
@@ -565,6 +565,10 @@ module.exports = function() {
 		if(checkGamephase && stats.gamephase != 1) { 
 			channel.send("⛔ Signup error. Sign ups are not open! Sign up will open up again soon."); 
 			return; 
+		} else if(isSub(member)) { 
+		// Failed sign out
+			channel.send("⛔ Sign up error. Can't sign up while being a substitute player."); 
+			return; 
 		} else if(!args[0] && !isSignedUp(member)) { 
 		// Failed sign out
 			channel.send("⛔ Sign up error. Can't sign out without being signed up! Use `" + stats.prefix + "signup <emoji>` to sign up."); 
@@ -572,9 +576,9 @@ module.exports = function() {
 		} else if(!args[0] && isSignedUp(member)) { 
 			// Sign out player
 			sql("DELETE FROM players WHERE id = " + connection.escape(member.id), result => {			
-				channel.send("✅ Successfully signed out, " + member.user + ". You will no longer participate in the next game!"); 
+				channel.send(`✅ Successfully signed out, ${member.user}. You will no longer participate in the next game!`); 
 				updateGameStatus(channel.guild);
-				member.removeRole(stats.signed_up).catch(err => { 
+				member.roles.remove(stats.signed_up).catch(err => { 
 					// Missing permissions
 					logO(err); 
 					sendError(channel, err, "Could not remove role!");
@@ -592,7 +596,7 @@ module.exports = function() {
 						if(result.length > 0 || args[0] === "⛔" || args[0] === "❌") { 
 							// Signup error
 							channel.send("⛔ Database error. Emoji " + args[0] + " is already being used!");
-							message.clearReactions().catch(err => { 
+							message.reactions.removeAll().catch(err => { 
 									// Couldn't clear reactions
 									logO(err);
 									sendError(channel, err, "Could not clear reactions!");
@@ -600,14 +604,14 @@ module.exports = function() {
 						} else { 
 							// Signup emoji
 							sql("INSERT INTO players (id, emoji, role) VALUES (" + connection.escape(member.id) + "," + connection.escape("" + args[0]) + "," + connection.escape("none") + ")", result => {
-								message.edit("✅ " + member.user + " signed up with emoji " + args[0] + "!");
+								message.edit(`✅ ${member.user} signed up with emoji ${args[0]}!`);
 								updateGameStatus(message.guild);
-								message.clearReactions().catch(err => { 
+								message.reactions.removeAll().catch(err => { 
 									// Couldn't clear reactions
 									logO(err);
 									sendError(channel, err, "Could not clear reactions!");
 								});
-								member.addRole(stats.signed_up).catch(err => { 
+								member.roles.add(stats.signed_up).catch(err => { 
 									// Missing permissions
 									logO(err); 
 									editError(message, err, "Could not add role!");
@@ -640,7 +644,7 @@ module.exports = function() {
 						if(result.length > 0 || args[0] === "⛔") { 
 							// Signup error
 							message.edit("⛔ Database error. Emoji " + args[0] + " is already being used!");
-							message.clearReactions().catch(err => { 
+							message.reactions.removeAll().catch(err => { 
 									// Couldn't clear reactions
 									logO(err);
 									sendError(channel, err, "Could not clear reactions!");
@@ -648,8 +652,8 @@ module.exports = function() {
 						} else {
 							// Change emoji
 							sql("UPDATE players SET emoji = " + connection.escape("" + args[0]) + " WHERE id = " + connection.escape(member.id), result => {
-								message.edit("✅ " + member.user + " changed emoji to " + args[0] + "!");
-								message.clearReactions().catch(err => { 
+								message.edit(`✅ ${member.user} changed emoji to ${args[0]}!`);
+								message.reactions.removeAll().catch(err => { 
 									// Couldn't clear reactions
 									logO(err);
 									sendError(channel, err, "Could not clear reactions!");
@@ -681,26 +685,26 @@ module.exports = function() {
 		var user;
 		// Get User by ID 
 		if(/^\d+$/.test(inUser)) {
-			user = client.users.find(user => user.id === inUser);
+			user = client.users.cache.find(user => user.id === inUser);
 			if(user) return user.id;
 		}
 		// Get User by Discord Tag with Nickname
 		if(/^<@!\d*>$/.test(inUser)) {
 			let inUserID = inUser.substr(3, inUser.length - 4) + "";
-			user = client.users.find(user => user.id === inUserID);
+			user = client.users.cache.find(user => user.id === inUserID);
 			if(user) return user.id;
 		}
 		// Get User by Discord Tag without Nickname
 		if(/^<@\d*>$/.test(inUser)) {
 			let inUserID = inUser.substr(2, inUser.length - 3) + "";
-			user = client.users.find(user => user.id === inUserID);
+			user = client.users.cache.find(user => user.id === inUserID);
 			if(user) return user.id;
 		}
 		// Get User by Name
-		user = client.users.find(user => user.username.toLowerCase() === inUser);
+		user = client.users.cache.find(user => user.username.toLowerCase() === inUser);
 		if(user) return user.id;
 		// Get User by Nickname
-		user = channel.guild.members.find(member => member.nickname && member.nickname.toLowerCase() === inUser);
+		user = channel.guild.members.cache.find(member => member.nickname && member.nickname.toLowerCase() === inUser);
 		if(user) return user.id;
 		// Get User by Emoji 
 		user = emojiToID(inUser)
@@ -714,7 +718,7 @@ module.exports = function() {
 		let players = args.slice(startIndex).map(el => getUser(channel, el));
 		// Filter out non participants
 		players = players.filter((el, index) => {
-			if(el && (isParticipant(channel.guild.members.find(el2 => el2.id === el)) || isGameMaster(executor))) {
+			if(el && (isParticipant(channel.guild.members.cache.get(el)) || isGameMaster(executor))) {
 				return true; 
 			}
 			else { 
@@ -742,27 +746,32 @@ module.exports = function() {
 	
 	/* Check if a member is a Game Master (or Bot) */
 	this.isGameMaster = function(member) {
-		return member.roles.find(el => el.id === stats.gamemaster) || member.roles.find(el => el.id === stats.bot) || member.roles.find(el => el.id === stats.admin);
+		return member.roles.cache.get(stats.gamemaster) || member.roles.cache.get(stats.bot) || member.roles.cache.get(stats.admin);
 	}
 
 	/* Check if a member is a (living) participant */
 	this.isParticipant = function(member) {
-		return member.roles.find(el => el.id === stats.participant);
+		return member.roles.cache.get(stats.participant);
 	}
 	
 	/* Check if a member is a dead participant */
 	this.isDeadParticipant = function(member) {
-		return member.roles.find(el => el.id === stats.dead_participant);
+		return member.roles.cache.get(stats.dead_participant);
 	}
 	
 	/* Check if a member is a dead participant */
 	this.isSpectator = function(member) {
-		return member.roles.find(el => el.id === stats.spectator);
+		return member.roles.cache.get(stats.spectator);
 	}
 
 	/* Check if a member is signed up */
 	this.isSignedUp = function(member) {
-		return member.roles.find(el => el.id === stats.signed_up);
+		return member.roles.cache.get(stats.signed_up);
+	}
+
+	/* Check if a member is a sub */
+	this.isSub = function(member) {
+		return member.roles.cache.get(stats.sub);
 	}
 	
 	/* Cache emojis */

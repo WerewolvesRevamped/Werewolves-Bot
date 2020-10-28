@@ -1,6 +1,7 @@
 /* Discord */
 const Discord = require("discord.js");
-global.client = new Discord.Client({disableEveryone: true});
+global.client = new Discord.Client({disableMentions: 'everyone'});
+config = require("./config.json");
 /* Utility Modules */
 require("./utility.js")();
 require("./sql.js")();
@@ -39,16 +40,16 @@ client.on("message", async message => {
 	if(message.content.indexOf(stats.prefix) !== 0 && message.content.length > 3) return;
 	if(message.content.slice(stats.prefix.length).indexOf(stats.prefix) == 0) return;
 	if(message.content.indexOf(stats.prefix) !== 0 && message.content.length <= 3) {
-		if(message.content.trim().match(/^[a-zA-Z]*$/) && (isSC(message.channel) | isCC(message.channel))) cmdInfo(message.channel, message.content.trim().match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()), false, true);
+		if(message.content.trim().match(/^[a-zA-Z]*$/) && (isSC(message.channel) | isCC(message.channel))) cmdInfo(message.channel, message.content.trim().match(/(".*?")|(\S+)/g) ? message.content.trim().match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "", false, true);
 		return;
 	}
 	// Replace contents
 	if(message.member) message.content = message.content.replace(/%s/, message.member.id)
 	if(message.channel) message.content = message.content.replace(/%c/, message.channel.id);
 	// Get default arguments / default command / unmodified arguments / unmodified commands
-	const args = message.content.slice(stats.prefix.length).trim().match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase());
+	const args = message.content.slice(stats.prefix.length).trim().match(/(".*?")|(\S+)/g) ? message.content.slice(stats.prefix.length).trim().match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : [];
 	const command = args.shift();
-	const argsX = message.content.slice(stats.prefix.length).trim().replace(/\n/g,"~").match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, ""));
+	const argsX = message.content.slice(stats.prefix.length).trim().replace(/\n/g,"~").match(/(".*?")|(\S+)/g) ? message.content.slice(stats.prefix.length).trim().replace(/\n/g,"~").match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "")) : [];
 	const commandX = argsX.shift();
 	
 	if(message.content.search("@everyone") >= 0) {
@@ -292,7 +293,7 @@ client.on("message", async message => {
 	/* Sudo */
 	case "sudo":
 		if(checkSafe(message)) {
-			message.delete(120000);
+			message.delete({timeout: 120000 });
 			setTimeout(message.channel.send(stats.prefix + argsX.join(" ").replace(/~/g,"\n")), 2000);
 		}
 	break;
@@ -319,7 +320,7 @@ client.on("messageDelete", message => {
 client.on("messageReactionAdd", async (reaction, user) => {
 	if(user.bot) return;
 	// Handle confirmation messages
-	else if(reaction.emoji.name === "✅" && isGameMaster(reaction.message.guild.members.find(el => el.id === user.id))) {
+	else if(reaction.emoji.name === "✅" && isGameMaster(reaction.message.guild.members.cache.get(user.id))) {
 		sql("SELECT time,action FROM confirm_msg WHERE id = " + connection.escape(reaction.message.id), result => {
 			if(result.length > 0) confirmAction(result[0], reaction.message);
 		}, () => {
@@ -328,11 +329,11 @@ client.on("messageReactionAdd", async (reaction, user) => {
 	// Handle reaction ingame
 	} else if(stats.gamephase == 2) {
 		// Remove unallowed reactions
-		if(isSpectator(reaction.message.guild.members.find(el => el.id === user.id)) || isDeadParticipant(reaction.message.guild.members.find(el => el.id === user.id))) {
+		if(isSpectator(reaction.message.guild.members.cache.get(user.id)) || isDeadParticipant(reaction.message.guild.members.cache.get(user.id))) {
 			if(reaction.emoji == client.emojis.get(stats.no_emoji) || reaction.emoji == client.emojis.get(stats.yes_emoji)) return;
-			reaction.remove(user);
+			reaction.users.remove(user);
 		// Automatic pinning
-		} else if(reaction.emoji.name === "📌" && isParticipant(reaction.message.guild.members.find(el => el.id === user.id)) && (isCC(reaction.message.channel) || isSC(reaction.message.channel))) {
+		} else if(reaction.emoji.name === "📌" && isParticipant(reaction.message.guild.members.cache.get(user.id)) && (isCC(reaction.message.channel) || isSC(reaction.message.channel))) {
 			reaction.message.pin();
 		}
 	}
@@ -342,14 +343,14 @@ client.on("messageReactionAdd", async (reaction, user) => {
 client.on("messageReactionRemove", async (reaction, user) => {
 	if(user.bot) return;
 	// Automatic unpinning
-	else if(reaction.emoji.name === "📌" && reaction.count == 0 && isParticipant(reaction.message.guild.members.find(el => el.id === user.id))) {
+	else if(reaction.emoji.name === "📌" && reaction.count == 0 && isParticipant(reaction.message.guild.members.cache.get(user.id))) {
 		reaction.message.unpin();
 	}
 });
 
 /* Leave Detection */
 client.on("guildMemberRemove", async member => {
-	log("❌ " + member.user + " has left the server!");
+	log(`❌ ${member.user} has left the server!`);
 	sql("UPDATE players SET alive = 0 WHERE id = " + connection.escape(member.id), result => {
 		log("✅ Killed `" +  member.displayName + "`!");
 	}, () => {
@@ -357,30 +358,30 @@ client.on("guildMemberRemove", async member => {
 	});	
 });
 
-/* Force Reaction Add & Remove on all messages */
+/* Force Reaction Add & Remove on all messages */ 
 client.on("raw", packet => {
     // We dont want this to run on unrelated packets
-    if (["MESSAGE_REACTION_ADD", "MESSAGE_REACTION_REMOVE"].includes(packet.t)) {
+    /**if (["MESSAGE_REACTION_ADD", "MESSAGE_REACTION_REMOVE"].includes(packet.t)) {
 		// Grab the channel to check the message from
 		const channel = client.channels.get(packet.d.channel_id);
 		// Stop for fetched messages
 		if (channel.messages.has(packet.d.message_id)) return;
 		// Fetch message
-		channel.fetchMessage(packet.d.message_id).then(message => {
+		channel.messages.fetch(packet.d.message_id).then(message => {
 			// Check which type of event it is before emitting
 			if(packet.t === "MESSAGE_REACTION_ADD") {
 				const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name;
 				const reaction = message.reactions.get(emoji);
-				if (reaction) reaction.users.set(packet.d.user_id, client.users.get(packet.d.user_id));
-				client.emit("messageReactionAdd", reaction, client.users.get(packet.d.user_id));
+				if (reaction) reaction.users.set(packet.d.user_id, client.users.cache.get(packet.d.user_id));
+				client.emit("messageReactionAdd", reaction, client.users.cache.get(packet.d.user_id));
 			} else if(packet.t === "MESSAGE_REACTION_REMOVE") {
 				const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name;
 				const reaction = message.reactions.get(emoji);
-				if (reaction) reaction.users.set(packet.d.user_id, client.users.get(packet.d.user_id));
-				client.emit("messageReactionRemove", reaction, client.users.get(packet.d.user_id));
+				if (reaction) reaction.users.set(packet.d.user_id, client.users.cache.get(packet.d.user_id));
+				client.emit("messageReactionRemove", reaction, client.users.cache.get(packet.d.user_id));
 			}
 		});
-	} else if(["MESSAGE_DELETE"].includes(packet.t)) {
+	} else**/ if(["MESSAGE_DELETE"].includes(packet.t)) {
 		// Grab the channel to check the message from
 		const channel = client.channels.get(packet.d.channel_id);
 		// Stop for fetched messages
