@@ -155,24 +155,29 @@ module.exports = function() {
 								// Create webhook
 								let webhookName = source.name != "" ? toTitleCase(source.name) : message.member.displayName;
 								let webhookAvatar = source.name != "" ? client.user.displayAvatarURL() : message.author.displayAvatarURL();
-								message.guild.channels.cache.get(destination.channel_id).createWebhook(webhookName, {avatar: webhookAvatar})
-								.then(webhook => {
-									// Send webhook
-									webhook.send(message.content).then(m => {
-										// Delete webhook
-										webhook.delete()
+								
+								message.guild.channels.cache.get(destination.channel_id).fetchWebhooks()
+								.then(webhooks => {
+									// search for webhook 
+									let webhook = webhooks.find(w => w.name == webhookName);
+									// webhook exists
+									if(webhook) {
+										webhook.send(message.content);
+									} else { // no webhook
+										message.guild.channels.cache.get(destination.channel_id).createWebhook(webhookName, {avatar: webhookAvatar})
+										.then(webhook => {
+											// Send webhook
+											webhook.send(message.content)
+										})
 										.catch(err => { 
+											// Webhook couldn't be created
 											logO(err); 
-											sendError(messsage.channel, err, "Could not delete webhook");
+											sendError(messsage.channel, err, "Could not create webhook");
 										});
-									});
-								}) 
-								.catch(err => { 
-									// Webhook couldn't be created
-									logO(err); 
-									sendError(messsage.channel, err, "Could not create webhook");
+									}
 								});
-							}
+								
+							}		
 						});
 					}, () => {
 						// Database error
