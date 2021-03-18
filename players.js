@@ -327,14 +327,23 @@ module.exports = function() {
 	this.cmdPlayersList = function(channel, args) {
 		// Get a list of players
 		sql("SELECT id,emoji,role,alive,public_value,private_value,public_votes,ccs FROM players", result => {
-			let playerList = result.map(el => `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"} (${el.role.split(",").map(role => toTitleCase(role)).join(" + ")}); Alive: ${channel.guild.members.cache.get(el.id) ? (el.alive ? client.emojis.cache.get(stats.yes_emoji) : client.emojis.cache.get(stats.no_emoji)) : "⚠️"}; CCs: ${el.ccs}; Votes: ${el.public_value},${el.private_value},${el.public_votes}`).join("\n");
-			// Print message
-			channel.send("✳ Listing all players").then(m => {
-				m.edit("**Players** | Total: " +  result.length + "\n" + playerList)
-			}).catch(err => {
-				logO(err); 
-				sendError(channel, err, "Could not list signed up players");
-			});
+			let playerListArray = result.map(el => `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"} (${el.role.split(",").map(role => toTitleCase(role)).join(" + ")}); Alive: ${channel.guild.members.cache.get(el.id) ? (el.alive ? client.emojis.cache.get(stats.yes_emoji) : client.emojis.cache.get(stats.no_emoji)) : "⚠️"}; CCs: ${el.ccs}; Votes: ${el.public_value},${el.private_value},${el.public_votes}`);
+			let playerList = [], counter = 0;
+			for(let i = 0; i < playerListArray.length; i++) {
+				if(!playerList[Math.floor(counter/10)]) playerList[Math.floor(counter/10)] = [];
+				playerList[Math.floor(counter/10)].push(playerListArray[i]);
+				counter++;
+			}
+			channel.send("**Players** | Total: " + result.length);
+			for(let i = 0; i < playerList.length; i++) {
+				// Print message
+				channel.send("✳ Listing players " + i  + "/" + (playerList.length) + "...").then(m => {
+					m.edit(playerList[i])
+				}).catch(err => {
+					logO(err); 
+					sendError(channel, err, "Could not list signed up players");
+				});
+			}
 		}, () => {
 			// DB error
 			channel.send("⛔ Database error. Could not list signed up players!");

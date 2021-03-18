@@ -40,7 +40,7 @@ client.on("message", async message => {
 	if(message.content.indexOf(stats.prefix) !== 0 && message.content.length > 3) return;
 	if(message.content.slice(stats.prefix.length).indexOf(stats.prefix) == 0) return;
 	if(message.content.indexOf(stats.prefix) !== 0 && message.content.length <= 3) {
-		if(message.content.trim().match(/^[a-zA-Z]*$/) && (isSC(message.channel) | isCC(message.channel))) cmdInfo(message.channel, message.content.trim().match(/(".*?")|(\S+)/g) ? message.content.trim().match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "", false, true);
+		if(message.content.trim().match(/^[a-zA-Z]*$/) && (isSC(message.channel) | isCC(message.channel)) || message.channel.topic == "GMSAFE") cmdInfo(message.channel, message.content.trim().match(/(".*?")|(\S+)/g) ? message.content.trim().match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "", false, true);
 		return;
 	}
 	// Replace contents
