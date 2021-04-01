@@ -39,6 +39,7 @@ module.exports = function() {
 			case "public": pollCreate(channel, args, "public"); break;
 			case "private": pollCreate(channel, args, "private"); break;
 			case "dead": pollCreate(channel, args, "dead"); break;
+			case "dead_vote": pollCreate(channel, args, "dead_vote"); break;
 			case "yn": pollCreate(channel, args, "yn"); break;
 			case "yna": pollCreate(channel, args, "yna"); break;
 			default:  
@@ -84,13 +85,15 @@ module.exports = function() {
 		// Cache vote values
 		getVotes();
 		// Get a list of players
-		sql("SELECT id,emoji FROM players WHERE alive = 1", result => {
+		sql("SELECT id,emoji FROM players WHERE alive = " + (type=="dead_vote"?"0":"1"), result => {
 			sqlGetStat(13, pollNum => {
 				// Get player lists
 				let pollName = Math.random().toString(36).replace(/[^a-z]+/g, "").substr(0, 1) + ((((+pollNum) + 2) * 3)  - 4).toString(36).replace(/[^a-z]+/g, "a") + Math.random().toString(36).replace(/[^a-z]+/g, "").substr(0, 1);
 				let playerLists = [], playerList = result.map(el => [el.emoji, channel.guild.members.cache.get(el.id)]);
 				if(type === "public" && stats.poll == 0) playerList.push(["⛔", "*Abstain*"]);
+				if(type === "dead_vote" && stats.poll == 0) playerList.push(["⛔", "*Abstain*"]);
 				else if(type === "public" && stats.poll == 1) playerList.push(["❌", "*Cancel*"]);
+				else if(type === "dead_vote" && stats.poll == 1) playerList.push(["❌", "*Cancel*"]);
 				else if(type === "dead") playerList = [[client.emojis.cache.get(stats.yes_emoji), "Yes"], [client.emojis.cache.get(stats.no_emoji), "No"]];
 				else if(type === "yn") playerList = [[client.emojis.cache.get(stats.yes_emoji), "Yes"], [client.emojis.cache.get(stats.no_emoji), "No"]];
 				else if(type === "yna") playerList = [[client.emojis.cache.get(stats.yes_emoji), "Yes"], [client.emojis.cache.get(stats.no_emoji), "No"], ["⛔", "*Abstain*"]];
@@ -160,6 +163,7 @@ module.exports = function() {
 				voteValue = + privateValues.find(el => el.id === member.id).private_value;
 			break;
 			case "dead": 
+			case "dead_vote": 
 				if(!isDeadParticipant(member)) return 0;
 				voteValue = 1;
 			break;
@@ -221,7 +225,7 @@ module.exports = function() {
 			if(votes <= 0) return { valid: false };
 			// Get string of voters
 			let voters;
-			if(pollType != "dead") voters = votersList.filter(el => isParticipant(el)).join(", ");
+			if(pollType != "dead" && pollType != "dead_vote") voters = votersList.filter(el => isParticipant(el)).join(", ");
 			else voters = votersList.filter(el => isDeadParticipant(el)).join(", ");
 			// Get candidate from emoji
 			let candidate = "not set";
