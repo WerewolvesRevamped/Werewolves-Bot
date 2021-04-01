@@ -202,6 +202,7 @@ client.on("message", async message => {
 		if(checkSafe(message)) cmdConfirm(message, "start_debug");
 	break;
 	/* Reset */ // Resets a game
+	case "r":
 	case "reset":
 		if(checkSafe(message)) cmdConfirm(message, "reset");
 	break;
@@ -229,11 +230,11 @@ client.on("message", async message => {
 		if(checkGM(message)) cmdPlayers(message, args);
 	break;
 	/* CCs */
-	case "c":
 	case "cc":
 		cmdCC(message, args, argsX);
 	break;
 	/* Webhook Message*/
+	case "<":
 	case "bot":
 	case "webhook":
 		cmdWebhook(message.channel, message.member, argsX);
@@ -265,11 +266,13 @@ client.on("message", async message => {
 		cmdDemote(message.channel, message.member);
 	break;
 	/* Theme */
+	case "th":
 	case "themes":
 	case "theme":
 		cmdTheme(message, args);
 	break;
 	/* New Game Ping */
+	case "@@":
 	case "gameping":
 		if(checkGM(message)) cmdGamePing(message.channel, message.member);
 	break;
@@ -298,6 +301,7 @@ client.on("message", async message => {
 		}
 	break;
 	/* Confirm */
+	case "c":
 	case "confirm":
 		confirmActionExecute(args.join(" "), message, false);
 	break;
