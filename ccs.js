@@ -262,10 +262,10 @@ module.exports = function() {
 		if(mode || isGameMaster(member) || ccOwner.includes(member.id)) {
 			players = getUserList(channel, args, 1, member);
 			let playerList = channel.permissionOverwrites.array().filter(el => el.type === "member" && el.allow > 0).map(el => el.id);
-			players = players.filter(el => playerList.includes(el));
+			if(players) players = players.filter(el => playerList.includes(el));
 			if(players && players.length > 0) {
 				players.forEach(el => { 
-					channel.createOverwrite(el, {VIEW_CHANNEL: false, READ_MESSAGE_HISTORY: null}).then(c => {
+					channel.permissionOverwrites.get(el).delete().then(() => {
 						channel.send(`✅ Removed ${channel.guild.members.cache.get(el)} from the CC!`);
 					}).catch(err => { 
 						logO(err); 
@@ -345,7 +345,7 @@ module.exports = function() {
 			// Get members
 			players = getUserList(channel, args, 1, member);
 			let playerList = channel.permissionOverwrites.array().filter(el => el.type === "member" && el.allow > 0).map(el => el.id);
-			players = players.filter(el => playerList.includes(el));
+			if(players) players = players.filter(el => playerList.includes(el));
 			if(players && players.length > 0) {
 				players.forEach(el => { 
 					// Promote members
@@ -375,7 +375,7 @@ module.exports = function() {
 			return;
 		}
 		// Remove permissions
-		channel.createOverwrite(member.id, {VIEW_CHANNEL: false, READ_MESSAGE_HISTORY: null}).then(c => {
+		channel.permissionOverwrites.get(member.id).delete().then(() => {
 			channel.send(`✅ ${member} left the CC!`);
 		}).catch(err => { 
 			// Permission error

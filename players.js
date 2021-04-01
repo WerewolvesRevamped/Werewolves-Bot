@@ -450,7 +450,7 @@ module.exports = function() {
 			let categories = cachedCCs;
 			categories.push(cachedSC)
 			switchChannels(message.channel, categories, 0, getUser(message.channel, args[1]), getUser(message.channel, args[2]));
-		}, 10000);
+		}, 3000);
 		setTimeout(function() { // reload data
 			cacheRoleInfo();
 			getVotes();
@@ -501,7 +501,7 @@ module.exports = function() {
 				setTimeout(function() {
 					cmdCCPromote(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["promote", subPlayerTo], 1);
 					substituteOneChannel(channel, ccCats, index, channels, ++channelIndex, subPlayerFrom, subPlayerTo);
-				}, 500);
+				}, 1000);
 			} else {
 				substituteOneChannel(channel, ccCats, index, channels, ++channelIndex, subPlayerFrom, subPlayerTo);
 			}
@@ -543,21 +543,23 @@ module.exports = function() {
 			if(channelMembers.includes(subPlayerFrom) && !channelMembers.includes(subPlayerTo)) {
 				cmdCCAdd(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["add", subPlayerTo], 1);
 				cmdCCRemove(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["remove", subPlayerFrom], 1);
+				channel.guild.channels.cache.get(channels[channelIndex].id).send("❗ " + channel.guild.members.cache.get(subPlayerFrom).displayName + " switched to " + channel.guild.members.cache.get(subPlayerTo).displayName + " ❗");
 			}
 			if(!channelMembers.includes(subPlayerFrom) && channelMembers.includes(subPlayerTo)) {
 				cmdCCAdd(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["add", subPlayerFrom], 1);
 				cmdCCRemove(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["remove", subPlayerTo], 1);
+				channel.guild.channels.cache.get(channels[channelIndex].id).send("❗ " + channel.guild.members.cache.get(subPlayerTo).displayName + " switched to " + channel.guild.members.cache.get(subPlayerFrom).displayName + " ❗");
 			}
 			if(channelOwners.includes(subPlayerFrom) && !channelOwners.includes(subPlayerTo)) {
 				setTimeout(function() {
 					cmdCCPromote(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["promote", subPlayerTo], 1);
 					switchOneChannel(channel, ccCats, index, channels, ++channelIndex, subPlayerFrom, subPlayerTo);
-				}, 500);
+				}, 1000);
 			} else if(!channelOwners.includes(subPlayerFrom) && channelOwners.includes(subPlayerTo)) {
 				setTimeout(function() {
 					cmdCCPromote(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["promote", subPlayerFrom], 1);
 					switchOneChannel(channel, ccCats, index, channels, ++channelIndex, subPlayerFrom, subPlayerTo);
-				}, 500);
+				}, 1000);
 			} else {
 				switchOneChannel(channel, ccCats, index, channels, ++channelIndex, subPlayerFrom, subPlayerTo);
 			}
@@ -849,7 +851,7 @@ module.exports = function() {
 	
 	/* Check if a member is a Game Master (or Bot) */
 	this.isGameMaster = function(member) {
-		return member.roles.cache.get(stats.gamemaster) || member.roles.cache.get(stats.bot) || member.roles.cache.get(stats.admin);
+		return member && member.roles && (member.roles.cache.get(stats.gamemaster) || member.roles.cache.get(stats.bot) || member.roles.cache.get(stats.admin));
 	}
 
 	/* Check if a member is a (living) participant */
