@@ -35,6 +35,7 @@ module.exports = function() {
 			case "signup": cmdPlayersSignup(message.channel, args); break;
 			case "sub": 
 			case "substitute": cmdPlayersSubstitute(message, args); break;
+			case "switch": cmdPlayersSwitch(message, args); break;
 			case "list": cmdConfirm(message, "players list"); break;
 			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
 		}
@@ -44,37 +45,44 @@ module.exports = function() {
 		let help = "";
 		switch(args[0]) {
 			case "":
-				if(isGameMaster(member)) help += stats.prefix + "players [get|get_clean|set|resurrect|signup|list|substitute] - Manages players\n";
+				if(isGameMaster(member)) help += stats.prefix + "players [get|get_clean|set|resurrect|signup|list] - Manages players\n";
+				if(isGameMaster(member)) help += stats.prefix + "players [substitute|switch] - Manages player changes\n";
 				if(isGameMaster(member)) help += stats.prefix + "killq [add|remove|killall|list|clear] - Manages kill queue\n";
 				help += stats.prefix + "list - Lists signed up players\n";
 				help += stats.prefix + "alive - Lists alive players\n";
 				help += stats.prefix + "signup - Signs you up for the next game\n";
 				help += stats.prefix + "emojis - Gives a list of emojis and player ids (Useful for CC creation)\n";
 			break;
+			case "l":
 			case "list":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "list\n```";
 				help += "```\nFunctionality\n\nLists all signed up players\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "list\n< Signed Up Players | Total: 3\n  🛠 - McTsts (@McTsts)\n  🤔 - marhjo (@marhjo)\n  👌 - federick (@federick)\n```";
 				help += "```diff\nAliases\n\n- l\n- signedup\n- signedup_list\n- signedup-list\n- listsignedup\n- list-signedup\n- list_signedup\n```";
 			break;
+			case "a":
 			case "alive":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "alive\n```";
 				help += "```\nFunctionality\n\nLists all alive players\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "list\n< Alive Players | Total: 3\n  🛠 - McTsts (@McTsts)\n  🤔 - marhjo (@marhjo)\n  👌 - federick (@federick)\n```";
 				help += "```diff\nAliases\n\n- a\n- alive_list\n- alive-list\n- listalive\n- list-alive\n- list_alive\n```";
 			break;
+			case "e":
 			case "emojis":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "emojis\n```";
 				help += "```\nFunctionality\n\nGives you a list of emojis and player ids as well as a list of all emojis. Can be used for CC creation.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "emojis\n< 🛠 242983689921888256\n  🤔 102036304845377536\n  👌 203091600283271169\n  🛠 🤔 👌\n```";
 				help += "```diff\nAliases\n\n- e\n```";
 			break;
+			case "join":
 			case "signup":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "signup <Emoji>\n```";
 				help += "```\nFunctionality\n\nSigns you up for the next game with emoji <Emoji>, which has to be a valid, not custom, emoji, that is not used by another player yet. If you have already signedup the command changes your emoji. If no emoji is provided, you are signed out.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "signup 🛠\n< ✅ @McTsts signed up with emoji 🛠!\n\n> " + stats.prefix + "signup\n< ✅ Successfully signed out, @McTsts. You will no longer participate in the next game!\n```";
 				help += "```diff\nAliases\n\n- join\n- sign-up\n- sign_up\n- unsignup\n- signout\n- participate\n- sign-out\n- sign_out\n```";
 			break;
+			case "player":
+			case "p":
 			case "players":
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
@@ -114,6 +122,11 @@ module.exports = function() {
 						help += "```\nFunctionality\n\nReplaces the first player with the second.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "players sub 242983689921888256 588628378312114179 🛠\n```";
 					break;
+					case "switch":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "players switch <Old Player> <New Player>\n```";
+						help += "```\nFunctionality\n\nSwitches the first player with the second.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "players switch 242983689921888256 588628378312114179\n```";
+					break;
 					case "list":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players list\n```";
 						help += "```\nFunctionality\n\nLists all players with their role and alive values.\n```";
@@ -121,6 +134,7 @@ module.exports = function() {
 					break;		
 				}
 			break;
+			case "kq":
 			case "killq":
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
@@ -394,7 +408,7 @@ module.exports = function() {
 	/* Substitutes a player */
 	this.cmdPlayersSubstitute = async function(message, args) {
 		if(!args[2] || !args[3]) { 
-			channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "players substitute <current player id> <new player id> <new emoji>`!"); 
+			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "players substitute <current player id> <new player id> <new emoji>`!"); 
 			return; 
 		}
 		cmdPlayersSet(message.channel, ["set", "role", getUser(message.channel, args[1]), "substituted"]);
@@ -420,6 +434,29 @@ module.exports = function() {
 			getPRoles();
 			getCCCats();
 			message.channel.send("✅ Substitution complete!");
+		}, 30000);
+	}
+	
+	/* Substitutes a player */
+	this.cmdPlayersSwitch = async function(message, args) {
+		if(!args[2]) { 
+			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "players switch <player id #1> <player id #2>`!"); 
+			return; 
+		}
+		cmdPlayersSet(message.channel, ["set", "role", getUser(message.channel, args[2]), pRoles.find(el => el.id === getUser(message.channel, args[1])).role]); 
+		cmdPlayersSet(message.channel, ["set", "role", getUser(message.channel, args[1]), pRoles.find(el => el.id === getUser(message.channel, args[2])).role]); 
+		setTimeout(function () { // switch channels
+			let categories = cachedCCs;
+			categories.push(cachedSC)
+			switchChannels(message.channel, categories, 0, getUser(message.channel, args[1]), getUser(message.channel, args[2]));
+		}, 10000);
+		setTimeout(function() { // reload data
+			cacheRoleInfo();
+			getVotes();
+			getCCs();
+			getPRoles();
+			getCCCats();
+			message.channel.send("✅ Switch complete!");
 		}, 30000);
 	}
 	
@@ -466,6 +503,62 @@ module.exports = function() {
 				}, 500);
 			} else {
 				substituteOneChannel(channel, ccCats, index, channels, ++channelIndex, subPlayerFrom, subPlayerTo);
+			}
+		}
+	}
+	
+	/* switch a category */
+	this.switchChannels = function(channel, ccCats, index, subPlayerFrom, subPlayerTo) {
+		// End
+		if(ccCats.length <= 0 || ccCats.length >= 20) return;
+		if(index >= ccCats.length) {
+			channel.send("✅ Successfully switched in all channel categories!");
+			return;
+		}
+		// Category deleted
+		if(!channel.guild.channels.cache.get(ccCats[index])) { 
+			switchChannels(channel, ccCats, ++index, subPlayerFrom, subPlayerTo);
+			return;
+		}
+		// SUB channels in category
+		switchOneChannel(channel, ccCats, index, channel.guild.channels.cache.get(ccCats[index]).children.array(), 0, subPlayerFrom, subPlayerTo);
+	}
+	
+	/* Subs a channel */
+	this.switchOneChannel = function(channel, ccCats, index, channels, channelIndex, subPlayerFrom, subPlayerTo) {
+		if(channels.length <= 0) return;
+		if(channelIndex >= channels.length) {
+			channel.send("✅ Successfully switched one channel category!");
+			switchChannels(channel, ccCats, ++index, subPlayerFrom, subPlayerTo);
+			return;
+		}
+		// Deleted channel
+		if(!channels[channelIndex] || !channel.guild.channels.cache.get(channels[channelIndex].id)) {
+			switchOneChannel(channel, ccCats, index, channels, ++channelIndex, subPlayerFrom, subPlayerTo);
+			return;
+		} else {
+			let channelMembers = channel.guild.channels.cache.get(channels[channelIndex].id).permissionOverwrites.array().filter(el => el.type === "member").map(el => el.id);
+			let channelOwners = channel.guild.channels.cache.get(channels[channelIndex].id).permissionOverwrites.array().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
+			if(channelMembers.includes(subPlayerFrom) && !channelMembers.includes(subPlayerTo)) {
+				cmdCCAdd(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["add", subPlayerTo], 1);
+				cmdCCRemove(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["remove", subPlayerFrom], 1);
+			}
+			if(!channelMembers.includes(subPlayerFrom) && channelMembers.includes(subPlayerTo)) {
+				cmdCCAdd(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["add", subPlayerFrom], 1);
+				cmdCCRemove(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["remove", subPlayerTo], 1);
+			}
+			if(channelOwners.includes(subPlayerFrom) && !channelOwners.includes(subPlayerTo)) {
+				setTimeout(function() {
+					cmdCCPromote(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["promote", subPlayerTo], 1);
+					switchOneChannel(channel, ccCats, index, channels, ++channelIndex, subPlayerFrom, subPlayerTo);
+				}, 500);
+			} else if(!channelOwners.includes(subPlayerFrom) && channelOwners.includes(subPlayerTo)) {
+				setTimeout(function() {
+					cmdCCPromote(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["promote", subPlayerFrom], 1);
+					switchOneChannel(channel, ccCats, index, channels, ++channelIndex, subPlayerFrom, subPlayerTo);
+				}, 500);
+			} else {
+				switchOneChannel(channel, ccCats, index, channels, ++channelIndex, subPlayerFrom, subPlayerTo);
 			}
 		}
 	}
