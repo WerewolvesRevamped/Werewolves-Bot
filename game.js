@@ -315,10 +315,7 @@ module.exports = function() {
 		if(isParticipant(member)) {
 			channel.send("⛔ Command error. Can't make you a substitute player while you're a participant."); 
 			return;
-		} else if(stats.gamephase < 1) {
-			channel.send("⛔ Command error. Can't make you a substitute player while there is no game."); 
-			return;
-		}else if(isSignedUp(member)) {
+		}  else if(isSignedUp(member)) {
 			channel.send("⛔ Command error. Can't make you a substitute player while being signed-up."); 
 			return;
 		}
