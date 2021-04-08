@@ -164,19 +164,22 @@ module.exports = function() {
 									if(webhook) {
 										webhook.send(message.content);
 									} else { // no webhook
-										message.guild.channels.cache.get(destination.channel_id).createWebhook(webhookName, {avatar: webhookAvatar})
-										.then(webhook => {
-											// Send webhook
-											webhook.send(message.content)
-										})
-										.catch(err => { 
-											// Webhook couldn't be created
-											logO(err); 
-											sendError(messsage.channel, err, "Could not create webhook");
-										});
+										if(webhooks.size < 10) { // empty slot
+											message.guild.channels.cache.get(destination.channel_id).createWebhook(webhookName, {avatar: webhookAvatar})
+											.then(webhook => {
+												// Send webhook
+												webhook.send(message.content)
+											})
+											.catch(err => { 
+												// Webhook couldn't be created
+												logO(err); 
+												sendError(messsage.channel, err, "Could not create webhook");
+											});
+										} else { // no empty slot
+											message.guild.channels.cache.get(destination.channel_id).send("**" + webhookName + "**: " + message.content);
+										}
 									}
 								});
-								
 							}		
 						});
 					}, () => {
