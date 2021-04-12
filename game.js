@@ -84,18 +84,22 @@ module.exports = function() {
 				help += "```\nFunctionality\n\nEnds the game. Sets the gamephase, and makes all Participants Dead Participants.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "end\n```";
 			break;
+			case "spec":
 			case "spectate":
+			case "spectator":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "spectate\n```";
 				help += "```\nFunctionality\n\nMakes you a spectator, if you are not a participant and a game is running.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "spectate\n< ✅ Attempting to make you a spectator, McTsts!\n```";
 				help += "```diff\nAliases\n\n\n- s\n- spec\n- spectator\n```";
 			break;
+			case "sub":
 			case "substitute":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "substitute\n```";
 				help += "```\nFunctionality\n\nMakes you a substitute player, if you are not a participant and a game is running.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "spectate\n< ✅ Attempting to make you a substitute player, McTsts!\n```";
 				help += "```diff\nAliases\n\n\n- s\n- spec\n- sub\n```";
 			break;
+			case "v":
 			case "demote":
 				if(!isGameMaster(member)) break;
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "demote\n```";
@@ -103,6 +107,7 @@ module.exports = function() {
 				help += "```fix\nUsage\n\n> " + stats.prefix + "demote\n< ✅ Attempting to demote you, McTsts!\n```";
 				help += "```diff\nAliases\n\n- v\n```";
 			break;
+			case "^":
 			case "promote":
 				if(!isGameMaster(member)) break;
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "promote\n```";
@@ -110,12 +115,15 @@ module.exports = function() {
 				help += "```fix\nUsage\n\n> " + stats.prefix + "promote\n< ✅ Attempting to promote you, McTsts!\n```";
 				help += "```diff\nAliases\n\n- ^\n```";
 			break;
+			case "@@":
 			case "gameping":
 				if(!isGameMaster(member)) break;
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "gameping\n```";
 				help += "```\nFunctionality\n\nMakes New Game Ping role mentionable, pings it and then makes it unmentionable again.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "gameping\n< Ts is going to start a new game! @New Game Ping\n```";
+				help += "```diff\nAliases\n\n- @@\n```";
 			break;
+			case "@":
 			case "open":
 				if(!isGameMaster(member)) break;
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "open\n```";
@@ -123,6 +131,8 @@ module.exports = function() {
 				help += "```fix\nUsage\n\n> " + stats.prefix + "open\n```";
 				help += "```diff\nAliases\n\n- @\n```";
 			break;
+			case "game":
+			case "sh":
 			case "sheet":
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {

@@ -61,6 +61,7 @@ client.on("message", async message => {
 
 	/* Ping */ // Generic test command / returns the ping
 	switch(command) {
+	case "°":
 	case "temp":
 		if(!args[0] || !args[1].match(/[0-9]*/) || (args[0] != "c" && args[0] != "f")) {
 			message.channel.send("Not enough/Invalid parameters.");
@@ -68,8 +69,8 @@ client.on("message", async message => {
 		}
 		switch(args[0]) {
 			default: message.channel.send("Unknown conversion."); break;
-			case "f": message.channel.send(args[1] + " �C in fahrenheit: "  + Math.round((args[1] * (9/5)) + 32, 2) + " �F"); break;
-			case "c": message.channel.send(args[1] + " �F in celsius: "  + Math.round((args[1] - 32) *  5/9, 2)  + " �C"); break;
+			case "f": message.channel.send(args[1] + " °C in fahrenheit: "  + Math.round((args[1] * (9/5)) + 32, 2) + " °F"); break;
+			case "c": message.channel.send(args[1] + " °F in celsius: "  + Math.round((args[1] - 32) *  5/9, 2)  + " °C"); break;
 		}
 	break;
 	case "ping":
@@ -95,10 +96,13 @@ client.on("message", async message => {
 		if(checkGM(message)) cmdGamephase(message, args);
 	break;
 	/* Connection */ // Manages connections between channels
+	case "con": 
+	case "whispers": 
 	case "connection": 
 		if(checkGM(message)) cmdConnection(message, args);
 	break;
 	/* Roles */ // Modify role information for commands such as 'info'
+	case "r":
 	case "role":
 	case "roles":
 		if(checkGM(message)) cmdRoles(message, args, argsX);
@@ -143,6 +147,7 @@ client.on("message", async message => {
 				case "241953256777973760": cmdSignup(message.channel, message.member, ["🤗"], true); break;
 				case "433957826491187202": cmdSignup(message.channel, message.member, ["🦦"], true); break;
 				case "334066065112039425": cmdSignup(message.channel, message.member, ["🔥"], true); break;
+				case "544125116640919557": cmdSignup(message.channel, message.member, ["▪️"], true); break;
 				default: cmdSignup(message.channel, message.member, args, true); break; 
 			}
 		} else cmdSignup(message.channel, message.member, args, true);
@@ -156,6 +161,8 @@ client.on("message", async message => {
 	case "participate": 
 	case "sign-out": 
 	case "sign_out": 
+	case "leave": 
+	case "unjoin": 
 		cmdSignup(message.channel, message.member, args, true);
 	break;
 	/* List Signedup */ // Lists all signedup players
@@ -202,7 +209,6 @@ client.on("message", async message => {
 		if(checkSafe(message)) cmdConfirm(message, "start_debug");
 	break;
 	/* Reset */ // Resets a game
-	case "r":
 	case "reset":
 		if(checkSafe(message)) cmdConfirm(message, "reset");
 	break;
@@ -230,6 +236,7 @@ client.on("message", async message => {
 		if(checkGM(message)) cmdPlayers(message, args);
 	break;
 	/* CCs */
+	case "c":
 	case "cc":
 		cmdCC(message, args, argsX);
 	break;
@@ -301,7 +308,6 @@ client.on("message", async message => {
 		}
 	break;
 	/* Confirm */
-	case "c":
 	case "confirm":
 		confirmActionExecute(args.join(" "), message, false);
 	break;

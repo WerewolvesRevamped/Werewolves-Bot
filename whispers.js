@@ -38,14 +38,17 @@ module.exports = function() {
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "webhook <Message>\n```";
 				help += "```\nFunctionality\n\nRepeats a message as a webhook pretending to be you.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "webhook Does this work?\n< Does this work?\n```";
-				help += "```diff\nAliases\n\n- bot\n```";
+				help += "```diff\nAliases\n\n- bot\n- <\n```";
 			break;
+			case "con":
+			case "whispers":
 			case "connection":
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
 					default:
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "connection [add|remove|reset]\n```";
 						help += "```\nFunctionality\n\nGroup of commands to handle connected channels. " + stats.prefix + "help connection <sub-command> for detailed help.```";
+				help += "```diff\nAliases\n\n- con\n- whispers\n```";
 					break;
 					case "add":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "connection add <Connection Name> <Connection Diguise>\n```";

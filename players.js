@@ -76,10 +76,16 @@ module.exports = function() {
 			break;
 			case "join":
 			case "signup":
+			case "signout":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "signup <Emoji>\n```";
 				help += "```\nFunctionality\n\nSigns you up for the next game with emoji <Emoji>, which has to be a valid, not custom, emoji, that is not used by another player yet. If you have already signedup the command changes your emoji. If no emoji is provided, you are signed out.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "signup 🛠\n< ✅ @McTsts signed up with emoji 🛠!\n\n> " + stats.prefix + "signup\n< ✅ Successfully signed out, @McTsts. You will no longer participate in the next game!\n```";
-				help += "```diff\nAliases\n\n- join\n- sign-up\n- sign_up\n- unsignup\n- signout\n- participate\n- sign-out\n- sign_out\n```";
+				help += "```diff\nAliases\n\n- join\n- sign-up\n- sign_up\n- unsignup\n- signout\n- participate\n- sign-out\n- sign_out\n- leave\n- unjoin```";
+			break;
+			case "j":
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "j\n```";
+				help += "```\nFunctionality\n\nSigns you up for the next game with your emoji. If you don't have a person emoji this can be considered as an alias of " + stats.prefix + "signup\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "j\n< ✅ @McTsts signed up with emoji 🛠!\n```";
 			break;
 			case "player":
 			case "p":

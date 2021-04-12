@@ -39,13 +39,15 @@ module.exports = function() {
 			case "":
 				if(isGameMaster(member)) help += stats.prefix + "theme [set|remove|list|select] - Manages themes\n";
 			break;
+			case "th":
+			case "themes":
 			case "theme":
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
 					default:
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "theme [set|remove|list|select]\n```";
 						help += "```\nFunctionality\n\nGroup of commands to handle renaming roles for themes. " + stats.prefix + "help theme <sub-command> for detailed help.```";
-						help += "```diff\nAliases\n\n- themes\n```";
+						help += "```diff\nAliases\n\n- themes\n- th\n```";
 					break;
 					case "set":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "theme set <Theme Id> <Original Word> <Themed Word>\n```";

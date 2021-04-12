@@ -88,12 +88,14 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "infopin - Returns role info & pins the message\n";
 				help += stats.prefix + "info - Returns role info\n";
 			break;
+			case "i":
 			case "info":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "info <Role Name>\n```";
 				help += "```\nFunctionality\n\nShows the description of a role.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "info citizen\n< Citizen | Townsfolk\n  Basics\n  The Citizen has no special abilities.\n  All the innocents vote during the day on whomever they suspect to be an enemy,\n  and hope during the night that they won’t get killed.\n```";
 				help += "```diff\nAliases\n\n- i\n```";
 			break;
+			case "ip":
 			case "infopin":
 				if(!isGameMaster(member)) break;
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "infopin <Role Name>\n```";
@@ -101,13 +103,15 @@ module.exports = function() {
 				help += "```fix\nUsage\n\n> " + stats.prefix + "infopin citizen\n< Citizen | Townsfolk\n  Basics\n  The Citizen has no special abilities\n  All the innocents vote during the day on whomever they suspect to be an enemy,\n  and hope during the night that they won’t get killed.\n```";
 				help += "```diff\nAliases\n\n- ip\n```";
 			break;
+			case "r":
+			case "role":
 			case "roles":
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
 					default:
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles [set|get|remove|list|list_names|clear]\n" + stats.prefix + "roles [set_alias|remove_alias|list_alias|clear_alias]\n```";
 						help += "```\nFunctionality\n\nGroup of commands to handle roles and aliases. " + stats.prefix + "help roles <sub-command> for detailed help.```";
-						help += "```diff\nAliases\n\n- role\n```";
+						help += "```diff\nAliases\n\n- role\n- r\n```";
 					break;
 					case "set":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles set <Role Name> <Role Description>\n```";
