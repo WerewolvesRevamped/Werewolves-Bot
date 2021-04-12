@@ -93,7 +93,7 @@ module.exports = function() {
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
 					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "players [get|get_clean|set|resurrect|signup|list|substitute]\n```";
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "players [get|get_clean|set|resurrect|signup|list|substitute|switch]\n```";
 						help += "```\nFunctionality\n\nGroup of commands to handle players. " + stats.prefix + "help players <sub-command> for detailed help.\n\nList of Player Properties:\nalive: Whether the player is alive`\nemoji: The emoji the player uses\nrole: The role of the player\npublic_value: The value of the players vote on public polls (Typically 1)\nprivate_value: The value of the players vote on private polls (Typically 1)\npublic_votes: The base value of votes the player has against them on public votes (Typically 0)\nid: The discord id of the player\nccs: the amount of created ccs```";
 						help += "```diff\nAliases\n\n- p\n- player\n```";
 					break;
