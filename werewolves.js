@@ -304,7 +304,7 @@ client.on("message", async message => {
 	case "sudo":
 		if(checkSafe(message)) {
 			message.delete({timeout: 120000 });
-			setTimeout(message.channel.send(stats.prefix + argsX.join(" ").replace(/~/g,"\n")), 2000);
+			setTimeout(message.channel.send(stats.prefix + message.content.substr(6)), 2000);
 		}
 	break;
 	/* Confirm */
