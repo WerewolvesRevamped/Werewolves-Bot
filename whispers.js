@@ -122,25 +122,34 @@ module.exports = function() {
 		// Create a webhook for the author
 		let webhookName = member ? member.displayName : client.user.username;
 		let webhookAvatar = member ? member.user.displayAvatarURL() : client.user.displayAvatarURL();
-		channel.createWebhook(webhookName, {avatar: webhookAvatar})
-		.then(webhook => {
-			// Send Message
-			let webhookMsg = args.join(" ");
-			if(!(webhookMsg.length > 0)) webhookMsg = "|| ||";
-			webhook.send(webhookMsg).then(msg => {
-				// Delete webhook
-				webhook.delete()
-				.catch(err => { 
-					logO(err); 
-					sendError(channel, err, "Could not delete webhook");
-				});
+		let webhookMsg = args.join(" ");
+		webhookMsg = webhookMsg.replace(/:~/g, ":");
+		if(!(webhookMsg.length > 0)) webhookMsg = "|| ||";
+		channel.fetchWebhooks()
+			.then(webhooks => {
+				// search for webhook 
+				let webhook = webhooks.find(w => w.name == webhookName);
+				// webhook exists
+				if(webhook) {
+					webhook.send(webhookMsg);
+				} else { // no webhook
+					if(webhooks.size < 10) { // empty slot
+						channel.createWebhook(webhookName, {avatar: webhookAvatar})
+						.then(webhook => {
+							// Send webhook
+							webhook.send(webhookMsg)
+						})
+						.catch(err => { 
+							// Webhook couldn't be created
+							logO(err); 
+							sendError(messsage.channel, err, "Could not create webhook");
+						});
+					} else { // no empty slot
+						channel.send("**" + webhookName + "**: " + webhookMsg);
+						webhooks.first().delete();
+					}
+				}
 			});
-		}) 
-		// Webhook could not be created
-		.catch(err => { 
-			logO(err); 
-			sendError(channel, err, "Could not create webhook");
-		});
 	}
 	
 	/* Copies over messages */
@@ -158,6 +167,8 @@ module.exports = function() {
 								// Create webhook
 								let webhookName = source.name != "" ? toTitleCase(source.name) : message.member.displayName;
 								let webhookAvatar = source.name != "" ? client.user.displayAvatarURL() : message.author.displayAvatarURL();
+								let webhookMsg = message.content;
+								webhookMsg = webhookMsg.replace(/:~/g, ":");
 								
 								message.guild.channels.cache.get(destination.channel_id).fetchWebhooks()
 								.then(webhooks => {
@@ -165,13 +176,13 @@ module.exports = function() {
 									let webhook = webhooks.find(w => w.name == webhookName);
 									// webhook exists
 									if(webhook) {
-										webhook.send(message.content);
+										webhook.send(webhookMsg);
 									} else { // no webhook
 										if(webhooks.size < 10) { // empty slot
 											message.guild.channels.cache.get(destination.channel_id).createWebhook(webhookName, {avatar: webhookAvatar})
 											.then(webhook => {
 												// Send webhook
-												webhook.send(message.content)
+												webhook.send(webhookMsg)
 											})
 											.catch(err => { 
 												// Webhook couldn't be created
@@ -179,7 +190,8 @@ module.exports = function() {
 												sendError(messsage.channel, err, "Could not create webhook");
 											});
 										} else { // no empty slot
-											message.guild.channels.cache.get(destination.channel_id).send("**" + webhookName + "**: " + message.content);
+											message.guild.channels.cache.get(destination.channel_id).send("**" + webhookName + "**: " + webhookMsg);
+											webhooks.first().delete();
 										}
 									}
 								});

@@ -34,6 +34,11 @@ client.on("ready", () => {
 client.on("message", async message => {
 	/* Connected Channels */ // Copies messages from one channel to another and applies disguises if one is set
 	connectionExecute(message);
+	/* Gif Check */
+	// isParticipant(message.author) &&
+	if(!message.author.bot && isParticipant(message.member) && message.content.search("http") >= 0 && stats.gif_ping.length > 0) {
+		urlHandle(message);
+	}
 	/* Find Command & Parameters */
 	// Not a command
 	if(message.channel.type === "dm") return;
@@ -391,13 +396,18 @@ client.on("messageReactionAdd", async (reaction, user) => {
 	} else if(stats.gamephase == 2) {
 		// Remove unallowed reactions
 		if(isSpectator(reaction.message.guild.members.cache.get(user.id)) || isDeadParticipant(reaction.message.guild.members.cache.get(user.id))) {
-			if(reaction.emoji == client.emojis.get(stats.no_emoji) || reaction.emoji == client.emojis.get(stats.yes_emoji)) return;
+			if(reaction.emoji == client.emojis.cache.get(stats.no_emoji) || reaction.emoji == client.emojis.cache.get(stats.yes_emoji)) return;
 			reaction.users.remove(user);
 		// Automatic pinning
 		} else if(reaction.emoji.name === "📌" && isParticipant(reaction.message.guild.members.cache.get(user.id)) && (isCC(reaction.message.channel) || isSC(reaction.message.channel))) {
 			reaction.message.pin();
+		} else if(isGameMaster(reaction.message.guild.members.cache.get(user.id)) && reaction.emoji == client.emojis.cache.get(stats.yes_emoji)) {
+			reaction.message.edit(Buffer.from(reaction.message.content.split("||")[1], 'base64').toString('ascii'));
+			reaction.message.reactions.removeAll();
+		} else if(isGameMaster(reaction.message.guild.members.cache.get(user.id)) && reaction.emoji == client.emojis.cache.get(stats.no_emoji)) {
+			reaction.message.delete();
 		}
-	}
+	} 
 });
 
 /* Reactions Remove */
@@ -455,6 +465,38 @@ client.on("raw", packet => {
 		log("**[Uncached Deleted Message]** A message from " + dateString + " has been deleted in " + client.channels.get(packet.d.channel_id) + "!");
 	}
 });
+
+async function urlHandle(message) {
+	var urls = findUrls(message.content);
+	urls = urls.filter(el => el.search("discord.com") == -1);
+	if(!urls.length) return;
+	var text = message.content;
+	for(let i = 0; i < urls.length; i++) {
+		log(stats.gif_ping + " <#" + message.channel.id + "> " + urls[i]);
+		text = text.replace(urls[i],"*~~url~~*");
+	}
+	await cmdWebhook(message.channel, message.member, text.split(" "));
+	await sleep(1000);
+	for(let i = 0; i < urls.length; i++) {
+		message.channel.send("*This url is not available.* ||" + Buffer.from(urls[i].replace(/\|/,"")).toString('base64') + "||").then(m => {
+			m.react(client.emojis.cache.get(stats.yes_emoji));
+			m.react(client.emojis.cache.get(stats.no_emoji));
+		});
+	}
+	message.delete();
+}
+
+/* util */
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+} 
+
+function findUrls(text) {
+	var urlRegex = /(https?:\/\/[^\s\)\]\}]+)/g;
+  return text.match(urlRegex);
+}
 
 /* 
 	LOGIN
