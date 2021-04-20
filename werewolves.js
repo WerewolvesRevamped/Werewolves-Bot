@@ -153,6 +153,8 @@ client.on("message", async message => {
 				case "433957826491187202": cmdSignup(message.channel, message.member, ["🦦"], true); break;
 				case "334066065112039425": cmdSignup(message.channel, message.member, ["🔥"], true); break;
 				case "544125116640919557": cmdSignup(message.channel, message.member, ["▪️"], true); break;
+				case "234474456624529410": cmdSignup(message.channel, message.member, ["🎨"], true); break;
+				case "356510817094598658": cmdSignup(message.channel, message.member, ["🐢"], true); break;
 				default: cmdSignup(message.channel, message.member, args, true); break; 
 			}
 		} else cmdSignup(message.channel, message.member, args, true);
