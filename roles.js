@@ -1088,6 +1088,7 @@ module.exports = function() {
 			if(!noErr) channel.send("⛔ Syntax error. Not enough parameters!"); 
 			return
 		}
+		args[0] = args.join(" ");
 		if(!verifyRoleVisible(args[0])) {
 			if(!noErr) channel.send("⛔ Command error. Invalid role `" + args[0] + "`!"); 
 			return; 
