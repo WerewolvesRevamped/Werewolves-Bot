@@ -279,6 +279,7 @@ client.on("message", async message => {
 	break;
 	/* Emoji */
 	case "e":
+	case "emoji":
 	case "emojis":
 		cmdEmojis(message.channel);
 	break;

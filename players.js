@@ -72,7 +72,7 @@ module.exports = function() {
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "emojis\n```";
 				help += "```\nFunctionality\n\nGives you a list of emojis and player ids as well as a list of all emojis. Can be used for CC creation.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "emojis\n< 🛠 242983689921888256\n  🤔 102036304845377536\n  👌 203091600283271169\n  🛠 🤔 👌\n```";
-				help += "```diff\nAliases\n\n- e\n```";
+				help += "```diff\nAliases\n\n- e\n- emoji\n```";
 			break;
 			case "join":
 			case "signup":
