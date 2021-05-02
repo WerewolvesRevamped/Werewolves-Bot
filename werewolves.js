@@ -32,6 +32,8 @@ client.on("ready", () => {
 
 /* New Message */
 client.on("message", async message => {
+	/* Fetch Channel */
+	message.channel.messages.fetch({ limit: 100 });
 	/* Connected Channels */ // Copies messages from one channel to another and applies disguises if one is set
 	connectionExecute(message);
 	/* Gif Check */
@@ -333,9 +335,15 @@ client.on("message", async message => {
 });
 
 client.on('messageDelete', message => {
-	//let channel = client.channels.cache.get(message.channelID);
-	//let author = client.users.cache.get(message.authorID);
-	//cmdWebhook(channel, author, ["deleted message"]);
+	message = JSON.parse(JSON.stringify(message)); // WHY IS THIS LINE OF CODE NECESSARY????????
+	// retrieve channel and author
+	let channel = client.guilds.cache.get(message.guildID).channels.cache.get(message.channelID);
+	let log = client.guilds.cache.get(stats.log_guild).channels.cache.get(stats.log_channel);
+	let author = client.guilds.cache.get(message.guildID).members.cache.get(message.authorID);
+	if(message.content[0] != config.prefix && message.content[0] != "§" && message.content[0] != "$") {
+		cmdWebhook(log, author, ["**Deleted Message**", "\n*Deleted message by <@" + message.authorID + "> in <#" + message.channelID + ">!*","\n> ", message.content.split("\n").join("\n> "),"\n","\n" + stats.ping ]);
+		cmdWebhook(channel, author, ["**Deleted Message**","\n*<@" + message.authorID + "> You're not allowed to delete messages during the game!*"]);
+	}
 });
 
 /* Reactions Add*/
