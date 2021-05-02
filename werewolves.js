@@ -254,7 +254,8 @@ client.on("message", async message => {
 		if(!message.author.bot) {
 			cmdWebhook(message.channel, message.member, argsX);
 		} else {
-			message.channel.send("No.");
+			let msg = ["Leave me alone.", "Please just stop.", "Why are you doing this?","What have I done to deserves this.","No.","Just no.","Seriously, no.","No means no.","Go away.","Why do you hate me?","What have I ever done to you?","I don't want to be part of your evil plots.","I'm a friendly bot, why are you trying to make me do this?","I just want to be nice, not annoying.","Please go away.","Why...","Stop...",":("];
+			message.channel.send(msg[Math.floor(Math.random() * msg.length)]);
 		}
 	break;
 	/* Help */
