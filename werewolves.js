@@ -251,7 +251,11 @@ client.on("message", async message => {
 	case "<":
 	case "bot":
 	case "webhook":
-		cmdWebhook(message.channel, message.member, argsX);
+		if(!message.author.bot) {
+			cmdWebhook(message.channel, message.member, argsX);
+		} else {
+			message.channel.send("No.");
+		}
 	break;
 	/* Help */
 	case "h":
@@ -328,9 +332,9 @@ client.on("message", async message => {
 });
 
 client.on('messageDelete', message => {
-	let channel = client.channels.cache.get(message.channelID);
-	let author = client.users.cache.get(message.authorID);
-	cmdWebhook(channel, author, ["deleted message"]);
+	//let channel = client.channels.cache.get(message.channelID);
+	//let author = client.users.cache.get(message.authorID);
+	//cmdWebhook(channel, author, ["deleted message"]);
 });
 
 /* Reactions Add*/
