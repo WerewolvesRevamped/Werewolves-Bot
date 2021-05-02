@@ -347,7 +347,6 @@ client.on("message", async message => {
 });
 
 client.on('messageDelete', message => {
-	return;
 	message = JSON.parse(JSON.stringify(message)); // WHY IS THIS LINE OF CODE NECESSARY????????
 	// retrieve channel and author
 	let channel = client.guilds.cache.get(message.guildID).channels.cache.get(message.channelID);
