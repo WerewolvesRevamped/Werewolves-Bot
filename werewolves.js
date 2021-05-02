@@ -340,7 +340,7 @@ client.on('messageDelete', message => {
 	let channel = client.guilds.cache.get(message.guildID).channels.cache.get(message.channelID);
 	let log = client.guilds.cache.get(stats.log_guild).channels.cache.get(stats.log_channel);
 	let author = client.guilds.cache.get(message.guildID).members.cache.get(message.authorID);
-	if(message.content[0] != config.prefix && message.content[0] != "§" && message.content[0] != "$") {
+	if((message.content[0] != config.prefix && message.content[0] != "§" && message.content[0] != "$") && isParticipant(author)) {
 		cmdWebhook(log, author, ["**Deleted Message**", "\n*Deleted message by <@" + message.authorID + "> in <#" + message.channelID + ">!*","\n> ", message.content.split("\n").join("\n> "),"\n","\n" + stats.ping ]);
 		cmdWebhook(channel, author, ["**Deleted Message**","\n*<@" + message.authorID + "> You're not allowed to delete messages during the game!*"]);
 	}
