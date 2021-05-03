@@ -338,6 +338,27 @@ client.on("message", async message => {
 	case "confirm":
 		confirmActionExecute(args.join(" "), message, false);
 	break;
+	/* Modrole */ // This command is not available in $help yet
+	case "modrole": 
+	case "mr":
+		if(!checkGM(message)) break;
+		let aid = getUser(message.channel, args[1]);
+		if(!aid) break;
+		let author = message.guild.members.cache.get(aid);
+		if(!author) break;
+		let role = message.guild.roles.cache.get(args[2]);
+		if(!role) break;
+		switch(args[0]) {
+			 case "add": 
+				author.roles.add(role); 
+				message.channel.send("✅ Added `" + role.name + "` to <@" + author.id + "> (" + author.user.username + ")!");
+			break;
+			 case "remove": 
+				author.roles.remove(role); 
+				message.channel.send("✅ Remove `" + role.name + "` from <@" + author.id + "> (" + author.user.username + ")!");
+			break;
+		}
+	break;
 	/* Invalid Command */
 	default:
 		message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
