@@ -32,13 +32,28 @@ client.on("ready", () => {
 
 /* New Message */
 client.on("message", async message => {
+	if(Math.floor(Math.random() * 250) == 1) {
+		switch(Math.floor(Math.random() * 15)) {
+			default:
+			case 0: message.channel.send("fuck"); break;
+			case 1: message.channel.send("hi"); break;
+			case 2: message.channel.send("khgkjdhgkdjhgk"); break;
+			case 3: message.channel.send("hello"); break;
+			case 4: message.channel.send("whats up?!"); break;
+			case 5: message.channel.send("👀"); break;
+			case 6: message.channel.send("yo"); break;
+			case 7: message.channel.send("how's it goin'"); break;
+			case 8: message.channel.send("what did you just say?"); break;
+			case 9: message.channel.send("no."); break;
+		}
+	}
 	/* Fetch Channel */
 	message.channel.messages.fetch({ limit: 100 });
 	/* Connected Channels */ // Copies messages from one channel to another and applies disguises if one is set
 	connectionExecute(message);
 	/* Gif Check */
 	// isParticipant(message.author) &&
-	if(!message.author.bot && isParticipant(message.member) && message.content.search("http") >= 0 && stats.gif_ping.length > 0) {
+	if(!message.author.bot && isParticipant(message.member) && message.content.search("http") >= 0 && stats.ping.length > 0) {
 		urlHandle(message);
 	}
 	
@@ -374,7 +389,7 @@ client.on('messageDelete', message => {
 	let channel = client.guilds.cache.get(message.guildID).channels.cache.get(message.channelID);
 	let log = client.guilds.cache.get(stats.log_guild).channels.cache.get(stats.log_channel);
 	let author = client.guilds.cache.get(message.guildID).members.cache.get(message.authorID);
-	if((message.content[0] != config.prefix && message.content[0] != "§" && message.content[0] != "$") && (isParticipant(author) || isDeadParticipant(author))) {
+	if((message.content[0] != config.prefix && message.content[0] != "§" && message.content[0] != "$") && (isParticipant(author) || isDeadParticipant(author)) && message.content.search("http") == -1) {
 		cmdWebhook(log, author, ["**Deleted Message**", "\n*Deleted message by <@" + message.authorID + "> in <#" + message.channelID + ">!*","\n> ", message.content.split("\n").join("\n> "),"\n","\n" + stats.ping ]);
 		cmdWebhook(channel, author, ["**Deleted Message**","\n*<@" + message.authorID + "> You're not allowed to delete messages during the game!*"]);
 	}
@@ -433,7 +448,7 @@ async function urlHandle(message) {
 	if(!urls.length) return;
 	var text = message.content;
 	for(let i = 0; i < urls.length; i++) {
-		log(stats.gif_ping + " <#" + message.channel.id + "> " + urls[i]);
+		log(stats.ping + " <#" + message.channel.id + "> " + urls[i]);
 		text = text.replace(urls[i],"*~~url~~*");
 	}
 	await cmdWebhook(message.channel, message.member, text.split(" "));
