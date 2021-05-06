@@ -179,6 +179,7 @@ client.on("message", async message => {
 				case "356510817094598658": cmdSignup(message.channel, message.member, ["🐢"], true); break;
 				default: cmdSignup(message.channel, message.member, args, true); break; 
 			}
+			if(isGameMaster(message.member)) cmdDemote(message.channel, message.member);
 		} else cmdSignup(message.channel, message.member, args, true);
 	break;
 	case "join":

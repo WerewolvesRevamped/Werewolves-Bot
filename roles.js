@@ -824,7 +824,7 @@ module.exports = function() {
 				channel.send("⛔ Database error. Coult not find any matching SC Info!");
 				return;
 			}
-			result.forEach(el => channel.send("```**__" + toTitleCase(el.name) + "__**:\n" + el.info.replace(/~/g,"\n") + "```"));
+			result.forEach(el => channel.send("**__" + toTitleCase(el.name) + "__**:\n```" + el.info.replace(/~/g,"\n") + "```"));
 		}, () => {
 			// Couldn't delete from database
 			channel.send("⛔ Database error. Coult not get values from SC Info database!");
