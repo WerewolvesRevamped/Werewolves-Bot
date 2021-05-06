@@ -32,21 +32,6 @@ client.on("ready", () => {
 
 /* New Message */
 client.on("message", async message => {
-	if(Math.floor(Math.random() * 250) == 1) {
-		switch(Math.floor(Math.random() * 15)) {
-			default:
-			case 0: message.channel.send("fuck"); break;
-			case 1: message.channel.send("hi"); break;
-			case 2: message.channel.send("khgkjdhgkdjhgk"); break;
-			case 3: message.channel.send("hello"); break;
-			case 4: message.channel.send("whats up?!"); break;
-			case 5: message.channel.send("👀"); break;
-			case 6: message.channel.send("yo"); break;
-			case 7: message.channel.send("how's it goin'"); break;
-			case 8: message.channel.send("what did you just say?"); break;
-			case 9: message.channel.send("no."); break;
-		}
-	}
 	/* Fetch Channel */
 	message.channel.messages.fetch({ limit: 100 });
 	/* Connected Channels */ // Copies messages from one channel to another and applies disguises if one is set
@@ -179,7 +164,6 @@ client.on("message", async message => {
 				case "356510817094598658": cmdSignup(message.channel, message.member, ["🐢"], true); break;
 				default: cmdSignup(message.channel, message.member, args, true); break; 
 			}
-			if(isGameMaster(message.member)) cmdDemote(message.channel, message.member);
 		} else cmdSignup(message.channel, message.member, args, true);
 	break;
 	case "join":
