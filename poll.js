@@ -39,6 +39,7 @@ module.exports = function() {
 			case "public": pollCreate(channel, args, "public"); break;
 			case "private": pollCreate(channel, args, "private"); break;
 			case "dead": pollCreate(channel, args, "dead"); break;
+			case "dead_list": pollCreate(channel, args, "dead_list"); break;
 			case "dead_vote": pollCreate(channel, args, "dead_vote"); break;
 			case "yn": pollCreate(channel, args, "yn"); break;
 			case "yna": pollCreate(channel, args, "yna"); break;
@@ -68,7 +69,7 @@ module.exports = function() {
 					break;
 					case "new":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "poll new <Poll Type>\n```";
-						help += "```\nFunctionality\n\nCreates a new poll. If no poll type is provided, and the command is executed in a secret channel, poll type is set to private, otherwise it is set to public. Assigns a sort of random name to each new poll.\n\nList of Poll Types:\npublic: Has all alive players, as well as an Abstain option. Uses public_value player property to evaluate poll results. Adds a players public_votes value to their own result. Only allows alive participants to vote. Mayor get an extra vote, unless they have less than 0 vote, then they get an extra negative vote.\nprivate: Has all alive players. Uses private_value player property to evaluate poll results. Only allows alive participants to vote.\ndead: Has Yes/No options. Every vote has a value of 1. Only allows dead participants to vote.\nyn: Yes/No for Participants\nyna: Yes/No/Abstain for Participants\ndead_vote: A list of dead participants, and only dead participants can vote on it.```";
+						help += "```\nFunctionality\n\nCreates a new poll. If no poll type is provided, and the command is executed in a secret channel, poll type is set to private, otherwise it is set to public. Assigns a sort of random name to each new poll.\n\nList of Poll Types:\npublic: Has all alive players, as well as an Abstain option. Uses public_value player property to evaluate poll results. Adds a players public_votes value to their own result. Only allows alive participants to vote. Mayor get an extra vote, unless they have less than 0 vote, then they get an extra negative vote.\nprivate: Has all alive players. Uses private_value player property to evaluate poll results. Only allows alive participants to vote.\ndead: Has Yes/No options. Every vote has a value of 1. Only allows dead participants to vote.\nyn: Yes/No for Participants\nyna: Yes/No/Abstain for Participants\ndead_vote: A list of dead participants, and only dead participants can vote on it.\ndead_list: Same as dead but shows who voted what.```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "poll new\n\n> " +  stats.prefix + "poll new public```";
 					break;
 					case "close":
@@ -97,6 +98,7 @@ module.exports = function() {
 				else if(type === "public" && stats.poll == 1) playerList.push(["❌", "*Cancel*"]);
 				else if(type === "dead_vote" && stats.poll == 1) playerList.push(["❌", "*Cancel*"]);
 				else if(type === "dead") playerList = [[client.emojis.cache.get(stats.yes_emoji), "Yes"], [client.emojis.cache.get(stats.no_emoji), "No"]];
+				else if(type === "dead_list") playerList = [[client.emojis.cache.get(stats.yes_emoji), "Yes"], [client.emojis.cache.get(stats.no_emoji), "No"]];
 				else if(type === "yn") playerList = [[client.emojis.cache.get(stats.yes_emoji), "Yes"], [client.emojis.cache.get(stats.no_emoji), "No"]];
 				else if(type === "yna") playerList = [[client.emojis.cache.get(stats.yes_emoji), "Yes"], [client.emojis.cache.get(stats.no_emoji), "No"], ["⛔", "*Abstain*"]];
 				while(playerList.length > 0) playerLists.push(playerList.splice(0, 20));
@@ -166,6 +168,7 @@ module.exports = function() {
 			break;
 			case "dead": 
 			case "dead_vote": 
+			case "dead_list": 
 				if(!isDeadParticipant(member)) return 0;
 				voteValue = 1;
 			break;
@@ -227,7 +230,7 @@ module.exports = function() {
 			if(votes <= 0) return { valid: false };
 			// Get string of voters
 			let voters;
-			if(pollType != "dead" && pollType != "dead_vote") voters = votersList.filter(el => isParticipant(el)).join(", ");
+			if(pollType != "dead" && pollType != "dead_vote" && pollType != "dead_list") voters = votersList.filter(el => isParticipant(el)).join(", ");
 			else voters = votersList.filter(el => isDeadParticipant(el)).join(", ");
 			// Get candidate from emoji
 			let candidate = "not set";
@@ -238,7 +241,11 @@ module.exports = function() {
 			else candidate = channel.guild.members.cache.get(emojiToID(el.emoji));
 			// Return one message line
 			return { valid: true, votes: votes, candidate: candidate, emoji: el.emoji, voters: voters };
-	}).filter(el => el.valid).sort((a, b) => a.votes < b.votes).map(el => { let vot = (el.voters ? el.voters : "*Nobody*"); return `(${el.votes}) ${el.emoji} ${el.candidate} **-** ${vot}`;}).join("\n");
+	}).filter(el => el.valid).sort((a, b) => a.votes < b.votes).map(el => { 
+		let vot = (el.voters ? el.voters : "*Nobody*"); 
+		if(pollType === "dead") vot = "*Hidden*";
+		return `(${el.votes}) ${el.emoji} ${el.candidate} **-** ${vot}`;
+	}).join("\n");
 		// Send message
 		if(!votesMessage.length) votesMessage = "*Nobody voted...*";
 		channel.send("Results for Poll `#" + pollNum + "`:\n" + votesMessage);
