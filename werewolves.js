@@ -162,6 +162,12 @@ client.on("message", async message => {
 				case "544125116640919557": cmdSignup(message.channel, message.member, ["▪️"], true); break;
 				case "234474456624529410": cmdSignup(message.channel, message.member, ["🎨"], true); break;
 				case "356510817094598658": cmdSignup(message.channel, message.member, ["🐢"], true); break;
+				case "299000787814842368": cmdSignup(message.channel, message.member, ["😃"], true); break;
+				case "83012212779646976": cmdSignup(message.channel, message.member, ["🇺🇸"], true); break;
+				case "633338331220148225": cmdSignup(message.channel, message.member, ["🌌"], true); break;
+				case "375578492580003840": cmdSignup(message.channel, message.member, ["💚"], true); break;
+				case "161551993704284171": cmdSignup(message.channel, message.member, ["🐼"], true); break;
+				case "215427550577557504": cmdSignup(message.channel, message.member, ["👁‍🗨"], true); break;
 				default: cmdSignup(message.channel, message.member, args, true); break; 
 			}
 			if(isGameMaster(message.member)) cmdDemote(message.channel, message.member);
