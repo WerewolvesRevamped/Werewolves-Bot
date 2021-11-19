@@ -1,6 +1,6 @@
 /* Discord */
-const Discord = require("discord.js");
-global.client = new Discord.Client({disableMentions: 'everyone'});
+const { Client, Intents } = require('discord.js');
+global.client = new Client({ intents: ['GUILDS', 'GUILD_WEBHOOKS', 'GUILD_VOICE_STATES', 'GUILD_MEMBERS', 'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS', 'DIRECT_MESSAGES', 'DIRECT_MESSAGE_REACTIONS'] });
 config = require("./config.json");
 /* Utility Modules */
 require("./utility.js")();
@@ -31,7 +31,7 @@ client.on("ready", () => {
 });
 
 /* New Message */
-client.on("message", async message => {
+client.on("messageCreate", async message => {
 	/* Fetch Channel */
 	message.channel.messages.fetch({ limit: 100 });
 	/* Connected Channels */ // Copies messages from one channel to another and applies disguises if one is set
@@ -378,9 +378,9 @@ client.on("message", async message => {
 client.on('messageDelete', message => {
 	message = JSON.parse(JSON.stringify(message)); // WHY IS THIS LINE OF CODE NECESSARY????????
 	// retrieve channel and author
-	let channel = client.guilds.cache.get(message.guildID).channels.cache.get(message.channelID);
+	let channel = client.guilds.cache.get(message.guildId).channels.cache.get(message.channelId);
 	let log = client.guilds.cache.get(stats.log_guild).channels.cache.get(stats.log_channel);
-	let author = client.guilds.cache.get(message.guildID).members.cache.get(message.authorID);
+	let author = client.guilds.cache.get(message.guildId).members.cache.get(message.authorId);
 	if((message.content[0] != config.prefix && message.content[0] != "§" && message.content[0] != "$") && (isParticipant(author) || isDeadParticipant(author)) && message.content.search("http") == -1) {
 		cmdWebhook(log, author, ["**Deleted Message**", "\n*Deleted message by <@" + message.authorID + "> in <#" + message.channelID + ">!*","\n> ", message.content.split("\n").join("\n> "),"\n","\n" + stats.ping ]);
 		cmdWebhook(channel, author, ["**Deleted Message**","\n*<@" + message.authorID + "> You're not allowed to delete messages during the game!*"]);

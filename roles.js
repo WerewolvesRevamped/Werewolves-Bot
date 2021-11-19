@@ -390,7 +390,7 @@ module.exports = function() {
 	
 	/* Creates secret channels */
 	this.createSCs = function(channel, debug) {
-		channel.guild.channels.create("🕵 " + toTitleCase(stats.game) + " Secret Channels", { type: "category",  permissionOverwrites: getSCCatPerms(channel.guild) })
+		channel.guild.channels.create("🕵 " + toTitleCase(stats.game) + " Secret Channels", { type: "GUILD_CATEGORY",  permissionOverwrites: getSCCatPerms(channel.guild) })
 		.then(cc => {
 			sqlSetStat(14, cc.id, result => {
 				createSCStartInd(channel, cc, debug);
@@ -400,7 +400,7 @@ module.exports = function() {
 			});
 		}).catch(err => { 
 			logO(err); 
-			sendError(channel, error, "Could not create SC category");
+			sendError(channel, err, "Could not create SC category");
 		});
 	}
 	
@@ -433,7 +433,7 @@ module.exports = function() {
 	
 	/* Returns default sc permissions */
 	this.getSCCatPerms = function(guild) {
-		return [ getPerms(guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.participant, ["write"], ["read"]) ];
+		return [  ];
 	}
 	
 	this.createOneMultiSC = function(channel, category, multi, index) {

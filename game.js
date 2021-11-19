@@ -19,7 +19,7 @@ module.exports = function() {
 		}
 		channel.send("✳ Game is called `" + stats.game + "`");
 		// Create Public Channels
-		channel.guild.channels.create("💬 " + toTitleCase(stats.game) + " Public Channels", { type: "category",  permissionOverwrites: getPublicCatPerms(channel.guild) })
+		channel.guild.channels.create("💬 " + toTitleCase(stats.game) + " Public Channels", { type: "GUILD_CATEGORY",  permissionOverwrites: getPublicCatPerms(channel.guild) })
 		.then(cc => {
 			sqlSetStat(15, cc.id, result => {
 				// Create public channels
@@ -40,7 +40,7 @@ module.exports = function() {
 		if(loadedModulePlayers) getCCs();
 		if(loadedModulePlayers) getRoles();
 		// Assign roles
-		startOnePlayer(channel, channel.guild.roles.cache.get(stats.signed_up).members.array(), 0);
+		startOnePlayer(channel, channel.guild.roles.cache.get(stats.signed_up).members.toJSON(), 0);
 		if(loadedModuleRoles) createSCs(channel, debug);
 	}
 	

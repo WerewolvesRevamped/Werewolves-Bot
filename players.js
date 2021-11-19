@@ -358,7 +358,7 @@ module.exports = function() {
 			for(let i = 0; i < playerList.length; i++) {
 				// Print message
 				channel.send("✳ Listing players " + i  + "/" + (playerList.length) + "...").then(m => {
-					m.edit(playerList[i])
+					m.edit(playerList[i].join("\n"));
 				}).catch(err => {
 					logO(err); 
 					sendError(channel, err, "Could not list signed up players");
@@ -368,6 +368,7 @@ module.exports = function() {
 			// DB error
 			channel.send("⛔ Database error. Could not list signed up players!");
 		});
+	
 	}
 	
 	/* Lists all signedup players */

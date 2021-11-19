@@ -13,8 +13,10 @@ module.exports = function() {
 	this.confirmAction = async function(data, message) {
 		// Check if the reaction was in time
 		if(+data.time + 20 >= getTime()) {
-			message.edit("✳ Executing `" + stats.prefix + data.action + "`!")
-			message.delete({timeout: 5000});
+			message.edit("✳ Executing `" + stats.prefix + data.action + "`!").then(async m => {
+				await sleep(1000);
+				message.delete();
+			});
 			// Runs the command
 			confirmActionExecute(data.action, message, true);
 		} else {
