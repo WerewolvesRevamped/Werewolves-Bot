@@ -433,7 +433,7 @@ module.exports = function() {
 	
 	/* Returns default sc permissions */
 	this.getSCCatPerms = function(guild) {
-		return [  ];
+		return [ getPerms(guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.participant, ["write"], ["read"]) ];
 	}
 	
 	this.createOneMultiSC = function(channel, category, multi, index) {
