@@ -217,11 +217,11 @@ module.exports = function() {
 	/* Prints a poll result */
 	this.pollPrintResult = function(channel, reactions, pollType, pollNum, messages) {
 		// Find duplicate votes
-		let duplicates = ([].concat.apply([], reactions.map(el => el.users.cache.array()))).filter((el, index, array) => array.indexOf(el) != index).filter((el, index, array) => array.indexOf(el) === index);
+		let duplicates = ([].concat.apply([], reactions.map(el => el.users.cache.toJSON()))).filter((el, index, array) => array.indexOf(el) != index).filter((el, index, array) => array.indexOf(el) === index);
 		// Create message
-		let votesMessage = reactions.filter(el => el.users.cache.array().length > 1 || (emojiToID(el.emoji) && publicVotes.find(el2 => el2.id === emojiToID(el.emoji)).public_votes > 0)).map(el => {
+		let votesMessage = reactions.filter(el => el.users.cache.toJSON().length > 1 || (emojiToID(el.emoji) && publicVotes.find(el2 => el2.id === emojiToID(el.emoji)).public_votes > 0)).map(el => {
 			// Get non duplicate voters
-			let votersList = el.users.cache.array().filter(el => !duplicates.includes(el)).map(el3 => channel.guild.members.cache.get(el3.id));
+			let votersList = el.users.cache.toJSON().filter(el => !duplicates.includes(el)).map(el3 => channel.guild.members.cache.get(el3.id));
 			if(!votersList.length && (!emojiToID(el.emoji) || publicVotes.find(el2 => el2.id === emojiToID(el.emoji)).public_votes <= 0)) return { valid: false };
 			// Count votes
 			let votes = 0;

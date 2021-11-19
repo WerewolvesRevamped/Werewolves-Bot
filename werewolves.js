@@ -26,6 +26,11 @@ client.on("ready", () => {
 		getCCs();
 		getPRoles();
 		getCCCats();
+		global.client.guilds.fetch(stats.log_guild).then(guild => {
+			guild.members.fetch().then((members) => {
+				console.log(members.map(el => el.user.username));
+			});
+		});
 		log("Bot > Caching completed, Bot is ready!")
 	}, 3000);
 });

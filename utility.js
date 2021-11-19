@@ -366,7 +366,7 @@ module.exports = function() {
 			return;
 		}
 		// Delete channels in category
-		cleanupOneChannel(channel, categoryID, channel.guild.channels.cache.get(categoryID).children.array(), 0, name);
+		cleanupOneChannel(channel, categoryID, channel.guild.channels.cache.get(categoryID).children.toJSON(), 0, name);
 	}
 	
 	/* Deletes a cc */

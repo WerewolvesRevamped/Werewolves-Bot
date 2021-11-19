@@ -179,7 +179,7 @@ module.exports = function() {
 			return;
 		}
 		// Delete channels in category
-		ccCleanupOneChannel(channel, ccCats, index, channel.guild.channels.cache.get(ccCats[index].id).children.array(), 0);
+		ccCleanupOneChannel(channel, ccCats, index, channel.guild.channels.cache.get(ccCats[index].id).children.toJSON(), 0);
 	}
 	
 	/* Deletes a cc */
@@ -229,14 +229,14 @@ module.exports = function() {
 			channel.send("⛔ Command error. Can't use command outside a CC!");
 			return;
 		}
-		let ccOwner = channel.permissionOverwrites.array().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
+		let ccOwner = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
 		if(mode || isGameMaster(member) || ccOwner.includes(member.id)) {
 			players = getUserList(channel, args, 1, member);
-			let playerList = channel.permissionOverwrites.array().filter(el => el.type === "member" && el.allow > 0).map(el => el.id);
+			let playerList = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member" && el.allow > 0).map(el => el.id);
 			if(players && players.length > 0) {
 				players = players.filter(el => !playerList.includes(el));
 				players.forEach(el => { 
-					channel.createOverwrite(el, {VIEW_CHANNEL: true}).then(c => {
+					channel.permissionOverwrites.create(el, {VIEW_CHANNEL: true}).then(c => {
 						channel.send(`✅ Added ${channel.guild.members.cache.get(el)} to the CC!`);
 					}).catch(err => { 
 						logO(err); 
@@ -258,14 +258,14 @@ module.exports = function() {
 			channel.send("⛔ Command error. Can't use command outside a CC!");
 			return;
 		}
-		let ccOwner = channel.permissionOverwrites.array().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
+		let ccOwner = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
 		if(mode || isGameMaster(member) || ccOwner.includes(member.id)) {
 			players = getUserList(channel, args, 1, member);
-			let playerList = channel.permissionOverwrites.array().filter(el => el.type === "member" && el.allow > 0).map(el => el.id);
+			let playerList = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member" && el.allow > 0).map(el => el.id);
 			if(players) players = players.filter(el => playerList.includes(el));
 			if(players && players.length > 0) {
 				players.forEach(el => { 
-					channel.permissionOverwrites.get(el).delete().then(() => {
+					channel.permissionOverwrites.cache.get(el).delete().then(() => {
 						channel.send(`✅ Removed ${channel.guild.members.cache.get(el)} from the CC!`);
 					}).catch(err => { 
 						logO(err); 
@@ -288,7 +288,7 @@ module.exports = function() {
 			return;
 		}
 		args[1] = args[1].replace(/🔒/,"lock");
-		let ccOwner = channel.permissionOverwrites.array().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
+		let ccOwner = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
 		if(mode || isGameMaster(member) || ccOwner.includes(member.id)) {
 			channel.edit({ name: args[1] })
 				.then(c => {
@@ -312,13 +312,13 @@ module.exports = function() {
 			channel.send("⛔ Command error. Can't use command outside a CC!");
 			return;
 		}
-		let ccOwner = channel.permissionOverwrites.array().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
+		let ccOwner = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
 		if(mode || isGameMaster(member) || ccOwner.includes(member.id)) {
 			channel.edit({ name: "🔒-" + channel.name })
 				.then(c => {
-					let ccList = c.permissionOverwrites.array().filter(el => el.type === "member").map(el => el.id);
+					let ccList = c.permissionOverwrites.cache.toJSON().filter(el => el.type === "member").map(el => el.id);
 					ccList.forEach(el => {
-						c.createOverwrite(el, {VIEW_CHANNEL: true, READ_MESSAGE_HISTORY: null, SEND_MESSAGES: false})
+						c.permissionOverwrites.create(el, {VIEW_CHANNEL: true, READ_MESSAGE_HISTORY: null, SEND_MESSAGES: false})
 					});
 					c.send("✅ Archived channel!");
 				})
@@ -340,16 +340,16 @@ module.exports = function() {
 			return;
 		}
 		// Get owner
-		let ccOwner = channel.permissionOverwrites.array().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
+		let ccOwner = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
 		if(mode || isGameMaster(member) || ccOwner.includes(member.id)) {
 			// Get members
 			players = getUserList(channel, args, 1, member);
-			let playerList = channel.permissionOverwrites.array().filter(el => el.type === "member" && el.allow > 0).map(el => el.id);
+			let playerList = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member" && el.allow > 0).map(el => el.id);
 			if(players) players = players.filter(el => playerList.includes(el));
 			if(players && players.length > 0) {
 				players.forEach(el => { 
 					// Promote members
-					channel.createOverwrite(el, {VIEW_CHANNEL: true, READ_MESSAGE_HISTORY: true}).then(c => {
+					channel.permissionOverwrites.create(el, {VIEW_CHANNEL: true, READ_MESSAGE_HISTORY: true}).then(c => {
 						channel.send(`✅ Promoted ${channel.guild.members.cache.get(el)}!`);
 					}).catch(err => { 
 						// Permission error
@@ -375,7 +375,7 @@ module.exports = function() {
 			return;
 		}
 		// Remove permissions
-		channel.permissionOverwrites.get(member.id).delete().then(() => {
+		channel.permissionOverwrites.cache.get(member.id).delete().then(() => {
 			channel.send(`✅ ${member} left the CC!`);
 		}).catch(err => { 
 			// Permission error
@@ -392,8 +392,8 @@ module.exports = function() {
 			return;
 		}
 		// Get lists
-		let ccList = shuffleArray(channel.permissionOverwrites.array()).filter(el => el.type === "member").filter(el => el.allow > 0).map(el => channel.guild.members.cache.get(el.id)).join("\n");
-		let ccOwner = shuffleArray(channel.permissionOverwrites.array()).filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => channel.guild.members.cache.get(el.id)).join("\n");
+		let ccList = shuffleArray(channel.permissionOverwrites.cache.toJSON()).filter(el => el.type === "member").filter(el => el.allow > 0).map(el => channel.guild.members.cache.get(el.id)).join("\n");
+		let ccOwner = shuffleArray(channel.permissionOverwrites.cache.toJSON()).filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => channel.guild.members.cache.get(el.id)).join("\n");
 		// Choose messages		
 		switch(mode) {
 			case 0: channel.send(ccOwner + " has created a new CC!\n\n**CC Members** | Total: " +  ccList.split("\n").length + "\n" + ccList); break;
@@ -433,7 +433,7 @@ module.exports = function() {
 					// Create a new category
 					let ccCatNum = Math.round(result / 50) + 1;
 					let ccCatPerms = getCCCatPerms(channel.guild);
-					channel.guild.channels.create(toTitleCase(stats.game) + " | CC " + ccCatNum, { type: "category",  permissionOverwrites: ccCatPerms })
+					channel.guild.channels.create(toTitleCase(stats.game) + " | CC " + ccCatNum, { type: "GUILD_CATEGORY",  permissionOverwrites: ccCatPerms })
 					.then(cc => {
 						sql("INSERT INTO cc_cats (id) VALUES (" + connection.escape(cc.id) + ")", result => {	
 							getCCCats();
@@ -554,6 +554,6 @@ module.exports = function() {
 	
 	/* Checks if something is a cc*/
 	this.isCC = function(channel) {
-		return !channel.parent ? true : cachedCCs.includes(channel.parentID);
+		return !channel.parent ? true : cachedCCs.includes(channel.parentId);
 	}
 }

@@ -274,23 +274,23 @@ module.exports = function() {
 		// Find name
 		switch(args[1]) {
 			case "mayor": 
-				channel.createOverwrite(stats.mayor, { VIEW_CHANNEL: true, SEND_MESSAGES: true }).catch(err => { 
+				channel.permissionOverwrites.create(stats.mayor, { VIEW_CHANNEL: true, SEND_MESSAGES: true }).catch(err => { 
 					logO(err); 
 					sendError(channel, err, "Could not setup channel permissions");
 				});
-				channel.createOverwrite(stats.mayor2, { VIEW_CHANNEL: true, SEND_MESSAGES: true }).catch(err => { 
+				channel.permissionOverwrites.create(stats.mayor2, { VIEW_CHANNEL: true, SEND_MESSAGES: true }).catch(err => { 
 					logO(err); 
 					sendError(channel, err, "Could not setup channel permissions");
 				});
 			break;
 			case "reporter": 
-				channel.createOverwrite(stats.reporter, { VIEW_CHANNEL: true, SEND_MESSAGES: true }).catch(err => { 
+				channel.permissionOverwrites.create(stats.reporter, { VIEW_CHANNEL: true, SEND_MESSAGES: true }).catch(err => { 
 					logO(err); 
 					sendError(channel, err, "Could not setup channel permissions");
 				});
 			break;
 			case "guardian": 
-				channel.createOverwrite(stats.guardian, { VIEW_CHANNEL: true, SEND_MESSAGES: true }).catch(err => { 
+				channel.permissionOverwrites.create(stats.guardian, { VIEW_CHANNEL: true, SEND_MESSAGES: true }).catch(err => { 
 					logO(err); 
 					sendError(channel, err, "Could not setup channel permissions");
 				});
@@ -317,7 +317,7 @@ module.exports = function() {
 					if(pin) {
 						m.pin().then(mp => {
 							mp.channel.messages.fetch().then(messages => {
-								mp.channel.bulkDelete(messages.filter(el => el.type === "PINS_ADD"));
+								mp.channel.bulkDelete(messages.filter(el => el.type === "CHANNEL_PINNED_MESSAGE"));
 							});	
 						}).catch(err => { 
 							logO(err); 
@@ -599,7 +599,7 @@ module.exports = function() {
 						sc.send(desc).then(m => {
 							m.pin().then(mp => {
 								mp.channel.messages.fetch().then(messages => {
-									mp.channel.bulkDelete(messages.filter(el => el.type === "PINS_ADD"));
+									mp.channel.bulkDelete(messages.filter(el => el.type === "CHANNEL_PINNED_MESSAGE"));
 								});	
 							}).catch(err => { 
 								logO(err); 
@@ -1102,7 +1102,7 @@ module.exports = function() {
 					if(pin) {
 						m.pin().then(mp => {
 							mp.channel.messages.fetch().then(messages => {
-								mp.channel.bulkDelete(messages.filter(el => el.type === "PINS_ADD"));
+								mp.channel.bulkDelete(messages.filter(el => el.type === "CHANNEL_PINNED_MESSAGE"));
 							});	
 						}).catch(err => { 
 							logO(err); 

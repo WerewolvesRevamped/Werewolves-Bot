@@ -378,8 +378,8 @@ module.exports = function() {
 				channel.send("⛔ Database error. Could not reset poll counter!");
 			});
 		}
-		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.participant).members.array(), 0);
-		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.dead_participant).members.array(), 0);
+		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.participant).members.toJSON(), 0);
+		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.dead_participant).members.toJSON(), 0);
 		// Remove Roles & Nicknames
 		wroles_remove(channel, [stats.signed_up, stats.participant, stats.dead_participant, stats.spectator, stats.mayor, stats.mayor2, stats.reporter, stats.guardian, stats.sub], ["signed up", "participant", "dead participant", "spectator", "mayor", "mayor2", "reporter", "guardian", "substitute"])
 		// Cleanup channels
@@ -402,7 +402,7 @@ module.exports = function() {
 	
 	this.wroles_remove2 = function(channel, id, name, callback) {
 		// Remove spectator role
-		if(channel.guild.roles.cache.get(id)) wroles_removeOnce(channel, id, name, channel.guild.roles.cache.get(id).members.array(), 0, callback);
+		if(channel.guild.roles.cache.get(id)) wroles_removeOnce(channel, id, name, channel.guild.roles.cache.get(id).members.toJSON(), 0, callback);
 		else channel.send("Invalid role with id " + id);
 	}
 	
