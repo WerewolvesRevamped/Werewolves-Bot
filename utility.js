@@ -152,21 +152,11 @@ module.exports = function() {
 					return;
 				}
 				client.user.setStatus(args[1])
-				  .then(() => {
-					  message.channel.send("✅ Updated bot status!");
-				  }).catch(err => {
-					logO(err); 
-					sendError(message.channel, err, "Could not update bot status");
-				});
+				message.channel.send("✅ Updated bot status!");
 			break;
 			case "activity":
-				client.user.setPresence({ activity: { name: argsX[1], type: "PLAYING" } })
-				.then(() => {
-					  message.channel.send("✅ Updated bot activity!");
-				  }).catch(err => {
-					logO(err); 
-					sendError(message.channel, err, "Could not update bot activity");
-				});
+				client.user.setPresence({ activities: [{ name: argsX[1], type: "PLAYING" }] })
+				message.channel.send("✅ Updated bot activity!");
 			break;
 			default:
 				message.channel.send("⛔ Syntax error. This is not a value that can be modified!"); 
