@@ -385,7 +385,7 @@ module.exports = function() {
 	
 	/* Check if a channel is a SC */
 	this.isSC = function(channel) {
-		return channel.parentID === cachedSC;
+		return channel.parentId === cachedSC;
 	}
 	
 	/* Creates secret channels */
