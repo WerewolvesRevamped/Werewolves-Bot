@@ -93,8 +93,8 @@ module.exports = function() {
 				// Get player lists
 				let pollName = Math.random().toString(36).replace(/[^a-z]+/g, "").substr(0, 1) + ((((+pollNum) + 2) * 3)  - 4).toString(36).replace(/[^a-z]+/g, "a") + Math.random().toString(36).replace(/[^a-z]+/g, "").substr(0, 1);
 				let playerLists = [], playerList = result.map(el => [el.emoji, channel.guild.members.cache.get(el.id)]);
-				if(type === "public" && stats.poll == 0) playerList.push(["⛔", "*Abstain*"]);
-				if(type === "dead_vote" && stats.poll == 0) playerList.push(["⛔", "*Abstain*"]);
+				if(type === "public" && (stats.poll == 0 || stats.poll == 2)) playerList.push(["⛔", "*Abstain*"]);
+				if(type === "dead_vote" && (stats.poll == 0 || stats.poll == 2)) playerList.push(["⛔", "*Abstain*"]);
 				else if(type === "public" && stats.poll == 1) playerList.push(["❌", "*Cancel*"]);
 				else if(type === "private" && stats.poll == 2) playerList.push(["❓", "*Random*"]);
 				else if(type === "dead_vote" && stats.poll == 1) playerList.push(["❌", "*Cancel*"]);
