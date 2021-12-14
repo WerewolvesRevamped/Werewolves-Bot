@@ -96,6 +96,7 @@ module.exports = function() {
 				if(type === "public" && stats.poll == 0) playerList.push(["⛔", "*Abstain*"]);
 				if(type === "dead_vote" && stats.poll == 0) playerList.push(["⛔", "*Abstain*"]);
 				else if(type === "public" && stats.poll == 1) playerList.push(["❌", "*Cancel*"]);
+				else if(type === "private" && stats.poll == 2) playerList.push(["❓", "*Random*"]);
 				else if(type === "dead_vote" && stats.poll == 1) playerList.push(["❌", "*Cancel*"]);
 				else if(type === "dead") playerList = [[client.emojis.cache.get(stats.yes_emoji), "Yes"], [client.emojis.cache.get(stats.no_emoji), "No"]];
 				else if(type === "dead_list") playerList = [[client.emojis.cache.get(stats.yes_emoji), "Yes"], [client.emojis.cache.get(stats.no_emoji), "No"]];
