@@ -172,7 +172,7 @@ module.exports = function() {
 			args[0] = "";
 			if(isGameMaster(member)) msgA += "**```yaml\nWerewolf Bot Game Master Help\n```**";
 			else msgA += "**```yaml\nWerewolf Bot Player Help\n```**";
-			msgA += "```\nUse " + stats.prefix + "help <command> to get information about a command.\nWhile ingame react to messages with 📌 to pin them!\nPlayer arguments can be names, emojis, ids, nicknames or discord tags\n%s and %c can be used to refer to yourself and to the current channel, in all commands.\nArguments can't contain spaces, unless the argument is quoted \"like this\"```";
+			msgA += "```php\n" + phpEscape("Use " + stats.prefix + "help <command> to get information about a command.\nWhile ingame react to messages with 📌 to pin them!\nPlayer arguments can be names, emojis, ids, nicknames or discord tags\n%s and %c can be used to refer to yourself and to the current channel, in all commands.\nArguments cant contain spaces, unless the argument is quoted \"like this\"") + "```";
 		} else {
 			msgA += "**```yaml\n" + toTitleCase(args.join(" ")) + " Help\n```**";
 		}
@@ -190,7 +190,7 @@ module.exports = function() {
 		msgB += helpConfirm(member, args);
 		// Print
 		if(args[0] === "") { 
-			msgC = chunkArray(msgB.split("\n"), 25).map(el => "```\n" + el.join("\n") + "\n```");
+			msgC = chunkArray(msgB.split("\n"), 25).map(el => "```php\n" + phpEscape(el.join("\n")) + "\n```");
 			msgC[0] = msgA + msgC[0];
 			msgC.forEach(el => channel.send(el));
 		} else {
@@ -198,6 +198,22 @@ module.exports = function() {
 			else channel.send(msgA + "```fix\nNot a valid command```");
 		}
 
+	}
+	
+	this.phpEscape = function(txt) {
+		return txt.replace(/(and|list|from|switch|Public|or|new|as|New|Use|While)/g, el => el.substr(0, 1) + "​" + el.substr(1));
+	}
+	
+	this.cmdTemp = function(message, args) {
+		if(!args[0] || !args[1].match(/[0-9]*/) || (args[0] != "c" && args[0] != "f")) {
+			message.channel.send("Not enough/Invalid parameters.");
+			return;
+		}
+		switch(args[0]) {
+			default: message.channel.send("Unknown conversion."); break;
+			case "f": message.channel.send(args[1] + " °C in fahrenheit: "  + Math.round((args[1] * (9/5)) + 32, 2) + " °F"); break;
+			case "c": message.channel.send(args[1] + " °F in celsius: "  + Math.round((args[1] - 32) *  5/9, 2)  + " °C"); break;
+		}
 	}
 	
 	/* Help for base module */
@@ -250,10 +266,12 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "delay - Executes a command with delay\n";
 				if(isGameMaster(member)) help += stats.prefix + "modify - Modifies the bot\n";
 			break;
+			case "?":
 			case "ping":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "ping\n```";
 				help += "```\nFunctionality\n\nGives the ping of the bot, and checks if the bot is running.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "ping\n< ✅ Pong! Latency is 170ms. API Latency is 128ms```";
+				help += "```diff\nAliases\n\n- ?\n```";
 			break;
 			case "bd": 
 			case "bulkdelete": 

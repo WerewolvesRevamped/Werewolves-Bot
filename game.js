@@ -84,9 +84,10 @@ module.exports = function() {
 				help += "```\nFunctionality\n\nEnds the game. Sets the gamephase, and makes all Participants Dead Participants.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "end\n```";
 			break;
+			case "s":
 			case "spec":
-			case "spectate":
 			case "spectator":
+			case "spectate":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "spectate\n```";
 				help += "```\nFunctionality\n\nMakes you a spectator, if you are not a participant and a game is running.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "spectate\n< ✅ Attempting to make you a spectator, McTsts!\n```";
@@ -97,7 +98,7 @@ module.exports = function() {
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "substitute\n```";
 				help += "```\nFunctionality\n\nMakes you a substitute player, if you are not a participant and a game is running.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "spectate\n< ✅ Attempting to make you a substitute player, McTsts!\n```";
-				help += "```diff\nAliases\n\n\n- s\n- spec\n- sub\n```";
+				help += "```diff\nAliases\n\n\n- sub\n```";
 			break;
 			case "v":
 			case "demote":

@@ -81,16 +81,9 @@ client.on("messageCreate", async message => {
 	switch(command) {
 	case "°":
 	case "temp":
-		if(!args[0] || !args[1].match(/[0-9]*/) || (args[0] != "c" && args[0] != "f")) {
-			message.channel.send("Not enough/Invalid parameters.");
-			return;
-		}
-		switch(args[0]) {
-			default: message.channel.send("Unknown conversion."); break;
-			case "f": message.channel.send(args[1] + " °C in fahrenheit: "  + Math.round((args[1] * (9/5)) + 32, 2) + " °F"); break;
-			case "c": message.channel.send(args[1] + " °F in celsius: "  + Math.round((args[1] - 32) *  5/9, 2)  + " °C"); break;
-		}
+		cmdTemp(message, args);
 	break;
+	case "?":
 	case "ping":
 		cmdPing(message);
 	break;
@@ -262,6 +255,12 @@ client.on("messageCreate", async message => {
 	case "players":
 		if(checkGM(message)) cmdPlayers(message, args);
 	break;
+	case "roll":
+	case "rand":
+	case "random":
+	case "randomize":
+		cmdRoll(message, args);
+	break;
 	/* CCs */
 	case "c":
 	case "cc":
@@ -277,13 +276,13 @@ client.on("messageCreate", async message => {
 			let msg = ["Leave me alone.", "Please just stop.", "Why are you doing this?","What have I done to deserves this.","No.","Just no.","Seriously, no.","No means no.","Go away.","Why do you hate me?","What have I ever done to you?","I don't want to be part of your evil plots.","I'm a friendly bot, why are you trying to make me do this?","I just want to be nice, not annoying.","Please go away.","Why...","Stop...",":("];
 			message.channel.send(msg[Math.floor(Math.random() * msg.length)]);
 		}
+	break;
 	case "impersonate":
 	case "imp":
 		if(checkGM(message)) {
 			let author = getUser(message.channel, argsX.shift());
 			if(author) cmdWebhook(message.channel, message.guild.members.cache.get(author), argsX);
 		}
-	break;
 	break;
 	/* Help */
 	case "h":
@@ -351,26 +350,10 @@ client.on("messageCreate", async message => {
 	case "confirm":
 		confirmActionExecute(args.join(" "), message, false);
 	break;
-	/* Modrole */ // This command is not available in $help yet
+	/* Modrole */ 
 	case "modrole": 
 	case "mr":
-		if(!checkGM(message)) break;
-		let aid = getUser(message.channel, args[1]);
-		if(!aid) break;
-		let author = message.guild.members.cache.get(aid);
-		if(!author) break;
-		let role = message.guild.roles.cache.get(args[2]);
-		if(!role) break;
-		switch(args[0]) {
-			 case "add": 
-				author.roles.add(role); 
-				message.channel.send("✅ Added `" + role.name + "` to <@" + author.id + "> (" + author.user.username + ")!");
-			break;
-			 case "remove": 
-				author.roles.remove(role); 
-				message.channel.send("✅ Remove `" + role.name + "` from <@" + author.id + "> (" + author.user.username + ")!");
-			break;
-		}
+		if(checkGM(message)) cmdModrole(message, args);
 	break;
 	/* Invalid Command */
 	default:
