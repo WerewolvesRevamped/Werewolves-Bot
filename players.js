@@ -460,7 +460,7 @@ module.exports = function() {
 	
 	}
 	
-	this.cmdModerole = function(message, args) {
+	this.cmdModrole = function(message, args) {
 		let aid = getUser(message.channel, args[1]);
 		if(!aid) return;
 		let author = message.guild.members.cache.get(aid);
