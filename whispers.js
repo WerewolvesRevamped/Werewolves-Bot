@@ -21,6 +21,7 @@ module.exports = function() {
 		switch(args[0]) {
 			case "add": cmdConnectionAdd(message.channel, args); break;
 			case "remove": cmdConnectionRemove(message.channel); break;
+			case "send": cmdConnectionSend(message.channel, args); break;
 			case "reset": cmdConfirm(message, "connection reset"); break;
 			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
 		}
@@ -218,5 +219,65 @@ module.exports = function() {
 			});
 		}
 	}
+	/* Send message over a connection */
+	this.cmdConnectionSend = function(channel, args) {
+        // Check arguments
+		if(!args[1] || !args[2] || !args[3]) { 
+			channel.send("⛔ Syntax error. Not enough parameters!"); 
+			return; 
+		}
+        
+        // set values
+        conn = args[1];
+        disguise = typeof args[2] === 'string' ? toTitleCase(args[2]) : "";
+        text = args[3];
+        
+
+        sql("SELECT channel_id, name FROM connected_channels WHERE id = " + connection.escape(conn), result => {
+            // Write message in each channel
+            result.forEach(destination => {
+                    // Create webhook
+                    let webhookMsg = text;
+                    webhookMsg = webhookMsg.replace(/:~/g, ":");
+                    
+                    if(disguise.length > 0) {
+                        let webhookName = disguise;
+                        let webhookAvatar = client.user.displayAvatarURL();
+                        channel.guild.channels.cache.get(destination.channel_id).fetchWebhooks()
+                        .then(webhooks => {
+                            // search for webhook 
+                            let webhook = webhooks.find(w => w.name == webhookName);
+                            // webhook exists
+                            if(webhook) {
+                                webhook.send(webhookMsg);
+                            } else { // no webhook
+                                if(webhooks.size < 10) { // empty slot
+                                    channel.guild.channels.cache.get(destination.channel_id).createWebhook(webhookName, {avatar: webhookAvatar})
+                                    .then(webhook => {
+                                        // Send webhook
+                                        webhook.send(webhookMsg)
+                                    })
+                                    .catch(err => { 
+                                        // Webhook couldn't be created
+                                        logO(err); 
+                                        sendError(channel, err, "Could not create webhook");
+                                    });
+                                } else { // no empty slot
+                                    channel.guild.channels.cache.get(destination.channel_id).send("**" + webhookName + "**: " + webhookMsg);
+                                    webhooks.first().delete();
+                                }
+                            }
+                        });	
+                    } else {
+                        let wchannel = channel.guild.channels.cache.get(destination.channel_id);
+                        wchannel.send(webhookMsg);
+                    }
+            });
+        }, () => {
+            // Database error
+            log("⛔ Database error. Could not access connected channels via id!");
+        });
+            
+    }
 	
 }
