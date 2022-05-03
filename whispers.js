@@ -76,6 +76,11 @@ module.exports = function() {
 						help += "```\nFunctionality\n\nRemoves all connections from all channels.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "connection reset\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "connection reset!\n< ✅ Successfully reset connections!\n```";
 					break;
+					case "send":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "connection send <Connection Name> <Connection Disguise> <Text>\n```";
+						help += "```\nFunctionality\n\nSend a message <Text> with disguise <Connection Disguise> over a connection <Connection Name>.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "connection send bartender fakebartender hi\n```";
+					break;
 				}
 			break;
 		}
