@@ -106,12 +106,6 @@ module.exports = function() {
 		}, () => {
 			log("Stats > ❗❗❗ Unable to cache game name!")
 		});
-		sqlGetStat(20,  result => { 
-			stats.reporter_channel = result; 
-			if(doLog) log("Stats > Cached reporter channel as `" + result + "`!")
-		}, () => {
-			log("Stats > ❗❗❗ Unable to cache reporter channel!")
-		});
 		sqlGetStat(21,  result => { 
 			stats.gamemaster_ingame = result; 
 			if(doLog) log("Stats > Cached game master ingame role id as `" + result + "`!")
@@ -233,7 +227,6 @@ module.exports = function() {
 				case "reporter": stat = 17; break;
 				case "guardian": stat = 18; break;
 				case "game": stat = 19; break;
-				case "reporter_channel": stat = 20; break;
 				case "gamemaster_ingame": stat = 21; break;
 				case "admin": stat = 22; break;
 				case "admin_ingame": stat = 23; break;
@@ -283,7 +276,7 @@ module.exports = function() {
 			case "options":
 				if(!isGameMaster(member)) break;
 					help += "```yaml\nSyntax\n\n" + stats.prefix + "options <Option Name> <New Value>\n```";
-					help += "```\nFunctionality\n\nReturns or sets (if <New Value> is set) the value of a bot option <Option Name>. A bot option can be a numeric id, or an option name.\n\nList of Option Names:\nprefix: The prefix the bot uses for commands\nparticipant: The id of the participant role\ngamemaster: The id of the gamemaster role\nspectator: The id of the spectator role\nsigned_up: The id of the signed up role\ndead_participant: The id of the dead participant role\nbot: The id of the bot role\nlog_guild: The id of the guild to use for logs\nlog_channel: The id of the channel to use for logs\nmayor: The id of the mayor role\nreporter: The id of the reporter role\nguardian: The id of the guardian role\ngame: The name of the game\nreporter_channel: The id of the reporter channel\ngamemaster_ingame: The id of the gamemaster ingame role\nadmin: The id of the admin role\nadmin_ingame: The id of the admin ingame role\nyes_emoji: The id of the yes emoji\nno_emoji: The id of the no emoji\nnew_game_ping: Role that gets pinged with certain commands\ngame_status: A VC that shows the status of the game\ncc_limit: Maximum amount of ccs one person can create (-1 for none)\nmayor2: The id of the second mayor role (which doesn't give extra votes)\npoll: The poll mode (0 -> default, 1 -> cancel, 2 -> private random)\nsub: role for substitute players\nping: ping for gifs and deleted messages\n```";
+					help += "```\nFunctionality\n\nReturns or sets (if <New Value> is set) the value of a bot option <Option Name>. A bot option can be a numeric id, or an option name.\n\nList of Option Names:\nprefix: The prefix the bot uses for commands\nparticipant: The id of the participant role\ngamemaster: The id of the gamemaster role\nspectator: The id of the spectator role\nsigned_up: The id of the signed up role\ndead_participant: The id of the dead participant role\nbot: The id of the bot role\nlog_guild: The id of the guild to use for logs\nlog_channel: The id of the channel to use for logs\nmayor: The id of the mayor role\nreporter: The id of the reporter role\nguardian: The id of the guardian role\ngame: The name of the game\ngamemaster_ingame: The id of the gamemaster ingame role\nadmin: The id of the admin role\nadmin_ingame: The id of the admin ingame role\nyes_emoji: The id of the yes emoji\nno_emoji: The id of the no emoji\nnew_game_ping: Role that gets pinged with certain commands\ngame_status: A VC that shows the status of the game\ncc_limit: Maximum amount of ccs one person can create (-1 for none)\nmayor2: The id of the second mayor role (which doesn't give extra votes)\npoll: The poll mode (0 -> default, 1 -> cancel, 2 -> private random)\nsub: role for substitute players\nping: ping for gifs and deleted messages\n```";
 					help += "```fix\nUsage\n\n> " + stats.prefix + "options mayor\n< ✅ mayor currently is set to 588125889611431946!\n\n> " + stats.prefix + "options mayor 588125889611431946\n< ✅ Successfully updated mayor to 588125889611431946!```";
 					help += "```diff\nAliases\n\n- stat\n- stats\n- option\n```";
 			break;
