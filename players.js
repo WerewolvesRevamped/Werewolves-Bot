@@ -477,7 +477,7 @@ module.exports = function() {
 	this.cmdListSignedup = function(channel) {
 		// Get a list of players
 		sql("SELECT id,emoji FROM players", result => {
-			let playerList = shuffleArray(result.map(el => `${el.emoji}  - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username : "*user left*"} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`)).join("\n");
+			let playerList = result.map(el => `${el.emoji}  - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username : "*user left*"} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
 			// Print message
 			channel.send("✳ Listing signed up players").then(m => {
 				m.edit("**Signed Up Players** | Total: " +  result.length + "\n" + playerList)
@@ -500,7 +500,7 @@ module.exports = function() {
 		}
 		// Get a list of players
 		sql("SELECT id,emoji FROM players WHERE alive = 1", result => {
-			let playerList = shuffleArray(result.map(el => `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username : "*user left*"} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`)).join("\n");
+			let playerList = result.map(el => `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username : "*user left*"} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
 			// Print message
 			channel.send("✳ Listing alive players").then(m => {
 				m.edit("**Alive Players** | Total: " +  result.length + "\n" + playerList)
