@@ -387,6 +387,11 @@ module.exports = function() {
 	this.isSC = function(channel) {
 		return channel.parentId === cachedSC;
 	}
+    
+	/* Check if a channel is a SC */
+	this.isPublic = function(channel) {
+		return channel.parentId === cachedPublic;
+	}
 	
 	/* Creates secret channels */
 	this.createSCs = function(channel, debug) {
@@ -666,6 +671,11 @@ module.exports = function() {
 			cachedSC = result;
 		}, () => {
 			log("Roles > ❗❗❗ Unable to cache SC Category!");
+		});
+		sqlGetStat(15, result => {
+			cachedPublic = result;
+		}, () => {
+			log("Roles > ❗❗❗ Unable to cache Public Category!");
 		});
 	}
 	

@@ -22,8 +22,8 @@ module.exports = function() {
 	/* Handle players command */
 	this.cmdPlayers = function(message, args) {
 		// Check subcommands
-		if(!args[0] || (!args[1] && args[0] != "list")) { 
-			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `players [get|get_clean|set|resurrect|signup|list]`!"); 
+		if(!args[0] || (!args[1] && args[0] != "list" && args[0] != "msgs")) { 
+			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `players [get|get_clean|set|resurrect|signup|list|msgs]`!"); 
 			return; 
 		}
 		//Find subcommand
@@ -37,6 +37,8 @@ module.exports = function() {
 			case "substitute": cmdPlayersSubstitute(message, args); break;
 			case "switch": cmdPlayersSwitch(message, args); break;
 			case "list": cmdConfirm(message, "players list"); break;
+			case "messages": 
+			case "msgs": cmdPlayersListMsgs(message.channel, args); break;
 			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
 		}
 	}
@@ -205,6 +207,12 @@ module.exports = function() {
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players list\n```";
 						help += "```\nFunctionality\n\nLists all players with their role and alive values.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "players list\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "players list!\n> Players | Total: 2\n  🛠 - @McTsts (Werewolf); Alive: 1\n  👌 - @federick (Baker); Alive: 1```";
+					break;		
+					case "messages":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "players messages\n```";
+						help += "```\nFunctionality\n\nLists all players and their public and private message count.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "players messages\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "players list!\n> Players | Total: 1\n  🛠 - @McTsts (Werewolf); Public Messages: 1; Private Messages: 3```";
+						help += "```diff\nAliases\n\n- players msgs\n```";
 					break;		
 				}
 			break;
@@ -412,6 +420,33 @@ module.exports = function() {
 		// Get a list of players
 		sql("SELECT id,emoji,role,alive,public_value,private_value,public_votes,ccs FROM players", result => {
 			let playerListArray = result.map(el => `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"} (${el.role.split(",").map(role => toTitleCase(role)).join(" + ")}); Alive: ${channel.guild.members.cache.get(el.id) ? (el.alive ? client.emojis.cache.get(stats.yes_emoji) : client.emojis.cache.get(stats.no_emoji)) : "⚠️"}; CCs: ${el.ccs}; Votes: ${el.public_value},${el.private_value},${el.public_votes}`);
+			let playerList = [], counter = 0;
+			for(let i = 0; i < playerListArray.length; i++) {
+				if(!playerList[Math.floor(counter/10)]) playerList[Math.floor(counter/10)] = [];
+				playerList[Math.floor(counter/10)].push(playerListArray[i]);
+				counter++;
+			}
+			channel.send("**Players** | Total: " + result.length);
+			for(let i = 0; i < playerList.length; i++) {
+				// Print message
+				channel.send("✳ Listing players " + i  + "/" + (playerList.length) + "...").then(m => {
+					m.edit(playerList[i].join("\n"));
+				}).catch(err => {
+					logO(err); 
+					sendError(channel, err, "Could not list signed up players");
+				});
+			}
+		}, () => {
+			// DB error
+			channel.send("⛔ Database error. Could not list signed up players!");
+		});
+	
+	}
+	/* Lists all signedup players */
+	this.cmdPlayersListMsgs = function(channel, args) {
+		// Get a list of players
+		sql("SELECT id,emoji,public_msgs,private_msgs FROM players", result => {
+			let playerListArray = result.map(el => `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"}; Public: ${el.public_msgs}; Private: ${el.private_msgs}`);
 			let playerList = [], counter = 0;
 			for(let i = 0; i < playerListArray.length; i++) {
 				if(!playerList[Math.floor(counter/10)]) playerList[Math.floor(counter/10)] = [];

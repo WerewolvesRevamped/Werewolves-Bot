@@ -42,6 +42,20 @@ client.on("messageCreate", async message => {
 	message.channel.messages.fetch({ limit: 100 });
 	/* Connected Channels */ // Copies messages from one channel to another and applies disguises if one is set
 	connectionExecute(message);
+    
+    /* Counts messages */
+    if(stats.gamephase == 2 && message.content.slice(stats.prefix.length).indexOf(stats.prefix) == 0 && !message.author.bot && isParticipant(message.member)) {
+        if(isCC(message.channel) || isSC(message.channel)) { // private message
+            sql("UPDATE players SET private_msgs=private_msgs+1 WHERE id = " + connection.escape(message.member.id), () => {}, () => {
+                log("MSG Count > Failed to count private message for " + message.autho + "!")
+            });
+        } else if(isPublic(message.channel)) { // public message
+            sql("UPDATE players SET public_msgs=public_msgs+1 WHERE id = " + connection.escape(message.member.id), () => {}, () => {
+                log("MSG Count > Failed to count private message for " + message.autho + "!")
+            });
+        }
+    }
+    
 	/* Gif Check */
 	// isParticipant(message.author) &&
 	if(!message.author.bot && isParticipant(message.member) && message.content.search("http") >= 0 && stats.ping.length > 0) {
@@ -58,7 +72,7 @@ client.on("messageCreate", async message => {
 	if(message.content.indexOf(stats.prefix) !== 0 && message.content.length > 3) return;
 	if(message.content.slice(stats.prefix.length).indexOf(stats.prefix) == 0) return;
 	if(message.content.indexOf(stats.prefix) !== 0 && message.content.length <= 3) {
-		if(message.content.trim().match(/^[a-zA-Z]*$/) && (isSC(message.channel) | isCC(message.channel)) || message.channel.topic == "GMSAFE") cmdInfo(message.channel, message.content.trim().match(/(".*?")|(\S+)/g) ? message.content.trim().match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "", false, true);
+		//if(message.content.trim().match(/^[a-zA-Z]*$/) && (isSC(message.channel) | isCC(message.channel)) || message.channel.topic == "GMSAFE") cmdInfo(message.channel, message.content.trim().match(/(".*?")|(\S+)/g) ? message.content.trim().match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "", false, true);
 		return;
 	}
 	// Replace contents
