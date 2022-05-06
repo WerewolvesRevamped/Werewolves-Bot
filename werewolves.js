@@ -44,7 +44,7 @@ client.on("messageCreate", async message => {
 	connectionExecute(message);
     
     /* Counts messages */
-    if(stats.gamephase == 2 && message.content.slice(stats.prefix.length).indexOf(stats.prefix) != 0 && !message.author.bot && isParticipant(message.member)) {
+    if(stats.gamephase == 2 && message.content.slice(stats.prefix.length).indexOf(stats.prefix) !== 0 && !message.author.bot && isParticipant(message.member)) {
         if(isCC(message.channel) || isSC(message.channel)) { // private message
             sql("UPDATE players SET private_msgs=private_msgs+1 WHERE id = " + connection.escape(message.member.id), () => {}, () => {
                 log("MSG Count > Failed to count private message for " + message.autho + "!")
@@ -69,12 +69,16 @@ client.on("messageCreate", async message => {
 	/* Find Command & Parameters */
 	// Not a command
 	if(message.channel.type === "dm") return;
-	if(message.content.indexOf(stats.prefix) !== 0 && message.content.length > 3) return;
 	if(message.content.slice(stats.prefix.length).indexOf(stats.prefix) == 0) return;
-	if(message.content.indexOf(stats.prefix) !== 0 && message.content.length <= 3) {
-		//if(message.content.trim().match(/^[a-zA-Z]*$/) && (isSC(message.channel) | isCC(message.channel)) || message.channel.topic == "GMSAFE") cmdInfo(message.channel, message.content.trim().match(/(".*?")|(\S+)/g) ? message.content.trim().match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "", false, true);
+	if(message.content.indexOf(stats.prefix) !== 0 && message.content[0] == ".") {
+        let msg = message.content.trim().substr(1).trim();
+        let msgRole = msg.match(/(".*?")|(\S+)/g) ? msg.match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "";
+        console.log(msg + " => " + msgRole);
+		if(msg.match(/^[a-zA-Z ]*$/)) cmdInfo(message.channel, msgRole, false, true);
 		return;
 	}
+	if(message.content.indexOf(stats.prefix) !== 0) return;
+    
 	// Replace contents
 	if(message.member) message.content = message.content.replace(/%s/, message.member.id)
 	if(message.channel) message.content = message.content.replace(/%c/, message.channel.id);
