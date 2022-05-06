@@ -446,7 +446,7 @@ module.exports = function() {
 	this.cmdPlayersListMsgs = function(channel, args) {
 		// Get a list of players
 		sql("SELECT id,emoji,public_msgs,private_msgs FROM players", result => {
-			let playerListArray = result.map(el => `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"}; Public: ${el.public_msgs}; Private: ${el.private_msgs}`);
+			let playerListArray = result.map(el => `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"}; Total: ${el.public_msgs+el.private_msgs}; Public: ${el.public_msgs}; Private: ${el.private_msgs}`);
 			let playerList = [], counter = 0;
 			for(let i = 0; i < playerListArray.length; i++) {
 				if(!playerList[Math.floor(counter/10)]) playerList[Math.floor(counter/10)] = [];

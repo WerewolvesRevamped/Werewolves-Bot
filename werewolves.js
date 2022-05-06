@@ -44,7 +44,7 @@ client.on("messageCreate", async message => {
 	connectionExecute(message);
     
     /* Counts messages */
-    if(stats.gamephase == 2 && message.content.slice(stats.prefix.length).indexOf(stats.prefix) == 0 && !message.author.bot && isParticipant(message.member)) {
+    if(stats.gamephase == 2 && message.content.slice(stats.prefix.length).indexOf(stats.prefix) != 0 && !message.author.bot && isParticipant(message.member)) {
         if(isCC(message.channel) || isSC(message.channel)) { // private message
             sql("UPDATE players SET private_msgs=private_msgs+1 WHERE id = " + connection.escape(message.member.id), () => {}, () => {
                 log("MSG Count > Failed to count private message for " + message.autho + "!")
