@@ -398,7 +398,7 @@ module.exports = function() {
 				channel.guild.members.cache.get(el).roles.add(stats.dead_participant).catch(err => { 
 					// Missing permissions
 					logO(err); 
-					sendError(channel, err, "Could not remove role");
+					sendError(channel, err, "Could not add role");
 				});
 			});
 		}, () => {

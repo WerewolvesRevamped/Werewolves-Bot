@@ -233,9 +233,9 @@ module.exports = function() {
 		}
         
         // set values
-        conn = args[1];
-        disguise = typeof args[2] === 'string' ? toTitleCase(args[2]) : "";
-        text = args[3];
+        let conn = args[1];
+        let disguise = typeof args[2] === 'string' ? toTitleCase(args[2]) : "";
+        let text = args[3];
         
 
         sql("SELECT channel_id, name FROM connected_channels WHERE id = " + connection.escape(conn), result => {
