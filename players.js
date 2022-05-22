@@ -620,7 +620,7 @@ module.exports = function() {
 			return;
 		}
 		// SUB channels in category
-		substituteOneChannel(channel, ccCats, index, channel.guild.channels.cache.get(ccCats[index]).children.array(), 0, subPlayerFrom, subPlayerTo);
+		substituteOneChannel(channel, ccCats, index, channel.guild.channels.cache.get(ccCats[index]).children.toJSON(), 0, subPlayerFrom, subPlayerTo);
 	}
 	
 	/* Subs a channel */
@@ -636,8 +636,8 @@ module.exports = function() {
 			substituteOneChannel(channel, ccCats, index, channels, ++channelIndex, subPlayerFrom, subPlayerTo);
 			return;
 		} else {
-			let channelMembers = channel.guild.channels.cache.get(channels[channelIndex].id).permissionOverwrites.array().filter(el => el.type === "member").map(el => el.id);
-			let channelOwners = channel.guild.channels.cache.get(channels[channelIndex].id).permissionOverwrites.array().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
+			let channelMembers = channel.guild.channels.cache.get(channels[channelIndex].id).permissionOverwrites.cache.toJSON().filter(el => el.type === "member").map(el => el.id);
+			let channelOwners = channel.guild.channels.cache.get(channels[channelIndex].id).permissionOverwrites.cache.toJSON().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
 			if(channelMembers.includes(subPlayerFrom)) {
 				cmdCCAdd(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["add", subPlayerTo], 1);
 			}
@@ -666,7 +666,7 @@ module.exports = function() {
 			return;
 		}
 		// SUB channels in category
-		switchOneChannel(channel, ccCats, index, channel.guild.channels.cache.get(ccCats[index]).children.array(), 0, subPlayerFrom, subPlayerTo);
+		switchOneChannel(channel, ccCats, index, channel.guild.channels.cache.get(ccCats[index]).children.toJSON(), 0, subPlayerFrom, subPlayerTo);
 	}
 	
 	/* Subs a channel */
@@ -682,8 +682,8 @@ module.exports = function() {
 			switchOneChannel(channel, ccCats, index, channels, ++channelIndex, subPlayerFrom, subPlayerTo);
 			return;
 		} else {
-			let channelMembers = channel.guild.channels.cache.get(channels[channelIndex].id).permissionOverwrites.array().filter(el => el.type === "member").map(el => el.id);
-			let channelOwners = channel.guild.channels.cache.get(channels[channelIndex].id).permissionOverwrites.array().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
+			let channelMembers = channel.guild.channels.cache.get(channels[channelIndex].id).permissionOverwrites.cache.toJSON().filter(el => el.type === "member").map(el => el.id);
+			let channelOwners = channel.guild.channels.cache.get(channels[channelIndex].id).permissionOverwrites.cache.toJSON().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
 			if(channelMembers.includes(subPlayerFrom) && !channelMembers.includes(subPlayerTo)) {
 				cmdCCAdd(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["add", subPlayerTo], 1);
 				cmdCCRemove(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["remove", subPlayerFrom], 1);
@@ -697,11 +697,13 @@ module.exports = function() {
 			if(channelOwners.includes(subPlayerFrom) && !channelOwners.includes(subPlayerTo)) {
 				setTimeout(function() {
 					cmdCCPromote(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["promote", subPlayerTo], 1);
+					if(channelMembers.includes(subPlayerTo) && channelMembers.includes(subPlayerFrom)) cmdCCDemote(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["demote", subPlayerFrom], 1);
 					switchOneChannel(channel, ccCats, index, channels, ++channelIndex, subPlayerFrom, subPlayerTo);
 				}, 1000);
 			} else if(!channelOwners.includes(subPlayerFrom) && channelOwners.includes(subPlayerTo)) {
 				setTimeout(function() {
 					cmdCCPromote(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["promote", subPlayerFrom], 1);
+                    if(channelMembers.includes(subPlayerTo) && channelMembers.includes(subPlayerFrom)) cmdCCDemote(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["demote", subPlayerTo], 1);
 					switchOneChannel(channel, ccCats, index, channels, ++channelIndex, subPlayerFrom, subPlayerTo);
 				}, 1000);
 			} else {

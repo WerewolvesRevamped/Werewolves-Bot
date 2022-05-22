@@ -32,6 +32,7 @@ module.exports = function() {
 			case "rename": cmdCCRename(message.channel, message.member, args, 0); break;
 			case "archive": cmdCCArchive(message.channel, message.member, 0); break;
 			case "promote": cmdCCPromote(message.channel, message.member, args, 0); break;
+			case "demote": cmdCCPromote(message.channel, message.member, args, 0); break;
 			case "leave": cmdCCLeave(message.channel, message.member); break;
 			case "list": cmdCCList(message.channel, 2); break;
 			case "owners": cmdCCList(message.channel, 3); break;
@@ -60,7 +61,7 @@ module.exports = function() {
 			case "":
 				help += stats.prefix + "cc [create|create_hidden] - Creates a CC\n";
 				help += stats.prefix + "cc [create_multi|create_multi_hidden] - Creates multiple CCs\n";
-				help += stats.prefix + "cc [add|remove|promote|leave|list|owners] - Manages a CC\n";
+				help += stats.prefix + "cc [add|remove|promote|demote|leave|list|owners] - Manages a CC\n";
 				help += stats.prefix + "cc [rename|archive] - Manages a CC\n";
 				if(isGameMaster(member)) help += stats.prefix + "cc cleanup - Cleans up CCs\n";
 			break;
@@ -105,6 +106,11 @@ module.exports = function() {
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc promote <Player List>\n```";
 						help += "```\nFunctionality\n\nPromotes all players in the <Player List> in the current CC to owner. Only works in CCs, in which you are an owner.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "cc promote federick\n< ✅ Promoted @federick!```";
+					break;
+					case "demote":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc demote <Player List>\n```";
+						help += "```\nFunctionality\n\nDemotes all players in the <Player List> in the current CC to non-owner. Only works in CCs, in which you are an owner.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "cc demote federick\n< ✅ Demoted @federick!```";
 					break;
 					case "rename":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc rename <name>\n```";
@@ -355,6 +361,41 @@ module.exports = function() {
 						// Permission error
 						logO(err); 
 						sendError(channel, err, "Could not promote");
+					});
+				});
+			} else {
+				// No valid players
+				channel.send("⛔ Command error. No valid players, that are part of this CC, were provided!");
+			}
+		} else {
+			// Not owner
+			channel.send("⛔ Command error. You are not an owner of this CC!");
+		}
+	}
+    
+	/* Demote somebody to CC non-Owner */
+	this.cmdCCDemote = function(channel, member, args, mode) {
+		// Check if CC
+		if(!mode && !isCC(channel)) {
+			channel.send("⛔ Command error. Can't use command outside a CC!");
+			return;
+		}
+		// Get owner
+		let ccOwner = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
+		if(mode || isGameMaster(member) || ccOwner.includes(member.id)) {
+			// Get members
+			players = getUserList(channel, args, 1, member);
+			let playerList = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member" && el.allow > 0).map(el => el.id);
+			if(players) players = players.filter(el => playerList.includes(el));
+			if(players && players.length > 0) {
+				players.forEach(el => { 
+					// Promote members
+					channel.permissionOverwrites.create(el, {VIEW_CHANNEL: true}).then(c => {
+						channel.send(`✅ Demoted ${channel.guild.members.cache.get(el)}!`);
+					}).catch(err => { 
+						// Permission error
+						logO(err); 
+						sendError(channel, err, "Could not demote");
 					});
 				});
 			} else {
