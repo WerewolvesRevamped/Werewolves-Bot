@@ -243,7 +243,7 @@ module.exports = function() {
 				players = players.filter(el => !playerList.includes(el));
 				players.forEach(el => { 
 					channel.permissionOverwrites.create(el, {VIEW_CHANNEL: true}).then(c => {
-						channel.send(`✅ Added ${channel.guild.members.cache.get(el)} to the CC!`);
+						if(!mode) channel.send(`✅ Added ${channel.guild.members.cache.get(el)} to the CC!`);
 					}).catch(err => { 
 						logO(err); 
 						sendError(channel, err, "Could not add to CC");
@@ -272,7 +272,7 @@ module.exports = function() {
 			if(players && players.length > 0) {
 				players.forEach(el => { 
 					channel.permissionOverwrites.cache.get(el).delete().then(() => {
-						channel.send(`✅ Removed ${channel.guild.members.cache.get(el)} from the CC!`);
+						if(!mode) channel.send(`✅ Removed ${channel.guild.members.cache.get(el)} from the CC!`);
 					}).catch(err => { 
 						logO(err); 
 						sendError(channel, err, "Could not remove from CC");
@@ -356,7 +356,7 @@ module.exports = function() {
 				players.forEach(el => { 
 					// Promote members
 					channel.permissionOverwrites.create(el, {VIEW_CHANNEL: true, READ_MESSAGE_HISTORY: true}).then(c => {
-						channel.send(`✅ Promoted ${channel.guild.members.cache.get(el)}!`);
+						if(!mode) channel.send(`✅ Promoted ${channel.guild.members.cache.get(el)}!`);
 					}).catch(err => { 
 						// Permission error
 						logO(err); 
@@ -391,7 +391,7 @@ module.exports = function() {
 				players.forEach(el => { 
 					// Promote members
 					channel.permissionOverwrites.create(el, {VIEW_CHANNEL: true}).then(c => {
-						channel.send(`✅ Demoted ${channel.guild.members.cache.get(el)}!`);
+						if(!mode) channel.send(`✅ Demoted ${channel.guild.members.cache.get(el)}!`);
 					}).catch(err => { 
 						// Permission error
 						logO(err); 

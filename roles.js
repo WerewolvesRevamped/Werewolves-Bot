@@ -391,9 +391,16 @@ module.exports = function() {
 	
 	/* Deletes a cc category */
 	this.cmdRolesScCleanup = function(channel) {
-		for(let i = 0; i < cachecSCs.length; i++) {
-			cleanupCat(channel, cachedSCs[i], "SC #" + i);
+		for(let i = 0; i < cachedSCs.length; i++) {
+			cleanupCat(channel, cachedSCs[i], "SC #" + (i+1));
 		}
+        // Reset SC Cat Database
+        sql("DELETE FROM sc_cats", result => {
+            channel.send("✅ Successfully reset sc cat list!");
+            getCCCats();
+        }, () => {
+            channel.send("⛔ Database error. Could not reset sc cat list!");
+        });
 	}
 
 	
@@ -409,19 +416,22 @@ module.exports = function() {
 	
 	/* Creates secret channels */
 	this.createSCs = function(channel, debug) {
-		let callback = ((arg1,arg3,arg2) => createSCStartInd(arg1, arg2, arg3)).bind(this,channel,debug);
+		let callback = ((arg1,arg3,arg2) => createSCStartInd(arg1, arg2, arg3)).bind(null,channel,debug);
 		createNewSCCat(channel, callback);
 	}
 	
-	this.createNewSCCat = function(channel, callback1, channel = false) {
+	this.createNewSCCat = function(channel, callback, childChannel = false) {
 		scCatCount++;
 		let scName = "🕵 " + toTitleCase(stats.game) + " Secret Channels";
 		if(scCatCount > 1) scName += " #" + scCatCount;
 		channel.guild.channels.create(scName, { type: "GUILD_CATEGORY",  permissionOverwrites: getSCCatPerms(channel.guild) })
 		.then(cc => {
 			sql("INSERT INTO sc_cats (id) VALUES (" + connection.escape(cc.id) + ")", result => {	
-				if(channel) { // sets the new category as a channel parent - for the first channel that failed to fit in the previous category
-					channel.setParent(cc, { lockPermissions: false });
+				if(childChannel) { // sets the new category as a channel parent - for the first channel that failed to fit in the previous category
+					childChannel.setParent(cc, { lockPermissions: false }).catch(err => { 
+                        logO(err); 
+                        sendError(channel, err, "Could not assign parent to SC!");
+                    });
 				}
 				callback(cc);
 				getSCCats();
@@ -499,7 +509,7 @@ module.exports = function() {
 						}).catch(err => { 
 							logO(err); 
 							sendError(channel, err, "Could not set category. Creating new SC category");
-							let callback = ((arg1,arg3,arg4,arg2) => createSCStartInd(arg1, arg2, arg3, arg4)).bind(this,channel,multi,++index);
+							let callback = ((arg1,arg3,arg4,arg2) => createOneMultiSC(arg1, arg2, arg3, arg4)).bind(null,channel,multi,++index);
 							createNewSCCat(channel, callback, sc);
 						});	
 					}).catch(err => { 
@@ -558,6 +568,7 @@ module.exports = function() {
 		if(extra[index].members === "%r") ccPerms.push(getPerms(result[resultIndex].id, ["history", "read"], []));
 		// Create channel
 		var name = extra[index].name;
+        name = name.replace("%r", channel.guild.members.cache.get(result[resultIndex].id).user.username);
 		cachedTheme.forEach(el => name = name.replace(new RegExp(el.original, "g"), el.new));
 		channel.guild.channels.create(name, { type: "text",  permissionOverwrites: ccPerms })
 		.then(sc => {
@@ -569,7 +580,7 @@ module.exports = function() {
 			}).catch(err => { 
 				logO(err); 
 				sendError(channel, err, "Could not set category. Creating new SC category");
-				let callback = ((arg1,arg3,arg4,arg5,arg6,arg2) => createSCStartInd(arg1, arg2, arg3, arg4, arg5, arg6)).bind(this,channel,extra,index,result,++resultIndex);
+				let callback = ((arg1,arg3,arg4,arg5,arg6,arg2) => createOneOneExtraSC(arg1, arg2, arg3, arg4, arg5, arg6)).bind(null,channel,extra,index,result,++resultIndex);
 				createNewSCCat(channel, callback, sc);
 			});	
 		}).catch(err => { 
@@ -652,7 +663,7 @@ module.exports = function() {
 					}).catch(err => { 
 						logO(err); 
 						sendError(channel, err, "Could not set category. Creating new SC category");
-						let callback = ((arg1,arg3,arg4,arg5,arg2) => createSCStartInd(arg1, arg2, arg3, arg4, arg5)).bind(this,channel,players,++index,debug);
+						let callback = ((arg1,arg3,arg4,arg5,arg2) => createOneIndSC(arg1, arg2, arg3, arg4, arg5)).bind(null,channel,players,++index,debug);
 						createNewSCCat(channel, callback, sc);
 					});	
 				}).catch(err => { 
