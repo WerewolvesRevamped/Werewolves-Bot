@@ -568,7 +568,7 @@ module.exports = function() {
 		}, 10000);
 		setTimeout(function () {
 			let categories = cachedCCs;
-			categories.push(cachedSC)
+			categories.push(...cachedSCs)
 			substituteChannels(message.channel, categories, 0, getUser(message.channel, args[1]), getUser(message.channel, args[2]));
 		}, 15000);
 		setTimeout(function() {
@@ -592,7 +592,7 @@ module.exports = function() {
 			cmdPlayersSet(message.channel, ["set", "role", getUser(message.channel, args[2]), pRoles.find(el => el.id === getUser(message.channel, args[1])).role]); 
 			cmdPlayersSet(message.channel, ["set", "role", getUser(message.channel, args[1]), pRoles.find(el => el.id === getUser(message.channel, args[2])).role]); 
 			let categories = cachedCCs;
-			categories.push(cachedSC)
+			categories.push(...cachedSCs)
 			switchChannels(message.channel, categories, 0, getUser(message.channel, args[1]), getUser(message.channel, args[2]));
 		}, 3000);
 		setTimeout(function() { // reload data
