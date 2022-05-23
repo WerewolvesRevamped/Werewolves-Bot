@@ -13,7 +13,7 @@ module.exports = function() {
 	this.loadedModuleRoles = true;
 	this.cachedAliases = [];
 	this.cachedRoles = [];
-	this.cachedSC = 0;
+	this.cachedSCs = [];
 	
 	/* Handle roles command */
 	this.cmdRoles = function(message, args, argsX) {
@@ -264,6 +264,17 @@ module.exports = function() {
 		return help;
 	}
 	
+	this.getSCCats = function() {
+		// Get SC Cats
+		sql("SELECT id FROM sc_cats", result => {
+			// Cache SC Cats
+			cachedSCs = result.map(el => el.id);
+		}, () => {
+			// Db error
+			log("CC > Database error. Could not cache sc cat list!");
+		});
+	}
+	
 	/* Sets permissions for an elected role */
 	this.cmdRolesElectedSc = function(channel, args) {
 		// Check arguments
@@ -379,13 +390,15 @@ module.exports = function() {
 	
 	/* Deletes a cc category */
 	this.cmdRolesScCleanup = function(channel) {
-		cleanupCat(channel, cachedSC, "SC");
+		for(let i = 0; i < cachecSCs.length; i++) {
+			cleanupCat(channel, cachedSCs[i], "SC #" + i);
+		}
 	}
 
 	
 	/* Check if a channel is a SC */
 	this.isSC = function(channel) {
-		return channel.parentId === cachedSC;
+		return !channel.parent ? true : cachedSCs.includes(channel.parentId);
 	}
     
 	/* Check if a channel is a SC */
@@ -665,13 +678,8 @@ module.exports = function() {
 		});
 	}
 	
-	/* Cache SC category */
-	this.getSCCat = function() {
-		sqlGetStat(14, result => {
-			cachedSC = result;
-		}, () => {
-			log("Roles > ❗❗❗ Unable to cache SC Category!");
-		});
+	/* Cache Public category */
+	this.getPublicCat = function() {
 		sqlGetStat(15, result => {
 			cachedPublic = result;
 		}, () => {
