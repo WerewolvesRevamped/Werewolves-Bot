@@ -14,6 +14,7 @@ module.exports = function() {
 	this.cachedAliases = [];
 	this.cachedRoles = [];
 	this.cachedSCs = [];
+	this.scCatCount = 0;
 	
 	/* Handle roles command */
 	this.cmdRoles = function(message, args, argsX) {
@@ -408,11 +409,22 @@ module.exports = function() {
 	
 	/* Creates secret channels */
 	this.createSCs = function(channel, debug) {
-		channel.guild.channels.create("🕵 " + toTitleCase(stats.game) + " Secret Channels", { type: "GUILD_CATEGORY",  permissionOverwrites: getSCCatPerms(channel.guild) })
+		let callback = ((arg1,arg3,arg2) => createSCStartInd(arg1, arg2, arg3)).bind(this,channel,debug);
+		createNewSCCat(channel, callback);
+	}
+	
+	this.createNewSCCat = function(channel, callback1, channel = false) {
+		scCatCount++;
+		let scName = "🕵 " + toTitleCase(stats.game) + " Secret Channels";
+		if(scCatCount > 1) scName += " #" + scCatCount;
+		channel.guild.channels.create(scName, { type: "GUILD_CATEGORY",  permissionOverwrites: getSCCatPerms(channel.guild) })
 		.then(cc => {
-			sqlSetStat(14, cc.id, result => {
-				createSCStartInd(channel, cc, debug);
-				getSCCat();
+			sql("INSERT INTO sc_cats (id) VALUES (" + connection.escape(cc.id) + ")", result => {	
+				if(channel) { // sets the new category as a channel parent - for the first channel that failed to fit in the previous category
+					channel.setParent(cc, { lockPermissions: false });
+				}
+				callback(cc);
+				getSCCats();
 			}, () => {
 				channel.send("⛔ Database error. Unable to save SC category!"); 
 			});
@@ -486,7 +498,9 @@ module.exports = function() {
 							createOneMultiSC(channel, category, multi, ++index);
 						}).catch(err => { 
 							logO(err); 
-							sendError(channel, err, "Could not set category");
+							sendError(channel, err, "Could not set category. Creating new SC category");
+							let callback = ((arg1,arg3,arg4,arg2) => createSCStartInd(arg1, arg2, arg3, arg4)).bind(this,channel,multi,++index);
+							createNewSCCat(channel, callback, sc);
 						});	
 					}).catch(err => { 
 						// Couldn't create channel
@@ -554,7 +568,9 @@ module.exports = function() {
 				createOneOneExtraSC(channel, category, extra, index, result, ++resultIndex);
 			}).catch(err => { 
 				logO(err); 
-				sendError(channel, err, "Could not set category");
+				sendError(channel, err, "Could not set category. Creating new SC category");
+				let callback = ((arg1,arg3,arg4,arg5,arg6,arg2) => createSCStartInd(arg1, arg2, arg3, arg4, arg5, arg6)).bind(this,channel,extra,index,result,++resultIndex);
+				createNewSCCat(channel, callback, sc);
 			});	
 		}).catch(err => { 
 			// Couldn't create channel
@@ -635,7 +651,9 @@ module.exports = function() {
 						createOneIndSC(channel, category, players, ++index, debug);
 					}).catch(err => { 
 						logO(err); 
-						sendError(channel, err, "Could not set category");
+						sendError(channel, err, "Could not set category. Creating new SC category");
+						let callback = ((arg1,arg3,arg4,arg5,arg2) => createSCStartInd(arg1, arg2, arg3, arg4, arg5)).bind(this,channel,players,++index,debug);
+						createNewSCCat(channel, callback, sc);
 					});	
 				}).catch(err => { 
 					// Couldn't create channel
@@ -657,7 +675,7 @@ module.exports = function() {
 	this.cacheRoleInfo = function() {
 		getAliases();
 		getRoles();
-		getSCCat();
+		getSCCats();
 	}
 	
 	/* Cache role aliases */
