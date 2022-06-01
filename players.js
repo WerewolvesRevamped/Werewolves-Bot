@@ -66,6 +66,7 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "killq [add|remove|killall|list|clear] - Manages kill queue\n";
 				if(isGameMaster(member)) help += stats.prefix + "modrole [add|remove] - Adds/removes roles from users\n";
 				help += stats.prefix + "list - Lists signed up players\n";
+				help += stats.prefix + "list_alphabetical - Lists signed up players (alphabetical)\n";
 				help += stats.prefix + "alive - Lists alive players\n";
 				help += stats.prefix + "signup - Signs you up for the next game\n";
 				help += stats.prefix + "emojis - Gives a list of emojis and player ids (Useful for CC creation)\n";
@@ -89,6 +90,13 @@ module.exports = function() {
 				help += "```\nFunctionality\n\nLists all signed up players\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "list\n< Signed Up Players | Total: 3\n  🛠 - McTsts (@McTsts)\n  🤔 - marhjo (@marhjo)\n  👌 - federick (@federick)\n```";
 				help += "```diff\nAliases\n\n- l\n- signedup\n- signedup_list\n- signedup-list\n- listsignedup\n- list-signedup\n- list_signedup\n```";
+			break;
+			case "list_alphabetical":
+			case "la":
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "list_alphabetical\n```";
+				help += "```\nFunctionality\n\nLists all signed up players (alphabetically)\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "list\n< Signed Up Players (Alphabetical) | Total: 3\n  🛠 - McTsts (@McTsts)\n  🤔 - marhjo (@marhjo)\n  👌 - zederick (@zederick)\n```";
+				help += "```diff\nAliases\n\n- la\n```";
 			break;
 			case "a":
 			case "alive":
@@ -367,6 +375,7 @@ module.exports = function() {
 					channel.send("⛔ Database error. Could not kill `" +  channel.guild.members.cache.get(el).displayName + "`!");
 				});	
 				// Send reporter message
+                cmdConnectionSend(channel, ["", "reporter2", true, stats.prefix + "players get_clean role " + channel.guild.members.cache.get(el)]);
                 cmdConnectionSend(channel, ["", "reporter", true, stats.prefix + "players get_clean role " + channel.guild.members.cache.get(el)]);
                 
 				// Remove roles
@@ -446,14 +455,22 @@ module.exports = function() {
 	this.cmdPlayersListMsgs = function(channel, args) {
 		// Get a list of players
 		sql("SELECT id,emoji,public_msgs,private_msgs FROM players", result => {
-			let playerListArray = result.sort((a,b) => (b.public_msgs+b.private_msgs) - (a.public_msgs+a.private_msgs)).map(el => `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"}; Total: ${el.public_msgs+el.private_msgs}; Public: ${el.public_msgs}; Private: ${el.private_msgs}`);
+            let totalMsgs = 0;
+            let totalMsgsPrivate = 0;
+            let totalMsgsPublic = 0;
+			let playerListArray = result.sort((a,b) => (b.public_msgs+b.private_msgs) - (a.public_msgs+a.private_msgs)).map(el => {
+                totalMsgs += el.public_msgs+el.private_msgs;
+                totalMsgsPrivate += el.private_msgs;
+                totalMsgsPublic += el.public_msgs;
+                return `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"}; Total: ${el.public_msgs+el.private_msgs}; Public: ${el.public_msgs}; Private: ${el.private_msgs}`;
+            });
 			let playerList = [], counter = 0;
 			for(let i = 0; i < playerListArray.length; i++) {
 				if(!playerList[Math.floor(counter/10)]) playerList[Math.floor(counter/10)] = [];
 				playerList[Math.floor(counter/10)].push(playerListArray[i]);
 				counter++;
 			}
-			channel.send("**Players** | Total: " + result.length);
+			channel.send("**Players** | Total: " + result.length + "\nTotal: " + totalMsgs + "; Public: " + totalMsgsPublic + "; Private: " + totalMsgsPrivate);
 			for(let i = 0; i < playerList.length; i++) {
 				// Print message
 				channel.send("✳ Listing players " + i  + "/" + (playerList.length) + "...").then(m => {
@@ -516,6 +533,28 @@ module.exports = function() {
 			// Print message
 			channel.send("✳ Listing signed up players").then(m => {
 				m.edit("**Signed Up Players** | Total: " +  result.length + "\n" + playerList)
+			}).catch(err => {
+				logO(err); 
+				sendError(channel, err, "Could not list signed up players");
+			});
+		}, () => {
+			// DB error
+			channel.send("⛔ Database error. Could not list signed up players!");
+		});
+	}
+    
+	/* Lists all signedup players */
+	this.cmdListSignedupAlphabetical = function(channel) {
+		// Get a list of players
+		sql("SELECT id,emoji FROM players", result => {
+			let playerList = result.sort((a,b) => {
+                let pa = channel.guild.members.cache.get(a.id);
+                let pb = channel.guild.members.cache.get(b.id);
+               return (pa ? pa.nickname : "-") > (pb ? pb.nickname : "-") ? 1 : -1;
+            }).map(el => `${el.emoji}  - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).nickname : "*user left*"}`).join("\n");
+			// Print message
+			channel.send("✳ Listing signed up players").then(m => {
+				m.edit("**Signed Up Players (Alphabetical)** | Total: " +  result.length + "\n" + playerList)
 			}).catch(err => {
 				logO(err); 
 				sendError(channel, err, "Could not list signed up players");

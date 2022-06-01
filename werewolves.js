@@ -215,6 +215,11 @@ client.on("messageCreate", async message => {
 	case "list_signedup":
 		cmdListSignedup(message.channel);
 	break;
+	/* List Signedup (alphabetical) */ // Lists all signedup players (alphabetically)
+	case "la":
+	case "list_alphabetical":
+		cmdListSignedupAlphabetical(message.channel);
+	break;
 	/* List Alive */ // Lists all alive players
 	case "a":
 	case "alive":
@@ -409,10 +414,10 @@ client.on("messageReactionAdd", async (reaction, user) => {
 	} else if(stats.gamephase == 2) {
 		// Remove unallowed reactions
 		if(isSpectator(reaction.message.guild.members.cache.get(user.id)) || isDeadParticipant(reaction.message.guild.members.cache.get(user.id))) {
-			if(reaction.emoji == client.emojis.cache.get(stats.no_emoji) || reaction.emoji == client.emojis.cache.get(stats.yes_emoji)) return;
+			if(reaction.emoji == client.emojis.cache.get(stats.no_emoji) || reaction.emoji == client.emojis.cache.get(stats.yes_emoji) || reaction.emoji.name == "🇦" || reaction.emoji.name == "🇧" || reaction.emoji.name == "🇨" || reaction.emoji.name == "🇩" || reaction.emoji.name == "🇪" || reaction.emoji.name == "🇫") return;
 			reaction.users.remove(user);
 		// Automatic pinning
-		} else if(reaction.emoji.name === "📌" && isParticipant(reaction.message.guild.members.cache.get(user.id)) && (isCC(reaction.message.channel) || isSC(reaction.message.channel))) {
+		} else if(reaction.emoji.name === "📌" && isParticipant(reaction.message.guild.members.cache.get(user.id))) {
 			reaction.message.pin();
 		} else if((isGameMaster(reaction.message.guild.members.cache.get(user.id)) || reaction.message.guild.members.cache.get(user.id).roles.cache.get(stats.gamemaster_ingame)) && reaction.emoji == client.emojis.cache.get(stats.yes_emoji)) {
 			reaction.message.edit(Buffer.from(reaction.message.content.split("||")[1], 'base64').toString('ascii'));

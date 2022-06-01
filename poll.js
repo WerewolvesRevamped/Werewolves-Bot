@@ -255,7 +255,7 @@ module.exports = function() {
 			if(votes <= 0) return { valid: false };
 			// Get string of voters
 			let voters;
-			if(pollType != "dead" && pollType != "dead_vote" && pollType != "dead_list") voters = votersList.filter(el => isParticipant(el)).join(", ");
+			if(pollType != "dead" && pollType != "dead_vote" && pollType != "dead_list" && pollType != "dead_a" && pollType != "dead_ab" && pollType != "dead_abc" && pollType != "dead_abcd" && pollType != "dead_abcde" && pollType != "dead_abcdef") voters = votersList.filter(el => isParticipant(el)).join(", ");
 			else voters = votersList.filter(el => isDeadParticipant(el)).join(", ");
 			// Get candidate from emoji
 			let candidate = "not set";
