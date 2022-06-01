@@ -75,7 +75,7 @@ client.on("messageCreate", async message => {
         let msg = message.content.trim().substr(1).trim();
         let msgRole = msg.match(/(".*?")|(\S+)/g) ? msg.match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "";
         console.log(msg + " => " + msgRole);
-		if(msg.match(/^[a-zA-Z ]*$/)) cmdInfo(message.channel, msgRole, false, true);
+		if(msg.match(/^[a-zA-Z ]*$/)) cmdInfo(message.channel, msgRole, false, true, true);
 		return;
 	}
 	if(message.content.indexOf(stats.prefix) !== 0) return;

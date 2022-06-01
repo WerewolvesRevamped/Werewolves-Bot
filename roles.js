@@ -1129,7 +1129,7 @@ module.exports = function() {
 	}
 	
 	/* Prints info for a role by name or alias */
-	this.cmdInfo = function(channel, args, pin, noErr) {
+	this.cmdInfo = function(channel, args, pin, noErr, simp = false) {
 		// Check arguments
 		if(!args[0]) { 
 			if(!noErr) channel.send("⛔ Syntax error. Not enough parameters!"); 
@@ -1143,6 +1143,11 @@ module.exports = function() {
 		sql("SELECT description FROM roles WHERE name = " + connection.escape(parseRole(args[0])), result => {
 			if(result.length > 0) { 
 				var desc = result[0].description.replace(/~/g,"\n");
+                // simplified role description support
+                desc = desc.split("__Simplified__");
+                if(simp) desc = desc[1] ? (desc[0].split("__Basics__")[0] ? desc[0].split("__Basics__")[0] : toTitleCase(parseRole(args[0]))) + desc[1].trim() : desc[0]; 
+                else desc = desc[0];
+                // apply themes
 				cachedTheme.forEach(el => desc = desc.replace(new RegExp(el.original, "g"), el.new));
 				channel.send(desc).then(m => {
 					// Pin if pin is true
