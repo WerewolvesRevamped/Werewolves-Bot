@@ -448,7 +448,7 @@ module.exports = function() {
 	/* Creates CC */
 	this.cmdCCCreate = function(channel, member, args, mode, callback) {
 		// Get a list of users that need to be in the cc
-		if((!(isCC(channel) || (loadedModuleRoles && isSC(channel)) || isGameMaster(member))) && false) {
+		if(!(isCC(channel) || (loadedModuleRoles && isSC(channel)) || isGameMaster(member))) {
 			channel.send("⛔ Command error. Can't use command outside a CC/SC!");
 			return;
 		} else if(!args[1]) {
