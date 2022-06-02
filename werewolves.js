@@ -59,7 +59,7 @@ client.on("messageCreate", async message => {
     
 	/* Gif Check */
 	// isParticipant(message.author) &&
-	if(!message.author.bot && isParticipant(message.member) && message.content.search("http") >= 0 && stats.ping.length > 0) {
+	if(!message.author.bot && isParticipant(message.member) && message.content.search("http") >= 0 && stats.ping.length > 0 && stats.gamephase == 2) {
 		urlHandle(message);
 	}
 	
