@@ -1161,6 +1161,9 @@ module.exports = function() {
 							if(!noErr) sendError(channel, err, "Could not pin info message");
 						});
 					}
+					if(simp) {
+					    setTimeout(() => m.delete(), 10000);
+					}
 				// Couldnt send message
 				}).catch(err => { 
 					logO(err); 
