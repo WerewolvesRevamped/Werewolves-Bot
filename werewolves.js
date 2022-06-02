@@ -403,6 +403,8 @@ client.on('messageDelete', message => {
 /* Reactions Add*/
 client.on("messageReactionAdd", async (reaction, user) => {
 	if(user.bot) return;
+	// reaction role
+	handleReactionRole(reaction, user, true);
 	// Handle confirmation messages
 	else if(reaction.emoji.name === "✅" && isGameMaster(reaction.message.guild.members.cache.get(user.id))) {
 		sql("SELECT time,action FROM confirm_msg WHERE id = " + connection.escape(reaction.message.id), result => {
@@ -431,6 +433,8 @@ client.on("messageReactionAdd", async (reaction, user) => {
 /* Reactions Remove */
 client.on("messageReactionRemove", async (reaction, user) => {
 	if(user.bot) return;
+	// reaction role
+	handleReactionRole(reaction, user, false);
 	// Automatic unpinning
 	else if(reaction.emoji.name === "📌" && reaction.count == 0 && isParticipant(reaction.message.guild.members.cache.get(user.id))) {
 		reaction.message.unpin();
@@ -446,6 +450,31 @@ client.on("guildMemberRemove", async member => {
 		log("⛔ Database error. Could not kill `" +  member.displayName + "`!");
 	});	
 });
+
+// for hardcoded reaction roles, because I'm lazy
+function handleReactionRole(reaction, user, add) {
+	var member = reaction.message.guild.members.cache.get(user.id);
+	if(!member) return; // cant find member
+	/* list of reaction messages */
+	var reactionMessages = { 
+		"123456789": { // sample msg #1
+			"1342424": "197194" // sample reaction #1
+		}
+	}; 
+	// get role id
+	var reactionMsg = reactionMessages[reaction.message.id];
+	var reactionRole = reactionMsg ? reactionMsg[reaction.emoji.id] : 0;
+	// check if a role was found
+	if(!reactionRole) { // no role could be found, so this was not an allowed reaction
+		reaction.users.remove(user); // remove reaction
+	} else {
+		if(add) { // add role
+			member.roles.add(reactionRole).catch(err => logO(err));
+		} else { // remove role
+			member.roles.remove(reactionRole).catch(err => logO(err));	
+		}
+	}
+}
 
 async function urlHandle(message) {
 	var urls = findUrls(message.content);
