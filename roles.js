@@ -1145,7 +1145,7 @@ module.exports = function() {
 				var desc = result[0].description.replace(/~/g,"\n");
                 // simplified role description support
                 desc = desc.split("__Simplified__");
-                if(simp) desc = desc[1] ? (desc[0].split("__Basics__")[0] ? desc[0].split("__Basics__")[0] : toTitleCase(parseRole(args[0]))) + desc[1].trim() : desc[0]; 
+                if(simp) desc = desc[1] ? (desc[0].split("__Basics__")[0] ? desc[0].split("__Basics__")[0] : toTitleCase(parseRole(args[0]))) + "\n" + desc[1].trim() : desc[0]; 
                 else desc = desc[0];
                 // apply themes
 				cachedTheme.forEach(el => desc = desc.replace(new RegExp(el.original, "g"), el.new));
@@ -1162,7 +1162,7 @@ module.exports = function() {
 						});
 					}
 					if(simp) {
-					    setTimeout(() => m.delete(), 10000);
+					    setTimeout(() => m.delete(), 180000);
 					}
 				// Couldnt send message
 				}).catch(err => { 

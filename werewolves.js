@@ -35,6 +35,8 @@ client.on("ready", () => {
 		});
 		log("Bot > Caching completed, Bot is ready!")
 	}, 3000);
+    // fetch reaction roles
+    client.channels.cache.get("611536670201872385").messages.fetch({limit:10});
 });
 
 /* New Message */
@@ -402,9 +404,9 @@ client.on('messageDelete', message => {
 
 /* Reactions Add*/
 client.on("messageReactionAdd", async (reaction, user) => {
-	if(user.bot) return;
 	// reaction role
 	handleReactionRole(reaction, user, true);
+	if(user.bot) return;
 	// Handle confirmation messages
 	else if(reaction.emoji.name === "✅" && isGameMaster(reaction.message.guild.members.cache.get(user.id))) {
 		sql("SELECT time,action FROM confirm_msg WHERE id = " + connection.escape(reaction.message.id), result => {
@@ -432,9 +434,9 @@ client.on("messageReactionAdd", async (reaction, user) => {
 
 /* Reactions Remove */
 client.on("messageReactionRemove", async (reaction, user) => {
-	if(user.bot) return;
 	// reaction role
 	handleReactionRole(reaction, user, false);
+	if(user.bot) return;
 	// Automatic unpinning
 	else if(reaction.emoji.name === "📌" && reaction.count == 0 && isParticipant(reaction.message.guild.members.cache.get(user.id))) {
 		reaction.message.unpin();
@@ -453,17 +455,33 @@ client.on("guildMemberRemove", async member => {
 
 // for hardcoded reaction roles, because I'm lazy
 function handleReactionRole(reaction, user, add) {
+    if(user.bot) return;
 	var member = reaction.message.guild.members.cache.get(user.id);
 	if(!member) return; // cant find member
 	/* list of reaction messages */
 	var reactionMessages = { 
-		"123456789": { // sample msg #1
-			"1342424": "197194" // sample reaction #1
-		}
+		"611547184524951563": { // pronoun
+			"👦": "611538168256266241", // he
+			"👧": "611538233154863144", // she
+			"🤠": "611538282127294464" // they
+		},
+        "611547204808867860": { // archive access
+            "🔒": "611544387804987392"
+        },
+        "611632076571148289": { // continent
+            "Asia": "611630624528269399", // asia
+            "Europe": "611630665808740353", // europe
+            "Africa": "611630718543593514", // africa
+            "Oceania": "611630756632068244", // oceania
+            "NAmerica": "611630781286187018", // namerica
+            "SAmerica": "611630817432699042" // samerica
+        }
 	}; 
 	// get role id
 	var reactionMsg = reactionMessages[reaction.message.id];
-	var reactionRole = reactionMsg ? reactionMsg[reaction.emoji.id] : 0;
+    console.log(reactionMsg);
+	var reactionRole = reactionMsg ? reactionMsg[reaction.emoji.name] : 0;
+    console.log(reaction.emoji.name);
 	// check if a role was found
 	if(!reactionRole) { // no role could be found, so this was not an allowed reaction
 		reaction.users.remove(user); // remove reaction
