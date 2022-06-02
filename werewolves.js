@@ -72,11 +72,11 @@ client.on("messageCreate", async message => {
 	if(message.channel.type === "dm") return;
 	if(message.content.slice(stats.prefix.length).indexOf(stats.prefix) == 0) return;
 	if(message.content.indexOf(stats.prefix) !== 0 && message.content[0] == ".") {
-        let msg = message.content.trim().substr(1).trim();
-        let msgRole = msg.match(/(".*?")|(\S+)/g) ? msg.match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "";
-        console.log(msg + " => " + msgRole);
-		if(msg.match(/^[a-zA-Z ]*$/)) cmdInfo(message.channel, msgRole, false, true, true);
-		return;
+                let msg = message.content.trim().substr(1).trim();
+                let msgRole = msg.match(/(".*?")|(\S+)/g) ? msg.match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "";
+                console.log(msg + " => " + msgRole);
+                if(msg.match(/^[a-zA-Z ]*$/)) cmdInfo(message.channel, msgRole, false, true, true);
+                return;
 	}
 	if(message.content.indexOf(stats.prefix) !== 0) return;
     
