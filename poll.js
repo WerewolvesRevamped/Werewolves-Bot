@@ -269,7 +269,8 @@ module.exports = function() {
 			else if(el.emoji == "🇫") candidate = "Option F";
 			else if(el.emoji_id == stats.yes_emoji) candidate = "Yes";
 			else if(el.emoji_id == stats.no_emoji) candidate = "No";
-			else candidate = channel.guild.members.cache.get(emojiToID(el.emoji));
+			else if(emojiToID(el.emoji)) candidate = channel.guild.members.cache.get(emojiToID(el.emoji));
+			else candidate = "*Unknown*";
 			// Return one message line
 			return { valid: true, votes: votes, candidate: candidate, emoji: el.emoji, voters: voters };
 	}).filter(el => el.valid).sort((a, b) => a.votes < b.votes).map(el => { 
