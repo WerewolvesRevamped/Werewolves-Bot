@@ -129,7 +129,7 @@ module.exports = function() {
 					case "set1":
 					case "set2":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles set2 <Role Name> <Role Description>\n```";
-						help += "```\nFunctionality\n\nCan be used to set very large role descriptions that do not fit in one message. Use set1 for the first half and set2 for the second half. Otherwise works just like set.\n```";
+						help += "```\nFunctionality\n\nCan be used to set very large role descriptions that do not fit in one message. Use set1 for the first half and set2 for the second half. Otherwise works just like set. For technical reasons, the first character of the description in set2 is ignored.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "roles set1 long_citizen long_text_part_1\n> " + stats.prefix + "roles set2 long_citizen long_text_part_2\n```";
 					break;
 					case "get":
@@ -903,7 +903,7 @@ module.exports = function() {
 			channel.send("⛔ Syntax error. Not enough parameters!"); 
 			return; 
 		}
-        argsX[2] = roleTempSegment + argsX[2];
+        argsX[2] = roleTempSegment + argsX[2].substr(1);
         cmdRolesSet(channel, args, argsX);
     }
     
