@@ -26,6 +26,8 @@ module.exports = function() {
 		// Find subcommand
 		switch(args[0]) {
 			// Role Subcommand
+			case "set1": cmdRolesSet1(message.channel, args, argsX); break;
+			case "set2": cmdRolesSet2(message.channel, args, argsX); break;
 			case "set": cmdRolesSet(message.channel, args, argsX); break;
 			case "get": cmdRolesGet(message.channel, args); break;
 			case "remove": cmdRolesRemove(message.channel, args); break;
@@ -878,6 +880,27 @@ module.exports = function() {
 		});
 	}
 	
+    /* Sets the description of a role / creates a role */
+    var roleTempSegment = "";
+	this.cmdRolesSet1 = function(channel, args, argsX) {
+        // Check arguments
+		if(!args[1] || !args[2]) { 
+			channel.send("⛔ Syntax error. Not enough parameters!"); 
+			return; 
+		}
+        roleTempSegment = argsX[2];
+    }
+    
+	this.cmdRolesSet2 = function(channel, args, argsX) {
+        // Check arguments
+		if(!args[1] || !args[2]) { 
+			channel.send("⛔ Syntax error. Not enough parameters!"); 
+			return; 
+		}
+        argsX[2] = roleTempSegment + argsX[2];
+        cmdRolesSet(channel, args, argsX);
+    }
+    
 	/* Sets the description of a role / creates a role */
 	this.cmdRolesSet = function(channel, args, argsX) {
 		// Check arguments

@@ -36,7 +36,8 @@ client.on("ready", () => {
 		log("Bot > Caching completed, Bot is ready!")
 	}, 3000);
     // fetch reaction roles
-    client.channels.cache.get("611536670201872385").messages.fetch({limit:10});
+    let reactionChannel = client.channels.cache.get("611536670201872385");
+    if(reactionChannel) reactionChannel.messages.fetch({limit:10});
 });
 
 /* New Message */
