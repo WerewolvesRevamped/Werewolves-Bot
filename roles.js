@@ -911,7 +911,7 @@ module.exports = function() {
 		// Insert Entry & Preview it
 		if(!verifyRole(args[1])) {
 			sql("INSERT INTO roles (name, description) VALUES (" + connection.escape(args[1]) + "," + connection.escape(argsX[2]) + ")", result => {
-				channel.send("✅ Set `" + toTitleCase(args[1]) + "`! Preview:\n" + argsX[2].replace(/~/g,"\n") + "\n---------------------------------------------------------------------------------"); 
+				channel.send("✅ Set `" + toTitleCase(args[1]) + "`! Preview:\n" + argsX[2].replace(/~/g,"\n").substr(0, 1800) + "\n---------------------------------------------------------------------------------"); 
 				getRoles();
 			}, () => {
 				// Couldn't add to database
@@ -919,7 +919,7 @@ module.exports = function() {
 			});		
 		} else {
 			sql("UPDATE roles SET description = " + connection.escape(argsX[2]) + " WHERE name = " + connection.escape(parseRole(args[1])), result => {
-				channel.send("✅ Set `" + toTitleCase(args[1]) + "`! Preview:\n" + argsX[2].replace(/~/g,"\n") + "\n---------------------------------------------------------------------------------"); 
+				channel.send("✅ Updated `" + toTitleCase(args[1]) + "`! Preview:\n" + argsX[2].replace(/~/g,"\n").substr(0, 1800) + "\n---------------------------------------------------------------------------------"); 
 				getRoles();
 			}, () => {
 				// Couldn't add to database
@@ -1170,28 +1170,48 @@ module.exports = function() {
                 desc = desc.split("__Simplified__");
                 if(simp) desc = desc[1] ? (desc[0].split("__Basics__")[0] ? desc[0].split("__Basics__")[0] : toTitleCase(parseRole(args[0]))) + "\n" + desc[1].trim() : desc[0]; 
                 else desc = desc[0];
-                // apply themes
-				cachedTheme.forEach(el => desc = desc.replace(new RegExp(el.original, "g"), el.new));
-				channel.send(desc).then(m => {
-					// Pin if pin is true
-					if(pin) {
-						m.pin().then(mp => {
-							mp.channel.messages.fetch().then(messages => {
-								mp.channel.bulkDelete(messages.filter(el => el.type === "CHANNEL_PINNED_MESSAGE"));
-							});	
-						}).catch(err => { 
-							logO(err); 
-							if(!noErr) sendError(channel, err, "Could not pin info message");
-						});
-					}
-					if(simp) {
-					    setTimeout(() => m.delete(), 180000);
-					}
-				// Couldnt send message
-				}).catch(err => { 
-					logO(err); 
-					if(!noErr) sendError(channel, err, "Could not send info message");
-				});
+               
+               if(desc.length > 1900) { // too long, requires splitting
+                   let descSplit = desc.split(/\n/);
+                   desc = [];
+                   let i = 0;
+                   let j = 0;
+                   while(i < descSplit.length) {
+                       desc[j] = "";
+                       while(i < descSplit.length && (desc[j].length + descSplit[i].length) < 1900) {
+                           desc[j] += "\n" + descSplit[i];
+                           i++;
+                       }
+                       j++;
+                   }
+               } else { // fits
+                   desc = [desc];
+               }
+               
+                for(let i = 0; i < desc.length; i++) {
+                    // apply themes
+                    cachedTheme.forEach(el => desc[i] = desc[i].replace(new RegExp(el.original, "g"), el.new));
+                    channel.send(desc[i]).then(m => {
+                        // Pin if pin is true
+                        if(pin) {
+                            m.pin().then(mp => {
+                                mp.channel.messages.fetch().then(messages => {
+                                    mp.channel.bulkDelete(messages.filter(el => el.type === "CHANNEL_PINNED_MESSAGE"));
+                                });	
+                            }).catch(err => { 
+                                logO(err); 
+                                if(!noErr) sendError(channel, err, "Could not pin info message");
+                            });
+                        }
+                        if(simp) {
+                            setTimeout(() => m.delete(), 180000);
+                        }
+                    // Couldnt send message
+                    }).catch(err => { 
+                        logO(err); 
+                        if(!noErr) sendError(channel, err, "Could not send info message");
+                    });
+                }
 			} else { 
 			// Empty result
 				if(!noErr) channel.send("⛔ Database error. Could not find role `" + args[0] + "`!");
