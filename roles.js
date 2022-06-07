@@ -82,7 +82,7 @@ module.exports = function() {
 		let help = "";
 		switch(args[0]) {
 			case "":
-				if(isGameMaster(member)) help += stats.prefix + "roles [set|get|remove|list|list_names|clear] - Manages roles\n";
+				if(isGameMaster(member)) help += stats.prefix + "roles [set|set1|set2|get|remove|list|list_names|clear] - Manages roles\n";
 				if(isGameMaster(member)) help += stats.prefix + "roles [set_alias|remove_alias|list_alias|clear_alias] - Manages role aliases\n";
 				if(isGameMaster(member)) help += stats.prefix + "channels [set_ind|get_ind|list_ind] - Manages individual SCs\n";
 				if(isGameMaster(member)) help += stats.prefix + "channels [set_extra|set_multi|set_public|get|raw|remove|list|elected] - Manages Extra/Public/Multi SCs\n";
@@ -125,6 +125,12 @@ module.exports = function() {
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles set_alias <Alias Name> <Role Name>\n```";
 						help += "```\nFunctionality\n\nSets an alias for a role.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "roles set_alias citizen-alias citizen\n< ✅ Alias Citizen-Alias set to Citizen!\n```";
+					break;
+					case "set1":
+					case "set2":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles set2 <Role Name> <Role Description>\n```";
+						help += "```\nFunctionality\n\nCan be used to set very large role descriptions that do not fit in one message. Use set1 for the first half and set2 for the second half. Otherwise works just like set.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "roles set1 long_citizen long_text_part_1\n> " + stats.prefix + "roles set2 long_citizen long_text_part_2\n```";
 					break;
 					case "get":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles get <Role Name>\n```";
