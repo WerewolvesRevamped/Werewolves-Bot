@@ -479,8 +479,9 @@ function handleReactionRole(reaction, user, add) {
 	}; 
 	// get role id
 	var reactionMsg = reactionMessages[reaction.message.id];
+    if(!reactionMsg) return;
     console.log(reactionMsg);
-	var reactionRole = reactionMsg ? reactionMsg[reaction.emoji.name] : 0;
+	var reactionRole = reactionMsg[reaction.emoji.name];
     console.log(reaction.emoji.name);
 	// check if a role was found
 	if(!reactionRole) { // no role could be found, so this was not an allowed reaction
