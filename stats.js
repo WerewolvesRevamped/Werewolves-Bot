@@ -4,10 +4,6 @@
 		- Gamephase
 		- Cacheing stats
 		- Convert gamephase id to name
-		
-	Requires:
-		- SQL Module
-		- Utility Module
 */
 module.exports = function() {
 	/* Variables */
@@ -32,7 +28,7 @@ module.exports = function() {
 		// Get Gamephase
 		sqlGetStat(1, result => { 
 			stats.gamephase = result; 
-			if(loadedModulePlayers) getEmojis(); 
+			getEmojis(); 
 			if(doLog) log("Stats > Cached gamephase as `" + result + "`!")
 		}, () => {
 			log("Stats > ❗❗❗ Unable to cache gamephase!")
