@@ -2,9 +2,6 @@
 	Module for using sql / interacting with the database
 		- Simplified sql access w/ automatic error logging
 		- Simplified access to stats
-	
-	Requires:
-		- Stats Module
 */
 module.exports = function() {
 	/* Variables */

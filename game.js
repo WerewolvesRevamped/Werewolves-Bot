@@ -7,12 +7,9 @@
 		- Players Module
 */
 module.exports = function() {
-	/* Variables */
-	this.loadedModuleGame = true;
 
 	/* Handles start command */
 	this.cmdStart = function(channel, debug) {
-		if(!loadedModulePlayers || !loadedModuleRoles) return;
 		if(stats.gamephase > 1) { 
 			channel.send("⛔ Command error. Can't start an already started game."); 
 			return; 
@@ -35,13 +32,13 @@ module.exports = function() {
 		// Set Gamephase
 		cmdGamephaseSet(channel, ["set", "2"]);
 		// Cache emojis
-		if(loadedModulePlayers) getEmojis();	
-		if(loadedModulePlayers) getVotes();
-		if(loadedModulePlayers) getCCs();
-		if(loadedModulePlayers) getRoles();
+		getEmojis();	
+		getVotes();
+		getCCs();
+		getRoles();
 		// Assign roles
 		startOnePlayer(channel, channel.guild.roles.cache.get(stats.signed_up).members.toJSON(), 0);
-		if(loadedModuleRoles) createSCs(channel, debug);
+		createSCs(channel, debug);
 	}
 	
 	this.helpGame = function(member, args) {
@@ -351,11 +348,10 @@ module.exports = function() {
 	
 	/* Handles reset command */
 	this.cmdReset = function(channel) {
-		if(!loadedModulePlayers) return;
 		// Set Gamephase
 		cmdGamephaseSet(channel, ["set", "0"]);
 		// Reset Connection
-		if(loadedModuleWhispers) cmdConnectionReset(channel);
+		cmdConnectionReset(channel);
 		// Reset Player Database
 		sql("DELETE FROM players", result => {
 			channel.send("✅ Successfully reset player list!");
@@ -364,29 +360,27 @@ module.exports = function() {
 			channel.send("⛔ Database error. Could not reset player list!");
 		});
 		// Reset polls
-		if(loadedModulePoll) {
-			// Reset Poll Database
-			sql("DELETE FROM polls", result => {
-				channel.send("✅ Successfully reset poll list!");
-				getEmojis();
-			},() => {
-				channel.send("⛔ Database error. Could not reset poll list!");
-			});
-			// Reset Poll Count
-			sqlSetStat(13, 1, result => {
-				channel.send("✅ Successfully reset poll counter!");
-			}, () => {
-				channel.send("⛔ Database error. Could not reset poll counter!");
-			});
-		}
+		// Reset Poll Database
+		sql("DELETE FROM polls", result => {
+			channel.send("✅ Successfully reset poll list!");
+			getEmojis();
+		},() => {
+			channel.send("⛔ Database error. Could not reset poll list!");
+		});
+		// Reset Poll Count
+		sqlSetStat(13, 1, result => {
+			channel.send("✅ Successfully reset poll counter!");
+		}, () => {
+			channel.send("⛔ Database error. Could not reset poll counter!");
+		});
 		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.participant).members.toJSON(), 0);
 		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.dead_participant).members.toJSON(), 0);
 		// Remove Roles & Nicknames
 		wroles_remove(channel, [stats.signed_up, stats.participant, stats.dead_participant, stats.spectator, stats.mayor, stats.mayor2, stats.reporter, stats.guardian, stats.sub], ["signed up", "participant", "dead participant", "spectator", "mayor", "mayor2", "reporter", "guardian", "substitute"])
 		// Cleanup channels
-		if(loadedModuleCCs) cmdCCCleanup(channel);
-		if(loadedModuleRoles) cmdRolesScCleanup(channel);
-		if(loadedModulePlayers) cmdKillqClear(channel);
+		cmdCCCleanup(channel);
+		cmdRolesScCleanup(channel);
+		cmdKillqClear(channel);
 		sqlGetStat(15, result => {
 			cleanupCat(channel, result, "public");
 		}, () => {
@@ -442,7 +436,6 @@ module.exports = function() {
 	
 	/* Handle Sheet Command */
 	this.cmdSheet = function(message, args) {
-		if(!loadedModulePlayers) return;
 		if(!args[0]) { 
 			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `sheet [prepare|prepare_|import]`!"); 
 			return; 

@@ -1,16 +1,8 @@
 /*
-	Module for roles / role info
-		- Set role name & aliases
-		- Get role info
-		- Create / Manage SCs
-		- Distribute roles
-		
-	Requires:
-		- Stats/Sql/Utility/Confirm Base Modules
+	Module for themes
 */
 module.exports = function() {
 	/* Variables */
-	this.loadedModuleTheme = true;
 	this.cachedTheme = [];
 	
 	/* Handle roles command */
@@ -170,6 +162,16 @@ module.exports = function() {
 	
 	this.cmdThemeSelect = function(channel, args) {
 		cmdOptionsSet(channel, args, "29"); 
+	}
+	
+	// can apply a theme onto both strings and arrays
+	this.applyTheme = function(text) {
+		if(text instanceof Array) {
+			return text.map(el => applyTheme(el));
+		} else {
+			cachedTheme.forEach(el => text = text.replace(new RegExp(el.original, "g"), el.new));
+			return text;
+		}
 	}
 	
 	this.cacheTheme = function() {

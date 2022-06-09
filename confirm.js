@@ -1,11 +1,6 @@
 /*
 	Module for confirmation of dangerous commands
 		- Confirms actions
-		
-	Requires:
-		- SQL Module
-		- Stats Module
-		- Utility Module
 */
 module.exports = function() {
 	
@@ -32,17 +27,17 @@ module.exports = function() {
 	
 	this.confirmActionExecute = function(command, message, messageSent) {
 		switch(command) {
-			case "connection reset": if(loadedModuleWhispers) cmdConnectionReset(message.channel); break;
-			case "roles clear": if(loadedModuleRoles) cmdRolesClear(message.channel); break;
-			case "roles clear_alias": if(loadedModuleRoles) cmdRolesClearAlias(message.channel); break;
-			case "start": if(loadedModuleGame) cmdStart(message.channel, false); break;
-			case "start_debug": if(loadedModuleGame) cmdStart(message.channel, true); break;
-			case "reset": if(loadedModuleGame) cmdReset(message.channel); break;
-			case "end": if(loadedModuleGame) cmdEnd(message.channel); break;
+			case "connection reset": cmdConnectionReset(message.channel); break;
+			case "roles clear": cmdRolesClear(message.channel); break;
+			case "roles clear_alias": cmdRolesClearAlias(message.channel); break;
+			case "start": cmdStart(message.channel, false); break;
+			case "start_debug": cmdStart(message.channel, true); break;
+			case "reset": cmdReset(message.channel); break;
+			case "end": cmdEnd(message.channel); break;
 			case "killq killall": cmdKillqKillall(message.channel); break;
-			case "players list": if(loadedModulePlayers) cmdPlayersList(message.channel); break;
-			case "cc cleanup": if(loadedModuleCCs) cmdCCCleanup(message.channel); break;
-			case "roles sc_cleanup": if(loadedModuleRoles) cmdRolesScCleanup(message.channel); break;
+			case "players list": cmdPlayersList(message.channel); break;
+			case "cc cleanup": cmdCCCleanup(message.channel); break;
+			case "roles sc_cleanup": cmdRolesScCleanup(message.channel); break;
 			case "bulkdelete": cmdBulkDelete(message.channel); break;
 			default:	messageSent ? 
 							message.edit("⛔ Syntax error. Tried to confirm unknown command!") : 

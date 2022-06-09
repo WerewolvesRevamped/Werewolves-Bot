@@ -7,19 +7,8 @@
 		- Pinging
 		- Handelling channels
 		- Handelling command permissions
-	
-	Requires:
-		- Stats Module
 */
 module.exports = function() {
-	/* Variables */
-	this.loadedModuleCCs = false;
-	this.loadedModulePlayers = false;
-	this.loadedModuleWhispers = false;
-	this.loadedModuleRoles = false;
-	this.loadedModuleGame = false;
-	this.loadedModulePoll = false;
-	
 	/* Converts a string to title case */
 	this.toTitleCase = function(str) {
 		return str.replace(/[a-zA-Z0-9][^\s-_]*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
@@ -179,13 +168,13 @@ module.exports = function() {
 		// Commands
 		msgB += helpUtility(member, args);
 		msgB += helpStats(member, args);
-		if(loadedModuleRoles) msgB += helpRoles(member, args);
-		if(loadedModuleCCs) msgB += helpCCs(member, args);
-		if(loadedModuleGame) msgB += helpGame(member, args);
-		if(loadedModuleWhispers) msgB += helpWhispers(member, args);
-		if(loadedModulePlayers) msgB += helpPlayers(member, args);
-		if(loadedModulePoll) msgB += helpPoll(member, args);
-		if(loadedModuleTheme) msgB += helpTheme(member, args);
+		msgB += helpRoles(member, args);
+		msgB += helpCCs(member, args);
+		msgB += helpGame(member, args);
+		msgB += helpWhispers(member, args);
+		msgB += helpPlayers(member, args);
+		msgB += helpPoll(member, args);
+		msgB += helpTheme(member, args);
 		msgB += helpBase(member, args);
 		msgB += helpConfirm(member, args);
 		// Print
