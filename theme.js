@@ -1,16 +1,8 @@
 /*
-	Module for roles / role info
-		- Set role name & aliases
-		- Get role info
-		- Create / Manage SCs
-		- Distribute roles
-		
-	Requires:
-		- Stats/Sql/Utility/Confirm Base Modules
+	Module for themes
 */
 module.exports = function() {
 	/* Variables */
-	this.loadedModuleTheme = true;
 	this.cachedTheme = [];
 	
 	/* Handle roles command */
