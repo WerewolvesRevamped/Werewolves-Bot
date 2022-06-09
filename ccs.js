@@ -9,12 +9,10 @@
 */
 module.exports = function() {
 	/* Variables */
-	this.loadedModuleCCs = true;
 	this.cachedCCs = [];
 	
 	/* Handles cc command */
 	this.cmdCC = function(message, args, argsX) {
-		if(!loadedModulePlayers) return;
 		// Check subcommand
 		if(!args[0]) { 
 			message.channel.send(helpCCs(message.member, ["cc"]));
@@ -448,7 +446,7 @@ module.exports = function() {
 	/* Creates CC */
 	this.cmdCCCreate = function(channel, member, args, mode, callback) {
 		// Get a list of users that need to be in the cc
-		if(!(isCC(channel) || (loadedModuleRoles && isSC(channel)) || isGameMaster(member))) {
+		if(!(isCC(channel) || isSC(channel) || isGameMaster(member))) {
 			channel.send("⛔ Command error. Can't use command outside a CC/SC!");
 			return;
 		} else if(!args[1]) {
