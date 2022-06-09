@@ -35,6 +35,9 @@ client.on("ready", () => {
 		});
 		log("Bot > Caching completed, Bot is ready!")
 	}, 3000);
+    // fetch reaction roles
+    let reactionChannel = client.channels.cache.get("611536670201872385");
+    if(reactionChannel) reactionChannel.messages.fetch({limit:10});
 });
 
 /* New Message */
@@ -59,7 +62,7 @@ client.on("messageCreate", async message => {
     
 	/* Gif Check */
 	// isParticipant(message.author) &&
-	if(!message.author.bot && isParticipant(message.member) && message.content.search("http") >= 0 && stats.ping.length > 0) {
+	if(!message.author.bot && isParticipant(message.member) && message.content.search("http") >= 0 && stats.ping.length > 0 && stats.gamephase == 2) {
 		urlHandle(message);
 	}
 	
@@ -72,11 +75,11 @@ client.on("messageCreate", async message => {
 	if(message.channel.type === "dm") return;
 	if(message.content.slice(stats.prefix.length).indexOf(stats.prefix) == 0) return;
 	if(message.content.indexOf(stats.prefix) !== 0 && message.content[0] == ".") {
-        let msg = message.content.trim().substr(1).trim();
-        let msgRole = msg.match(/(".*?")|(\S+)/g) ? msg.match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "";
-        console.log(msg + " => " + msgRole);
-		if(msg.match(/^[a-zA-Z ]*$/)) cmdInfo(message.channel, msgRole, false, true);
-		return;
+                let msg = message.content.trim().substr(1).trim();
+                let msgRole = msg.match(/(".*?")|(\S+)/g) ? msg.match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "";
+                console.log(msg + " => " + msgRole);
+                if(msg.match(/^[a-zA-Z ]*$/)) cmdInfo(message.channel, msgRole, false, true, true);
+                return;
 	}
 	if(message.content.indexOf(stats.prefix) !== 0) return;
     
@@ -214,6 +217,11 @@ client.on("messageCreate", async message => {
 	case "list-signedup":
 	case "list_signedup":
 		cmdListSignedup(message.channel);
+	break;
+	/* List Signedup (alphabetical) */ // Lists all signedup players (alphabetically)
+	case "la":
+	case "list_alphabetical":
+		cmdListSignedupAlphabetical(message.channel);
 	break;
 	/* List Alive */ // Lists all alive players
 	case "a":
@@ -397,6 +405,8 @@ client.on('messageDelete', message => {
 
 /* Reactions Add*/
 client.on("messageReactionAdd", async (reaction, user) => {
+	// reaction role
+	handleReactionRole(reaction, user, true);
 	if(user.bot) return;
 	// Handle confirmation messages
 	else if(reaction.emoji.name === "✅" && isGameMaster(reaction.message.guild.members.cache.get(user.id))) {
@@ -409,7 +419,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
 	} else if(stats.gamephase == 2) {
 		// Remove unallowed reactions
 		if(isSpectator(reaction.message.guild.members.cache.get(user.id)) || isDeadParticipant(reaction.message.guild.members.cache.get(user.id))) {
-			if(reaction.emoji == client.emojis.cache.get(stats.no_emoji) || reaction.emoji == client.emojis.cache.get(stats.yes_emoji)) return;
+			if(reaction.emoji == client.emojis.cache.get(stats.no_emoji) || reaction.emoji == client.emojis.cache.get(stats.yes_emoji) || reaction.emoji.name == "🇦" || reaction.emoji.name == "🇧" || reaction.emoji.name == "🇨" || reaction.emoji.name == "🇩" || reaction.emoji.name == "🇪" || reaction.emoji.name == "🇫") return;
 			reaction.users.remove(user);
 		// Automatic pinning
 		} else if(reaction.emoji.name === "📌" && isParticipant(reaction.message.guild.members.cache.get(user.id)) && (isCC(reaction.message.channel) || isSC(reaction.message.channel))) {
@@ -425,6 +435,8 @@ client.on("messageReactionAdd", async (reaction, user) => {
 
 /* Reactions Remove */
 client.on("messageReactionRemove", async (reaction, user) => {
+	// reaction role
+	handleReactionRole(reaction, user, false);
 	if(user.bot) return;
 	// Automatic unpinning
 	else if(reaction.emoji.name === "📌" && reaction.count == 0 && isParticipant(reaction.message.guild.members.cache.get(user.id))) {
@@ -441,6 +453,48 @@ client.on("guildMemberRemove", async member => {
 		log("⛔ Database error. Could not kill `" +  member.displayName + "`!");
 	});	
 });
+
+// for hardcoded reaction roles, because I'm lazy
+function handleReactionRole(reaction, user, add) {
+    if(user.bot) return;
+	var member = reaction.message.guild.members.cache.get(user.id);
+	if(!member) return; // cant find member
+	/* list of reaction messages */
+	var reactionMessages = { 
+		"611547184524951563": { // pronoun
+			"👦": "611538168256266241", // he
+			"👧": "611538233154863144", // she
+			"🤠": "611538282127294464" // they
+		},
+        "611547204808867860": { // archive access
+            "🔒": "611544387804987392"
+        },
+        "611632076571148289": { // continent
+            "Asia": "611630624528269399", // asia
+            "Europe": "611630665808740353", // europe
+            "Africa": "611630718543593514", // africa
+            "Oceania": "611630756632068244", // oceania
+            "NAmerica": "611630781286187018", // namerica
+            "SAmerica": "611630817432699042" // samerica
+        }
+	}; 
+	// get role id
+	var reactionMsg = reactionMessages[reaction.message.id];
+    if(!reactionMsg) return;
+    console.log(reactionMsg);
+	var reactionRole = reactionMsg[reaction.emoji.name];
+    console.log(reaction.emoji.name);
+	// check if a role was found
+	if(!reactionRole) { // no role could be found, so this was not an allowed reaction
+		reaction.users.remove(user); // remove reaction
+	} else {
+		if(add) { // add role
+			member.roles.add(reactionRole).catch(err => logO(err));
+		} else { // remove role
+			member.roles.remove(reactionRole).catch(err => logO(err));	
+		}
+	}
+}
 
 async function urlHandle(message) {
 	var urls = findUrls(message.content);

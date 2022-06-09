@@ -13,7 +13,8 @@ module.exports = function() {
 	this.loadedModuleRoles = true;
 	this.cachedAliases = [];
 	this.cachedRoles = [];
-	this.cachedSC = 0;
+	this.cachedSCs = [];
+	this.scCatCount = 0;
 	
 	/* Handle roles command */
 	this.cmdRoles = function(message, args, argsX) {
@@ -25,6 +26,8 @@ module.exports = function() {
 		// Find subcommand
 		switch(args[0]) {
 			// Role Subcommand
+			case "set1": cmdRolesSet1(message.channel, args, argsX); break;
+			case "set2": cmdRolesSet2(message.channel, args, argsX); break;
 			case "set": cmdRolesSet(message.channel, args, argsX); break;
 			case "get": cmdRolesGet(message.channel, args); break;
 			case "remove": cmdRolesRemove(message.channel, args); break;
@@ -79,7 +82,7 @@ module.exports = function() {
 		let help = "";
 		switch(args[0]) {
 			case "":
-				if(isGameMaster(member)) help += stats.prefix + "roles [set|get|remove|list|list_names|clear] - Manages roles\n";
+				if(isGameMaster(member)) help += stats.prefix + "roles [set|set1|set2|get|remove|list|list_names|clear] - Manages roles\n";
 				if(isGameMaster(member)) help += stats.prefix + "roles [set_alias|remove_alias|list_alias|clear_alias] - Manages role aliases\n";
 				if(isGameMaster(member)) help += stats.prefix + "channels [set_ind|get_ind|list_ind] - Manages individual SCs\n";
 				if(isGameMaster(member)) help += stats.prefix + "channels [set_extra|set_multi|set_public|get|raw|remove|list|elected] - Manages Extra/Public/Multi SCs\n";
@@ -122,6 +125,12 @@ module.exports = function() {
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles set_alias <Alias Name> <Role Name>\n```";
 						help += "```\nFunctionality\n\nSets an alias for a role.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "roles set_alias citizen-alias citizen\n< ✅ Alias Citizen-Alias set to Citizen!\n```";
+					break;
+					case "set1":
+					case "set2":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles set2 <Role Name> <Role Description>\n```";
+						help += "```\nFunctionality\n\nCan be used to set very large role descriptions that do not fit in one message. Use set1 for the first half and set2 for the second half. Otherwise works just like set. For technical reasons, the first character of the description in set2 is ignored.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "roles set1 long_citizen long_text_part_1\n> " + stats.prefix + "roles set2 long_citizen long_text_part_2\n```";
 					break;
 					case "get":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles get <Role Name>\n```";
@@ -264,6 +273,17 @@ module.exports = function() {
 		return help;
 	}
 	
+	this.getSCCats = function() {
+		// Get SC Cats
+		sql("SELECT id FROM sc_cats", result => {
+			// Cache SC Cats
+			cachedSCs = result.map(el => el.id);
+		}, () => {
+			// Db error
+			log("CC > Database error. Could not cache sc cat list!");
+		});
+	}
+	
 	/* Sets permissions for an elected role */
 	this.cmdRolesElectedSc = function(channel, args) {
 		// Check arguments
@@ -379,13 +399,22 @@ module.exports = function() {
 	
 	/* Deletes a cc category */
 	this.cmdRolesScCleanup = function(channel) {
-		cleanupCat(channel, cachedSC, "SC");
+		for(let i = 0; i < cachedSCs.length; i++) {
+			cleanupCat(channel, cachedSCs[i], "SC #" + (i+1));
+		}
+        // Reset SC Cat Database
+        sql("DELETE FROM sc_cats", result => {
+            channel.send("✅ Successfully reset sc cat list!");
+            getCCCats();
+        }, () => {
+            channel.send("⛔ Database error. Could not reset sc cat list!");
+        });
 	}
 
 	
 	/* Check if a channel is a SC */
 	this.isSC = function(channel) {
-		return channel.parentId === cachedSC;
+		return !channel.parent ? true : cachedSCs.includes(channel.parentId);
 	}
     
 	/* Check if a channel is a SC */
@@ -395,11 +424,25 @@ module.exports = function() {
 	
 	/* Creates secret channels */
 	this.createSCs = function(channel, debug) {
-		channel.guild.channels.create("🕵 " + toTitleCase(stats.game) + " Secret Channels", { type: "GUILD_CATEGORY",  permissionOverwrites: getSCCatPerms(channel.guild) })
+		let callback = ((arg1,arg3,arg2) => createSCStartInd(arg1, arg2, arg3)).bind(null,channel,debug);
+		createNewSCCat(channel, callback);
+	}
+	
+	this.createNewSCCat = function(channel, callback, childChannel = false) {
+		scCatCount++;
+		let scName = "🕵 " + toTitleCase(stats.game) + " Secret Channels";
+		if(scCatCount > 1) scName += " #" + scCatCount;
+		channel.guild.channels.create(scName, { type: "GUILD_CATEGORY",  permissionOverwrites: getSCCatPerms(channel.guild) })
 		.then(cc => {
-			sqlSetStat(14, cc.id, result => {
-				createSCStartInd(channel, cc, debug);
-				getSCCat();
+			sql("INSERT INTO sc_cats (id) VALUES (" + connection.escape(cc.id) + ")", result => {	
+				if(childChannel) { // sets the new category as a channel parent - for the first channel that failed to fit in the previous category
+					childChannel.setParent(cc, { lockPermissions: false }).catch(err => { 
+                        logO(err); 
+                        sendError(channel, err, "Could not assign parent to SC!");
+                    });
+				}
+				callback(cc);
+				getSCCats();
 			}, () => {
 				channel.send("⛔ Database error. Unable to save SC category!"); 
 			});
@@ -473,7 +516,9 @@ module.exports = function() {
 							createOneMultiSC(channel, category, multi, ++index);
 						}).catch(err => { 
 							logO(err); 
-							sendError(channel, err, "Could not set category");
+							sendError(channel, err, "Could not set category. Creating new SC category");
+							let callback = ((arg1,arg3,arg4,arg2) => createOneMultiSC(arg1, arg2, arg3, arg4)).bind(null,channel,multi,++index);
+							createNewSCCat(channel, callback, sc);
 						});	
 					}).catch(err => { 
 						// Couldn't create channel
@@ -531,6 +576,7 @@ module.exports = function() {
 		if(extra[index].members === "%r") ccPerms.push(getPerms(result[resultIndex].id, ["history", "read"], []));
 		// Create channel
 		var name = extra[index].name;
+        name = name.replace("%r", channel.guild.members.cache.get(result[resultIndex].id).user.username);
 		cachedTheme.forEach(el => name = name.replace(new RegExp(el.original, "g"), el.new));
 		channel.guild.channels.create(name, { type: "text",  permissionOverwrites: ccPerms })
 		.then(sc => {
@@ -541,7 +587,9 @@ module.exports = function() {
 				createOneOneExtraSC(channel, category, extra, index, result, ++resultIndex);
 			}).catch(err => { 
 				logO(err); 
-				sendError(channel, err, "Could not set category");
+				sendError(channel, err, "Could not set category. Creating new SC category");
+				let callback = ((arg1,arg3,arg4,arg5,arg6,arg2) => createOneOneExtraSC(arg1, arg2, arg3, arg4, arg5, arg6)).bind(null,channel,extra,index,result,++resultIndex);
+				createNewSCCat(channel, callback, sc);
 			});	
 		}).catch(err => { 
 			// Couldn't create channel
@@ -622,7 +670,9 @@ module.exports = function() {
 						createOneIndSC(channel, category, players, ++index, debug);
 					}).catch(err => { 
 						logO(err); 
-						sendError(channel, err, "Could not set category");
+						sendError(channel, err, "Could not set category. Creating new SC category");
+						let callback = ((arg1,arg3,arg4,arg5,arg2) => createOneIndSC(arg1, arg2, arg3, arg4, arg5)).bind(null,channel,players,++index,debug);
+						createNewSCCat(channel, callback, sc);
 					});	
 				}).catch(err => { 
 					// Couldn't create channel
@@ -644,7 +694,7 @@ module.exports = function() {
 	this.cacheRoleInfo = function() {
 		getAliases();
 		getRoles();
-		getSCCat();
+		getSCCats();
 	}
 	
 	/* Cache role aliases */
@@ -665,13 +715,8 @@ module.exports = function() {
 		});
 	}
 	
-	/* Cache SC category */
-	this.getSCCat = function() {
-		sqlGetStat(14, result => {
-			cachedSC = result;
-		}, () => {
-			log("Roles > ❗❗❗ Unable to cache SC Category!");
-		});
+	/* Cache Public category */
+	this.getPublicCat = function() {
 		sqlGetStat(15, result => {
 			cachedPublic = result;
 		}, () => {
@@ -841,6 +886,27 @@ module.exports = function() {
 		});
 	}
 	
+    /* Sets the description of a role / creates a role */
+    var roleTempSegment = "";
+	this.cmdRolesSet1 = function(channel, args, argsX) {
+        // Check arguments
+		if(!args[1] || !args[2]) { 
+			channel.send("⛔ Syntax error. Not enough parameters!"); 
+			return; 
+		}
+        roleTempSegment = argsX[2];
+    }
+    
+	this.cmdRolesSet2 = function(channel, args, argsX) {
+        // Check arguments
+		if(!args[1] || !args[2]) { 
+			channel.send("⛔ Syntax error. Not enough parameters!"); 
+			return; 
+		}
+        argsX[2] = roleTempSegment + argsX[2].substr(1);
+        cmdRolesSet(channel, args, argsX);
+    }
+    
 	/* Sets the description of a role / creates a role */
 	this.cmdRolesSet = function(channel, args, argsX) {
 		// Check arguments
@@ -851,7 +917,7 @@ module.exports = function() {
 		// Insert Entry & Preview it
 		if(!verifyRole(args[1])) {
 			sql("INSERT INTO roles (name, description) VALUES (" + connection.escape(args[1]) + "," + connection.escape(argsX[2]) + ")", result => {
-				channel.send("✅ Set `" + toTitleCase(args[1]) + "`! Preview:\n" + argsX[2].replace(/~/g,"\n") + "\n---------------------------------------------------------------------------------"); 
+				channel.send("✅ Set `" + toTitleCase(args[1]) + "`! Preview:\n" + argsX[2].replace(/~/g,"\n").substr(0, 1800) + "\n---------------------------------------------------------------------------------"); 
 				getRoles();
 			}, () => {
 				// Couldn't add to database
@@ -859,7 +925,7 @@ module.exports = function() {
 			});		
 		} else {
 			sql("UPDATE roles SET description = " + connection.escape(argsX[2]) + " WHERE name = " + connection.escape(parseRole(args[1])), result => {
-				channel.send("✅ Set `" + toTitleCase(args[1]) + "`! Preview:\n" + argsX[2].replace(/~/g,"\n") + "\n---------------------------------------------------------------------------------"); 
+				channel.send("✅ Updated `" + toTitleCase(args[1]) + "`! Preview:\n" + argsX[2].replace(/~/g,"\n").substr(0, 1800) + "\n---------------------------------------------------------------------------------"); 
 				getRoles();
 			}, () => {
 				// Couldn't add to database
@@ -1092,7 +1158,7 @@ module.exports = function() {
 	}
 	
 	/* Prints info for a role by name or alias */
-	this.cmdInfo = function(channel, args, pin, noErr) {
+	this.cmdInfo = function(channel, args, pin, noErr, simp = false) {
 		// Check arguments
 		if(!args[0]) { 
 			if(!noErr) channel.send("⛔ Syntax error. Not enough parameters!"); 
@@ -1106,24 +1172,52 @@ module.exports = function() {
 		sql("SELECT description FROM roles WHERE name = " + connection.escape(parseRole(args[0])), result => {
 			if(result.length > 0) { 
 				var desc = result[0].description.replace(/~/g,"\n");
-				cachedTheme.forEach(el => desc = desc.replace(new RegExp(el.original, "g"), el.new));
-				channel.send(desc).then(m => {
-					// Pin if pin is true
-					if(pin) {
-						m.pin().then(mp => {
-							mp.channel.messages.fetch().then(messages => {
-								mp.channel.bulkDelete(messages.filter(el => el.type === "CHANNEL_PINNED_MESSAGE"));
-							});	
-						}).catch(err => { 
-							logO(err); 
-							if(!noErr) sendError(channel, err, "Could not pin info message");
-						});
-					}
-				// Couldnt send message
-				}).catch(err => { 
-					logO(err); 
-					if(!noErr) sendError(channel, err, "Could not send info message");
-				});
+                // simplified role description support
+                desc = desc.split("__Simplified__");
+                if(simp) desc = desc[1] ? (desc[0].split("__Basics__")[0] ? desc[0].split("__Basics__")[0] : toTitleCase(parseRole(args[0]))) + "\n" + desc[1].trim() : desc[0]; 
+                else desc = desc[0];
+               
+               if(desc.length > 1900) { // too long, requires splitting
+                   let descSplit = desc.split(/\n/);
+                   desc = [];
+                   let i = 0;
+                   let j = 0;
+                   while(i < descSplit.length) {
+                       desc[j] = "";
+                       while(i < descSplit.length && (desc[j].length + descSplit[i].length) < 1900) {
+                           desc[j] += "\n" + descSplit[i];
+                           i++;
+                       }
+                       j++;
+                   }
+               } else { // fits
+                   desc = [desc];
+               }
+               
+                for(let i = 0; i < desc.length; i++) {
+                    // apply themes
+                    cachedTheme.forEach(el => desc[i] = desc[i].replace(new RegExp(el.original, "g"), el.new));
+                    channel.send(desc[i]).then(m => {
+                        // Pin if pin is true
+                        if(pin) {
+                            m.pin().then(mp => {
+                                mp.channel.messages.fetch().then(messages => {
+                                    mp.channel.bulkDelete(messages.filter(el => el.type === "CHANNEL_PINNED_MESSAGE"));
+                                });	
+                            }).catch(err => { 
+                                logO(err); 
+                                if(!noErr) sendError(channel, err, "Could not pin info message");
+                            });
+                        }
+                        if(simp) {
+                            setTimeout(() => m.delete(), 180000);
+                        }
+                    // Couldnt send message
+                    }).catch(err => { 
+                        logO(err); 
+                        if(!noErr) sendError(channel, err, "Could not send info message");
+                    });
+                }
 			} else { 
 			// Empty result
 				if(!noErr) channel.send("⛔ Database error. Could not find role `" + args[0] + "`!");

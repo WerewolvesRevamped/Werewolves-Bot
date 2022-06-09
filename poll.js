@@ -255,7 +255,7 @@ module.exports = function() {
 			if(votes <= 0) return { valid: false };
 			// Get string of voters
 			let voters;
-			if(pollType != "dead" && pollType != "dead_vote" && pollType != "dead_list") voters = votersList.filter(el => isParticipant(el)).join(", ");
+			if(pollType != "dead" && pollType != "dead_vote" && pollType != "dead_list" && pollType != "dead_a" && pollType != "dead_ab" && pollType != "dead_abc" && pollType != "dead_abcd" && pollType != "dead_abcde" && pollType != "dead_abcdef") voters = votersList.filter(el => isParticipant(el)).join(", ");
 			else voters = votersList.filter(el => isDeadParticipant(el)).join(", ");
 			// Get candidate from emoji
 			let candidate = "not set";
@@ -269,7 +269,8 @@ module.exports = function() {
 			else if(el.emoji == "🇫") candidate = "Option F";
 			else if(el.emoji_id == stats.yes_emoji) candidate = "Yes";
 			else if(el.emoji_id == stats.no_emoji) candidate = "No";
-			else candidate = channel.guild.members.cache.get(emojiToID(el.emoji));
+			else if(emojiToID(el.emoji)) candidate = channel.guild.members.cache.get(emojiToID(el.emoji));
+			else candidate = "*Unknown*";
 			// Return one message line
 			return { valid: true, votes: votes, candidate: candidate, emoji: el.emoji, voters: voters };
 	}).filter(el => el.valid).sort((a, b) => a.votes < b.votes).map(el => { 
