@@ -327,7 +327,7 @@ module.exports = function() {
 		sql("SELECT info FROM sc_info WHERE name = " + connection.escape(args[1]), result => {
 			if(result.length > 0) { 
 				var desc = result[0].info.replace(/~/g,"\n");
-				cachedTheme.forEach(el => desc = desc.replace(new RegExp(el.original, "g"), el.new));
+				desc = applyTheme(desc);
 				channel.send(desc).then(m => {
 					// Pin if pin is true
 					if(pin) {
@@ -502,7 +502,7 @@ module.exports = function() {
 					}
 					// Create channel
 					var name = multi[index].name;
-					cachedTheme.forEach(el => name = name.replace(new RegExp(el.original, "g"), el.new));
+					name = applyTheme(name);
 					channel.guild.channels.create(name, { type: "text",  permissionOverwrites: ccPerms })
 					.then(sc => {
 						// Send info message
@@ -573,7 +573,7 @@ module.exports = function() {
 		// Create channel
 		var name = extra[index].name;
         name = name.replace("%r", channel.guild.members.cache.get(result[resultIndex].id).user.username);
-		cachedTheme.forEach(el => name = name.replace(new RegExp(el.original, "g"), el.new));
+		name = applyTheme(name);
 		channel.guild.channels.create(name, { type: "text",  permissionOverwrites: ccPerms })
 		.then(sc => {
 			// Send info message
@@ -610,7 +610,7 @@ module.exports = function() {
 			if(!debug) { 
 				if(!customRole) {
 					roles = roles.join("` + `");
-					cachedTheme.forEach(el => roles = roles.replace(new RegExp(el.original, "g"), el.new));
+					roles = applyTheme(roles);
 					channel.guild.members.cache.get(players[index].id).user.send("This message is giving you your role" + (result.length != 1 ? "s" : "") + " for the next game of Werewolves: Revamped!\n\n\nYour role" + (result.length != 1 ? "s are" : " is") + " `" + roles + "`.\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.\n\nIf you're confused about your role at all, then check #announcements on the discord, which contains a role book with information on all the roles in this game.").catch(err => { 
 						logO(err); 
 						sendError(channel, err, "Could not send role message to " + 	channel.guild.members.cache.get(players[index].id).displayName);
@@ -633,7 +633,7 @@ module.exports = function() {
 				// Create channel
 				
 				var name = indscRoles.join("-");
-				cachedTheme.forEach(el => name = name.replace(new RegExp(el.original, "g"), el.new));
+				name = applyTheme(name);
 				channel.guild.channels.create(name.substr(0, 100), { type: "text",  permissionOverwrites: ccPerms })
 				.then(sc => {
 					// Send info message
@@ -644,7 +644,7 @@ module.exports = function() {
 						desc += "\n__Basics__\n" + toSentenceCase(customRole.basics.replace(/%n/g,toTitleCase(customRole.name)));
 						desc += "\n__Details__\n" + toSentenceCase(customRole.details.replace(/%n/g,toTitleCase(customRole.name)));
 						desc += "\n__Win Condition__\n" + toSentenceCase(customRole.win.replace(/%n/g,toTitleCase(customRole.name)));
-						cachedTheme.forEach(el => desc = desc.replace(new RegExp(el.original, "g"), el.new));
+						desc = applyTheme(desc);
 						sc.send(desc).then(m => {
 							m.pin().then(mp => {
 								mp.channel.messages.fetch().then(messages => {
@@ -1191,8 +1191,8 @@ module.exports = function() {
                }
                
                 for(let i = 0; i < desc.length; i++) {
-                    // apply themes
-                    cachedTheme.forEach(el => desc[i] = desc[i].replace(new RegExp(el.original, "g"), el.new));
+		     // apply themes
+	            desc = applyTheme(desc);
                     channel.send(desc[i]).then(m => {
                         // Pin if pin is true
                         if(pin) {
