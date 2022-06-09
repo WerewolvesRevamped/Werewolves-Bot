@@ -4,13 +4,9 @@
 		- Get role info
 		- Create / Manage SCs
 		- Distribute roles
-		
-	Requires:
-		- Stats/Sql/Utility/Confirm Base Modules
 */
 module.exports = function() {
 	/* Variables */
-	this.loadedModuleRoles = true;
 	this.cachedAliases = [];
 	this.cachedRoles = [];
 	this.cachedSCs = [];
