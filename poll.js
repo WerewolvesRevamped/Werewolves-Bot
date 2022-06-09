@@ -81,6 +81,22 @@ module.exports = function() {
 		return help;
 	}
 	
+	
+	// custom values
+	this.pollValues = {
+		"abstain": ["⛔", "*Abstain*"],
+		"cancel": ["❌", "*Cancel*"],
+		"random": ["❓", "*Random*"],
+		"yes": [client.emojis.cache.get(stats.yes_emoji), "Yes"],
+		"no": [client.emojis.cache.get(stats.no_emoji), "No"],
+		"a": ["🇦", "Option A"],
+		"b": ["🇧", "Option B"],
+		"c": ["🇨", "Option C"],
+		"d": ["🇩", "Option D"],
+		"e": ["🇪", "Option E"],
+		"f": ["🇫", "Option F"]
+	};
+	
 	/* Create new poll */
 	this.pollCreate = async function(channel, args, type) {
 		// Cache vote values
@@ -88,24 +104,42 @@ module.exports = function() {
 		// Get a list of players
 		sql("SELECT id,emoji FROM players WHERE alive = " + (type=="dead_vote"?"0":"1"), result => {
 			sqlGetStat(13, pollNum => {
+				// poll name
+				let pollName;
+				if(args[2]) { // allow named polls
+					pollName = args[2].replace(/[^a-z\-_]+/g, "");
+					if(pollName.length > 20) pollName = pollName.substr(0, 20);
+				} 
+				if(!pollName || !pollName.length) { // if no name is provided generate one
+					pollName = Math.random().toString(36).replace(/[^a-z]+/g, "").substr(0, 1) + ((((+pollNum) + 2) * 3)  - 4).toString(36).replace(/[^a-z]+/g, "a") + Math.random().toString(36).replace(/[^a-z]+/g, "").substr(0, 1);
+				}
 				// Get player lists
-				let pollName = Math.random().toString(36).replace(/[^a-z]+/g, "").substr(0, 1) + ((((+pollNum) + 2) * 3)  - 4).toString(36).replace(/[^a-z]+/g, "a") + Math.random().toString(36).replace(/[^a-z]+/g, "").substr(0, 1);
 				let playerLists = [], playerList = result.map(el => [el.emoji, channel.guild.members.cache.get(el.id)]);
-				if(type === "public" && (stats.poll == 0 || stats.poll == 2)) playerList.push(["⛔", "*Abstain*"]);
-				if(type === "dead_vote" && (stats.poll == 0 || stats.poll == 2)) playerList.push(["⛔", "*Abstain*"]);
-				else if(type === "public" && stats.poll == 1) playerList.push(["❌", "*Cancel*"]);
-				else if(type === "private" && stats.poll == 2) playerList.push(["❓", "*Random*"]);
-				else if(type === "dead_vote" && stats.poll == 1) playerList.push(["❌", "*Cancel*"]);
-				else if(type === "dead") playerList = [[client.emojis.cache.get(stats.yes_emoji), "Yes"], [client.emojis.cache.get(stats.no_emoji), "No"]];
-				else if(type === "dead_list") playerList = [[client.emojis.cache.get(stats.yes_emoji), "Yes"], [client.emojis.cache.get(stats.no_emoji), "No"]];
-				else if(type === "yn") playerList = [[client.emojis.cache.get(stats.yes_emoji), "Yes"], [client.emojis.cache.get(stats.no_emoji), "No"]];
-				else if(type === "yna") playerList = [[client.emojis.cache.get(stats.yes_emoji), "Yes"], [client.emojis.cache.get(stats.no_emoji), "No"], ["⛔", "*Abstain*"]];
-				else if(type === "a" || type === "dead_a") playerList = [["🇦", "Option A"]];
-				else if(type === "ab" || type === "dead_ab") playerList = [["🇦", "Option A"], ["🇧", "Option B"]];
-				else if(type === "abc" || type === "dead_abc") playerList = [["🇦", "Option A"], ["🇧", "Option B"], ["🇨", "Option C"]];
-				else if(type === "abcd" || type === "dead_abcd") playerList = [["🇦", "Option A"], ["🇧", "Option B"], ["🇨", "Option C"], ["🇩", "Option D"]];
-				else if(type === "abcde" || type === "dead_abcde") playerList = [["🇦", "Option A"], ["🇧", "Option B"], ["🇨", "Option C"], ["🇩", "Option D"], ["🇪", "Option E"]];
-				else if(type === "abcdef" || type === "dead_abcdef") playerList = [["🇦", "Option A"], ["🇧", "Option B"], ["🇨", "Option C"], ["🇩", "Option D"], ["🇪", "Option E"], ["🇫", "Option F"]];
+				let addValues = [];
+				let overwriteValues = [];
+				if(type === "public" && (stats.poll == 0 || stats.poll == 2)) addValues.push("abstain");
+				if(type === "dead_vote" && (stats.poll == 0 || stats.poll == 2)) addValues.push("abstain");
+				else if(type === "public" && stats.poll == 1) addValues.push("cancel");
+				else if(type === "private" && stats.poll == 2) addValues.push("random");
+				else if(type === "dead_vote" && stats.poll == 1) addValues.push("cancel");
+				else if(type === "dead") overwriteValues = ["yes", "no"];
+				else if(type === "dead_list") overwriteValues = ["yes", "no"];
+				else if(type === "yn") overwriteValues = ["yes", "no"];
+				else if(type === "yna") overwriteValues = ["yes", "no", "abstain"];
+				else if(type === "a" || type === "dead_a") overwriteValues = ["a"];
+				else if(type === "ab" || type === "dead_ab") overwriteValues = ["a","b"];
+				else if(type === "abc" || type === "dead_abc") overwriteValues = ["a","b","c"];
+				else if(type === "abcd" || type === "dead_abcd") overwriteValues = ["a","b","c","d"];
+				else if(type === "abcde" || type === "dead_abcde") overwriteValues = ["a","b","c","d","e"];
+				else if(type === "abcdef" || type === "dead_abcdef") overwriteValues = ["a","b","c","d","e","f"];
+				
+				// add or overwrite poll
+				if(overwriteValues[0]) playerList = [];
+				addValues.push(...overwriteValues);
+				addValues = addValues.map(el => pollValues[el]);
+				playerList.push(...addValues);
+				
+				// split poll into several messages if necessary
 				while(playerList.length > 0) playerLists.push(playerList.splice(0, 20));
 				// Print message
 				channel.send("Poll `#" + pollName + "`");
@@ -245,16 +279,8 @@ module.exports = function() {
 			else voters = votersList.filter(el => isDeadParticipant(el)).join(", ");
 			// Get candidate from emoji
 			let candidate = "not set";
-			if(el.emoji == "⛔") candidate = "Abstain";
-			else if(el.emoji == "❌") candidate = "Cancel";
-			else if(el.emoji == "🇦") candidate = "Option A";
-			else if(el.emoji == "🇧") candidate = "Option B";
-			else if(el.emoji == "🇨") candidate = "Option C";
-			else if(el.emoji == "🇩") candidate = "Option D";
-			else if(el.emoji == "🇪") candidate = "Option E";
-			else if(el.emoji == "🇫") candidate = "Option F";
-			else if(el.emoji_id == stats.yes_emoji) candidate = "Yes";
-			else if(el.emoji_id == stats.no_emoji) candidate = "No";
+			let pollVal = Object.values(pollValues).find(el2 => el2[0] == el.emoji);
+			if(pollVal) candidate = pollVal[1];
 			else if(emojiToID(el.emoji)) candidate = channel.guild.members.cache.get(emojiToID(el.emoji));
 			else candidate = "*Unknown*";
 			// Return one message line
