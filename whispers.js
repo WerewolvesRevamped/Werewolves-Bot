@@ -2,13 +2,8 @@
 	Module for whispering
 		- Connects channels (with optional disguises)
 		- Converts yourself into a bot
-		
-	Requires:
-		- Stats/Sql/Utility/Confirm Base Modules
 */
 module.exports = function() {
-	/* Variables */
-	this.loadedModuleWhispers = true;
 	
 	/* Handles connection command */
 	this.cmdConnection = function(message, args) {
