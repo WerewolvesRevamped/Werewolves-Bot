@@ -1,11 +1,6 @@
 /*
 	Module for confirmation of dangerous commands
 		- Confirms actions
-		
-	Requires:
-		- SQL Module
-		- Stats Module
-		- Utility Module
 */
 module.exports = function() {
 	
