@@ -22,25 +22,16 @@ module.exports = function() {
 	/* Handles poll creation command */
 	this.cmdPollNew = function(channel, args) {
 		switch(args[1]) {
-			case "public": pollCreate(channel, args, "public"); break;
-			case "private": pollCreate(channel, args, "private"); break;
-			case "dead": pollCreate(channel, args, "dead"); break;
-			case "dead_list": pollCreate(channel, args, "dead_list"); break;
-			case "dead_vote": pollCreate(channel, args, "dead_vote"); break;
-			case "yn": pollCreate(channel, args, "yn"); break;
-			case "yna": pollCreate(channel, args, "yna"); break;
-			case "a": pollCreate(channel, args, "a"); break;
-			case "ab": pollCreate(channel, args, "ab"); break;
-			case "abc": pollCreate(channel, args, "abc"); break;
-			case "abcd": pollCreate(channel, args, "abcd"); break;
-			case "abcde": pollCreate(channel, args, "abcde"); break;
-			case "abcdef": pollCreate(channel, args, "abcdef"); break;
-			case "dead_a": pollCreate(channel, args, "dead_a"); break;
-			case "dead_ab": pollCreate(channel, args, "dead_ab"); break;
-			case "dead_abc": pollCreate(channel, args, "dead_abc"); break;
-			case "dead_abcd": pollCreate(channel, args, "dead_abcd"); break;
-			case "dead_abcde": pollCreate(channel, args, "dead_abcde"); break;
-			case "dead_abcdef": pollCreate(channel, args, "dead_abcdef"); break;
+			case "public": // public (lynch, election)
+			case "private": // private (cult, wolfpack)
+			case "dead": // medium
+			case "dead_list": // medium + shows voters
+			case "dead_vote": // list of dead participants
+			case "yn": case "yna": // yes / no
+			case "a": case "ab": case "abc": case "abcd": case "abcde": case "abcdef": // live trivia
+			case "dead_a": case "dead_ab": case "dead_abc": case "dead_abcd": case "dead_abcde": case "dead_abcdef": // dead trivia
+				pollCreate(channel, args, args[1]);
+			break;
 			default:  
 				if(isCC(channel) || isSC(channel)) pollCreate(channel, args, "private");
 				else pollCreate(channel, args, "public");
