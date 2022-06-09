@@ -74,19 +74,25 @@ module.exports = function() {
 	
 	
 	// custom values
-	this.pollValues = {
-		"abstain": ["⛔", "*Abstain*"],
-		"cancel": ["❌", "*Cancel*"],
-		"random": ["❓", "*Random*"],
-		"yes": [client.emojis.cache.get(stats.yes_emoji), "Yes"],
-		"no": [client.emojis.cache.get(stats.no_emoji), "No"],
-		"a": ["🇦", "Option A"],
-		"b": ["🇧", "Option B"],
-		"c": ["🇨", "Option C"],
-		"d": ["🇩", "Option D"],
-		"e": ["🇪", "Option E"],
-		"f": ["🇫", "Option F"]
-	};
+	this.pollValues = {};
+    
+    this.loadPollValues = function () {
+        pollValues = {
+            "abstain": ["⛔", "*Abstain*"],
+            "cancel": ["❌", "*Cancel*"],
+            "random": ["❓", "*Random*"],
+            "yes": [client.emojis.cache.get(stats.yes_emoji), "Yes"],
+            "no": [client.emojis.cache.get(stats.no_emoji), "No"],
+            "no_": [client.emojis.cache.get(stats.no_emoji).name, "No"],
+            "yes_": [client.emojis.cache.get(stats.yes_emoji).name, "Yes"],
+            "a": ["🇦", "Option A"],
+            "b": ["🇧", "Option B"],
+            "c": ["🇨", "Option C"],
+            "d": ["🇩", "Option D"],
+            "e": ["🇪", "Option E"],
+            "f": ["🇫", "Option F"]
+        };
+    }
 	
 	/* Create new poll */
 	this.pollCreate = async function(channel, args, type) {
@@ -270,7 +276,7 @@ module.exports = function() {
 			else voters = votersList.filter(el => isDeadParticipant(el)).join(", ");
 			// Get candidate from emoji
 			let candidate = "not set";
-			let pollVal = Object.values(pollValues).find(el2 => el2[0] == el.emoji);
+			let pollVal = Object.values(pollValues).find(el2 => el2[0] == el.emoji || el2[0] == el.emoji.split(":")[1]);
 			if(pollVal) candidate = pollVal[1];
 			else if(emojiToID(el.emoji)) candidate = channel.guild.members.cache.get(emojiToID(el.emoji));
 			else candidate = "*Unknown*";

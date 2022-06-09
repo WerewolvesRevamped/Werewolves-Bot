@@ -28,6 +28,7 @@ client.on("ready", () => {
 		getCCCats();
 		getSCCats();
 		getPublicCat();
+        loadPollValues();
 		global.client.guilds.fetch(stats.log_guild).then(guild => {
 			guild.members.fetch().then((members) => {
 				console.log(members.map(el => el.user.username));
