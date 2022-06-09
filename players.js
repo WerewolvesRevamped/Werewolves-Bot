@@ -4,14 +4,10 @@
 		- Handelling a list of users
 		- Checking if a user has a specific role
 		- Cacheing player emojis
-		- Converting between emojis and user ids
-		
-	Requires:
-		- Stats/Sql/Utility/Confirm Base Modules
+		- Converting between emojis and user id
 */
 module.exports = function() {
 	/* Variables */
-	this.loadedModulePlayers = true;
 	this.emojiIDs = null;
 	this.publicValues = null;
 	this.privateValues = null;
