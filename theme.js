@@ -164,6 +164,16 @@ module.exports = function() {
 		cmdOptionsSet(channel, args, "29"); 
 	}
 	
+	// can apply a theme onto both strings and arrays
+	this.applyTheme = function(text) {
+		if(text instanceof Array) {
+			return text.map(el => applyTheme(el));
+		} else {
+			cachedTheme.forEach(el => text = text.replace(new RegExp(el.original, "g"), el.new));
+			return text;
+		}
+	}
+	
 	this.cacheTheme = function() {
 		sql("SELECT original,new FROM theme WHERE theme = " + connection.escape(stats.theme) + " ORDER BY theme ASC", result => {
 				cachedTheme = result;
