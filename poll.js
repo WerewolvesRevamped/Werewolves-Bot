@@ -1,24 +1,10 @@
 /*
 	Module for polls
-		- Logging / Errors
-		- Time
-		- Title Case
-		- Remove array duplicates
-		- Pinging
-		- Handelling channels
-		- Handelling command permissions
-	
-	Requires:
-		- Stats/Sql/Utility/Confirm Base Modules
-		- Players Module
 */
 module.exports = function() {
-	/* Variables */
-	this.loadedModulePoll = true;
 	
 	/* Handle poll command */
 	this.cmdPoll = function(message, args) {
-		if(!loadedModulePlayers) return;
 		// Check subcommand
 		if(!args[0]) { 
 			message.channel.send("⛔ Syntax error. Not enough parameters!"); 
