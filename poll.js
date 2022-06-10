@@ -104,7 +104,7 @@ module.exports = function() {
 				// poll name
 				let pollName;
 				if(args[2]) { // allow named polls
-					pollName = args[2].replace(/[^a-z\-_]+/g, "");
+					pollName = args[2].replace(/[^a-z0-9\-_]+/g, "");
 					if(pollName.length > 20) pollName = pollName.substr(0, 20);
 				} 
 				if(!pollName || !pollName.length) { // if no name is provided generate one
