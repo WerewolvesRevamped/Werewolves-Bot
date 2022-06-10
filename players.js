@@ -217,7 +217,7 @@ module.exports = function() {
 					case "log":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players log\n```";
 						help += "```\nFunctionality\n\nLists all players with their role and nickname in the gamelog format.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "players list\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "players list!\n> Players | Total: 2\n  • 🛠 @McTsts (as `Ts`) is `Werewolf`\n  • 👌 @federick (as `fed`) is `Baker`\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "players log\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "players list!\n> Players | Total: 2\n  • 🛠 @McTsts (as `Ts`) is `Werewolf`\n  • 👌 @federick (as `fed`) is `Baker`\n```";
 					break;		
 					case "messages":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players messages\n```";
