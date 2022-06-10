@@ -157,12 +157,12 @@ module.exports = function() {
 					case "import":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "sheet import\n  <Sheet Information>\n```";
 						help += "```\nFunctionality\n\nSets nicknames and roles of players by pasting in the first four columns of a google sheet for the game (First Column: Name, Second Column: Id, Third Column: Nickname (can be empty), Fourth Column: Role)\nOptionally, more columns with extra roles can be provided for double (or more) role games.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "sheet import\n  Fl1nt5t0n3	334066065112039425	The Artist	Stalker\n  Alice Howlter	277156693765390337	The Hooker	Angel\n  sav	437289420899745795	The Clown	Dog\n  SuperbWolfPack	309072997950554113	The Dancer	Citizen\n  Chopper2112	271399293372334081	The Chopper	Scared Wolf```";	
+						help += "```fix\nUsage\n\n> " + stats.prefix + "sheet import\n  Fl1nt5t0n3	334066065112039425	The Artist	Stalker\n  Vera	277156693765390337	The Hooker	Angel\n  sav	437289420899745795	The Clown	Dog\n  SuperbWolfPack	309072997950554113	The Dancer	Citizen\n  Chopper2112	271399293372334081	The Chopper	Scared Wolf```";	
 					break;
 					case "mimport":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "sheet mimport\n  <Sheet Information>\n```";
 						help += "```\nFunctionality\n\n" + stats.prefix + "sheet import variation that can be more easily handwritten. Different values are comma seperated (First Column: Name, Second Column: Id, Third Column: Nickname (can be empty), Fourth Column: Role)\nOptionally, more columns with extra roles can be provided for double (or more) role games.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "sheet import\n  Fl1nt5t0n3,334066065112039425,The Artist,Stalker\n  Alice Howlter,277156693765390337,The Hooker,Angel\n  sav,437289420899745795,The Clown,Dog\n  SuperbWolfPack,309072997950554113,The Dancer,Citizen\n  Chopper2112,271399293372334081,The Chopper,Scared Wolf```";	
+						help += "```fix\nUsage\n\n> " + stats.prefix + "sheet import\n  Fl1nt5t0n3,334066065112039425,The Artist,Stalker\n  Vera,277156693765390337,The Hooker,Angel\n  sav,437289420899745795,The Clown,Dog\n  SuperbWolfPack,309072997950554113,The Dancer,Citizen\n  Chopper2112,271399293372334081,The Chopper,Scared Wolf```";	
 					break;
 				}
 			break;
