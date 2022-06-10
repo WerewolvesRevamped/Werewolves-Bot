@@ -36,6 +36,7 @@ module.exports = function() {
 			case "end": cmdEnd(message.channel); break;
 			case "killq killall": cmdKillqKillall(message.channel); break;
 			case "players list": cmdPlayersList(message.channel); break;
+			case "players log": cmdPlayersLog(message.channel); break;
 			case "cc cleanup": cmdCCCleanup(message.channel); break;
 			case "roles sc_cleanup": cmdRolesScCleanup(message.channel); break;
 			case "bulkdelete": cmdBulkDelete(message.channel); break;

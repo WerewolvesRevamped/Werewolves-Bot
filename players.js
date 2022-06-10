@@ -18,7 +18,7 @@ module.exports = function() {
 	/* Handle players command */
 	this.cmdPlayers = function(message, args) {
 		// Check subcommands
-		if(!args[0] || (!args[1] && args[0] != "list" && args[0] != "msgs")) { 
+		if(!args[0] || (!args[1] && args[0] != "list" && args[0] != "log" && args[0] != "msgs")) { 
 			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `players [get|get_clean|set|resurrect|signup|list|msgs]`!"); 
 			return; 
 		}
@@ -33,6 +33,7 @@ module.exports = function() {
 			case "substitute": cmdPlayersSubstitute(message, args); break;
 			case "switch": cmdPlayersSwitch(message, args); break;
 			case "list": cmdConfirm(message, "players list"); break;
+			case "log": cmdConfirm(message, "players log"); break;
 			case "messages": 
 			case "msgs": cmdPlayersListMsgs(message.channel, args); break;
 			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
@@ -57,7 +58,8 @@ module.exports = function() {
 		let help = "";
 		switch(args[0]) {
 			case "":
-				if(isGameMaster(member)) help += stats.prefix + "players [get|get_clean|set|resurrect|signup|list] - Manages players\n";
+				if(isGameMaster(member)) help += stats.prefix + "players [list|log|msgs] - Information about players\n";
+				if(isGameMaster(member)) help += stats.prefix + "players [get|get_clean|set|resurrect|signup] - Manages players\n";
 				if(isGameMaster(member)) help += stats.prefix + "players [substitute|switch] - Manages player changes\n";
 				if(isGameMaster(member)) help += stats.prefix + "killq [add|remove|killall|list|clear] - Manages kill queue\n";
 				if(isGameMaster(member)) help += stats.prefix + "modrole [add|remove] - Adds/removes roles from users\n";
@@ -211,6 +213,11 @@ module.exports = function() {
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players list\n```";
 						help += "```\nFunctionality\n\nLists all players with their role and alive values.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "players list\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "players list!\n> Players | Total: 2\n  🛠 - @McTsts (Werewolf); Alive: 1\n  👌 - @federick (Baker); Alive: 1```";
+					break;	
+					case "log":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "players log\n```";
+						help += "```\nFunctionality\n\nLists all players with their role and nickname in the gamelog format.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "players list\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "players list!\n> Players | Total: 2\n  • 🛠 @McTsts (as `Ts`) is `Werewolf`\n  • 👌 @federick (as `fed`) is `Baker`\n```";
 					break;		
 					case "messages":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players messages\n```";
@@ -447,6 +454,29 @@ module.exports = function() {
 		});
 	
 	}
+    
+	/* Lists all signedup players in log format */
+	this.cmdPlayersLog = function(channel, args) {
+		// Get a list of players
+		sql("SELECT id,emoji,role,alive,public_value,private_value,public_votes,ccs FROM players", result => {
+			let playerList = result.map(el => {
+                let player = channel.guild.members.cache.get(el.id);
+                let nickname = player.nickname ? " (as `" + player.nickname + "`)" : "";
+                return `• ${el.emoji} ${player ? player : "<@" + el.id + ">"}${nickname} is \`${el.role.split(",").map(role => toTitleCase(role)).join(" + ")}\``;
+            });
+			channel.send("```**Players** | Total: " + result.length + "\n" + playerList.join("\n") + "\n```")
+            .catch(err => {
+					logO(err); 
+					sendError(channel, err, "Could not log signed up players");
+				});
+		}, () => {
+			// DB error
+			channel.send("⛔ Database error. Could not list signed up players!");
+		});
+	
+	}
+    
+    
 	/* Lists all signedup players */
 	this.cmdPlayersListMsgs = function(channel, args) {
 		// Get a list of players
