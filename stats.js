@@ -181,9 +181,9 @@ module.exports = function() {
 		// gif ping
 		sqlGetStat(33,  result => { 
 			stats.ping = result; 
-			if(doLog) log("Stats > Cached ping as `" + result + "`!")
+			if(doLog) log("Stats > Cached gif ping as `" + result + "`!")
 		}, () => {
-			log("Stats > ❗❗❗ Unable to cache ping!")
+			log("Stats > ❗❗❗ Unable to cache gif ping!")
 		});
 	}
 	
