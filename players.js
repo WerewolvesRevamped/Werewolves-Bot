@@ -595,7 +595,7 @@ module.exports = function() {
 	/* Lists all alive players */
 	this.cmdListAlive = function(channel) {
 		// Check gamephase
-		if(stats.gamephase != 2) { 
+		if(stats.gamephase >= gp.INGAME) { 
 			channel.send("⛔ Command error. Can only list alive players in ingame phase."); 
 			return; 
 		}
@@ -879,7 +879,7 @@ module.exports = function() {
 	/* Signup a player */
 	this.cmdSignup = function(channel, member, args, checkGamephase) {
 		// Wrong Phase 
-		if(checkGamephase && stats.gamephase != 1) { 
+		if(checkGamephase && stats.gamephase != gp.SIGNUP) { 
 			channel.send("⛔ Signup error. Sign ups are not open! Sign up will open up again soon."); 
 			return; 
 		} else if(isSub(member)) { 

@@ -10,7 +10,7 @@ module.exports = function() {
 
 	/* Handles start command */
 	this.cmdStart = function(channel, debug) {
-		if(stats.gamephase > 1) { 
+		if(stats.gamephase != gp.SETUP) { 
 			channel.send("⛔ Command error. Can't start an already started game."); 
 			return; 
 		}
@@ -30,7 +30,7 @@ module.exports = function() {
 			sendError(channel, err, "Could not create public channels!");
 		});
 		// Set Gamephase
-		cmdGamephaseSet(channel, ["set", "2"]);
+		cmdGamephaseSet(channel, ["set", gp.INGAME]);
 		// Cache emojis
 		getEmojis();	
 		getVotes();
@@ -307,7 +307,7 @@ module.exports = function() {
 		if(isParticipant(member)) {
 			channel.send("⛔ Command error. Can't make you a spectator while you're a participant."); 
 			return;
-		} else if(stats.gamephase < 2) {
+		} else if(stats.gamephase < gp.SETUP) {
 			channel.send("⛔ Command error. Can't make you a spectator while there is no game."); 
 			return;
 		}
@@ -336,7 +336,7 @@ module.exports = function() {
 	}
 	
 	this.cmdEnd = function(channel) {
-		cmdGamephaseSet(channel, ["set", "3"]);
+		cmdGamephaseSet(channel, ["set", gp.POSTGAME]);
 		channel.guild.roles.cache.get(stats.participant).members.forEach(el => {
 			el.roles.add(stats.dead_participant).catch(err => { 
 				// Missing permissions
@@ -349,7 +349,7 @@ module.exports = function() {
 	/* Handles reset command */
 	this.cmdReset = function(channel) {
 		// Set Gamephase
-		cmdGamephaseSet(channel, ["set", "0"]);
+		cmdGamephaseSet(channel, ["set", gp.NONE]);
 		// Reset Connection
 		cmdConnectionReset(channel);
 		// Reset Player Database
@@ -455,7 +455,7 @@ module.exports = function() {
 	/* Prepare info for sheet */
 	this.cmdSheetPrepare = function(channel, seperator, mode) {
 		// Check gamephase
-		if(stats.gamephase > 1) { 
+		if(stats.gamephase >= gp.INGAME) { 
 			channel.send("⛔ Command error. Can't prepare an already started game."); 
 			return; 
 		}
@@ -483,7 +483,7 @@ module.exports = function() {
 	/* Import info from sheet */
 	this.cmdSheetImport = function(message, channel, args, mode) {
 		// Check gamephase
-		if(stats.gamephase > 1) { 
+		if(stats.gamephase >= gp.INGAME) { 
 			channel.send("⛔ Command error. Can't import into an already started game."); 
 			return; 
 		}
@@ -544,6 +544,7 @@ module.exports = function() {
 	
 	/* Pings all players with the New Game Ping role */
 	this.cmdGamePing = function(channel, member) {
+        if(!stats.new_game_ping) return;
 		channel.guild.roles.cache.get(stats.new_game_ping).setMentionable(true).then(u => {
 			channel.send("**" + member.displayName + "** is going to start a new game! <@&" + stats.new_game_ping + ">").then(m => {
 				channel.guild.roles.cache.get(stats.new_game_ping).setMentionable(false).catch(err => {
@@ -565,8 +566,15 @@ module.exports = function() {
 	
 	/* Opens signups & Pings players */
 	this.cmdOpen = function(message) {
-		cmdGamephase(message, ["set", "1"]);
+        message.channel.send("**Signups are now open!**");
+		cmdGamephase(message, ["set", gp.SIGNUP]);
 		cmdGamePing(message.channel, message.member);
+	}
+    
+	/* Closes signups */
+	this.cmdClose = function(message) {
+        message.channel.send("**Signups are now closed!**");
+		cmdGamephase(message, ["set", gp.SETUP]);
 	}
 	
 }

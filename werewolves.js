@@ -49,7 +49,7 @@ client.on("messageCreate", async message => {
 	connectionExecute(message);
     
     /* Counts messages */
-    if(stats.gamephase == 2 && message.content.slice(stats.prefix.length).indexOf(stats.prefix) !== 0 && !message.author.bot && isParticipant(message.member)) {
+    if(stats.gamephase == gp.INGAME && message.content.slice(stats.prefix.length).indexOf(stats.prefix) !== 0 && !message.author.bot && isParticipant(message.member)) {
         if(isCC(message.channel) || isSC(message.channel)) { // private message
             sql("UPDATE players SET private_msgs=private_msgs+1 WHERE id = " + connection.escape(message.member.id), () => {}, () => {
                 log("MSG Count > Failed to count private message for " + message.autho + "!")
@@ -63,7 +63,7 @@ client.on("messageCreate", async message => {
     
 	/* Gif Check */
 	// isParticipant(message.author) &&
-	if(!message.author.bot && isParticipant(message.member) && message.content.search("http") >= 0 && stats.ping.length > 0 && stats.gamephase == 2) {
+	if(!message.author.bot && isParticipant(message.member) && message.content.search("http") >= 0 && stats.ping.length > 0 && stats.gamephase == gp.INGAME) {
 		urlHandle(message);
 	}
 	
@@ -342,10 +342,15 @@ client.on("messageCreate", async message => {
 	case "gameping":
 		if(checkGM(message)) cmdGamePing(message.channel, message.member);
 	break;
-	/* New Game Ping */
+	/* Open Signups */
 	case "@":
 	case "open":
 		if(checkGM(message)) cmdOpen(message);
+	break;
+	/* Close Signups */
+	case "x":
+	case "close":
+		if(checkGM(message)) cmdClose(message);
 	break;
 	/* Spectate */
 	case "s":
@@ -409,7 +414,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
 			reaction.message.edit("⛔ Database error. Failed to handle confirmation message!");
 		});
 	// Handle reaction ingame
-	} else if(stats.gamephase == 2) {
+	} else if(stats.gamephase == gp.INGAME) {
 		// Remove unallowed reactions
 		if(isSpectator(reaction.message.guild.members.cache.get(user.id)) || isDeadParticipant(reaction.message.guild.members.cache.get(user.id))) {
 			if(reaction.emoji == client.emojis.cache.get(stats.no_emoji) || reaction.emoji == client.emojis.cache.get(stats.yes_emoji) || reaction.emoji.name == "🇦" || reaction.emoji.name == "🇧" || reaction.emoji.name == "🇨" || reaction.emoji.name == "🇩" || reaction.emoji.name == "🇪" || reaction.emoji.name == "🇫") return;

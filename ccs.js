@@ -17,7 +17,7 @@ module.exports = function() {
 		if(!args[0]) { 
 			message.channel.send(helpCCs(message.member, ["cc"]));
 			return; 
-		} else if(stats.gamephase != 2 && args[0] != "cleanup") { 
+		} else if(stats.gamephase != gp.INGAME && args[0] != "cleanup") { 
 			message.channel.send("⛔ Command error. Can only use CCs while a game is running."); 
 			return; 
 		}

@@ -33,7 +33,7 @@ module.exports = function() {
 			getEmojis(); 
 			if(doLog) log("Stats > Cached gamephase as `" + result + "`!")
 		}, () => {
-            stats.gamephase = 0; 
+            stats.gamephase = gp.NONE; 
 			log("Stats > ❗❗❗ Unable to cache gamephase!")
 		});
 		// Get Prefix
@@ -225,10 +225,11 @@ module.exports = function() {
 	/* Gets the name of a gamephase by id */
 	this.getPhaseName = function(id) {
 		switch(+id) {
-			case 0: return "NOTHING"; 
-			case 1: return "SIGNUP"; 
-			case 2: return "INGAME"; 
-			case 3: return "POST GAME";
+			case gp.NONE: return "NOTHING"; 
+			case gp.SIGNUP: return "SIGNUP"; 
+			case gp.SETUP: return "SETUP"; 
+			case gp.INGAME: return "INGAME"; 
+			case gp.POSTGAME: return "POST GAME";
 			default: return "INVALID";
 		}
 	}
@@ -366,6 +367,17 @@ module.exports = function() {
 			case "set": cmdGamephaseSet(message.channel, args); break;
 		}
 	}
+    
+    this.gp = {
+        NONE: 0,
+        SIGNUP: 1,
+        SETUP: 2,
+        INGAME: 3,
+        POSTGAME: 4,
+        
+        MIN: 0,
+        MAX: 4
+    };
 	
 	/* Set gamephase */
 	this.cmdGamephaseSet = function(channel, args) {
@@ -373,7 +385,7 @@ module.exports = function() {
 		if(!args[1]) { 
 			channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `gamephase set <phase>`"); 
 			return; 
-		} else if(args[1] >= 0 && args[1] <= 3) {
+		} else if(args[1] >= gp.MIN && args[1] <= gp.MAX) {
 			// Saved verified gamephase
 			sqlSetStat(1, args[1], result => {
 				let phase = getPhaseName(args[1]);
@@ -406,10 +418,11 @@ module.exports = function() {
 		sql("SELECT alive FROM players", result => {
 			let gameStatus = guild.channels.cache.get(stats.game_status);
 			switch(+stats.gamephase) {
-				case 0: gameStatus.setName("⛔ No Game"); break;
-				case 1: gameStatus.setName("📰 Signups Open (" + result.length + ")"); break;
-				case 2: gameStatus.setName("🔁 Game Running (" + result.filter(el => el.alive).length + "/" + result.length + ")"); break;
-				case 3: gameStatus.setName("✅ Game Concluded"); break;
+				case gp.NONE: gameStatus.setName("⛔ No Game"); break;
+				case gp.SIGNUP: gameStatus.setName("📰 Signups Open (" + result.length + ")"); break;
+				case gp.SETUP: gameStatus.setName("📝 Game Setup (" + result.length + ")"); break;
+				case gp.INGAME: gameStatus.setName("🔁 Game Running (" + result.filter(el => el.alive).length + "/" + result.length + ")"); break;
+				case gp.POSTGAME: gameStatus.setName("✅ Game Concluded"); break;
 			}
 		});
 	}
