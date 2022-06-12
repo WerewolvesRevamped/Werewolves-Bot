@@ -55,7 +55,7 @@ module.exports = function() {
 				// Check which mode and return result accordingly
 				switch(mode) {
 					case 0: resCallback(result); break;
-					case 1: resCallback(result[0].value); break;
+					case 1: result[0] ? resCallback(result[0].value) : errCallback(); break;
 					default: resCallback(result); break;
 				}
 			} else { 

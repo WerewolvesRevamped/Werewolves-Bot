@@ -17,12 +17,14 @@ module.exports = function() {
 			stats.log_guild = result;
 			if(doLog) log("Stats > Cached log guild id as `" + result + "`!")
 		}, () => {
+            stats.log_guild = false;
 			log("Stats > ❗❗❗ Unable to cache log guild id!")
 		});
 		sqlGetStat(12,  result => { 
 			stats.log_channel = result; 
 			if(doLog) log("Stats > Cached log channel id as `" + result + "`!")
 		}, () => {
+            stats.log_channel = false;
 			log("Stats > ❗❗❗ Unable to cache log channel id!")
 		});
 		// Get Gamephase
@@ -31,6 +33,7 @@ module.exports = function() {
 			getEmojis(); 
 			if(doLog) log("Stats > Cached gamephase as `" + result + "`!")
 		}, () => {
+            stats.gamephase = 0; 
 			log("Stats > ❗❗❗ Unable to cache gamephase!")
 		});
 		// Get Prefix
@@ -38,6 +41,7 @@ module.exports = function() {
 			stats.prefix = result; 
 			if(doLog) log("Stats > Cached prefix as `" + result + "`!")
 		}, () => {
+            stats.prefix = "$";
 			log("Stats > ❗❗❗ Unable to cache prefix!")
 		});
 		// Get Role Ids
@@ -45,36 +49,42 @@ module.exports = function() {
 			stats.participant = result; 
 			if(doLog) log("Stats > Cached participant role id as `" + result + "`!")
 		}, () => {
+            stats.participant = false;
 			log("Stats > ❗❗❗ Unable to cache participant role id!")
 		});
 		sqlGetStat(4,  result => { 
 			stats.gamemaster = result; 
 			if(doLog) log("Stats > Cached gamemaster role id as `" + result + "`!")
 		}, () => {
+            stats.gamemaster = false;
 			log("Stats > ❗❗❗ Unable to cache gamemaster role id!")
 		});
 		sqlGetStat(5,  result => { 
 			stats.spectator = result; 
 			if(doLog) log("Stats > Cached spectator role id as `" + result + "`!")
 		}, () => {
+            stats.spectator = false;
 			log("Stats > ❗❗❗ Unable to cache spectator role id!")
 		});
 		sqlGetStat(6,  result => { 
 			stats.signed_up = result; 
 			if(doLog) log("Stats > Cached signed up role id as `" + result + "`!")
 		}, () => {
+            stats.signed_up = false;
 			log("Stats > ❗❗❗ Unable to cache signed up role id!")
 		});
 		sqlGetStat(7,  result => { 
 			stats.dead_participant = result; 
 			if(doLog) log("Stats > Cached dead participant role id as `" + result + "`!")
 		}, () => {
+            stats.dead_participant = false;
 			log("Stats > ❗❗❗ Unable to cache dead participant role id!")
 		});
 		sqlGetStat(8,  result => { 
 			stats.bot = result; 
 			if(doLog) log("Stats > Cached bot role id as `" + result + "`!")
 		}, () => {
+            stats.bot = false;
 			log("Stats > ❗❗❗ Unable to cache bot role id!")
 		});
 		// Cache Elected roles
@@ -82,72 +92,84 @@ module.exports = function() {
 			stats.mayor = result; 
 			if(doLog) log("Stats > Cached mayor role id as `" + result + "`!")
 		}, () => {
+            stats.mayor = false;
 			log("Stats > ❗❗❗ Unable to cache mayor role id!")
 		});
 		sqlGetStat(17,  result => { 
 			stats.reporter = result; 
 			if(doLog) log("Stats > Cached reporter role id as `" + result + "`!")
 		}, () => {
+            stats.reporter = false;
 			log("Stats > ❗❗❗ Unable to cache reporter role id!")
 		});
 		sqlGetStat(18,  result => { 
 			stats.guardian = result; 
 			if(doLog) log("Stats > Cached guardian role id as `" + result + "`!")
 		}, () => {
+            stats.guardian = false;
 			log("Stats > ❗❗❗ Unable to cache guardian role id!")
 		});
 		sqlGetStat(19,  result => { 
 			stats.game = result; 
 			if(doLog) log("Stats > Cached game name as `" + result + "`!")
 		}, () => {
+            stats.game = "WWR";
 			log("Stats > ❗❗❗ Unable to cache game name!")
 		});
 		sqlGetStat(21,  result => { 
 			stats.gamemaster_ingame = result; 
 			if(doLog) log("Stats > Cached game master ingame role id as `" + result + "`!")
 		}, () => {
+            stats.gamemaster_ingame = false;
 			log("Stats > ❗❗❗ Unable to cache game master ingame role id!")
 		});
 		sqlGetStat(22,  result => { 
 			stats.admin = result; 
 			if(doLog) log("Stats > Cached admin role id as `" + result + "`!")
 		}, () => {
+            stats.admin = false;
 			log("Stats > ❗❗❗ Unable to cache admin role id!")
 		});
 		sqlGetStat(23,  result => { 
 			stats.admin_ingame = result; 
 			if(doLog) log("Stats > Cached admin ingame role id as `" + result + "`!")
 		}, () => {
+            stats.admin_ingame = false;
 			log("Stats > ❗❗❗ Unable to cache admin ingame role id!")
 		});
 		sqlGetStat(24,  result => { 
 			stats.yes_emoji = result; 
 			if(doLog) log("Stats > Cached yes emoji as `" + result + "`!")
 		}, () => {
+            stats.yes_emoji = "false";
 			log("Stats > ❗❗❗ Unable to cache yes emoji!")
 		});
 		sqlGetStat(25,  result => { 
 			stats.no_emoji = result; 
 			if(doLog) log("Stats > Cached no emoji as `" + result + "`!")
 		}, () => {
+            stats.no_emoji = false;
 			log("Stats > ❗❗❗ Unable to cache no emoji!")
 		});
 		sqlGetStat(26,  result => { 
 			stats.new_game_ping = result; 
 			if(doLog) log("Stats > Cached new game ping as `" + result + "`!")
 		}, () => {
+            stats.new_game_ping = false;
 			log("Stats > ❗❗❗ Unable to cache new game ping!")
 		});
 		sqlGetStat(27,  result => { 
 			stats.game_status = result; 
 			if(doLog) log("Stats > Cached game status vc as `" + result + "`!")
 		}, () => {
+            stats.game_status = false;
 			log("Stats > ❗❗❗ Unable to cache game status vc!")
 		});
 		sqlGetStat(28,  result => { 
 			stats.cc_limit = result; 
 			if(doLog) log("Stats > Cached cc limit as `" + result + "`!")
 		}, () => {
+            stats.cc_limit = 0;
 			log("Stats > ❗❗❗ Unable to cache game status vc!")
 		});
 		sqlGetStat(29,  result => { 
@@ -155,6 +177,7 @@ module.exports = function() {
 			if(doLog) log("Stats > Cached theme as `" + result + "`!");
 			cacheTheme();
 		}, () => {
+            stats.theme = "default";
 			log("Stats > ❗❗❗ Unable to cache theme!")
 		});
 		// Cache Elected roles
@@ -162,6 +185,7 @@ module.exports = function() {
 			stats.mayor2 = result; 
 			if(doLog) log("Stats > Cached mayor2 role id as `" + result + "`!")
 		}, () => {
+            stats.mayor2 = false;
 			log("Stats > ❗❗❗ Unable to cache mayor2 role id!")
 		});
 		// Cache Elected roles
@@ -169,6 +193,7 @@ module.exports = function() {
 			stats.poll = result; 
 			if(doLog) log("Stats > Cached poll mode as `" + result + "`!")
 		}, () => {
+            stats.poll = 0;
 			log("Stats > ❗❗❗ Unable to cache poll mode!")
 		});
 		// Sub role
@@ -176,6 +201,7 @@ module.exports = function() {
 			stats.sub = result; 
 			if(doLog) log("Stats > Cached substitute player role as `" + result + "`!")
 		}, () => {
+            stats.sub = false;
 			log("Stats > ❗❗❗ Unable to cache substitute player role mode!")
 		});
 		// gif ping
@@ -183,7 +209,16 @@ module.exports = function() {
 			stats.ping = result; 
 			if(doLog) log("Stats > Cached gif ping as `" + result + "`!")
 		}, () => {
+            stats.ping = stats.gamemaster ? stats.gamemaster : false;
 			log("Stats > ❗❗❗ Unable to cache gif ping!")
+		});
+		// secret mode
+		sqlGetStat(34,  result => { 
+			stats.secret_mode = result; 
+			if(doLog) log("Stats > Cached secret mode as `" + result + "`!")
+		}, () => {
+            stats.secret_mode = false;
+			log("Stats > ❗❗❗ Unable to cache secret mode!")
 		});
 	}
 	
@@ -236,6 +271,7 @@ module.exports = function() {
 				case "poll": stat = 31; break;
 				case "sub": stat = 32; break;
 				case "ping": stat = 33; break;
+				case "secret_mode": stat = 34; break;
 				default: message.channel.send("⛔ Syntax error. Invalid parameter!"); return;
 			}
 		} else {
