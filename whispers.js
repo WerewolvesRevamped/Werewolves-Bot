@@ -21,6 +21,20 @@ module.exports = function() {
 			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
 		}
 	}
+    
+    this.cmdImpersonate = function(message, argsX) {
+        let author = getUser(message.channel, argsX.shift());
+        if(author) cmdWebhook(message.channel, message.guild.members.cache.get(author), argsX);
+    }
+    
+    this.cmdWebhookDirect = function(message, argsX) {
+        if(!message.author.bot) {
+			cmdWebhook(message.channel, message.member, argsX);
+		} else {
+			let msg = ["Leave me alone.", "Please just stop.", "Why are you doing this?","What have I done to deserves this.","No.","Just no.","Seriously, no.","No means no.","Go away.","Why do you hate me?","What have I ever done to you?","I don't want to be part of your evil plots.","I'm a friendly bot, why are you trying to make me do this?","I just want to be nice, not annoying.","Please go away.","Why...","Stop...",":("];
+			message.channel.send(msg[Math.floor(Math.random() * msg.length)]);
+		}
+    }
 	
 	/* Help for this module */
 	this.helpWhispers = function(member, args) {

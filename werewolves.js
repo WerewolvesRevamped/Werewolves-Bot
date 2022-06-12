@@ -298,19 +298,11 @@ client.on("messageCreate", async message => {
 	case "<":
 	case "bot":
 	case "webhook":
-		if(!message.author.bot) {
-			cmdWebhook(message.channel, message.member, argsX);
-		} else {
-			let msg = ["Leave me alone.", "Please just stop.", "Why are you doing this?","What have I done to deserves this.","No.","Just no.","Seriously, no.","No means no.","Go away.","Why do you hate me?","What have I ever done to you?","I don't want to be part of your evil plots.","I'm a friendly bot, why are you trying to make me do this?","I just want to be nice, not annoying.","Please go away.","Why...","Stop...",":("];
-			message.channel.send(msg[Math.floor(Math.random() * msg.length)]);
-		}
+		cmdWebhookDirect(message, argsX);
 	break;
 	case "impersonate":
 	case "imp":
-		if(checkGM(message)) {
-			let author = getUser(message.channel, argsX.shift());
-			if(author) cmdWebhook(message.channel, message.guild.members.cache.get(author), argsX);
-		}
+		if(checkGM(message)) cmdImpersonate(message, argsX);
 	break;
 	/* Help */
 	case "h":
