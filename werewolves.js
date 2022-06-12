@@ -452,6 +452,11 @@ client.on("guildMemberRemove", async member => {
 	});	
 });
 
+/* Join Detection */
+client.on("guildMemberAdd", async member => {
+	log(`👋 ${member.user} has joined the server!`);
+});
+
 // for hardcoded reaction roles, because I'm lazy
 function handleReactionRole(reaction, user, add) {
     if(user.bot) return;
