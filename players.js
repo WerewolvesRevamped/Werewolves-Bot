@@ -76,6 +76,7 @@ module.exports = function() {
 				help += "```\nFunctionality\n\nAdds or removes a role from a user\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "modrole add 242983689921888256 584770967058776067\n< ✅ Added Bot Developer to @McTsts (Ts)!\n```";
 				help += "```diff\nAliases\n\n- mr\n```";
+            break;
 			case "l":
 			case "list":
 			case "signedup":
