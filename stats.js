@@ -303,9 +303,6 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "options <Option Name> - Manages options\n";
 				if(isGameMaster(member)) help += stats.prefix + "gamephase [get|set] - Manages gamephase\n";
 			break;
-			case "option":
-			case "stats":
-			case "stat":
 			case "options":
 				if(!isGameMaster(member)) break;
 					help += "```yaml\nSyntax\n\n" + stats.prefix + "options <Option Name> <New Value>\n```";
@@ -313,10 +310,7 @@ module.exports = function() {
 					help += "```fix\nUsage\n\n> " + stats.prefix + "options mayor\n< ✅ mayor currently is set to 588125889611431946!\n\n> " + stats.prefix + "options mayor 588125889611431946\n< ✅ Successfully updated mayor to 588125889611431946!```";
 					help += "```diff\nAliases\n\n- stat\n- stats\n- option\n```";
 			break;
-			case "gp":
 			case "gamephase":
-			case "game-phase":
-			case "game_phase":
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
 					default:
