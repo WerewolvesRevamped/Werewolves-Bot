@@ -45,23 +45,18 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "impersonate - Repeats a message as a webhook pretending to be somebody\n";
 				if(isGameMaster(member)) help += stats.prefix + "connection [add|remove|reset] - Manages connections\n";
 			break;
-			case "<":
-			case "bot":
 			case "webhook":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "webhook <Message>\n```";
 				help += "```\nFunctionality\n\nRepeats a message as a webhook pretending to be you.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "webhook Does this work?\n< Does this work?\n```";
 				help += "```diff\nAliases\n\n- bot\n- <\n```";
 			break;
-			case "imp":
 			case "impersonate":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "impersonate <User> <Message>\n```";
 				help += "```\nFunctionality\n\nRepeats a message as a webhook pretending to be a certain user.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "impersonate 242983689921888256 Does this work?\n< Does this work?\n```";
 				help += "```diff\nAliases\n\n- imp\n```";
 			break;
-			case "con":
-			case "whispers":
 			case "connection":
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
