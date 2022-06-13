@@ -10,7 +10,9 @@ module.exports = function() {
 
 	/* Handles start command */
 	this.cmdStart = function(channel, debug) {
-		if(stats.gamephase != gp.SETUP) { 
+		if(stats.gamephase == gp.SETUP || (debug && stats.gamephase == gp.NONE)) {
+            // start
+        } else { 
 			channel.send("⛔ Command error. Can't start an already started game."); 
 			return; 
 		}
@@ -39,6 +41,7 @@ module.exports = function() {
 		// Assign roles
 		startOnePlayer(channel, channel.guild.roles.cache.get(stats.signed_up).members.toJSON(), 0);
 		createSCs(channel, debug);
+        if(stats.secret_mode) getDisguises();
 	}
 	
 	this.helpGame = function(member, args) {
@@ -68,6 +71,12 @@ module.exports = function() {
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "start_debug\n```";
 				help += "```\nFunctionality\n\nDoes the same as " + stats.prefix + "start, but does not send out role messages.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "start_debug\n```";
+			break;
+			case "reset_debug":
+				if(!isGameMaster(member)) break;
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "reset_debug\n```";
+				help += "```\nFunctionality\n\nDoes the same as " + stats.prefix + "reset, but keeps all players as signed up.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "reset_debug\n```";
 			break;
 			case "reset":
 				if(!isGameMaster(member)) break;
@@ -200,11 +209,24 @@ module.exports = function() {
 	
 	/* Starts the creation of extra scs */
 	this.createStartPublic = function(channel, cc) {
-		sql("SELECT name,members,setup FROM sc WHERE type = 'public' ORDER BY cond ASC", result => {
-			createOnePublic(channel, cc, result, 0);
-		}, () => {
-			channel.send("⛔ Database error. Unable to get a list extra SCs."); 
-		});
+        if(!stats.secret_mode) { // standard mode
+            sql("SELECT name,members,setup FROM sc WHERE type = 'public' ORDER BY cond ASC", result => {
+                createOnePublic(channel, cc, result, 0);
+            }, () => {
+                channel.send("⛔ Database error. Unable to get a list extra SCs."); 
+            });
+        } else {
+            // Get players with that role
+            sql("SELECT id,disguise FROM players ORDER BY disguise ASC", allPlayers => {
+                sql("SELECT name,members,setup FROM sc WHERE type = 'public' ORDER BY cond ASC", publicChannels => {
+                    createOneSecretPublic(channel, cc, publicChannels, 0, allPlayers, 0);
+                }, () => {
+                    channel.send("⛔ Database error. Unable to get a list extra SCs."); 
+                });
+            }, () => {
+                channel.send("⛔ Database error. Unable to get a list of players."); 
+            });
+        }
 	}
 	
 	this.createOnePublic = function(channel, category, channels, index) {
@@ -233,6 +255,63 @@ module.exports = function() {
 			if(channels[index].setup.length > 1) channels[index].setup.replace(/%n/g, index).split(",").forEach(el => sc.send(stats.prefix + el));
 			sc.setParent(category,{ lockPermissions: false }).then(m => {
 				createOnePublic(channel, category, channels, ++index);
+			}).catch(err => { 
+				logO(err); 
+				sendError(channel, err, "Could not set category"); 
+			}); 
+		}).catch(err => { 
+			logO(err); 
+			sendError(channel, err, "Could not create channel"); 
+		});
+	}
+    
+	this.createOneSecretPublic = function(channel, category, channels, index, players, playersIndex) {
+		// Checks
+		if(index >= channels.length) {
+			channel.send("✅ Finished creating Public Channels!");
+			return;
+		}
+        if(playersIndex >= players.length) {
+			channel.send("✅ Finished creating `" + channels[index].name + "`.");
+			createOneSecretPublic(channel, category, channels, ++index, players, 0);
+            return;
+        }
+        
+		let cPerms;
+		switch(channels[index].members) {
+			case "mayor": 
+				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.mayor, ["write"], []), getPerms(stats.mayor2, ["write"], []), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(players[playersIndex].id, ["read"], ["write"]) ]; 
+			break;
+			case "info": 
+				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.dead_participant, [], ["read"]), getPerms(players[playersIndex].id, ["read"], ["write"]) ]; 
+			break;
+			case "alive": 
+				cPerms = [ getPerms(channel.guild.id, ["write"], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.dead_participant, [], ["read"]), getPerms(players[playersIndex].id, ["read"], []) ]; 
+			break;
+			case "dead": // dead channels are shared
+				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read","write"], []), getPerms(stats.spectator, ["read","write"], []), getPerms(stats.participant, [], ["read"]), getPerms(stats.sub, [], ["read"]) ]; 
+                channel.guild.channels.create(channels[index].name, { type: "text",  permissionOverwrites: cPerms })
+                .then(sc => { 
+                    if(channels[index].setup.length > 1) channels[index].setup.replace(/%n/g, index).split(",").forEach(el => sc.send(stats.prefix + el));
+                    sc.setParent(category,{ lockPermissions: false }).then(m => {
+                        createOneSecretPublic(channel, category, channels, ++index, players, 0);
+                    }).catch(err => { 
+                        logO(err); 
+                        sendError(channel, err, "Could not set category"); 
+                    }); 
+                }).catch(err => { 
+                    logO(err); 
+                    sendError(channel, err, "Could not create channel"); 
+                });
+                return;
+			break;
+		}
+		channel.guild.channels.create(channels[index].name + "-" + players[playersIndex].disguise.split(",")[0].substr(0, 10), { type: "text",  permissionOverwrites: cPerms })
+		.then(sc => { 
+            sc.send(stats.prefix + "split connection add " + channels[index].name + " %n;delay 1 delete 1");
+			if(channels[index].setup.length > 1) channels[index].setup.replace(/%n/g, index).split(",").forEach(el => sc.send(stats.prefix + el));
+			sc.setParent(category,{ lockPermissions: false }).then(m => {
+				createOneSecretPublic(channel, category, channels, index, players, ++playersIndex);
 			}).catch(err => { 
 				logO(err); 
 				sendError(channel, err, "Could not set category"); 
@@ -347,18 +426,20 @@ module.exports = function() {
 	}
 	
 	/* Handles reset command */
-	this.cmdReset = function(channel) {
+	this.cmdReset = function(channel, debug) {
 		// Set Gamephase
 		cmdGamephaseSet(channel, ["set", gp.NONE]);
 		// Reset Connection
 		cmdConnectionReset(channel);
 		// Reset Player Database
-		sql("DELETE FROM players", result => {
-			channel.send("✅ Successfully reset player list!");
-			getEmojis();
-		},() => {
-			channel.send("⛔ Database error. Could not reset player list!");
-		});
+        if(!debug) {
+            sql("DELETE FROM players", result => {
+                channel.send("✅ Successfully reset player list!");
+                getEmojis();
+            },() => {
+                channel.send("⛔ Database error. Could not reset player list!");
+            });
+        }
 		// Reset polls
 		// Reset Poll Database
 		sql("DELETE FROM polls", result => {

@@ -722,7 +722,7 @@ module.exports = function() {
 	
 	/* Converts a role/alias to role */
 	this.parseRole = function(input) {
-		console.log(input);
+		//console.log(input);
 		input = input.toLowerCase();
 		let alias = cachedAliases.find(el => el.alias === input);
 		if(alias) return parseRole(alias.name);

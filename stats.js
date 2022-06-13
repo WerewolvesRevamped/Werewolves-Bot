@@ -214,7 +214,8 @@ module.exports = function() {
 		});
 		// secret mode
 		sqlGetStat(34,  result => { 
-			stats.secret_mode = result; 
+			stats.secret_mode = result == true; 
+            if(stats.secret_mode) getDisguises();
 			if(doLog) log("Stats > Cached secret mode as `" + result + "`!")
 		}, () => {
             stats.secret_mode = false;
@@ -382,7 +383,7 @@ module.exports = function() {
 	/* Set gamephase */
 	this.cmdGamephaseSet = function(channel, args) {
 		// Check arguments
-		if(!args[1]) { 
+		if(!args[1] && args[1] !== 0) { 
 			channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `gamephase set <phase>`"); 
 			return; 
 		} else if(args[1] >= gp.MIN && args[1] <= gp.MAX) {

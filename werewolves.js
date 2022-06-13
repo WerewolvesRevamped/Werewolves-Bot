@@ -254,7 +254,11 @@ client.on("messageCreate", async message => {
 	break;
 	/* Start */ // Starts a debug game
 	case "start_debug":
-		if(checkSafe(message)) cmdConfirm(message, "start_debug");
+		if(checkSafe(message)) cmdStart(message.channel, true);
+	break;
+	/* Restart */ // Debug restart
+	case "reset_debug":
+		if(checkSafe(message)) cmdReset(message.channel, true);
 	break;
 	/* Reset */ // Resets a game
 	case "reset":
