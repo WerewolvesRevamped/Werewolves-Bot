@@ -99,23 +99,19 @@ client.on("messageCreate", async message => {
 
 	
 
-
+	command = parseAlias(command);
 	/* Ping */ // Generic test command / returns the ping
 	switch(command) {
-	case "°":
 	case "temp":
 		cmdTemp(message, args);
 	break;
-	case "?":
 	case "ping":
 		cmdPing(message);
 	break;
 	/* Split */
-	case ">":
 	case "say":
 		if(checkGM(message)) message.channel.send(args.join(" "));
 	break;
-	case "mod":
 	case "modify":
 		if(checkGM(message)) cmdModify(message, args, argsX);
 	break;
@@ -123,43 +119,30 @@ client.on("messageCreate", async message => {
 		if(checkGM(message)) args.join(" ").replace(/'/g,'"').split(";").forEach(el => message.channel.send(stats.prefix + el));
 	break;
 	/* Gamephase */ // Commands related to the gamephase
-	case "game-phase":
-	case "game_phase":
 	case "gamephase":
-	case "gp":
 		if(checkGM(message)) cmdGamephase(message, args);
 	break;
 	/* Connection */ // Manages connections between channels
-	case "con": 
-	case "whispers": 
 	case "connection": 
 		if(checkGM(message)) cmdConnection(message, args);
 	break;
 	/* Roles */ // Modify role information for commands such as 'info'
-	case "r":
-	case "role":
 	case "roles":
 		if(checkGM(message)) cmdRoles(message, args, argsX);
 	break;
 	/* Roles */ // Modify channel information for commands
-	case "channel":
 	case "channels":
 		if(checkGM(message)) cmdChannels(message, args, argsX);
 	break;
 	/* Role Info */ // Returns the info for a role set by the roles command
-	case "i":
 	case "info":
 		cmdInfo(message.channel, args, false, false);
 	break;
 	/* Role Info + Pin */ // Returns the info for a role set by the roles command & pins the message
-	case "ip":
 	case "infopin":
 		if(checkGM(message)) cmdInfo(message.channel, args, true, false);
 	break;
 	/* Options */ // Modify options such as role ids and prefix
-	case "stat":
-	case "stats":
-	case "option":
 	case "options": 
 		if(checkGM(message)) cmdOptions(message, args);
 	break;
@@ -195,52 +178,26 @@ client.on("messageCreate", async message => {
 			if(isGameMaster(message.member)) cmdDemote(message.channel, message.member);
 		} else cmdSignup(message.channel, message.member, args, true);
 	break;
-	case "join":
-	case "sign-up":
-	case "sign_up":
 	case "signup": 
-	case "unsignup": 
-	case "signout": 
-	case "participate": 
-	case "sign-out": 
-	case "sign_out": 
-	case "leave": 
-	case "unjoin": 
 		cmdSignup(message.channel, message.member, args, true);
 	break;
 	/* List Signedup */ // Lists all signedup players
-	case "l":
-	case "list":
-	case "signedup":
-	case "signedup_list":
-	case "signedup-list":
-	case "listsignedup":
-	case "list-signedup":
 	case "list_signedup":
 		cmdListSignedup(message.channel);
 	break;
 	/* List Signedup (alphabetical) */ // Lists all signedup players (alphabetically)
-	case "la":
 	case "list_alphabetical":
 		cmdListSignedupAlphabetical(message.channel);
 	break;
 	/* List Alive */ // Lists all alive players
-	case "a":
-	case "alive":
-	case "alive_list":
-	case "alive-list":
-	case "listalive":
-	case "list-alive":
 	case "list_alive":
 		cmdListAlive(message.channel);
 	break;
 	/* Bulk Delete */ // Deletes a lot of messages
-	case "bd":
 	case "bulkdelete":
 		if(checkGM(message)) cmdConfirm(message, "bulkdelete");
 	break;
 	/* Delete */ // Deletes a couple of messages
-	case "d":
 	case "delete":
 		if(checkGM(message)) cmdDelete(message.channel, args);
 	break;
@@ -265,102 +222,72 @@ client.on("messageCreate", async message => {
 		if(checkSafe(message)) cmdConfirm(message, "end");
 	break;
 	/* Sheet */ // Simplifies game managment via sheet
-	case "sh":
-	case "game":
 	case "sheet":
 		if(checkSafe(message)) cmdSheet(message, args);
 	break;
 	/* Kill Q */
-	case "killqueue":
-	case "kq":
-	case "kill":
 	case "killq":
 		if(checkSafe(message)) cmdKillq(message, args);	
 	break;
 	/* Players */
-	case "p":
-	case "player":
 	case "players":
 		if(checkGM(message)) cmdPlayers(message, args);
 	break;
 	case "roll":
-	case "rand":
-	case "random":
-	case "randomize":
 		cmdRoll(message, args);
 	break;
 	/* CCs */
-	case "c":
 	case "cc":
 		cmdCC(message, args, argsX);
 	break;
 	/* Webhook Message*/
-	case "<":
-	case "bot":
 	case "webhook":
 		cmdWebhookDirect(message, argsX);
 	break;
 	case "impersonate":
-	case "imp":
 		if(checkGM(message)) cmdImpersonate(message, argsX);
 	break;
 	/* Help */
-	case "h":
 	case "help":
 		cmdHelp(message.channel, message.member, args);
 	break;
 	/* Emoji */
-	case "e":
-	case "emoji":
 	case "emojis":
 		cmdEmojis(message.channel);
 	break;
 	/* Poll */
-	case "pl":
-	case "polls":
 	case "poll":
 		if(checkGM(message)) cmdPoll(message, args);
 	break;
 	/* Promote */
-	case "^":
 	case "promote":
 		cmdPromote(message.channel, message.member);
 	break;
 	/* Promote */
-	case "v":
 	case "demote":
 		cmdDemote(message.channel, message.member);
 	break;
 	/* Theme */
-	case "th":
-	case "themes":
 	case "theme":
 		cmdTheme(message, args);
 	break;
 	/* New Game Ping */
-	case "@@":
 	case "gameping":
 		if(checkGM(message)) cmdGamePing(message.channel, message.member);
 	break;
 	/* Open Signups */
-	case "@":
 	case "open":
 		if(checkGM(message)) cmdOpen(message);
 	break;
 	/* Close Signups */
-	case "x":
 	case "close":
 		if(checkGM(message)) cmdClose(message);
 	break;
 	/* Spectate */
-	case "s":
-	case "spec":
-	case "spectator":
 	case "spectate":
 		cmdSpectate(message.channel, message.member);
 	break;
 	/* Substitute */
-	case "sub":
 	case "substitute":
 		cmdSubstitute(message.channel, message.member);
 	break;
@@ -377,7 +304,6 @@ client.on("messageCreate", async message => {
 	break;
 	/* Modrole */ 
 	case "modrole": 
-	case "mr":
 		if(checkGM(message)) cmdModrole(message, args);
 	break;
 	/* Invalid Command */
@@ -388,6 +314,51 @@ client.on("messageCreate", async message => {
 	/* Delete Message */
 	message.delete();
 });
+
+this.parseAlias = function(alias) {
+    let aliases = {
+            "modrole": ["mr"],
+            "substitute": ["sub"],
+            "spectate": ["s","spec","spectator"],
+            "close": ["x"],
+            "open": ["@"],
+            "gameping": ["@@"],
+            "theme": ["th","themes"],
+            "demote": ["v"],
+            "promote": ["^"],
+            "poll": ["polls","pl"],
+            "emojis": ["emoji","e"],
+            "help": ["h"],
+            "impersonate": ["imp"],
+            "webhook": ["bot","<"],
+            "cc": ["c","ccs"],
+            "roll": ["rand","random","randomize"],
+            "players": ["p","player"],
+            "killq": ["kq","kill","killqueue"],
+            "sheet": ["sh","game"],
+            "delete": ["d"],
+            "bulkdelete": ["bd"],
+            "list_alive": ["a","alive","alive_list","alive-list","listalive","list-alive"],
+            "list_alphabetical": ["la"],
+            "list_signedup": ["l","list","signedup","signedup_list","signedup-list","listsignedup","list-signedup"],
+            "signup": ["join","sign-up","sign_up","unsignup","signout","participate","sign-out","sign_out","leave","unjoin"],
+            "options": ["stat","stats","option"],
+            "info": ["i"],
+            "infopin": ["ip"],
+            "channels": ["channel","ch"],
+            "roles": ["role","r"],
+            "connection": ["con","connect","whisper","whispers"],
+            "gamephase": ["gp","game_phase","game-phase"],
+            "modify": ["mod"],
+            "say": [">"],
+            "?": ["ping"],
+            "temp": ["°"]
+    };
+    for(let cmd in aliases) {
+        if(aliases[cmd].indexOf(alias) != -1) return cmd;
+    }
+    return alias;
+}
 
 client.on('messageDelete', message => {
 	message = JSON.parse(JSON.stringify(message)); // WHY IS THIS LINE OF CODE NECESSARY????????
