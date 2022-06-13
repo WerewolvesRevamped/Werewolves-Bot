@@ -47,8 +47,6 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "poll [new|close] - Manages polls\n";
 			break;
 			case "poll":
-			case "polls":
-			case "pl":
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
 					default:
