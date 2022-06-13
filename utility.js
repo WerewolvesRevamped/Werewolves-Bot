@@ -155,8 +155,10 @@ module.exports = function() {
 	
 	/* Handles help command */
 	this.cmdHelp = function(channel, member, args) {
+		// parse alias
+		args[0] = parseAlias(args[0]);
 		// Normal help
-			let msgA = "", msgB = "", msgC = "";
+		let msgA = "", msgB = "", msgC = "";
 		if(!args[0]) {
 			args[0] = "";
 			if(isGameMaster(member)) msgA += "**```yaml\nWerewolf Bot Game Master Help\n```**";
@@ -220,14 +222,12 @@ module.exports = function() {
 				help += "```\nFunctionality\n\nRuns a list of commands that are provided as a semicolon seperated list.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "split help;ping```";
 			break;
-			case ">":
 			case "say":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "say\n```";
 				help += "```\nFunctionality\n\nMakes the bot repeat everything after say.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "say Hello!\n< Hello!```";
 				help += "```diff\nAliases\n\n- >\n```";
 			break;
-			case "°":
 			case "temp":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "temp [c|f] <Value>\n```";
 				help += "```\nFunctionality\n\nConverts <Value> to the scale provided in the first argument\n```";
@@ -255,21 +255,18 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "delay - Executes a command with delay\n";
 				if(isGameMaster(member)) help += stats.prefix + "modify - Modifies the bot\n";
 			break;
-			case "?":
 			case "ping":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "ping\n```";
 				help += "```\nFunctionality\n\nGives the ping of the bot, and checks if the bot is running.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "ping\n< ✅ Pong! Latency is 170ms. API Latency is 128ms```";
 				help += "```diff\nAliases\n\n- ?\n```";
 			break;
-			case "bd": 
 			case "bulkdelete": 
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "bulkdelete\n```";
 				help += "```\nFunctionality\n\nDeletes webhook/user messages (but not bot messages) in bulk from a channel.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "bulkdelete\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "bulkdelete!\n< ✅ Deleted 17 messages.```";
 				help += "```diff\nAliases\n\n- bd\n```";
 			break;
-			case "d": 
 			case "delete": 
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "delete [0-5]\n```";
 				help += "```\nFunctionality\n\nDeletes the last up to five messages from a channel.\n```";
@@ -281,14 +278,12 @@ module.exports = function() {
 				help += "```\nFunctionality\n\nExecutes a command with delay in seconds.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "delay 5 ping\n< ✅ Pong! Latency is 990ms. API Latency is 114ms```";
 			break;
-			case "h":
 			case "help":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "help <Command> [Sub-Command(s)]\n```";
 				help += "```\nFunctionality\n\nProvides help for a command (with subcommands)\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "help help\n```";
 				help += "```diff\nAliases\n\n- h\n```";
 			break;
-			case "mod":
 			case "modify":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "modify <attribute> <value>\n```";
 				help += "```\nFunctionality\n\Updates an <attribute> of the bot to <value>. Available attributes: status, nickname, activity.\n```";

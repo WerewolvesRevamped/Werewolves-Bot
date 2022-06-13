@@ -31,8 +31,6 @@ module.exports = function() {
 			case "":
 				if(isGameMaster(member)) help += stats.prefix + "theme [set|remove|list|select] - Manages themes\n";
 			break;
-			case "th":
-			case "themes":
 			case "theme":
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
