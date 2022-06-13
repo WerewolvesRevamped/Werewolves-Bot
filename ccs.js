@@ -41,6 +41,28 @@ module.exports = function() {
 		}
 	}
 	
+	this.cmdSC = function(message, args, argsX) {
+		// Check subcommand
+		if(!args[0]) { 
+			message.channel.send(helpCCs(message.member, ["sc"]));
+			return; 
+		} else if(stats.gamephase != gp.INGAME) { 
+			message.channel.send("⛔ Command error. Can only use SCs while a game is running."); 
+			return; 
+		}
+		// Check Subcommand
+		switch(args[0]) {
+			case "add": cmdCCAdd(message.channel, message.member, args, 1); break;
+			case "remove": cmdCCRemove(message.channel, message.member, args, 1); break;
+			case "rename": cmdCCRename(message.channel, message.member, args, 1); break;
+			case "list": cmdCCList(message.channel, 2, 1); break;
+			case "clear": cmdSCClear(message.channel); break;
+			case "clean": cmdSCClean(message.channel); break;
+			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
+		}
+		
+	}
+	
 	this.cmdCCCreateMulti = function(channel, member, args, type) {
 		cmdCCCreateOneMulti(channel, member, args.join(" ").split("~").splice(1).map(el => ("create " + el).split(" ")).splice(0, emojiIDs.length + 1), type, 0);
 	}
@@ -62,6 +84,7 @@ module.exports = function() {
 				help += stats.prefix + "cc [add|remove|promote|demote|leave|list|owners] - Manages a CC\n";
 				help += stats.prefix + "cc [rename|archive] - Manages a CC\n";
 				if(isGameMaster(member)) help += stats.prefix + "cc cleanup - Cleans up CCs\n";
+				if(isGameMaster(member)) help += stats.prefix + "sc [add|remove|list|rename|clear|clean] - Manages a SC\n";
 			break;
 			case "cc":
 				switch(args[1]) {
@@ -142,6 +165,45 @@ module.exports = function() {
 						help += "```fix\nUsage\n\n> " + stats.prefix + "cc cleanup\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "cc cleanup!\n< ✅ Successfully deleted a cc category!\n< ✅ Successfully deleted ccs!\n< ✅ Successfully reset cc counter!\n< ✅ Successfully reset cc cat list!```";
 					break;
 				}
+			break;
+			case "sc":
+				switch(args[1]) {
+					default:
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "sc [add|remove|rename|list]\n```";
+						help += "```\nFunctionality\n\nGroup of commands to handle SCs. " + stats.prefix + "help sc <sub-command> for detailed help. Primarily provides the same functionality as the cc command.\n```";
+					break;
+					case "add":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "sc add <Player List>\n```";
+						help += "```\nFunctionality\n\nAdds all players in the <Player List> to the current SC.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "sc add marhjo\n< ✅ Added @marhjo to the CC!```";
+					break;
+					case "remove":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "sc remove <Player List>\n```";
+						help += "```\nFunctionality\n\nRemoves all players in the <Player List> from the current SC.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "sc remove marhjo\n< ✅ Removed @marhjo from the CC!```";
+					break;
+					case "rename":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "sc rename <name>\n```";
+						help += "```\nFunctionality\n\nRenames the current sc into <name>.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "sc rename newName\n< ✅ Renamed channel to newName!```";
+					break;
+					case "list":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "sc list\n```";
+						help += "```\nFunctionality\n\nLists all members of the current SC.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "sc list\n< CC Members | Total: 2\n  @marhjo\n  @McTsts```";
+					break;
+					case "clear":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "sc clear\n```";
+						help += "```\nFunctionality\n\nRemoves all members of the current SC.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "sc clear```";
+					break;
+					case "clean":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "sc clean\n```";
+						help += "```\nFunctionality\n\nRemoves all members of the current SC and bulkdeletes messages. Same as running sc clear and bulkdelete.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "sc clean```";
+					break;
+				}
+			break;
 		}
 		return help;
 	}
@@ -424,9 +486,9 @@ module.exports = function() {
 	}
 	
 	/* List CC members */
-	this.cmdCCList = function(channel, mode) {
+	this.cmdCCList = function(channel, mode, mode2 = 0) {
 		// Check if CC
-		if(!isCC(channel)) {
+		if(!mode2 && !isCC(channel)) {
 			channel.send("⛔ Command error. Can't use command outside a CC!");
 			return;
 		}
@@ -441,6 +503,18 @@ module.exports = function() {
 			case 3: channel.send("✳ Listing CC members").then(m => { m.edit("**CC Owners** | Total: " +  ccOwner.split("\n").length + "\n" + ccOwner); }).catch(err => {logO(err); sendError(channel, err, "Could not list CC members"); }); break;
 		}
 		
+	}
+	
+	this.cmdSCClear = function(channel) {
+		let members = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member").filter(el => el.allow > 0).map(el => channel.guild.members.cache.get(el.id));
+		members.forEach(el => {
+			channel.permissionOverwrites.cache.get(el).delete();	
+		});
+	}
+	
+	this.cmdSCClean = function(channel) {
+		cmdSCClear(channel);
+		cmdBulkDelete(channel);
 	}
 		
 	/* Creates CC */
