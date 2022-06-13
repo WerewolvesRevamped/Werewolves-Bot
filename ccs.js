@@ -58,6 +58,7 @@ module.exports = function() {
 			case "list": cmdCCList(message.channel, 2, 1); break;
 			case "clear": cmdSCClear(message.channel); break;
 			case "clean": cmdSCClean(message.channel); break;
+			case "change": cmdSCChange(message.channel, args); break;
 			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
 		}
 		
@@ -84,7 +85,7 @@ module.exports = function() {
 				help += stats.prefix + "cc [add|remove|promote|demote|leave|list|owners] - Manages a CC\n";
 				help += stats.prefix + "cc [rename|archive] - Manages a CC\n";
 				if(isGameMaster(member)) help += stats.prefix + "cc cleanup - Cleans up CCs\n";
-				if(isGameMaster(member)) help += stats.prefix + "sc [add|remove|list|rename|clear|clean] - Manages a SC\n";
+				if(isGameMaster(member)) help += stats.prefix + "sc [add|remove|list|rename|clear|clean|change] - Manages a SC\n";
 			break;
 			case "cc":
 				switch(args[1]) {
@@ -201,6 +202,11 @@ module.exports = function() {
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "sc clean\n```";
 						help += "```\nFunctionality\n\nRemoves all members of the current SC and bulkdeletes messages. Same as running sc clear and bulkdelete.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "sc clean```";
+					break;
+					case "change":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "sc change <roleName>\n```";
+						help += "```\nFunctionality\n\nRenames the cc to a new name and infopins that name.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "sc change citizen```";
 					break;
 				}
 			break;
@@ -506,6 +512,10 @@ module.exports = function() {
 	}
 	
 	this.cmdSCClear = function(channel) {
+		if(!isSC(channel)) {
+			channel.send("⛔ Command error. Can't use command outside a SC!");
+			return;
+		}
 		let members = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member").filter(el => el.allow > 0).map(el => channel.guild.members.cache.get(el.id));
 		members.forEach(el => {
 			channel.permissionOverwrites.cache.get(el).delete();	
@@ -513,8 +523,26 @@ module.exports = function() {
 	}
 	
 	this.cmdSCClean = function(channel) {
+		if(!isSC(channel)) {
+			channel.send("⛔ Command error. Can't use command outside a SC!");
+			return;
+		}
 		cmdSCClear(channel);
 		cmdBulkDelete(channel);
+	}
+	
+	this.cmdSCChange = function(channel, args) {
+		let role = verifyRole(args[1]);
+		if(!args[1] || !role ) {
+			channel.send("⛔ Command error. You must provide a valid role!");
+			return;
+		}
+		if(!isSC(channel)) {
+			channel.send("⛔ Command error. Can't use command outside a SC!");
+			return;
+		}
+		cmdCCRename(channel, false, args, 1);
+		cmdRolesScInfo(channel, [args[1]], true);
 	}
 		
 	/* Creates CC */
