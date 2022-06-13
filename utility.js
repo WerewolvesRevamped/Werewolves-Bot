@@ -155,8 +155,10 @@ module.exports = function() {
 	
 	/* Handles help command */
 	this.cmdHelp = function(channel, member, args) {
+		// parse alias
+		args[0] = parseAlias(args[0]);
 		// Normal help
-			let msgA = "", msgB = "", msgC = "";
+		let msgA = "", msgB = "", msgC = "";
 		if(!args[0]) {
 			args[0] = "";
 			if(isGameMaster(member)) msgA += "**```yaml\nWerewolf Bot Game Master Help\n```**";
@@ -220,14 +222,12 @@ module.exports = function() {
 				help += "```\nFunctionality\n\nRuns a list of commands that are provided as a semicolon seperated list.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "split help;ping```";
 			break;
-			case ">":
 			case "say":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "say\n```";
 				help += "```\nFunctionality\n\nMakes the bot repeat everything after say.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "say Hello!\n< Hello!```";
 				help += "```diff\nAliases\n\n- >\n```";
 			break;
-			case "°":
 			case "temp":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "temp [c|f] <Value>\n```";
 				help += "```\nFunctionality\n\nConverts <Value> to the scale provided in the first argument\n```";
