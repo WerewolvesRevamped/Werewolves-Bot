@@ -34,6 +34,7 @@ module.exports = function() {
 			case "switch": cmdPlayersSwitch(message, args); break;
 			case "list": cmdConfirm(message, "players list"); break;
 			case "log": cmdConfirm(message, "players log"); break;
+			case "log2": cmdConfirm(message, "players log2"); break;
 			case "messages": 
 			case "msgs": cmdPlayersListMsgs(message.channel, args); break;
 			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
@@ -58,7 +59,7 @@ module.exports = function() {
 		let help = "";
 		switch(args[0]) {
 			case "":
-				if(isGameMaster(member)) help += stats.prefix + "players [list|log|msgs] - Information about players\n";
+				if(isGameMaster(member)) help += stats.prefix + "players [list|msgs|log|log2] - Information about players\n";
 				if(isGameMaster(member)) help += stats.prefix + "players [get|get_clean|set|resurrect|signup] - Manages players\n";
 				if(isGameMaster(member)) help += stats.prefix + "players [substitute|switch] - Manages player changes\n";
 				if(isGameMaster(member)) help += stats.prefix + "killq [add|remove|killall|list|clear] - Manages kill queue\n";
@@ -138,7 +139,7 @@ module.exports = function() {
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
 					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "players [get|get_clean|set|resurrect|signup|list|substitute|switch]\n```";
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "players [get|get_clean|set|resurrect|signup|list|substitute|switch|messages|log|log2]\n```";
 						help += "```\nFunctionality\n\nGroup of commands to handle players. " + stats.prefix + "help players <sub-command> for detailed help.\n\nList of Player Properties:\nalive: Whether the player is alive`\nemoji: The emoji the player uses\nrole: The role of the player\npublic_value: The value of the players vote on public polls (Typically 1)\nprivate_value: The value of the players vote on private polls (Typically 1)\npublic_votes: The base value of votes the player has against them on public votes (Typically 0)\nid: The discord id of the player\nccs: the amount of created ccs\npublic_msgs: Amount of messages sent in public channels\nprivate_msgs: Amount of messages sent in private channels```";
 						help += "```diff\nAliases\n\n- p\n- player\n```";
 					break;
@@ -187,7 +188,12 @@ module.exports = function() {
 					case "log":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players log\n```";
 						help += "```\nFunctionality\n\nLists all players with their role and nickname in the gamelog format.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "players log\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "players list!\n> Players | Total: 2\n  • 🛠 @McTsts (as `Ts`) is `Werewolf`\n  • 👌 @federick (as `fed`) is `Baker`\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "players log\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "players log!\n> Players | Total: 2\n  • 🛠 @McTsts (as `Ts`) is `Werewolf`\n  • 👌 @federick (as `fed`) is `Baker`\n```";
+					break;	
+					case "log2":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "players log2\n```";
+						help += "```\nFunctionality\n\nLists all players with their role and all roles with their player. Can be used to copy into gamelog messages.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "players log2\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "players log2!```";
 					break;		
 					case "messages":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players messages\n```";
@@ -436,6 +442,48 @@ module.exports = function() {
 					logO(err); 
 					sendError(channel, err, "Could not log signed up players");
 				});
+		}, () => {
+			// DB error
+			channel.send("⛔ Database error. Could not list signed up players!");
+		});
+	
+	}
+	
+    
+	/* Lists all signedup players in a different log format */
+	this.cmdPlayersLog2 = function(channel, args) {
+		// Get a list of players
+		sql("SELECT id,emoji,role,alive,public_value,private_value,public_votes,ccs FROM players WHERE alive=1", result => {
+			let playerList = result.map(el => {
+				let thisRoles = el.role.split(",").map(role => toTitleCase(role));
+				let thisPlayer = channel.guild.members.cache.get(el.id);
+				if(thisPlayer.roles.cache.get(stats.mayor) || thisPlayer.roles.cache.get(stats.mayor2)) thisRoles.push("Mayor");
+				if(thisPlayer.roles.cache.get(stats.reporter)) thisRoles.push("Reporter");
+				if(thisPlayer.roles.cache.get(stats.guardian)) thisRoles.push("Guardian");
+				let thisPlayerList = [];
+				thisPlayerList.push(thisPlayer.nickname.toUpperCase());
+				thisPlayerList.push(`• <@${el.id}> (${thisRoles.join(", ")}) ? []`);
+				thisRoles.forEach(role => thisPlayerList.push(`• ${role} (<@${el.id}>${thisRoles.length>1?', '+thisRoles.filter(r=>r!=role).join(', '):''}) ? @ ()`));
+				return thisPlayerList;
+			});
+			// chunk list
+			let playerListArray = playerList.flat();
+			playerList = [];
+			let counter = 0;
+			for(let i = 0; i < playerListArray.length; i++) {
+				if(!playerList[Math.floor(counter/40)]) playerList[Math.floor(counter/40)] = [];
+				playerList[Math.floor(counter/40)].push(playerListArray[i]);
+				counter++;
+			}
+			// send list
+			for(let i = 0; i < playerList.length; i++) {
+				// Print message
+				channel.send("```" + playerList[i].join("\n") + "```")
+				.catch(err => {
+					logO(err); 
+					sendError(channel, err, "Could not list players for log");
+				});
+			}
 		}, () => {
 			// DB error
 			channel.send("⛔ Database error. Could not list signed up players!");
