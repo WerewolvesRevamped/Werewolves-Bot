@@ -18,8 +18,8 @@ module.exports = function() {
 	/* Handle players command */
 	this.cmdPlayers = function(message, args) {
 		// Check subcommands
-		if(!args[0] || (!args[1] && args[0] != "list" && args[0] != "log" && args[0] != "msgs")) { 
-			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `players [get|get_clean|set|resurrect|signup|list|msgs]`!"); 
+		if(!args[0] || (!args[1] && args[0] != "list" && args[0] != "log" && args[0] != "log2" && args[0] != "msgs")) { 
+			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `players [get|get_clean|set|resurrect|signup|list|msgs|log|log2]`!"); 
 			return; 
 		}
 		//Find subcommand
@@ -478,7 +478,7 @@ module.exports = function() {
 			// send list
 			for(let i = 0; i < playerList.length; i++) {
 				// Print message
-				channel.send("```" + playerList[i].join("\n") + "```")
+				channel.send("```\n" + playerList[i].join("\n") + "```")
 				.catch(err => {
 					logO(err); 
 					sendError(channel, err, "Could not list players for log");

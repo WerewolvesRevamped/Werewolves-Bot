@@ -393,5 +393,51 @@ module.exports = function() {
 			setTimeout(resolve, ms);
 		});
 	}
+    
+    this.parseAlias = function(alias) {
+        let aliases = {
+                "modrole": ["mr"],
+                "substitute": ["sub"],
+                "spectate": ["s","spec","spectator"],
+                "close": ["x"],
+                "open": ["@"],
+                "gameping": ["@@"],
+                "theme": ["th","themes"],
+                "demote": ["v"],
+                "promote": ["^"],
+                "poll": ["polls","pl"],
+                "emojis": ["emoji","e"],
+                "help": ["h"],
+                "impersonate": ["imp"],
+                "webhook": ["bot","<"],
+                "cc": ["c","ccs"],
+                "roll": ["rand","random","randomize"],
+                "players": ["p","player"],
+                "killq": ["kq","kill","killqueue"],
+                "sheet": ["sh","game"],
+                "delete": ["d"],
+                "bulkdelete": ["bd"],
+                "list_alive": ["a","alive","alive_list","alive-list","listalive","list-alive"],
+                "list_alphabetical": ["la"],
+                "list_signedup": ["l","list","signedup","signedup_list","signedup-list","listsignedup","list-signedup"],
+                "signup": ["join","sign-up","sign_up","unsignup","signout","participate","sign-out","sign_out","leave","unjoin"],
+                "options": ["stat","stats","option"],
+                "info": ["i"],
+                "infopin": ["ip"],
+                "channels": ["channel","ch"],
+                "roles": ["role","r"],
+                "connection": ["con","connect","whisper","whispers"],
+                "gamephase": ["gp","game_phase","game-phase"],
+                "modify": ["mod"],
+                "say": [">"],
+                "ping": ["?"],
+                "temp": ["°"]
+        };
+        for(let cmd in aliases) {
+            if(aliases[cmd].indexOf(alias) != -1) return cmd;
+        }
+        return alias;
+    }
+
 	
 }

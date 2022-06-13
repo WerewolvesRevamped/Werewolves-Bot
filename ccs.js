@@ -41,7 +41,7 @@ module.exports = function() {
 		}
 	}
 	
-	this.cmdSC = function(message, args, argsX) {
+	this.cmdSC = function(message, args) {
 		// Check subcommand
 		if(!args[0]) { 
 			message.channel.send(helpCCs(message.member, ["sc"]));
@@ -170,7 +170,7 @@ module.exports = function() {
 			case "sc":
 				switch(args[1]) {
 					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "sc [add|remove|rename|list]\n```";
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "sc [add|remove|rename|list|clear|clean|change]\n```";
 						help += "```\nFunctionality\n\nGroup of commands to handle SCs. " + stats.prefix + "help sc <sub-command> for detailed help. Primarily provides the same functionality as the cc command.\n```";
 					break;
 					case "add":
@@ -516,7 +516,7 @@ module.exports = function() {
 			channel.send("⛔ Command error. Can't use command outside a SC!");
 			return;
 		}
-		let members = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member").filter(el => el.allow > 0).map(el => channel.guild.members.cache.get(el.id));
+		let members = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member").filter(el => el.allow > 0).map(el => el.id);
 		members.forEach(el => {
 			channel.permissionOverwrites.cache.get(el).delete();	
 		});
@@ -542,7 +542,8 @@ module.exports = function() {
 			return;
 		}
 		cmdCCRename(channel, false, args, 1);
-		cmdRolesScInfo(channel, [args[1]], true);
+		cmdInfo(channel, [args[1]], true, true);
+        channel.send(`**<@&${stats.participant}> Your role has changed to \`${toTitleCase(args[1])}\`.**`);
 	}
 		
 	/* Creates CC */

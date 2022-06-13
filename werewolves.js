@@ -89,7 +89,7 @@ client.on("messageCreate", async message => {
 	if(message.channel) message.content = message.content.replace(/%c/, message.channel.id);
 	// Get default arguments / default command / unmodified arguments / unmodified commands
 	const args = message.content.slice(stats.prefix.length).trim().match(/(".*?")|(\S+)/g) ? message.content.slice(stats.prefix.length).trim().match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : [];
-	const command = args.shift();
+	const command = parseAlias(args.shift());
 	const argsX = message.content.slice(stats.prefix.length).trim().replace(/\n/g,"~").match(/(".*?")|(\S+)/g) ? message.content.slice(stats.prefix.length).trim().replace(/\n/g,"~").match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "")) : [];
 	const commandX = argsX.shift();
 	
@@ -97,9 +97,7 @@ client.on("messageCreate", async message => {
 		message.channel.send("killq add " + message.author);
 	}
 
-	
 
-	command = parseAlias(command);
 	/* Ping */ // Generic test command / returns the ping
 	switch(command) {
 	case "temp":
@@ -244,6 +242,9 @@ client.on("messageCreate", async message => {
 	case "cc":
 		cmdCC(message, args, argsX);
 	break;
+	case "sc":
+		cmdSC(message, args);
+	break;
 	/* Webhook Message*/
 	case "webhook":
 		cmdWebhookDirect(message, argsX);
@@ -318,51 +319,6 @@ client.on("messageCreate", async message => {
 	/* Delete Message */
 	message.delete();
 });
-
-this.parseAlias = function(alias) {
-    let aliases = {
-            "modrole": ["mr"],
-            "substitute": ["sub"],
-            "spectate": ["s","spec","spectator"],
-            "close": ["x"],
-            "open": ["@"],
-            "gameping": ["@@"],
-            "theme": ["th","themes"],
-            "demote": ["v"],
-            "promote": ["^"],
-            "poll": ["polls","pl"],
-            "emojis": ["emoji","e"],
-            "help": ["h"],
-            "impersonate": ["imp"],
-            "webhook": ["bot","<"],
-            "cc": ["c","ccs"],
-            "roll": ["rand","random","randomize"],
-            "players": ["p","player"],
-            "killq": ["kq","kill","killqueue"],
-            "sheet": ["sh","game"],
-            "delete": ["d"],
-            "bulkdelete": ["bd"],
-            "list_alive": ["a","alive","alive_list","alive-list","listalive","list-alive"],
-            "list_alphabetical": ["la"],
-            "list_signedup": ["l","list","signedup","signedup_list","signedup-list","listsignedup","list-signedup"],
-            "signup": ["join","sign-up","sign_up","unsignup","signout","participate","sign-out","sign_out","leave","unjoin"],
-            "options": ["stat","stats","option"],
-            "info": ["i"],
-            "infopin": ["ip"],
-            "channels": ["channel","ch"],
-            "roles": ["role","r"],
-            "connection": ["con","connect","whisper","whispers"],
-            "gamephase": ["gp","game_phase","game-phase"],
-            "modify": ["mod"],
-            "say": [">"],
-            "?": ["ping"],
-            "temp": ["°"]
-    };
-    for(let cmd in aliases) {
-        if(aliases[cmd].indexOf(alias) != -1) return cmd;
-    }
-    return alias;
-}
 
 client.on('messageDelete', message => {
 	message = JSON.parse(JSON.stringify(message)); // WHY IS THIS LINE OF CODE NECESSARY????????
