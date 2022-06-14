@@ -13,8 +13,19 @@ module.exports = function() {
 		if(stats.gamephase == gp.SETUP || (debug && stats.gamephase == gp.NONE)) {
             // start
         } else { 
-			channel.send("⛔ Command error. Can't start an already started game."); 
-			return; 
+            if(stats.gamephase == gp.NONE) {
+                channel.send("⛔ Command error. Can't start if there is no game."); 
+                return; 
+            } else if(stats.gamephase >= gp.INGAME) {
+                channel.send("⛔ Command error. Can't start an already started game."); 
+                return; 
+            } else if(stats.gamephase == gp.SIGNUP {
+                channel.send("⛔ Command error. Can't start the game while signups are open."); 
+                return; 
+            } else {
+                channel.send("⛔ Command error. Invalid gamephase."); 
+                return; 
+            }
 		}
 		channel.send("✳ Game is called `" + stats.game + "`");
 		// Create Public Channels

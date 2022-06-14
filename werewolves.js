@@ -31,7 +31,8 @@ client.on("ready", () => {
         loadPollValues();
 		global.client.guilds.fetch(stats.log_guild).then(guild => {
 			guild.members.fetch().then((members) => {
-				//console.log(members.map(el => el.user.username));
+                //members.forEach(el => console.log(el.user.id));
+				//console.log(members.map(el => el.user.id));
 			});
 		});
 		log("Bot > Caching completed, Bot is ready!")
