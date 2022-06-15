@@ -215,7 +215,6 @@ module.exports = function() {
 		// secret mode
 		sqlGetStat(34,  result => { 
 			stats.secret_mode = result == true; 
-            if(stats.secret_mode) getDisguises();
 			if(doLog) log("Stats > Cached secret mode as `" + result + "`!")
 		}, () => {
             stats.secret_mode = false;

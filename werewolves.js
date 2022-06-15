@@ -29,6 +29,7 @@ client.on("ready", () => {
 		getSCCats();
 		getPublicCat();
         loadPollValues();
+        getDisguises();
 		global.client.guilds.fetch(stats.log_guild).then(guild => {
 			guild.members.fetch().then((members) => {
                 //members.forEach(el => console.log(el.user.id));
@@ -40,7 +41,46 @@ client.on("ready", () => {
     // fetch reaction roles
     let reactionChannel = client.channels.cache.get("611536670201872385");
     if(reactionChannel) reactionChannel.messages.fetch({limit:10});
+    
+    //logDMs();
 });
+
+async function logDMs() {
+    // test
+    let ids = [];
+    //let ids = ["242983689921888256"];
+    for(let i = 0; i < ids.length; i++) {
+        console.log("Checking dms with: " + ids[i]);
+        await logDM(ids[i]);
+    }
+}
+
+async function logDM(id) {
+    await global.client.users.fetch(id).then(async u => {
+        await u.createDM().then(async dm => {
+            await dm.messages.fetch({limit: 100}).then(async msgs => {
+                await sleep(1000);
+                await msgs.forEach(async m => {
+                    await sleep(1000);
+                    log("To: " + u.username + "\nBy: " + m.author.username + "\nAt: " + timeConverter(m.createdTimestamp) + "\n```" + m.content + "```");
+                });
+            });
+        });
+    });
+}
+
+function timeConverter(UNIX_timestamp){
+    var a = new Date(UNIX_timestamp);
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var year = a.getFullYear();
+    var month = months[a.getMonth()];
+    var date = a.getDate();
+    var hour = a.getHours();
+    var min = a.getMinutes();
+    var sec = a.getSeconds();
+    var time = date + ' ' + month + ' ' + year + ' ' + (hour<=9?"0"+hour:hour) + ':' + (min<=9?"0"+min:min) + ':' + (sec<=9?"0"+sec:sec);
+    return time;
+}
 
 /* New Message */
 client.on("messageCreate", async message => {
@@ -102,7 +142,7 @@ client.on("messageCreate", async message => {
 	/* Ping */ // Generic test command / returns the ping
 	switch(command) {
 	case "temp":
-		cmdTemp(message, args);
+		//cmdTemp(message, args);
 	break;
 	case "ping":
 		cmdPing(message);

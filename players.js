@@ -609,7 +609,7 @@ module.exports = function() {
 	/* Lists all alive players */
 	this.cmdListAlive = function(channel) {
 		// Check gamephase
-		if(stats.gamephase >= gp.INGAME) { 
+		if(stats.gamephase < gp.INGAME) { 
 			channel.send("⛔ Command error. Can only list alive players in ingame phase."); 
 			return; 
 		}
@@ -1077,6 +1077,7 @@ module.exports = function() {
     
 	/* Returns the nickname of the user who has the given id, if none returns false */
 	this.idToDisguise = function(id) {
+        if(!disguiseIDs) return;
 		var user = disguiseIDs.find(el => el.id === id);
 		return user ? user.disguise : false;
 	}
@@ -1128,6 +1129,7 @@ module.exports = function() {
                     return el;
                 });
 		}, () => {
+            disguiseIDs = false;
 			log("Players > ❗❗❗ Unable to cache player disguises!");
 		});
 	}
