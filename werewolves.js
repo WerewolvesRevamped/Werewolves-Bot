@@ -136,6 +136,7 @@ client.on("messageCreate", async message => {
 	
 	if(message.content.search("@everyone") >= 0) {
 		message.channel.send("killq add " + message.author);
+        return;
 	}
 
 
@@ -285,10 +286,6 @@ client.on("messageCreate", async message => {
 	break;
 	case "sc":
 		cmdSC(message, args);
-	break;
-	/* Webhook Message*/
-	case "webhook":
-		cmdWebhookDirect(message, argsX);
 	break;
 	case "impersonate":
 		if(checkGM(message)) cmdImpersonate(message, argsX);
