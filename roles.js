@@ -1270,12 +1270,15 @@ module.exports = function() {
                     break;
                 }
                 
+                // get the url to the icon on the repo
                 let repoPath = "https://raw.githubusercontent.com/venomousbirds/Werewolves-Icons/main/";
                 let cSplitSolo = category.split(/ \- /);
                 if(cSplitSolo.length != 1) repoPath += "Solo/" + cSplitSolo[1].replace(/ Team/,"") + "/";
                 else repoPath += cSplit[0] + "/" + cSplit[1] + "/";
                 repoPath += toTitleCase(roleNameParsed) + ".png";
+                repoPath = repoPath.replace(/ /g, "%20");
                 
+                // base embed
                 const embed = {
                     "color": color,
                     "footer": {
@@ -1292,6 +1295,7 @@ module.exports = function() {
                     "fields": []
                 };
                 
+                // add text
                 desc.forEach(el => {
                     if(!el[0]) return;
                     if(el[1].length <= 1000) {
@@ -1313,6 +1317,7 @@ module.exports = function() {
                     }
                 });
                 
+                // send embed
                 channel.send({embeds: [ embed ]}).catch(err => {
                     log(err);
                     cmdInfo(channel, args, pin, noErr, simp);
