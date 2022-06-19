@@ -1296,26 +1296,30 @@ module.exports = function() {
                 };
                 
                 // add text
-                desc.forEach(el => {
-                    if(!el[0]) return;
-                    if(el[1].length <= 1000) {
-                        embed.fields.push({"name": `__${el[0]}__`, "value": el[1]});
-                    } else {
-                        let descSplit = el[1].split(/\n/);
-                       descSplitElements = [];
-                       let i = 0;
-                       let j = 0;
-                       while(i < descSplit.length) {
-                           descSplitElements[j] = "";
-                           while(i < descSplit.length && (descSplitElements[j].length + descSplit[i].length) <= 1000) {
-                               descSplitElements[j] += "\n" + descSplit[i];
-                               i++;
+                if(!simp) {
+                    desc.forEach(el => {
+                        if(!el[0]) return;
+                        if(el[1].length <= 1000) {
+                            embed.fields.push({"name": `__${el[0]}__`, "value": el[1]});
+                        } else {
+                            let descSplit = el[1].split(/\n/);
+                           descSplitElements = [];
+                           let i = 0;
+                           let j = 0;
+                           while(i < descSplit.length) {
+                               descSplitElements[j] = "";
+                               while(i < descSplit.length && (descSplitElements[j].length + descSplit[i].length) <= 1000) {
+                                   descSplitElements[j] += "\n" + descSplit[i];
+                                   i++;
+                               }
+                               j++;
                            }
-                           j++;
-                       }
-                       descSplitElements.forEach(d => embed.fields.push({"name": `__${el[0]}__ (${descSplitElements.indexOf(d)+1}/${descSplitElements.length})`, "value": d}));
-                    }
-                });
+                           descSplitElements.forEach(d => embed.fields.push({"name": `__${el[0]}__ (${descSplitElements.indexOf(d)+1}/${descSplitElements.length})`, "value": d}));
+                        }
+                    });
+                } else {
+                    embed.description = desc.find(el => el[0] === "Simplified")[1];
+                }
                 
                 // send embed
                 channel.send({embeds: [ embed ]}).catch(err => {
