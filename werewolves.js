@@ -182,9 +182,17 @@ client.on("messageCreate", async message => {
 	case "infopin":
 		if(checkGM(message)) cmdInfo(message.channel, args, true, false);
 	break;
+	/* Role Info (Fancy) */ // Returns the info for a role set by the roles command, but more fancy
+	case "infofancy":
+		cmdInfoFancy(message.channel, args, false, false);
+	break;
+	/* Role Info (Fancy) */ // Returns the info for a role set by the roles command, but more fancy (simplified)
+	case "infofancysimp":
+		cmdInfoFancy(message.channel, args, false, false, true);
+	break;
 	/* Options */ // Modify options such as role ids and prefix
 	case "options": 
-		if(checkGM(message)) cmdOptions(message, args);
+		if(checkGM(message)) cmdOptions(message, argsX);
 	break;
 	/* Signup */ // Signs a player up with an emoji
 	case "j":

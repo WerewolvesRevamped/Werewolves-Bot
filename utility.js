@@ -424,6 +424,8 @@ module.exports = function() {
                 "options": ["stat","stats","option"],
                 "info": ["i"],
                 "infopin": ["ip"],
+                "infofancy": ["if"],
+                "infofancysimp": ["ifs"],
                 "channels": ["channel","ch"],
                 "roles": ["role","r"],
                 "connection": ["con","connect","whisper","whispers"],

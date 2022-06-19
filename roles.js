@@ -1219,5 +1219,113 @@ module.exports = function() {
 			if(!noErr) channel.send("⛔ Database error. Couldn't look for role information!");
 		});	
 	}
+    
+	/* Prints info for a role by name or alias */
+	this.cmdInfoFancy = function(channel, args, pin, noErr, simp = false) {
+		// Check arguments
+		if(!args[0]) { 
+			if(!noErr) channel.send("⛔ Syntax error. Not enough parameters!"); 
+			return
+		}
+		args[0] = args.join(" ");
+		if(!verifyRoleVisible(args[0])) {
+			if(!noErr) channel.send("⛔ Command error. Invalid role `" + args[0] + "`!"); 
+			return; 
+		}
+        let roleNameParsed = parseRole(args[0]);
+		sql("SELECT description FROM roles WHERE name = " + connection.escape(roleNameParsed), result => {
+			if(result.length > 0) { 
+				var desc = result[0].description.replace(/~/g,"\n");
+                
+                // split into name & text pairs + apply theme
+                desc = desc.split(/(?=__[\w\d_]+__)/).map(el => {
+                    let cat = el.match(/^__([\w\d_]+)__\s*\n([\w\W]*)\n?$/);
+                    console.log(cat);
+                    return cat ? [cat[1], cat[2]] : ["", el];
+                }).map(el => {
+                    return applyTheme(el);
+                });
+                
+                if(!simp) {
+                    desc = desc.filter(el => el[0] != "Simplified");
+                } else {
+                    desc = desc.filter(el => el[0] === "Simplified" || el[0] === ""); 
+                }
+                
+                let category = (desc.find(el => el[0] == "")[1].split(/ \| /)[1] ?? "Unknown").replace(/[\n\r]*/g,"").trim();
+                let fancyRoleName = toTitleCase(roleNameParsed) + (category ? " [" + category + "]" : "");
+                
+                let color = 0;
+                let cSplit = category.split(/ /);
+                switch(cSplit[0]) {
+                    case "Townsfolk": 
+                        color = 3138709;
+                    break;
+                    case "Werewolf":
+                        color = 14882377;
+                    break;
+                    default:
+                        color = 15852544;
+                        console.log(category);
+                    break;
+                }
+                
+                let repoPath = "https://raw.githubusercontent.com/venomousbirds/Werewolves-Icons/main/";
+                let cSplitSolo = category.split(/ \- /);
+                if(cSplitSolo.length != 1) repoPath += "Solo/" + cSplitSolo[1].replace(/ Team/,"") + "/";
+                else repoPath += cSplit[0] + "/" + cSplit[1] + "/";
+                repoPath += toTitleCase(roleNameParsed) + ".png";
+                
+                const embed = {
+                    "color": color,
+                    "footer": {
+                        "icon_url": `${channel.guild.iconURL()}`,
+                        "text": `${channel.guild.name} - ${stats.game}`
+                    },
+                    "thumbnail": {
+                        "url": repoPath
+                    },
+                    "author": {
+                        "name": fancyRoleName,
+                        "icon_url": repoPath
+                    },
+                    "fields": []
+                };
+                
+                desc.forEach(el => {
+                    if(!el[0]) return;
+                    if(el[1].length <= 1000) {
+                        embed.fields.push({"name": `__${el[0]}__`, "value": el[1]});
+                    } else {
+                        let descSplit = el[1].split(/\n/);
+                       descSplitElements = [];
+                       let i = 0;
+                       let j = 0;
+                       while(i < descSplit.length) {
+                           descSplitElements[j] = "";
+                           while(i < descSplit.length && (descSplitElements[j].length + descSplit[i].length) <= 1000) {
+                               descSplitElements[j] += "\n" + descSplit[i];
+                               i++;
+                           }
+                           j++;
+                       }
+                       descSplitElements.forEach(d => embed.fields.push({"name": `__${el[0]}__ (${descSplitElements.indexOf(d)+1}/${descSplitElements.length})`, "value": d}));
+                    }
+                });
+                
+                channel.send({embeds: [ embed ]}).catch(err => {
+                    log(err);
+                    cmdInfo(channel, args, pin, noErr, simp);
+                });
+                
+			} else { 
+			// Empty result
+				if(!noErr) channel.send("⛔ Database error. Could not find role `" + args[0] + "`!");
+			}
+		}, () => {
+			// DB error
+			if(!noErr) channel.send("⛔ Database error. Couldn't look for role information!");
+		});	
+	}
 	
 }
