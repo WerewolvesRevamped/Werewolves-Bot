@@ -358,8 +358,9 @@ module.exports = function() {
                 // fancy variant
                 if(stats.fancy_mode) {
                     let descSplit = desc.split(/\n/);
+                    let title = descSplit.shift();
                    let embed = {
-                        "title": descSplit.shift(),
+                        "title": title,
                         "description": descSplit.join("\n"),
                         "color": 10921638,
                         "footer": {
@@ -367,6 +368,8 @@ module.exports = function() {
                             "text": `${channel.guild.name} - ${stats.game}`
                         }
                     };
+                    let cRole = getCategoryRole(title);
+                    if(cRole) embed.thumbnail = {url: repoBaseUrl + "/" + cRole + ".png"};
                     cMsg = {embeds: [ embed ]};
                 }
                 
@@ -1315,7 +1318,7 @@ module.exports = function() {
         else repoPath += cSplit[0] + "/" + cSplit[1] + "/";
         repoPath += toTitleCase(role) + ".png";
         repoPath = repoPath.replace(/ /g, "%20");
-        repoPath += "?time=" + (+ new Date());
+        repoPath += "?game=" + stats.game;
         
         // get color
         let color = 0;
@@ -1354,6 +1357,7 @@ module.exports = function() {
     }
     
     this.getCategoryRole = function(team) {
+        team = team.toLowerCase().replace(/[^a-z ]/g,"").trim();
         const phTown = "Placeholder/Townsfolk";
         const phWolf = "Placeholder/Werewolf";
         const phUA = "Placeholder/Unaligned";
@@ -1533,7 +1537,7 @@ module.exports = function() {
                     }
                 } else { // apparntly not a role
                     let descSplit = result[0].description.split(/~/);
-                    let catRole = getCategoryRole(descSplit[0].toLowerCase().replace(/[^a-z ]/g,"").trim());
+                    let catRole = getCategoryRole(descSplit[0]);
                     
                     // base embed
                     embed = {
