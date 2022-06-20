@@ -442,6 +442,14 @@ module.exports = function() {
         }
         return alias;
     }
-
+    
+    /* HTTP */
+    const fetch = require('node-fetch');
+    this.checkUrlExists = async function(url) {
+        const response = await fetch(url, {
+            method: 'HEAD'
+        });
+        return response.ok;
+    }
 	
 }

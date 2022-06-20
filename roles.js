@@ -661,22 +661,26 @@ module.exports = function() {
                         });	
                     } else { // fancy DM
                         let roleData = getRoleData(rolesArray[0], result.find(el => toTitleCase(el.name) == rolesArray[0]).description);
-                        let embed = {
-                            "title": "The game has started!",
-                            "description": "This message is giving you your role for the next game of Werewolves: Revamped!\n\nYour role" + (result.length != 1 ? "s are" : " is") + " `" + roles + "`.\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.\n\nIf you're confused about your role at all, then check #how-to-play on the discord, which contains a role book with information on all the roles in this game. If you have any questions about the game, ping @Host.",
-                            "color": roleData.color,
-                            "footer": {
-                                "icon_url": `${channel.guild.iconURL()}`,
-                                "text": `${channel.guild.name} - ${stats.game}`
-                            },
-                            "thumbnail": {
-                                "url": roleData.url
-                            }
-                        };
-                        channel.guild.members.cache.get(players[index].id).user.send({embeds: [ embed ]}).catch(err => {
-                            logO(err); 
-                            sendError(channel, err, "Could not send role message to " + disName);
-                        });
+                        if(!roleData) {
+                            sendError(channel, err, "Could not find role for " + disName);
+                        } else {
+                            let embed = {
+                                "title": "The game has started!",
+                                "description": "This message is giving you your role for the next game of Werewolves: Revamped!\n\nYour role" + (result.length != 1 ? "s are" : " is") + " `" + roles + "`.\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.\n\nIf you're confused about your role at all, then check #how-to-play on the discord, which contains a role book with information on all the roles in this game. If you have any questions about the game, ping @Host.",
+                                "color": roleData.color,
+                                "footer": {
+                                    "icon_url": `${channel.guild.iconURL()}`,
+                                    "text": `${channel.guild.name} - ${stats.game}`
+                                },
+                                "thumbnail": {
+                                    "url": roleData.url
+                                }
+                            };
+                            channel.guild.members.cache.get(players[index].id).user.send({embeds: [ embed ]}).catch(err => {
+                                logO(err); 
+                                sendError(channel, err, "Could not send role message to " + disName);
+                            });
+                        }
                     }
 				} else {
 					channel.guild.members.cache.get(players[index].id).user.send("This message is giving you your custom role for the next game of Werewolves: Revamped!\n\n\nYour role is `" + toTitleCase(customRole.name) + "` (" + customRole.id + ").\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.").catch(err => { 
@@ -1295,18 +1299,23 @@ module.exports = function() {
 		});	
 	}
     
+    const repoBaseUrl = "https://raw.githubusercontent.com/venomousbirds/Werewolves-Icons/main/";
     this.getRoleData = function(role, description) {
         // prep 
-         let category = description.split(/\n|~/)[0].split(/ \| /)[1].trim() ?? "Unknown Unknown";
+        let category = description.split(/\n|~/)[0].split(/ \| /)[1]?.trim() ?? false;
+        if(!category) return false;
         let cSplit = category.split(/ /);
         
+        
         // get url
-         let repoPath = "https://raw.githubusercontent.com/venomousbirds/Werewolves-Icons/main/";
+         let repoPath = repoBaseUrl;
         let cSplitSolo = category.split(/ \- /);
         if(cSplitSolo.length != 1) repoPath += "Solo/" + cSplitSolo[1].replace(/ Team/,"") + "/";
+        else if(cSplit.length == 1) repoPath += cSplit[0] + "/";
         else repoPath += cSplit[0] + "/" + cSplit[1] + "/";
         repoPath += toTitleCase(role) + ".png";
         repoPath = repoPath.replace(/ /g, "%20");
+        repoPath += "?time=" + (+ new Date());
         
         // get color
         let color = 0;
@@ -1344,6 +1353,73 @@ module.exports = function() {
         return {url: repoPath, color: color};
     }
     
+    this.getCategoryRole = function(team) {
+        const phTown = "Placeholder/Townsfolk";
+        const phWolf = "Placeholder/Werewolf";
+        const phUA = "Placeholder/Unaligned";
+        const phSolo = "Placeholder/Solo";
+        switch(team) {
+            case "teams": return false;
+            /** Role Categories **/
+            // town
+            case "townsfolk categories": return "Townsfolk/Miscellaneous/Citizen";
+            case "townsfolk miscellaneous": return "Townsfolk/Miscellaneous/Devout%20Villager";
+            case "townsfolk group": return "Townsfolk/Group/Baker";
+            case "townsfolk investigative": return "Townsfolk/Investigative/Aura%20Teller";
+            case "townsfolk killing": return "Townsfolk/Killing/Assassin";
+            case "townsfolk power": return phTown;
+            // wolves
+            case "werewolf categories": return "Werewolf/Miscellaneous/Wolf";
+            case "werewolf miscellaneous": return "Werewolf/Miscellaneous/Wolf";
+            case "werewolf investigative": return "Werewolf/Investigative/Tracking%20Wolf";
+            case "werewolf power": return "Werewolf/Power/Tanner";
+            case "werewolf killing": return phWolf;
+            case "werewolf transformation": return phWolf;
+            // ua
+            case "unaligned categories": return phUA;
+            case "unaligned miscellaneous": return "Unaligned/Miscellaneous/Riding%20Hood";
+            case "unaligned align": return phUA;
+            case "unaligned align - hag": return phUA;
+            case "unaligned align - cupid": return phUA;
+            case "unaligned extra": return phUA;
+            // solo
+            case "solo categories": return phSolo;
+            case "solo killing": return phSolo;
+            case "solo miscellaneous": return phSolo;
+            case "solo power": return phSolo;
+            case "solo recruitment": return phSolo;
+            // solo teams
+            case "solo teams": return phSolo;
+            case "hell team": return "Solo/Hell/Devil";
+            case "underworld team": return "Solo/Underworld/Vampire";
+            case "flock team": return phSolo;
+            case "flute team": return phSolo;
+            case "graveyard team": return phSolo;
+            case "hag team": return phSolo;
+            case "nightmare team": return phSolo;
+            case "plague team": return phSolo;
+            case "pyro team": return phSolo;
+            case "white wolves team": return phSolo;
+            // elected
+            case "elected": return "Elected/Mayor";
+            /** Groups **/
+            //group
+            case "butchers": return "Townsfolk/Group/Butcher";
+            case "bakers": return "Townsfolk/Group/Baker";
+            case "cult": return "Townsfolk/Group/Cult%20Member";
+            case "hellhounds": return phWolf;
+            case "jury": return phTown;
+            /** Custom **/
+            case "foxes": return phWolf;
+            case "lone werewolves": return phWolf;
+            case "wolfpack": return "Werewolf/Miscellaneous/Wolf";
+            case "lycans": return "Werewolf/Miscellaneous/Wolf";
+            case "packless werewolves": return "Werewolf/Power/Tanner";
+            // default
+            default: return false;
+        }
+    }
+    
 	/* Prints info for a role by name or alias */
 	this.cmdInfoFancy = function(channel, args, pin, noErr, simp = false) {
 		// Check arguments
@@ -1357,7 +1433,7 @@ module.exports = function() {
 			return; 
 		}
         let roleNameParsed = parseRole(args[0]);
-		sql("SELECT description FROM roles WHERE name = " + connection.escape(roleNameParsed), result => {
+		sql("SELECT description FROM roles WHERE name = " + connection.escape(roleNameParsed), async result => {
 			if(result.length > 0) { 
 				var desc = result[0].description.replace(/~/g,"\n");
                 
@@ -1382,58 +1458,113 @@ module.exports = function() {
                 // get the url to the icon on the repo
                 let roleData = getRoleData(roleNameParsed, result[0].description);
                 
-                // base embed
-                const embed = {
-                    "color": roleData.color,
-                    "footer": {
-                        "icon_url": `${channel.guild.iconURL()}`,
-                        "text": `${channel.guild.name} - ${stats.game}`
-                    },
-                    "thumbnail": {
-                        "url": roleData.url
-                    },
-                    "author": {
-                        "name": fancyRoleName,
-                        "icon_url": roleData.url
-                    },
-                    "fields": []
-                };
-                
-                // add text
-                if(!simp) {
-                    desc.forEach(el => {
-                        if(!el[0]) return;
-                        if(el[1].length <= 1000) {
-                            embed.fields.push({"name": `__${el[0]}__`, "value": el[1]});
-                        } else {
-                            let descSplit = el[1].split(/\n/);
-                           descSplitElements = [];
-                           let i = 0;
-                           let j = 0;
-                           while(i < descSplit.length) {
-                               descSplitElements[j] = "";
-                               while(i < descSplit.length && (descSplitElements[j].length + descSplit[i].length) <= 1000) {
-                                   descSplitElements[j] += "\n" + descSplit[i];
-                                   i++;
-                               }
-                               j++;
-                           }
-                           descSplitElements.forEach(d => embed.fields.push({"name": `__${el[0]}__ (${descSplitElements.indexOf(d)+1}/${descSplitElements.length})`, "value": d}));
-                        }
-                    });
-                } else {
-                    let simpDesc = desc.find(el => el && el[0] === "Simplified");
-                    if(simpDesc) {
-                        embed.description = simpDesc[1];
-                    }  else {
-                        simpDesc = desc.find(el => el && el[0] === "Basics");
-                        if(simpDesc) {
-                            embed.description = simpDesc[1];
-                        } else {
-                            cmdInfo(channel, args, pin, noErr, simp);
-                            return;
+                var embed = {};
+                if(roleData && result[0].description.split(/~/)[1][0] == "_") { // actual role
+                    // base embed
+                    let urlExists = await checkUrlExists(roleData.url);
+                     let emUrl = roleData.url;
+                     // if the url doesnt exist, use a placeholder
+                    if(!urlExists) {
+                        let pCat = category.split(" ")[0];
+                        switch(pCat) {
+                            case "Townsfolk":
+                            case "Werewolf":
+                            case "Unaligned":
+                            case "Solo":
+                                emUrl = `${repoBaseUrl}Placeholder/${pCat}.png`;
+                            break;
+                            default:
+                                emUrl = `${repoBaseUrl}Placeholder/Unaligned.png`;
+                            break;
                         }
                     }
+                    // create the embed
+                    embed = {
+                        "color": roleData.color,
+                        "footer": {
+                            "icon_url": `${channel.guild.iconURL()}`,
+                            "text": `${channel.guild.name} - ${stats.game}`
+                        },
+                        "thumbnail": {
+                            "url": emUrl
+                        },
+                        "author": {
+                            "name": fancyRoleName,
+                            "icon_url": emUrl
+                        },
+                        "fields": []
+                    };
+                    
+                    // add text
+                    if(!simp) {
+                        desc.forEach(el => {
+                            if(!el[0]) return;
+                            if(el[1].length <= 1000) {
+                                embed.fields.push({"name": `__${el[0]}__`, "value": el[1]});
+                            } else {
+                                let descSplit = el[1].split(/\n/);
+                               descSplitElements = [];
+                               let i = 0;
+                               let j = 0;
+                               while(i < descSplit.length) {
+                                   descSplitElements[j] = "";
+                                   while(i < descSplit.length && (descSplitElements[j].length + descSplit[i].length) <= 1000) {
+                                       descSplitElements[j] += "\n" + descSplit[i];
+                                       i++;
+                                   }
+                                   j++;
+                               }
+                               descSplitElements.forEach(d => embed.fields.push({"name": `__${el[0]}__ (${descSplitElements.indexOf(d)+1}/${descSplitElements.length})`, "value": d}));
+                            }
+                        });
+                    } else {
+                        let simpDesc = desc.find(el => el && el[0] === "Simplified");
+                        if(simpDesc) {
+                            embed.description = simpDesc[1];
+                        }  else {
+                            simpDesc = desc.find(el => el && el[0] === "Basics");
+                            if(simpDesc) {
+                                embed.description = simpDesc[1];
+                            } else {
+                                cmdInfo(channel, args, pin, noErr, simp);
+                                return;
+                            }
+                        }
+                    }
+                } else { // apparntly not a role
+                    let descSplit = result[0].description.split(/~/);
+                    let catRole = getCategoryRole(descSplit[0].toLowerCase().replace(/[^a-z ]/g,"").trim());
+                    
+                    // base embed
+                    embed = {
+                        "color": 7829367,
+                        "footer": {
+                            "icon_url": `${channel.guild.iconURL()}`,
+                            "text": `${channel.guild.name} - ${stats.game}`
+                        },
+                        "title": descSplit.shift()
+                    };
+                    
+                    if(descSplit.join("\n").length > 1900) { // too long
+                       descSplitElements = [];
+                       let i = 0;
+                       let j = 0;
+                       while(i < descSplit.length) {
+                           descSplitElements[j] = "";
+                           while(i < descSplit.length && (descSplitElements[j].length + descSplit[i].length) <= 1000) {
+                               descSplitElements[j] += "\n" + descSplit[i];
+                               i++;
+                           }
+                           j++;
+                       }
+                       embed.description = descSplitElements.shift() + "\n" + descSplitElements.shift();
+                       embed.fields = [];
+                       descSplitElements.forEach(el => embed.fields.push({"name": `...`, "value": el}));
+                    } else { // not too long
+                        embed.description = descSplit.join("\n");
+                    }
+                    
+                    if(catRole) embed.thumbnail = {url: repoBaseUrl + "/" + catRole + ".png"};
                 }
                 
                 // send embed
