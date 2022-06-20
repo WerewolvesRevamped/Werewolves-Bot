@@ -120,7 +120,7 @@ client.on("messageCreate", async message => {
                 let msg = message.content.trim().substr(1).trim();
                 let msgRole = msg.match(/(".*?")|(\S+)/g) ? msg.match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "";
                 console.log(msg + " => " + msgRole);
-                if(msg.match(/^[a-zA-Z ]*$/)) cmdInfo(message.channel, msgRole, false, true, true);
+                if(msg.match(/^[a-zA-Z ]*$/)) cmdInfoEither(message.channel, msgRole, false, true, true);
                 return;
 	}
 	if(message.content.indexOf(stats.prefix) !== 0) return;
@@ -176,19 +176,27 @@ client.on("messageCreate", async message => {
 	break;
 	/* Role Info */ // Returns the info for a role set by the roles command
 	case "info":
-		cmdInfo(message.channel, args, false, false);
+		cmdInfoEither(message.channel, args, false, false);
 	break;
 	/* Role Info + Pin */ // Returns the info for a role set by the roles command & pins the message
 	case "infopin":
-		if(checkGM(message)) cmdInfo(message.channel, args, true, false);
+		if(checkGM(message)) cmdInfoEither(message.channel, args, true, false);
+	break;
+	/* Role Info (Classic) */ // Returns the info for a role set by the roles command
+	case "info_classic":
+		if(checkGM(message)) cmdInfo(message.channel, args, false, false);
+	break;
+	/* Role Info (Classic) */ // Returns the info for a role set by the roles command (simplified)
+	case "info_classic_simplified":
+		if(checkGM(message)) cmdInfo(message.channel, args, false, false, true);
 	break;
 	/* Role Info (Fancy) */ // Returns the info for a role set by the roles command, but more fancy
-	case "infofancy":
-		cmdInfoFancy(message.channel, args, false, false);
+	case "info_fancy":
+		if(checkGM(message)) cmdInfoFancy(message.channel, args, false, false);
 	break;
 	/* Role Info (Fancy) */ // Returns the info for a role set by the roles command, but more fancy (simplified)
-	case "infofancysimp":
-		cmdInfoFancy(message.channel, args, false, false, true);
+	case "info_fancy_simplified":
+		if(checkGM(message)) cmdInfoFancy(message.channel, args, false, false, true);
 	break;
 	/* Options */ // Modify options such as role ids and prefix
 	case "options": 

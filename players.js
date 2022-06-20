@@ -1125,6 +1125,7 @@ module.exports = function() {
 	this.getDisguises = function() {
 		sql("SELECT id,disguise FROM players", result => {
 				disguiseIDs = result.map(el => {
+                    if(!el.disguise) return el;
                     el.disguise = el.disguise.split(",");
                     return el;
                 });

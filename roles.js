@@ -85,6 +85,10 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "channels [info|infopin|info_set|info_get|info_remove|info_list] - Manages SC Info\n";
 				if(isGameMaster(member)) help += stats.prefix + "channels cleanup - Cleans up SCs\n";
 				if(isGameMaster(member)) help += stats.prefix + "infopin - Returns role info & pins the message\n";
+				if(isGameMaster(member)) help += stats.prefix + "info_fancy - Returns role info (fancy)\n";
+				if(isGameMaster(member)) help += stats.prefix + "info_fancy_simplified - Returns role info (fancy, simplified)\n";
+				if(isGameMaster(member)) help += stats.prefix + "info_classic - Returns role info (classic)\n";
+				if(isGameMaster(member)) help += stats.prefix + "info_classic_simplified - Returns role info (classic, simplified)\n";
 				help += stats.prefix + "info - Returns role info\n";
 			break;
 			case "info":
@@ -92,6 +96,30 @@ module.exports = function() {
 				help += "```\nFunctionality\n\nShows the description of a role.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "info citizen\n< Citizen | Townsfolk\n  Basics\n  The Citizen has no special abilities.\n  All the innocents vote during the day on whomever they suspect to be an enemy,\n  and hope during the night that they won’t get killed.\n```";
 				help += "```diff\nAliases\n\n- i\n```";
+			break;
+			case "info_fancy":
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "info_fancy <Role Name>\n```";
+				help += "```\nFunctionality\n\nShows the description of a role in the fancy view.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "info_fancy citizen\n```";
+				help += "```diff\nAliases\n\n- if\n```";
+			break;
+			case "info_fancy_simplified":
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "info_fancy_simplified <Role Name>\n```";
+				help += "```\nFunctionality\n\nShows the description of a role in the fancy view and simplified.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "info_fancy_simplified citizen\n```";
+				help += "```diff\nAliases\n\n- ifs\n```";
+			break;
+			case "info_classic":
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "info_classic <Role Name>\n```";
+				help += "```\nFunctionality\n\nShows the description of a role in the classic view.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "info_classic citizen\n```";
+				help += "```diff\nAliases\n\n- ic\n```";
+			break;
+			case "info_classic_simplified":
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "info_classic_simplified <Role Name>\n```";
+				help += "```\nFunctionality\n\nShows the description of a role in the classic view and simplified.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "info_classic_simplified citizen\n```";
+				help += "```diff\nAliases\n\n- ics\n```";
 			break;
 			case "infopin":
 				if(!isGameMaster(member)) break;
@@ -324,7 +352,25 @@ module.exports = function() {
 			if(result.length > 0) { 
 				var desc = result[0].info.replace(/~/g,"\n");
 				desc = applyTheme(desc);
-				channel.send(desc).then(m => {
+                
+                let cMsg = desc;
+                
+                // fancy variant
+                if(stats.fancy_mode) {
+                    let descSplit = desc.split(/\n/);
+                   let embed = {
+                        "title": descSplit.shift(),
+                        "description": descSplit.join("\n"),
+                        "color": 10921638,
+                        "footer": {
+                            "icon_url": `${channel.guild.iconURL()}`,
+                            "text": `${channel.guild.name} - ${stats.game}`
+                        }
+                    };
+                    cMsg = {embeds: [ embed ]};
+                }
+                
+				channel.send(cMsg).then(m => {
 					// Pin if pin is true
 					if(pin) {
 						m.pin().then(mp => {
@@ -600,17 +646,38 @@ module.exports = function() {
 		var customRole = false;
 		if(roleListD[0] === "custom") customRole = JSON.parse(roleListD[1].replace(/'/g,"\"").replace(/;/g,","));
 		let roleList = roleListD.map(el => "name = " + connection.escape(el)).join(" OR ");
-		sql("SELECT name,ind_sc FROM roles WHERE " + roleList, result => {	
+		sql("SELECT name,description,ind_sc FROM roles WHERE " + roleList, result => {	
 			result = result.filter(role => verifyRoleVisible(role.name));
-			var roles = result.map(el => toTitleCase(el.name));
+			var rolesArray = result.map(el => toTitleCase(el.name));
+            let disName = channel.guild.members.cache.get(players[index].id).displayName;
 			if(!debug) { 
 				if(!customRole) {
-					roles = roles.join("` + `");
+					let roles = rolesArray.join("` + `");
 					roles = applyTheme(roles);
-					channel.guild.members.cache.get(players[index].id).user.send("This message is giving you your role" + (result.length != 1 ? "s" : "") + " for the next game of Werewolves: Revamped!\n\n\nYour role" + (result.length != 1 ? "s are" : " is") + " `" + roles + "`.\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.\n\nIf you're confused about your role at all, then check #announcements on the discord, which contains a role book with information on all the roles in this game.").catch(err => { 
-						logO(err); 
-						sendError(channel, err, "Could not send role message to " + 	channel.guild.members.cache.get(players[index].id).displayName);
-					});	
+                    if(!stats.fancy_mode) { // default DM
+                        channel.guild.members.cache.get(players[index].id).user.send("This message is giving you your role" + (result.length != 1 ? "s" : "") + " for the next game of Werewolves: Revamped!\n\n\nYour role" + (result.length != 1 ? "s are" : " is") + " `" + roles + "`.\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.\n\nIf you're confused about your role at all, then check #announcements on the discord, which contains a role book with information on all the roles in this game.").catch(err => { 
+                            logO(err); 
+                            sendError(channel, err, "Could not send role message to " + disName);
+                        });	
+                    } else { // fancy DM
+                        let roleData = getRoleData(rolesArray[0], result.find(el => toTitleCase(el.name) == rolesArray[0]).description);
+                        let embed = {
+                            "title": "The game has started!",
+                            "description": "This message is giving you your role for the next game of Werewolves: Revamped!\n\nYour role" + (result.length != 1 ? "s are" : " is") + " `" + roles + "`.\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.\n\nIf you're confused about your role at all, then check #how-to-play on the discord, which contains a role book with information on all the roles in this game. If you have any questions about the game, ping @Host.",
+                            "color": roleData.color,
+                            "footer": {
+                                "icon_url": `${channel.guild.iconURL()}`,
+                                "text": `${channel.guild.name} - ${stats.game}`
+                            },
+                            "thumbnail": {
+                                "url": roleData.url
+                            }
+                        };
+                        channel.guild.members.cache.get(players[index].id).user.send({embeds: [ embed ]}).catch(err => {
+                            logO(err); 
+                            sendError(channel, err, "Could not send role message to " + disName);
+                        });
+                    }
 				} else {
 					channel.guild.members.cache.get(players[index].id).user.send("This message is giving you your custom role for the next game of Werewolves: Revamped!\n\n\nYour role is `" + toTitleCase(customRole.name) + "` (" + customRole.id + ").\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.").catch(err => { 
 						logO(err); 
@@ -633,7 +700,7 @@ module.exports = function() {
 				channel.guild.channels.create(name.substr(0, 100), { type: "text",  permissionOverwrites: ccPerms })
 				.then(sc => {
 					// Send info message
-					if(!customRole) indscRoles.forEach(el => cmdInfo(sc, [ el ], true, false));
+					if(!customRole) indscRoles.forEach(el => cmdInfoEither(sc, [ el ], true, false));
 					else {
 						var desc = "";
 						desc += "**" + toTitleCase(customRole.name) + "** | " + toTitleCase(customRole.team);
@@ -1148,6 +1215,14 @@ module.exports = function() {
 			channel.send("✅ Successfully executed `" + data.action + "`!");
 		});
 	}
+    
+    this.cmdInfoEither = function(channel, args, pin, noErr, simp = false) {
+        if(stats.fancy_mode) {
+            cmdInfoFancy(channel, args, pin, noErr, simp);
+        } else {
+            cmdInfo(channel, args, pin, noErr, simp);
+        }
+    }
 	
 	/* Prints info for a role by name or alias */
 	this.cmdInfo = function(channel, args, pin, noErr, simp = false) {
@@ -1220,6 +1295,55 @@ module.exports = function() {
 		});	
 	}
     
+    this.getRoleData = function(role, description) {
+        // prep 
+         let category = description.split(/\n|~/)[0].split(/ \| /)[1].trim() ?? "Unknown Unknown";
+        let cSplit = category.split(/ /);
+        
+        // get url
+         let repoPath = "https://raw.githubusercontent.com/venomousbirds/Werewolves-Icons/main/";
+        let cSplitSolo = category.split(/ \- /);
+        if(cSplitSolo.length != 1) repoPath += "Solo/" + cSplitSolo[1].replace(/ Team/,"") + "/";
+        else repoPath += cSplit[0] + "/" + cSplit[1] + "/";
+        repoPath += toTitleCase(role) + ".png";
+        repoPath = repoPath.replace(/ /g, "%20");
+        
+        // get color
+        let color = 0;
+        switch(cSplit[0]) {
+            case "Townsfolk": 
+                color = 3138709;
+            break;
+            case "Werewolf":
+                color = 14882377;
+            break;
+            case "Unaligned":
+                color = 15451648;
+            break;
+            case "Solo":
+                let soloTeam = cSplitSolo[1].replace(/ Team/,"");
+                switch(soloTeam) {
+                    case "Hell":
+                        color = 7607345;
+                    break;
+                    case "Underworld":
+                        color = 6361226;
+                    break;
+                    default:
+                        color = 7829367;
+                        console.log("Category: " + category + "; Team: " + cSplit[0] + " - " + soloTeam);
+                    break;
+                }
+            break;
+            default:
+                color = 7829367;
+                console.log("Category: " + category + "; Team: " + cSplit[0]);
+            break;
+        }
+        
+        return {url: repoPath, color: color};
+    }
+    
 	/* Prints info for a role by name or alias */
 	this.cmdInfoFancy = function(channel, args, pin, noErr, simp = false) {
 		// Check arguments
@@ -1240,7 +1364,7 @@ module.exports = function() {
                 // split into name & text pairs + apply theme
                 desc = desc.split(/(?=__[\w\d_]+__)/).map(el => {
                     let cat = el.match(/^__([\w\d_]+)__\s*\n([\w\W]*)\n?$/);
-                    console.log(cat);
+                    //console.log(cat);
                     return cat ? [cat[1], cat[2]] : ["", el];
                 }).map(el => {
                     return applyTheme(el);
@@ -1255,42 +1379,22 @@ module.exports = function() {
                 let category = (desc.find(el => el[0] == "")[1].split(/ \| /)[1] ?? "Unknown").replace(/[\n\r]*/g,"").trim();
                 let fancyRoleName = toTitleCase(roleNameParsed) + (category ? " [" + category + "]" : "");
                 
-                let color = 0;
-                let cSplit = category.split(/ /);
-                switch(cSplit[0]) {
-                    case "Townsfolk": 
-                        color = 3138709;
-                    break;
-                    case "Werewolf":
-                        color = 14882377;
-                    break;
-                    default:
-                        color = 15852544;
-                        console.log(category);
-                    break;
-                }
-                
                 // get the url to the icon on the repo
-                let repoPath = "https://raw.githubusercontent.com/venomousbirds/Werewolves-Icons/main/";
-                let cSplitSolo = category.split(/ \- /);
-                if(cSplitSolo.length != 1) repoPath += "Solo/" + cSplitSolo[1].replace(/ Team/,"") + "/";
-                else repoPath += cSplit[0] + "/" + cSplit[1] + "/";
-                repoPath += toTitleCase(roleNameParsed) + ".png";
-                repoPath = repoPath.replace(/ /g, "%20");
+                let roleData = getRoleData(roleNameParsed, result[0].description);
                 
                 // base embed
                 const embed = {
-                    "color": color,
+                    "color": roleData.color,
                     "footer": {
                         "icon_url": `${channel.guild.iconURL()}`,
                         "text": `${channel.guild.name} - ${stats.game}`
                     },
                     "thumbnail": {
-                        "url": repoPath
+                        "url": roleData.url
                     },
                     "author": {
                         "name": fancyRoleName,
-                        "icon_url": repoPath
+                        "icon_url": roleData.url
                     },
                     "fields": []
                 };
@@ -1318,12 +1422,23 @@ module.exports = function() {
                         }
                     });
                 } else {
-                    embed.description = desc.find(el => el[0] === "Simplified")[1];
+                    let simpDesc = desc.find(el => el && el[0] === "Simplified");
+                    if(simpDesc) {
+                        embed.description = simpDesc[1];
+                    }  else {
+                        simpDesc = desc.find(el => el && el[0] === "Basics");
+                        if(simpDesc) {
+                            embed.description = simpDesc[1];
+                        } else {
+                            cmdInfo(channel, args, pin, noErr, simp);
+                            return;
+                        }
+                    }
                 }
                 
                 // send embed
                 channel.send({embeds: [ embed ]}).catch(err => {
-                    log(err);
+                    logO(err);
                     cmdInfo(channel, args, pin, noErr, simp);
                 });
                 

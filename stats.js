@@ -11,7 +11,7 @@ module.exports = function() {
 	
 	/* Caches stats everytime they are changed or the bot is (re)started */
 	this.getStats = function() {
-		var doLog = false;
+		var doLog = true;
 		// Get Log Channel & Guild
 		sqlGetStat(11,  result => { 
 			stats.log_guild = result;
@@ -214,11 +214,19 @@ module.exports = function() {
 		});
 		// secret mode
 		sqlGetStat(34,  result => { 
-			stats.secret_mode = result == true; 
-			if(doLog) log("Stats > Cached secret mode as `" + result + "`!")
+			stats.secret_mode = result === 'true'; 
+			if(doLog) log("Stats > Cached secret mode as `" + stats.secret_mode + "`!")
 		}, () => {
             stats.secret_mode = false;
 			log("Stats > ❗❗❗ Unable to cache secret mode!")
+		});
+		// fancy mode
+		sqlGetStat(35,  result => { 
+			stats.fancy_mode = result === 'true'; 
+			if(doLog) log("Stats > Cached fancy mode as `" + stats.fancy_mode + "`!")
+		}, () => {
+            stats.fancy_mode = false;
+			log("Stats > ❗❗❗ Unable to cache fancy mode!")
 		});
 	}
 	
@@ -273,6 +281,7 @@ module.exports = function() {
 				case "sub": stat = 32; break;
 				case "ping": stat = 33; break;
 				case "secret_mode": stat = 34; break;
+				case "fancy_mode": stat = 35; break;
 				default: message.channel.send("⛔ Syntax error. Invalid parameter!"); return;
 			}
 		} else {
@@ -306,7 +315,7 @@ module.exports = function() {
 			case "options":
 				if(!isGameMaster(member)) break;
 					help += "```yaml\nSyntax\n\n" + stats.prefix + "options <Option Name> <New Value>\n```";
-					help += "```\nFunctionality\n\nReturns or sets (if <New Value> is set) the value of a bot option <Option Name>. A bot option can be a numeric id, or an option name.\n\nList of Option Names:\nprefix: The prefix the bot uses for commands\nparticipant: The id of the participant role\ngamemaster: The id of the gamemaster role\nspectator: The id of the spectator role\nsigned_up: The id of the signed up role\ndead_participant: The id of the dead participant role\nbot: The id of the bot role\nlog_guild: The id of the guild to use for logs\nlog_channel: The id of the channel to use for logs\nmayor: The id of the mayor role\nreporter: The id of the reporter role\nguardian: The id of the guardian role\ngame: The name of the game\ngamemaster_ingame: The id of the gamemaster ingame role\nadmin: The id of the admin role\nadmin_ingame: The id of the admin ingame role\nyes_emoji: The id of the yes emoji\nno_emoji: The id of the no emoji\nnew_game_ping: Role that gets pinged with certain commands\ngame_status: A VC that shows the status of the game\ncc_limit: Maximum amount of ccs one person can create (-1 for none)\nmayor2: The id of the second mayor role (which doesn't give extra votes)\npoll: The poll mode (0 -> default, 1 -> cancel, 2 -> private random)\nsub: role for substitute players\nping: ping for gifs and deleted messages\n```";
+					help += "```\nFunctionality\n\nReturns or sets (if <New Value> is set) the value of a bot option <Option Name>. A bot option can be a numeric id, or an option name.\n\nList of Option Names:\nprefix: The prefix the bot uses for commands\nparticipant: The id of the participant role\ngamemaster: The id of the gamemaster role\nspectator: The id of the spectator role\nsigned_up: The id of the signed up role\ndead_participant: The id of the dead participant role\nbot: The id of the bot role\nlog_guild: The id of the guild to use for logs\nlog_channel: The id of the channel to use for logs\nmayor: The id of the mayor role\nreporter: The id of the reporter role\nguardian: The id of the guardian role\ngame: The name of the game\ngamemaster_ingame: The id of the gamemaster ingame role\nadmin: The id of the admin role\nadmin_ingame: The id of the admin ingame role\nyes_emoji: The id of the yes emoji\nno_emoji: The id of the no emoji\nnew_game_ping: Role that gets pinged with certain commands\ngame_status: A VC that shows the status of the game\ncc_limit: Maximum amount of ccs one person can create (-1 for none)\nmayor2: The id of the second mayor role (which doesn't give extra votes)\npoll: The poll mode (0 -> default, 1 -> cancel, 2 -> private random)\nsub: role for substitute players\nping: ping for gifs and deleted messages\nsecret_mode: Unfinished mode that keeps players true name secret.\nfancy_mode: Changes info messages to fancy versions if set to true.\n```";
 					help += "```fix\nUsage\n\n> " + stats.prefix + "options mayor\n< ✅ mayor currently is set to 588125889611431946!\n\n> " + stats.prefix + "options mayor 588125889611431946\n< ✅ Successfully updated mayor to 588125889611431946!```";
 					help += "```diff\nAliases\n\n- stat\n- stats\n- option\n```";
 			break;
