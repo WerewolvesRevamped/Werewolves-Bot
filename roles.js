@@ -1318,7 +1318,7 @@ module.exports = function() {
         else repoPath += cSplit[0] + "/" + cSplit[1] + "/";
         repoPath += toTitleCase(role) + ".png";
         repoPath = repoPath.replace(/ /g, "%20");
-        repoPath += "?game=" + stats.game;
+        repoPath += `?version=${stats.icon_version}`;
         
         // get color
         let color = 0;
@@ -1414,7 +1414,7 @@ module.exports = function() {
             case "hellhounds": return phWolf;
             case "jury": return phTown;
             /** Custom **/
-            case "foxes": return phWolf;
+            case "foxes": return "Werewolf/Fox";
             case "lone werewolves": return phWolf;
             case "wolfpack": return "Werewolf/Miscellaneous/Wolf";
             case "lycans": return "Werewolf/Miscellaneous/Wolf";
@@ -1475,10 +1475,10 @@ module.exports = function() {
                             case "Werewolf":
                             case "Unaligned":
                             case "Solo":
-                                emUrl = `${repoBaseUrl}Placeholder/${pCat}.png`;
+                                emUrl = `${repoBaseUrl}Placeholder/${pCat}.png?version=${stats.icon_version}`;
                             break;
                             default:
-                                emUrl = `${repoBaseUrl}Placeholder/Unaligned.png`;
+                                emUrl = `${repoBaseUrl}Placeholder/Unaligned.png?version=${stats.icon_version}`;
                             break;
                         }
                     }
@@ -1568,7 +1568,7 @@ module.exports = function() {
                         embed.description = descSplit.join("\n");
                     }
                     
-                    if(catRole) embed.thumbnail = {url: repoBaseUrl + "/" + catRole + ".png"};
+                    if(catRole) embed.thumbnail = {url: repoBaseUrl + catRole + `.png?version=${stats.icon_version}`};
                 }
                 
                 // send embed
