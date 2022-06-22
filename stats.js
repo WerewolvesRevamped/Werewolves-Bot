@@ -11,7 +11,7 @@ module.exports = function() {
 	
 	/* Caches stats everytime they are changed or the bot is (re)started */
 	this.getStats = function() {
-		var doLog = true;
+		var doLog = false;
 		// Get Log Channel & Guild
 		sqlGetStat(11,  result => { 
 			stats.log_guild = result;

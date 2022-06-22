@@ -1362,6 +1362,8 @@ module.exports = function() {
         const phWolf = "Placeholder/Werewolf";
         const phUA = "Placeholder/Unaligned";
         const phSolo = "Placeholder/Solo";
+        
+                console.log(team);
         switch(team) {
             case "teams": return false;
             /** Role Categories **/
@@ -1375,23 +1377,23 @@ module.exports = function() {
             // wolves
             case "werewolf categories": return "Werewolf/Miscellaneous/Wolf";
             case "werewolf miscellaneous": return "Werewolf/Miscellaneous/Wolf";
-            case "werewolf investigative": return "Werewolf/Investigative/Tracking%20Wolf";
+            case "werewolf investigative": return "Werewolf/Investigative/Psychic%20Wolf"; 
             case "werewolf power": return "Werewolf/Power/Tanner";
-            case "werewolf killing": return phWolf;
-            case "werewolf transformation": return phWolf;
+            case "werewolf killing": return "Werewolf/Killing/Alpha%20Wolf";
+            case "werewolf transformation": return "Werewolf/Transformation/Trickster%20Wolf";
             // ua
             case "unaligned categories": return phUA;
             case "unaligned miscellaneous": return "Unaligned/Miscellaneous/Riding%20Hood";
-            case "unaligned align": return phUA;
-            case "unaligned align - hag": return phUA;
-            case "unaligned align - cupid": return phUA;
-            case "unaligned extra": return phUA;
+            case "unaligned align": return "Unaligned/Align/Cat";
+            case "unaligned align  hag": return phUA;
+            case "unaligned align  cupid": return "Unaligned/Extra/Lover"; /** TEMP **/
+            case "unaligned extra": return "Unaligned/Extra/Lover";
             // solo
-            case "solo categories": return phSolo;
-            case "solo killing": return phSolo;
-            case "solo miscellaneous": return phSolo;
-            case "solo power": return phSolo;
-            case "solo recruitment": return phSolo;
+            case "solo categories": return "Solo/Miscellaneous" /** TEMP **/;
+            case "solo killing": return "Solo/Killing";
+            case "solo miscellaneous": return "Solo/Miscellaneous";
+            case "solo power": return "Solo/Power";
+            case "solo recruitment": return "Solo/Recruitment";
             // solo teams
             case "solo teams": return phSolo;
             case "hell team": return "Solo/Hell/Devil";
@@ -1403,19 +1405,19 @@ module.exports = function() {
             case "nightmare team": return phSolo;
             case "plague team": return phSolo;
             case "pyro team": return phSolo;
-            case "white wolves team": return phSolo;
+            case "white wolves team": return "Solo/White%20Wolves/White%20Werewolf";
             // elected
             case "elected": return "Elected/Mayor";
             /** Groups **/
             //group
             case "butchers": return "Townsfolk/Group/Butcher";
             case "bakers": return "Townsfolk/Group/Baker";
-            case "cult": return "Townsfolk/Group/Cult%20Member";
-            case "hellhounds": return phWolf;
+            case "cult": return "Townsfolk/Killing/Cult%20Leader";
+            case "hellhounds": return "Werewolf/Miscellaneous/Hellhound";
             case "jury": return phTown;
             /** Custom **/
             case "foxes": return "Werewolf/Fox";
-            case "lone werewolves": return phWolf;
+            case "lone werewolves": return "Werewolf/Killing/Lone%20Wolf";
             case "wolfpack": return "Werewolf/Miscellaneous/Wolf";
             case "lycans": return "Werewolf/Miscellaneous/Wolf";
             case "packless werewolves": return "Werewolf/Power/Tanner";
@@ -1538,6 +1540,7 @@ module.exports = function() {
                 } else { // apparntly not a role
                     let descSplit = result[0].description.split(/~/);
                     let catRole = getCategoryRole(descSplit[0]);
+                    let title = descSplit.shift();
                     
                     // base embed
                     embed = {
@@ -1546,8 +1549,33 @@ module.exports = function() {
                             "icon_url": `${channel.guild.iconURL()}`,
                             "text": `${channel.guild.name} - ${stats.game}`
                         },
-                        "title": descSplit.shift()
+                        "title": title
                     };
+                    
+                    // add emojis for role lists
+                    let descSplitCopy = descSplit;
+                    let emojiFound = 0;
+                    descSplit = descSplit.map(relFull => {
+                        let rel = relFull.split(" (")[0]; // remove team names
+                        if(rel[0] && rel[0].match(/[A-Za-z\*]/) && rel.length < 30 && rel.length > 2 && !rel.match(/[^\w\d\-_\s\*']/)) { // check if role
+                                let rName = parseRole(rel.replace(/[^\w\s]/g,"").trim()); // parse role
+                                //console.log(rName);
+                                if(rName && verifyRole(rName)) { // find an emoji
+                                    rName = toTitleCase(rName).replace(/[^\w]+/g,"").trim();
+                                    //console.log("found => " + rName);
+                                    let rEmoji = client.emojis.cache.find(el => el.name == rName);
+                                    if(rEmoji) emojiFound++;
+                                    else emojiFound--;
+                                    if(!rEmoji) rEmoji = client.emojis.cache.find(el => el.name == (toTitleCase(roleNameParsed.split(" ")[0]) + "Placeholder"));
+                                    if(!rEmoji) return relFull;
+                                    if(relFull.split(" (").length > 1 && rel[0] == "*") rel += "*"; // solo team limited fixer
+                                    return `<:${rEmoji.name}:${rEmoji.id}> ${relFull}`
+                                }
+                        }
+                        return relFull;
+                    });
+                    // if a majority dont have emojis, then just dont
+                    if(emojiFound < 0) descSplit = descSplitCopy;
                     
                     if(descSplit.join("\n").length > 1900) { // too long
                        descSplitElements = [];
