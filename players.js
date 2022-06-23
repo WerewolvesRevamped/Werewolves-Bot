@@ -461,7 +461,7 @@ module.exports = function() {
 				if(thisPlayer.roles.cache.get(stats.reporter)) thisRoles.push("Reporter");
 				if(thisPlayer.roles.cache.get(stats.guardian)) thisRoles.push("Guardian");
 				let thisPlayerList = [];
-				thisPlayerList.push(thisPlayer.nickname.toUpperCase());
+				thisPlayerList.push(thisPlayer.nickname ? (thisPlayer.nickname + " (" + thisPlayer.user.username + ")") : thisPlayer.user.username);
 				thisPlayerList.push(`• <@${el.id}> (${thisRoles.join(", ")}) ? []`);
 				thisRoles.forEach(role => thisPlayerList.push(`• ${role} (<@${el.id}>${thisRoles.length>1?', '+thisRoles.filter(r=>r!=role).join(', '):''}) ? @ ()`));
 				return thisPlayerList;
