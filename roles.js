@@ -352,14 +352,15 @@ module.exports = function() {
 			if(result.length > 0) { 
 				var desc = result[0].info.replace(/~/g,"\n");
 				desc = applyTheme(desc);
-                
+				desc = applyEmoji(desc);
+				
                 let cMsg = desc;
                 
                 // fancy variant
                 if(stats.fancy_mode) {
-                    let descSplit = desc.split(/\n/);
+					let descSplit = desc.split(/\n/);
                     let title = descSplit.shift();
-                   let embed = {
+                   	let embed = {
                         "title": title,
                         "description": descSplit.join("\n"),
                         "color": 10921638,
@@ -1246,6 +1247,7 @@ module.exports = function() {
 		sql("SELECT description FROM roles WHERE name = " + connection.escape(parseRole(args[0])), result => {
 			if(result.length > 0) { 
 				var desc = result[0].description.replace(/~/g,"\n");
+				desc = applyEmoji(desc);
                 // simplified role description support
                 desc = desc.split("__Simplified__");
                 if(simp) desc = desc[1] ? (desc[0].split("__Basics__")[0] ? desc[0].split("__Basics__")[0] : toTitleCase(parseRole(args[0]))) + "\n" + desc[1].trim() : desc[0]; 
@@ -1300,6 +1302,16 @@ module.exports = function() {
 			// DB error
 			if(!noErr) channel.send("⛔ Database error. Couldn't look for role information!");
 		});	
+	}
+	
+	this.applyEmoji = function(text) {
+		[...text.matchAll(/\<\?([\w\d]*):([^>]{1,4})\>/g)].forEach(match => {
+			let emoji = client.emojis.cache.find(el => el.name === match[1]);
+			if(emoji) emoji = `<:${emoji.name}:${emoji.id}>`;
+			else emoji = match[2];
+			text = text.replace(match[0], emoji)
+		}); 
+		return text;
 	}
     
     const repoBaseUrl = "https://raw.githubusercontent.com/venomousbirds/Werewolves-Icons/main/";
@@ -1442,6 +1454,7 @@ module.exports = function() {
 		sql("SELECT description FROM roles WHERE name = " + connection.escape(roleNameParsed), async result => {
 			if(result.length > 0) { 
 				var desc = result[0].description.replace(/~/g,"\n");
+				desc = applyEmoji(desc);
                 
                 // split into name & text pairs + apply theme
                 desc = desc.split(/(?=__[\w\d_]+__)/).map(el => {
