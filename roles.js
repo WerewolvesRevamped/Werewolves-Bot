@@ -1305,7 +1305,7 @@ module.exports = function() {
 	}
 	
 	this.applyEmoji = function(text) {
-		[...text.matchAll(/\<\?([\w\d]*):([^>]{1,4})\>/g)].forEach(match => {
+		[...text.matchAll(/\<\?([\w\d]*):([^>]{0,4})\>/g)].forEach(match => {
 			let emoji = client.emojis.cache.find(el => el.name === match[1]);
 			if(emoji) emoji = `<:${emoji.name}:${emoji.id}>`;
 			else emoji = match[2];
