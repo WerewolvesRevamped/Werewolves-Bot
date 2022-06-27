@@ -471,8 +471,8 @@ module.exports = function() {
 			playerList = [];
 			let counter = 0;
 			for(let i = 0; i < playerListArray.length; i++) {
-				if(!playerList[Math.floor(counter/40)]) playerList[Math.floor(counter/40)] = [];
-				playerList[Math.floor(counter/40)].push(playerListArray[i]);
+				if(!playerList[Math.floor(counter/30)]) playerList[Math.floor(counter/30)] = [];
+				playerList[Math.floor(counter/30)].push(playerListArray[i]);
 				counter++;
 			}
 			// send list
@@ -1053,7 +1053,7 @@ module.exports = function() {
 				return true; 
 			}
 			else { 
-				channel.send("⛔ Syntax error. Invalid Player #" + (index + 1) + " (`" + el + "`)!"); 
+				channel.send("⛔ Syntax error. Invalid Player #" + (index + 1) + " (`" + args.slice(startIndex)[index] + "`)!"); 
 				return false; 
 			}
 		});

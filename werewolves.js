@@ -119,17 +119,17 @@ client.on("messageCreate", async message => {
 	if(message.content.indexOf(stats.prefix) !== 0 && message.content[0] == ".") {
                 let msg = message.content.trim().substr(1).trim();
                 let msgRole = msg.match(/(".*?")|(\S+)/g) ? msg.match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "";
-                console.log(msg + " => " + msgRole);
+                //console.log(msg + " => " + msgRole);
                 if(msg.match(/^[a-zA-Z ]*$/)) cmdInfoEither(message.channel, msgRole, false, true, true);
-                if(stats.fancy_mode) message.delete();
+                if(stats.fancy_mode && verifyRole(msgRole.join(" "))) message.delete();
                 return;
 	}
 	if(message.content.indexOf(stats.prefix) !== 0 && message.content[0] == ";") {
                 let msg = message.content.trim().substr(1).trim();
                 let msgRole = msg.match(/(".*?")|(\S+)/g) ? msg.match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "";
-                console.log(msg + " => " + msgRole);
+                //console.log(msg + " => " + msgRole);
                 if(msg.match(/^[a-zA-Z ]*$/)) cmdInfoEither(message.channel, msgRole, false, true, false);
-                if(stats.fancy_mode) message.delete();
+                if(stats.fancy_mode && verifyRole(msgRole.join(" "))) message.delete();
                 return;
 	}
 	if(message.content.indexOf(stats.prefix) !== 0) return;
@@ -389,9 +389,21 @@ client.on('messageDelete', message => {
 	let channel = client.guilds.cache.get(message.guildId).channels.cache.get(message.channelId);
 	let log = client.guilds.cache.get(stats.log_guild).channels.cache.get(stats.log_channel);
 	let author = client.guilds.cache.get(message.guildId).members.cache.get(message.authorId);
-	if((message.content[0] != config.prefix && message.content[0] != "§" && message.content[0] != "$") && (isParticipant(author) || isDeadParticipant(author)) && message.content.search("http") == -1) {
+	if((message.content[0] != config.prefix && message.content[0] != "§" && message.content[0] != "$" && message.content[0] != "." && message.content[0] != ";") && (isParticipant(author) || isDeadParticipant(author)) && message.content.search("http") == -1) {
 		cmdWebhook(log, author, ["**Deleted Message**", "\n*Deleted message by <@" + message.authorId + "> in <#" + message.channelId + ">!*","\n> ", message.content.split("\n").join("\n> "),"\n","\n" + stats.ping ]);
 		cmdWebhook(channel, author, ["**Deleted Message**","\n*<@" + message.authorId + "> You're not allowed to delete messages during the game!*"]);
+	}
+});
+
+client.on('messageUpdate', (oldMessage, newMessage) => {
+    oldMessage = JSON.parse(JSON.stringify(oldMessage));
+    newMessage = JSON.parse(JSON.stringify(newMessage));
+	// retrieve channel and author
+	let channel = client.guilds.cache.get(oldMessage.guildId).channels.cache.get(oldMessage.channelId);
+	let log = client.guilds.cache.get(stats.log_guild).channels.cache.get(stats.log_channel);
+	let author = client.guilds.cache.get(oldMessage.guildId).members.cache.get(oldMessage.authorId);
+	if(isParticipant(author) && (Math.abs(oldMessage.content.length - newMessage.content.length) > (oldMessage.content.length/5))) {
+		cmdWebhook(log, author, ["**Updated Message**", "\n*Updated message by <@" + oldMessage.authorId + "> in <#" + oldMessage.channelId + ">!*","\n__Old:__\n> ", oldMessage.content.split("\n").join("\n> "),"\n","\n__New:__\n> ", newMessage.content.split("\n").join("\n> "),"\n","\n" + stats.ping ]);
 	}
 });
 

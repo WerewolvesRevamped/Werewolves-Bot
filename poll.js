@@ -226,7 +226,7 @@ module.exports = function() {
 			return;
 		} else {
 			channel.messages.fetch(messages[index]).then(m => {
-				let newReactions = reactions.concat(m.reactions.cache.map((data,emoji) => { return {emoji_id: emoji, emoji: emoji.match(/\d+/) ? "<:" + (client.emojis.cache.get(emoji).name).toLowerCase() + ":"  + client.emojis.cache.get(emoji).id + ">" : emoji, users: data.users, count: data.count, messageID: data.messageID}; }));
+				let newReactions = reactions.concat(m.reactions.cache.map((data,emoji) => { return {emoji_id: emoji, emoji: (emoji.match(/\d+/) && client.emojis.cache.get(emoji))  ? "<:" + (client.emojis.cache.get(emoji).name).toLowerCase() + ":"  + client.emojis.cache.get(emoji).id + ">" : emoji, users: data.users, count: data.count, messageID: data.messageID}; }));
 				//logO(newReactions);
 				//channel.send("```" + JSON.stringify(newReactions, null, 4) + "```");
 				//channel.send("```" + JSON.stringify(emojiIDs, null, 4) + "```");

@@ -1325,9 +1325,9 @@ module.exports = function() {
         // get url
          let repoPath = repoBaseUrl;
         let cSplitSolo = category.split(/ \- /);
-        if(cSplitSolo.length != 1) repoPath += "Solo/" + cSplitSolo[1].replace(/ Team/,"") + "/";
+        if(cSplitSolo.length != 1 && cSplit[0] === "Solo") repoPath += "Solo/" + cSplitSolo[1].replace(/ Team/,"") + "/";
         else if(cSplit.length == 1) repoPath += cSplit[0] + "/";
-        else repoPath += cSplit[0] + "/" + cSplit[1] + "/";
+        else repoPath += cSplit[0] + "/" + cSplit[1].split(/ - /)[0] + "/";
         repoPath += toTitleCase(role) + ".png";
         repoPath = repoPath.replace(/ /g, "%20");
         repoPath += `?version=${stats.icon_version}`;
@@ -1345,6 +1345,8 @@ module.exports = function() {
                 color = 15451648;
             break;
             case "Solo":
+                console.log(cSplit);
+                console.log(cSplitSolo);
                 let soloTeam = cSplitSolo[1].replace(/ Team/,"");
                 switch(soloTeam) {
                     case "Hell":
@@ -1385,7 +1387,7 @@ module.exports = function() {
             case "townsfolk group": return "Townsfolk/Group/Baker";
             case "townsfolk investigative": return "Townsfolk/Investigative/Aura%20Teller";
             case "townsfolk killing": return "Townsfolk/Killing/Assassin";
-            case "townsfolk power": return phTown;
+            case "townsfolk power": return "Townsfolk/Power/Stalker";
             // wolves
             case "werewolf categories": return "Werewolf/Miscellaneous/Wolf";
             case "werewolf miscellaneous": return "Werewolf/Miscellaneous/Wolf";
@@ -1394,29 +1396,29 @@ module.exports = function() {
             case "werewolf killing": return "Werewolf/Killing/Alpha%20Wolf";
             case "werewolf transformation": return "Werewolf/Transformation/Trickster%20Wolf";
             // ua
-            case "unaligned categories": return phUA;
+            case "unaligned categories": return "Unaligned/Miscellaneous/Angel";
             case "unaligned miscellaneous": return "Unaligned/Miscellaneous/Riding%20Hood";
             case "unaligned align": return "Unaligned/Align/Cat";
             case "unaligned align  hag": return phUA;
-            case "unaligned align  cupid": return "Unaligned/Extra/Lover"; /** TEMP **/
+            case "unaligned align  cupid": return "Unaligned/Align/Cupid"; 
             case "unaligned extra": return "Unaligned/Extra/Lover";
             // solo
-            case "solo categories": return "Solo/Miscellaneous" /** TEMP **/;
+            case "solo categories": return "Solo/Miscellaneous";
             case "solo killing": return "Solo/Killing";
             case "solo miscellaneous": return "Solo/Miscellaneous";
             case "solo power": return "Solo/Power";
             case "solo recruitment": return "Solo/Recruitment";
             // solo teams
-            case "solo teams": return phSolo;
+            case "solo teams": return "Solo/Miscellaneous";
             case "hell team": return "Solo/Hell/Devil";
             case "underworld team": return "Solo/Underworld/Vampire";
-            case "flock team": return phSolo;
+            case "flock team": return "Solo/Flock/Shepherd";
             case "flute team": return phSolo;
             case "graveyard team": return phSolo;
             case "hag team": return phSolo;
             case "nightmare team": return phSolo;
-            case "plague team": return phSolo;
-            case "pyro team": return phSolo;
+            case "plague team": return "Solo/Plague/Plague%20Bearer";
+            case "pyro team": return "Solo/Pyro/Pyromancer";
             case "white wolves team": return "Solo/White%20Wolves/White%20Werewolf";
             // elected
             case "elected": return "Elected/Mayor";
@@ -1436,6 +1438,29 @@ module.exports = function() {
             // default
             default: return false;
         }
+    }
+    
+    this.getIconFromName = function(name) {
+        return new Promise((resolve, reject) => {
+            getIconFromNameInternal(name,(successResponse) => {
+                    resolve(successResponse);
+            }, (errorResponse) => {
+                reject(errorResponse);
+            });
+        });
+    }
+    
+    this.getIconFromNameInternal = function(name, callback, err) {
+        let roleNameParsed = parseRole(name);
+        if(!roleNameParsed) return callback(false);
+        var output;
+        sql("SELECT description FROM roles WHERE name = " + connection.escape(roleNameParsed), async result => {
+            if(!result[0] || !result[0].description) callback(false);
+            let roleData = getRoleData(roleNameParsed, result[0].description);
+            let urlExists = await checkUrlExists(roleData.url);
+            if(urlExists) callback(roleData.url);
+            else callback(false);
+        });
     }
     
 	/* Prints info for a role by name or alias */

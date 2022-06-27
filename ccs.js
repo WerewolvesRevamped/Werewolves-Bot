@@ -568,6 +568,7 @@ module.exports = function() {
 		}
 		args[1] = args[1].replace(/🔒/,"lock");
 		players = getUserList(channel, args, 2, member);
+        players = players.filter(el => el != member.id);
 		if(isParticipant(member) || players.length > 0) {
 			sqlGetStat(9, result => {
 				// Check if a new category is needed
