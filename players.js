@@ -1053,7 +1053,7 @@ module.exports = function() {
 				return true; 
 			}
 			else { 
-				channel.send("⛔ Syntax error. Invalid Player #" + (index + 1) + " (`" + args.slice(startIndex)[index] + "`)!"); 
+				channel.send("⛔ Syntax error. Invalid Player: `" + args.slice(startIndex)[index] + "`!"); 
 				return false; 
 			}
 		});
@@ -1061,6 +1061,18 @@ module.exports = function() {
 		players = removeDuplicates(players);
 		// Return array or if empty false
 		return players.length > 0 ? players : false;
+	}
+	
+	this.fixUserList = function(list) {
+		let allPlayerNames = playerIDs.map(el => client.users.cache.find(user => user.id === el)?.username).filter(el => el);
+		let parsed = parseList(list, allPlayerNames);
+		return [...parsed.invalid, ...parsed.found];
+	}
+	
+	this.parseUserList = function(channel, args, startIndex, executor) {
+		let players = args.slice(startIndex);
+		let players = fixUserList(players);
+		return getUserList(channel, players, 0, executor);
 	}
 
 	/* Returns the id of the user who uses the given emoji, if none returns false */
@@ -1178,6 +1190,97 @@ module.exports = function() {
 		}, () => {
 			log("Players > ❗❗❗ Unable to cache player ids!");
 		});
+	}
+	
+	this.strDst = function (str1 = "", str2 = "") {
+	    // create empty matrix, with row 1 and column 1 filled with incrementing numbers
+	    var len1 = str1.length, len2 = str2.length;
+	    var track = Array(len2 + 1).fill().map((_, ind1) => 
+		Array(len1 + 1).fill().map((_, ind2) =>
+		    !ind1 ? ind2 : (!ind2 ? ind1 : null)
+		)
+	    );
+	    // determine levenshtein distance
+	    for(let j = 1; j <= len2; j++) {
+		for(let i = 1; i <= len1; i++) {
+		    const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1;
+		    track[j][i] = Math.min(
+			track[j][i - 1] + 1, // deletion
+			track[j - 1][i] + 1, // insertion
+			track[j - 1][i - 1] + indicator // substitution
+		    );
+		}
+	    }
+	    return track[len2][len1];
+	};
+
+	// finds the best match for arg1 in the list arg2
+	this.findBestMatch = function(name = "", players = []) {
+	    let w = players.map(p => strDst(p, name));
+	    // get index of closest match (lowest weight)
+	    let best = w.reduce((iMax, x, i, arr) => x < arr[iMax] ? i : iMax, 0);
+	    return {value: w[best], index: best, name: players[best]};
+	}
+
+	this.parseList = function(inputList, allPlayers) {
+	    let playerList = [];
+	    // filter out ids, emojis, unicode
+	    inputList = inputList.filter(el => {
+		let directMatch = el.match(/^(\d+|<:.+:\d+>|[^\w]{1,2})$/);
+		if(directMatch) playerList.push(el);
+		return !directMatch;
+	    });
+
+	    // handle direct names
+	    inputList = inputList.filter(el => {
+		// extract quoted name, if necessary
+		let quoted = el.match(/^(".+")$/), nameExtracted = el;
+		if(quoted) nameExtracted = el.substr(1, el.length - 2);
+		// search for a direct match
+		let apIndex = allPlayers.indexOf(p => p === nameExtracted);
+		if(apIndex >= 0) { // direct match found
+		    playerList.push(el);
+		    return false;
+		} else { // search for closest name
+		    let bestMatch = findBestMatch(el, allPlayers);
+		    // close match found?
+		    if(bestMatch.value <= ~~(nameExtracted.length/2)) { 
+			playerList.push(bestMatch.name);
+			return false;
+		    }   
+		}
+		return quoted ? false : true; // no (close) match found
+	    });
+
+	    // try combining names in different ways
+	    for(let maxLength = 2; maxLength < inputList.length; maxLength++) {
+		for(let i = 0; i < inputList.length; i++) {
+		    let combinedName = inputList[i];
+		    for(let j = i+1; j < inputList.length; j++) {
+			if(j-i >= maxLength) { // limit length
+			    j = inputList.length
+			    continue; 
+			}
+			combinedName += " " + inputList[j];
+			let bestMatch = findBestMatch(combinedName, allPlayers);
+			// close match found?
+			if(bestMatch.value <= ~~(combinedName.length/2)) {
+			    // remove all used elements
+			    for(let k = i; k <= j; k++) inputList[k] = "-".repeat(50); 
+			    playerList.push(bestMatch.name);
+			    //console.log(combinedName, "=>", bestMatch.name, bestMatch.value, i, j, inputList.map(el=>el));
+			    j = inputList.length;
+			}
+		    }
+		}
+	    }
+	    // filter out "deleted" names
+	    inputList = inputList.filter(el => el != "-".repeat(50));
+	    // remove duplicates
+	    inputList = [...new Set(inputList)];
+	    playerList = [...new Set(playerList)];
+	    // output
+	    return {found: playerList, invalid: inputList};
 	}
 	
 }
