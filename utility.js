@@ -420,7 +420,7 @@ module.exports = function() {
                 "list_alive": ["a","alive","alive_list","alive-list","listalive","list-alive"],
                 "list_alphabetical": ["la"],
                 "list_signedup": ["l","list","signedup","signedup_list","signedup-list","listsignedup","list-signedup"],
-                "signup": ["join","sign-up","sign_up","unsignup","signout","participate","sign-out","sign_out","leave","unjoin"],
+                "signup": ["join","sign-up","sign_up","unsignup","signout","participate","sign-out","sign_out","leave","unjoin","signups"],
                 "options": ["stat","stats","option"],
                 "info": ["i"],
                 "infopin": ["ip"],

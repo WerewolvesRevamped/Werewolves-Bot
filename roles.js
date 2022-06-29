@@ -1226,17 +1226,19 @@ module.exports = function() {
     
     this.cmdInfoEither = function(channel, args, pin, noErr, simp = false) {
 		// fix role name if necessary
-		let roleName = args.join(" ").replace(/[^a-zA-Z0-9'\-]+/g,"");
-		if(!verifyRoleVisible(roleName)) { // not a valid role
+		let roleName = args.join(" ").replace(/[^a-zA-Z0-9'\-_ ]+/g,"");
+		if(!verifyRole(roleName)) { // not a valid role
 			// get all roles and aliases, to get an array of all possible role names
-			let allRoleNames = [...cachedRoles, ...cachedAlias.map(el => el.alias)];
-			let bestMatch = findBestMatch(roleName, allRoleNames); // find closest match
+			let allRoleNames = [...cachedRoles, ...cachedAliases.map(el => el.alias)];
+			let bestMatch = findBestMatch(roleName.toLowerCase(), allRoleNames.map(el => el.toLowerCase())); // find closest match
+            //console.log(bestMatch);
 			// check if match is close enough
 			if(bestMatch.value <= ~~(roleName.length/2)) { // auto alias if so, but send warning 
 				args = [parseRole(bestMatch.name)];
-				channel.send("❗ Could not find role `" + roleName + "`. Did you mean `" args[0] + "`?");
+				channel.send("❗ Could not find role `" + roleName + "`. Did you mean `" + args[0] + "`?");
 			} else { // early fail if otherwise
 				channel.send("❗ Could not find role `" + roleName + "`.");
+                return;
 			}
 		}
 		

@@ -1063,15 +1063,16 @@ module.exports = function() {
 		return players.length > 0 ? players : false;
 	}
 	
-	this.fixUserList = function(list) {
-		let allPlayerNames = playerIDs.map(el => client.users.cache.find(user => user.id === el)?.username).filter(el => el).map(el => el.toLowerCase());
+	this.fixUserList = function(list, channel) {
+		let allPlayerNames = playerIDs.map(el => [channel.guild.members.cache.get(el)?.user.username,channel.guild.members.cache.get(el)?.nickname]).flat().filter(el => el).map(el => el.toLowerCase());
+        //console.log(allPlayerNames);
 		let parsed = parseList(list.map(el => el.toLowerCase()), allPlayerNames);
 		return [...parsed.invalid, ...parsed.found];
 	}
 	
 	this.parseUserList = function(channel, args, startIndex, executor) {
 		let players = args.slice(startIndex);
-		let players = fixUserList(players);
+		players = fixUserList(players, channel);
 		return getUserList(channel, players, 0, executor);
 	}
 
@@ -1196,53 +1197,55 @@ module.exports = function() {
 	    let playerList = [];
 	    // filter out ids, emojis, unicode
 	    inputList = inputList.filter(el => {
-		let directMatch = el.match(/^(\d+|<:.+:\d+>|[^\w]{1,2})$/);
-		if(directMatch) playerList.push(el);
-		return !directMatch;
+            let directMatch = el.match(/^(\d+|<:.+:\d+>|[^\w]{1,2})$/);
+            if(directMatch) playerList.push(el);
+            return !directMatch;
 	    });
 
 	    // handle direct names
 	    inputList = inputList.filter(el => {
-		// extract quoted name, if necessary
-		let quoted = el.match(/^(".+")$/), nameExtracted = el;
-		if(quoted) nameExtracted = el.substr(1, el.length - 2);
-		// search for a direct match
-		let apIndex = allPlayers.indexOf(p => p === nameExtracted);
-		if(apIndex >= 0) { // direct match found
-		    playerList.push(el);
-		    return false;
-		} else { // search for closest name
-		    let bestMatch = findBestMatch(el, allPlayers);
-		    // close match found?
-		    if(bestMatch.value <= ~~(nameExtracted.length/2)) { 
-			playerList.push(bestMatch.name);
-			return false;
-		    }   
-		}
-		return quoted ? false : true; // no (close) match found
+            // extract quoted name, if necessary
+            let quoted = el.match(/^(".+")$/), nameExtracted = el;
+            if(quoted) nameExtracted = el.substr(1, el.length - 2);
+            // search for a direct match
+            let apIndex = allPlayers.indexOf(p => p === nameExtracted);
+            if(apIndex >= 0) { // direct match found
+                playerList.push(el);
+                return false;
+            } else { // search for closest name
+                let bestMatch = findBestMatch(el, allPlayers);
+                console.log(bestMatch);
+                // close match found?
+                if(bestMatch.value <= ~~(nameExtracted.length/2)) { 
+                    playerList.push(bestMatch.name);
+                    return false;
+                }   
+            }
+            return quoted ? false : true; // no (close) match found
 	    });
 
 	    // try combining names in different ways
-	    for(let maxLength = 2; maxLength < inputList.length; maxLength++) {
-		for(let i = 0; i < inputList.length; i++) {
-		    let combinedName = inputList[i];
-		    for(let j = i+1; j < inputList.length; j++) {
-			if(j-i >= maxLength) { // limit length
-			    j = inputList.length
-			    continue; 
-			}
-			combinedName += " " + inputList[j];
-			let bestMatch = findBestMatch(combinedName, allPlayers);
-			// close match found?
-			if(bestMatch.value <= ~~(combinedName.length/2)) {
-			    // remove all used elements
-			    for(let k = i; k <= j; k++) inputList[k] = "-".repeat(50); 
-			    playerList.push(bestMatch.name);
-			    //console.log(combinedName, "=>", bestMatch.name, bestMatch.value, i, j, inputList.map(el=>el));
-			    j = inputList.length;
-			}
-		    }
-		}
+	    for(let maxLength = 2; maxLength <= inputList.length; maxLength++) {
+            for(let i = 0; i < inputList.length; i++) {
+                let combinedName = inputList[i];
+                for(let j = i+1; j < inputList.length; j++) {
+                    if(j-i >= maxLength) { // limit length
+                        j = inputList.length
+                        continue; 
+                    }
+                    combinedName += " " + inputList[j];
+                    let bestMatch = findBestMatch(combinedName, allPlayers);
+                    //console.log(combinedName, "=>", bestMatch.name, bestMatch.value, i, j);
+                    // close match found?
+                    if(bestMatch.value <= ~~(combinedName.length/2)) {
+                        // remove all used elements
+                        for(let k = i; k <= j; k++) inputList[k] = "-".repeat(50); 
+                        playerList.push(bestMatch.name);
+                        //console.log(combinedName, "=>", bestMatch.name, bestMatch.value, i, j, inputList.map(el=>el));
+                        j = inputList.length;
+                    }
+                }
+            }
 	    }
 	    // filter out "deleted" names
 	    inputList = inputList.filter(el => el != "-".repeat(50));

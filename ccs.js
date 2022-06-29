@@ -568,6 +568,10 @@ module.exports = function() {
 		}
 		args[1] = args[1].replace(/🔒/,"lock");
 		players = parseUserList(channel, args, 2, member);
+        if(!players) {
+				channel.send("⛔ Could not create CC. Please specify at least one valid player!");
+                return;
+        }
         players = players.filter(el => el != member.id);
 		if(isParticipant(member) || players.length > 0) {
 			sqlGetStat(9, result => {
