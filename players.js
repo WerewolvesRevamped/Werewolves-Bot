@@ -1171,4 +1171,13 @@ module.exports = function() {
 		});
 	}
 	
+	
+	this.getIDs = function() {
+		sql("SELECT id FROM players", result => {
+				playerIDs = result.map(el => el.id);
+		}, () => {
+			log("Players > ❗❗❗ Unable to cache player ids!");
+		});
+	}
+	
 }
