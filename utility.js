@@ -478,11 +478,11 @@ module.exports = function() {
 	};
 
 	// finds the best match for arg1 in the list arg2
-	this.findBestMatch = function(name = "", players = []) {
-	    let w = players.map(p => strDst(p, name));
+	this.findBestMatch = function(name = "", list = []) {
+	    let w = list.map(p => strDst(p, name));
 	    // get index of closest match (lowest weight)
 	    let best = w.reduce((iMax, x, i, arr) => x < arr[iMax] ? i : iMax, 0);
-	    return {value: w[best], index: best, name: players[best]};
+	    return {value: w[best], index: best, name: list[best]};
 	}
 
 	
