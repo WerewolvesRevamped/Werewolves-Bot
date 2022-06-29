@@ -1064,8 +1064,8 @@ module.exports = function() {
 	}
 	
 	this.fixUserList = function(list) {
-		let allPlayerNames = playerIDs.map(el => client.users.cache.find(user => user.id === el)?.username).filter(el => el);
-		let parsed = parseList(list, allPlayerNames);
+		let allPlayerNames = playerIDs.map(el => client.users.cache.find(user => user.id === el)?.username).filter(el => el).map(el => el.toLowerCase());
+		let parsed = parseList(list.map(el => el.toLowerCase()), allPlayerNames);
 		return [...parsed.invalid, ...parsed.found];
 	}
 	
