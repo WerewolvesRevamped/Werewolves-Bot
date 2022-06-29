@@ -1613,8 +1613,8 @@ module.exports = function() {
         const response = await fetch("https://raw.githubusercontent.com/venomousbirds/Werewolves-Icons/main/replacements.csv");
         const body = await response.text();
         iconLUT = {};
-        body.split("\n").filter(el => el && el.length).map(el => el.split(",")).forEach(el => iconLUT[el[0]] = el[1]);
-        //console.log(iconLUT);
+        body.split("\n").filter(el => el && el.length).map(el => el.split(",")).forEach(el => iconLUT[el[0]] = el[1].trim().replace(/ /g,"%20"));
+        console.log(iconLUT);
     }
 	
 }
