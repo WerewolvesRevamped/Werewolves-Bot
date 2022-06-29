@@ -303,7 +303,7 @@ module.exports = function() {
 		}
 		let ccOwner = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
 		if(mode || isGameMaster(member) || ccOwner.includes(member.id)) {
-			players = getUserList(channel, args, 1, member);
+			players = parseUserList(channel, args, 1, member);
 			let playerList = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member" && el.allow > 0).map(el => el.id);
 			if(players && players.length > 0) {
 				players = players.filter(el => !playerList.includes(el));
@@ -332,7 +332,7 @@ module.exports = function() {
 		}
 		let ccOwner = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
 		if(mode || isGameMaster(member) || ccOwner.includes(member.id)) {
-			players = getUserList(channel, args, 1, member);
+			players = parseUserList(channel, args, 1, member);
 			let playerList = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member" && el.allow > 0).map(el => el.id);
 			if(players) players = players.filter(el => playerList.includes(el));
 			if(players && players.length > 0) {
@@ -415,7 +415,7 @@ module.exports = function() {
 		let ccOwner = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
 		if(mode || isGameMaster(member) || ccOwner.includes(member.id)) {
 			// Get members
-			players = getUserList(channel, args, 1, member);
+			players = parseUserList(channel, args, 1, member);
 			let playerList = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member" && el.allow > 0).map(el => el.id);
 			if(players) players = players.filter(el => playerList.includes(el));
 			if(players && players.length > 0) {
@@ -450,7 +450,7 @@ module.exports = function() {
 		let ccOwner = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
 		if(mode || isGameMaster(member) || ccOwner.includes(member.id)) {
 			// Get members
-			players = getUserList(channel, args, 1, member);
+			players = parseUserList(channel, args, 1, member);
 			let playerList = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member" && el.allow > 0).map(el => el.id);
 			if(players) players = players.filter(el => playerList.includes(el));
 			if(players && players.length > 0) {
@@ -567,7 +567,7 @@ module.exports = function() {
 			});
 		}
 		args[1] = args[1].replace(/🔒/,"lock");
-		players = getUserList(channel, args, 2, member);
+		players = parseUserList(channel, args, 2, member);
         players = players.filter(el => el != member.id);
 		if(isParticipant(member) || players.length > 0) {
 			sqlGetStat(9, result => {

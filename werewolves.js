@@ -21,6 +21,7 @@ client.on("ready", () => {
 	sqlSetup();
 	getStats();
 	setTimeout(function() {
+		getIDs();
 		cacheRoleInfo();
 		getVotes();
 		getCCs();
