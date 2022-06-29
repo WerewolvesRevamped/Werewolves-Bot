@@ -31,6 +31,7 @@ client.on("ready", () => {
 		getPublicCat();
         loadPollValues();
         getDisguises();
+        cacheIconLUT();
 		global.client.guilds.fetch(stats.log_guild).then(guild => {
 			guild.members.fetch().then((members) => {
                 //members.forEach(el => console.log(el.user.id));

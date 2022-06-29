@@ -11,6 +11,7 @@ module.exports = function() {
 	this.cachedRoles = [];
 	this.cachedSCs = [];
 	this.scCatCount = 0;
+    this.iconLUT = {};
 	
 	/* Handle roles command */
 	this.cmdRoles = function(message, args, argsX) {
@@ -1389,74 +1390,9 @@ module.exports = function() {
         return {url: repoPath, color: color};
     }
     
-    this.getCategoryRole = function(team) {
-        team = team.toLowerCase().replace(/[^a-z ]/g,"").trim();
-        const phTown = "Placeholder/Townsfolk";
-        const phWolf = "Placeholder/Werewolf";
-        const phUA = "Placeholder/Unaligned";
-        const phSolo = "Placeholder/Solo";
-        
-                console.log(team);
-        switch(team) {
-            case "teams": return false;
-            /** Role Categories **/
-            // town
-            case "townsfolk categories": return "Townsfolk/Miscellaneous/Citizen";
-            case "townsfolk miscellaneous": return "Townsfolk/Miscellaneous/Devout%20Villager";
-            case "townsfolk group": return "Townsfolk/Group/Baker";
-            case "townsfolk investigative": return "Townsfolk/Investigative/Aura%20Teller";
-            case "townsfolk killing": return "Townsfolk/Killing/Assassin";
-            case "townsfolk power": return "Townsfolk/Power/Stalker";
-            // wolves
-            case "werewolf categories": return "Werewolf/Miscellaneous/Wolf";
-            case "werewolf miscellaneous": return "Werewolf/Miscellaneous/Wolf";
-            case "werewolf investigative": return "Werewolf/Investigative/Psychic%20Wolf"; 
-            case "werewolf power": return "Werewolf/Power/Tanner";
-            case "werewolf killing": return "Werewolf/Killing/Alpha%20Wolf";
-            case "werewolf transformation": return "Werewolf/Transformation/Trickster%20Wolf";
-            // ua
-            case "unaligned categories": return "Unaligned/Miscellaneous/Angel";
-            case "unaligned miscellaneous": return "Unaligned/Miscellaneous/Riding%20Hood";
-            case "unaligned align": return "Unaligned/Align/Cat";
-            case "unaligned align  hag": return phUA;
-            case "unaligned align  cupid": return "Unaligned/Align/Cupid"; 
-            case "unaligned extra": return "Unaligned/Extra/Lover";
-            // solo
-            case "solo categories": return "Solo/Miscellaneous";
-            case "solo killing": return "Solo/Killing";
-            case "solo miscellaneous": return "Solo/Miscellaneous";
-            case "solo power": return "Solo/Power";
-            case "solo recruitment": return "Solo/Recruitment";
-            // solo teams
-            case "solo teams": return "Solo/Miscellaneous";
-            case "hell team": return "Solo/Hell/Devil";
-            case "underworld team": return "Solo/Underworld/Vampire";
-            case "flock team": return "Solo/Flock/Shepherd";
-            case "flute team": return phSolo;
-            case "graveyard team": return phSolo;
-            case "hag team": return phSolo;
-            case "nightmare team": return phSolo;
-            case "plague team": return "Solo/Plague/Plague%20Bearer";
-            case "pyro team": return "Solo/Pyro/Pyromancer";
-            case "white wolves team": return "Solo/White%20Wolves/White%20Werewolf";
-            // elected
-            case "elected": return "Elected/Mayor";
-            /** Groups **/
-            //group
-            case "butchers": return "Townsfolk/Group/Butcher";
-            case "bakers": return "Townsfolk/Group/Baker";
-            case "cult": return "Townsfolk/Killing/Cult%20Leader";
-            case "hellhounds": return "Werewolf/Miscellaneous/Hellhound";
-            case "jury": return phTown;
-            /** Custom **/
-            case "foxes": return "Werewolf/Fox";
-            case "lone werewolves": return "Werewolf/Killing/Lone%20Wolf";
-            case "wolfpack": return "Werewolf/Miscellaneous/Wolf";
-            case "lycans": return "Werewolf/Miscellaneous/Wolf";
-            case "packless werewolves": return "Werewolf/Power/Tanner";
-            // default
-            default: return false;
-        }
+    this.getCategoryRole = function(val) {
+        val = val.toLowerCase().replace(/[^a-z ]/g,"").trim();
+        return iconLUT[val] ?? false;
     }
     
     this.getIconFromName = function(name) {
@@ -1671,5 +1607,14 @@ module.exports = function() {
 			if(!noErr) channel.send("⛔ Database error. Couldn't look for role information!");
 		});	
 	}
+    
+    const fetch = require('node-fetch');
+    this.cacheIconLUT = async function() {
+        const response = await fetch("https://raw.githubusercontent.com/venomousbirds/Werewolves-Icons/main/replacements.csv");
+        const body = await response.text();
+        iconLUT = {};
+        body.split("\n").filter(el => el && el.length).map(el => el.split(",")).forEach(el => iconLUT[el[0]] = el[1]);
+        //console.log(iconLUT);
+    }
 	
 }
