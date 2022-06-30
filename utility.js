@@ -428,14 +428,14 @@ module.exports = function() {
                 "info_classic_simplified": ["ics"],
                 "info_fancy": ["if"],
                 "info_fancy_simplified": ["ifs"],
-                "channels": ["channel","ch"],
                 "roles": ["role","r"],
                 "connection": ["con","connect","whisper","whispers"],
                 "gamephase": ["gp","game_phase","game-phase"],
                 "modify": ["mod"],
                 "say": [">"],
                 "ping": ["?"],
-                "temp": ["°"]
+                "temp": ["°"],
+                "sc": ["channel","ch"]
         };
         for(let cmd in aliases) {
             if(aliases[cmd].indexOf(alias) != -1) return cmd;

@@ -46,7 +46,7 @@ module.exports = function() {
 		if(!args[0]) { 
 			message.channel.send(helpCCs(message.member, ["sc"]));
 			return; 
-		} else if(stats.gamephase != gp.INGAME) { 
+		} else if(stats.gamephase != gp.INGAME && args[0] != "rename") { 
 			message.channel.send("⛔ Command error. Can only use SCs while a game is running."); 
 			return; 
 		}
@@ -54,7 +54,7 @@ module.exports = function() {
 		switch(args[0]) {
 			case "add": cmdCCAdd(message.channel, message.member, args, 1); break;
 			case "remove": cmdCCRemove(message.channel, message.member, args, 1); break;
-			case "rename": cmdCCRename(message.channel, message.member, args, 1); break;
+			case "rename": cmdCCRename(message.channel, message.member, args, 1, true); break;
 			case "list": cmdCCList(message.channel, 2, 1); break;
 			case "clear": cmdSCClear(message.channel); break;
 			case "clean": cmdSCClean(message.channel); break;
