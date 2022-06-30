@@ -214,7 +214,6 @@ module.exports = function() {
 			case "":
 				if(isGameMaster(member)) help += stats.prefix + "split - Runs a list of semicolon seperated commands\n";
 				if(isGameMaster(member)) help += stats.prefix + "say - Makes the bot repeat a message\n";
-				if(isGameMaster(member)) help += stats.prefix + "temp - Converts between °C and °F\n";
 				if(isGameMaster(member)) help += stats.prefix + "sudo - Allows webhooks to run commands\n";
 			break;
 			case "split":
@@ -227,12 +226,6 @@ module.exports = function() {
 				help += "```\nFunctionality\n\nMakes the bot repeat everything after say.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "say Hello!\n< Hello!```";
 				help += "```diff\nAliases\n\n- >\n```";
-			break;
-			case "temp":
-				help += "```yaml\nSyntax\n\n" + stats.prefix + "temp [c|f] <Value>\n```";
-				help += "```\nFunctionality\n\nConverts <Value> to the scale provided in the first argument\n```";
-				help += "```fix\nUsage\n\n> " + stats.prefix + "temp f 5\n< 5 °C in fahrenheit: 41 °F```";
-				help += "```diff\nAliases\n\n- °\n```";
 			break;
 			case "sudo":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "sudo <Command>\n```";
@@ -434,7 +427,6 @@ module.exports = function() {
                 "modify": ["mod"],
                 "say": [">"],
                 "ping": ["?"],
-                "temp": ["°"],
                 "sc": ["channel","ch"]
         };
         for(let cmd in aliases) {

@@ -153,9 +153,6 @@ client.on("messageCreate", async message => {
 
 	/* Ping */ // Generic test command / returns the ping
 	switch(command) {
-	case "temp":
-		//cmdTemp(message, args);
-	break;
 	case "ping":
 		cmdPing(message);
 	break;
