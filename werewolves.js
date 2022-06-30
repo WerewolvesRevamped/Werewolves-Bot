@@ -312,7 +312,7 @@ client.on("messageCreate", async message => {
 		cmdCC(message, args, argsX);
 	break;
 	case "sc":
-		cmdSC(message, args);
+		if(checkGM(message)) cmdSC(message, args);
 	break;
 	case "impersonate":
 		if(checkGM(message)) cmdImpersonate(message, argsX);
