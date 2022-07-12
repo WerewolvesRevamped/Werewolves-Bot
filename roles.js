@@ -1227,6 +1227,10 @@ module.exports = function() {
     
     this.cmdInfoEither = function(channel, args, pin, noErr, simp = false) {
 		// fix role name if necessary
+        if(!args) {
+            if(!noErr) channel.send("❗ Could not find role.");
+            return;
+        }
 		let roleName = args.join(" ").replace(/[^a-zA-Z0-9'\-_ ]+/g,"");
 		if(!verifyRole(roleName)) { // not a valid role
 			// get all roles and aliases, to get an array of all possible role names
@@ -1375,6 +1379,27 @@ module.exports = function() {
                     case "Underworld":
                         color = 6361226;
                     break;
+                    case "Pyro":
+                        color = 15173690;
+                    break;
+                    case "Flute":
+                        color = 3947978;
+                    break;
+                    case "White Wolves":
+                        color = 16777215;
+                    break;
+                    case "Plague":
+                        color = 30001;
+                    break;
+                    case "Nightmare":
+                        color = 1649994;
+                    break;
+                    case "Flock":
+                        color = 13093063;
+                    break;
+                    case "Graveyard":
+                        color = 8497497;
+                    break;
                     default:
                         color = 7829367;
                         console.log("Category: " + category + "; Team: " + cSplit[0] + " - " + soloTeam);
@@ -1453,6 +1478,14 @@ module.exports = function() {
                 
                 let category = (desc.find(el => el[0] == "")[1].split(/ \| /)[1] ?? "Unknown").replace(/[\n\r]*/g,"").trim();
                 let fancyRoleName = toTitleCase(roleNameParsed) + (category ? " [" + category + "]" : "");
+                // determine role type ("limited")
+                let roleType = false;
+                switch((desc.find(el => el[0] == "")[1].split(/ \| /)[2] ?? "-").trim().toLowerCase()) {
+                    case "limited": roleType = "Limited Role"; break;
+                    case "temporary":
+                    case "fake role": roleType = "Temporary Role"; break;
+                    case "technical": roleType = "Technical Role"; break;
+                }
                 
                 // get the url to the icon on the repo
                 let roleData = getRoleData(roleNameParsed, result[0].description);
@@ -1494,6 +1527,8 @@ module.exports = function() {
                         "fields": []
                     };
                     
+                    if(roleType) embed.title = roleType;
+                    
                     // add text
                     if(!simp) {
                         desc.forEach(el => {
@@ -1525,7 +1560,8 @@ module.exports = function() {
                             if(simpDesc) {
                                 embed.description = simpDesc[1];
                             } else {
-                                cmdInfo(channel, args, pin, noErr, simp);
+                                if(simp) cmdInfoFancy(channel, args, pin, noErr, false);
+                                else cmdInfo(channel, args, pin, noErr, simp);
                                 return;
                             }
                         }
@@ -1593,9 +1629,26 @@ module.exports = function() {
                 }
                 
                 // send embed
-                channel.send({embeds: [ embed ]}).catch(err => {
+                channel.send({embeds: [ embed ]}).then(m => {
+                        // Pin if pin is true
+                        if(pin) {
+                            m.pin().then(mp => {
+                                mp.channel.messages.fetch().then(messages => {
+                                    mp.channel.bulkDelete(messages.filter(el => el.type === "CHANNEL_PINNED_MESSAGE"));
+                                });	
+                            }).catch(err => { 
+                                logO(err); 
+                                if(!noErr) sendError(channel, err, "Could not pin info message");
+                            });
+                        }
+                        if(simp) {
+                            setTimeout(() => m.delete(), 180000);
+                        }
+                    // Couldnt send message
+                }).catch(err => {
                     logO(err);
-                    cmdInfo(channel, args, pin, noErr, simp);
+                    if(simp) cmdInfoFancy(channel, args, pin, noErr, false);
+                    else cmdInfo(channel, args, pin, noErr, simp);
                 });
                 
 			} else { 

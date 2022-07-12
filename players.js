@@ -1097,31 +1097,37 @@ module.exports = function() {
 	
 	/* Check if a member is a Game Master (or Bot) */
 	this.isGameMaster = function(member) {
+        if(!member) return false;
 		return member && member.roles && (member.roles.cache.get(stats.gamemaster) || member.roles.cache.get(stats.bot) || member.roles.cache.get(stats.admin));
 	}
 
 	/* Check if a member is a (living) participant */
 	this.isParticipant = function(member) {
+        if(!member) return false;
 		return member.roles.cache.get(stats.participant);
 	}
 	
 	/* Check if a member is a dead participant */
 	this.isDeadParticipant = function(member) {
+        if(!member) return false;
 		return member.roles.cache.get(stats.dead_participant);
 	}
 	
 	/* Check if a member is a dead participant */
 	this.isSpectator = function(member) {
+        if(!member) return false;
 		return member.roles.cache.get(stats.spectator);
 	}
 
 	/* Check if a member is signed up */
 	this.isSignedUp = function(member) {
+        if(!member) return false;
 		return member.roles.cache.get(stats.signed_up);
 	}
 
 	/* Check if a member is a sub */
 	this.isSub = function(member) {
+        if(!member) return false;
 		return member.roles.cache.get(stats.sub);
 	}
 	

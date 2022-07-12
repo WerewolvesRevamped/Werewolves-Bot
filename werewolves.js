@@ -398,11 +398,14 @@ client.on('messageUpdate', (oldMessage, newMessage) => {
     oldMessage = JSON.parse(JSON.stringify(oldMessage));
     newMessage = JSON.parse(JSON.stringify(newMessage));
 	// retrieve channel and author
-	let channel = client.guilds.cache.get(oldMessage.guildId).channels.cache.get(oldMessage.channelId);
+    let msgGuild = client.guilds.cache.get(oldMessage.guildId);
+    if(!msgGuild) return;
+	let channel = msgGuild.channels.cache.get(oldMessage.channelId);
 	let log = client.guilds.cache.get(stats.log_guild).channels.cache.get(stats.log_channel);
-	let author = client.guilds.cache.get(oldMessage.guildId).members.cache.get(oldMessage.authorId);
+	let author = msgGuild.members.cache.get(oldMessage.authorId);
 	if(isParticipant(author) && (Math.abs(oldMessage.content.length - newMessage.content.length) > (oldMessage.content.length/5))) {
-		cmdWebhook(log, author, ["**Updated Message**", "\n*Updated message by <@" + oldMessage.authorId + "> in <#" + oldMessage.channelId + ">!*","\n__Old:__\n> ", oldMessage.content.split("\n").join("\n> "),"\n","\n__New:__\n> ", newMessage.content.split("\n").join("\n> "),"\n","\n" + stats.ping ]);
+		//cmdWebhook(log, author, ["**Updated Message**", "\n*Updated message by <@" + oldMessage.authorId + "> in <#" + oldMessage.channelId + ">!*","\n__Old:__\n> ", oldMessage.content.split("\n").join("\n> "),"\n","\n__New:__\n> ", newMessage.content.split("\n").join("\n> "),"\n","\n" + stats.ping ]);
+		cmdWebhook(log, author, ["**Updated Message**", "\n*Updated message by <@" + oldMessage.authorId + "> in <#" + oldMessage.channelId + ">!*","\n__Old:__\n> ", oldMessage.content.split("\n").join("\n> "),"\n","\n__New:__\n> ", newMessage.content.split("\n").join("\n> "),"\n","\n<@242983689921888256>" ]);
 	}
 });
 
