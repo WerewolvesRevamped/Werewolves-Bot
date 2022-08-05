@@ -352,6 +352,8 @@ module.exports = function() {
 		sql("SELECT info FROM sc_info WHERE name = " + connection.escape(args[1]), result => {
 			if(result.length > 0) { 
 				var desc = result[0].info.replace(/~/g,"\n");
+                let titleRaw = desc.split(/\n/)[0].replace(/\<\?.*?:.*?\>/g,"");
+                console.log(titleRaw);
 				desc = applyTheme(desc);
 				desc = applyEmoji(desc);
 				
@@ -370,7 +372,7 @@ module.exports = function() {
                             "text": `${channel.guild.name} - ${stats.game}`
                         }
                     };
-                    let cRole = getCategoryRole(title);
+                    let cRole = getCategoryRole(titleRaw);
                     if(cRole) embed.thumbnail = {url: repoBaseUrl + "/" + cRole + ".png"};
                     cMsg = {embeds: [ embed ]};
                 }
@@ -1204,8 +1206,17 @@ module.exports = function() {
 		sql("SELECT alias,name FROM roles_alias ORDER BY alias ASC", result => {
 			if(result.length > 0) {
 				channel.send("✳ Sending a list of currently existing role aliases:");
+                let aliases = {};
+                result.forEach(el => {
+                    if(!aliases[el.name]) aliases[el.name] = [];
+                    aliases[el.name].push(el.alias);
+                });
+                let lines = [];
+                Object.keys(aliases).map(alias => {
+                    lines.push("**" + toTitleCase(alias) + ":** " + aliases[alias].join(", "));
+                });
 				// For each alias send a message
-				chunkArray(result.map(alias => "**" +  toTitleCase(alias.alias) + ":** " + toTitleCase(parseRole(alias.name))), 40).map(el => el.join("\n")).forEach(el => channel.send(el));
+				chunkArray(lines, 20).map(el => el.join("\n")).forEach(el => channel.send(el));
 			} else { 
 				channel.send("⛔ Database error. Could not find any role aliases!");
 			}
@@ -1329,7 +1340,7 @@ module.exports = function() {
 	}
 	
 	this.applyEmoji = function(text) {
-		[...text.matchAll(/\<\?([\w\d]*):([^>]{0,4})\>/g)].forEach(match => {
+		[...text.matchAll(/\<\?([\w\d]*):([^>]{0,10})\>/g)].forEach(match => {
 			let emoji = client.emojis.cache.find(el => el.name === match[1]);
 			if(emoji) emoji = `<:${emoji.name}:${emoji.id}>`;
 			else emoji = match[2];
@@ -1349,12 +1360,15 @@ module.exports = function() {
         // get url
          let repoPath = repoBaseUrl;
         let cSplitSolo = category.split(/ \- /);
-        if(cSplitSolo.length != 1 && cSplit[0] === "Solo") repoPath += "Solo/" + cSplitSolo[1].replace(/ Team/,"") + "/";
+        let catRole = getCategoryRole(role);
+        if(catRole) repoPath += catRole + ".png";
+        else if(cSplitSolo.length != 1 && cSplit[0] === "Solo") repoPath += "Solo/" + cSplitSolo[1].replace(/ Team/,"") + "/";
         else if(cSplit.length == 1) repoPath += cSplit[0] + "/";
         else repoPath += cSplit[0] + "/" + cSplit[1].split(/ - /)[0] + "/";
-        repoPath += toTitleCase(role) + ".png";
+        if(!catRole) repoPath += toTitleCase(role) + ".png";
         repoPath = repoPath.replace(/ /g, "%20");
         repoPath += `?version=${stats.icon_version}`;
+        
         
         // get color
         let color = 0;
@@ -1417,8 +1431,10 @@ module.exports = function() {
     
     this.getCategoryRole = function(val) {
         val = val.toLowerCase().replace(/[^a-z ]/g,"").trim();
+        console.log(val);
         return iconLUT[val] ?? false;
     }
+    
     
     this.getIconFromName = function(name) {
         return new Promise((resolve, reject) => {
@@ -1458,6 +1474,7 @@ module.exports = function() {
         let roleNameParsed = parseRole(args[0]);
 		sql("SELECT description FROM roles WHERE name = " + connection.escape(roleNameParsed), async result => {
 			if(result.length > 0) { 
+                roleNameParsed = roleNameParsed.split("$")[0];
 				var desc = result[0].description.replace(/~/g,"\n");
 				desc = applyEmoji(desc);
                 

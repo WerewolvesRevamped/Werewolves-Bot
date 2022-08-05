@@ -18,8 +18,8 @@ module.exports = function() {
 	/* Handle players command */
 	this.cmdPlayers = function(message, args) {
 		// Check subcommands
-		if(!args[0] || (!args[1] && args[0] != "list" && args[0] != "log" && args[0] != "log2" && args[0] != "msgs")) { 
-			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `players [get|get_clean|set|resurrect|signup|list|msgs|log|log2]`!"); 
+		if(!args[0] || (!args[1] && args[0] != "list" && args[0] != "log" && args[0] != "log2" && args[0] != "msgs" && args[0] != "votes")) { 
+			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `players [get|get_clean|set|resurrect|signup|list|msgs|log|log2|votes]`!"); 
 			return; 
 		}
 		//Find subcommand
@@ -35,8 +35,11 @@ module.exports = function() {
 			case "list": cmdConfirm(message, "players list"); break;
 			case "log": cmdConfirm(message, "players log"); break;
 			case "log2": cmdConfirm(message, "players log2"); break;
+			case "votes": cmdConfirm(message, "players votes"); break;
 			case "messages": 
 			case "msgs": cmdPlayersListMsgs(message.channel, args); break;
+			case "messages2": 
+			case "msgs2": cmdPlayersListMsgs2(message.channel, args); break;
 			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
 		}
 	}
@@ -51,7 +54,18 @@ module.exports = function() {
 		switch(args[0]) {
 			case "bl": case "blacklist": cmdRollExe(message.channel, args, false); break;
 			case "wl": case "whitelist": cmdRollExe(message.channel, args, true); break;
-			default: cmdRollExe(message.channel, [], false); break;
+            case "num": case "number": case "n": case "d": cmdRollNum(message.channel, args); break;
+            default:
+                if(args[0] && args[0].match(/\d*d\d+/)) {
+                    let args2 = args[0].split(/d/);
+                    if(!(args2[0] >= 1)) args2[0] = 1;
+                    if(!(args2[1] >= 1)) args2[1] = 1;
+                    if(args2[0] > 10) args2[0] = 10;
+                    cmdRollNum(message.channel, ["d", args2[1]], (args2[0]-1));
+                } else {
+                    cmdRollExe(message.channel, [], false); break;
+                }
+            break; 
 		}
 	}
 	
@@ -59,7 +73,7 @@ module.exports = function() {
 		let help = "";
 		switch(args[0]) {
 			case "":
-				if(isGameMaster(member)) help += stats.prefix + "players [list|msgs|log|log2] - Information about players\n";
+				if(isGameMaster(member)) help += stats.prefix + "players [list|msgs|log|log2|votes|msgs2] - Information about players\n";
 				if(isGameMaster(member)) help += stats.prefix + "players [get|get_clean|set|resurrect|signup] - Manages players\n";
 				if(isGameMaster(member)) help += stats.prefix + "players [substitute|switch] - Manages player changes\n";
 				if(isGameMaster(member)) help += stats.prefix + "killq [add|remove|killall|list|clear] - Manages kill queue\n";
@@ -69,7 +83,7 @@ module.exports = function() {
 				help += stats.prefix + "alive - Lists alive players\n";
 				help += stats.prefix + "signup - Signs you up for the next game\n";
 				help += stats.prefix + "emojis - Gives a list of emojis and player ids (Useful for CC creation)\n";
-				help += stats.prefix + "roll [-|whitelist|blacklist] - Selects a random player\n";
+				help += stats.prefix + "roll [-|whitelist|blacklist|number] - Selects a random player\n";
 			break;
 			case "modrole":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "modrole [add|remove] <user id> <role id>\n```";
@@ -116,7 +130,7 @@ module.exports = function() {
 			case "roll":
 				switch(args[1]) {
 					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "roll [whitelist|blacklist]\n```";
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "roll [whitelist|blacklist|number]\n```";
 						help += "```\nFunctionality\n\nCommands to randomize a list of players. " + stats.prefix + "help roll <sub-command> for detailed help.\n\nIf used without a subcommand randomizes from the full player list.```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "roll\n< ▶️ Selected @McTsts (🛠)\n```";
 						help += "```diff\nAliases\n\n- rand\n- random\n- randomize\n```";
@@ -133,13 +147,19 @@ module.exports = function() {
 						help += "```fix\nUsage\n\n> " + stats.prefix + "roll blacklist Vera\n< ▶️ Selected @McTsts (🛠)\n```";
 						help += "```diff\nAliases\n\n- roll bl\n```";
 					break;
+					case "num": case "n":  case "number":  case "d": 
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "roll number <Number>\n```";
+						help += "```\nFunctionality\n\nSelects a random number from 1 to <Number>\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "roll number 5\n< ▶️ Selected `3`\n```";
+						help += "```diff\nAliases\n\n- roll n\n- roll num\n- roll d\n```";
+					break;
 				}
 			break;
 			case "players":
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
 					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "players [get|get_clean|set|resurrect|signup|list|substitute|switch|messages|log|log2]\n```";
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "players [get|get_clean|set|resurrect|signup|list|substitute|switch|messages|messages2|log|log2|votes]\n```";
 						help += "```\nFunctionality\n\nGroup of commands to handle players. " + stats.prefix + "help players <sub-command> for detailed help.\n\nList of Player Properties:\nalive: Whether the player is alive`\nemoji: The emoji the player uses\nrole: The role of the player\npublic_value: The value of the players vote on public polls (Typically 1)\nprivate_value: The value of the players vote on private polls (Typically 1)\npublic_votes: The base value of votes the player has against them on public votes (Typically 0)\nid: The discord id of the player\nccs: the amount of created ccs\npublic_msgs: Amount of messages sent in public channels\nprivate_msgs: Amount of messages sent in private channels```";
 						help += "```diff\nAliases\n\n- p\n- player\n```";
 					break;
@@ -195,9 +215,22 @@ module.exports = function() {
 						help += "```\nFunctionality\n\nLists all players with their role and all roles with their player. Can be used to copy into gamelog messages.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "players log2\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "players log2!```";
 					break;		
+					case "votes":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "players votes\n```";
+						help += "```\nFunctionality\n\nLists all players with and their votes if they are affected by vote manipulation.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "players votes\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "players votes!```";
+					break;		
+					case "msgs":
 					case "messages":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players messages\n```";
 						help += "```\nFunctionality\n\nLists all players and their public and private message count.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "players messages\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "players list!\n> Players | Total: 1\n  🛠 - @McTsts (Werewolf); Public Messages: 1; Private Messages: 3```";
+						help += "```diff\nAliases\n\n- players msgs\n```";
+					break;		
+					case "msgs2":
+					case "messages2":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "players messages2 <phase>\n```";
+						help += "```\nFunctionality\n\nLists all alive players and their public and private message count.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "players messages\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "players list!\n> Players | Total: 1\n  🛠 - @McTsts (Werewolf); Public Messages: 1; Private Messages: 3```";
 						help += "```diff\nAliases\n\n- players msgs\n```";
 					break;		
@@ -427,6 +460,34 @@ module.exports = function() {
 		});
 	
 	}
+	
+	/* Lists all vote changes */
+	this.cmdPlayersVotes = function(channel, args) {
+		// Get a list of players
+		sql("SELECT id,emoji,role,alive,public_value,private_value,public_votes,ccs FROM players", result => {
+			let playerListArray = result.filter(el => el.alive && (el.public_value != 1 || el.private_value != 1 || el.public_votes != 0)).map(el => `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"} ${el.public_value},${el.private_value},${el.public_votes}`);
+			let playerList = [], counter = 0;
+			for(let i = 0; i < playerListArray.length; i++) {
+				if(!playerList[Math.floor(counter/10)]) playerList[Math.floor(counter/10)] = [];
+				playerList[Math.floor(counter/10)].push(playerListArray[i]);
+				counter++;
+			}
+			channel.send("**Manipulated Players** | Total: " + playerListArray.length +  "\nPublic Value, Private Value, Public Votes");
+			for(let i = 0; i < playerList.length; i++) {
+				// Print message
+				channel.send("✳ Listing players " + i  + "/" + (playerList.length) + "...").then(m => {
+					m.edit(playerList[i].join("\n"));
+				}).catch(err => {
+					logO(err); 
+					sendError(channel, err, "Could not list manipulated players");
+				});
+			}
+		}, () => {
+			// DB error
+			channel.send("⛔ Database error. Could not list manipulated players!");
+		});
+	
+	}
     
 	/* Lists all signedup players in log format */
 	this.cmdPlayersLog = function(channel, args) {
@@ -440,11 +501,11 @@ module.exports = function() {
 			channel.send("```**Players** | Total: " + result.length + "\n" + playerList.join("\n") + "\n```")
             .catch(err => {
 					logO(err); 
-					sendError(channel, err, "Could not log signed up players");
+					sendError(channel, err, "Could not log players");
 				});
 		}, () => {
 			// DB error
-			channel.send("⛔ Database error. Could not list signed up players!");
+			channel.send("⛔ Database error. Could not log players!");
 		});
 	
 	}
@@ -486,13 +547,13 @@ module.exports = function() {
 			}
 		}, () => {
 			// DB error
-			channel.send("⛔ Database error. Could not list signed up players!");
+			channel.send("⛔ Database error. Could not list players for log!");
 		});
 	
 	}
     
     
-	/* Lists all signedup players */
+	/* Lists player message counts */
 	this.cmdPlayersListMsgs = function(channel, args) {
 		// Get a list of players
 		sql("SELECT id,emoji,public_msgs,private_msgs FROM players", result => {
@@ -518,12 +579,52 @@ module.exports = function() {
 					m.edit(playerList[i].join("\n"));
 				}).catch(err => {
 					logO(err); 
-					sendError(channel, err, "Could not list signed up players");
+					sendError(channel, err, "Could not list players");
 				});
 			}
 		}, () => {
 			// DB error
-			channel.send("⛔ Database error. Could not list signed up players!");
+			channel.send("⛔ Database error. Could not list players!");
+		});
+	
+	}
+	/* Lists message counts for living players    */
+	this.cmdPlayersListMsgs2 = function(channel, args) {
+		// Get a list of players
+		sql("SELECT id,emoji,public_msgs,private_msgs FROM players WHERE alive=1", result => {
+            let totalMsgs = 0;
+            let totalMsgsPrivate = 0;
+            let totalMsgsPublic = 0;
+			let playerListArray = result.sort((a,b) => (b.public_msgs+b.private_msgs) - (a.public_msgs+a.private_msgs)).map(el => {
+                totalMsgs += el.public_msgs+el.private_msgs;
+                totalMsgsPrivate += el.private_msgs;
+                totalMsgsPublic += el.public_msgs;
+                let prWarn = false;
+                let pubWarn = false;
+                let phases = args[1];
+                if((el.public_msgs+el.private_msgs) < (phases * 15)) prWarn = true;
+                if(el.public_msgs < (Math.floor(phases/2) * 10)) pubWarn = true;
+                return `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"}; Total: ${el.public_msgs+el.private_msgs}${prWarn?' ❗':''}; Public: ${el.public_msgs}${pubWarn?' ❗':''}; Private: ${el.private_msgs}`;
+            });
+			let playerList = [], counter = 0;
+			for(let i = 0; i < playerListArray.length; i++) {
+				if(!playerList[Math.floor(counter/10)]) playerList[Math.floor(counter/10)] = [];
+				playerList[Math.floor(counter/10)].push(playerListArray[i]);
+				counter++;
+			}
+			channel.send("**Alive Players** | Total: " + result.length + "\nTotal: " + totalMsgs + "; Public: " + totalMsgsPublic + "; Private: " + totalMsgsPrivate);
+			for(let i = 0; i < playerList.length; i++) {
+				// Print message
+				channel.send("✳ Listing players " + i  + "/" + (playerList.length) + "...").then(m => {
+					m.edit(playerList[i].join("\n"));
+				}).catch(err => {
+					logO(err); 
+					sendError(channel, err, "Could not list players");
+				});
+			}
+		}, () => {
+			// DB error
+			channel.send("⛔ Database error. Could not list players!");
 		});
 	
 	}
@@ -545,6 +646,19 @@ module.exports = function() {
 			channel.send("⛔ Database error. Could not retrieve list of participants!");
 		});
 	
+	}
+	/* Randomizes */
+	this.cmdRollNum = function(channel, args, repeat = 0) {
+        if(!(args[1] >= 2)) {
+            channel.send("⛔ Invalid argument.");
+            return;
+        };
+		let val = Math.ceil(Math.random() * args[1]);
+        channel.send(`⏺️ Randomizing from \`1\` to \`${args[1]}\``);
+        channel.send(`✳ Selecting...`).then(m => {
+            m.edit(`▶️ Selected \`${val}\``);
+            if(repeat > 0) cmdRollNum(channel, args, --repeat);
+        });
 	}
 	
 	this.cmdModrole = function(message, args) {

@@ -433,7 +433,7 @@ module.exports = function() {
 				case gp.NONE: gameStatus.setName("⛔ No Game"); break;
 				case gp.SIGNUP: gameStatus.setName("📰 Signups Open (" + result.length + ")"); break;
 				case gp.SETUP: gameStatus.setName("📝 Game Setup (" + result.length + ")"); break;
-				case gp.INGAME: gameStatus.setName("🔁 Game Running (" + result.filter(el => el.alive).length + "/" + result.length + ")"); break;
+				case gp.INGAME: gameStatus.setName("🔁 In-Game (" + result.filter(el => el.alive).length + "/" + result.length + ")"); break;
 				case gp.POSTGAME: gameStatus.setName("✅ Game Concluded"); break;
 			}
 		});

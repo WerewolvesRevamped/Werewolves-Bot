@@ -237,6 +237,7 @@ client.on("messageCreate", async message => {
 				case "375578492580003840": cmdSignup(message.channel, message.member, ["💚"], true); break;
 				case "161551993704284171": cmdSignup(message.channel, message.member, ["🐼"], true); break;
 				case "215427550577557504": cmdSignup(message.channel, message.member, ["👁‍🗨"], true); break;
+				case "334136126745083907": cmdSignup(message.channel, message.member, ["🐓"], true); break;
 				default: cmdSignup(message.channel, message.member, args, true); break; 
 			}
 			if(isGameMaster(message.member)) cmdDemote(message.channel, message.member);
@@ -463,6 +464,8 @@ client.on("guildMemberRemove", async member => {
 /* Join Detection */
 client.on("guildMemberAdd", async member => {
 	log(`👋 ${member.user} has joined the server!`);
+    let oog = member.guild.channels.cache.get("584793703923580965");
+    if(oog) oog.send(`Welcome ${member.user} 👋!`);
 });
 
 // for hardcoded reaction roles, because I'm lazy
