@@ -1191,6 +1191,17 @@ module.exports = function() {
 		players = fixUserList(players, channel);
 		return getUserList(channel, players, 0, executor);
 	}
+	
+	/* parseUserList for a single user */
+	this.parseUser = function(channel, inUser) {
+		let user = getUser(channel, inUser);
+		if(!user) {
+			user = parseUserList(channel, [inUser], 0);
+			if(user && user.length == 1) return user[0];
+			else return false;
+		}
+		return user;
+	}
 
 	/* Returns the id of the user who uses the given emoji, if none returns false */
 	this.emojiToID = function(emoji) {
