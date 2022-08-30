@@ -320,7 +320,7 @@ module.exports = function() {
 			return; 
 		}
 		// Get users 
-		players = getUserList(channel, args, 1);
+		players = parseUserList(channel, args, 1);
 		if(players)  {
 			let playerList = players.map(el => "`" + channel.guild.members.cache.get(el).displayName + "`").join(", ");
 			// Add to killq
@@ -347,7 +347,7 @@ module.exports = function() {
 			return; 
 		}
 		// Get users
-		players = getUserList(channel, args, 1);
+		players = parseUserList(channel, args, 1);
 		if(players) { 
 			// Remove from killq
 			let playerList = players.map(el =>"`" + channel.guild.members.cache.get(el).displayName + "`").join(", ");
@@ -1157,8 +1157,8 @@ module.exports = function() {
 		return false;
 	}
 
-	/* Convert a List of Users, Into a List of Valid User IDs */
-	this.getUserList = function(channel, args, startIndex, executor) {
+	/* Convert a List of Users, Into a List of Valid User IDs; Provide executor to allow GMs to specify non-participants */
+	this.getUserList = function(channel, args, startIndex, executor = false) {
 		// Cut off entries at the start
 		let players = args.slice(startIndex).map(el => getUser(channel, el));
 		// Filter out non participants
@@ -1184,7 +1184,9 @@ module.exports = function() {
 		return [...parsed.invalid, ...parsed.found];
 	}
 	
-	this.parseUserList = function(channel, args, startIndex, executor) {
+	/* Convert a List of (badly written) Users, Into a List of Valid User IDs; Provide executor to allow GMs to specify non-participants */
+	/* Equivalent to getUserList, but auto adds quotes, fixes typos and such */
+	this.parseUserList = function(channel, args, startIndex, executor = false) {
 		let players = args.slice(startIndex);
 		players = fixUserList(players, channel);
 		return getUserList(channel, players, 0, executor);
