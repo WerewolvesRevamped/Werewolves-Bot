@@ -915,7 +915,7 @@ module.exports = function() {
 			return; 
 		}
 		// Get user
-		var user = getUser(channel, args[2]);
+		var user = parseUser(channel, args[2]);
 		if(!user) { 
 			// Invalid user
 			channel.send("⛔ Syntax error. `" + args[2] + "` is not a valid player!"); 
@@ -944,7 +944,7 @@ module.exports = function() {
 			return; 
 		}
 		// Get user
-		var user = getUser(channel, args[2]);
+		var user = parseUser(channel, args[2]);
 		if(!user) { 
 			// Invalid user
 			channel.send("⛔ Syntax error. `" + args[2] + "` is not a valid player!"); 
@@ -969,7 +969,7 @@ module.exports = function() {
 	/* Resurrects a dead player */
 	this.cmdPlayersResurrect = function(channel, args) {
 		// Get user
-		var user = getUser(channel, args[1]);
+		var user = parseUser(channel, args[1]);
 		if(!user) { 
 			// Invalid user
 			channel.send("⛔ Syntax error. `" + args[1] + "` is not a valid player!"); 
