@@ -631,7 +631,7 @@ module.exports = function() {
 	
 	/* Randomizes */
 	this.cmdRollExe = function(channel, args, wl) {
-		let blacklist = getUserList(channel, args, 1) || [];
+		let blacklist = parseUserList(channel, args, 1) || [];
 		console.log(blacklist);
 		// Get a list of players
 		sql("SELECT id FROM players WHERE alive=1", result => {
