@@ -186,7 +186,7 @@ module.exports = function() {
 							if(destination.channel_id != message.channel.id) { 	
 								// Create webhook
                                 let pdis = idToDisguise(message.author.id);
-                                let disguiseName = source.name;
+                                let disguiseName = source.name.replace(/\-/," ");
                                 let disguiseAvatar = client.user.displayAvatarURL();
                                 
                                 // role icon
