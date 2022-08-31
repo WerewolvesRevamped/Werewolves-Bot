@@ -18,8 +18,8 @@ module.exports = function() {
 	/* Handle players command */
 	this.cmdPlayers = function(message, args) {
 		// Check subcommands
-		if(!args[0] || (!args[1] && args[0] != "list" && args[0] != "log" && args[0] != "log2" && args[0] != "msgs" && args[0] != "votes")) { 
-			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `players [get|get_clean|set|resurrect|signup|list|msgs|log|log2|votes]`!"); 
+		if(!args[0] || (!args[1] && ["list","log","log2","msgs","messages","votes","roles","rl"].indexOf(args[0]) == -1)) { 
+			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `players [get|get_clean|set|resurrect|signup|list|msgs|msgs2|log|log2|votes|rl]`!"); 
 			return; 
 		}
 		//Find subcommand
