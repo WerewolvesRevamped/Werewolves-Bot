@@ -33,6 +33,8 @@ module.exports = function() {
 			case "substitute": cmdPlayersSubstitute(message, args); break;
 			case "switch": cmdPlayersSwitch(message, args); break;
 			case "list": cmdConfirm(message, "players list"); break;
+            case "rl":
+			case "roles": cmdConfirm(message, "players roles"); break;
 			case "log": cmdConfirm(message, "players log"); break;
 			case "log2": cmdConfirm(message, "players log2"); break;
 			case "votes": cmdConfirm(message, "players votes"); break;
@@ -73,7 +75,7 @@ module.exports = function() {
 		let help = "";
 		switch(args[0]) {
 			case "":
-				if(isGameMaster(member)) help += stats.prefix + "players [list|msgs|log|log2|votes|msgs2] - Information about players\n";
+				if(isGameMaster(member)) help += stats.prefix + "players [list|msgs|log|log2|votes|msgs2|roles] - Information about players\n";
 				if(isGameMaster(member)) help += stats.prefix + "players [get|get_clean|set|resurrect|signup] - Manages players\n";
 				if(isGameMaster(member)) help += stats.prefix + "players [substitute|switch] - Manages player changes\n";
 				if(isGameMaster(member)) help += stats.prefix + "killq [add|remove|killall|list|clear] - Manages kill queue\n";
@@ -159,7 +161,7 @@ module.exports = function() {
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
 					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "players [get|get_clean|set|resurrect|signup|list|substitute|switch|messages|messages2|log|log2|votes]\n```";
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "players [get|get_clean|set|resurrect|signup|list|substitute|switch|messages|messages2|log|log2|votes|roles]\n```";
 						help += "```\nFunctionality\n\nGroup of commands to handle players. " + stats.prefix + "help players <sub-command> for detailed help.\n\nList of Player Properties:\nalive: Whether the player is alive`\nemoji: The emoji the player uses\nrole: The role of the player\npublic_value: The value of the players vote on public polls (Typically 1)\nprivate_value: The value of the players vote on private polls (Typically 1)\npublic_votes: The base value of votes the player has against them on public votes (Typically 0)\nid: The discord id of the player\nccs: the amount of created ccs\npublic_msgs: Amount of messages sent in public channels\nprivate_msgs: Amount of messages sent in private channels```";
 						help += "```diff\nAliases\n\n- p\n- player\n```";
 					break;
@@ -224,16 +226,23 @@ module.exports = function() {
 					case "messages":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players messages\n```";
 						help += "```\nFunctionality\n\nLists all players and their public and private message count.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "players messages\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "players list!\n> Players | Total: 1\n  🛠 - @McTsts (Werewolf); Public Messages: 1; Private Messages: 3```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "players messages\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "players messages!\n> Players | Total: 1\n  🛠 - @McTsts (Werewolf); Public Messages: 1; Private Messages: 3```";
 						help += "```diff\nAliases\n\n- players msgs\n```";
 					break;		
 					case "msgs2":
 					case "messages2":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players messages2 <phase>\n```";
 						help += "```\nFunctionality\n\nLists all alive players and their public and private message count.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "players messages\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "players list!\n> Players | Total: 1\n  🛠 - @McTsts (Werewolf); Public Messages: 1; Private Messages: 3```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "players messages\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "players messages2!\n> Players | Total: 1\n  🛠 - @McTsts (Werewolf); Public Messages: 1; Private Messages: 3```";
 						help += "```diff\nAliases\n\n- players msgs\n```";
-					break;		
+					break;			
+					case "roles":
+					case "rl":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "players roles\n```";
+						help += "```\nFunctionality\n\nLists all roles in the game. Used to export the role list for the WWR Role List Builder.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "players roles\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "players roles!```";
+						help += "```diff\nAliases\n\n- players rl\n```";
+					break;	
 				}
 			break;
 			case "killq":
@@ -485,6 +494,23 @@ module.exports = function() {
 		}, () => {
 			// DB error
 			channel.send("⛔ Database error. Could not list manipulated players!");
+		});
+	
+	}
+    
+	/* Returns a comman separated role list */
+	this.cmdPlayersRoleList = function(channel, args) {
+		// Get a list of players
+		sql("SELECT role FROM players", result => {
+			let roleList = result.map(el => el.role);
+			channel.send("**Roles** | Total: " + result.length + "\n```" + roleList.join(",") + "```")
+            .catch(err => {
+					logO(err); 
+					sendError(channel, err, "Could not print role list");
+				});
+		}, () => {
+			// DB error
+			channel.send("⛔ Database error. Could not print role list!");
 		});
 	
 	}
