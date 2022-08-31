@@ -167,6 +167,7 @@ module.exports = function() {
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players get <Player Property> <Player>\n```";
 						help += "```\nFunctionality\n\nReturns the value of <Player Property> for a player indentified with <Player>. For a list of player properties see " + stats.prefix + "help players.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "players get alive mctsts\n< ✅ McTsts's alive value is 1!\n```";
+						help += "```diff\nAliases\n\n- pg\n```";
 					break;
 					case "get_clean":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players get_clean <Player Property> <Player>\n```";
@@ -177,6 +178,7 @@ module.exports = function() {
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players set <Player Property> <Player> <Value>\n```";
 						help += "```\nFunctionality\n\nSets the value of <Player Property> for a player indentified with <Player> to <Value>. For a list of player properties see " + stats.prefix + "help players.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "players set role mctsts baker\n< ✅ McTsts's role value now is baker!\n```";
+						help += "```diff\nAliases\n\n- ps\n```";
 					break;
 					case "resurrect":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players resurrect <Player>\n```";

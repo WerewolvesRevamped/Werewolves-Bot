@@ -302,6 +302,12 @@ client.on("messageCreate", async message => {
 	case "players":
 		if(checkGM(message)) cmdPlayers(message, args);
 	break;
+	case "pg":
+		if(checkGM(message)) cmdPlayers(message, ["get", ...args]);	
+	break;
+	case "ps":
+		if(checkGM(message)) cmdPlayers(message, ["set", ...args]);	
+	break;
 	case "roll":
 		cmdRoll(message, args);
 	break;
