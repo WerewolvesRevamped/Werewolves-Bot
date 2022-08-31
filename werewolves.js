@@ -105,15 +105,10 @@ client.on("messageCreate", async message => {
     }
     
 	/* Gif Check */
-	// isParticipant(message.author) &&
 	if(!message.author.bot && isParticipant(message.member) && message.content.search("http") >= 0 && stats.ping.length > 0 && stats.gamephase == gp.INGAME) {
 		urlHandle(message);
 	}
 	
-	if(!message.author.bot && message.content.indexOf(stats.prefix) !== 0) { // super cursed thing that turns every message into a webhook one
-		//cmdWebhook(message.channel, message.member, [message.content]);
-		//message.delete({timeout: 500 })
-	}
 	/* Find Command & Parameters */
 	// Not a command
 	if(message.channel.type === "dm") return;
