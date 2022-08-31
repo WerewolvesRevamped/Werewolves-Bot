@@ -30,7 +30,6 @@ client.on("ready", () => {
 		getSCCats();
 		getPublicCat();
         loadPollValues();
-        getDisguises();
         cacheIconLUT();
 		global.client.guilds.fetch(stats.log_guild).then(guild => {
 			guild.members.fetch().then((members) => {

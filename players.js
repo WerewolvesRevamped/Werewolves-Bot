@@ -1216,13 +1216,6 @@ module.exports = function() {
 		var user = emojiIDs.find(el => el.id === id);
 		return user ? user.emoji : false;
 	}
-    
-	/* Returns the nickname of the user who has the given id, if none returns false */
-	this.idToDisguise = function(id) {
-        if(!disguiseIDs) return;
-		var user = disguiseIDs.find(el => el.id === id);
-		return user ? user.disguise : false;
-	}
 	
 	/* Check if a member is a Game Master (or Bot) */
 	this.isGameMaster = function(member) {
@@ -1266,20 +1259,6 @@ module.exports = function() {
 				emojiIDs = result;
 		}, () => {
 			log("Players > ❗❗❗ Unable to cache player emojis!");
-		});
-	}
-    
-	/* Cache nicknames */
-	this.getDisguises = function() {
-		sql("SELECT id,disguise FROM players", result => {
-				disguiseIDs = result.map(el => {
-                    if(!el.disguise) return el;
-                    el.disguise = el.disguise.split(",");
-                    return el;
-                });
-		}, () => {
-            disguiseIDs = false;
-			log("Players > ❗❗❗ Unable to cache player disguises!");
 		});
 	}
 	

@@ -185,20 +185,13 @@ module.exports = function() {
 							// Ignore if it's same channel as source
 							if(destination.channel_id != message.channel.id) { 	
 								// Create webhook
-                                let pdis = idToDisguise(message.author.id);
                                 let disguiseName = source.name.replace(/\-/," ");
                                 let disguiseAvatar = client.user.displayAvatarURL();
                                 
                                 // role icon
                                 let roleIcon = await getIconFromName(disguiseName);
                                 if(roleIcon) disguiseAvatar = roleIcon;
-                                
-                                // player disguise
-                                if(disguiseName && disguiseName.search(/%n/) != -1) {
-                                    disguiseName = disguiseName.replace(/%n|%N/, pdis[0]);
-                                    disguiseAvatar = pdis[1];
-                                }
-                                
+
 								let webhookName = disguiseName != "" ? toTitleCase(disguiseName) : message.member.displayName;
 								let webhookAvatar = disguiseName != "" ? disguiseAvatar : message.author.displayAvatarURL();
 								let webhookMsg = message.content;
