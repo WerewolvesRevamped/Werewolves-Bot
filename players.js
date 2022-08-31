@@ -83,7 +83,7 @@ module.exports = function() {
 				help += stats.prefix + "alive - Lists alive players\n";
 				help += stats.prefix + "signup - Signs you up for the next game\n";
 				help += stats.prefix + "emojis - Gives a list of emojis and player ids (Useful for CC creation)\n";
-				help += stats.prefix + "roll [-|whitelist|blacklist|number] - Selects a random player\n";
+				help += stats.prefix + "roll [-|whitelist|blacklist|number|?d?] - Selects a random player\n";
 			break;
 			case "modrole":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "modrole [add|remove] <user id> <role id>\n```";
@@ -130,7 +130,7 @@ module.exports = function() {
 			case "roll":
 				switch(args[1]) {
 					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "roll [whitelist|blacklist|number]\n```";
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "roll [whitelist|blacklist|number|?d?]\n```";
 						help += "```\nFunctionality\n\nCommands to randomize a list of players. " + stats.prefix + "help roll <sub-command> for detailed help.\n\nIf used without a subcommand randomizes from the full player list.```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "roll\n< ▶️ Selected @McTsts (🛠)\n```";
 						help += "```diff\nAliases\n\n- rand\n- random\n- randomize\n```";
@@ -147,9 +147,9 @@ module.exports = function() {
 						help += "```fix\nUsage\n\n> " + stats.prefix + "roll blacklist Vera\n< ▶️ Selected @McTsts (🛠)\n```";
 						help += "```diff\nAliases\n\n- roll bl\n```";
 					break;
-					case "num": case "n":  case "number":  case "d": 
+					case "num": case "n":  case "number":  case "d":  case "d?": case "?d?": 
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "roll number <Number>\n```";
-						help += "```\nFunctionality\n\nSelects a random number from 1 to <Number>\n```";
+						help += "```\nFunctionality\n\nSelects a random number from 1 to <Number>. An alternative syntax is also supported: Instead of specifying the number subcommand you can use " + stats.prefix + "roll <amount>d<number> where amount specifies an amount of rolls to do and number specifies the highest value. The amount argument is optional. This means that " + stats.prefix + "roll d6 is equivalent to " + stats.prefix + "roll number 6 and " + stats.prefix + "roll 2d6 is equivalent to running it twice.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "roll number 5\n< ▶️ Selected `3`\n```";
 						help += "```diff\nAliases\n\n- roll n\n- roll num\n- roll d\n```";
 					break;
@@ -167,6 +167,7 @@ module.exports = function() {
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players get <Player Property> <Player>\n```";
 						help += "```\nFunctionality\n\nReturns the value of <Player Property> for a player indentified with <Player>. For a list of player properties see " + stats.prefix + "help players.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "players get alive mctsts\n< ✅ McTsts's alive value is 1!\n```";
+						help += "```diff\nAliases\n\n- pg\n```";
 					break;
 					case "get_clean":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players get_clean <Player Property> <Player>\n```";
@@ -177,6 +178,7 @@ module.exports = function() {
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players set <Player Property> <Player> <Value>\n```";
 						help += "```\nFunctionality\n\nSets the value of <Player Property> for a player indentified with <Player> to <Value>. For a list of player properties see " + stats.prefix + "help players.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "players set role mctsts baker\n< ✅ McTsts's role value now is baker!\n```";
+						help += "```diff\nAliases\n\n- ps\n```";
 					break;
 					case "resurrect":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players resurrect <Player>\n```";
@@ -320,7 +322,7 @@ module.exports = function() {
 			return; 
 		}
 		// Get users 
-		players = getUserList(channel, args, 1);
+		players = parseUserList(channel, args, 1);
 		if(players)  {
 			let playerList = players.map(el => "`" + channel.guild.members.cache.get(el).displayName + "`").join(", ");
 			// Add to killq
@@ -347,7 +349,7 @@ module.exports = function() {
 			return; 
 		}
 		// Get users
-		players = getUserList(channel, args, 1);
+		players = parseUserList(channel, args, 1);
 		if(players) { 
 			// Remove from killq
 			let playerList = players.map(el =>"`" + channel.guild.members.cache.get(el).displayName + "`").join(", ");
@@ -631,7 +633,7 @@ module.exports = function() {
 	
 	/* Randomizes */
 	this.cmdRollExe = function(channel, args, wl) {
-		let blacklist = getUserList(channel, args, 1) || [];
+		let blacklist = parseUserList(channel, args, 1) || [];
 		console.log(blacklist);
 		// Get a list of players
 		sql("SELECT id FROM players WHERE alive=1", result => {
@@ -915,7 +917,7 @@ module.exports = function() {
 			return; 
 		}
 		// Get user
-		var user = getUser(channel, args[2]);
+		var user = parseUser(channel, args[2]);
 		if(!user) { 
 			// Invalid user
 			channel.send("⛔ Syntax error. `" + args[2] + "` is not a valid player!"); 
@@ -944,7 +946,7 @@ module.exports = function() {
 			return; 
 		}
 		// Get user
-		var user = getUser(channel, args[2]);
+		var user = parseUser(channel, args[2]);
 		if(!user) { 
 			// Invalid user
 			channel.send("⛔ Syntax error. `" + args[2] + "` is not a valid player!"); 
@@ -969,7 +971,7 @@ module.exports = function() {
 	/* Resurrects a dead player */
 	this.cmdPlayersResurrect = function(channel, args) {
 		// Get user
-		var user = getUser(channel, args[1]);
+		var user = parseUser(channel, args[1]);
 		if(!user) { 
 			// Invalid user
 			channel.send("⛔ Syntax error. `" + args[1] + "` is not a valid player!"); 
@@ -1157,8 +1159,8 @@ module.exports = function() {
 		return false;
 	}
 
-	/* Convert a List of Users, Into a List of Valid User IDs */
-	this.getUserList = function(channel, args, startIndex, executor) {
+	/* Convert a List of Users, Into a List of Valid User IDs; Provide executor to allow GMs to specify non-participants */
+	this.getUserList = function(channel, args, startIndex, executor = false) {
 		// Cut off entries at the start
 		let players = args.slice(startIndex).map(el => getUser(channel, el));
 		// Filter out non participants
@@ -1184,10 +1186,23 @@ module.exports = function() {
 		return [...parsed.invalid, ...parsed.found];
 	}
 	
-	this.parseUserList = function(channel, args, startIndex, executor) {
+	/* Convert a List of (badly written) Users, Into a List of Valid User IDs; Provide executor to allow GMs to specify non-participants */
+	/* Equivalent to getUserList, but auto adds quotes, fixes typos and such */
+	this.parseUserList = function(channel, args, startIndex, executor = false) {
 		let players = args.slice(startIndex);
 		players = fixUserList(players, channel);
 		return getUserList(channel, players, 0, executor);
+	}
+	
+	/* parseUserList for a single user */
+	this.parseUser = function(channel, inUser) {
+		let user = getUser(channel, inUser);
+		if(!user) {
+			user = parseUserList(channel, [inUser], 0);
+			if(user && user.length == 1) return user[0];
+			else return false;
+		}
+		return user;
 	}
 
 	/* Returns the id of the user who uses the given emoji, if none returns false */

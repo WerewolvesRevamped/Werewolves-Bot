@@ -94,25 +94,20 @@ client.on("messageCreate", async message => {
     if(stats.gamephase == gp.INGAME && message.content.slice(stats.prefix.length).indexOf(stats.prefix) !== 0 && !message.author.bot && isParticipant(message.member)) {
         if(isCC(message.channel) || isSC(message.channel)) { // private message
             sql("UPDATE players SET private_msgs=private_msgs+1 WHERE id = " + connection.escape(message.member.id), () => {}, () => {
-                log("MSG Count > Failed to count private message for " + message.autho + "!")
+                log("MSG Count > Failed to count private message for " + message.author + "!")
             });
         } else if(isPublic(message.channel)) { // public message
             sql("UPDATE players SET public_msgs=public_msgs+1 WHERE id = " + connection.escape(message.member.id), () => {}, () => {
-                log("MSG Count > Failed to count private message for " + message.autho + "!")
+                log("MSG Count > Failed to count private message for " + message.author + "!")
             });
         }
     }
     
 	/* Gif Check */
-	// isParticipant(message.author) &&
 	if(!message.author.bot && isParticipant(message.member) && message.content.search("http") >= 0 && stats.ping.length > 0 && stats.gamephase == gp.INGAME) {
 		urlHandle(message);
 	}
 	
-	if(!message.author.bot && message.content.indexOf(stats.prefix) !== 0) { // super cursed thing that turns every message into a webhook one
-		//cmdWebhook(message.channel, message.member, [message.content]);
-		//message.delete({timeout: 500 })
-	}
 	/* Find Command & Parameters */
 	// Not a command
 	if(message.channel.type === "dm") return;
@@ -300,6 +295,12 @@ client.on("messageCreate", async message => {
 	/* Players */
 	case "players":
 		if(checkGM(message)) cmdPlayers(message, args);
+	break;
+	case "pg":
+		if(checkGM(message)) cmdPlayers(message, ["get", ...args]);	
+	break;
+	case "ps":
+		if(checkGM(message)) cmdPlayers(message, ["set", ...args]);	
 	break;
 	case "roll":
 		cmdRoll(message, args);

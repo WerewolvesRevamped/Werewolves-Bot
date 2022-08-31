@@ -23,7 +23,7 @@ module.exports = function() {
 	}
     
     this.cmdImpersonate = function(message, argsX) {
-        let author = getUser(message.channel, argsX.shift());
+        let author = parseUser(message.channel, argsX.shift());
         if(author) cmdWebhook(message.channel, message.guild.members.cache.get(author), argsX);
     }
     
@@ -185,7 +185,7 @@ module.exports = function() {
 							// Ignore if it's same channel as source
 							if(destination.channel_id != message.channel.id) { 	
 								// Create webhook
-                                let disguiseName = source.name;
+                                let disguiseName = source.name.replace(/\-/," ");
                                 let disguiseAvatar = client.user.displayAvatarURL();
                                 
                                 // role icon
