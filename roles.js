@@ -464,7 +464,7 @@ module.exports = function() {
     
 	/* Check if a channel is a SC */
 	this.isPublic = function(channel) {
-		return channel.parentId === cachedPublic;
+		return !channel.parent ? false : channel.parentId === cachedPublic;
 	}
 	
 	/* Creates secret channels */

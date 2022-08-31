@@ -83,7 +83,7 @@ module.exports = function() {
 				help += stats.prefix + "alive - Lists alive players\n";
 				help += stats.prefix + "signup - Signs you up for the next game\n";
 				help += stats.prefix + "emojis - Gives a list of emojis and player ids (Useful for CC creation)\n";
-				help += stats.prefix + "roll [-|whitelist|blacklist|number] - Selects a random player\n";
+				help += stats.prefix + "roll [-|whitelist|blacklist|number|?d?] - Selects a random player\n";
 			break;
 			case "modrole":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "modrole [add|remove] <user id> <role id>\n```";
@@ -130,7 +130,7 @@ module.exports = function() {
 			case "roll":
 				switch(args[1]) {
 					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "roll [whitelist|blacklist|number]\n```";
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "roll [whitelist|blacklist|number|?d?]\n```";
 						help += "```\nFunctionality\n\nCommands to randomize a list of players. " + stats.prefix + "help roll <sub-command> for detailed help.\n\nIf used without a subcommand randomizes from the full player list.```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "roll\n< ▶️ Selected @McTsts (🛠)\n```";
 						help += "```diff\nAliases\n\n- rand\n- random\n- randomize\n```";
@@ -147,9 +147,9 @@ module.exports = function() {
 						help += "```fix\nUsage\n\n> " + stats.prefix + "roll blacklist Vera\n< ▶️ Selected @McTsts (🛠)\n```";
 						help += "```diff\nAliases\n\n- roll bl\n```";
 					break;
-					case "num": case "n":  case "number":  case "d": 
+					case "num": case "n":  case "number":  case "d":  case "d?": case "?d?": 
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "roll number <Number>\n```";
-						help += "```\nFunctionality\n\nSelects a random number from 1 to <Number>\n```";
+						help += "```\nFunctionality\n\nSelects a random number from 1 to <Number>. An alternative syntax is also supported: Instead of specifying the number subcommand you can use " + stats.prefix + "roll <amount>d<number> where amount specifies an amount of rolls to do and number specifies the highest value. The amount argument is optional. This means that " + stats.prefix + "roll d6 is equivalent to " + stats.prefix + "roll number 6 and " + stats.prefix + "roll 2d6 is equivalent to running it twice.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "roll number 5\n< ▶️ Selected `3`\n```";
 						help += "```diff\nAliases\n\n- roll n\n- roll num\n- roll d\n```";
 					break;

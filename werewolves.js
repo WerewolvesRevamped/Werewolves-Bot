@@ -95,11 +95,11 @@ client.on("messageCreate", async message => {
     if(stats.gamephase == gp.INGAME && message.content.slice(stats.prefix.length).indexOf(stats.prefix) !== 0 && !message.author.bot && isParticipant(message.member)) {
         if(isCC(message.channel) || isSC(message.channel)) { // private message
             sql("UPDATE players SET private_msgs=private_msgs+1 WHERE id = " + connection.escape(message.member.id), () => {}, () => {
-                log("MSG Count > Failed to count private message for " + message.autho + "!")
+                log("MSG Count > Failed to count private message for " + message.author + "!")
             });
         } else if(isPublic(message.channel)) { // public message
             sql("UPDATE players SET public_msgs=public_msgs+1 WHERE id = " + connection.escape(message.member.id), () => {}, () => {
-                log("MSG Count > Failed to count private message for " + message.autho + "!")
+                log("MSG Count > Failed to count private message for " + message.author + "!")
             });
         }
     }
