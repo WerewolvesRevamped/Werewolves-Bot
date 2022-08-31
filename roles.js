@@ -1437,25 +1437,17 @@ module.exports = function() {
     
     
     this.getIconFromName = function(name) {
-        return new Promise((resolve, reject) => {
-            getIconFromNameInternal(name,(successResponse) => {
-                    resolve(successResponse);
-            }, (errorResponse) => {
-                reject(errorResponse);
+        return new Promise(res => {
+            let roleNameParsed = parseRole(name);
+            if(!roleNameParsed) return res(false);
+            var output;
+            sql("SELECT description FROM roles WHERE name = " + connection.escape(roleNameParsed), async result => {
+                if(!result[0] || !result[0].description) return res(false);
+                let roleData = getRoleData(roleNameParsed, result[0].description);
+                let urlExists = await checkUrlExists(roleData.url);
+                if(urlExists) res(roleData.url);
+                else res(false);
             });
-        });
-    }
-    
-    this.getIconFromNameInternal = function(name, callback, err) {
-        let roleNameParsed = parseRole(name);
-        if(!roleNameParsed) return callback(false);
-        var output;
-        sql("SELECT description FROM roles WHERE name = " + connection.escape(roleNameParsed), async result => {
-            if(!result[0] || !result[0].description) callback(false);
-            let roleData = getRoleData(roleNameParsed, result[0].description);
-            let urlExists = await checkUrlExists(roleData.url);
-            if(urlExists) callback(roleData.url);
-            else callback(false);
         });
     }
     
