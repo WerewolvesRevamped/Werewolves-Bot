@@ -39,7 +39,7 @@ module.exports = function() {
 			case "log2": cmdConfirm(message, "players log2"); break;
 			case "votes": cmdConfirm(message, "players votes"); break;
 			case "messages": 
-			case "msgs": cmdPlayersListMsgs(message.channel, args); break;
+			case "msgs": cmdPlayersListMsgs(message.channel); break;
 			case "messages2": 
 			case "msgs2": cmdPlayersListMsgs2(message.channel, args); break;
 			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
@@ -443,7 +443,7 @@ module.exports = function() {
 	}
 	
 	/* Lists all signedup players */
-	this.cmdPlayersList = function(channel, args) {
+	this.cmdPlayersList = function(channel) {
 		// Get a list of players
 		sql("SELECT id,emoji,role,alive,public_value,private_value,public_votes,ccs FROM players", result => {
 			let playerListArray = result.map(el => `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"} (${el.role.split(",").map(role => toTitleCase(role)).join(" + ")}); Alive: ${channel.guild.members.cache.get(el.id) ? (el.alive ? client.emojis.cache.get(stats.yes_emoji) : client.emojis.cache.get(stats.no_emoji)) : "⚠️"}; CCs: ${el.ccs}; Votes: ${el.public_value},${el.private_value},${el.public_votes}`);
@@ -471,7 +471,7 @@ module.exports = function() {
 	}
 	
 	/* Lists all vote changes */
-	this.cmdPlayersVotes = function(channel, args) {
+	this.cmdPlayersVotes = function(channel) {
 		// Get a list of players
 		sql("SELECT id,emoji,role,alive,public_value,private_value,public_votes,ccs FROM players", result => {
 			let playerListArray = result.filter(el => el.alive && (el.public_value != 1 || el.private_value != 1 || el.public_votes != 0)).map(el => `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"} ${el.public_value},${el.private_value},${el.public_votes}`);
@@ -499,7 +499,7 @@ module.exports = function() {
 	}
     
 	/* Returns a comman separated role list */
-	this.cmdPlayersRoleList = function(channel, args) {
+	this.cmdPlayersRoleList = function(channel) {
 		// Get a list of players
 		sql("SELECT role FROM players", result => {
 			let roleList = result.map(el => el.role);
@@ -516,7 +516,7 @@ module.exports = function() {
 	}
     
 	/* Lists all signedup players in log format */
-	this.cmdPlayersLog = function(channel, args) {
+	this.cmdPlayersLog = function(channel) {
 		// Get a list of players
 		sql("SELECT id,emoji,role,alive,public_value,private_value,public_votes,ccs FROM players", result => {
 			let playerList = result.map(el => {
@@ -538,7 +538,7 @@ module.exports = function() {
 	
     
 	/* Lists all signedup players in a different log format */
-	this.cmdPlayersLog2 = function(channel, args) {
+	this.cmdPlayersLog2 = function(channel) {
 		// Get a list of players
 		sql("SELECT id,emoji,role,alive,public_value,private_value,public_votes,ccs FROM players WHERE alive=1", result => {
 			let playerList = result.map(el => {
@@ -580,7 +580,7 @@ module.exports = function() {
     
     
 	/* Lists player message counts */
-	this.cmdPlayersListMsgs = function(channel, args) {
+	this.cmdPlayersListMsgs = function(channel) {
 		// Get a list of players
 		sql("SELECT id,emoji,public_msgs,private_msgs FROM players", result => {
             let totalMsgs = 0;
