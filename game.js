@@ -220,6 +220,7 @@ module.exports = function() {
 		// Checks
 		if(index >= channels.length) {
 			channel.send("✅ Finished creating Public Channels!");
+            getPublicCat();
 			return;
 		}
 		let cPerms;
