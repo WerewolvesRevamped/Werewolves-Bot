@@ -396,7 +396,7 @@ module.exports = function() {
 				});	
 				// Send reporter message
                 cmdConnectionSend(channel, ["", "reporter2", true, stats.prefix + "players get_clean role " + channel.guild.members.cache.get(el)]);
-                cmdConnectionSend(channel, ["", "reporter", true, stats.prefix + "players get_clean role " + channel.guild.members.cache.get(el)]);
+                cmdConnectionSend(channel, ["", "reporter", "Reporter", stats.prefix + "players get_clean role " + channel.guild.members.cache.get(el)]);
                 
 				// Remove roles
 				channel.guild.members.cache.get(el).roles.remove(stats.participant).catch(err => { 
