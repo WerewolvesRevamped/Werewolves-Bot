@@ -186,6 +186,7 @@ module.exports = function() {
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players resurrect <Player>\n```";
 						help += "```\nFunctionality\n\nResurrects a player indentified with <Player>, by setting their alive value to 1, removing the dead participant role, and adding the participant role.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "players resurrect mctsts\n< ✳ Resurrecting McTsts!\n< ✅ McTsts's alive value now is 1!\n```";
+						help += "```diff\nAliases\n\n- pr\n```";
 					break;
 					case "signup":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players signup <Player> <Emoji>\n```";
@@ -394,9 +395,24 @@ module.exports = function() {
 				}, () => {
 					channel.send("⛔ Database error. Could not kill `" +  channel.guild.members.cache.get(el).displayName + "`!");
 				});	
-				// Send reporter message
-                cmdConnectionSend(channel, ["", "reporter2", true, stats.prefix + "players get_clean role " + channel.guild.members.cache.get(el)]);
-                cmdConnectionSend(channel, ["", "reporter", "Reporter", stats.prefix + "players get_clean role " + channel.guild.members.cache.get(el)]);
+                
+                var reportMsg;
+                // Get info
+                sql("SELECT role FROM players WHERE id = " + connection.escape(el), result => {
+                    let roleList = result[0].role.split(",").filter(role => verifyRoleVisible(role)).map(role => toTitleCase(role)).join("` + `");
+                    reportMsg = "<@" + el + "> was a `" + roleList + "`";
+                    
+                    // Send reporter message
+                    cmdConnectionSend(channel, ["", "reporter2", true, reportMsg]);
+                    cmdConnectionSend(channel, ["", "reporter", "Reporter", reportMsg]);
+                }, () => {
+                    // Database error
+                    reportMsg = "⛔ Database error. Could not get player information!";
+                    
+                    // Send reporter message
+                    cmdConnectionSend(channel, ["", "reporter2", true, reportMsg]);
+                    cmdConnectionSend(channel, ["", "reporter", "Reporter", reportMsg]);
+                });
                 
 				// Remove roles
 				channel.guild.members.cache.get(el).roles.remove(stats.participant).catch(err => { 

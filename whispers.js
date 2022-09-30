@@ -252,7 +252,7 @@ module.exports = function() {
 
         sql("SELECT channel_id, name FROM connected_channels WHERE id = " + connection.escape(conn), result => {
             // Write message in each channel
-            result.forEach(destination => {
+            result.forEach(async destination => {
                     // Create webhook
                     let webhookMsg = text;
                     webhookMsg = webhookMsg.replace(/:~/g, ":");
@@ -260,6 +260,11 @@ module.exports = function() {
                     if(disguise.length > 0) {
                         let webhookName = disguise;
                         let webhookAvatar = client.user.displayAvatarURL();
+                        
+                        // role icon
+                        let roleIcon = await getIconFromName(disguise);
+                        if(roleIcon) webhookAvatar = roleIcon;
+                        
                         channel.guild.channels.cache.get(destination.channel_id).fetchWebhooks()
                         .then(webhooks => {
                             // search for webhook 

@@ -292,6 +292,13 @@ client.on("messageCreate", async message => {
 	case "killq":
 		if(checkSafe(message)) cmdKillq(message, args);	
 	break;
+	/* Kill Q */
+	case "kqak":
+		if(checkSafe(message)) {
+            cmdKillq(message, ["add" ,...args]);	
+            cmdKillq(message, ["killall" ,...args]);	
+        }
+	break;
 	/* Players */
 	case "players":
 		if(checkGM(message)) cmdPlayers(message, args);
@@ -301,6 +308,9 @@ client.on("messageCreate", async message => {
 	break;
 	case "ps":
 		if(checkGM(message)) cmdPlayers(message, ["set", ...args]);	
+	break;
+	case "pr":
+		if(checkGM(message)) cmdPlayers(message, ["resurrect", ...args]);	
 	break;
 	case "roll":
 		cmdRoll(message, args);

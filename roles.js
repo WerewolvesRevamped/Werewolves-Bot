@@ -1369,7 +1369,6 @@ module.exports = function() {
         repoPath = repoPath.replace(/ /g, "%20");
         repoPath += `?version=${stats.icon_version}`;
         
-        
         // get color
         let color = 0;
         switch(cSplit[0]) {
@@ -1381,6 +1380,9 @@ module.exports = function() {
             break;
             case "Unaligned":
                 color = 15451648;
+            break;
+            case "Elected":
+                color = 9719883;
             break;
             case "Solo":
                 console.log(cSplit);
