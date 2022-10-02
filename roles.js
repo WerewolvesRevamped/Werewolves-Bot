@@ -651,18 +651,26 @@ module.exports = function() {
 		}
 		let roleListD = players[index].role.split(",");
 		var customRole = false;
-		if(roleListD[0] === "custom") customRole = JSON.parse(roleListD[1].replace(/'/g,"\"").replace(/;/g,","));
+        var roleType = "default";
+		if(roleListD[0] === "custom") {
+            customRole = JSON.parse(roleListD[1].replace(/'/g,"\"").replace(/;/g,","));
+            roleType = "custom";
+        } else if(roleListD[0] === "merged") {
+            customRole = [roleListD[1], roleListD[2]];
+            roleType = "merged";
+        }
 		let roleList = roleListD.map(el => "name = " + connection.escape(el)).join(" OR ");
 		sql("SELECT name,description,ind_sc FROM roles WHERE " + roleList, result => {	
 			result = result.filter(role => verifyRoleVisible(role.name));
 			var rolesArray = result.map(el => toTitleCase(el.name));
             let disName = channel.guild.members.cache.get(players[index].id).displayName;
 			if(!debug) { 
-				if(!customRole) {
+				if(roleType == "default" || roleType == "merged") {
 					let roles = rolesArray.join("` + `");
 					roles = applyTheme(roles);
+                    if(roleType == "merged") roles = [toTitleCase(customRole.join(" "))];
                     if(!stats.fancy_mode) { // default DM
-                        channel.guild.members.cache.get(players[index].id).user.send("This message is giving you your role" + (result.length != 1 ? "s" : "") + " for the next game of Werewolves: Revamped!\n\n\nYour role" + (result.length != 1 ? "s are" : " is") + " `" + roles + "`.\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.\n\nIf you're confused about your role at all, then check #announcements on the discord, which contains a role book with information on all the roles in this game.").catch(err => { 
+                        channel.guild.members.cache.get(players[index].id).user.send("This message is giving you your role" + ((result.length != 1 && roleType == "default") ? "s" : "") + " for the next game of Werewolves: Revamped!\n\n\nYour role" + ((result.length != 1 && roleType == "default") ? "s are" : " is") + " `" + roles + "`.\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.\n\nIf you're confused about your role at all, then check #announcements on the discord, which contains a role book with information on all the roles in this game.").catch(err => { 
                             logO(err); 
                             sendError(channel, err, "Could not send role message to " + disName);
                         });	
@@ -673,7 +681,7 @@ module.exports = function() {
                         } else {
                             let embed = {
                                 "title": "The game has started!",
-                                "description": "This message is giving you your role for the next game of Werewolves: Revamped!\n\nYour role" + (result.length != 1 ? "s are" : " is") + " `" + roles + "`.\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.\n\nIf you're confused about your role at all, then check #how-to-play on the discord, which contains a role book with information on all the roles in this game. If you have any questions about the game, ping @Host.",
+                                "description": "This message is giving you your role" + ((result.length != 1 && roleType == "default") ? "s" : "") + " for the next game of Werewolves: Revamped!\n\nYour role" + ((result.length != 1 && roleType == "default") ? "s are" : " is") + " `" + roles + "`.\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.\n\nIf you're confused about your role at all, then check #how-to-play on the discord, which contains a role book with information on all the roles in this game. If you have any questions about the game, ping @Host.",
                                 "color": roleData.color,
                                 "footer": {
                                     "icon_url": `${channel.guild.iconURL()}`,
@@ -689,7 +697,7 @@ module.exports = function() {
                             });
                         }
                     }
-				} else {
+				} else if(roleType == "custom") {
 					channel.guild.members.cache.get(players[index].id).user.send("This message is giving you your custom role for the next game of Werewolves: Revamped!\n\n\nYour role is `" + toTitleCase(customRole.name) + "` (" + customRole.id + ").\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.").catch(err => { 
 						logO(err); 
 						sendError(channel, err, "Could not send role message to " + 	channel.guild.members.cache.get(players[index].id).displayName);
@@ -697,7 +705,7 @@ module.exports = function() {
 				}
 			}
 			let indscRoles = result.filter(el => el.ind_sc).map(el => el.name);
-			if(customRole) indscRoles = [ customRole.name ];
+			if(roleType == "custom") indscRoles = [ customRole.name ];
 			// Check if ind sc
 			if(indscRoles.length) { 
 				channel.send("✅ Creating `" + toTitleCase(indscRoles.join("-")) + "` Ind SC for `" + channel.guild.members.cache.get(players[index].id).displayName + "` (`" + result.map(el => toTitleCase(el.name)).join("` + `") + "`)!");
@@ -707,12 +715,22 @@ module.exports = function() {
 				// Create channel
 				
 				var name = indscRoles.join("-");
+                if(roleType == "merged") name = customRole.join(" ");
 				name = applyTheme(name);
 				channel.guild.channels.create(name.substr(0, 100), { type: "text",  permissionOverwrites: ccPerms })
 				.then(sc => {
 					// Send info message
-					if(!customRole) indscRoles.forEach(el => cmdInfoEither(sc, [ el ], true, false));
-					else {
+					if(roleType == "default") indscRoles.forEach(el => cmdInfoEither(sc, [ el ], true, false));
+					else if(roleType == "merged") {
+                        sql("SELECT description FROM roles WHERE name = " + connection.escape(parseRole(customRole[0])), result => {
+                            let addDesc = result[0].description;
+                            let addTitle = addDesc.split("~__Basics__")[0].split("|")[1].trim();
+                            addDesc = addDesc.split("__Basics__")[1].replace(/~/g,"\n");
+                            cmdInfoEither(sc, [ customRole[1] ], true, false, false, toTitleCase(customRole.join(" ")), [addTitle, addDesc]);
+                        }, () => {
+                            cmdInfoEither(sc, [ customRole[1] ], true, false, false, toTitleCase(customRole.join(" ")));
+                        });
+                    } else if(roleType == "custom") {
 						var desc = "";
 						desc += "**" + toTitleCase(customRole.name) + "** | " + toTitleCase(customRole.team);
 						desc += "\n__Basics__\n" + toSentenceCase(customRole.basics.replace(/%n/g,toTitleCase(customRole.name)));
@@ -1015,12 +1033,12 @@ module.exports = function() {
 			return; 
 		}
 		// Get info
-		sql("SELECT description FROM roles WHERE name = " + connection.escape(parseRole(args[1])), result => {
+		sql("SELECT description FROM roles WHERE name = " + connection.escape(args[1].toLowerCase()), result => {
 			if(result.length > 0) { 
 				let roleDesc = result[0].description.replace(/~/g,"\n");
-				channel.send("✅ Getting raw `"+ toTitleCase(parseRole(args[1])) + "` description!\n```" + roleDesc + "```");
+				channel.send("✅ Getting raw `"+ toTitleCase(args[1]) + "` description!\n```" + roleDesc + "```");
 			} else { 
-				channel.send("⛔ Database error. Role `" + parseRole(args[1]) + "` does not exist!");
+				channel.send("⛔ Database error. Role `" + args[1] + "` does not exist!");
 			}
 		}, () => {
 			// DB error
@@ -1039,8 +1057,8 @@ module.exports = function() {
 			return; 
 		}
 		// Delete info
-		sql("DELETE FROM roles WHERE name = " + connection.escape(parseRole(args[1])), result => {
-			channel.send("✅ Removed `" + toTitleCase(parseRole(args[1])) + "`!");
+		sql("DELETE FROM roles WHERE name = " + connection.escape(args[1].toLowerCase()), result => {
+			channel.send("✅ Removed `" + toTitleCase(args[1]) + "`!");
 			getRoles();
 		}, () => {
 			// Couldn't delete
@@ -1236,7 +1254,7 @@ module.exports = function() {
 		});
 	}
     
-    this.cmdInfoEither = function(channel, args, pin, noErr, simp = false) {
+    this.cmdInfoEither = function(channel, args, pin, noErr, simp = false, overwriteName = false, appendSection = false) {
 		// fix role name if necessary
         if(!args) {
             if(!noErr) channel.send("❗ Could not find role.");
@@ -1261,14 +1279,14 @@ module.exports = function() {
 		
 		// run info command
         if(stats.fancy_mode) {
-            cmdInfoFancy(channel, args, pin, noErr, simp);
+            cmdInfoFancy(channel, args, pin, noErr, simp, overwriteName, appendSection);
         } else {
-            cmdInfo(channel, args, pin, noErr, simp);
+            cmdInfo(channel, args, pin, noErr, simp, overwriteName, appendSection);
         }
     }
 	
 	/* Prints info for a role by name or alias */
-	this.cmdInfo = function(channel, args, pin, noErr, simp = false) {
+	this.cmdInfo = function(channel, args, pin, noErr, simp = false, overwriteName = false, appendSection = false) {
 		// Check arguments
 		if(!args[0]) { 
 			if(!noErr) channel.send("⛔ Syntax error. Not enough parameters!"); 
@@ -1282,11 +1300,17 @@ module.exports = function() {
 		sql("SELECT description FROM roles WHERE name = " + connection.escape(parseRole(args[0])), result => {
 			if(result.length > 0) { 
 				var desc = result[0].description.replace(/~/g,"\n");
+                if(overwriteName) {
+                    desc = desc.split("|");
+                    desc[0] = `**${overwriteName}** `;
+                    desc = desc.join("|");
+                }
 				desc = applyEmoji(desc);
                 // simplified role description support
                 desc = desc.split("__Simplified__");
                 if(simp) desc = desc[1] ? (desc[0].split("__Basics__")[0] ? desc[0].split("__Basics__")[0] : toTitleCase(parseRole(args[0]))) + "\n" + desc[1].trim() : desc[0]; 
                 else desc = desc[0];
+                if(appendSection) desc = desc.trim() + `\n__${appendSection[0]}__\n${appendSection[1]}`;
                
                if(desc.length > 1900) { // too long, requires splitting
                    let descSplit = desc.split(/\n/);
@@ -1433,7 +1457,7 @@ module.exports = function() {
     
     this.getCategoryRole = function(val) {
         val = val.toLowerCase().replace(/[^a-z ]/g,"").trim();
-        console.log(val);
+        console.log(`look lut: "${val}"`);
         return iconLUT[val] ?? false;
     }
     
@@ -1454,7 +1478,7 @@ module.exports = function() {
     }
     
 	/* Prints info for a role by name or alias */
-	this.cmdInfoFancy = function(channel, args, pin, noErr, simp = false) {
+	this.cmdInfoFancy = function(channel, args, pin, noErr, simp = false, overwriteName = false, appendSection = false) {
 		// Check arguments
 		if(!args[0]) { 
 			if(!noErr) channel.send("⛔ Syntax error. Not enough parameters!"); 
@@ -1489,6 +1513,7 @@ module.exports = function() {
                 
                 let category = (desc.find(el => el[0] == "")[1].split(/ \| /)[1] ?? "Unknown").replace(/[\n\r]*/g,"").trim();
                 let fancyRoleName = toTitleCase(roleNameParsed) + (category ? " [" + category + "]" : "");
+                if(overwriteName) fancyRoleName = overwriteName;
                 // determine role type ("limited")
                 let roleType = false;
                 switch((desc.find(el => el[0] == "")[1].split(/ \| /)[2] ?? "-").trim().toLowerCase()) {
@@ -1562,6 +1587,7 @@ module.exports = function() {
                                descSplitElements.forEach(d => embed.fields.push({"name": `__${el[0]}__ (${descSplitElements.indexOf(d)+1}/${descSplitElements.length})`, "value": d}));
                             }
                         });
+                        if(appendSection) embed.fields.push({"name": `__${appendSection[0]}__`, "value": appendSection[1]});
                     } else {
                         let simpDesc = desc.find(el => el && el[0] === "Simplified");
                         if(simpDesc) {
@@ -1578,7 +1604,9 @@ module.exports = function() {
                         }
                     }
                 } else { // apparntly not a role
-                    let descSplit = result[0].description.split(/~/);
+                    let desc = result[0].description;
+                    desc = applyEmoji(desc);
+                    let descSplit = desc.split(/~/);
                     let catRole = getCategoryRole(descSplit[0]);
                     let title = descSplit.shift();
                     
