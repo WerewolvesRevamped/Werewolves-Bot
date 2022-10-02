@@ -28,7 +28,7 @@ module.exports = function() {
 			case "set": cmdRolesSet(message.channel, args, argsX); break;
 			case "get": cmdRolesGet(message.channel, args); break;
 			case "remove": cmdRolesRemove(message.channel, args); break;
-			case "list": cmdRolesList(message.channel); break;
+			case "list": cmdRolesList(message.channel, args); break;
 			case "list_names": cmdRolesListNames(message.channel); break;
 			case "clear": cmdConfirm(message, "roles clear"); break;
 			// Alias Subcommands
@@ -127,7 +127,14 @@ module.exports = function() {
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "infopin <Role Name>\n```";
 				help += "```\nFunctionality\n\nShows the description of a role, pins it and deletes the pinning message.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "infopin citizen\n< Citizen | Townsfolk\n  Basics\n  The Citizen has no special abilities\n  All the innocents vote during the day on whomever they suspect to be an enemy,\n  and hope during the night that they won’t get killed.\n```";
-				help += "```diff\nAliases\n\n- ip\n```";
+				help += "```diff\nAliases\n\n- ip\n- info_pin\n```";
+			break;
+			case "infoedit":
+				if(!isGameMaster(member)) break;
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "infoedit <Role Name> <Message ID>\n```";
+				help += "```\nFunctionality\n\nUpdates an info message in the current channel.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "infoedit citizen 14901984562573\n< Citizen | Townsfolk\n  Basics\n  The Citizen has no special abilities\n  All the innocents vote during the day on whomever they suspect to be an enemy,\n  and hope during the night that they won’t get killed.\n```";
+				help += "```diff\nAliases\n\n- id\n- info_edit\n```";
 			break;
 			case "roles":
 				if(!isGameMaster(member)) break;
@@ -169,8 +176,8 @@ module.exports = function() {
 						help += "```fix\nUsage\n\n> " + stats.prefix + "roles remove_alias citizen-alias\n< ✅ Removed Citizen-Alias!\n```";
 					break;
 					case "list":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles list\n```";
-						help += "```\nFunctionality\n\nLists all roles and a short part of their description.\n```";
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles list [Role Name]\n```";
+						help += "```\nFunctionality\n\nLists all roles and a short part of their description. If a role name is provided lists all subroles of that role.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "roles list\n```";
 					break;
 					case "list_names":
@@ -1108,17 +1115,33 @@ module.exports = function() {
 	}
 	
 	/* Lists all roles */
-	this.cmdRolesList = function(channel) {
+	this.cmdRolesList = function(channel, args) {
+        let filter = false;
+        if(args[1]) {
+            filter = args[1];
+        }
 		// Get all roles
 		sql("SELECT name,description FROM roles ORDER BY name ASC", result => {
 			if(result.length > 0) {
 				// At least one role exists
-				channel.send("✳ Sending a list of currently existing roles:");
+				if(!filter) channel.send("✳ Sending a list of currently existing roles:");
+				else channel.send("✳ Sending a list `" + filter + "` of subroles:");
 				// Send message
-				chunkArray(result.map(role => {
+				chunkArray(result.filter(el => {
+                    // when a filter is set filter out
+                    if(!filter) return true;
+                    let role = el.name.split("$");
+                    role = role[0];
+                    if(role == filter) return true;
+                    return false;
+                }).map(role => {
 					let roleDesc = role.description.replace(/\*|_|Basics|Details/g,"")
-					return "**" +  toTitleCase(role.name) + ":** " + roleDesc.replace(/~/g," ").substr(roleDesc.search("~") + 1, 90)
-				}), 15).map(el => el.join("\n")).forEach(el => channel.send(el));
+					if(!filter) return "**" +  toTitleCase(role.name) + ":** " + roleDesc.replace(/~/g," ").substr(roleDesc.search("~") + 1, 90)
+					else return role.name;
+				}), 15).map(el => {
+                    if(!filter) return el.join("\n");
+                    else return el.join(", ");
+                }).forEach(el => channel.send(el));
 			} else { 
 				// No roles exist
 				channel.send("⛔ Database error. Could not find any roles!");
@@ -1254,13 +1277,28 @@ module.exports = function() {
 		});
 	}
     
-    this.cmdInfoEither = function(channel, args, pin, noErr, simp = false, overwriteName = false, appendSection = false) {
+    this.cmdInfoEdit = function(channel, args) {
+        if(!args[0] || !args[1]) {
+            if(!noErr) channel.send("⛔ Syntax error. Not enough parameters!");
+            return;
+        }
+        channel.messages.fetch(args[1])
+        .then(message => {
+            cmdInfoEither(message.channel, [args[0]], false, false, false, false, false, message);
+        })
+        .catch(err => { 
+            logO(err); 
+            sendError(channel, err, "Could not edit in info message");
+        });
+    }
+    
+    this.cmdInfoEither = function(channel, args, pin, noErr, simp = false, overwriteName = false, appendSection = false, editOnto = false) {
 		// fix role name if necessary
         if(!args) {
             if(!noErr) channel.send("❗ Could not find role.");
             return;
         }
-		let roleName = args.join(" ").replace(/[^a-zA-Z0-9'\-_ ]+/g,"");
+		let roleName = args.join(" ").replace(/[^a-zA-Z0-9'\-_\$ ]+/g,"");
 		if(!verifyRole(roleName)) { // not a valid role
 			// get all roles and aliases, to get an array of all possible role names
 			let allRoleNames = [...cachedRoles, ...cachedAliases.map(el => el.alias)];
@@ -1279,14 +1317,14 @@ module.exports = function() {
 		
 		// run info command
         if(stats.fancy_mode) {
-            cmdInfoFancy(channel, args, pin, noErr, simp, overwriteName, appendSection);
+            cmdInfoFancy(channel, args, pin, noErr, simp, overwriteName, appendSection, editOnto);
         } else {
-            cmdInfo(channel, args, pin, noErr, simp, overwriteName, appendSection);
+            cmdInfo(channel, args, pin, noErr, simp, overwriteName, appendSection, editOnto);
         }
     }
 	
 	/* Prints info for a role by name or alias */
-	this.cmdInfo = function(channel, args, pin, noErr, simp = false, overwriteName = false, appendSection = false) {
+	this.cmdInfo = function(channel, args, pin, noErr, simp = false, overwriteName = false, appendSection = false, editOnto = false) {
 		// Check arguments
 		if(!args[0]) { 
 			if(!noErr) channel.send("⛔ Syntax error. Not enough parameters!"); 
@@ -1478,7 +1516,7 @@ module.exports = function() {
     }
     
 	/* Prints info for a role by name or alias */
-	this.cmdInfoFancy = function(channel, args, pin, noErr, simp = false, overwriteName = false, appendSection = false) {
+	this.cmdInfoFancy = function(channel, args, pin, noErr, simp = false, overwriteName = false, appendSection = false, editOnto = false) {
 		// Check arguments
 		if(!args[0]) { 
 			if(!noErr) channel.send("⛔ Syntax error. Not enough parameters!"); 
@@ -1597,8 +1635,8 @@ module.exports = function() {
                             if(simpDesc) {
                                 embed.description = simpDesc[1];
                             } else {
-                                if(simp) cmdInfoFancy(channel, args, pin, noErr, false);
-                                else cmdInfo(channel, args, pin, noErr, simp);
+                                if(simp) cmdInfoFancy(channel, args, pin, noErr, false, overwriteName, appendSection, editOnto);
+                                else cmdInfo(channel, args, pin, noErr, simp, overwriteName, appendSection, editOnto);
                                 return;
                             }
                         }
@@ -1668,28 +1706,36 @@ module.exports = function() {
                 }
                 
                 // send embed
-                channel.send({embeds: [ embed ]}).then(m => {
-                        // Pin if pin is true
-                        if(pin) {
-                            m.pin().then(mp => {
-                                mp.channel.messages.fetch().then(messages => {
-                                    mp.channel.bulkDelete(messages.filter(el => el.type === "CHANNEL_PINNED_MESSAGE"));
-                                });	
-                            }).catch(err => { 
-                                logO(err); 
-                                if(!noErr) sendError(channel, err, "Could not pin info message");
-                            });
-                        }
-                        if(simp) {
-                            setTimeout(() => m.delete(), 180000);
-                        }
-                    // Couldnt send message
-                }).catch(err => {
-                    logO(err);
-                    if(simp) cmdInfoFancy(channel, args, pin, noErr, false);
-                    else cmdInfo(channel, args, pin, noErr, simp);
-                });
-                
+                if(!editOnto) {
+                    channel.send({embeds: [ embed ]}).then(m => {
+                            // Pin if pin is true
+                            if(pin) {
+                                m.pin().then(mp => {
+                                    mp.channel.messages.fetch().then(messages => {
+                                        mp.channel.bulkDelete(messages.filter(el => el.type === "CHANNEL_PINNED_MESSAGE"));
+                                    });	
+                                }).catch(err => { 
+                                    logO(err); 
+                                    if(!noErr) sendError(channel, err, "Could not pin info message");
+                                });
+                            }
+                            if(simp) {
+                                setTimeout(() => m.delete(), 180000);
+                            }
+                        // Couldnt send message
+                    }).catch(err => {
+                        logO(err);
+                        if(simp) cmdInfoFancy(channel, args, pin, noErr, false, overwriteName, appendSection, editOnto);
+                        else cmdInfo(channel, args, pin, noErr, simp, overwriteName, appendSection, editOnto);
+                    });
+                } else {
+                    // edit onto an existing message instead
+                    editOnto.edit({embeds: [ embed ]}).catch(err => {
+                        logO(err);
+                        if(simp) cmdInfoFancy(channel, args, pin, noErr, false, overwriteName, appendSection, editOnto);
+                        else cmdInfo(channel, args, pin, noErr, simp, overwriteName, appendSection, editOnto);
+                    });
+                }
 			} else { 
 			// Empty result
 				if(!noErr) channel.send("⛔ Database error. Could not find role `" + args[0] + "`!");

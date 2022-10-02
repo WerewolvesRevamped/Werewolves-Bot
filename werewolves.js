@@ -184,6 +184,10 @@ client.on("messageCreate", async message => {
 	case "infopin":
 		if(checkGM(message)) cmdInfoEither(message.channel, args, true, false);
 	break;
+	/* Role Info */ // Returns the info for a role set by the roles command
+	case "infoedit":
+		if(checkGM(message)) cmdInfoEdit(message.channel, args);
+	break;
 	/* Role Info (Classic) */ // Returns the info for a role set by the roles command
 	case "info_classic":
 		if(checkGM(message)) cmdInfo(message.channel, args, false, false);
