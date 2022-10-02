@@ -1015,12 +1015,12 @@ module.exports = function() {
 			return; 
 		}
 		// Get info
-		sql("SELECT description FROM roles WHERE name = " + connection.escape(parseRole(args[1])), result => {
+		sql("SELECT description FROM roles WHERE name = " + connection.escape(args[1].toLowerCase()), result => {
 			if(result.length > 0) { 
 				let roleDesc = result[0].description.replace(/~/g,"\n");
-				channel.send("✅ Getting raw `"+ toTitleCase(parseRole(args[1])) + "` description!\n```" + roleDesc + "```");
+				channel.send("✅ Getting raw `"+ toTitleCase(args[1]) + "` description!\n```" + roleDesc + "```");
 			} else { 
-				channel.send("⛔ Database error. Role `" + parseRole(args[1]) + "` does not exist!");
+				channel.send("⛔ Database error. Role `" + args[1] + "` does not exist!");
 			}
 		}, () => {
 			// DB error
@@ -1039,8 +1039,8 @@ module.exports = function() {
 			return; 
 		}
 		// Delete info
-		sql("DELETE FROM roles WHERE name = " + connection.escape(parseRole(args[1])), result => {
-			channel.send("✅ Removed `" + toTitleCase(parseRole(args[1])) + "`!");
+		sql("DELETE FROM roles WHERE name = " + connection.escape(args[1].toLowerCase()), result => {
+			channel.send("✅ Removed `" + toTitleCase(args[1]) + "`!");
 			getRoles();
 		}, () => {
 			// Couldn't delete
