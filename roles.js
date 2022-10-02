@@ -1433,7 +1433,7 @@ module.exports = function() {
     
     this.getCategoryRole = function(val) {
         val = val.toLowerCase().replace(/[^a-z ]/g,"").trim();
-        console.log(val);
+        console.log(`look lut: "${val}"`);
         return iconLUT[val] ?? false;
     }
     
@@ -1578,7 +1578,9 @@ module.exports = function() {
                         }
                     }
                 } else { // apparntly not a role
-                    let descSplit = result[0].description.split(/~/);
+                    let desc = result[0].description;
+                    desc = applyEmoji(desc);
+                    let descSplit = desc.split(/~/);
                     let catRole = getCategoryRole(descSplit[0]);
                     let title = descSplit.shift();
                     
