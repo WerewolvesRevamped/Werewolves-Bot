@@ -441,7 +441,7 @@ module.exports = function() {
     
     this.updateGameStatusDelayedAllowImmediate = async function() {
         console.log("Unlocking immediate updates");
-        await sleep(300000);
+        await sleep(600000);
         console.log("Unlocked immediate updates");
         allowImmediate = true;
     }
