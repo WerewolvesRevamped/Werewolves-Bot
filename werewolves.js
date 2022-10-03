@@ -136,7 +136,7 @@ client.on("messageCreate", async message => {
 	// Get default arguments / default command / unmodified arguments / unmodified commands
 	const args = message.content.slice(stats.prefix.length).trim().match(/(".*?")|(\S+)/g) ? message.content.slice(stats.prefix.length).trim().match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : [];
 	const command = parseAlias(args.shift());
-	const argsX = message.content.slice(stats.prefix.length).trim().replace(/\r?\n/g,"~").match(/(".*?")|(\S+)/g) ? message.content.slice(stats.prefix.length).trim().replace(/\r?\n/g,"~").match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "")) : [];
+	const argsX = message.content.slice(stats.prefix.length).trim().replace(/\r?\n/g,"~").match(/(".*?")|(\S+)/g) ? message.content.slice(stats.prefix.length).trim().replace(/~/g,"</>").replace(/\r?\n/g,"~").match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "")) : [];
 	const commandX = argsX.shift();
 	
 	if(message.content.search("@everyone") >= 0) {
@@ -186,7 +186,11 @@ client.on("messageCreate", async message => {
 	break;
 	/* Role Info */ // Returns the info for a role set by the roles command
 	case "infoedit":
-		if(checkGM(message)) cmdInfoEdit(message.channel, args);
+		if(checkGM(message)) cmdInfoEdit(message.channel, args, argsX);
+	break;
+	/* Role Info (Add) */ // Returns the info for a role set by the roles command, but with additions
+	case "infoadd":
+		if(checkGM(message)) cmdInfoFancy(message.channel, [args[0]], false, false, true, false, ["", argsX[1].replace(/~/g, "\n").replace(/<\/>/g,"~")]);
 	break;
 	/* Role Info (Classic) */ // Returns the info for a role set by the roles command
 	case "info_classic":

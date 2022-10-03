@@ -418,6 +418,7 @@ module.exports = function() {
                 "info": ["i"],
                 "infopin": ["ip","info_pin"],
                 "infoedit": ["ie","info_edit"],
+                "infoadd": ["ia","info_add"],
                 "info_classic": ["ic"],
                 "info_classic_simplified": ["ics"],
                 "info_fancy": ["if"],

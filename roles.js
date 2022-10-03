@@ -131,10 +131,17 @@ module.exports = function() {
 			break;
 			case "infoedit":
 				if(!isGameMaster(member)) break;
-				help += "```yaml\nSyntax\n\n" + stats.prefix + "infoedit <Role Name> <Message ID>\n```";
-				help += "```\nFunctionality\n\nUpdates an info message in the current channel.\n```";
-				help += "```fix\nUsage\n\n> " + stats.prefix + "infoedit citizen 14901984562573\n< Citizen | Townsfolk\n  Basics\n  The Citizen has no special abilities\n  All the innocents vote during the day on whomever they suspect to be an enemy,\n  and hope during the night that they won’t get killed.\n```";
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "infoedit <Message ID> <Role Name> [Addition]\n```";
+				help += "```\nFunctionality\n\nUpdates an info message in the current channel. Optionally specify contents to append to the info message.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "infoedit 14901984562573 citizen\n< Citizen | Townsfolk\n  Basics\n  The Citizen has no special abilities\n  All the innocents vote during the day on whomever they suspect to be an enemy,\n  and hope during the night that they won’t get killed.\n```";
 				help += "```diff\nAliases\n\n- id\n- info_edit\n```";
+			break;
+			case "infoadd":
+				if(!isGameMaster(member)) break;
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "infoadd <Role Name> <Addition>\n```";
+				help += "```\nFunctionality\n\nSends an info message with an appended addition.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "infoadd citizen EXTRATEXT\n< Citizen | Townsfolk\n  Basics\n  The Citizen has no special abilities\n  All the innocents vote during the day on whomever they suspect to be an enemy,\n  and hope during the night that they won’t get killed.EXTRATEXT\n```";
+				help += "```diff\nAliases\n\n- ia\n- info_add\n```";
 			break;
 			case "roles":
 				if(!isGameMaster(member)) break;
@@ -1118,7 +1125,7 @@ module.exports = function() {
 	this.cmdRolesList = function(channel, args) {
         let filter = false;
         if(args[1]) {
-            filter = args[1];
+            filter = parseRole(args[1]);
         }
 		// Get all roles
 		sql("SELECT name,description FROM roles ORDER BY name ASC", result => {
@@ -1277,14 +1284,16 @@ module.exports = function() {
 		});
 	}
     
-    this.cmdInfoEdit = function(channel, args) {
+    this.cmdInfoEdit = function(channel, args, argsX) {
         if(!args[0] || !args[1]) {
             if(!noErr) channel.send("⛔ Syntax error. Not enough parameters!");
             return;
         }
-        channel.messages.fetch(args[1])
+        channel.messages.fetch(args[0])
         .then(message => {
-            cmdInfoEither(message.channel, [args[0]], false, false, false, false, false, message);
+            let append = false;
+            if(argsX[2]) append = ["", argsX[2].replace(/~/g, "\n").replace(/<\/>/g,"~")];
+            cmdInfoEither(message.channel, [args[1]], false, false, false, false, append, message);
         })
         .catch(err => { 
             logO(err); 
@@ -1647,6 +1656,7 @@ module.exports = function() {
                     let descSplit = desc.split(/~/);
                     let catRole = getCategoryRole(descSplit[0]);
                     let title = descSplit.shift();
+                    if(overwriteName) title = overwriteName;
                     
                     // base embed
                     embed = {
@@ -1658,11 +1668,16 @@ module.exports = function() {
                         "title": title
                     };
                     
+                    // append section
+                    if(appendSection && appendSection[0] && appendSection[0].length > 0) descSplit.push("**" + appendSection[0] + "**");
+                    if(appendSection && appendSection[1] && appendSection[1].length > 0) descSplit.push(...appendSection[1].split(/\r?\n/g));
+                    
                     // add emojis for role lists
                     let descSplitCopy = descSplit;
                     let emojiFound = 0;
                     descSplit = descSplit.map(relFull => {
                         let rel = relFull.split(" (")[0]; // remove team names
+                        rel = rel.replace(/ x\d+$/, ""); // remove number multipliers
                         if(rel[0] && rel[0].match(/[A-Za-z\*]/) && rel.length < 30 && rel.length > 2 && !rel.match(/[^\w\d\-_\s\*']/)) { // check if role
                                 let rName = parseRole(rel.replace(/[^\w\s]/g,"").trim()); // parse role
                                 //console.log(rName);
@@ -1699,8 +1714,10 @@ module.exports = function() {
                        embed.fields = [];
                        descSplitElements.forEach(el => embed.fields.push({"name": `...`, "value": el}));
                     } else { // not too long
+                        embed.fields = [];
                         embed.description = descSplit.join("\n");
                     }
+                    
                     
                     if(catRole) embed.thumbnail = {url: repoBaseUrl + catRole + `.png?version=${stats.icon_version}`};
                 }
