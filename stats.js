@@ -418,13 +418,43 @@ module.exports = function() {
 			channel.send("⛔ Database error. Could not find gamephase.");
 		});
 	}
+    
+    var updateID = 0;
+    var allowImmediate = false;
+    this.updateGameStatusDelayed = async function(guild) {
+        console.log("Attempted update");
+        if(allowImmediate) {
+            console.log("Update allowed immediately");
+            updateGameStatus(guild);
+            return;
+        }
+        updateGameStatusDelayedAllowImmediate();
+        let id = ++updateID;
+        await sleep(60000);
+        if(id != updateID) {
+            console.log("Updated blocked");
+            return;
+        }
+        console.log("Executing delayed update");
+        updateGameStatus(guild);
+    }
+    
+    this.updateGameStatusDelayedAllowImmediate = async function() {
+        console.log("Unlocking immediate updates");
+        await sleep(300000);
+        console.log("Unlocked immediate updates");
+        allowImmediate = true;
+    }
 	
 	this.updateGameStatus = function(guild) {
 		sql("SELECT alive FROM players", result => {
 			let gameStatus = guild.channels.cache.get(stats.game_status);
 			switch(+stats.gamephase) {
 				case gp.NONE: gameStatus.setName("⛔ No Game"); break;
-				case gp.SIGNUP: gameStatus.setName("📰 Signups Open (" + result.length + ")"); break;
+				case gp.SIGNUP: 
+                    if(result.length > 0) gameStatus.setName("📰 Signups Open (" + result.length + ")"); 
+                    else gameStatus.setName("📰 Signups Open");
+                break;
 				case gp.SETUP: gameStatus.setName("📝 Game Setup (" + result.length + ")"); break;
 				case gp.INGAME: gameStatus.setName("🔁 In-Game (" + result.filter(el => el.alive).length + "/" + result.length + ")"); break;
 				case gp.POSTGAME: gameStatus.setName("✅ Game Concluded"); break;

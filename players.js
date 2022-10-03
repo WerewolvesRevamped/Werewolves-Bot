@@ -1066,7 +1066,7 @@ module.exports = function() {
 			// Sign out player
 			sql("DELETE FROM players WHERE id = " + connection.escape(member.id), result => {			
 				channel.send(`✅ Successfully signed out, ${member.user}. You will no longer participate in the next game!`); 
-				updateGameStatus(channel.guild);
+				updateGameStatusDelayed(channel.guild);
 				member.roles.remove(stats.signed_up).catch(err => { 
 					// Missing permissions
 					logO(err); 
@@ -1094,7 +1094,7 @@ module.exports = function() {
 							// Signup emoji
 							sql("INSERT INTO players (id, emoji, role) VALUES (" + connection.escape(member.id) + "," + connection.escape("" + args[0]) + "," + connection.escape("none") + ")", result => {
 								message.edit(`✅ ${member.user} signed up with emoji ${args[0]}!`);
-								updateGameStatus(message.guild);
+								updateGameStatusDelayed(message.guild);
 								message.reactions.removeAll().catch(err => { 
 									// Couldn't clear reactions
 									logO(err);
