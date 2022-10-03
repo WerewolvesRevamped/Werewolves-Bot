@@ -41,15 +41,8 @@ module.exports = function() {
 		let help = "";
 		switch(args[0]) {
 			case "":
-				help += stats.prefix + "webhook - Repeats a message as a webhook pretending to be you\n";
 				if(isGameMaster(member)) help += stats.prefix + "impersonate - Repeats a message as a webhook pretending to be somebody\n";
 				if(isGameMaster(member)) help += stats.prefix + "connection [add|remove|reset] - Manages connections\n";
-			break;
-			case "webhook":
-				help += "```yaml\nSyntax\n\n" + stats.prefix + "webhook <Message>\n```";
-				help += "```\nFunctionality\n\nRepeats a message as a webhook pretending to be you.\n```";
-				help += "```fix\nUsage\n\n> " + stats.prefix + "webhook Does this work?\n< Does this work?\n```";
-				help += "```diff\nAliases\n\n- bot\n- <\n```";
 			break;
 			case "impersonate":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "impersonate <User> <Message>\n```";

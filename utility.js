@@ -163,14 +163,15 @@ module.exports = function() {
 			args[0] = "";
 			if(isGameMaster(member)) msgA += "**```yaml\nWerewolf Bot Game Master Help\n```**";
 			else msgA += "**```yaml\nWerewolf Bot Player Help\n```**";
-			msgA += "```php\n" + phpEscape("Use " + stats.prefix + "help <command> to get information about a command.\nWhile ingame react to messages with 📌 to pin them!\nPlayer arguments can be names, emojis, ids, nicknames or discord tags\n%s and %c can be used to refer to yourself and to the current channel, in all commands.\nArguments cant contain spaces, unless the argument is quoted \"like this\"") + "```";
+			if(isGameMaster(member)) msgA += "```php\n" + phpEscape("Use " + stats.prefix + "help <command> to get information about a command.\nWhile ingame react to messages with 📌 to pin them!\nPlayer arguments can be names, emojis, ids, nicknames or discord tags\n%s and %c can be used to refer to yourself and to the current channel, in all commands.\nArguments cant contain spaces, unless the argument is quoted \"like this\"") + "```";
+			else msgA += "```php\n" + phpEscape("Use " + stats.prefix + "help <command> to get information about a command.\nWhile ingame react to messages with 📌 to pin them!\nPlayer arguments can be names, emojis, ids, nicknames or discord tags\nArguments cant contain spaces, unless the argument is quoted \"like this\"") + "```";
 		} else {
 			msgA += "**```yaml\n" + toTitleCase(args.join(" ")) + " Help\n```**";
 		}
 		// Commands
+		msgB += helpRoles(member, args);
 		msgB += helpUtility(member, args);
 		msgB += helpStats(member, args);
-		msgB += helpRoles(member, args);
 		msgB += helpCCs(member, args);
 		msgB += helpGame(member, args);
 		msgB += helpWhispers(member, args);

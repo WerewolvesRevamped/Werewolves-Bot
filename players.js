@@ -84,8 +84,8 @@ module.exports = function() {
 				help += stats.prefix + "list_alphabetical - Lists signed up players (alphabetical)\n";
 				help += stats.prefix + "alive - Lists alive players\n";
 				help += stats.prefix + "signup - Signs you up for the next game\n";
-				help += stats.prefix + "emojis - Gives a list of emojis and player ids (Useful for CC creation)\n";
-				help += stats.prefix + "roll [-|whitelist|blacklist|number|?d?] - Selects a random player\n";
+				help += stats.prefix + "emojis - Emoji & Player ID list for CCs\n";
+				help += stats.prefix + "roll [-|whitelist|blacklist|number|?d?] - Randomizes\n";
 			break;
 			case "modrole":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "modrole [add|remove] <user id> <role id>\n```";

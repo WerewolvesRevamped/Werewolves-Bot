@@ -86,10 +86,14 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "channels [info|infopin|info_set|info_get|info_remove|info_list] - Manages SC Info\n";
 				if(isGameMaster(member)) help += stats.prefix + "channels cleanup - Cleans up SCs\n";
 				if(isGameMaster(member)) help += stats.prefix + "infopin - Returns role info & pins the message\n";
+				if(isGameMaster(member)) help += stats.prefix + "infoedit - Edits a bot info message\n";
+				if(isGameMaster(member)) help += stats.prefix + "infoeadd - Returns role info with additional text\n";
 				if(isGameMaster(member)) help += stats.prefix + "info_fancy - Returns role info (fancy)\n";
 				if(isGameMaster(member)) help += stats.prefix + "info_fancy_simplified - Returns role info (fancy, simplified)\n";
 				if(isGameMaster(member)) help += stats.prefix + "info_classic - Returns role info (classic)\n";
 				if(isGameMaster(member)) help += stats.prefix + "info_classic_simplified - Returns role info (classic, simplified)\n";
+				help += "; - Returns role info\n";
+				help += ". - Returns simplified role info\n";
 				help += stats.prefix + "info - Returns role info\n";
 			break;
 			case "info":

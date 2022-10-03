@@ -94,8 +94,10 @@ module.exports = function() {
 			case "":
 				help += stats.prefix + "cc [create|create_hidden] - Creates a CC\n";
 				help += stats.prefix + "cc [create_multi|create_multi_hidden] - Creates multiple CCs\n";
-				help += stats.prefix + "cc [add|remove|promote|demote|leave|list|owners] - Manages a CC\n";
-				help += stats.prefix + "cc [rename|archive] - Manages a CC\n";
+				help += stats.prefix + "cc [add|remove|promote|demote|leave] - Manages CC members\n";
+				help += stats.prefix + "cc leave - Leave a CC\n";
+				help += stats.prefix + "cc [list|owners] - Shows CC Info\n";
+				help += stats.prefix + "cc [rename|archive] - Manages a CC name\n";
 				if(isGameMaster(member)) help += stats.prefix + "cc cleanup - Cleans up CCs\n";
 				if(isGameMaster(member)) help += stats.prefix + "sc [add|remove|list|rename|clear|clean|change] - Manages a SC\n";
 			break;
