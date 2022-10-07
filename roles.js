@@ -1683,7 +1683,7 @@ module.exports = function() {
                         let rel = relFull.split(" (")[0]; // remove team names
                         rel = rel.replace(/ x\d+$/, ""); // remove number multipliers
                         if(rel[0] && rel[0].match(/[A-Za-z\*]/) && rel.length < 30 && rel.length > 2 && !rel.match(/[^\w\d\-_\s\*']/)) { // check if role
-                                let rName = parseRole(rel.replace(/[^\w\s]/g,"").trim()); // parse role
+                                let rName = parseRole(rel.replace(/[^\w\s\-']/g,"").trim()); // parse role
                                 //console.log(rName);
                                 if(rName && verifyRole(rName)) { // find an emoji
                                     rName = toTitleCase(rName).replace(/[^\w]+/g,"").trim();
