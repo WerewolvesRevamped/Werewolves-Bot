@@ -215,35 +215,15 @@ client.on("messageCreate", async message => {
 	/* Signup */ // Signs a player up with an emoji
 	case "j":
 		if(!args[0]) {
-			switch(message.author.id) {
-				case "242983689921888256": cmdSignup(message.channel, message.member, ["🛠️"], true); break;
-				case "277156693765390337": cmdSignup(message.channel, message.member, ["🏹"], true); break;
-				case "271399293372334081": cmdSignup(message.channel, message.member, ["🚁"], true); break;
-				case "331803222064758786": cmdSignup(message.channel, message.member, ["🥝"], true); break;
-				case "152875086213283841": cmdSignup(message.channel, message.member, ["🐘"], true); break;
-				case "328035409055449089": cmdSignup(message.channel, message.member, ["💠"], true); break;
-				case "329977469350445069": cmdSignup(message.channel, message.member, ["🐺"], true); break;
-				case "281590363213398016": cmdSignup(message.channel, message.member, ["🍄"], true); break;
-				case "458727748504911884": cmdSignup(message.channel, message.member, ["🦎"], true); break;
-				case "244211825820827648": cmdSignup(message.channel, message.member, ["🐸"], true); break;
-				case "413001114292846612": cmdSignup(message.channel, message.member, ["🐛"], true); break;
-				case "241953256777973760": cmdSignup(message.channel, message.member, ["🤗"], true); break;
-				case "433957826491187202": cmdSignup(message.channel, message.member, ["🦦"], true); break;
-				case "334066065112039425": cmdSignup(message.channel, message.member, ["🔥"], true); break;
-				case "544125116640919557": cmdSignup(message.channel, message.member, ["▪️"], true); break;
-				case "234474456624529410": cmdSignup(message.channel, message.member, ["🎨"], true); break;
-				case "356510817094598658": cmdSignup(message.channel, message.member, ["🐢"], true); break;
-				case "299000787814842368": cmdSignup(message.channel, message.member, ["😃"], true); break;
-				case "83012212779646976": cmdSignup(message.channel, message.member, ["🇺🇸"], true); break;
-				case "633338331220148225": cmdSignup(message.channel, message.member, ["🌌"], true); break;
-				case "375578492580003840": cmdSignup(message.channel, message.member, ["💚"], true); break;
-				case "161551993704284171": cmdSignup(message.channel, message.member, ["🐼"], true); break;
-				case "215427550577557504": cmdSignup(message.channel, message.member, ["👁‍🗨"], true); break;
-				case "334136126745083907": cmdSignup(message.channel, message.member, ["🐓"], true); break;
-				default: cmdSignup(message.channel, message.member, args, true); break; 
-			}
+            // find emoji
+            let em = idEmojis.filter(el => el[0] == message.author.id);
+            if(em[0]) cmdSignup(message.channel, message.member, [em[0][1]], true);
+            else cmdSignup(message.channel, message.member, args, true);
+            // for gm demote
 			if(isGameMaster(message.member)) cmdDemote(message.channel, message.member);
-		} else cmdSignup(message.channel, message.member, args, true);
+		} else { // if arg specified
+            cmdSignup(message.channel, message.member, args, true);
+        }
 	break;
 	case "signup": 
 		cmdSignup(message.channel, message.member, args, true);
@@ -353,6 +333,22 @@ client.on("messageCreate", async message => {
 	case "demote":
 		cmdDemote(message.channel, message.member);
 	break;
+    /* Host */
+    case "host":
+        cmdHost(message.channel, message.member);
+     break;
+    /* Unhost */
+    case "unhost":
+        cmdUnhost(message.channel, message.member);
+     break;
+    /* Promote Host */
+    case "promote_host":
+        cmdPromoteHost(message.channel, message.member);
+     break;
+    /* Demote Unhost */
+    case "demote_unhost":
+        cmdDemoteUnhost(message.channel, message.member);
+     break;
 	/* Theme */
 	case "theme":
 		cmdTheme(message, args);

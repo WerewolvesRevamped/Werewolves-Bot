@@ -65,6 +65,10 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "end - Ends a game\n";
 				if(isGameMaster(member)) help += stats.prefix + "demote - Removes Game Master and Admin roles\n";
 				if(isGameMaster(member)) help += stats.prefix + "promote - Reassigns Game Master and Admin roles\n";
+				if(isGameMaster(member)) help += stats.prefix + "demote_unhost - Demotes or Unhosts\n";
+				if(isGameMaster(member)) help += stats.prefix + "promote_host - Promotes or Hosts\n";
+				if(isGameMaster(member)) help += stats.prefix + "unhost - Removes Host roles\n";
+				if(isGameMaster(member)) help += stats.prefix + "host - Adds Host role\n";
 				if(isGameMaster(member)) help += stats.prefix + "gameping - Notifies players with the New Game Ping role about a new game\n";
 				if(isGameMaster(member)) help += stats.prefix + "open - Opens signups and notifies players\n";
 				help += stats.prefix + "spectate - Makes you a spectator\n";
@@ -117,12 +121,40 @@ module.exports = function() {
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "demote\n```";
 				help += "```\nFunctionality\n\nReplaces Game Master and Admin roles with GM Ingame and Admin Ingame roles, which have no permisions.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "demote\n< ✅ Attempting to demote you, McTsts!\n```";
-				help += "```diff\nAliases\n\n- v\n```";
+				help += "```diff\nAliases\n\n- de\n```";
 			break;
 			case "promote":
 				if(!isGameMaster(member)) break;
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "promote\n```";
 				help += "```\nFunctionality\n\nReplaces GM Ingame and Admin Ingame roles with Game Master and Admin roles.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "promote\n< ✅ Attempting to promote you, McTsts!\n```";
+				help += "```diff\nAliases\n\n- pro\n```";
+			break;
+			case "unhost":
+				if(!isGameMaster(member)) break;
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "unhost\n```";
+				help += "```\nFunctionality\n\nRemoves Host role.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "demote\n< ✅ Attempting to unhost you, McTsts!\n```";
+				help += "```diff\nAliases\n\n- un\n```";
+			break;
+			case "host":
+				if(!isGameMaster(member)) break;
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "host\n```";
+				help += "```\nFunctionality\n\nAdds Host role.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "promote\n< ✅ Attempting to host you, McTsts!\n```";
+				help += "```diff\nAliases\n\n- ho\n```";
+			break;
+			case "demote_unhost":
+				if(!isGameMaster(member)) break;
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "demote_unhost\n```";
+				help += "```\nFunctionality\n\nDemotes or unhosts depending on context.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "demote\n< ✅ Attempting to demote you, McTsts!\n```";
+				help += "```diff\nAliases\n\n- v\n```";
+			break;
+			case "promote_host":
+				if(!isGameMaster(member)) break;
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "promote_host\n```";
+				help += "```\nFunctionality\n\nPromotes or hosts depending on context.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "promote\n< ✅ Attempting to promote you, McTsts!\n```";
 				help += "```diff\nAliases\n\n- ^\n```";
 			break;
@@ -312,6 +344,48 @@ module.exports = function() {
 			});
 		}
 	}
+	
+	this.cmdUnhost = function(channel, member) {
+		channel.send("✅ Attempting to unhost you, " + member.displayName + "!");
+		if(member.roles.cache.get(stats.host)) {
+			member.roles.remove(stats.host).catch(err => { 
+				// Missing permissions
+				logO(err); 
+				sendError(channel, err, "Could not remove host role from " + member.displayName);
+			});
+		}
+	}
+	
+	this.cmdHost = function(channel, member) {
+		if(isParticipant(member)) {
+			channel.send("⛔ Command error. Can't host you while you're a participant."); 
+			return;
+		}
+		channel.send("✅ Attempting to host you, " + member.displayName + "!");
+		if(member.roles.cache.get(stats.gamemaster)) {
+			member.roles.add(stats.host).catch(err => { 
+				// Missing permissions
+				logO(err); 
+				sendError(channel, err, "Could not remove host role from " + member.displayName);
+			});
+		}
+	}
+    
+    this.cmdDemoteUnhost = function(channel, member) {
+        if(member.roles.cache.get(stats.host)) {
+            cmdUnhost(channel, member);
+        } else {
+            cmdDemote(channel, member);
+        }
+    }
+    
+    this.cmdPromoteHost = function(channel, member) {
+        if(member.roles.cache.get(stats.gamemaster_ingame) || member.roles.cache.get(stats.admin_ingame)) {
+            cmdPromote(channel, member);
+        } else {
+            cmdHost(channel, member);
+        }
+    }
 	
 	this.cmdSpectate = function(channel, member) {
 		if(isParticipant(member)) {
