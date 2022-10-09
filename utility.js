@@ -79,6 +79,15 @@ module.exports = function() {
 			message.edit("⛔ Unknown error. " + info + "!");
 		}
 	}
+    
+    this.cmdEdit = function(channel, args, argsX) {
+        channel.messages.fetch(args[0])
+            .then(m => {
+                argsX.shift();
+                let text = argsX.join(" ");
+                m.edit(text.replace(/~/g,"\n"));
+            });
+    }
 	
 	this.cmdBulkDelete = function(channel) {
 		channel.messages.fetch().then(messages => {
@@ -248,6 +257,7 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "delete - Deletes a couple of messages\n";
 				if(isGameMaster(member)) help += stats.prefix + "delay - Executes a command with delay\n";
 				if(isGameMaster(member)) help += stats.prefix + "modify - Modifies the bot\n";
+				if(isGameMaster(member)) help += stats.prefix + "edit - Edits a bot message\n";
 			break;
 			case "ping":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "ping\n```";
@@ -280,9 +290,14 @@ module.exports = function() {
 			break;
 			case "modify":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "modify <attribute> <value>\n```";
-				help += "```\nFunctionality\n\Updates an <attribute> of the bot to <value>. Available attributes: status, nickname, activity.\n```";
+				help += "```\nFunctionality\n\nUpdates an <attribute> of the bot to <value>. Available attributes: status, nickname, activity.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "modify status dnd!\n< ✅ Updated bot status!```";
 				help += "```diff\nAliases\n\n- mod\n```";
+			break;
+			case "edit":
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "edit <id> <text>\n```";
+				help += "```\nFunctionality\n\nUpdates a bot message.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "edit 28462946294 New message contents```";
 			break;
 		}
 		return help;

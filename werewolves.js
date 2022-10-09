@@ -150,6 +150,9 @@ client.on("messageCreate", async message => {
 	case "ping":
 		cmdPing(message);
 	break;
+    case "edit":
+        if(checkGM(message)) cmdEdit(message.channel, args, argsX);
+    break;
 	/* Split */
 	case "say":
 		if(checkGM(message)) message.channel.send(args.join(" "));
