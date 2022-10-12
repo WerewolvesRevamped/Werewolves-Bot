@@ -140,7 +140,7 @@ module.exports = function() {
 				switch(args[1]) {
 					default:
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players [get|get_clean|set|resurrect|signup|list|substitute|switch|messages|log|log2]\n```";
-						help += "```\nFunctionality\n\nGroup of commands to handle players. " + stats.prefix + "help players <sub-command> for detailed help.\n\nList of Player Properties:\nalive: Whether the player is alive`\nemoji: The emoji the player uses\nrole: The role of the player\npublic_value: The value of the players vote on public polls (Typically 1)\nprivate_value: The value of the players vote on private polls (Typically 1)\npublic_votes: The base value of votes the player has against them on public votes (Typically 0)\nid: The discord id of the player\nccs: the amount of created ccs\npublic_msgs: Amount of messages sent in public channels\nprivate_msgs: Amount of messages sent in private channels```";
+						help += "```\nFunctionality\n\nGroup of commands to handle players. " + stats.prefix + "help players <sub-command> for detailed help.\n\nList of Player Properties:\nalive: Whether the player is alive`\nemoji: The emoji the player uses\nrole: The role of the player\npublic_value: The value of the players vote on public polls (Typically 1)\nprivate_value: The value of the players vote on private polls (Typically 1)\npublic_votes: The base value of votes the player has against them on public votes (Typically 0)\nid: The discord id of the player\nccs: the amount of created ccs\npublic_msgs: Amount of messages sent in public channels\nprivate_msgs: Amount of messages sent in private channels\type: The type of player. 0 for default, 1 for substitute.```";
 						help += "```diff\nAliases\n\n- p\n- player\n```";
 					break;
 					case "get":
@@ -794,6 +794,10 @@ module.exports = function() {
 		}
 	}
 	
+	this.isPlayersArgs = function(arg) {
+		let allowedArgs = ["emoji", "role", "alive", "public_value", "private_value", "public_votes", "id", "ccs", "public_msgs", "private_msgs", "type"];
+		return allowedArgs.indexOf(arg) >= 0;
+	}
 	
 	/* Get information about a player */
 	this.cmdPlayersGet = function(channel, args, mode) {
@@ -808,7 +812,7 @@ module.exports = function() {
 			// Invalid user
 			channel.send("⛔ Syntax error. `" + args[2] + "` is not a valid player!"); 
 			return; 
-		} else if(args[1] != "emoji" && args[1] != "role" && args[1] != "alive" && args[1] != "public_value" && args[1] != "private_value" && args[1] != "public_votes" && args[1] != "id" && args[1] != "ccs" && args[1] != "public_msgs" && args[1] != "private_msgs") { 
+		} else if(!isPlayersArgs(args[1])) { 
 			// Invalid parameter
 			channel.send("⛔ Syntax error. Invalid parameter `" + args[1] + "`!"); 
 			return; 
@@ -837,7 +841,7 @@ module.exports = function() {
 			// Invalid user
 			channel.send("⛔ Syntax error. `" + args[2] + "` is not a valid player!"); 
 			return; 
-		} else if(args[1] != "id" && args[1] != "emoji" && args[1] != "role" && args[1] != "alive" && args[1] != "public_value" && args[1] != "private_value" && args[1] != "public_votes" && args[1] != "ccs" && args[1] != "public_msgs" && args[1] != "private_msgs") { 
+		} else if(!isPlayersArgs(args[1])) { 
 			// Invalid parameter
 			channel.send("⛔ Syntax error. Invalid parameter `" + args[1] + "`!"); 
 			return; 
