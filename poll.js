@@ -244,13 +244,17 @@ module.exports = function() {
 			pollPrintResult(channel, reactions, pollType, pollNum, messages);
 		} else {
 			// Fetch each user
-			reactions[index].users.fetch().then(u => {
+			if(reactions[index].total <= 1) {
 				pollGetVoters(channel, reactions, ++index, pollType, pollNum, messages);
-			}).catch(err => { 
-				// Discord error
-				logO(err); 
-				sendError(channel, err, "Could not find all voters");
-			});
+			} else {
+				reactions[index].users.fetch().then(u => {
+					pollGetVoters(channel, reactions, ++index, pollType, pollNum, messages);
+				}).catch(err => { 
+					// Discord error
+					logO(err); 
+					sendError(channel, err, "Could not find all voters");
+				});
+			}
 		}
 	}
 	
