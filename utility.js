@@ -79,6 +79,15 @@ module.exports = function() {
 			message.edit("⛔ Unknown error. " + info + "!");
 		}
 	}
+    
+    this.cmdEdit = function(channel, args, argsX) {
+        channel.messages.fetch(args[0])
+            .then(m => {
+                argsX.shift();
+                let text = argsX.join(" ");
+                m.edit(text.replace(/~/g,"\n"));
+            });
+    }
 	
 	this.cmdBulkDelete = function(channel) {
 		channel.messages.fetch().then(messages => {
@@ -163,14 +172,15 @@ module.exports = function() {
 			args[0] = "";
 			if(isGameMaster(member)) msgA += "**```yaml\nWerewolf Bot Game Master Help\n```**";
 			else msgA += "**```yaml\nWerewolf Bot Player Help\n```**";
-			msgA += "```php\n" + phpEscape("Use " + stats.prefix + "help <command> to get information about a command.\nWhile ingame react to messages with 📌 to pin them!\nPlayer arguments can be names, emojis, ids, nicknames or discord tags\n%s and %c can be used to refer to yourself and to the current channel, in all commands.\nArguments cant contain spaces, unless the argument is quoted \"like this\"") + "```";
+			if(isGameMaster(member)) msgA += "```php\n" + phpEscape("Use " + stats.prefix + "help <command> to get information about a command.\nWhile ingame react to messages with 📌 to pin them!\nPlayer arguments can be names, emojis, ids, nicknames or discord tags\n%s and %c can be used to refer to yourself and to the current channel, in all commands.\nArguments cant contain spaces, unless the argument is quoted \"like this\"") + "```";
+			else msgA += "```php\n" + phpEscape("Use " + stats.prefix + "help <command> to get information about a command.\nWhile ingame react to messages with 📌 to pin them!\nPlayer arguments can be names, emojis, ids, nicknames or discord tags\nArguments cant contain spaces, unless the argument is quoted \"like this\"") + "```";
 		} else {
 			msgA += "**```yaml\n" + toTitleCase(args.join(" ")) + " Help\n```**";
 		}
 		// Commands
+		msgB += helpRoles(member, args);
 		msgB += helpUtility(member, args);
 		msgB += helpStats(member, args);
-		msgB += helpRoles(member, args);
 		msgB += helpCCs(member, args);
 		msgB += helpGame(member, args);
 		msgB += helpWhispers(member, args);
@@ -214,7 +224,6 @@ module.exports = function() {
 			case "":
 				if(isGameMaster(member)) help += stats.prefix + "split - Runs a list of semicolon seperated commands\n";
 				if(isGameMaster(member)) help += stats.prefix + "say - Makes the bot repeat a message\n";
-				if(isGameMaster(member)) help += stats.prefix + "temp - Converts between °C and °F\n";
 				if(isGameMaster(member)) help += stats.prefix + "sudo - Allows webhooks to run commands\n";
 			break;
 			case "split":
@@ -227,12 +236,6 @@ module.exports = function() {
 				help += "```\nFunctionality\n\nMakes the bot repeat everything after say.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "say Hello!\n< Hello!```";
 				help += "```diff\nAliases\n\n- >\n```";
-			break;
-			case "temp":
-				help += "```yaml\nSyntax\n\n" + stats.prefix + "temp [c|f] <Value>\n```";
-				help += "```\nFunctionality\n\nConverts <Value> to the scale provided in the first argument\n```";
-				help += "```fix\nUsage\n\n> " + stats.prefix + "temp f 5\n< 5 °C in fahrenheit: 41 °F```";
-				help += "```diff\nAliases\n\n- °\n```";
 			break;
 			case "sudo":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "sudo <Command>\n```";
@@ -254,6 +257,7 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "delete - Deletes a couple of messages\n";
 				if(isGameMaster(member)) help += stats.prefix + "delay - Executes a command with delay\n";
 				if(isGameMaster(member)) help += stats.prefix + "modify - Modifies the bot\n";
+				if(isGameMaster(member)) help += stats.prefix + "edit - Edits a bot message\n";
 			break;
 			case "ping":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "ping\n```";
@@ -286,9 +290,14 @@ module.exports = function() {
 			break;
 			case "modify":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "modify <attribute> <value>\n```";
-				help += "```\nFunctionality\n\Updates an <attribute> of the bot to <value>. Available attributes: status, nickname, activity.\n```";
+				help += "```\nFunctionality\n\nUpdates an <attribute> of the bot to <value>. Available attributes: status, nickname, activity.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "modify status dnd!\n< ✅ Updated bot status!```";
 				help += "```diff\nAliases\n\n- mod\n```";
+			break;
+			case "edit":
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "edit <id> <text>\n```";
+				help += "```\nFunctionality\n\nUpdates a bot message.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "edit 28462946294 New message contents```";
 			break;
 		}
 		return help;
@@ -394,6 +403,33 @@ module.exports = function() {
 		});
 	}
     
+    this.idEmojis = [
+        ["242983689921888256","🛠️"],
+        ["277156693765390337","🏹"],
+        ["271399293372334081","🚁"],
+        ["331803222064758786","🥝"],
+        ["152875086213283841","🐘"],
+        ["328035409055449089","💠"],
+        ["329977469350445069","🐺"],
+        ["281590363213398016","🍄"],
+        ["458727748504911884","🦎"],
+        ["244211825820827648","🐸"],
+        ["413001114292846612","🐛"],
+        ["241953256777973760","🤗"],
+        ["433957826491187202","🦦"],
+        ["334066065112039425","🔥"],
+        ["544125116640919557","▪️"],
+        ["234474456624529410","🎨"],
+        ["356510817094598658","🐢"],
+        ["299000787814842368","😃"],
+        ["83012212779646976","🇺🇸"],
+        ["633338331220148225","🌌"],
+        ["375578492580003840","💚"],
+        ["161551993704284171","🐼"],
+        ["215427550577557504","👁‍🗨"],
+        ["334136126745083907","🐓"]
+    ];
+    
     this.parseAlias = function(alias) {
         let aliases = {
                 "modrole": ["mr"],
@@ -403,8 +439,12 @@ module.exports = function() {
                 "open": ["@"],
                 "gameping": ["@@"],
                 "theme": ["th","themes"],
-                "demote": ["v"],
-                "promote": ["^"],
+                "demote": ["de"],
+                "promote": ["pro"],
+                "unhost": ["unho"],
+                "host": ["ho"],
+                "demote_unhost": ["v"],
+                "promote_host": ["^"],
                 "poll": ["polls","pl"],
                 "emojis": ["emoji","e"],
                 "help": ["h"],
@@ -423,19 +463,20 @@ module.exports = function() {
                 "signup": ["join","sign-up","sign_up","unsignup","signout","participate","sign-out","sign_out","leave","unjoin","signups"],
                 "options": ["stat","stats","option"],
                 "info": ["i"],
-                "infopin": ["ip"],
+                "infopin": ["ip","info_pin"],
+                "infoedit": ["ie","info_edit"],
+                "infoadd": ["ia","info_add"],
                 "info_classic": ["ic"],
                 "info_classic_simplified": ["ics"],
                 "info_fancy": ["if"],
                 "info_fancy_simplified": ["ifs"],
-                "channels": ["channel","ch"],
                 "roles": ["role","r"],
                 "connection": ["con","connect","whisper","whispers"],
                 "gamephase": ["gp","game_phase","game-phase"],
                 "modify": ["mod"],
                 "say": [">"],
                 "ping": ["?"],
-                "temp": ["°"]
+                "sc": ["channel","ch"]
         };
         for(let cmd in aliases) {
             if(aliases[cmd].indexOf(alias) != -1) return cmd;

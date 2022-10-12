@@ -52,7 +52,6 @@ module.exports = function() {
 		// Assign roles
 		startOnePlayer(channel, channel.guild.roles.cache.get(stats.signed_up).members.toJSON(), 0);
 		createSCs(channel, debug);
-        if(stats.secret_mode) getDisguises();
 	}
 	
 	this.helpGame = function(member, args) {
@@ -66,6 +65,10 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "end - Ends a game\n";
 				if(isGameMaster(member)) help += stats.prefix + "demote - Removes Game Master and Admin roles\n";
 				if(isGameMaster(member)) help += stats.prefix + "promote - Reassigns Game Master and Admin roles\n";
+				if(isGameMaster(member)) help += stats.prefix + "demote_unhost - Demotes or Unhosts\n";
+				if(isGameMaster(member)) help += stats.prefix + "promote_host - Promotes or Hosts\n";
+				if(isGameMaster(member)) help += stats.prefix + "unhost - Removes Host roles\n";
+				if(isGameMaster(member)) help += stats.prefix + "host - Adds Host role\n";
 				if(isGameMaster(member)) help += stats.prefix + "gameping - Notifies players with the New Game Ping role about a new game\n";
 				if(isGameMaster(member)) help += stats.prefix + "open - Opens signups and notifies players\n";
 				help += stats.prefix + "spectate - Makes you a spectator\n";
@@ -118,12 +121,40 @@ module.exports = function() {
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "demote\n```";
 				help += "```\nFunctionality\n\nReplaces Game Master and Admin roles with GM Ingame and Admin Ingame roles, which have no permisions.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "demote\n< ✅ Attempting to demote you, McTsts!\n```";
-				help += "```diff\nAliases\n\n- v\n```";
+				help += "```diff\nAliases\n\n- de\n```";
 			break;
 			case "promote":
 				if(!isGameMaster(member)) break;
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "promote\n```";
 				help += "```\nFunctionality\n\nReplaces GM Ingame and Admin Ingame roles with Game Master and Admin roles.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "promote\n< ✅ Attempting to promote you, McTsts!\n```";
+				help += "```diff\nAliases\n\n- pro\n```";
+			break;
+			case "unhost":
+				if(!isGameMaster(member)) break;
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "unhost\n```";
+				help += "```\nFunctionality\n\nRemoves Host role.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "demote\n< ✅ Attempting to unhost you, McTsts!\n```";
+				help += "```diff\nAliases\n\n- un\n```";
+			break;
+			case "host":
+				if(!isGameMaster(member)) break;
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "host\n```";
+				help += "```\nFunctionality\n\nAdds Host role.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "promote\n< ✅ Attempting to host you, McTsts!\n```";
+				help += "```diff\nAliases\n\n- ho\n```";
+			break;
+			case "demote_unhost":
+				if(!isGameMaster(member)) break;
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "demote_unhost\n```";
+				help += "```\nFunctionality\n\nDemotes or unhosts depending on context.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "demote\n< ✅ Attempting to demote you, McTsts!\n```";
+				help += "```diff\nAliases\n\n- v\n```";
+			break;
+			case "promote_host":
+				if(!isGameMaster(member)) break;
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "promote_host\n```";
+				help += "```\nFunctionality\n\nPromotes or hosts depending on context.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "promote\n< ✅ Attempting to promote you, McTsts!\n```";
 				help += "```diff\nAliases\n\n- ^\n```";
 			break;
@@ -210,30 +241,18 @@ module.exports = function() {
 	
 	/* Starts the creation of extra scs */
 	this.createStartPublic = function(channel, cc) {
-        if(!stats.secret_mode) { // standard mode
-            sql("SELECT name,members,setup FROM sc WHERE type = 'public' ORDER BY cond ASC", result => {
-                createOnePublic(channel, cc, result, 0);
-            }, () => {
-                channel.send("⛔ Database error. Unable to get a list extra SCs."); 
-            });
-        } else {
-            // Get players with that role
-            sql("SELECT id,disguise FROM players ORDER BY disguise ASC", allPlayers => {
-                sql("SELECT name,members,setup FROM sc WHERE type = 'public' ORDER BY cond ASC", publicChannels => {
-                    createOneSecretPublic(channel, cc, publicChannels, 0, allPlayers, 0);
-                }, () => {
-                    channel.send("⛔ Database error. Unable to get a list extra SCs."); 
-                });
-            }, () => {
-                channel.send("⛔ Database error. Unable to get a list of players."); 
-            });
-        }
+		sql("SELECT name,members,setup FROM sc WHERE type = 'public' ORDER BY cond ASC", result => {
+			createOnePublic(channel, cc, result, 0);
+		}, () => {
+			channel.send("⛔ Database error. Unable to get a list extra SCs."); 
+		});
 	}
 	
 	this.createOnePublic = function(channel, category, channels, index) {
 		// Checks
 		if(index >= channels.length) {
 			channel.send("✅ Finished creating Public Channels!");
+            getPublicCat();
 			return;
 		}
 		let cPerms;
@@ -256,63 +275,6 @@ module.exports = function() {
 			if(channels[index].setup.length > 1) channels[index].setup.replace(/%n/g, index).split(",").forEach(el => sc.send(stats.prefix + el));
 			sc.setParent(category,{ lockPermissions: false }).then(m => {
 				createOnePublic(channel, category, channels, ++index);
-			}).catch(err => { 
-				logO(err); 
-				sendError(channel, err, "Could not set category"); 
-			}); 
-		}).catch(err => { 
-			logO(err); 
-			sendError(channel, err, "Could not create channel"); 
-		});
-	}
-    
-	this.createOneSecretPublic = function(channel, category, channels, index, players, playersIndex) {
-		// Checks
-		if(index >= channels.length) {
-			channel.send("✅ Finished creating Public Channels!");
-			return;
-		}
-        if(playersIndex >= players.length) {
-			channel.send("✅ Finished creating `" + channels[index].name + "`.");
-			createOneSecretPublic(channel, category, channels, ++index, players, 0);
-            return;
-        }
-        
-		let cPerms;
-		switch(channels[index].members) {
-			case "mayor": 
-				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.mayor, ["write"], []), getPerms(stats.mayor2, ["write"], []), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(players[playersIndex].id, ["read"], ["write"]) ]; 
-			break;
-			case "info": 
-				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.dead_participant, [], ["read"]), getPerms(players[playersIndex].id, ["read"], ["write"]) ]; 
-			break;
-			case "alive": 
-				cPerms = [ getPerms(channel.guild.id, ["write"], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.dead_participant, [], ["read"]), getPerms(players[playersIndex].id, ["read"], []) ]; 
-			break;
-			case "dead": // dead channels are shared
-				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read","write"], []), getPerms(stats.spectator, ["read","write"], []), getPerms(stats.participant, [], ["read"]), getPerms(stats.sub, [], ["read"]) ]; 
-                channel.guild.channels.create(channels[index].name, { type: "text",  permissionOverwrites: cPerms })
-                .then(sc => { 
-                    if(channels[index].setup.length > 1) channels[index].setup.replace(/%n/g, index).split(",").forEach(el => sc.send(stats.prefix + el));
-                    sc.setParent(category,{ lockPermissions: false }).then(m => {
-                        createOneSecretPublic(channel, category, channels, ++index, players, 0);
-                    }).catch(err => { 
-                        logO(err); 
-                        sendError(channel, err, "Could not set category"); 
-                    }); 
-                }).catch(err => { 
-                    logO(err); 
-                    sendError(channel, err, "Could not create channel"); 
-                });
-                return;
-			break;
-		}
-		channel.guild.channels.create(channels[index].name + "-" + players[playersIndex].disguise.split(",")[0].substr(0, 10), { type: "text",  permissionOverwrites: cPerms })
-		.then(sc => { 
-            sc.send(stats.prefix + "split connection add " + channels[index].name + " %n;delay 1 delete 1");
-			if(channels[index].setup.length > 1) channels[index].setup.replace(/%n/g, index).split(",").forEach(el => sc.send(stats.prefix + el));
-			sc.setParent(category,{ lockPermissions: false }).then(m => {
-				createOneSecretPublic(channel, category, channels, index, players, ++playersIndex);
 			}).catch(err => { 
 				logO(err); 
 				sendError(channel, err, "Could not set category"); 
@@ -382,6 +344,48 @@ module.exports = function() {
 			});
 		}
 	}
+	
+	this.cmdUnhost = function(channel, member) {
+		channel.send("✅ Attempting to unhost you, " + member.displayName + "!");
+		if(member.roles.cache.get(stats.host)) {
+			member.roles.remove(stats.host).catch(err => { 
+				// Missing permissions
+				logO(err); 
+				sendError(channel, err, "Could not remove host role from " + member.displayName);
+			});
+		}
+	}
+	
+	this.cmdHost = function(channel, member) {
+		if(isParticipant(member)) {
+			channel.send("⛔ Command error. Can't host you while you're a participant."); 
+			return;
+		}
+		channel.send("✅ Attempting to host you, " + member.displayName + "!");
+		if(member.roles.cache.get(stats.gamemaster)) {
+			member.roles.add(stats.host).catch(err => { 
+				// Missing permissions
+				logO(err); 
+				sendError(channel, err, "Could not remove host role from " + member.displayName);
+			});
+		}
+	}
+    
+    this.cmdDemoteUnhost = function(channel, member) {
+        if(member.roles.cache.get(stats.host)) {
+            cmdUnhost(channel, member);
+        } else {
+            cmdDemote(channel, member);
+        }
+    }
+    
+    this.cmdPromoteHost = function(channel, member) {
+        if(member.roles.cache.get(stats.gamemaster_ingame) || member.roles.cache.get(stats.admin_ingame)) {
+            cmdPromote(channel, member);
+        } else {
+            cmdHost(channel, member);
+        }
+    }
 	
 	this.cmdSpectate = function(channel, member) {
 		if(isParticipant(member)) {
@@ -458,7 +462,9 @@ module.exports = function() {
 		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.participant).members.toJSON(), 0);
 		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.dead_participant).members.toJSON(), 0);
 		// Remove Roles & Nicknames
-		wroles_remove(channel, [stats.signed_up, stats.participant, stats.dead_participant, stats.spectator, stats.mayor, stats.mayor2, stats.reporter, stats.guardian, stats.sub], ["signed up", "participant", "dead participant", "spectator", "mayor", "mayor2", "reporter", "guardian", "substitute"])
+		wroles_remove(channel, [stats.signed_up, stats.spectator, stats.mayor, stats.mayor2, stats.reporter, stats.guardian, stats.sub, stats.participant, stats.dead_participant, stats.host], ["signed up", "spectator", "mayor", "mayor2", "reporter", "guardian", "substitute", "participant", "dead participant", "host"]);
+        // run role removal again for critical roles because sometimes it fails even though it says it succeeds
+		wroles_remove(channel, [stats.participant, stats.dead_participant], ["participant", "dead participant"]);
 		// Cleanup channels
 		cmdCCCleanup(channel);
 		cmdRolesScCleanup(channel);

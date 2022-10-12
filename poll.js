@@ -30,6 +30,7 @@ module.exports = function() {
 			case "yn": case "yna": // yes / no
 			case "a": case "ab": case "abc": case "abcd": case "abcde": case "abcdef": // live trivia
 			case "dead_a": case "dead_ab": case "dead_abc": case "dead_abcd": case "dead_abcde": case "dead_abcdef": // dead trivia
+            case "gm": case "host": case "admin": // gm polls
 				pollCreate(channel, args, args[1]);
 			break;
 			default:  
@@ -56,7 +57,7 @@ module.exports = function() {
 					break;
 					case "new":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "poll new <Poll Type>\n```";
-						help += "```\nFunctionality\n\nCreates a new poll. If no poll type is provided, and the command is executed in a secret channel, poll type is set to private, otherwise it is set to public. Assigns a sort of random name to each new poll.\n\nList of Poll Types:\npublic: Has all alive players, as well as an Abstain option. Uses public_value player property to evaluate poll results. Adds a players public_votes value to their own result. Only allows alive participants to vote. Mayor get an extra vote, unless they have less than 0 vote, then they get an extra negative vote.\nprivate: Has all alive players. Uses private_value player property to evaluate poll results. Only allows alive participants to vote.\ndead: Has Yes/No options. Every vote has a value of 1. Only allows dead participants to vote.\nyn: Yes/No for Participants\nyna: Yes/No/Abstain for Participants\ndead_vote: A list of dead participants, and only dead participants can vote on it.\ndead_list: Same as dead but shows who voted what.\na, ab, abc, abcd, abcde, abcdef, dead_a, dead_ab, dead_abc, dead_abcd, dead_abcde, dead_abcdef: Polls with options a-f, for alive or dead participants.```";
+						help += "```\nFunctionality\n\nCreates a new poll. If no poll type is provided, and the command is executed in a secret channel, poll type is set to private, otherwise it is set to public. Assigns a sort of random name to each new poll.\n\nList of Poll Types:\npublic: Has all alive players, as well as an Abstain option. Uses public_value player property to evaluate poll results. Adds a players public_votes value to their own result. Only allows alive participants to vote. Mayor get an extra vote, unless they have less than 0 vote, then they get an extra negative vote.\nprivate: Has all alive players. Uses private_value player property to evaluate poll results. Only allows alive participants to vote.\ndead: Has Yes/No options. Every vote has a value of 1. Only allows dead participants to vote.\nyn: Yes/No for Participants\nyna: Yes/No/Abstain for Participants\ndead_vote: A list of dead participants, and only dead participants can vote on it.\ndead_list: Same as dead but shows who voted what.\na, ab, abc, abcd, abcde, abcdef, dead_a, dead_ab, dead_abc, dead_abcd, dead_abcde, dead_abcdef: Polls with options a-f, for alive or dead participants.\ngm, host, admin: Polls with gms/host/admin candidates```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "poll new\n\n> " +  stats.prefix + "poll new public```";
 					break;
 					case "close":
@@ -127,6 +128,25 @@ module.exports = function() {
 				else if(type === "abcd" || type === "dead_abcd") overwriteValues = ["a","b","c","d"];
 				else if(type === "abcde" || type === "dead_abcde") overwriteValues = ["a","b","c","d","e"];
 				else if(type === "abcdef" || type === "dead_abcdef") overwriteValues = ["a","b","c","d","e","f"];
+                else if(type == "gm") {
+                    playerList = [];
+                    channel.guild.roles.cache.get(stats.gamemaster).members.each(el => {
+                        let em = idEmojis.filter(el2 => el2[0] == el.id);
+                        if(em[0]) playerList.push([em[0][1], el]);
+                    });
+                } else if(type == "host") {
+                    playerList = [];
+                    channel.guild.roles.cache.get(stats.host).members.each(el => {
+                        let em = idEmojis.filter(el2 => el2[0] == el.id);
+                        if(em[0]) playerList.push([em[0][1], el]);
+                    });
+                } else if(type == "admin") {
+                    playerList = [];
+                    channel.guild.roles.cache.get(stats.admin).members.each(el => {
+                        let em = idEmojis.filter(el2 => el2[0] == el.id);
+                        if(em[0]) playerList.push([em[0][1], el]);
+                    });
+                }
 				
 				// add or overwrite poll
 				if(overwriteValues[0]) playerList = [];
@@ -212,6 +232,12 @@ module.exports = function() {
 				if(!isDeadParticipant(member)) return 0;
 				voteValue = 1;
 			break;
+            case "host":
+            case "admin":
+            case "gm":
+                if(member.user.bot) return 0;
+                voteValue = 1;
+            break;
 			default: 
 				if(!isParticipant(member)) return 0;
 				voteValue = 1;
@@ -274,12 +300,14 @@ module.exports = function() {
 			if(votes <= 0) return { valid: false };
 			// Get string of voters
 			let voters;
-			if(pollType != "dead" && pollType != "dead_vote" && pollType != "dead_list" && pollType != "dead_a" && pollType != "dead_ab" && pollType != "dead_abc" && pollType != "dead_abcd" && pollType != "dead_abcde" && pollType != "dead_abcdef") voters = votersList.filter(el => isParticipant(el)).join(", ");
+            if(pollType == "gm" || pollType == "host" || pollType == "admin") voters = votersList.filter(el => !el.user.bot).join(", ");
+			else if(pollType != "dead" && pollType != "dead_vote" && pollType != "dead_list" && pollType != "dead_a" && pollType != "dead_ab" && pollType != "dead_abc" && pollType != "dead_abcd" && pollType != "dead_abcde" && pollType != "dead_abcdef") voters = votersList.filter(el => isParticipant(el)).join(", ");
 			else voters = votersList.filter(el => isDeadParticipant(el)).join(", ");
 			// Get candidate from emoji
 			let candidate = "not set";
 			let pollVal = Object.values(pollValues).find(el2 => el2[0] == el.emoji || el2[0] == el.emoji.split(":")[1]);
 			if(pollVal) candidate = pollVal[1];
+            else if(pollType == "gm" || pollType == "host" || pollType == "admin") candidate = channel.guild.members.cache.get(idEmojis.filter(el2 => el2[1] == el.emoji)[0][0]);
 			else if(emojiToID(el.emoji)) candidate = channel.guild.members.cache.get(emojiToID(el.emoji));
 			else candidate = "*Unknown*";
 			// Return one message line

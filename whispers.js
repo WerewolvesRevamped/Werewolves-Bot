@@ -23,7 +23,7 @@ module.exports = function() {
 	}
     
     this.cmdImpersonate = function(message, argsX) {
-        let author = getUser(message.channel, argsX.shift());
+        let author = parseUser(message.channel, argsX.shift());
         if(author) cmdWebhook(message.channel, message.guild.members.cache.get(author), argsX);
     }
     
@@ -41,15 +41,8 @@ module.exports = function() {
 		let help = "";
 		switch(args[0]) {
 			case "":
-				help += stats.prefix + "webhook - Repeats a message as a webhook pretending to be you\n";
 				if(isGameMaster(member)) help += stats.prefix + "impersonate - Repeats a message as a webhook pretending to be somebody\n";
 				if(isGameMaster(member)) help += stats.prefix + "connection [add|remove|reset] - Manages connections\n";
-			break;
-			case "webhook":
-				help += "```yaml\nSyntax\n\n" + stats.prefix + "webhook <Message>\n```";
-				help += "```\nFunctionality\n\nRepeats a message as a webhook pretending to be you.\n```";
-				help += "```fix\nUsage\n\n> " + stats.prefix + "webhook Does this work?\n< Does this work?\n```";
-				help += "```diff\nAliases\n\n- bot\n- <\n```";
 			break;
 			case "impersonate":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "impersonate <User> <Message>\n```";
@@ -185,20 +178,13 @@ module.exports = function() {
 							// Ignore if it's same channel as source
 							if(destination.channel_id != message.channel.id) { 	
 								// Create webhook
-                                let pdis = idToDisguise(message.author.id);
-                                let disguiseName = source.name;
+                                let disguiseName = source.name.replace(/\-/," ");
                                 let disguiseAvatar = client.user.displayAvatarURL();
                                 
                                 // role icon
                                 let roleIcon = await getIconFromName(disguiseName);
                                 if(roleIcon) disguiseAvatar = roleIcon;
-                                
-                                // player disguise
-                                if(disguiseName && disguiseName.search(/%n/) != -1) {
-                                    disguiseName = disguiseName.replace(/%n|%N/, pdis[0]);
-                                    disguiseAvatar = pdis[1];
-                                }
-                                
+
 								let webhookName = disguiseName != "" ? toTitleCase(disguiseName) : message.member.displayName;
 								let webhookAvatar = disguiseName != "" ? disguiseAvatar : message.author.displayAvatarURL();
 								let webhookMsg = message.content;
@@ -259,7 +245,7 @@ module.exports = function() {
 
         sql("SELECT channel_id, name FROM connected_channels WHERE id = " + connection.escape(conn), result => {
             // Write message in each channel
-            result.forEach(destination => {
+            result.forEach(async destination => {
                     // Create webhook
                     let webhookMsg = text;
                     webhookMsg = webhookMsg.replace(/:~/g, ":");
@@ -267,6 +253,11 @@ module.exports = function() {
                     if(disguise.length > 0) {
                         let webhookName = disguise;
                         let webhookAvatar = client.user.displayAvatarURL();
+                        
+                        // role icon
+                        let roleIcon = await getIconFromName(disguise);
+                        if(roleIcon) webhookAvatar = roleIcon;
+                        
                         channel.guild.channels.cache.get(destination.channel_id).fetchWebhooks()
                         .then(webhooks => {
                             // search for webhook 

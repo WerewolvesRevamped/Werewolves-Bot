@@ -46,15 +46,15 @@ module.exports = function() {
 		if(!args[0]) { 
 			message.channel.send(helpCCs(message.member, ["sc"]));
 			return; 
-		} else if(stats.gamephase != gp.INGAME) { 
+		} else if(stats.gamephase != gp.INGAME && args[0] != "rename") { 
 			message.channel.send("⛔ Command error. Can only use SCs while a game is running."); 
 			return; 
 		}
 		// Check Subcommand
 		switch(args[0]) {
-			case "add": cmdCCAdd(message.channel, message.member, args, 1); break;
-			case "remove": cmdCCRemove(message.channel, message.member, args, 1); break;
-			case "rename": cmdCCRename(message.channel, message.member, args, 1); break;
+			case "add": cmdSCAdd(message.channel, message.member, args, 1); break;
+			case "remove": cmdSCRemove(message.channel, message.member, args, 1); break;
+			case "rename": cmdCCRename(message.channel, message.member, args, 1, true); break;
 			case "list": cmdCCList(message.channel, 2, 1); break;
 			case "clear": cmdSCClear(message.channel); break;
 			case "clean": cmdSCClean(message.channel); break;
@@ -64,6 +64,18 @@ module.exports = function() {
 		
 	}
 	
+    this.cmdSCAdd = function(channel, member, args) {
+        cmdCCAdd(channel, member, args, 1);
+        players = parseUserList(channel, args, 1, member);
+        players.forEach(p => channel.send(`**<@${p}> has been added to <#${channel.id}>.**`));
+    }
+    
+    this.cmdSCRemove = function(channel, member, args) {
+        cmdCCRemove(channel, member, args, 1);
+        players = parseUserList(channel, args, 1, member);
+        players.forEach(p => channel.send(`**<@${p}> has been removed from <#${channel.id}>.**`));
+    }
+    
 	this.cmdCCCreateMulti = function(channel, member, args, type) {
 		cmdCCCreateOneMulti(channel, member, args.join(" ").split("~").splice(1).map(el => ("create " + el).split(" ")).splice(0, emojiIDs.length + 1), type, 0);
 	}
@@ -82,8 +94,10 @@ module.exports = function() {
 			case "":
 				help += stats.prefix + "cc [create|create_hidden] - Creates a CC\n";
 				help += stats.prefix + "cc [create_multi|create_multi_hidden] - Creates multiple CCs\n";
-				help += stats.prefix + "cc [add|remove|promote|demote|leave|list|owners] - Manages a CC\n";
-				help += stats.prefix + "cc [rename|archive] - Manages a CC\n";
+				help += stats.prefix + "cc [add|remove|promote|demote|leave] - Manages CC members\n";
+				help += stats.prefix + "cc leave - Leave a CC\n";
+				help += stats.prefix + "cc [list|owners] - Shows CC Info\n";
+				help += stats.prefix + "cc [rename|archive] - Manages a CC name\n";
 				if(isGameMaster(member)) help += stats.prefix + "cc cleanup - Cleans up CCs\n";
 				if(isGameMaster(member)) help += stats.prefix + "sc [add|remove|list|rename|clear|clean|change] - Manages a SC\n";
 			break;
@@ -542,7 +556,7 @@ module.exports = function() {
 			return;
 		}
 		cmdCCRename(channel, false, args, 1);
-		cmdInfo(channel, [args[1]], true, true);
+		cmdInfoEither(channel, [args[1]], true, true);
         channel.send(`**<@&${stats.participant}> Your role has changed to \`${toTitleCase(args[1])}\`.**`);
 	}
 		
@@ -559,6 +573,9 @@ module.exports = function() {
 			channel.send("⛔ You have hit the CC limit of `" + stats.cc_limit + "` CCs!");
 			return;
 		}
+		args[1] = args[1].replace(/🔒/,"lock");
+		players = parseUserList(channel, args, 2, member);
+        if(!players) players = [];
 		if(!isGameMaster(member)) {
 			sql("UPDATE players SET ccs = ccs + 1 WHERE id = " + connection.escape(member.id), result => {
 				getCCs();
@@ -566,12 +583,6 @@ module.exports = function() {
 				channel.send("⛔ Database error. Could not increase the CC amount!");
 			});
 		}
-		args[1] = args[1].replace(/🔒/,"lock");
-		players = parseUserList(channel, args, 2, member);
-        if(!players) {
-				channel.send("⛔ Could not create CC. Please specify at least one valid player!");
-                return;
-        }
         players = players.filter(el => el != member.id);
 		if(isParticipant(member) || players.length > 0) {
 			sqlGetStat(9, result => {

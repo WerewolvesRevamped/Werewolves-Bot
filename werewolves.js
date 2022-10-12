@@ -30,7 +30,6 @@ client.on("ready", () => {
 		getSCCats();
 		getPublicCat();
         loadPollValues();
-        getDisguises();
         cacheIconLUT();
 		global.client.guilds.fetch(stats.log_guild).then(guild => {
 			guild.members.fetch().then((members) => {
@@ -95,25 +94,20 @@ client.on("messageCreate", async message => {
     if(stats.gamephase == gp.INGAME && message.content.slice(stats.prefix.length).indexOf(stats.prefix) !== 0 && !message.author.bot && isParticipant(message.member)) {
         if(isCC(message.channel) || isSC(message.channel)) { // private message
             sql("UPDATE players SET private_msgs=private_msgs+1 WHERE id = " + connection.escape(message.member.id), () => {}, () => {
-                log("MSG Count > Failed to count private message for " + message.autho + "!")
+                log("MSG Count > Failed to count private message for " + message.author + "!")
             });
         } else if(isPublic(message.channel)) { // public message
             sql("UPDATE players SET public_msgs=public_msgs+1 WHERE id = " + connection.escape(message.member.id), () => {}, () => {
-                log("MSG Count > Failed to count private message for " + message.autho + "!")
+                log("MSG Count > Failed to count private message for " + message.author + "!")
             });
         }
     }
     
 	/* Gif Check */
-	// isParticipant(message.author) &&
 	if(!message.author.bot && isParticipant(message.member) && message.content.search("http") >= 0 && stats.ping.length > 0 && stats.gamephase == gp.INGAME) {
 		urlHandle(message);
 	}
 	
-	if(!message.author.bot && message.content.indexOf(stats.prefix) !== 0) { // super cursed thing that turns every message into a webhook one
-		//cmdWebhook(message.channel, message.member, [message.content]);
-		//message.delete({timeout: 500 })
-	}
 	/* Find Command & Parameters */
 	// Not a command
 	if(message.channel.type === "dm") return;
@@ -142,7 +136,7 @@ client.on("messageCreate", async message => {
 	// Get default arguments / default command / unmodified arguments / unmodified commands
 	const args = message.content.slice(stats.prefix.length).trim().match(/(".*?")|(\S+)/g) ? message.content.slice(stats.prefix.length).trim().match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : [];
 	const command = parseAlias(args.shift());
-	const argsX = message.content.slice(stats.prefix.length).trim().replace(/\n/g,"~").match(/(".*?")|(\S+)/g) ? message.content.slice(stats.prefix.length).trim().replace(/\n/g,"~").match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "")) : [];
+	const argsX = message.content.slice(stats.prefix.length).trim().replace(/\r?\n/g,"~").match(/(".*?")|(\S+)/g) ? message.content.slice(stats.prefix.length).trim().replace(/~/g,"</>").replace(/\r?\n/g,"~").match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "")) : [];
 	const commandX = argsX.shift();
 	
 	if(message.content.search("@everyone") >= 0) {
@@ -153,12 +147,12 @@ client.on("messageCreate", async message => {
 
 	/* Ping */ // Generic test command / returns the ping
 	switch(command) {
-	case "temp":
-		//cmdTemp(message, args);
-	break;
 	case "ping":
 		cmdPing(message);
 	break;
+    case "edit":
+        if(checkGM(message)) cmdEdit(message.channel, args, argsX);
+    break;
 	/* Split */
 	case "say":
 		if(checkGM(message)) message.channel.send(args.join(" "));
@@ -193,6 +187,14 @@ client.on("messageCreate", async message => {
 	case "infopin":
 		if(checkGM(message)) cmdInfoEither(message.channel, args, true, false);
 	break;
+	/* Role Info */ // Returns the info for a role set by the roles command
+	case "infoedit":
+		if(checkGM(message)) cmdInfoEdit(message.channel, args, argsX);
+	break;
+	/* Role Info (Add) */ // Returns the info for a role set by the roles command, but with additions
+	case "infoadd":
+		if(checkGM(message)) cmdInfoFancy(message.channel, [args[0]], false, false, true, false, ["", argsX[1].replace(/~/g, "\n").replace(/<\/>/g,"~")]);
+	break;
 	/* Role Info (Classic) */ // Returns the info for a role set by the roles command
 	case "info_classic":
 		if(checkGM(message)) cmdInfo(message.channel, args, false, false);
@@ -216,34 +218,15 @@ client.on("messageCreate", async message => {
 	/* Signup */ // Signs a player up with an emoji
 	case "j":
 		if(!args[0]) {
-			switch(message.author.id) {
-				case "242983689921888256": cmdSignup(message.channel, message.member, ["🛠️"], true); break;
-				case "277156693765390337": cmdSignup(message.channel, message.member, ["🏹"], true); break;
-				case "271399293372334081": cmdSignup(message.channel, message.member, ["🚁"], true); break;
-				case "331803222064758786": cmdSignup(message.channel, message.member, ["🥝"], true); break;
-				case "152875086213283841": cmdSignup(message.channel, message.member, ["🐘"], true); break;
-				case "328035409055449089": cmdSignup(message.channel, message.member, ["💠"], true); break;
-				case "329977469350445069": cmdSignup(message.channel, message.member, ["🐺"], true); break;
-				case "281590363213398016": cmdSignup(message.channel, message.member, ["🍄"], true); break;
-				case "458727748504911884": cmdSignup(message.channel, message.member, ["🦎"], true); break;
-				case "244211825820827648": cmdSignup(message.channel, message.member, ["🐸"], true); break;
-				case "413001114292846612": cmdSignup(message.channel, message.member, ["🐛"], true); break;
-				case "241953256777973760": cmdSignup(message.channel, message.member, ["🤗"], true); break;
-				case "433957826491187202": cmdSignup(message.channel, message.member, ["🦦"], true); break;
-				case "334066065112039425": cmdSignup(message.channel, message.member, ["🔥"], true); break;
-				case "544125116640919557": cmdSignup(message.channel, message.member, ["▪️"], true); break;
-				case "234474456624529410": cmdSignup(message.channel, message.member, ["🎨"], true); break;
-				case "356510817094598658": cmdSignup(message.channel, message.member, ["🐢"], true); break;
-				case "299000787814842368": cmdSignup(message.channel, message.member, ["😃"], true); break;
-				case "83012212779646976": cmdSignup(message.channel, message.member, ["🇺🇸"], true); break;
-				case "633338331220148225": cmdSignup(message.channel, message.member, ["🌌"], true); break;
-				case "375578492580003840": cmdSignup(message.channel, message.member, ["💚"], true); break;
-				case "161551993704284171": cmdSignup(message.channel, message.member, ["🐼"], true); break;
-				case "215427550577557504": cmdSignup(message.channel, message.member, ["👁‍🗨"], true); break;
-				default: cmdSignup(message.channel, message.member, args, true); break; 
-			}
+            // find emoji
+            let em = idEmojis.filter(el => el[0] == message.author.id);
+            if(em[0]) cmdSignup(message.channel, message.member, [em[0][1]], true);
+            else cmdSignup(message.channel, message.member, args, true);
+            // for gm demote
 			if(isGameMaster(message.member)) cmdDemote(message.channel, message.member);
-		} else cmdSignup(message.channel, message.member, args, true);
+		} else { // if arg specified
+            cmdSignup(message.channel, message.member, args, true);
+        }
 	break;
 	case "signup": 
 		cmdSignup(message.channel, message.member, args, true);
@@ -300,6 +283,13 @@ client.on("messageCreate", async message => {
 	case "killq":
 		if(checkSafe(message)) cmdKillq(message, args);	
 	break;
+	/* Kill Q */
+	case "kqak":
+		if(checkSafe(message)) {
+            cmdKillq(message, ["add" ,...args]);	
+            cmdKillq(message, ["killall" ,...args]);	
+        }
+	break;
 	/* Players */
 	case "players":
 		if(checkGM(message)) cmdPlayers(message, args);
@@ -310,6 +300,9 @@ client.on("messageCreate", async message => {
 	case "ps":
 		if(checkGM(message)) cmdPlayers(message, ["set", ...args]);	
 	break;
+	case "pr":
+		if(checkGM(message)) cmdPlayers(message, ["resurrect", ...args]);	
+	break;
 	case "roll":
 		cmdRoll(message, args);
 	break;
@@ -318,7 +311,7 @@ client.on("messageCreate", async message => {
 		cmdCC(message, args, argsX);
 	break;
 	case "sc":
-		cmdSC(message, args);
+		if(checkGM(message)) cmdSC(message, args);
 	break;
 	case "impersonate":
 		if(checkGM(message)) cmdImpersonate(message, argsX);
@@ -343,6 +336,22 @@ client.on("messageCreate", async message => {
 	case "demote":
 		cmdDemote(message.channel, message.member);
 	break;
+    /* Host */
+    case "host":
+        cmdHost(message.channel, message.member);
+     break;
+    /* Unhost */
+    case "unhost":
+        cmdUnhost(message.channel, message.member);
+     break;
+    /* Promote Host */
+    case "promote_host":
+        cmdPromoteHost(message.channel, message.member);
+     break;
+    /* Demote Unhost */
+    case "demote_unhost":
+        cmdDemoteUnhost(message.channel, message.member);
+     break;
 	/* Theme */
 	case "theme":
 		cmdTheme(message, args);
@@ -407,11 +416,14 @@ client.on('messageUpdate', (oldMessage, newMessage) => {
     oldMessage = JSON.parse(JSON.stringify(oldMessage));
     newMessage = JSON.parse(JSON.stringify(newMessage));
 	// retrieve channel and author
-	let channel = client.guilds.cache.get(oldMessage.guildId).channels.cache.get(oldMessage.channelId);
+    let msgGuild = client.guilds.cache.get(oldMessage.guildId);
+    if(!msgGuild) return;
+	let channel = msgGuild.channels.cache.get(oldMessage.channelId);
 	let log = client.guilds.cache.get(stats.log_guild).channels.cache.get(stats.log_channel);
-	let author = client.guilds.cache.get(oldMessage.guildId).members.cache.get(oldMessage.authorId);
+	let author = msgGuild.members.cache.get(oldMessage.authorId);
 	if(isParticipant(author) && (Math.abs(oldMessage.content.length - newMessage.content.length) > (oldMessage.content.length/5))) {
-		cmdWebhook(log, author, ["**Updated Message**", "\n*Updated message by <@" + oldMessage.authorId + "> in <#" + oldMessage.channelId + ">!*","\n__Old:__\n> ", oldMessage.content.split("\n").join("\n> "),"\n","\n__New:__\n> ", newMessage.content.split("\n").join("\n> "),"\n","\n" + stats.ping ]);
+		//cmdWebhook(log, author, ["**Updated Message**", "\n*Updated message by <@" + oldMessage.authorId + "> in <#" + oldMessage.channelId + ">!*","\n__Old:__\n> ", oldMessage.content.split("\n").join("\n> "),"\n","\n__New:__\n> ", newMessage.content.split("\n").join("\n> "),"\n","\n" + stats.ping ]);
+		cmdWebhook(log, author, ["**Updated Message**", "\n*Updated message by <@" + oldMessage.authorId + "> in <#" + oldMessage.channelId + ">!*","\n__Old:__\n> ", oldMessage.content.split("\n").join("\n> "),"\n","\n__New:__\n> ", newMessage.content.split("\n").join("\n> "),"\n","\n<@242983689921888256>" ]);
 	}
 });
 
@@ -469,6 +481,8 @@ client.on("guildMemberRemove", async member => {
 /* Join Detection */
 client.on("guildMemberAdd", async member => {
 	log(`👋 ${member.user} has joined the server!`);
+    let oog = member.guild.channels.cache.get("584793703923580965");
+    if(oog) oog.send(`Welcome ${member.user} 👋!`);
 });
 
 // for hardcoded reaction roles, because I'm lazy
