@@ -33,8 +33,8 @@ module.exports = function() {
 				pollCreate(channel, args, args[1]);
 			break;
 			default:  
-				if(isCC(channel) || isSC(channel)) pollCreate(channel, args, "private");
-				else pollCreate(channel, args, "public");
+				if(isCC(channel) || isSC(channel)) pollCreate(channel, [args.shift(), "private", ...args], "private");
+				else pollCreate(channel, [args.shift(), "public", ...args], "public");
 			break;
 		}
 	}
