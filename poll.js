@@ -34,8 +34,8 @@ module.exports = function() {
 				pollCreate(channel, args, args[1]);
 			break;
 			default:  
-				if(isCC(channel) || isSC(channel)) pollCreate(channel, args, "private");
-				else pollCreate(channel, args, "public");
+				if(isCC(channel) || isSC(channel)) pollCreate(channel, [args.shift(), "private", ...args], "private");
+				else pollCreate(channel, [args.shift(), "public", ...args], "public");
 			break;
 		}
 	}
@@ -270,13 +270,17 @@ module.exports = function() {
 			pollPrintResult(channel, reactions, pollType, pollNum, messages);
 		} else {
 			// Fetch each user
-			reactions[index].users.fetch().then(u => {
+			if(reactions[index].total <= 1) {
 				pollGetVoters(channel, reactions, ++index, pollType, pollNum, messages);
-			}).catch(err => { 
-				// Discord error
-				logO(err); 
-				sendError(channel, err, "Could not find all voters");
-			});
+			} else {
+				reactions[index].users.fetch().then(u => {
+					pollGetVoters(channel, reactions, ++index, pollType, pollNum, messages);
+				}).catch(err => { 
+					// Discord error
+					logO(err); 
+					sendError(channel, err, "Could not find all voters");
+				});
+			}
 		}
 	}
 	
