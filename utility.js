@@ -432,7 +432,7 @@ module.exports = function() {
         ["490180990237540352","🧋"], // the kremblin
         ["139855429357273088","☢️"], // Swurtle
         ["489047121840963585","🐙"], // Alphaviki
-        ["405803301251055617","💀"] // harperette
+        ["405803301251055617","4️⃣"] // harperette
     ];
     
     this.parseAlias = function(alias) {
