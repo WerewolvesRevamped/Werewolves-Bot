@@ -90,14 +90,19 @@ module.exports = function() {
     }
 	
 	this.cmdBulkDelete = function(channel) {
-		channel.messages.fetch().then(messages => {
-			channel.bulkDelete(messages.filter(el => el.member == null || !el.author.bot)).then(messages => {
-			  channel.send("✅ Deleted " + messages.size + " messages.").then(msg => msg.delete({timeout: 5000}));
-			});
-		}).catch(err => {
-			logO(err); 
-			sendError(channel, err, "Could not perform bulk delete");
-		});
+        if(isSC(channel)) {
+            channel.messages.fetch().then(messages => {
+                channel.bulkDelete(messages.filter(el => el.member == null || !el.author.bot)).then(messages => {
+                  channel.send("✅ Deleted " + messages.size + " messages.").then(msg => msg.delete({timeout: 5000}));
+                });
+            }).catch(err => {
+                logO(err); 
+                sendError(channel, err, "Could not perform bulk delete");
+            });
+        } else {
+            channel.send("⛔ Game Master error. Do not run this in non-SCs!"); 
+			return; 
+        }
 	}
 	
 	this.cmdDelete = function(channel, args) {
