@@ -79,6 +79,7 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "players [get|get_clean|set|resurrect|signup] - Manages players\n";
 				if(isGameMaster(member)) help += stats.prefix + "players [substitute|switch] - Manages player changes\n";
 				if(isGameMaster(member)) help += stats.prefix + "killq [add|remove|killall|list|clear] - Manages kill queue\n";
+				if(isGameMaster(member)) help += stats.prefix + "kqak - Instant kill a player\n";
 				if(isGameMaster(member)) help += stats.prefix + "modrole [add|remove] - Adds/removes roles from users\n";
 				help += stats.prefix + "list - Lists signed up players\n";
 				help += stats.prefix + "list_alphabetical - Lists signed up players (alphabetical)\n";
@@ -92,6 +93,11 @@ module.exports = function() {
 				help += "```\nFunctionality\n\nAdds or removes a role from a user\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "modrole add 242983689921888256 584770967058776067\n< ✅ Added Bot Developer to @McTsts (Ts)!\n```";
 				help += "```diff\nAliases\n\n- mr\n```";
+            break;
+			case "kqak":
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "kqak <user>\n```";
+				help += "```\nFunctionality\n\nAdds a user to the killq and runs killq killall\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "kqak Ts\n```";
             break;
 
 			case "list_signedup":

@@ -91,7 +91,12 @@ module.exports = function() {
             "c": ["🇨", "Option C"],
             "d": ["🇩", "Option D"],
             "e": ["🇪", "Option E"],
-            "f": ["🇫", "Option F"]
+            "f": ["🇫", "Option F"],
+            "g": ["🇬", "Option G"],
+            "h": ["🇭", "Option H"],
+            "i": ["🇮", "Option I"],
+            "j": ["🇯", "Option J"],
+            "k": ["🇰", "Option K"]
         };
     }
 	
@@ -281,9 +286,11 @@ module.exports = function() {
 			pollPrintResult(channel, reactions, pollType, pollNum, messages);
 		} else {
 			// Fetch each user
-			if(reactions[index].total <= 1) {
+			if(reactions[index].count <= 1) {
+                console.log("skip fetching users");
 				pollGetVoters(channel, reactions, ++index, pollType, pollNum, messages);
 			} else {
+                console.log("fetch users");
 				reactions[index].users.fetch().then(u => {
 					pollGetVoters(channel, reactions, ++index, pollType, pollNum, messages);
 				}).catch(err => { 
