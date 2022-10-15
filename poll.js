@@ -287,10 +287,8 @@ module.exports = function() {
 		} else {
 			// Fetch each user
 			if(reactions[index].count <= 1) {
-                console.log("skip fetching users");
 				pollGetVoters(channel, reactions, ++index, pollType, pollNum, messages);
 			} else {
-                console.log("fetch users");
 				reactions[index].users.fetch().then(u => {
 					pollGetVoters(channel, reactions, ++index, pollType, pollNum, messages);
 				}).catch(err => { 
