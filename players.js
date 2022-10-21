@@ -319,10 +319,14 @@ module.exports = function() {
 	/* Lists current killq */
 	this.cmdKillqList = function(channel) {
 		// Get killq
-		sql("SELECT id FROM killq", result => {
+		sql("SELECT killq.id, players.role FROM killq INNER JOIN players ON killq.id = players.id", result => {
 			// Print killq
-			result = removeDuplicates(result.map(el => el.id));
-			let playerList = result.map(el => idToEmoji(el) + " - " + channel.guild.members.cache.get(el).displayName + " (" + channel.guild.members.cache.get(el).user.username + ")").join("\n");
+			let playerList = result.map(el => {
+                let member = channel.guild.members.cache.get(el.id);
+                let rName = toTitleCase(el.role);
+                let rEmoji = getRoleEmoji(rName);
+                return idToEmoji(el.id) + " - " + member.displayName + "/" + member.user.username + " - " + (rEmoji ? `<:${rEmoji.name}:${rEmoji.id}> ` : "") + rName;
+            }).join("\n");
 			channel.send("**Kill Queue** | Total: " +  result.length + "\n" + playerList);
 		}, () => {
 			// Db error
@@ -405,8 +409,13 @@ module.exports = function() {
                 var reportMsg;
                 // Get info
                 sql("SELECT role FROM players WHERE id = " + connection.escape(el), result => {
-                    let roleList = result[0].role.split(",").filter(role => verifyRoleVisible(role)).map(role => toTitleCase(role)).join("` + `");
-                    reportMsg = "<@" + el + "> was a `" + roleList + "`";
+                    let rolesFiltered = result[0].role.split(",").filter(role => verifyRoleVisible(role));
+                    let roleList = rolesFiltered.map(role => toTitleCase(role)).join("` + `");
+                    let emojiList = rolesFiltered.map(role => {
+                        let rEmoji = getRoleEmoji(role);
+                        return rEmoji ? `<:${rEmoji.name}:${rEmoji.id}>` : false;
+                    }).filter(el => el).join(" ");
+                    reportMsg = "<@" + el + "> was a `" + roleList + "` " + emojiList;
                     
                     // Send reporter message
                     cmdConnectionSend(channel, ["", "reporter2", true, reportMsg]);
@@ -469,18 +478,24 @@ module.exports = function() {
 	/* Lists all signedup players */
 	this.cmdPlayersList = function(channel) {
 		// Get a list of players
-		sql("SELECT id,emoji,role,alive,public_value,private_value,public_votes,ccs FROM players", result => {
-			let playerListArray = result.map(el => `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"} (${el.role.split(",").map(role => toTitleCase(role)).join(" + ")}); Alive: ${channel.guild.members.cache.get(el.id) ? (el.alive ? client.emojis.cache.get(stats.yes_emoji) : client.emojis.cache.get(stats.no_emoji)) : "⚠️"}; CCs: ${el.ccs}; Votes: ${el.public_value},${el.private_value},${el.public_votes}`);
+		sql("SELECT id,emoji,role,alive,ccs FROM players", result => {
+			let playerListArray = result.map(el => {  
+                let rName = toTitleCase(el.role);
+                let rEmoji = getRoleEmoji(rName);
+                rEmoji = (rEmoji ? `<:${rEmoji.name}:${rEmoji.id}> | ` : "");
+                return `${channel.guild.members.cache.get(el.id) ? (el.alive ? client.emojis.cache.get(stats.yes_emoji) : client.emojis.cache.get(stats.no_emoji)) : "⚠️"} | ${rEmoji}${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"} (${el.role.split(",").map(role => toTitleCase(role)).join(" + ")})`
+            });
+            const perMessageCount = 18;
 			let playerList = [], counter = 0;
 			for(let i = 0; i < playerListArray.length; i++) {
-				if(!playerList[Math.floor(counter/10)]) playerList[Math.floor(counter/10)] = [];
-				playerList[Math.floor(counter/10)].push(playerListArray[i]);
+				if(!playerList[Math.floor(counter/perMessageCount)]) playerList[Math.floor(counter/perMessageCount)] = [];
+				playerList[Math.floor(counter/perMessageCount)].push(playerListArray[i]);
 				counter++;
 			}
 			channel.send("**Players** | Total: " + result.length);
 			for(let i = 0; i < playerList.length; i++) {
 				// Print message
-				channel.send("✳ Listing players " + i  + "/" + (playerList.length) + "...").then(m => {
+				channel.send("✳ Listing players " + (i+1)  + "/" + (playerList.length) + "...").then(m => {
 					m.edit(playerList[i].join("\n"));
 				}).catch(err => {
 					logO(err); 

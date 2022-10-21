@@ -1686,9 +1686,8 @@ module.exports = function() {
                                 let rName = parseRole(rel.replace(/[^\w\s\-']/g,"").trim()); // parse role
                                 //console.log(rName);
                                 if(rName && verifyRole(rName)) { // find an emoji
-                                    rName = toTitleCase(rName).replace(/[^\w]+/g,"").trim();
                                     //console.log("found => " + rName);
-                                    let rEmoji = client.emojis.cache.find(el => el.name == rName);
+                                    let rEmoji = getRoleEmoji(rName);
                                     if(rEmoji) emojiFound++;
                                     else emojiFound--;
                                     if(!rEmoji) rEmoji = client.emojis.cache.find(el => el.name == (toTitleCase(roleNameParsed.split(" ")[0]) + "Placeholder"));
@@ -1766,6 +1765,11 @@ module.exports = function() {
 			if(!noErr) channel.send("⛔ Database error. Couldn't look for role information!");
 		});	
 	}
+    
+    this.getRoleEmoji = function(roleName) {
+        roleName = toTitleCase(roleName).replace(/[^\w]+/g,"").trim();
+        return client.emojis.cache.find(el => el.name == roleName);
+    }
     
     const fetch = require('node-fetch');
     this.cacheIconLUT = async function() {
