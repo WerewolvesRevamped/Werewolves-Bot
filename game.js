@@ -148,14 +148,14 @@ module.exports = function() {
 				if(!isGameMaster(member)) break;
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "demote_unhost\n```";
 				help += "```\nFunctionality\n\nDemotes or unhosts depending on context.\n```";
-				help += "```fix\nUsage\n\n> " + stats.prefix + "demote\n< ✅ Attempting to demote you, McTsts!\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "demote_unhost\n< ✅ Attempting to demote you, McTsts!\n```";
 				help += "```diff\nAliases\n\n- v\n```";
 			break;
 			case "promote_host":
 				if(!isGameMaster(member)) break;
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "promote_host\n```";
 				help += "```\nFunctionality\n\nPromotes or hosts depending on context.\n```";
-				help += "```fix\nUsage\n\n> " + stats.prefix + "promote\n< ✅ Attempting to promote you, McTsts!\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "promote_host\n< ✅ Attempting to promote you, McTsts!\n```";
 				help += "```diff\nAliases\n\n- ^\n```";
 			break;
 			case "gameping":
@@ -474,7 +474,18 @@ module.exports = function() {
 		}, () => {
 			channel.send("⛔ Database error. Could not get public category!");
 		});
+        resetRoleNames(channel);
 	}
+    
+    this.resetRoleNames = async function(channel) {
+        // rename roles correctly
+        let roles = [stats.signed_up, stats.spectator, stats.mayor, stats.mayor2, stats.reporter, stats.guardian, stats.sub, stats.participant, stats.dead_participant, stats.host, stats.gamemaster];
+        let names = ["Signed-up","Spectator","Mayor (<= 15)","Mayor (>15)","Reporter","Guardian","Substitute","Participant","Dead Participant","Host", "Game Master"];
+        for(let i = 0; i < roles.length; i++) {
+            await channel.guild.roles.cache.get(roles[i]).setName(names[i]);
+        }  
+        channel.send("✅ Reset role names!");
+    }
 	
 	this.wroles_remove = function(channel, ids, names) {
 		wroles_remove2(channel, ids[0], names[0], () => {
@@ -492,11 +503,11 @@ module.exports = function() {
 	this.wroles_removeOnce = function(channel, id, name, members, index, callback) {
 		if(index >= members.length) {
 			callback();
-			channel.send("✅ Removed `" + name + "` role from `" + members.length + "` players!");
+			if(members.length > 0) channel.send("✅ Removed `" + name + "` role from `" + members.length + "` players!");
 			return;
 		}
 		members[index].roles.remove(id).then(m => {
-			channel.send("✅ `" + members[index].displayName + "` is no longer a " + name + "!");
+			//channel.send("✅ `" + members[index].displayName + "` is no longer a " + name + "!");
 			wroles_removeOnce(channel, id, name, members, ++index, callback);
 		}).catch(err => { 
 			// Missing permissions

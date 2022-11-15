@@ -316,7 +316,7 @@ module.exports = function() {
 			return;
 		}
 		let ccOwner = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
-		if(mode || isGameMaster(member) || ccOwner.includes(member.id)) {
+		if(mode || isGameMaster(member, true) || ccOwner.includes(member.id)) {
 			players = parseUserList(channel, args, 1, member);
 			let playerList = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member" && el.allow > 0).map(el => el.id);
 			if(players && players.length > 0) {
@@ -345,7 +345,7 @@ module.exports = function() {
 			return;
 		}
 		let ccOwner = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
-		if(mode || isGameMaster(member) || ccOwner.includes(member.id)) {
+		if(mode || isGameMaster(member, true) || ccOwner.includes(member.id)) {
 			players = parseUserList(channel, args, 1, member);
 			let playerList = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member" && el.allow > 0).map(el => el.id);
 			if(players) players = players.filter(el => playerList.includes(el));
@@ -375,7 +375,7 @@ module.exports = function() {
 		}
 		args[1] = args[1].replace(/🔒/,"lock");
 		let ccOwner = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
-		if(mode || isGameMaster(member) || ccOwner.includes(member.id)) {
+		if(mode || isGameMaster(member, true) || ccOwner.includes(member.id)) {
 			channel.edit({ name: args[1] })
 				.then(c => {
 					c.send("✅ Renamed channel to `" + c.name + "`!");
@@ -399,7 +399,7 @@ module.exports = function() {
 			return;
 		}
 		let ccOwner = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
-		if(mode || isGameMaster(member) || ccOwner.includes(member.id)) {
+		if(mode || isGameMaster(member, true) || ccOwner.includes(member.id)) {
 			channel.edit({ name: "🔒-" + channel.name })
 				.then(c => {
 					let ccList = c.permissionOverwrites.cache.toJSON().filter(el => el.type === "member").map(el => el.id);
@@ -427,7 +427,7 @@ module.exports = function() {
 		}
 		// Get owner
 		let ccOwner = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
-		if(mode || isGameMaster(member) || ccOwner.includes(member.id)) {
+		if(mode || isGameMaster(member, true) || ccOwner.includes(member.id)) {
 			// Get members
 			players = parseUserList(channel, args, 1, member);
 			let playerList = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member" && el.allow > 0).map(el => el.id);
@@ -462,7 +462,7 @@ module.exports = function() {
 		}
 		// Get owner
 		let ccOwner = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
-		if(mode || isGameMaster(member) || ccOwner.includes(member.id)) {
+		if(mode || isGameMaster(member, true) || ccOwner.includes(member.id)) {
 			// Get members
 			players = parseUserList(channel, args, 1, member);
 			let playerList = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === "member" && el.allow > 0).map(el => el.id);
@@ -563,20 +563,20 @@ module.exports = function() {
 	/* Creates CC */
 	this.cmdCCCreate = function(channel, member, args, mode, callback) {
 		// Get a list of users that need to be in the cc
-		if(!(isCC(channel) || isSC(channel) || isGameMaster(member))) {
+		if(!(isCC(channel) || isSC(channel) || isGameMaster(member, true))) {
 			channel.send("⛔ Command error. Can't use command outside a CC/SC!");
 			return;
 		} else if(!args[1]) {
 			channel.send(helpCCs(member, ["cc", "create"]));
 			return;
-		} else if(!isGameMaster(member) && stats.cc_limit >= 0 && ccs.find(el => el.id == member.id).ccs >= stats.cc_limit) {
+		} else if(!isGameMaster(member, true) && stats.cc_limit >= 0 && ccs.find(el => el.id == member.id).ccs >= stats.cc_limit) {
 			channel.send("⛔ You have hit the CC limit of `" + stats.cc_limit + "` CCs!");
 			return;
 		}
 		args[1] = args[1].replace(/🔒/,"lock");
 		players = parseUserList(channel, args, 2, member);
         if(!players) players = [];
-		if(!isGameMaster(member)) {
+		if(!isGameMaster(member, true)) {
 			sql("UPDATE players SET ccs = ccs + 1 WHERE id = " + connection.escape(member.id), result => {
 				getCCs();
 			}, () => {

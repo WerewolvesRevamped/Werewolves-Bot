@@ -105,7 +105,7 @@ client.on("messageCreate", async message => {
     
 	/* Gif Check */
 	if(!message.author.bot && isParticipant(message.member) && message.content.search("http") >= 0 && stats.ping.length > 0 && stats.gamephase == gp.INGAME) {
-		urlHandle(message);
+        urlHandle(message, !!message.member.roles.cache.get(stats.gamemaster_ingame));
 	}
 	
 	/* Find Command & Parameters */
@@ -193,7 +193,7 @@ client.on("messageCreate", async message => {
 	break;
 	/* Role Info (Add) */ // Returns the info for a role set by the roles command, but with additions
 	case "infoadd":
-		if(checkGM(message)) cmdInfoFancy(message.channel, [args[0]], false, false, true, false, ["", argsX[1].replace(/~/g, "\n").replace(/<\/>/g,"~")]);
+		if(checkGM(message)) cmdInfoFancy(message.channel, [args[0]], false, false, false, false, ["", argsX[1].replace(/~/g, "\n").replace(/<\/>/g,"~")]);
 	break;
 	/* Role Info (Classic) */ // Returns the info for a role set by the roles command
 	case "info_classic":
@@ -470,6 +470,7 @@ client.on("messageReactionRemove", async (reaction, user) => {
 
 /* Leave Detection */
 client.on("guildMemberRemove", async member => {
+    if(member.guild.id != stats.log_guild) return;
 	log(`❌ ${member.user} has left the server!`);
 	sql("UPDATE players SET alive = 0 WHERE id = " + connection.escape(member.id), result => {
 		log("✅ Killed `" +  member.displayName + "`!");
@@ -480,6 +481,7 @@ client.on("guildMemberRemove", async member => {
 
 /* Join Detection */
 client.on("guildMemberAdd", async member => {
+    if(member.guild.id != stats.log_guild) return;
 	log(`👋 ${member.user} has joined the server!`);
     let oog = member.guild.channels.cache.get("584793703923580965");
     if(oog) oog.send(`Welcome ${member.user} 👋!`);
@@ -527,24 +529,30 @@ function handleReactionRole(reaction, user, add) {
 	}
 }
 
-async function urlHandle(message) {
+async function urlHandle(message, autoApprove = false) {
 	var urls = findUrls(message.content);
 	urls = urls.filter(el => el.search("discord.com") == -1);
 	if(!urls.length) return;
-	var text = message.content;
-	for(let i = 0; i < urls.length; i++) {
-		log(stats.ping + " <#" + message.channel.id + "> " + urls[i]);
-		text = text.replace(urls[i],"*~~url~~*");
-	}
-	await cmdWebhook(message.channel, message.member, text.split(" "));
-	await sleep(1000);
-	for(let i = 0; i < urls.length; i++) {
-		message.channel.send("*This url is not available.* ||" + Buffer.from(urls[i].replace(/\|/,"")).toString('base64') + "||").then(m => {
-			m.react(client.emojis.cache.get(stats.yes_emoji));
-			m.react(client.emojis.cache.get(stats.no_emoji));
-		});
-	}
-	message.delete();
+    if(!autoApprove) {
+        var text = message.content;
+        for(let i = 0; i < urls.length; i++) {
+            log(stats.ping + " <#" + message.channel.id + "> " + urls[i]);
+            text = text.replace(urls[i],"*~~url~~*");
+        }
+        await cmdWebhook(message.channel, message.member, text.split(" "));
+        await sleep(1000);
+        for(let i = 0; i < urls.length; i++) {
+            message.channel.send("*This url is not available.* ||" + Buffer.from(urls[i].replace(/\|/,"")).toString('base64') + "||").then(m => {
+                m.react(client.emojis.cache.get(stats.yes_emoji));
+                m.react(client.emojis.cache.get(stats.no_emoji));
+            });
+        }
+        message.delete();
+    } else {
+        for(let i = 0; i < urls.length; i++) {
+            message.channel.send(urls[i]);
+        }
+    }
 }
 
 /* util */

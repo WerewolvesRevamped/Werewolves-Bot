@@ -482,7 +482,7 @@ module.exports = function() {
 			let playerListArray = result.map(el => {  
                 let rName = toTitleCase(el.role);
                 let rEmoji = getRoleEmoji(rName);
-                rEmoji = (rEmoji ? `<:${rEmoji.name}:${rEmoji.id}> | ` : "");
+                rEmoji = (rEmoji ? `<:${rEmoji.name}:${rEmoji.id}> | ` : "❓ | ");
                 return `${channel.guild.members.cache.get(el.id) ? (el.alive ? client.emojis.cache.get(stats.yes_emoji) : client.emojis.cache.get(stats.no_emoji)) : "⚠️"} | ${rEmoji}${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"} (${el.role.split(",").map(role => toTitleCase(role)).join(" + ")})`
             });
             const perMessageCount = 18;
@@ -1285,9 +1285,9 @@ module.exports = function() {
 	}
 	
 	/* Check if a member is a Game Master (or Bot) */
-	this.isGameMaster = function(member) {
+	this.isGameMaster = function(member, noAdminIngame = false) {
         if(!member) return false;
-		return member && member.roles && (member.roles.cache.get(stats.gamemaster) || member.roles.cache.get(stats.bot) || member.roles.cache.get(stats.admin));
+		return member && member.roles && (member.roles.cache.get(stats.gamemaster) || member.roles.cache.get(stats.bot) || member.roles.cache.get(stats.admin) || (!noAdminIngame && member.roles.cache.get(stats.admin_ingame)));
 	}
 
 	/* Check if a member is a (living) participant */

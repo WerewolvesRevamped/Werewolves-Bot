@@ -374,6 +374,7 @@ module.exports = function() {
                 console.log(titleRaw);
 				desc = applyTheme(desc);
 				desc = applyEmoji(desc);
+				desc = applyNums(channel.guild, desc);
 				
                 let cMsg = desc;
                 
@@ -1357,6 +1358,7 @@ module.exports = function() {
                     desc = desc.join("|");
                 }
 				desc = applyEmoji(desc);
+				desc = applyNums(channel.guild, desc);
                 // simplified role description support
                 desc = desc.split("__Simplified__");
                 if(simp) desc = desc[1] ? (desc[0].split("__Basics__")[0] ? desc[0].split("__Basics__")[0] : toTitleCase(parseRole(args[0]))) + "\n" + desc[1].trim() : desc[0]; 
@@ -1424,6 +1426,19 @@ module.exports = function() {
 		return text;
 	}
     
+    this.applyNums = function(guild, text) {
+        let playerCount = guild.roles.cache.get(stats.participant).members.size;
+        playerCount += guild.roles.cache.get(stats.signed_up).members.size;
+        text = text.replace(/\{\|1\|\}/g, playerCount);
+        text = text.replace(/\{\|2\|\}/g, Math.floor(playerCount / 2));
+        text = text.replace(/\{\|3\|\}/g, Math.floor(playerCount / 3));
+        text = text.replace(/\{\|4\|\}/g, Math.floor(playerCount / 4));
+        text = text.replace(/\{\|5\|\}/g, Math.floor(playerCount / 5));
+        text = text.replace(/\{\|10\|\}/g, Math.floor(playerCount / 10));
+        text = text.replace(/\{\|20\|\}/g, Math.floor(playerCount / 20));
+        return text;
+    }
+    
     const repoBaseUrl = "https://raw.githubusercontent.com/venomousbirds/Werewolves-Icons/main/";
     this.getRoleData = function(role, description) {
         // prep 
@@ -1443,6 +1458,10 @@ module.exports = function() {
         if(!catRole) repoPath += toTitleCase(role) + ".png";
         repoPath = repoPath.replace(/ /g, "%20");
         repoPath += `?version=${stats.icon_version}`;
+        
+        // glitched overwrite
+        //repoPath = 'http://ww.mctsts.com/icon_glitched.php?name=' + toTitleCase(role).replace(/ /g, "%20");
+        //repoPath += `&version=${stats.icon_version}`;
         
         // get color
         let color = 0;
@@ -1546,6 +1565,7 @@ module.exports = function() {
                 roleNameParsed = roleNameParsed.split("$")[0];
 				var desc = result[0].description.replace(/~/g,"\n");
 				desc = applyEmoji(desc);
+                desc = applyNums(channel.guild, desc);
                 
                 // split into name & text pairs + apply theme
                 desc = desc.split(/(?=__[\w\d_]+__)/).map(el => {
@@ -1657,6 +1677,7 @@ module.exports = function() {
                 } else { // apparntly not a role
                     let desc = result[0].description;
                     desc = applyEmoji(desc);
+                    desc = applyNums(channel.guild, desc);
                     let descSplit = desc.split(/~/);
                     let catRole = getCategoryRole(descSplit[0]);
                     let title = descSplit.shift();
@@ -1767,8 +1788,8 @@ module.exports = function() {
 	}
     
     this.getRoleEmoji = function(roleName) {
-        roleName = toTitleCase(roleName).replace(/[^\w]+/g,"").trim();
-        return client.emojis.cache.find(el => el.name == roleName);
+        roleName = toTitleCase(roleName).replace(/[^\w]+/g,"").trim().toLowerCase();
+        return client.emojis.cache.find(el => el.name.toLowerCase() == roleName);
     }
     
     const fetch = require('node-fetch');
