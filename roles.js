@@ -1321,7 +1321,6 @@ module.exports = function() {
 			// check if match is close enough
 			if(bestMatch.value <= ~~(roleName.length/2)) { // auto alias if so, but send warning 
 				args = [parseRole(bestMatch.name)];
-                if(args[0].length == 16) { channel.send("❗ Could not find role `" + roleName + "`."); return; } // S8G8 Map Block
                 if(args[0].toLowerCase() === bestMatch.name.toLowerCase()) channel.send("❗ Could not find role `" + roleName + "`. Did you mean `" + args[0] + "`?");
                 else channel.send("❗ Could not find role `" + roleName + "`. Did you mean `" + args[0] + "` (aka `" + (bestMatch.name.length>2 ? toTitleCase(bestMatch.name) : bestMatch.name.toUpperCase()) + "`)?");
 			} else { // early fail if otherwise
