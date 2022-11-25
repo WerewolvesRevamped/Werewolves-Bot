@@ -459,8 +459,11 @@ module.exports = function() {
 		}, () => {
 			channel.send("⛔ Database error. Could not reset poll counter!");
 		});
-		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.participant).members.toJSON(), 0);
-		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.dead_participant).members.toJSON(), 0);
+		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.participant).members.toJSON(), 0, "participant");
+		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.dead_participant).members.toJSON(), 0, "dead participant");
+		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.gamemaster).members.toJSON(), 0, "game master");
+		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.spectator).members.toJSON(), 0, "spectator");
+		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.sub).members.toJSON(), 0, "substitute");
 		// Remove Roles & Nicknames
 		wroles_remove(channel, [stats.signed_up, stats.spectator, stats.mayor, stats.mayor2, stats.reporter, stats.guardian, stats.sub, stats.participant, stats.dead_participant, stats.host], ["signed up", "spectator", "mayor", "mayor2", "reporter", "guardian", "substitute", "participant", "dead participant", "host"]);
         // run role removal again for critical roles because sometimes it fails even though it says it succeeds
@@ -518,18 +521,18 @@ module.exports = function() {
 	}
 	
 	// Reset nicknames
-	this.removeNicknameOnce = function(channel, members, index) {
+	this.removeNicknameOnce = function(channel, members, index, name) {
 		if(index >= members.length) {
-			channel.send("✅ Reset nicknames of `" + members.length + "` players!");
+			if(members.length > 0) channel.send("✅ Reset nicknames of `" + members.length + "` " + name + (members.length>1?"s":"") + "!");
 			return;
 		}
 		members[index].setNickname("").then(m => {
-			removeNicknameOnce(channel, members, ++index);
+			removeNicknameOnce(channel, members, ++index, name);
 		}).catch(err => { 
 			// Missing permissions
 			logO(err); 
 			sendError(channel, err, "Could not reset nickname from " + members[index].displayName);
-			removeNicknameOnce(channel, members, ++index);
+			removeNicknameOnce(channel, members, ++index, name);
 		});
 	}
 	

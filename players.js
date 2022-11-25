@@ -323,7 +323,7 @@ module.exports = function() {
 			// Print killq
 			let playerList = result.map(el => {
                 let member = channel.guild.members.cache.get(el.id);
-                let rName = toTitleCase(el.role);
+                let rName = toTitleCase(el.role.split(",")[0]);
                 let rEmoji = getRoleEmoji(rName);
                 return idToEmoji(el.id) + " - " + member.displayName + "/" + member.user.username + " - " + (rEmoji ? `<:${rEmoji.name}:${rEmoji.id}> ` : "") + rName;
             }).join("\n");
@@ -480,7 +480,7 @@ module.exports = function() {
 		// Get a list of players
 		sql("SELECT id,emoji,role,alive,ccs FROM players", result => {
 			let playerListArray = result.map(el => {  
-                let rName = toTitleCase(el.role);
+                let rName = toTitleCase(el.role.split(",")[0]);
                 let rEmoji = getRoleEmoji(rName);
                 rEmoji = (rEmoji ? `<:${rEmoji.name}:${rEmoji.id}> | ` : "❓ | ");
                 return `${channel.guild.members.cache.get(el.id) ? (el.alive ? client.emojis.cache.get(stats.yes_emoji) : client.emojis.cache.get(stats.no_emoji)) : "⚠️"} | ${rEmoji}${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"} (${el.role.split(",").map(role => toTitleCase(role)).join(" + ")})`

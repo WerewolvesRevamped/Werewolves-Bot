@@ -150,8 +150,8 @@ module.exports = function() {
 				});
 			break;
 			case "status":
-				if(args[1] != "dnd" && args[1] != "online" && args[1] != "idle") {
-					message.channel.send("⛔ Syntax error. Needs to be `online`, `idle` or `dnd`!"); 
+				if(args[1] != "dnd" && args[1] != "online" && args[1] != "idle" && args[1] != "invisible") {
+					message.channel.send("⛔ Syntax error. Needs to be `online`, `idle`, `dnd` or `invisible`!"); 
 					return;
 				}
 				client.user.setStatus(args[1])

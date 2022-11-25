@@ -83,6 +83,7 @@ function timeConverter(UNIX_timestamp){
     return time;
 }
 
+
 /* New Message */
 client.on("messageCreate", async message => {
 	/* Fetch Channel */
@@ -150,6 +151,15 @@ client.on("messageCreate", async message => {
 	case "ping":
 		cmdPing(message);
 	break;
+    case "embed": // generates an embed (not documented!!)
+        if(checkGM(message)) {
+            let embed = message.content.split(" ");
+            embed.shift();
+            embed = JSON.parse(embed.join(" ").replace(/'/g,'"'));
+            if(embed.embed) embed = embed.embed;
+            message.channel.send({embeds:[ embed ]});
+        }
+    break;
     case "edit":
         if(checkGM(message)) cmdEdit(message.channel, args, argsX);
     break;
