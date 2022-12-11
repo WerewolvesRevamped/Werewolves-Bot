@@ -1436,6 +1436,10 @@ module.exports = function() {
         text = text.replace(/\{\|5\|\}/g, Math.floor(playerCount / 5));
         text = text.replace(/\{\|10\|\}/g, Math.floor(playerCount / 10));
         text = text.replace(/\{\|20\|\}/g, Math.floor(playerCount / 20));
+        text = text.replace(/\{\|2\^\|\}/g, Math.ceil(playerCount / 2));
+        text = text.replace(/\{\|3\^\|\}/g, Math.ceil(playerCount / 3));
+        text = text.replace(/\{\|4\^\|\}/g, Math.ceil(playerCount / 4));
+        text = text.replace(/\{\|5\^\|\}/g, Math.ceil(playerCount / 5));
         return text;
     }
     
@@ -1592,6 +1596,9 @@ module.exports = function() {
                     case "temporary":
                     case "fake role": roleType = "Temporary Role"; break;
                     case "technical": roleType = "Technical Role"; break;
+                    case "transformation": roleType = "Transformation Role"; break;
+                    case "transformation limited":
+                    case "limited transformation": roleType = "Limited & Transformation Role"; break;
                 }
                 
                 // get the url to the icon on the repo
@@ -1703,11 +1710,11 @@ module.exports = function() {
                     descSplit = descSplit.map(relFull => {
                         let rel = relFull.split(" (")[0]; // remove team names
                         rel = rel.replace(/ x\d+$/, ""); // remove number multipliers
-                        if(rel[0] && rel[0].match(/[A-Za-z\*]/) && rel.length < 30 && rel.length > 2 && !rel.match(/[^\w\d\-_\s\*']/)) { // check if role
+                        if(rel[0] && rel[0].match(/[A-Za-z\*]/) && rel.length < 30 && rel.length > 2 && !rel.match(/[^\w\d\-_\s\*'\\]/)) { // check if role
                                 let rName = parseRole(rel.replace(/[^\w\s\-']/g,"").trim()); // parse role
-                                //console.log(rName);
+                                console.log(rName);
                                 if(rName && verifyRole(rName)) { // find an emoji
-                                    //console.log("found => " + rName);
+                                    console.log("found => " + rName);
                                     let rEmoji = getRoleEmoji(rName);
                                     if(rEmoji) emojiFound++;
                                     else emojiFound--;

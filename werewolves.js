@@ -46,6 +46,20 @@ client.on("ready", () => {
     //logDMs();
 });
 
+async function forceReload(channel) {
+    try { sqlSetup(); channel.send("✅ Setup DB connection."); } catch (err) { logO(err); channel.send("⛔ Failed to setup DB connection."); } await sleep(1000);
+    try { getStats(); channel.send("✅ Loaded stats."); } catch (err) { logO(err); channel.send("⛔ Failed to load stats."); } await sleep(1000);
+    try { getIDs(); channel.send("✅ Loaded ids."); } catch (err) { logO(err); channel.send("⛔ Failed to load ids."); } await sleep(1000);
+    try { cacheRoleInfo(); channel.send("✅ Cached role info."); } catch (err) { logO(err); channel.send("⛔ Failed to cache role info."); } await sleep(1000);
+    try { getVotes(); channel.send("✅ Cached votes."); } catch (err) { logO(err); channel.send("⛔ Failed to cache votes."); } await sleep(1000);
+    try { getCCs(); channel.send("✅ Cached cc cats."); } catch (err) { logO(err); channel.send("⛔ Failed to cache cc cats."); } await sleep(1000);
+    try { getSCCats(); channel.send("✅ Cached sc cats."); } catch (err) { logO(err); channel.send("⛔ Failed to cache sc cats."); } await sleep(1000);
+    try { getPublicCat(); channel.send("✅ Cached public cat."); } catch (err) { logO(err); channel.send("⛔ Failed to cache public cat."); } await sleep(1000);
+    try { loadPollValues(); channel.send("✅ Cached poll values."); } catch (err) { logO(err); channel.send("⛔ Failed to cache poll values."); } await sleep(1000);
+    try { cacheIconLUT(); channel.send("✅ Loaded icon lut."); } catch (err) { logO(err); channel.send("⛔ Failed to load icon lut."); } await sleep(1000);
+    try { global.client.guilds.fetch(stats.log_guild).then(guild => {guild.members.fetch().then((members) => {})}); channel.send("✅ Loaded users."); } catch (err) { logO(err); channel.send("⛔ Failed to load users."); } await sleep(1000);
+}
+
 async function logDMs() {
     // test
     let ids = [];
@@ -160,12 +174,15 @@ client.on("messageCreate", async message => {
             message.channel.send({embeds:[ embed ]});
         }
     break;
+    case "force_reload": // reloads db and caches (not documented!!)
+        if(checkGM(message)) forceReload(message.channel);
+    break;
     case "edit":
         if(checkGM(message)) cmdEdit(message.channel, args, argsX);
     break;
 	/* Split */
 	case "say":
-		if(checkGM(message)) message.channel.send(args.join(" "));
+		if(checkGM(message)) message.channel.send(argsX.join(" ").replace(/~/g,"\n"));
 	break;
 	case "modify":
 		if(checkGM(message)) cmdModify(message, args, argsX);
