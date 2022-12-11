@@ -518,7 +518,7 @@ module.exports = function() {
 	
 	/* Starts the creation of individual scs */
 	this.createSCStartInd = function(channel, cc, debug) {
-		sql("SELECT id,role FROM players WHERE type='player' ORDER BY role ASC", result => {
+		sql("SELECT id,role FROM players ORDER BY role ASC", result => {
 			createOneIndSC(channel, cc, result, 0, debug);
 		}, () => {
 			channel.send("⛔ Database error. Unable to get a list of player roles."); 

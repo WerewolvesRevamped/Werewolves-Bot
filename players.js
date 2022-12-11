@@ -1202,17 +1202,19 @@ module.exports = function() {
         }
         
         // proceeed to do things
-        let msg = "??", dbType = "player", msg2 = "??", signupRole = null;
+        let msg = "??", dbType = "player", msg2 = "??", signupRole = null, defRole = "none";
         if(signupMode == "signup") {
             msg = "Attempting to sign you up";
             dbType = "player";
             msg2 = "signed up with emoji";
             signupRole = stats.signed_up;
+            defRole = "none";
         } else if(signupMode == "substitute") {
             msg = "Attempting to make you a substitute player";
             dbType = "substitute";
             msg2 = "is a substitute with emoji";
             signupRole = stats.sub;
+            defRole = "substitute";
         }
         
         if(!isSignedUp(member) && !isSub(member)) {
@@ -1231,7 +1233,7 @@ module.exports = function() {
 								});
 						} else { 
 							// Signup emoji
-							sql("INSERT INTO players (id, emoji, role, type) VALUES (" + connection.escape(member.id) + "," + connection.escape("" + args[0]) + "," + connection.escape("none") +  "," + connection.escape(dbType) + ")", result => {
+							sql("INSERT INTO players (id, emoji, role, type) VALUES (" + connection.escape(member.id) + "," + connection.escape("" + args[0]) + "," + connection.escape(defRole) +  "," + connection.escape(dbType) + ")", result => {
 								message.edit(`✅ ${member.user} ${msg2} ${args[0]}!`);
 								if(signupMode == "signup") updateGameStatusDelayed(message.guild);
 								message.reactions.removeAll().catch(err => { 
