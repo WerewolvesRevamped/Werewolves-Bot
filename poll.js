@@ -15,6 +15,9 @@ module.exports = function() {
 			case "new":  cmdPollNew(message.channel, args); break;
 			case "end": 
 			case "close": cmdPollClose(message.channel, args); break;
+			case "list": cmdPollList(message.channel); break;
+			case "delete": cmdPollDelete(message.channel, args); break;
+			case "load": cmdPollLoad(message.channel, args); break;
 			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
 		}
 	}
@@ -48,12 +51,13 @@ module.exports = function() {
 		switch(args[0]) {
 			case "":
 				if(isGameMaster(member)) help += stats.prefix + "poll [new|close] - Manages polls\n";
+				if(isGameMaster(member)) help += stats.prefix + "poll [list|delete|load] - Advanced poll management\n";
 			break;
 			case "poll":
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
 					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "poll [new|close]\n```";
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "poll [new|close|list|delete|load]\n```";
 						help += "```\nFunctionality\n\nGroup of commands to handle polls. " + stats.prefix + "help poll <sub-command> for detailed help.```";
 						help += "```diff\nAliases\n\n- pl\n- polls\n```";
 					break;
@@ -67,12 +71,68 @@ module.exports = function() {
 						help += "```\nFunctionality\n\nCloses a poll with the name <Poll Name> evaluates it depending on what type it is and sends the results in the channel the command is run in. If more than one poll name is provided, attempts to close all polls```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "poll close dsk\n```";
 					break;
+					case "list":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "poll list```";
+						help += "```\nFunctionality\n\nLists all currently registered polls.```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "poll list\n```";
+					break;
+					case "delete":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "poll delete <ai_id>```";
+						help += "```\nFunctionality\n\nDeletes a poll by <ai_id>, this value can be found in the first column of the poll list command. Some polls may consist out of several messages and need to be deleted once for each.```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "poll delete 1\n```";
+					break;
+					case "load":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "poll delete <poll id> <message id> <poll type>```";
+						help += "```\nFunctionality\n\nAdds a poll to the poll database. This should generally only done on polls that were deleted by accident or to update poll type/id (delete the poll first, then load it again!), though it is possible to load messages that didn't start out as polls this way, however closing will only succeed if the reactions are manually added. <poll id> corresponds to the poll name (without #!), <message id> to the discord id of the poll message (some polls may consist out of several messages in which case they need to be re-added several times) and <poll type> the type of poll (there is now automatic logic here, 'private' and 'public' (or any other type) MUST be specified).```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "poll load wolfpack 1051596269744820235 private\n```";
+					break;
 				}
 			break;
 		}
 		return help;
 	}
 	
+    
+	this.cmdPollList = function(channel) {
+		sql("SELECT * FROM polls", result => {
+			if(result.length > 0) {
+                let msg = [];
+                result.forEach(el => {
+                    msg.push("`" + el.ai_id + "` - `#" + el.poll_id + "` [" + el.type + "] @ `" + el.message_id + "`");
+                });
+                channel.send("**Poll List**\n" + msg.join("\n"));
+            } else {
+                channel.send("⛔ Database error. Could not find any polls!");
+            }
+		}, () => {
+			channel.send("⛔ Database error. Could not get info from poll database!");
+		});
+	}
+    
+	this.cmdPollDelete = function(channel, args) {
+		if(!args[1] || isNaN(args[1])) { 
+			message.channel.send("⛔ Syntax error. Not enough parameters!"); 
+			return; 
+		}
+		sql("DELETE FROM polls WHERE ai_id =" + connection.escape(args[1]), result => {
+			channel.send("✅ Deleted poll `" + args[1] + "`!");
+		}, () => {
+			channel.send("⛔ Database error. Could not get delete from poll database!");
+		});
+	}
+    
+    this.cmdPollLoad = function(channel, args) {
+		if(!args[1] || !args[2] || !args[3]) { 
+			message.channel.send("⛔ Syntax error. Not enough parameters!"); 
+			return; 
+		}
+        sql("INSERT INTO polls (poll_id, message_id, type) VALUES (" + connection.escape(args[1]) + ", " + connection.escape(args[2]) + ", " + connection.escape(args[3]) + ")", result => {
+			channel.send("✅ Added poll `" + args[1] + "`!");
+		}, () => {
+            // DB Error
+            channel.send("⛔ Database error. Could not add poll message to database!");
+        })
+	}
 	
 	// custom values
 	this.pollValues = {};
