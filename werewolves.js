@@ -401,7 +401,7 @@ client.on("messageCreate", async message => {
 	break;
 	/* Substitute */
 	case "substitute":
-		cmdSubstitute(message.channel, message.member);
+		cmdSubstitute(message.channel, message.member, args);
 	break;
 	/* Sudo */
 	case "sudo":

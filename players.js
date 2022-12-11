@@ -29,6 +29,8 @@ module.exports = function() {
 			case "set": cmdPlayersSet(message.channel, args); break;
 			case "resurrect": cmdPlayersResurrect(message.channel, args); break;
 			case "signup": cmdPlayersSignup(message.channel, args); break;
+			case "signsub": 
+			case "signup_sub": cmdPlayersSignupSubstitute(message.channel, args); break;
 			case "sub": 
 			case "substitute": cmdPlayersSubstitute(message, args); break;
 			case "switch": cmdPlayersSwitch(message, args); break;
@@ -76,7 +78,7 @@ module.exports = function() {
 		switch(args[0]) {
 			case "":
 				if(isGameMaster(member)) help += stats.prefix + "players [list|msgs|log|log2|votes|msgs2|roles] - Information about players\n";
-				if(isGameMaster(member)) help += stats.prefix + "players [get|get_clean|set|resurrect|signup] - Manages players\n";
+				if(isGameMaster(member)) help += stats.prefix + "players [get|get_clean|set|resurrect|signup|signup_sub] - Manages players\n";
 				if(isGameMaster(member)) help += stats.prefix + "players [substitute|switch] - Manages player changes\n";
 				if(isGameMaster(member)) help += stats.prefix + "killq [add|remove|killall|list|clear] - Manages kill queue\n";
 				if(isGameMaster(member)) help += stats.prefix + "kqak - Instant kill a player\n";
@@ -87,6 +89,23 @@ module.exports = function() {
 				help += stats.prefix + "signup - Signs you up for the next game\n";
 				help += stats.prefix + "emojis - Emoji & Player ID list for CCs\n";
 				help += stats.prefix + "roll [-|whitelist|blacklist|number|?d?] - Randomizes\n";
+				help += stats.prefix + "spectate - Makes you a spectator\n";
+				help += stats.prefix + "substitute - Makes you a substitute player\n";
+			break;
+			case "spectate":
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "spectate\n```";
+				help += "```\nFunctionality\n\nMakes you a spectator, if you are not a participant and a game is running.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "spectate\n< ✅ Attempting to make you a spectator, McTsts!\n```";
+				help += "```diff\nAliases\n\n\n- s\n- spec\n- spectator\n```";
+			break;
+			case "substitute":
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "substitute <Emoji>\n```";
+				help += "```\nFunctionality\n\nSigns you up as a substitute for the next game with emoji <Emoji>, which has to be a valid emoji, that is not used by another player yet. If you have already signedup, signout before using this command.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "signup 🛠\n< ✅ @McTsts is a substitute with emoji 🛠!\n\n> " + stats.prefix + "signup\n< ✅ Successfully signed out, @McTsts. You will no longer substitute for the next game!\n```";
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "substitute\n```";
+				help += "```\nFunctionality\n\nMakes you a substitute player, if you are not a participant and a game is running.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "spectate\n< ✅ Attempting to make you a substitute player, McTsts!\n```";
+				help += "```diff\nAliases\n\n\n- sub\n- unsub\n- unsubstitute\n```";
 			break;
 			case "modrole":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "modrole [add|remove] <user id> <role id>\n```";
@@ -126,7 +145,7 @@ module.exports = function() {
 			break;
 			case "signup": 
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "signup <Emoji>\n```";
-				help += "```\nFunctionality\n\nSigns you up for the next game with emoji <Emoji>, which has to be a valid, not custom, emoji, that is not used by another player yet. If you have already signedup the command changes your emoji. If no emoji is provided, you are signed out.\n```";
+				help += "```\nFunctionality\n\nSigns you up for the next game with emoji <Emoji>, which has to be a valid emoji, that is not used by another player yet. If you have already signedup the command changes your emoji. If no emoji is provided, you are signed out.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "signup 🛠\n< ✅ @McTsts signed up with emoji 🛠!\n\n> " + stats.prefix + "signup\n< ✅ Successfully signed out, @McTsts. You will no longer participate in the next game!\n```";
 				help += "```diff\nAliases\n\n- join\n- sign-up\n- sign_up\n- unsignup\n- signout\n- participate\n- sign-out\n- sign_out\n- leave\n- unjoin```";
 			break;
@@ -198,6 +217,13 @@ module.exports = function() {
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players signup <Player> <Emoji>\n```";
 						help += "```\nFunctionality\n\nPretends the player identified with <Player> used the command " + stats.prefix + "signup <Emoji>. This command works even if signups aren't open.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "players signup mctsts 🛠\n< ✅ @McTsts signed up with emoji 🛠!\n```";
+					break;
+					case "signsub":
+					case "signup_sub":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "players signup_sub <Player> <Emoji>\n```";
+						help += "```\nFunctionality\n\nPretends the player identified with <Player> used the command " + stats.prefix + "substitute <Emoji>. This command works even if signups aren't open.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "players signup_sub mctsts 🛠\n< ✅ @McTsts is a substitute with emoji 🛠!\n```";
+						help += "```diff\nAliases\n\n- players signsub\n```";
 					break;
 					case "sub":
 					case "substitute":
@@ -478,7 +504,7 @@ module.exports = function() {
 	/* Lists all signedup players */
 	this.cmdPlayersList = function(channel) {
 		// Get a list of players
-		sql("SELECT id,emoji,role,alive,ccs FROM players", result => {
+		sql("SELECT id,emoji,role,alive,ccs FROM players WHERE type='player'", result => {
 			let playerListArray = result.map(el => {  
                 let rName = toTitleCase(el.role.split(",")[0]);
                 let rEmoji = getRoleEmoji(rName);
@@ -512,7 +538,7 @@ module.exports = function() {
 	/* Lists all vote changes */
 	this.cmdPlayersVotes = function(channel) {
 		// Get a list of players
-		sql("SELECT id,emoji,role,alive,public_value,private_value,public_votes,ccs FROM players", result => {
+		sql("SELECT id,emoji,role,alive,public_value,private_value,public_votes,ccs FROM players WHERE type='player'", result => {
 			let playerListArray = result.filter(el => el.alive && (el.public_value != 1 || el.private_value != 1 || el.public_votes != 0)).map(el => `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"} ${el.public_value},${el.private_value},${el.public_votes}`);
 			let playerList = [], counter = 0;
 			for(let i = 0; i < playerListArray.length; i++) {
@@ -540,7 +566,7 @@ module.exports = function() {
 	/* Returns a comman separated role list */
 	this.cmdPlayersRoleList = function(channel) {
 		// Get a list of players
-		sql("SELECT role FROM players", result => {
+		sql("SELECT role FROM players WHERE type='player'", result => {
 			let roleList = result.map(el => el.role);
 			channel.send("**Roles** | Total: " + result.length + "\n```" + roleList.join(",") + "```")
             .catch(err => {
@@ -557,7 +583,7 @@ module.exports = function() {
 	/* Lists all signedup players in log format */
 	this.cmdPlayersLog = function(channel) {
 		// Get a list of players
-		sql("SELECT id,emoji,role,alive,public_value,private_value,public_votes,ccs FROM players", result => {
+		sql("SELECT id,emoji,role,alive,public_value,private_value,public_votes,ccs FROM players WHERE type='player'", result => {
 			let playerList = result.map(el => {
                 let player = channel.guild.members.cache.get(el.id);
                 let nickname = player.nickname ? " (as `" + player.nickname + "`)" : "";
@@ -579,7 +605,7 @@ module.exports = function() {
 	/* Lists all signedup players in a different log format */
 	this.cmdPlayersLog2 = function(channel) {
 		// Get a list of players
-		sql("SELECT id,emoji,role,alive,public_value,private_value,public_votes,ccs FROM players WHERE alive=1", result => {
+		sql("SELECT id,emoji,role,alive,public_value,private_value,public_votes,ccs FROM players WHERE alive=1 AND type='player'", result => {
 			let playerList = result.map(el => {
 				let thisRoles = el.role.split(",").map(role => toTitleCase(role));
 				let thisPlayer = channel.guild.members.cache.get(el.id);
@@ -621,7 +647,7 @@ module.exports = function() {
 	/* Lists player message counts */
 	this.cmdPlayersListMsgs = function(channel) {
 		// Get a list of players
-		sql("SELECT id,emoji,public_msgs,private_msgs FROM players", result => {
+		sql("SELECT id,emoji,public_msgs,private_msgs FROM players WHERE type='player'", result => {
             let totalMsgs = 0;
             let totalMsgsPrivate = 0;
             let totalMsgsPublic = 0;
@@ -656,7 +682,7 @@ module.exports = function() {
 	/* Lists message counts for living players    */
 	this.cmdPlayersListMsgs2 = function(channel, args) {
 		// Get a list of players
-		sql("SELECT id,emoji,public_msgs,private_msgs FROM players WHERE alive=1", result => {
+		sql("SELECT id,emoji,public_msgs,private_msgs FROM players WHERE alive=1 AND type='player'", result => {
             let totalMsgs = 0;
             let totalMsgsPrivate = 0;
             let totalMsgsPublic = 0;
@@ -699,7 +725,7 @@ module.exports = function() {
 		let blacklist = parseUserList(channel, args, 1) || [];
 		console.log(blacklist);
 		// Get a list of players
-		sql("SELECT id FROM players WHERE alive=1", result => {
+		sql("SELECT id FROM players WHERE alive=1 AND type='player'", result => {
 			let playerList = result.map(el => getUser(channel, el.id)); 
 			if(!wl) playerList = playerList.filter(el => blacklist.indexOf(el) === -1);
 			else playerList = playerList.filter(el => blacklist.indexOf(el) != -1);
@@ -748,7 +774,7 @@ module.exports = function() {
 	/* Lists all signedup players */
 	this.cmdListSignedup = function(channel) {
 		// Get a list of players
-		sql("SELECT id,emoji FROM players", result => {
+		sql("SELECT id,emoji FROM players WHERE type='player'", result => {
 			let playerList = result.map(el => `${el.emoji}  - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username : "*user left*"} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
 			// Print message
 			channel.send("✳ Listing signed up players").then(m => {
@@ -766,7 +792,7 @@ module.exports = function() {
 	/* Lists all signedup players */
 	this.cmdListSignedupAlphabetical = function(channel) {
 		// Get a list of players
-		sql("SELECT id,emoji FROM players", result => {
+		sql("SELECT id,emoji FROM players WHERE type='player'", result => {
 			let playerList = result.sort((a,b) => {
                 let pa = channel.guild.members.cache.get(a.id);
                 let pb = channel.guild.members.cache.get(b.id);
@@ -793,7 +819,7 @@ module.exports = function() {
 			return; 
 		}
 		// Get a list of players
-		sql("SELECT id,emoji FROM players WHERE alive = 1", result => {
+		sql("SELECT id,emoji FROM players WHERE alive = 1 AND type='player'", result => {
 			let playerList = result.map(el => `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username : "*user left*"} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
 			// Print message
 			channel.send("✳ Listing alive players").then(m => {
@@ -810,25 +836,45 @@ module.exports = function() {
 	
 	/* Substitutes a player */
 	this.cmdPlayersSubstitute = async function(message, args) {
-		if(!args[2] || !args[3]) { 
-			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "players substitute <current player id> <new player id> <new emoji>`!"); 
+		if(!args[2]) { 
+			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "players substitute <current player id> <new player id>`!"); 
 			return; 
 		}
-		cmdPlayersSet(message.channel, ["set", "role", getUser(message.channel, args[1]), "substituted"]);
-		cmdKillqAdd(message.channel, ["add", getUser(message.channel, args[1])]);
+        let originalPlayer = getUser(message.channel, args[1]);
+        let newPlayer = getUser(message.channel, args[2]);
+        let newPlayerMember = message.channel.guild.members.cache.get(newPlayer);
+        if(!originalPlayer || !newPlayer) {
+			message.channel.send("⛔ Player error. Could not find player!"); 
+			return; 
+        }
+        // substitution
+        let subRole = pRoles.find(el => el.id === originalPlayer).role;
+		cmdPlayersSet(message.channel, ["set", "role", originalPlayer, "substituted"]);
+		cmdPlayersSet(message.channel, ["set", "type", originalPlayer, "substituted"]);
+		cmdKillqAdd(message.channel, ["add", originalPlayer]);
 		setTimeout(function () {
 			confirmActionExecute("killq killall", message, false);
 		}, 5000);
 		setTimeout(function () {
-			cmdPlayersSet(message.channel, ["set", "id", getUser(message.channel, args[1]), getUser(message.channel, args[2])]);
-			cmdPlayersSet(message.channel, ["set", "emoji", getUser(message.channel, args[2]), args[3]]); 
-			cmdPlayersSet(message.channel, ["set", "role", getUser(message.channel, args[2]), pRoles.find(el => el.id === getUser(message.channel, args[1])).role]); 
-			cmdPlayersResurrect(message.channel, ["resurrect", getUser(message.channel, args[2])]);
+			cmdPlayersSet(message.channel, ["set", "type", newPlayer, "player"]); 
+			cmdPlayersSet(message.channel, ["set", "role", newPlayer, subRole]); 
+            // add particpant role
+            newPlayerMember.roles.add(stats.participant).catch(err => { 
+                // Missing permissions
+                logO(err); 
+                editError(message, err, "Could not add role!");
+            });
+            // remove sub role
+            newPlayerMember.roles.remove(stats.sub).catch(err => { 
+                // Missing permissions
+                logO(err); 
+                editError(message, err, "Could not remove role!");
+            });
 		}, 10000);
 		setTimeout(function () {
 			let categories = cachedCCs;
 			categories.push(...cachedSCs)
-			substituteChannels(message.channel, categories, 0, getUser(message.channel, args[1]), getUser(message.channel, args[2]));
+			substituteChannels(message.channel, categories, 0, originalPlayer, newPlayer);
 		}, 15000);
 		setTimeout(function() {
 			cacheRoleInfo();
@@ -1072,38 +1118,106 @@ module.exports = function() {
 			cmdSignup(channel, channel.guild.members.cache.get(user), args.slice(2), false);
 		}
 	}
+    
+	/* Substitutes somebody else */
+	this.cmdPlayersSignupSubstitute = function(channel, args) {
+		var user = getUser(channel, args[1]);
+		if(!user) { 
+			// Invalid user
+			channel.send("⛔ Syntax error. `" + args[1] + "` is not a valid player!"); 
+			return; 
+		} else {
+			cmdSignup(channel, channel.guild.members.cache.get(user), args.slice(2), false, "substitute");
+		}
+	}
+	
+	this.cmdSpectate = function(channel, member) {
+		if(isParticipant(member)) {
+			channel.send("⛔ Command error. Can't make you a spectator while you're a participant."); 
+			return;
+		} else if(stats.gamephase < gp.SETUP) {
+			channel.send("⛔ Command error. Can't make you a spectator while there is no game."); 
+			return;
+		}
+		channel.send("✅ Attempting to make you a spectator, " + member.displayName + "!");
+		member.roles.add(stats.spectator).catch(err => { 
+			// Missing permissions
+			logO(err); 
+			sendError(channel, err, "Could not add spectator role to " + member.displayName);
+		});
+	}
+	
+	this.cmdSubstitute = function(channel, member, args) {
+		if(isParticipant(member)) {
+			channel.send("⛔ Command error. Can't make you a substitute player while you're a participant."); 
+			return;
+		}
+		cmdSignup(channel, member, args, false, "substitute");
+	}
 	
 	/* Signup a player */
-	this.cmdSignup = function(channel, member, args, checkGamephase) {
+	this.cmdSignup = function(channel, member, args, checkGamephase, signupMode = "signup") {
 		// Wrong Phase 
 		if(checkGamephase && stats.gamephase != gp.SIGNUP) { 
 			channel.send("⛔ Signup error. Sign ups are not open! Sign up will open up again soon."); 
 			return; 
-		} else if(isSub(member)) { 
-		// Failed sign out
-			channel.send("⛔ Sign up error. Can't sign up while being a substitute player."); 
-			return; 
-		} else if(!args[0] && !isSignedUp(member)) { 
+		} else if(!args[0] && !isSignedUp(member) && signupMode == "signup") { 
 		// Failed sign out
 			channel.send("⛔ Sign up error. Can't sign out without being signed up! Use `" + stats.prefix + "signup <emoji>` to sign up."); 
 			return; 
-		} else if(!args[0] && isSignedUp(member)) { 
+		} else if(!args[0] && !isSub(member) && signupMode == "substitute") { 
+		// Failed sign out
+			channel.send("⛔ Sign up error. Can't stop substituting without being a substitute! Use `" + stats.prefix + "substitute <emoji>` to be a substitute player."); 
+			return; 
+		} else if(!args[0] && ((isSignedUp(member) && signupMode == "signup") || (isSub(member) && signupMode == "substitute"))) { 
 			// Sign out player
 			sql("DELETE FROM players WHERE id = " + connection.escape(member.id), result => {			
-				channel.send(`✅ Successfully signed out, ${member.user}. You will no longer participate in the next game!`); 
-				updateGameStatusDelayed(channel.guild);
-				member.roles.remove(stats.signed_up).catch(err => { 
-					// Missing permissions
-					logO(err); 
-					sendError(channel, err, "Could not remove role!");
-				});
+				if(signupMode == "signup") {
+                    channel.send(`✅ Successfully signed out, ${member.user}. You will no longer participate in the next game!`); 
+                    updateGameStatusDelayed(channel.guild);
+                    member.roles.remove(stats.signed_up).catch(err => { 
+                        // Missing permissions
+                        logO(err); 
+                        sendError(channel, err, "Could not remove role!");
+                    });
+                } else if(signupMode == "substitute") {
+                    channel.send(`✅ Successfully signed out, ${member.user}. You will no longer substitute for the next game!`); 
+                    member.roles.remove(stats.sub).catch(err => { 
+                        // Missing permissions
+                        logO(err); 
+                        sendError(channel, err, "Could not remove role!");
+                    });
+                }
 			}, () => {
 				// DB error
 				channel.send("⛔ Database error. Could not sign you out!");
 			});
-		} else if(!isSignedUp(member)) {
+            return;
+		} else if(isSub(member) && signupMode == "signup") {
+			channel.send("⛔ Sign up error. Can't sign up while being a substitute! Use `" + stats.prefix + "unsubstitute` to stop being a substitute player."); 
+			return; 
+        } else if(isSignedUp(member) && signupMode == "substitute") {
+			channel.send("⛔ Sign up error. Can't substitute while being signed up! Use `" + stats.prefix + "signout` to sign out."); 
+			return; 
+        }
+        
+        // proceeed to do things
+        let msg = "??", dbType = "player", msg2 = "??", signupRole = null;
+        if(signupMode == "signup") {
+            msg = "Attempting to sign you up";
+            dbType = "player";
+            msg2 = "signed up with emoji";
+            signupRole = stats.signed_up;
+        } else if(signupMode == "substitute") {
+            msg = "Attempting to make you a substitute player";
+            dbType = "substitute";
+            msg2 = "is a substitute with emoji";
+            signupRole = stats.sub;
+        }
+        
+        if(!isSignedUp(member) && !isSub(member)) {
 			// Sign Up
-			channel.send("✳ Attempting to sign you up").then(message => {
+			channel.send("✳ " + msg).then(message => {
 				message.react(args[0].replace(/<|>/g,"")).then(r => {
 					sql("SELECT id FROM players WHERE emoji = " + connection.escape(args[0]), result => {
 						// Check if somebody is already signed up with this emoji
@@ -1117,15 +1231,15 @@ module.exports = function() {
 								});
 						} else { 
 							// Signup emoji
-							sql("INSERT INTO players (id, emoji, role) VALUES (" + connection.escape(member.id) + "," + connection.escape("" + args[0]) + "," + connection.escape("none") + ")", result => {
-								message.edit(`✅ ${member.user} signed up with emoji ${args[0]}!`);
-								updateGameStatusDelayed(message.guild);
+							sql("INSERT INTO players (id, emoji, role, type) VALUES (" + connection.escape(member.id) + "," + connection.escape("" + args[0]) + "," + connection.escape("none") +  "," + connection.escape(dbType) + ")", result => {
+								message.edit(`✅ ${member.user} ${msg2} ${args[0]}!`);
+								if(signupMode == "signup") updateGameStatusDelayed(message.guild);
 								message.reactions.removeAll().catch(err => { 
 									// Couldn't clear reactions
 									logO(err);
 									sendError(channel, err, "Could not clear reactions!");
 								});
-								member.roles.add(stats.signed_up).catch(err => { 
+								member.roles.add(signupRole).catch(err => { 
 									// Missing permissions
 									logO(err); 
 									editError(message, err, "Could not add role!");
@@ -1151,7 +1265,7 @@ module.exports = function() {
 			});
 		} else {
 		// Change Emoji 
-			channel.send("✳ Attempting to sign you up").then(message => {
+			channel.send("✳ " + msg).then(message => {
 				message.react(args[0].replace(/<|>/g,"")).then(r => {
 					sql("SELECT id FROM players WHERE emoji = " + connection.escape(args[0]), result => {
 						// Check if somebody already has this emoji

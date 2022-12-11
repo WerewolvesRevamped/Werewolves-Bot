@@ -518,7 +518,7 @@ module.exports = function() {
 	
 	/* Starts the creation of individual scs */
 	this.createSCStartInd = function(channel, cc, debug) {
-		sql("SELECT id,role FROM players ORDER BY role ASC", result => {
+		sql("SELECT id,role FROM players WHERE type='player' ORDER BY role ASC", result => {
 			createOneIndSC(channel, cc, result, 0, debug);
 		}, () => {
 			channel.send("⛔ Database error. Unable to get a list of player roles."); 
@@ -555,11 +555,11 @@ module.exports = function() {
 			return;
 		}
 		// Check if multi sc condition is met
-		sql("SELECT id,role FROM players ORDER BY role ASC", result => {
+		sql("SELECT id,role FROM players WHERE type='player' ORDER BY role ASC", result => {
 			result = result.filter(el => el.role.split(",").some(el => multi[index].cond.split(",").includes(el)));
 			if(result.length > 0 || multi[index].cond === " ") {
 				// Find members of multisc
-				sql("SELECT id,role FROM players ORDER BY role ASC", result2 => {
+				sql("SELECT id,role FROM players WHERE type='player' ORDER BY role ASC", result2 => {
 					result2 = result2.filter(el => el.role.split(",").some(el => multi[index].members.split(",").includes(el)));
 					// Create permissions
 					let ccPerms = getCCCatPerms(channel.guild);
@@ -614,7 +614,7 @@ module.exports = function() {
 			createOneExtraSC(channel, category, extra, ++index);
 		}
 		// Get players with that role
-		sql("SELECT id,role FROM players ORDER BY role ASC", result => {
+		sql("SELECT id,role FROM players WHERE type='player' ORDER BY role ASC", result => {
 			result = result.filter(el => el.role.split(",").includes(parseRole(extra[index].cond)));
 			if(result.length > 0) {
 				// Create SCs

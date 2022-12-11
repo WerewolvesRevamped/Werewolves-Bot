@@ -453,7 +453,7 @@ module.exports = function() {
     }
 	
 	this.updateGameStatus = function(guild) {
-		sql("SELECT alive FROM players", result => {
+		sql("SELECT alive FROM players WHERE type='player'", result => {
 			let gameStatus = guild.channels.cache.get(stats.game_status);
 			switch(+stats.gamephase) {
 				case gp.NONE: gameStatus.setName("⛔ No Game"); break;

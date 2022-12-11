@@ -443,7 +443,7 @@ module.exports = function() {
     this.parseAlias = function(alias) {
         let aliases = {
                 "modrole": ["mr"],
-                "substitute": ["sub"],
+                "substitute": ["sub","unsub","unsubstitute"],
                 "spectate": ["s","spec","spectator"],
                 "close": ["x"],
                 "open": ["@"],

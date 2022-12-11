@@ -105,7 +105,7 @@ module.exports = function() {
 		// Cache vote values
 		getVotes();
 		// Get a list of players
-		sql("SELECT id,emoji FROM players WHERE alive = " + (type=="dead_vote"?"0":"1"), result => {
+		sql("SELECT id,emoji FROM players WHERE type='player' AND alive = " + (type=="dead_vote"?"0":"1"), result => {
 			sqlGetStat(13, pollNum => {
 				// poll name
 				let pollName;

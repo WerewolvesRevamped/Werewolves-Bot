@@ -49,6 +49,7 @@ module.exports = function() {
 		getVotes();
 		getCCs();
 		getRoles();
+        getPRoles();
 		// Assign roles
 		startOnePlayer(channel, channel.guild.roles.cache.get(stats.signed_up).members.toJSON(), 0);
 		createSCs(channel, debug);
@@ -71,8 +72,6 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "host - Adds Host role\n";
 				if(isGameMaster(member)) help += stats.prefix + "gameping - Notifies players with the New Game Ping role about a new game\n";
 				if(isGameMaster(member)) help += stats.prefix + "open - Opens signups and notifies players\n";
-				help += stats.prefix + "spectate - Makes you a spectator\n";
-				help += stats.prefix + "substitute - Makes you a substitute player\n";
 			break;
 			case "start":
 				if(!isGameMaster(member)) break;
@@ -103,18 +102,6 @@ module.exports = function() {
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "end\n```";
 				help += "```\nFunctionality\n\nEnds the game. Sets the gamephase, and makes all Participants Dead Participants.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "end\n```";
-			break;
-			case "spectate":
-				help += "```yaml\nSyntax\n\n" + stats.prefix + "spectate\n```";
-				help += "```\nFunctionality\n\nMakes you a spectator, if you are not a participant and a game is running.\n```";
-				help += "```fix\nUsage\n\n> " + stats.prefix + "spectate\n< ✅ Attempting to make you a spectator, McTsts!\n```";
-				help += "```diff\nAliases\n\n\n- s\n- spec\n- spectator\n```";
-			break;
-			case "substitute":
-				help += "```yaml\nSyntax\n\n" + stats.prefix + "substitute\n```";
-				help += "```\nFunctionality\n\nMakes you a substitute player, if you are not a participant and a game is running.\n```";
-				help += "```fix\nUsage\n\n> " + stats.prefix + "spectate\n< ✅ Attempting to make you a substitute player, McTsts!\n```";
-				help += "```diff\nAliases\n\n\n- sub\n```";
 			break;
 			case "demote":
 				if(!isGameMaster(member)) break;
@@ -269,6 +256,9 @@ module.exports = function() {
 			case "dead": 
 				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read","write"], []), getPerms(stats.spectator, ["read","write"], []), getPerms(stats.participant, [], ["read"]), getPerms(stats.sub, [], ["read"]) ]; 
 			break;
+			case "sub": 
+				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.spectator, ["read","write"], []), getPerms(stats.participant, [], ["read"]), getPerms(stats.sub, ["read","write"], []) ]; 
+			break;
 		}
 		channel.guild.channels.create(channels[index].name, { type: "text",  permissionOverwrites: cPerms })
 		.then(sc => { 
@@ -386,38 +376,6 @@ module.exports = function() {
             cmdHost(channel, member);
         }
     }
-	
-	this.cmdSpectate = function(channel, member) {
-		if(isParticipant(member)) {
-			channel.send("⛔ Command error. Can't make you a spectator while you're a participant."); 
-			return;
-		} else if(stats.gamephase < gp.SETUP) {
-			channel.send("⛔ Command error. Can't make you a spectator while there is no game."); 
-			return;
-		}
-		channel.send("✅ Attempting to make you a spectator, " + member.displayName + "!");
-		member.roles.add(stats.spectator).catch(err => { 
-			// Missing permissions
-			logO(err); 
-			sendError(channel, err, "Could not add spectator role to " + member.displayName);
-		});
-	}
-	
-	this.cmdSubstitute = function(channel, member) {
-		if(isParticipant(member)) {
-			channel.send("⛔ Command error. Can't make you a substitute player while you're a participant."); 
-			return;
-		}  else if(isSignedUp(member)) {
-			channel.send("⛔ Command error. Can't make you a substitute player while being signed-up."); 
-			return;
-		}
-		channel.send("✅ Attempting to make you a substitute player, " + member.displayName + "!");
-		member.roles.add(stats.sub).catch(err => { 
-			// Missing permissions
-			logO(err); 
-			sendError(channel, err, "Could not add substitute player role to " + member.displayName);
-		});
-	}
 	
 	this.cmdEnd = function(channel) {
 		cmdGamephaseSet(channel, ["set", gp.POSTGAME]);
@@ -562,7 +520,7 @@ module.exports = function() {
 			return; 
 		}
 		// Get all players
-		sql("SELECT id,emoji FROM players", result => {
+		sql("SELECT id,emoji FROM players WHERE type='player'", result => {
 			// Print all players
 			let playerList;
 			switch(mode) {
