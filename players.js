@@ -877,11 +877,13 @@ module.exports = function() {
 			substituteChannels(message.channel, categories, 0, originalPlayer, newPlayer);
 		}, 15000);
 		setTimeout(function() {
+            getIDs();
 			cacheRoleInfo();
 			getVotes();
 			getCCs();
 			getPRoles();
 			getCCCats();
+            loadPollValues();
 			message.channel.send("✅ Substitution complete!");
 		}, 30000);
 	}
