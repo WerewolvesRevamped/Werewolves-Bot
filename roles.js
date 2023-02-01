@@ -1589,6 +1589,7 @@ module.exports = function() {
                 let category = (desc.find(el => el[0] == "")[1].split(/ \| /)[1] ?? "Unknown").replace(/[\n\r]*/g,"").trim();
                 let fancyRoleName = toTitleCase(roleNameParsed) + (category ? " [" + category + "]" : "");
                 if(overwriteName) fancyRoleName = overwriteName;
+                fancyRoleName = applyTheme(fancyRoleName);
                 // determine role type ("limited")
                 let roleType = false;
                 switch((desc.find(el => el[0] == "")[1].split(/ \| /)[2] ?? "-").trim().toLowerCase()) {
@@ -1721,7 +1722,7 @@ module.exports = function() {
                                     if(!rEmoji) rEmoji = client.emojis.cache.find(el => el.name == (toTitleCase(roleNameParsed.split(" ")[0]) + "Placeholder"));
                                     if(!rEmoji) return relFull;
                                     if(relFull.split(" (").length > 1 && rel[0] == "*") rel += "*"; // solo team limited fixer
-                                    return `<:${rEmoji.name}:${rEmoji.id}> ${relFull}`
+                                    return `<:${rEmoji.name}:${rEmoji.id}> ${applyTheme(relFull)}`
                                 }
                         }
                         return relFull;

@@ -166,7 +166,7 @@ client.on("messageCreate", async message => {
 		cmdPing(message);
 	break;
     case "embed": // generates an embed (not documented!!)
-        if(checkGM(message)) {
+        if(checkGM(message) || message.member.id == "544125116640919557" || message.member.id == "242983689921888256") { // temporary exception to let ethan test embeds on a secondary  server without a GM role
             let embed = message.content.split(" ");
             embed.shift();
             embed = JSON.parse(embed.join(" ").replace(/'/g,'"'));

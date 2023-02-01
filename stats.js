@@ -235,6 +235,20 @@ module.exports = function() {
             stats.icon_version = 0;
 			log("Stats > ❗❗❗ Unable to cache icon version!")
 		});
+		sqlGetStat(37,  result => { 
+			stats.senior_gamemaster = result; 
+			if(doLog) log("Stats > Cached senior gamemaster role id as `" + result + "`!")
+		}, () => {
+            stats.senior_gamemaster = false;
+			log("Stats > ❗❗❗ Unable to cache senior gamemaster id!")
+		});
+		sqlGetStat(38,  result => { 
+			stats.senior_gamemaster_ingame = result; 
+			if(doLog) log("Stats > Cached senior gamemaster ingame role id as `" + result + "`!")
+		}, () => {
+            stats.senior_gamemaster_ingame = false;
+			log("Stats > ❗❗❗ Unable to cache senior gamemaster ingame id!")
+		});
 	}
 	
 	/* Gets the name of a gamephase by id */

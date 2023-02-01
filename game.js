@@ -289,6 +289,18 @@ module.exports = function() {
 				sendError(channel, err, "Could not add game master ingame role to " + member.displayName);
 			});
 		}
+        if(member.roles.cache.get(stats.senior_gamemaster)) {
+			member.roles.remove(stats.senior_gamemaster).catch(err => { 
+				// Missing permissions
+				logO(err); 
+				sendError(channel, err, "Could not remove senior game master role from " + member.displayName);
+			});
+			member.roles.add(stats.senior_gamemaster_ingame).catch(err => { 
+				// Missing permissions
+				logO(err); 
+				sendError(channel, err, "Could not add senior game master ingame role to " + member.displayName);
+			});
+		}
 		if(member.roles.cache.get(stats.admin)) {
 			member.roles.remove(stats.admin).catch(err => { 
 				// Missing permissions
@@ -308,6 +320,10 @@ module.exports = function() {
 			channel.send("⛔ Command error. Can't promote you while you're a participant."); 
 			return;
 		}
+        if(isDeadParticipant(member) && !member.roles.cache.get(stats.senior_gamemaster_ingame)) {
+			channel.send("⛔ Command error. Can't promote you while you're a dead participant."); 
+			return;
+		}
 		channel.send("✅ Attempting to promote you, " + member.displayName + "!");
 		if(member.roles.cache.get(stats.gamemaster_ingame)) {
 			member.roles.remove(stats.gamemaster_ingame).catch(err => { 
@@ -319,6 +335,18 @@ module.exports = function() {
 				// Missing permissions
 				logO(err); 
 				sendError(channel, err, "Could not add game master role to " + member.displayName);
+			});
+		}
+		if(member.roles.cache.get(stats.senior_gamemaster_ingame)) {
+			member.roles.remove(stats.senior_gamemaster_ingame).catch(err => { 
+				// Missing permissions
+				logO(err); 
+				sendError(channel, err, "Could not remove senior game master ingame role from " + member.displayName);
+			});
+			member.roles.add(stats.senior_gamemaster).catch(err => { 
+				// Missing permissions
+				logO(err); 
+				sendError(channel, err, "Could not add senior game master role to " + member.displayName);
 			});
 		}
 		if(member.roles.cache.get(stats.admin_ingame)) {
@@ -380,6 +408,13 @@ module.exports = function() {
 	this.cmdEnd = function(channel) {
 		cmdGamephaseSet(channel, ["set", gp.POSTGAME]);
 		channel.guild.roles.cache.get(stats.participant).members.forEach(el => {
+			el.roles.add(stats.dead_participant).catch(err => { 
+				// Missing permissions
+				logO(err); 
+				sendError(channel, err, "Could not add role to" + el);
+			});
+		});
+        channel.guild.roles.cache.get(stats.sub).members.forEach(el => {
 			el.roles.add(stats.dead_participant).catch(err => { 
 				// Missing permissions
 				logO(err); 

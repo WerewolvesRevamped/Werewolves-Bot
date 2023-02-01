@@ -89,7 +89,23 @@ module.exports = function() {
 			sql("SELECT original,new FROM theme WHERE theme = " + connection.escape(args[1]) + " ORDER BY theme ASC", result => {
 				if(result.length > 0) {
 					// At least one role exists
-					channel.send("✅ Theme: `" + args[1] + "`" + result.map(el => "\n" + el.original + " => " + el.new).join(""));
+                    result = result.map(el => "\n" + el.original + " => " + el.new);
+                    console.log(result);
+                    // chunk messages
+                    let msg = "";
+                    let msgs = [];
+                    for(let i = 0; i < result.length; i++) {
+                        if((msg.length + result[i].length) < 1900) {
+                            msg = msg + result[i];
+                        } else {
+                            msgs.push(msg);
+                            msg = result[i];
+                        }
+                    }
+                    msgs.push(msg); // final message (<1900)
+                    // send messages
+					channel.send("✅ Theme: `" + args[1] + "`" + msgs[0]);
+                    for(let i = 1; i < msgs.length; i++) channel.send(msgs[i]);
 				} else { 
 					// No roles exist
 					channel.send("⛔ Database error. Could not find any entries for theme `" + args[1] + "`!");

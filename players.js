@@ -1044,7 +1044,7 @@ module.exports = function() {
 		} else {
 			// Get info
 			sql("SELECT " + args[1] + " FROM players WHERE id = " + connection.escape(user), result => {
-				let playerName = channel.guild.members.cache.get(user).displayName;
+				let playerName = channel.guild.members.cache.get(user)?.displayName ?? "USER LEFT";
 				channel.send("✅ `" + playerName + "`'s " + args[1] + " is `" + (args[1] === "role" ? (mode ? result[0][args[1]].split(",").filter(role => verifyRoleVisible(role)).join("` + `") : result[0][args[1]].split(",").join(", ")) : result[0][args[1]]) + "`!");
 			}, () => {
 				// Database error
@@ -1072,7 +1072,7 @@ module.exports = function() {
 			return; 
 		}
 		sql("UPDATE players SET " + args[1] + " = " + connection.escape(args[3]) + " WHERE id = " + connection.escape(user), result => {
-			let playerName = channel.guild.members.cache.get(user).displayName;
+			let playerName = channel.guild.members.cache.get(user)?.displayName ?? "USER LEFT";
 			channel.send("✅ `" + playerName + "`'s " + args[1] + " value now is `" + args[3] + "`!");
 			updateGameStatus(channel.guild);
 			getVotes();
