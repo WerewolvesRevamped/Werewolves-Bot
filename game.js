@@ -661,6 +661,7 @@ module.exports = function() {
 	
 	/* Opens signups & Pings players */
 	this.cmdOpen = function(message) {
+        cmdHost(message.channel, message.member);
         message.channel.send("**Signups are now open!**");
 		cmdGamephase(message, ["set", gp.SIGNUP]);
 		cmdGamePing(message.channel, message.member);
