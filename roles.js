@@ -1596,6 +1596,7 @@ module.exports = function() {
                     case "limited": roleType = "Limited Role"; break;
                     case "temporary":
                     case "fake role": roleType = "Temporary Role"; break;
+                    case "mini": roleType = "Mini Wolves Exclusive"; break;
                     case "technical": roleType = "Technical Role"; break;
                     case "transformation": roleType = "Transformation Role"; break;
                     case "transformation limited":
