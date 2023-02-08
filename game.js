@@ -320,7 +320,7 @@ module.exports = function() {
 			channel.send("⛔ Command error. Can't promote you while you're a participant."); 
 			return;
 		}
-        if(isDeadParticipant(member) && !member.roles.cache.get(stats.senior_gamemaster_ingame)) {
+        if(isDeadParticipant(member) && !member.roles.cache.get(stats.senior_gamemaster_ingame) && !member.roles.cache.get(stats.admin_ingame)) {
 			channel.send("⛔ Command error. Can't promote you while you're a dead participant."); 
 			return;
 		}

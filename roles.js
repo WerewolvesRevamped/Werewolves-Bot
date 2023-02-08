@@ -1572,8 +1572,8 @@ module.exports = function() {
                 desc = applyNums(channel.guild, desc);
                 
                 // split into name & text pairs + apply theme
-                desc = desc.split(/(?=__[\w\d_]+__)/).map(el => {
-                    let cat = el.match(/^__([\w\d_]+)__\s*\n([\w\W]*)\n?$/);
+                desc = desc.split(/(?=__[\w\d _]+__)/).map(el => {
+                    let cat = el.match(/^__([\w\d _]+)__\s*\n([\w\W]*)\n?$/);
                     //console.log(cat);
                     return cat ? [cat[1], cat[2]] : ["", el];
                 }).map(el => {
@@ -1592,15 +1592,29 @@ module.exports = function() {
                 fancyRoleName = applyTheme(fancyRoleName);
                 // determine role type ("limited")
                 let roleType = false;
+                // 0 - default
+                // 1 - limited
+                // 2 - transformation
+                // x - transformation limited
+                // 3 - technical
+                // 4 - joke
+                // 5 - temporary
+                // 6 - variant
+                // 7 - mini wolves
+                let roleTypeID = 0; 
                 switch((desc.find(el => el[0] == "")[1].split(/ \| /)[2] ?? "-").trim().toLowerCase()) {
-                    case "limited": roleType = "Limited Role"; break;
-                    case "temporary":
-                    case "fake role": roleType = "Temporary Role"; break;
-                    case "mini": roleType = "Mini Wolves Exclusive"; break;
-                    case "technical": roleType = "Technical Role"; break;
-                    case "transformation": roleType = "Transformation Role"; break;
+                    case "technical": roleTypeID = 3; roleType = "Technical Role"; break;
+                    case "limited": roleTypeID = 2; roleType = "Limited Role"; break;
+                    case "transformation": roleTypeID = 1; roleType = "Transformation Role"; break;
                     case "transformation limited":
-                    case "limited transformation": roleType = "Limited & Transformation Role"; break;
+                    case "limited transformation": roleTypeID = -1; roleType = "Limited & Transformation Role"; break;
+                    
+                    case "joke role": 
+                    case "joke": roleTypeID = 4; roleType = "Joke Role"; break;
+                    case "temporary": roleTypeID = 5; roleType = "Temporary Role"; break;
+                    case "fake role":
+                    case "variant": roleTypeID = 6; roleType = "Variant Role"; break;
+                    case "mini": roleTypeID = 7; roleType = "Mini Wolves Exclusive"; break;
                 }
                 
                 // get the url to the icon on the repo
@@ -1645,44 +1659,49 @@ module.exports = function() {
                     
                     if(roleType) embed.title = roleType;
                     
-                    // add text
-                    if(!simp) {
-                        desc.forEach(el => {
-                            if(!el[0]) return;
-                            if(el[1].length <= 1000) {
-                                embed.fields.push({"name": `__${el[0]}__`, "value": el[1]});
-                            } else {
-                                let descSplit = el[1].split(/\n/);
-                               descSplitElements = [];
-                               let i = 0;
-                               let j = 0;
-                               while(i < descSplit.length) {
-                                   descSplitElements[j] = "";
-                                   while(i < descSplit.length && (descSplitElements[j].length + descSplit[i].length) <= 1000) {
-                                       descSplitElements[j] += "\n" + descSplit[i];
-                                       i++;
+                    if(stats.gamephase > 0 && ((roleTypeID >= 0 && (stats.role_filter & (1 << roleTypeID))) || (roleTypeID == -1 && (stats.role_filter & (1 << 1)) && (stats.role_filter & (1 << 2))))) {
+                        // add text
+                        if(!simp) {
+                            desc.forEach(el => {
+                                if(!el[0]) return;
+                                if(el[1].length <= 1000) {
+                                    embed.fields.push({"name": `__${el[0]}__`, "value": el[1]});
+                                } else {
+                                    let descSplit = el[1].split(/\n/);
+                                   descSplitElements = [];
+                                   let i = 0;
+                                   let j = 0;
+                                   while(i < descSplit.length) {
+                                       descSplitElements[j] = "";
+                                       while(i < descSplit.length && (descSplitElements[j].length + descSplit[i].length) <= 1000) {
+                                           descSplitElements[j] += "\n" + descSplit[i];
+                                           i++;
+                                       }
+                                       j++;
                                    }
-                                   j++;
-                               }
-                               descSplitElements.forEach(d => embed.fields.push({"name": `__${el[0]}__ (${descSplitElements.indexOf(d)+1}/${descSplitElements.length})`, "value": d}));
-                            }
-                        });
-                        if(appendSection) embed.fields.push({"name": `__${appendSection[0]}__`, "value": appendSection[1]});
-                    } else {
-                        let simpDesc = desc.find(el => el && el[0] === "Simplified");
-                        if(simpDesc) {
-                            embed.description = simpDesc[1];
-                        }  else {
-                            simpDesc = desc.find(el => el && el[0] === "Basics");
+                                   descSplitElements.forEach(d => embed.fields.push({"name": `__${el[0]}__ (${descSplitElements.indexOf(d)+1}/${descSplitElements.length})`, "value": d}));
+                                }
+                            });
+                            if(appendSection) embed.fields.push({"name": `__${appendSection[0]}__`, "value": appendSection[1]});
+                        } else {
+                            let simpDesc = desc.find(el => el && el[0] === "Simplified");
                             if(simpDesc) {
                                 embed.description = simpDesc[1];
-                            } else {
-                                if(simp) cmdInfoFancy(channel, args, pin, noErr, false, overwriteName, appendSection, editOnto);
-                                else cmdInfo(channel, args, pin, noErr, simp, overwriteName, appendSection, editOnto);
-                                return;
+                            }  else {
+                                simpDesc = desc.find(el => el && el[0] === "Basics");
+                                if(simpDesc) {
+                                    embed.description = simpDesc[1];
+                                } else {
+                                    if(simp) cmdInfoFancy(channel, args, pin, noErr, false, overwriteName, appendSection, editOnto);
+                                    else cmdInfo(channel, args, pin, noErr, simp, overwriteName, appendSection, editOnto);
+                                    return;
+                                }
                             }
                         }
+                    } else {
+                        embed.description = "**This role type is currently not in use.**";
                     }
+                    
                 } else { // apparntly not a role
                     let desc = result[0].description;
                     desc = applyEmoji(desc);
