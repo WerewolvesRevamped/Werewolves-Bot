@@ -1659,7 +1659,7 @@ module.exports = function() {
                     
                     if(roleType) embed.title = roleType;
                     
-                    if(stats.gamephase > 0 && ((roleTypeID >= 0 && (stats.role_filter & (1 << roleTypeID))) || (roleTypeID == -1 && (stats.role_filter & (1 << 1)) && (stats.role_filter & (1 << 2))))) {
+                    if(stats.gamephase == 0 || (stats.gamephase > 0 && ((roleTypeID >= 0 && (stats.role_filter & (1 << roleTypeID))) || (roleTypeID == -1 && (stats.role_filter & (1 << 1)) && (stats.role_filter & (1 << 2)))))) {
                         // add text
                         if(!simp) {
                             desc.forEach(el => {
