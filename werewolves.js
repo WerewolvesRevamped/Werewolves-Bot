@@ -146,8 +146,8 @@ client.on("messageCreate", async message => {
 	if(message.content.indexOf(stats.prefix) !== 0) return;
     
 	// Replace contents
-	if(message.member) message.content = message.content.replace(/%s/, message.member.id)
-	if(message.channel) message.content = message.content.replace(/%c/, message.channel.id);
+	if(message.member && !message.author.bot) message.content = message.content.replace(/%s/, message.member.id)
+	if(message.channel && !message.author.bot) message.content = message.content.replace(/%c/, message.channel.id);
 	// Get default arguments / default command / unmodified arguments / unmodified commands
 	const args = message.content.slice(stats.prefix.length).trim().match(/(".*?")|(\S+)/g) ? message.content.slice(stats.prefix.length).trim().match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : [];
 	const command = parseAlias(args.shift());
@@ -165,6 +165,16 @@ client.on("messageCreate", async message => {
 	case "ping":
 		cmdPing(message);
 	break;
+    case "drag":
+        if(checkGM(message)) {
+            sql("SELECT id FROM players WHERE alive = 1 AND type='player'", result => {
+                result.forEach(p => {
+                    let member = message.channel.guild.members.cache.get(p.id);
+                    member.voice.setChannel("1075234996329136138");
+                });
+            });
+        }
+    break;
     case "embed": // generates an embed (not documented!!)
         if(checkGM(message) || message.member.id == "544125116640919557" || message.member.id == "242983689921888256") { // temporary exception to let ethan test embeds on a secondary  server without a GM role
             let embed = message.content.split(" ");

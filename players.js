@@ -431,6 +431,7 @@ module.exports = function() {
 				}, () => {
 					channel.send("⛔ Database error. Could not kill `" +  channel.guild.members.cache.get(el).displayName + "`!");
 				});	
+                 channel.guild.members.cache.get(el).voice.disconnect();
                 
                 var reportMsg;
                 // Get info

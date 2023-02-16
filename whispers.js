@@ -85,7 +85,7 @@ module.exports = function() {
 	}
 	
 	/* Adds a connection */
-	this.cmdConnectionAdd = function(channel, args) {
+	this.cmdConnectionAdd = function(channel, args, hidden = false) {
 		// Check arguments
 		if(!args[1]) { 
 			channel.send("⛔ Syntax error. Not enough parameters!"); 
@@ -97,11 +97,11 @@ module.exports = function() {
 		sql("INSERT INTO connected_channels (channel_id, id, name) VALUES (" + connection.escape(channel.id) + "," + connection.escape(args[1]) + "," + connection.escape(args[2]) + ")", result => {
 			if(args[2] != "") { 
 				// Connection w/ disguise
-				channel.send("✅ Added connection `" + args[1] + "` with disguise `" + toTitleCase(args[2]) + "`!");
+				if(!hidden) channel.send("✅ Added connection `" + args[1] + "` with disguise `" + toTitleCase(args[2]) + "`!");
 				log("Whispers > Created connection `" + args[1] + "` with disguise `" + toTitleCase(args[2]) + "`!");
 			} else { 
 				// Connection w/o disguise
-				channel.send("✅ Added connection `" + args[1] + "` with no disguise!");
+				if(!hidden) channel.send("✅ Added connection `" + args[1] + "` with no disguise!");
 				log("Whispers > Created connection `" + args[1] + "` with no disguise!");
 			}
 		}, () => {
@@ -250,7 +250,7 @@ module.exports = function() {
                     let webhookMsg = text;
                     webhookMsg = webhookMsg.replace(/:~/g, ":");
                     
-                    if(disguise.length > 0) {
+                    if(disguise.length > 1) {
                         let webhookName = disguise;
                         let webhookAvatar = client.user.displayAvatarURL();
                         

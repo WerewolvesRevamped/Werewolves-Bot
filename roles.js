@@ -612,6 +612,7 @@ module.exports = function() {
 		if(!verifyRole(extra[index].cond)) {	
 			channel.send("✅ Skipping `" + extra[index].name +"`! Invalid role condition!");
 			createOneExtraSC(channel, category, extra, ++index);
+            return;
 		}
 		// Get players with that role
 		sql("SELECT id,role FROM players WHERE type='player' ORDER BY role ASC", result => {
@@ -738,6 +739,7 @@ module.exports = function() {
 				name = applyTheme(name);
 				channel.guild.channels.create(name.substr(0, 100), { type: "text",  permissionOverwrites: ccPerms })
 				.then(sc => {
+                    cmdConnectionAdd(sc, ["", players[index].id], true);
 					// Send info message
 					if(roleType == "default") indscRoles.forEach(el => cmdInfoEither(sc, [ el ], true, false));
 					else if(roleType == "merged") {
@@ -835,6 +837,7 @@ module.exports = function() {
 	this.parseRole = function(input) {
 		//console.log(input);
 		input = input.toLowerCase();
+        if(input.length < 50) input = input.replace(/_/g," ");
 		let alias = cachedAliases.find(el => el.alias === input);
 		if(alias) return parseRole(alias.name);
 		else return input;
