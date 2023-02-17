@@ -219,7 +219,7 @@ module.exports = function() {
 					default:
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "channels [set_ind|get_ind|list_ind]\n" + stats.prefix + "channels [set_extra|set_multi|set_public|get|raw|remove|list|elected]\n" + stats.prefix + "channels [info|infopin|info_set|info_get|info_remove|info_list]\n```";
 						help += "```\nFunctionality\n\nGroup of commands to handle individual, extra, multi and public channels as well as channel information. " + stats.prefix + "help channels <sub-command> for detailed help.```";
-						help += "```diff\nAliases\n\n- channel\n```";
+						help += "```diff\nAliases\n\n- channel\n- ch\n```";
 					break;
 					case "set_ind":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "channels set_ind <Role Name> <0|1>\n```";
