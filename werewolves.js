@@ -1,6 +1,15 @@
 /* Discord */
-const { Client, Intents } = require('discord.js');
-global.client = new Client({ intents: ['GUILDS', 'GUILD_WEBHOOKS', 'GUILD_VOICE_STATES', 'GUILD_MEMBERS', 'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS', 'DIRECT_MESSAGES', 'DIRECT_MESSAGE_REACTIONS'] });
+const { Client, Intents, Options } = require('discord.js');
+global.client = new Client({ 
+    intents: ['GUILDS', 'GUILD_WEBHOOKS', 'GUILD_VOICE_STATES', 'GUILD_MEMBERS', 'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS', 'DIRECT_MESSAGES', 'DIRECT_MESSAGE_REACTIONS'],
+    sweepers: {
+		...Options.DefaultSweeperSettings,
+		messages: {
+			interval: 86400, // Every 24 hours...
+			lifetime: 86400,	// Remove messages older than 24 hours.
+		}
+	}
+});
 config = require("./config.json");
 /* Utility Modules */
 require("./utility.js")();
@@ -97,11 +106,19 @@ function timeConverter(UNIX_timestamp){
     return time;
 }
 
+function uncacheMessage(message) {
+    if(!isParticipant(message.member)) {
+        message.channel.messages.cache.delete(message.id);
+    }
+}
+
 
 /* New Message */
 client.on("messageCreate", async message => {
 	/* Fetch Channel */
-	message.channel.messages.fetch({ limit: 100 });
+    if(isParticipant(message.member)) {
+        message.channel.messages.fetch({ limit: 50 });
+    }
 	/* Connected Channels */ // Copies messages from one channel to another and applies disguises if one is set
 	connectionExecute(message);
     
@@ -133,6 +150,7 @@ client.on("messageCreate", async message => {
                 //console.log(msg + " => " + msgRole);
                 if(msg.match(/^[a-zA-Z ]*$/)) cmdInfoEither(message.channel, msgRole, false, true, true);
                 if(stats.fancy_mode && verifyRole(msgRole.join(" "))) message.delete();
+                uncacheMessage(message);
                 return;
 	}
 	if(message.content.indexOf(stats.prefix) !== 0 && message.content[0] == ";") {
@@ -141,9 +159,13 @@ client.on("messageCreate", async message => {
                 //console.log(msg + " => " + msgRole);
                 if(msg.match(/^[a-zA-Z ]*$/)) cmdInfoEither(message.channel, msgRole, false, true, false);
                 if(stats.fancy_mode && verifyRole(msgRole.join(" "))) message.delete();
+                uncacheMessage(message);
                 return;
 	}
-	if(message.content.indexOf(stats.prefix) !== 0) return;
+	if(message.content.indexOf(stats.prefix) !== 0) {
+        uncacheMessage(message);
+        return;
+    }
     
 	// Replace contents
 	if(message.member && !message.author.bot) message.content = message.content.replace(/%s/, message.member.id)

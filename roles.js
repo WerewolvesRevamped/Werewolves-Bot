@@ -837,7 +837,7 @@ module.exports = function() {
 	this.parseRole = function(input) {
 		//console.log(input);
 		input = input.toLowerCase();
-        if(input.length < 50) input = input.replace(/_/g," ");
+        if(input.length < 50 && input.substr(0, 2) != "!_") input = input.replace(/_/g," ");
 		let alias = cachedAliases.find(el => el.alias === input);
 		if(alias) return parseRole(alias.name);
 		else return input;
@@ -1024,6 +1024,12 @@ module.exports = function() {
 			channel.send("⛔ Syntax error. Not enough parameters!"); 
 			return; 
 		}
+        // dont allow _'s in role names as they are auto aliased
+        if(args[1].indexOf("_") > -1) {
+            channel.send("⛔ Input error. You may not use `_`'s in role names. When running an info command `_`'s are automatically substituted with spaces!"); 
+			return; 
+        }
+        
 		// Insert Entry & Preview it
 		if(!verifyRole(args[1])) {
 			sql("INSERT INTO roles (name, description) VALUES (" + connection.escape(args[1]) + "," + connection.escape(argsX[2]) + ")", result => {
