@@ -36,6 +36,7 @@ module.exports = function() {
 			case "end": cmdEnd(message.channel); break;
 			case "killq killall": cmdKillqKillall(message.channel); break;
 			case "players list": cmdPlayersList(message.channel); break;
+			case "players list_alive": cmdPlayersListAlive(message.channel); break;
 			case "players log": cmdPlayersLog(message.channel); break;
 			case "players log2": cmdPlayersLog2(message.channel); break;
 			case "players votes": cmdPlayersVotes(message.channel); break;

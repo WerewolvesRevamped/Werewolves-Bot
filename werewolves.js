@@ -448,7 +448,7 @@ client.on("messageCreate", async message => {
 	break;
 	/* Modrole */ 
 	case "modrole": 
-		if(checkGM(message)) cmdModrole(message, args);
+		if(checkAdmin(message)) cmdModrole(message, args);
 	break;
 	/* Invalid Command */
 	default:

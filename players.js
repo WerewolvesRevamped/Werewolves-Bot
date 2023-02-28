@@ -18,7 +18,7 @@ module.exports = function() {
 	/* Handle players command */
 	this.cmdPlayers = function(message, args) {
 		// Check subcommands
-		if(!args[0] || (!args[1] && ["list","log","log2","msgs","messages","votes","roles","rl"].indexOf(args[0]) == -1)) { 
+		if(!args[0] || (!args[1] && ["list","log","log2","msgs","messages","votes","roles","rl","list_alive"].indexOf(args[0]) == -1)) { 
 			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `players [get|get_clean|set|resurrect|signup|list|msgs|msgs2|log|log2|votes|rl]`!"); 
 			return; 
 		}
@@ -35,6 +35,7 @@ module.exports = function() {
 			case "substitute": cmdPlayersSubstitute(message, args); break;
 			case "switch": cmdPlayersSwitch(message, args); break;
 			case "list": cmdConfirm(message, "players list"); break;
+			case "list_alive": cmdConfirm(message, "players list_alive"); break;
             case "rl":
 			case "roles": cmdConfirm(message, "players roles"); break;
 			case "log": cmdConfirm(message, "players log"); break;
@@ -77,12 +78,12 @@ module.exports = function() {
 		let help = "";
 		switch(args[0]) {
 			case "":
-				if(isGameMaster(member)) help += stats.prefix + "players [list|msgs|log|log2|votes|msgs2|roles] - Information about players\n";
+				if(isGameMaster(member)) help += stats.prefix + "players [list|list_alive|msgs|log|log2|votes|msgs2|roles] - Information about players\n";
 				if(isGameMaster(member)) help += stats.prefix + "players [get|get_clean|set|resurrect|signup|signup_sub] - Manages players\n";
 				if(isGameMaster(member)) help += stats.prefix + "players [substitute|switch] - Manages player changes\n";
 				if(isGameMaster(member)) help += stats.prefix + "killq [add|remove|killall|list|clear] - Manages kill queue\n";
 				if(isGameMaster(member)) help += stats.prefix + "kqak - Instant kill a player\n";
-				if(isGameMaster(member)) help += stats.prefix + "modrole [add|remove] - Adds/removes roles from users\n";
+				if(isAdmin(member)) help += stats.prefix + "modrole [add|remove] - Adds/removes roles from users\n";
 				help += stats.prefix + "list - Lists signed up players\n";
 				help += stats.prefix + "list_alphabetical - Lists signed up players (alphabetical)\n";
 				help += stats.prefix + "alive - Lists alive players\n";
@@ -186,7 +187,7 @@ module.exports = function() {
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
 					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "players [get|get_clean|set|resurrect|signup|list|substitute|switch|messages|messages2|log|log2|votes|roles]\n```";
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "players [get|get_clean|set|resurrect|signup|list|list_alive|substitute|switch|messages|messages2|log|log2|votes|roles]\n```";
             help += "```\nFunctionality\n\nGroup of commands to handle players. " + stats.prefix + "help players <sub-command> for detailed help.\n\nList of Player Properties:\nalive: Whether the player is alive`\ntype: What type of player. Can be 'player', 'substitute' and 'substituted'.\nemoji: The emoji the player uses\nrole: The role of the player\npublic_value: The value of the players vote on public polls (Typically 1)\nprivate_value: The value of the players vote on private polls (Typically 1)\npublic_votes: The base value of votes the player has against them on public votes (Typically 0)\nid: The discord id of the player\nccs: the amount of created ccs\npublic_msgs: Amount of messages sent in public channels\nprivate_msgs: Amount of messages sent in private channels\type: The type of player. 0 for default, 1 for substitute.```";
 					  help += "```diff\nAliases\n\n- p\n- player\n```";
 					break;
@@ -241,6 +242,11 @@ module.exports = function() {
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players list\n```";
 						help += "```\nFunctionality\n\nLists all players with their role and alive values.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "players list\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "players list!\n> Players | Total: 2\n  🛠 - @McTsts (Werewolf); Alive: 1\n  👌 - @federick (Baker); Alive: 1```";
+					break;	
+					case "list_alive":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "players list_alive\n```";
+						help += "```\nFunctionality\n\nLists all living players with their role.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "players list\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "players list_alive!\n> Players | Total: 2\n  🛠 - @McTsts (Werewolf); Alive: 1\n  👌 - @federick (Baker); Alive: 1```";
 					break;	
 					case "log":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players log\n```";
@@ -532,6 +538,40 @@ module.exports = function() {
 		}, () => {
 			// DB error
 			channel.send("⛔ Database error. Could not list signed up players!");
+		});
+	
+	}
+	/* Lists all signedup players */
+	this.cmdPlayersListAlive = function(channel) {
+		// Get a list of players
+		sql("SELECT id,emoji,role,ccs FROM players WHERE type='player' AND alive=1", result => {
+			let playerListArray = result.map(el => {  
+                let rolesFiltered = el.role.split(",").filter(role => verifyRoleVisible(role));
+                let rName = rolesFiltered[0];
+                let rEmoji = getRoleEmoji(rName);
+                rEmoji = (rEmoji ? `<:${rEmoji.name}:${rEmoji.id}> | ` : "❓ | ");
+                return `${rEmoji}${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"} (${rolesFiltered.map(role => toTitleCase(role)).join(" + ")})`
+            });
+            const perMessageCount = 18;
+			let playerList = [], counter = 0;
+			for(let i = 0; i < playerListArray.length; i++) {
+				if(!playerList[Math.floor(counter/perMessageCount)]) playerList[Math.floor(counter/perMessageCount)] = [];
+				playerList[Math.floor(counter/perMessageCount)].push(playerListArray[i]);
+				counter++;
+			}
+			channel.send("**Alive Players** | Total: " + result.length);
+			for(let i = 0; i < playerList.length; i++) {
+				// Print message
+				channel.send("✳ Listing alive players " + (i+1)  + "/" + (playerList.length) + "...").then(m => {
+					m.edit(playerList[i].join("\n"));
+				}).catch(err => {
+					logO(err); 
+					sendError(channel, err, "Could not list alive players");
+				});
+			}
+		}, () => {
+			// DB error
+			channel.send("⛔ Database error. Could not list alive players!");
 		});
 	
 	}
@@ -1407,6 +1447,12 @@ module.exports = function() {
 	this.isGameMaster = function(member, noAdminIngame = false) {
         if(!member) return false;
 		return member && member.roles && (member.roles.cache.get(stats.gamemaster) || member.roles.cache.get(stats.bot) || member.roles.cache.get(stats.admin) || (!noAdminIngame && member.roles.cache.get(stats.admin_ingame)));
+	}
+    
+	/* Check if a member is an Admin (or Bot) */
+	this.isAdmin = function(member, noAdminIngame = false) {
+        if(!member) return false;
+		return member && member.roles && (member.roles.cache.get(stats.admin) || (!noAdminIngame && member.roles.cache.get(stats.admin_ingame)));
 	}
 
 	/* Check if a member is a (living) participant */

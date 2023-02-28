@@ -351,6 +351,15 @@ module.exports = function() {
 		} 
 		return true;
 	}
+    
+	/* Commands for only Admins */
+	this.checkAdmin = function(message) {
+		if(!isAdmin(message.member)) { 
+			message.channel.send("❌ You're not allowed to use this command! (Admin required)"); 
+			return false;
+		} 
+		return true;
+	}
 	
 	/* Commands for only GMSAFE channels */
 	this.checkSafe = function(message) {

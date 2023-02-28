@@ -30,7 +30,7 @@ module.exports = function() {
 			case "rename": cmdCCRename(message.channel, message.member, args, 0); break;
 			case "archive": cmdCCArchive(message.channel, message.member, 0); break;
 			case "promote": cmdCCPromote(message.channel, message.member, args, 0); break;
-			case "demote": cmdCCPromote(message.channel, message.member, args, 0); break;
+			case "demote": cmdCCDemote(message.channel, message.member, args, 0); break;
 			case "leave": cmdCCLeave(message.channel, message.member); break;
 			case "list": cmdCCList(message.channel, 2); break;
 			case "owners": cmdCCList(message.channel, 3); break;
