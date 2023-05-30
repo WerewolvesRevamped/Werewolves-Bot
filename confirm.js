@@ -70,6 +70,7 @@ module.exports = function() {
 	this.cmdConfirm = async function(message, action) {
 		message.channel.send("❗ Click the reaction in the next `20.0` seconds to confirm `" + message.content + "`!")
 		.then(m => {
+            m.fetch();
 			m.react("✅").then(r => {
 				sql("DELETE FROM confirm_msg WHERE time < " + (getTime() - 900), result => {
 					sql("INSERT INTO confirm_msg (id, time, action) VALUES (" + connection.escape(m.id) + "," + connection.escape(getTime()) + "," + connection.escape(action) + ")", result => {

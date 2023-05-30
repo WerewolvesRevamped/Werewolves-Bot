@@ -228,9 +228,9 @@ module.exports = function() {
 					break;
 					case "sub":
 					case "substitute":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "players substitute <Old Player> <New Player> <New Emoji>\n```";
-						help += "```\nFunctionality\n\nReplaces the first player with the second.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "players sub 242983689921888256 588628378312114179 🛠\n```";
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "players substitute <Old Player> <New Player>\n```";
+						help += "```\nFunctionality\n\nReplaces the first player with the second (both players must be signed up).\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "players sub 242983689921888256 588628378312114179\n```";
 						help += "```diff\nAliases\n\n- players sub\n```";
 					break;
 					case "switch":
@@ -968,7 +968,7 @@ module.exports = function() {
 			return;
 		}
 		// SUB channels in category
-		substituteOneChannel(channel, ccCats, index, channel.guild.channels.cache.get(ccCats[index]).children.toJSON(), 0, subPlayerFrom, subPlayerTo);
+		substituteOneChannel(channel, ccCats, index, channel.guild.channels.cache.get(ccCats[index]).children.cache.toJSON(), 0, subPlayerFrom, subPlayerTo);
 	}
 	
 	/* Subs a channel */
@@ -984,8 +984,8 @@ module.exports = function() {
 			substituteOneChannel(channel, ccCats, index, channels, ++channelIndex, subPlayerFrom, subPlayerTo);
 			return;
 		} else {
-			let channelMembers = channel.guild.channels.cache.get(channels[channelIndex].id).permissionOverwrites.cache.toJSON().filter(el => el.type === "member").map(el => el.id);
-			let channelOwners = channel.guild.channels.cache.get(channels[channelIndex].id).permissionOverwrites.cache.toJSON().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
+			let channelMembers = channel.guild.channels.cache.get(channels[channelIndex].id).permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Member).map(el => el.id);
+			let channelOwners = channel.guild.channels.cache.get(channels[channelIndex].id).permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Member).filter(el => el.allow == 66560).map(el => el.id);
 			if(channelMembers.includes(subPlayerFrom)) {
 				cmdCCAdd(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["add", subPlayerTo], 1);
 			}
@@ -1014,7 +1014,7 @@ module.exports = function() {
 			return;
 		}
 		// SUB channels in category
-		switchOneChannel(channel, ccCats, index, channel.guild.channels.cache.get(ccCats[index]).children.toJSON(), 0, subPlayerFrom, subPlayerTo);
+		switchOneChannel(channel, ccCats, index, channel.guild.channels.cache.get(ccCats[index]).children.cache.toJSON(), 0, subPlayerFrom, subPlayerTo);
 	}
 	
 	/* Subs a channel */
@@ -1030,8 +1030,8 @@ module.exports = function() {
 			switchOneChannel(channel, ccCats, index, channels, ++channelIndex, subPlayerFrom, subPlayerTo);
 			return;
 		} else {
-			let channelMembers = channel.guild.channels.cache.get(channels[channelIndex].id).permissionOverwrites.cache.toJSON().filter(el => el.type === "member").map(el => el.id);
-			let channelOwners = channel.guild.channels.cache.get(channels[channelIndex].id).permissionOverwrites.cache.toJSON().filter(el => el.type === "member").filter(el => el.allow == 66560).map(el => el.id);
+			let channelMembers = channel.guild.channels.cache.get(channels[channelIndex].id).permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Member).map(el => el.id);
+			let channelOwners = channel.guild.channels.cache.get(channels[channelIndex].id).permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Member).filter(el => el.allow == 66560).map(el => el.id);
 			if(channelMembers.includes(subPlayerFrom) && !channelMembers.includes(subPlayerTo)) {
 				cmdCCAdd(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["add", subPlayerTo], 1);
 				cmdCCRemove(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["remove", subPlayerFrom], 1);

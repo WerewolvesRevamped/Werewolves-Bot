@@ -28,8 +28,9 @@ module.exports = function() {
             }
 		}
 		channel.send("✳ Game is called `" + stats.game + "`");
+        
 		// Create Public Channels
-		channel.guild.channels.create("💬 " + toTitleCase(stats.game) + " Public Channels", { type: ChannelType.GuildCategory,  permissionOverwrites: getPublicCatPerms(channel.guild) })
+		channel.guild.channels.create({ name: "💬 " + toTitleCase(stats.game) + " Public Channels", type: ChannelType.GuildCategory,  permissionOverwrites: getPublicCatPerms(channel.guild) })
 		.then(cc => {
 			sqlSetStat(15, cc.id, result => {
 				// Create public channels
@@ -40,7 +41,7 @@ module.exports = function() {
 		}).catch(err => { 
 			// Missing permissions
 			logO(err); 
-			sendError(channel, err, "Could not create public channels!");
+			sendError(channel, err, "Could not create public channels");
 		});
 		// Set Gamephase
 		cmdGamephaseSet(channel, ["set", gp.INGAME]);
@@ -260,7 +261,7 @@ module.exports = function() {
 				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.spectator, ["read","write"], []), getPerms(stats.participant, [], ["read"]), getPerms(stats.sub, ["read","write"], []) ]; 
 			break;
 		}
-		channel.guild.channels.create(channels[index].name, { type: ChannelType.Text,  permissionOverwrites: cPerms })
+		channel.guild.channels.create({ name: channels[index].name, type: ChannelType.GuildText,  permissionOverwrites: cPerms })
 		.then(sc => { 
 			if(channels[index].setup.length > 1) channels[index].setup.replace(/%n/g, index).split(",").forEach(el => sc.send(stats.prefix + el));
 			sc.setParent(category,{ lockPermissions: false }).then(m => {

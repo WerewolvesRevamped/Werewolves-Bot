@@ -1,15 +1,16 @@
 /* Discord */
-const { Client, Intents, Options, GatewayIntentBits, ChannelType, MessageType, OverwriteType } = require('discord.js');
-global.client = new Client({ 
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildWebhooks, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessages, GatewayIntentBits.DirectMessageReactions],
-    sweepers: {
-		...Options.DefaultSweeperSettings,
-		messages: {
-			interval: 86400, // Every 24 hours...
-			lifetime: 86400,	// Remove messages older than 24 hours.
-		}
-	}
-});
+const { Client, Intents, Options, GatewayIntentBits, ChannelType, MessageType, OverwriteType, PermissionsBitField } = require('discord.js');
+    global.client = new Client({ 
+        intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildWebhooks, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessages, GatewayIntentBits.DirectMessageReactions],
+        sweepers: {
+            ...Options.DefaultSweeperSettings,
+            messages: {
+                interval: 86400, // Every 24 hours...
+                lifetime: 86400,	// Remove messages older than 24 hours.
+            }
+        }
+    });
+require("./discord.js")();
 
 config = require("./config.json");
 
@@ -117,7 +118,13 @@ function uncacheMessage(message) {
 
 /* New Message */
 client.on("messageCreate", async message => {
-    await message.fetch();
+    try {
+        await message.fetch();
+    } catch (err) {
+        console.log("UNKNOWN MESSAGE");
+        console.log(err);
+        return;
+    }
 	/* Fetch Channel */
     if(isParticipant(message.member)) {
         message.channel.messages.fetch({ limit: 50 });
@@ -461,7 +468,7 @@ client.on("messageCreate", async message => {
 	message.delete();
 });
 
-client.on('messageDelete', message => {
+client.on('messageDelete', async message => {
 	message = JSON.parse(JSON.stringify(message)); // WHY IS THIS LINE OF CODE NECESSARY????????
 	// retrieve channel and author
 	let channel = client.guilds.cache.get(message.guildId).channels.cache.get(message.channelId);
@@ -473,7 +480,7 @@ client.on('messageDelete', message => {
 	}
 });
 
-client.on('messageUpdate', (oldMessage, newMessage) => {
+client.on('messageUpdate', async (oldMessage, newMessage) => {
     oldMessage = JSON.parse(JSON.stringify(oldMessage));
     newMessage = JSON.parse(JSON.stringify(newMessage));
 	// retrieve channel and author
@@ -490,6 +497,8 @@ client.on('messageUpdate', (oldMessage, newMessage) => {
 
 /* Reactions Add*/
 client.on("messageReactionAdd", async (reaction, user) => {
+    await reaction.fetch();
+    await user.fetch();
 	// reaction role
 	handleReactionRole(reaction, user, true);
 	if(user.bot) return;
@@ -520,6 +529,8 @@ client.on("messageReactionAdd", async (reaction, user) => {
 
 /* Reactions Remove */
 client.on("messageReactionRemove", async (reaction, user) => {
+    await reaction.fetch();
+    await user.fetch();
 	// reaction role
 	handleReactionRole(reaction, user, false);
 	if(user.bot) return;
@@ -531,6 +542,7 @@ client.on("messageReactionRemove", async (reaction, user) => {
 
 /* Leave Detection */
 client.on("guildMemberRemove", async member => {
+    await member.fetch();
     if(member.guild.id != stats.log_guild) return;
 	log(`❌ ${member.user} has left the server!`);
 	sql("UPDATE players SET alive = 0 WHERE id = " + connection.escape(member.id), result => {
@@ -542,6 +554,7 @@ client.on("guildMemberRemove", async member => {
 
 /* Join Detection */
 client.on("guildMemberAdd", async member => {
+    await member.fetch();
     if(member.guild.id != stats.log_guild) return;
 	log(`👋 ${member.user} has joined the server!`);
     let oog = member.guild.channels.cache.get("584793703923580965");

@@ -148,7 +148,7 @@ module.exports = function() {
 					webhook.send(webhookMsg);
 				} else { // no webhook
 					if(webhooks.size < 10) { // empty slot
-						channel.createWebhook(webhookName, {avatar: webhookAvatar})
+						channel.createWebhook({name: webhookName, avatar: webhookAvatar})
 						.then(webhook => {
 							// Send webhook
 							webhook.send(webhookMsg)
@@ -201,7 +201,7 @@ module.exports = function() {
 										webhook.send(webhookMsg);
 									} else { // no webhook
 										if(webhooks.size < 10) { // empty slot
-											message.guild.channels.cache.get(destination.channel_id).createWebhook(webhookName, {avatar: webhookAvatar})
+											message.guild.channels.cache.get(destination.channel_id).createWebhook({name: webhookName, avatar: webhookAvatar})
 											.then(webhook => {
 												// Send webhook
 												webhook.send(webhookMsg)
@@ -268,7 +268,7 @@ module.exports = function() {
                                 webhook.send(webhookMsg);
                             } else { // no webhook
                                 if(webhooks.size < 10) { // empty slot
-                                    channel.guild.channels.cache.get(destination.channel_id).createWebhook(webhookName, {avatar: webhookAvatar})
+                                    channel.guild.channels.cache.get(destination.channel_id).createWebhook({ name: webhookName, avatar: webhookAvatar})
                                     .then(webhook => {
                                         // Send webhook
                                         webhook.send(webhookMsg)

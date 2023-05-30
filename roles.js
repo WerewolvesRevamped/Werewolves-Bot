@@ -496,7 +496,7 @@ module.exports = function() {
 		scCatCount++;
 		let scName = "🕵 " + toTitleCase(stats.game) + " Secret Channels";
 		if(scCatCount > 1) scName += " #" + scCatCount;
-		channel.guild.channels.create(scName, { type: "GuildCategory",  permissionOverwrites: getSCCatPerms(channel.guild) })
+		channel.guild.channels.create({ name: scName, type: ChannelType.GuildCategory,  permissionOverwrites: getSCCatPerms(channel.guild) })
 		.then(cc => {
 			sql("INSERT INTO sc_cats (id) VALUES (" + connection.escape(cc.id) + ")", result => {	
 				if(childChannel) { // sets the new category as a channel parent - for the first channel that failed to fit in the previous category
@@ -571,7 +571,7 @@ module.exports = function() {
 					// Create channel
 					var name = multi[index].name;
 					name = applyTheme(name);
-					channel.guild.channels.create(name, { type: ChannelType.Text,  permissionOverwrites: ccPerms })
+					channel.guild.channels.create({ name: name, type: ChannelType.GuildText,  permissionOverwrites: ccPerms })
 					.then(sc => {
 						// Send info message
 						multi[index].setup.split(",").forEach(el => sc.send(stats.prefix + el));
@@ -643,7 +643,7 @@ module.exports = function() {
 		var name = extra[index].name;
         name = name.replace("%r", channel.guild.members.cache.get(result[resultIndex].id).user.username);
 		name = applyTheme(name);
-		channel.guild.channels.create(name, { type: ChannelType.Text,  permissionOverwrites: ccPerms })
+		channel.guild.channels.create({ name: name, type: ChannelType.GuildText,  permissionOverwrites: ccPerms })
 		.then(sc => {
 			// Send info message
 			if(extra[index].setup.length > 1) extra[index].setup.replace(/%r/g, result[resultIndex].id + "").replace(/%n/g, resultIndex).split(",").forEach(el => sc.send(stats.prefix + el));
@@ -737,7 +737,7 @@ module.exports = function() {
 				var name = indscRoles.join("-");
                 if(roleType == "merged") name = customRole.join(" ");
 				name = applyTheme(name);
-				channel.guild.channels.create(name.substr(0, 100), { type: ChannelType.Text,  permissionOverwrites: ccPerms })
+				channel.guild.channels.create({ name: name.substr(0, 100), type: ChannelType.GuildText,  permissionOverwrites: ccPerms })
 				.then(sc => {
                     cmdConnectionAdd(sc, ["", players[index].id], true);
 					// Send info message

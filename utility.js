@@ -335,10 +335,10 @@ module.exports = function() {
 	/* Converts simplified permissions to discord permissions */
 	this.mapPerm = function(permission) {
 		switch(permission) {
-			case "read": return OverwriteType.ViewChannel;
-			case "write": return OverwriteType.SendMessages;
-			case "manage": return OverwriteType.ManageMessages;
-			case "history": return OverwriteType.ReadMessageHistory;
+			case "read": return PermissionsBitField.Flags.ViewChannel;
+			case "write": return PermissionsBitField.Flags.SendMessages;
+			case "manage": return PermissionsBitField.Flags.ManageMessages;
+			case "history": return PermissionsBitField.Flags.ReadMessageHistory;
 			default: return "";
 		}
 	}
@@ -390,7 +390,7 @@ module.exports = function() {
 			return;
 		}
 		// Delete channels in category
-		cleanupOneChannel(channel, categoryID, channel.guild.channels.cache.get(categoryID).children.toJSON(), 0, name);
+		cleanupOneChannel(channel, categoryID, channel.guild.channels.cache.get(categoryID).children.cache.toJSON(), 0, name);
 	}
 	
 	/* Deletes a cc */
