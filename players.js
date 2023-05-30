@@ -1449,6 +1449,12 @@ module.exports = function() {
 		return member && member.roles && (member.roles.cache.get(stats.gamemaster) || member.roles.cache.get(stats.bot) || member.roles.cache.get(stats.admin) || (!noAdminIngame && member.roles.cache.get(stats.admin_ingame)));
 	}
     
+	/* Check if a member is a Game Master (or Bot) */
+	this.isHelper = function(member) {
+        if(!member) return false;
+		return member && member.roles && (member.roles.cache.get(stats.helper) || member.roles.cache.get(stats.bot) || member.roles.cache.get(stats.admin));
+	}
+    
 	/* Check if a member is an Admin (or Bot) */
 	this.isAdmin = function(member, noAdminIngame = false) {
         if(!member) return false;

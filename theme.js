@@ -29,10 +29,10 @@ module.exports = function() {
 		let help = "";
 		switch(args[0]) {
 			case "":
-				if(isGameMaster(member)) help += stats.prefix + "theme [set|remove|list|select] - Manages themes\n";
+				if(isGameMaster(member) || isHelper(member)) help += stats.prefix + "theme [set|remove|list|select] - Manages themes\n";
 			break;
 			case "theme":
-				if(!isGameMaster(member)) break;
+				if(!isGameMaster(member) && !isHelper(member)) break;
 				switch(args[1]) {
 					default:
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "theme [set|remove|list|select]\n```";

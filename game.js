@@ -29,7 +29,7 @@ module.exports = function() {
 		}
 		channel.send("✳ Game is called `" + stats.game + "`");
 		// Create Public Channels
-		channel.guild.channels.create("💬 " + toTitleCase(stats.game) + " Public Channels", { type: "GUILD_CATEGORY",  permissionOverwrites: getPublicCatPerms(channel.guild) })
+		channel.guild.channels.create("💬 " + toTitleCase(stats.game) + " Public Channels", { type: ChannelType.GuildCategory,  permissionOverwrites: getPublicCatPerms(channel.guild) })
 		.then(cc => {
 			sqlSetStat(15, cc.id, result => {
 				// Create public channels
@@ -64,10 +64,10 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "start_debug - Starts a game, without sending out the role messages\n";
 				if(isGameMaster(member)) help += stats.prefix + "reset - Resets a game\n";
 				if(isGameMaster(member)) help += stats.prefix + "end - Ends a game\n";
-				if(isGameMaster(member)) help += stats.prefix + "demote - Removes Game Master and Admin roles\n";
-				if(isGameMaster(member)) help += stats.prefix + "promote - Reassigns Game Master and Admin roles\n";
-				if(isGameMaster(member)) help += stats.prefix + "demote_unhost - Demotes or Unhosts\n";
-				if(isGameMaster(member)) help += stats.prefix + "promote_host - Promotes or Hosts\n";
+				if(isGameMaster(member) || isHelper(member)) help += stats.prefix + "demote - Removes Game Master and Admin roles\n";
+				if(isGameMaster(member) || isHelper(member)) help += stats.prefix + "promote - Reassigns Game Master and Admin roles\n";
+				if(isGameMaster(member) || isHelper(member)) help += stats.prefix + "demote_unhost - Demotes or Unhosts\n";
+				if(isGameMaster(member) || isHelper(member)) help += stats.prefix + "promote_host - Promotes or Hosts\n";
 				if(isGameMaster(member)) help += stats.prefix + "unhost - Removes Host roles\n";
 				if(isGameMaster(member)) help += stats.prefix + "host - Adds Host role\n";
 				if(isGameMaster(member)) help += stats.prefix + "gameping - Notifies players with the New Game Ping role about a new game\n";
@@ -104,14 +104,14 @@ module.exports = function() {
 				help += "```fix\nUsage\n\n> " + stats.prefix + "end\n```";
 			break;
 			case "demote":
-				if(!isGameMaster(member)) break;
+				if(!isGameMaster(member) && !isHelper(member)) break;
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "demote\n```";
 				help += "```\nFunctionality\n\nReplaces Game Master and Admin roles with GM Ingame and Admin Ingame roles, which have no permisions.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "demote\n< ✅ Attempting to demote you, McTsts!\n```";
 				help += "```diff\nAliases\n\n- de\n```";
 			break;
 			case "promote":
-				if(!isGameMaster(member)) break;
+				if(!isGameMaster(member) && !isHelper(member)) break;
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "promote\n```";
 				help += "```\nFunctionality\n\nReplaces GM Ingame and Admin Ingame roles with Game Master and Admin roles.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "promote\n< ✅ Attempting to promote you, McTsts!\n```";
@@ -132,14 +132,14 @@ module.exports = function() {
 				help += "```diff\nAliases\n\n- ho\n```";
 			break;
 			case "demote_unhost":
-				if(!isGameMaster(member)) break;
+				if(!isGameMaster(member) && !isHelper(member)) break;
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "demote_unhost\n```";
 				help += "```\nFunctionality\n\nDemotes or unhosts depending on context.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "demote_unhost\n< ✅ Attempting to demote you, McTsts!\n```";
 				help += "```diff\nAliases\n\n- v\n```";
 			break;
 			case "promote_host":
-				if(!isGameMaster(member)) break;
+				if(!isGameMaster(member) && !isHelper(member)) break;
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "promote_host\n```";
 				help += "```\nFunctionality\n\nPromotes or hosts depending on context.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "promote_host\n< ✅ Attempting to promote you, McTsts!\n```";
@@ -223,7 +223,7 @@ module.exports = function() {
 	
 	/* Public Permissions */
 	this.getPublicCatPerms = function(guild) {
-		return [ getPerms(guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.participant, ["write", "read"], []) ];
+		return [ getPerms(guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.participant, ["write", "read"], []) ];
 	}
 	
 	/* Starts the creation of extra scs */
@@ -260,7 +260,7 @@ module.exports = function() {
 				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.spectator, ["read","write"], []), getPerms(stats.participant, [], ["read"]), getPerms(stats.sub, ["read","write"], []) ]; 
 			break;
 		}
-		channel.guild.channels.create(channels[index].name, { type: "text",  permissionOverwrites: cPerms })
+		channel.guild.channels.create(channels[index].name, { type: ChannelType.Text,  permissionOverwrites: cPerms })
 		.then(sc => { 
 			if(channels[index].setup.length > 1) channels[index].setup.replace(/%n/g, index).split(",").forEach(el => sc.send(stats.prefix + el));
 			sc.setParent(category,{ lockPermissions: false }).then(m => {
@@ -313,6 +313,18 @@ module.exports = function() {
 				sendError(channel, err, "Could not add admin ingame role to " + member.displayName);
 			});
 		}
+		if(member.roles.cache.get(stats.helper)) {
+			member.roles.remove(stats.helper).catch(err => { 
+				// Missing permissions
+				logO(err); 
+				sendError(channel, err, "Could not remove helper role from " + member.displayName);
+			});
+			member.roles.add(stats.helper_ingame).catch(err => { 
+				// Missing permissions
+				logO(err); 
+				sendError(channel, err, "Could not add helper ingame role to " + member.displayName);
+			});
+		}
 	}
 	
 	this.cmdPromote = function(channel, member) {
@@ -361,6 +373,18 @@ module.exports = function() {
 				sendError(channel, err, "Could not add admin role to " + member.displayName);
 			});
 		}
+		if(member.roles.cache.get(stats.helper_ingame)) {
+			member.roles.remove(stats.helper_ingame).catch(err => { 
+				// Missing permissions
+				logO(err); 
+				sendError(channel, err, "Could not remove helper ingame role from " + member.displayName);
+			});
+			member.roles.add(stats.helper).catch(err => { 
+				// Missing permissions
+				logO(err); 
+				sendError(channel, err, "Could not add helper role to " + member.displayName);
+			});
+		}
 	}
 	
 	this.cmdUnhost = function(channel, member) {
@@ -398,7 +422,7 @@ module.exports = function() {
     }
     
     this.cmdPromoteHost = function(channel, member) {
-        if(member.roles.cache.get(stats.gamemaster_ingame) || member.roles.cache.get(stats.admin_ingame)) {
+        if(member.roles.cache.get(stats.gamemaster_ingame) || member.roles.cache.get(stats.senior_gamemaster_ingame) || member.roles.cache.get(stats.admin_ingame) || member.roles.cache.get(stats.helper_ingame)) {
             cmdPromote(channel, member);
         } else {
             cmdHost(channel, member);

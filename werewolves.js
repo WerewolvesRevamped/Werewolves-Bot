@@ -1,7 +1,7 @@
 /* Discord */
-const { Client, Intents, Options } = require('discord.js');
+const { Client, Intents, Options, GatewayIntentBits, ChannelType, MessageType, OverwriteType } = require('discord.js');
 global.client = new Client({ 
-    intents: ['GUILDS', 'GUILD_WEBHOOKS', 'GUILD_VOICE_STATES', 'GUILD_MEMBERS', 'GUILD_MESSAGES', 'GUILD_MESSAGE_REACTIONS', 'DIRECT_MESSAGES', 'DIRECT_MESSAGE_REACTIONS'],
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildWebhooks, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessages, GatewayIntentBits.DirectMessageReactions],
     sweepers: {
 		...Options.DefaultSweeperSettings,
 		messages: {
@@ -10,7 +10,9 @@ global.client = new Client({
 		}
 	}
 });
+
 config = require("./config.json");
+
 /* Utility Modules */
 require("./utility.js")();
 require("./sql.js")();
@@ -115,6 +117,7 @@ function uncacheMessage(message) {
 
 /* New Message */
 client.on("messageCreate", async message => {
+    await message.fetch();
 	/* Fetch Channel */
     if(isParticipant(message.member)) {
         message.channel.messages.fetch({ limit: 50 });
@@ -139,10 +142,10 @@ client.on("messageCreate", async message => {
 	if(!message.author.bot && isParticipant(message.member) && message.content.search("http") >= 0 && stats.ping.length > 0 && stats.gamephase == gp.INGAME) {
         urlHandle(message, !!message.member.roles.cache.get(stats.gamemaster_ingame));
 	}
-	
+    
 	/* Find Command & Parameters */
 	// Not a command
-	if(message.channel.type === "dm") return;
+	if(message.channel.type === ChannelType.DM) return;
 	if(message.content.slice(stats.prefix.length).indexOf(stats.prefix) == 0) return;
 	if(message.content.indexOf(stats.prefix) !== 0 && message.content[0] == ".") {
                 let msg = message.content.trim().substr(1).trim();
@@ -181,7 +184,6 @@ client.on("messageCreate", async message => {
         return;
 	}
 
-
 	/* Ping */ // Generic test command / returns the ping
 	switch(command) {
 	case "ping":
@@ -198,7 +200,7 @@ client.on("messageCreate", async message => {
         }
     break;
     case "embed": // generates an embed (not documented!!)
-        if(checkGM(message) || message.member.id == "544125116640919557" || message.member.id == "242983689921888256") { // temporary exception to let ethan test embeds on a secondary  server without a GM role
+        if(checkGMHelper(message)) { // temporary exception to let ethan test embeds on a secondary  server without a GM role
             let embed = message.content.split(" ");
             embed.shift();
             embed = JSON.parse(embed.join(" ").replace(/'/g,'"'));
@@ -210,14 +212,14 @@ client.on("messageCreate", async message => {
         if(checkGM(message)) forceReload(message.channel);
     break;
     case "edit":
-        if(checkGM(message)) cmdEdit(message.channel, args, argsX);
+        if(checkGMHelper(message)) cmdEdit(message.channel, args, argsX);
     break;
 	/* Split */
 	case "say":
-		if(checkGM(message)) message.channel.send(argsX.join(" ").replace(/~/g,"\n"));
+		if(checkGMHelper(message)) message.channel.send(argsX.join(" ").replace(/~/g,"\n"));
 	break;
 	case "modify":
-		if(checkGM(message)) cmdModify(message, args, argsX);
+		if(checkGMHelper(message)) cmdModify(message, args, argsX);
 	break;
 	case "split":
 		if(checkGM(message)) args.join(" ").replace(/'/g,'"').split(";").forEach(el => message.channel.send(stats.prefix + el));
@@ -228,7 +230,7 @@ client.on("messageCreate", async message => {
 	break;
 	/* Connection */ // Manages connections between channels
 	case "connection": 
-		if(checkGM(message)) cmdConnection(message, args);
+		if(checkGMHelper(message)) cmdConnection(message, args);
 	break;
 	/* Roles */ // Modify role information for commands such as 'info'
 	case "roles":
@@ -304,15 +306,15 @@ client.on("messageCreate", async message => {
 	break;
 	/* Bulk Delete */ // Deletes a lot of messages
 	case "bulkdelete":
-		if(checkGM(message)) cmdConfirm(message, "bulkdelete");
+		if(checkGMHelper(message)) cmdConfirm(message, "bulkdelete");
 	break;
 	/* Delete */ // Deletes a couple of messages
 	case "delete":
-		if(checkGM(message)) cmdDelete(message.channel, args);
+		if(checkGMHelper(message)) cmdDelete(message.channel, args);
 	break;
 	/* Delay */ // Executes a command with delay
 	case "delay":
-		if(checkGM(message)) cmdDelay(message.channel, args);
+		if(checkGMHelper(message)) cmdDelay(message.channel, args);
 	break;
 	/* Start */ // Starts the game
 	case "start":
@@ -373,7 +375,7 @@ client.on("messageCreate", async message => {
 		if(checkGM(message)) cmdSC(message, args);
 	break;
 	case "impersonate":
-		if(checkGM(message)) cmdImpersonate(message, argsX);
+		if(checkGMHelper(message)) cmdImpersonate(message, argsX);
 	break;
 	/* Help */
 	case "help":
@@ -413,7 +415,7 @@ client.on("messageCreate", async message => {
      break;
 	/* Theme */
 	case "theme":
-		cmdTheme(message, args);
+		if(checkGMHelper(message)) cmdTheme(message, args);
 	break;
 	/* New Game Ping */
 	case "gameping":

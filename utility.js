@@ -228,7 +228,7 @@ module.exports = function() {
 		switch(args[0]) {
 			case "":
 				if(isGameMaster(member)) help += stats.prefix + "split - Runs a list of semicolon seperated commands\n";
-				if(isGameMaster(member)) help += stats.prefix + "say - Makes the bot repeat a message\n";
+				if(isGameMaster(member) || isHelper(member)) help += stats.prefix + "say - Makes the bot repeat a message\n";
 				if(isGameMaster(member)) help += stats.prefix + "sudo - Allows webhooks to run commands\n";
 			break;
 			case "split":
@@ -258,11 +258,11 @@ module.exports = function() {
 			case "":
 				help += stats.prefix + "ping - Tests the bot\n";
 				help += stats.prefix + "help - Provides information about commands\n";
-				if(isGameMaster(member)) help += stats.prefix + "bulkdelete - Deletes webhook & user messages in bulk\n";
-				if(isGameMaster(member)) help += stats.prefix + "delete - Deletes a couple of messages\n";
-				if(isGameMaster(member)) help += stats.prefix + "delay - Executes a command with delay\n";
-				if(isGameMaster(member)) help += stats.prefix + "modify - Modifies the bot\n";
-				if(isGameMaster(member)) help += stats.prefix + "edit - Edits a bot message\n";
+				if(isGameMaster(member) || isHelper(member)) help += stats.prefix + "bulkdelete - Deletes webhook & user messages in bulk\n";
+				if(isGameMaster(member) || isHelper(member)) help += stats.prefix + "delete - Deletes a couple of messages\n";
+				if(isGameMaster(member) || isHelper(member)) help += stats.prefix + "delay - Executes a command with delay\n";
+				if(isGameMaster(member) || isHelper(member)) help += stats.prefix + "modify - Modifies the bot\n";
+				if(isGameMaster(member) || isHelper(member)) help += stats.prefix + "edit - Edits a bot message\n";
 			break;
 			case "ping":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "ping\n```";
@@ -335,10 +335,10 @@ module.exports = function() {
 	/* Converts simplified permissions to discord permissions */
 	this.mapPerm = function(permission) {
 		switch(permission) {
-			case "read": return "VIEW_CHANNEL";
-			case "write": return "SEND_MESSAGES";
-			case "manage": return "MANAGE_MESSAGES";
-			case "history": return "READ_MESSAGE_HISTORY";
+			case "read": return OverwriteType.ViewChannel;
+			case "write": return OverwriteType.SendMessages;
+			case "manage": return OverwriteType.ManageMessages;
+			case "history": return OverwriteType.ReadMessageHistory;
 			default: return "";
 		}
 	}
@@ -346,6 +346,15 @@ module.exports = function() {
 	/* Commands for only GMs */
 	this.checkGM = function(message) {
 		if(!isGameMaster(message.member)) { 
+			message.channel.send("❌ You're not allowed to use this command!"); 
+			return false;
+		} 
+		return true;
+	}
+    
+    /* Commands for only GMs */
+	this.checkGMHelper = function(message) {
+		if(!isGameMaster(message.member) && !isHelper(message.member)) { 
 			message.channel.send("❌ You're not allowed to use this command!"); 
 			return false;
 		} 

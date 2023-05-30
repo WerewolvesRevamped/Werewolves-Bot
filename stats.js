@@ -256,6 +256,20 @@ module.exports = function() {
             stats.role_filter = 0;
 			log("Stats > ❗❗❗ Unable to cache role filter!")
 		});
+		sqlGetStat(40,  result => { 
+			stats.helper = result; 
+			if(doLog) log("Stats > Cached helper as `" + result + "`!")
+		}, () => {
+            stats.helper = false;
+			log("Stats > ❗❗❗ Unable to cache helper!")
+		});
+		sqlGetStat(41,  result => { 
+			stats.helper_ingame = result; 
+			if(doLog) log("Stats > Cached helper ingame as `" + result + "`!")
+		}, () => {
+            stats.helper_ingame = false;
+			log("Stats > ❗❗❗ Unable to cache helper ingame!")
+		});
 	}
 	
 	/* Gets the name of a gamephase by id */
@@ -314,6 +328,8 @@ module.exports = function() {
 				case "senior_gamemaster": stat = 37; break;
 				case "senior_gamemaster_ingame": stat = 38; break;
 				case "role_filter": stat = 39; break;
+                case "helper": stat = 40; break;
+                case "helper_ingame": stat = 41; break;
 				default: message.channel.send("⛔ Syntax error. Invalid parameter!"); return;
 			}
 		} else {
@@ -347,7 +363,7 @@ module.exports = function() {
 			case "options":
 				if(!isGameMaster(member)) break;
 					help += "```yaml\nSyntax\n\n" + stats.prefix + "options <Option Name> <New Value>\n```";
-					help += "```\nFunctionality\n\nReturns or sets (if <New Value> is set) the value of a bot option <Option Name>. A bot option can be a numeric id, or an option name.\n\nList of Option Names:\nprefix: The prefix the bot uses for commands\nparticipant: The id of the participant role\ngamemaster: The id of the gamemaster role\nspectator: The id of the spectator role\nsigned_up: The id of the signed up role\ndead_participant: The id of the dead participant role\nbot: The id of the bot role\nlog_guild: The id of the guild to use for logs\nlog_channel: The id of the channel to use for logs\nmayor: The id of the mayor role\nreporter: The id of the reporter role\nguardian: The id of the guardian role\ngame: The name of the game\ngamemaster_ingame: The id of the gamemaster ingame role\nadmin: The id of the admin role\nadmin_ingame: The id of the admin ingame role\nyes_emoji: The id of the yes emoji\nno_emoji: The id of the no emoji\nnew_game_ping: Role that gets pinged with certain commands\ngame_status: A VC that shows the status of the game\ncc_limit: Maximum amount of ccs one person can create (-1 for none)\nmayor2: The id of the second mayor role (which doesn't give extra votes)\npoll: The poll mode (0 -> default, 1 -> cancel, 2 -> private random)\nsub: role for substitute players\nping: ping for gifs and deleted messages\nhost: The id of the host role\nfancy_mode: Changes info messages to fancy versions if set to true.\nicon: the version to use for icon images.\senior_gamemaster: The id of the senior gm role.\nsenior_gamemaster_ingame: The id of the senior gm ingame role\nrole_filter: see " + stats.prefix + "help optionsrf\n```";
+					help += "```\nFunctionality\n\nReturns or sets (if <New Value> is set) the value of a bot option <Option Name>. A bot option can be a numeric id, or an option name.\n\nList of Option Names:\nprefix: The prefix the bot uses for commands\nparticipant: The id of the participant role\ngamemaster: The id of the gamemaster role\nspectator: The id of the spectator role\nsigned_up: The id of the signed up role\ndead_participant: The id of the dead participant role\nbot: The id of the bot role\nlog_guild: The id of the guild to use for logs\nlog_channel: The id of the channel to use for logs\nmayor: The id of the mayor role\nreporter: The id of the reporter role\nguardian: The id of the guardian role\ngame: The name of the game\ngamemaster_ingame: The id of the gamemaster ingame role\nadmin: The id of the admin role\nadmin_ingame: The id of the admin ingame role\nyes_emoji: The id of the yes emoji\nno_emoji: The id of the no emoji\nnew_game_ping: Role that gets pinged with certain commands\ngame_status: A VC that shows the status of the game\ncc_limit: Maximum amount of ccs one person can create (-1 for none)\nmayor2: The id of the second mayor role (which doesn't give extra votes)\npoll: The poll mode (0 -> default, 1 -> cancel, 2 -> private random)\nsub: role for substitute players\nping: ping for gifs and deleted messages\nhost: The id of the host role\nfancy_mode: Changes info messages to fancy versions if set to true.\nicon: the version to use for icon images.\senior_gamemaster: The id of the senior gm role.\nsenior_gamemaster_ingame: The id of the senior gm ingame role\nrole_filter: see " + stats.prefix + "help optionsrf\nhelper: The id of the helper role\nhelper_ingame: The id of the helper ingame role\n```";
 					help += "```fix\nUsage\n\n> " + stats.prefix + "options mayor\n< ✅ mayor currently is set to 588125889611431946!\n\n> " + stats.prefix + "options mayor 588125889611431946\n< ✅ Successfully updated mayor to 588125889611431946!```";
 					help += "```diff\nAliases\n\n- stat\n- stats\n- option\n```";
 			break;

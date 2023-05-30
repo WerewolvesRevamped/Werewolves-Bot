@@ -333,23 +333,23 @@ module.exports = function() {
 		// Find name
 		switch(args[1]) {
 			case "mayor": 
-				channel.permissionOverwrites.create(stats.mayor, { VIEW_CHANNEL: true, SEND_MESSAGES: true }).catch(err => { 
+				channel.permissionOverwrites.create(stats.mayor, { ViewChannel: true, SendMessages: true }).catch(err => { 
 					logO(err); 
 					sendError(channel, err, "Could not setup channel permissions");
 				});
-				channel.permissionOverwrites.create(stats.mayor2, { VIEW_CHANNEL: true, SEND_MESSAGES: true }).catch(err => { 
+				channel.permissionOverwrites.create(stats.mayor2, { ViewChannel: true, SendMessages: true }).catch(err => { 
 					logO(err); 
 					sendError(channel, err, "Could not setup channel permissions");
 				});
 			break;
 			case "reporter": 
-				channel.permissionOverwrites.create(stats.reporter, { VIEW_CHANNEL: true, SEND_MESSAGES: true }).catch(err => { 
+				channel.permissionOverwrites.create(stats.reporter, { ViewChannel: true, SendMessages: true }).catch(err => { 
 					logO(err); 
 					sendError(channel, err, "Could not setup channel permissions");
 				});
 			break;
 			case "guardian": 
-				channel.permissionOverwrites.create(stats.guardian, { VIEW_CHANNEL: true, SEND_MESSAGES: true }).catch(err => { 
+				channel.permissionOverwrites.create(stats.guardian, { ViewChannel: true, SendMessages: true }).catch(err => { 
 					logO(err); 
 					sendError(channel, err, "Could not setup channel permissions");
 				});
@@ -401,7 +401,7 @@ module.exports = function() {
 					if(pin) {
 						m.pin().then(mp => {
 							mp.channel.messages.fetch().then(messages => {
-								mp.channel.bulkDelete(messages.filter(el => el.type === "CHANNEL_PINNED_MESSAGE"));
+								mp.channel.bulkDelete(messages.filter(el => el.type === MessageType.ChannelPinnedMessage));
 							});	
 						}).catch(err => { 
 							logO(err); 
@@ -496,7 +496,7 @@ module.exports = function() {
 		scCatCount++;
 		let scName = "🕵 " + toTitleCase(stats.game) + " Secret Channels";
 		if(scCatCount > 1) scName += " #" + scCatCount;
-		channel.guild.channels.create(scName, { type: "GUILD_CATEGORY",  permissionOverwrites: getSCCatPerms(channel.guild) })
+		channel.guild.channels.create(scName, { type: "GuildCategory",  permissionOverwrites: getSCCatPerms(channel.guild) })
 		.then(cc => {
 			sql("INSERT INTO sc_cats (id) VALUES (" + connection.escape(cc.id) + ")", result => {	
 				if(childChannel) { // sets the new category as a channel parent - for the first channel that failed to fit in the previous category
@@ -545,7 +545,7 @@ module.exports = function() {
 	
 	/* Returns default sc permissions */
 	this.getSCCatPerms = function(guild) {
-		return [ getPerms(guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.participant, ["write"], ["read"]) ];
+		return [ getPerms(guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.participant, ["write"], ["read"]) ];
 	}
 	
 	this.createOneMultiSC = function(channel, category, multi, index) {
@@ -571,7 +571,7 @@ module.exports = function() {
 					// Create channel
 					var name = multi[index].name;
 					name = applyTheme(name);
-					channel.guild.channels.create(name, { type: "text",  permissionOverwrites: ccPerms })
+					channel.guild.channels.create(name, { type: ChannelType.Text,  permissionOverwrites: ccPerms })
 					.then(sc => {
 						// Send info message
 						multi[index].setup.split(",").forEach(el => sc.send(stats.prefix + el));
@@ -643,7 +643,7 @@ module.exports = function() {
 		var name = extra[index].name;
         name = name.replace("%r", channel.guild.members.cache.get(result[resultIndex].id).user.username);
 		name = applyTheme(name);
-		channel.guild.channels.create(name, { type: "text",  permissionOverwrites: ccPerms })
+		channel.guild.channels.create(name, { type: ChannelType.Text,  permissionOverwrites: ccPerms })
 		.then(sc => {
 			// Send info message
 			if(extra[index].setup.length > 1) extra[index].setup.replace(/%r/g, result[resultIndex].id + "").replace(/%n/g, resultIndex).split(",").forEach(el => sc.send(stats.prefix + el));
@@ -737,7 +737,7 @@ module.exports = function() {
 				var name = indscRoles.join("-");
                 if(roleType == "merged") name = customRole.join(" ");
 				name = applyTheme(name);
-				channel.guild.channels.create(name.substr(0, 100), { type: "text",  permissionOverwrites: ccPerms })
+				channel.guild.channels.create(name.substr(0, 100), { type: ChannelType.Text,  permissionOverwrites: ccPerms })
 				.then(sc => {
                     cmdConnectionAdd(sc, ["", players[index].id], true);
 					// Send info message
@@ -761,7 +761,7 @@ module.exports = function() {
 						sc.send(desc).then(m => {
 							m.pin().then(mp => {
 								mp.channel.messages.fetch().then(messages => {
-									mp.channel.bulkDelete(messages.filter(el => el.type === "CHANNEL_PINNED_MESSAGE"));
+									mp.channel.bulkDelete(messages.filter(el => el.type === MessageType.ChannelPinnedMessage));
 								});	
 							}).catch(err => { 
 								logO(err); 
@@ -1399,7 +1399,7 @@ module.exports = function() {
                         if(pin) {
                             m.pin().then(mp => {
                                 mp.channel.messages.fetch().then(messages => {
-                                    mp.channel.bulkDelete(messages.filter(el => el.type === "CHANNEL_PINNED_MESSAGE"));
+                                    mp.channel.bulkDelete(messages.filter(el => el.type === MessageType.ChannelPinnedMessage));
                                 });	
                             }).catch(err => { 
                                 logO(err); 
@@ -1597,6 +1597,7 @@ module.exports = function() {
                 
                 let category = (desc.find(el => el[0] == "")[1].split(/ \| /)[1] ?? "Unknown").replace(/[\n\r]*/g,"").trim();
                 let fancyRoleName = toTitleCase(roleNameParsed) + (category ? " [" + category + "]" : "");
+                if(fancyRoleName.substr(0, 16) == "Ability Types - ") fancyRoleName = fancyRoleName.substr(16);
                 if(overwriteName) fancyRoleName = overwriteName;
                 fancyRoleName = applyTheme(fancyRoleName);
                 // determine role type ("limited")
@@ -1790,7 +1791,7 @@ module.exports = function() {
                             if(pin) {
                                 m.pin().then(mp => {
                                     mp.channel.messages.fetch().then(messages => {
-                                        mp.channel.bulkDelete(messages.filter(el => el.type === "CHANNEL_PINNED_MESSAGE"));
+                                        mp.channel.bulkDelete(messages.filter(el => el.type === MessageType.ChannelPinnedMessage));
                                     });	
                                 }).catch(err => { 
                                     logO(err); 

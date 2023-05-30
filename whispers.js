@@ -41,17 +41,18 @@ module.exports = function() {
 		let help = "";
 		switch(args[0]) {
 			case "":
-				if(isGameMaster(member)) help += stats.prefix + "impersonate - Repeats a message as a webhook pretending to be somebody\n";
-				if(isGameMaster(member)) help += stats.prefix + "connection [add|remove|reset] - Manages connections\n";
+				if(isGameMaster(member) || isHelper(member)) help += stats.prefix + "impersonate - Repeats a message as a webhook pretending to be somebody\n";
+				if(isGameMaster(member) || isHelper(member)) help += stats.prefix + "connection [add|remove|reset] - Manages connections\n";
 			break;
 			case "impersonate":
+				if(!isGameMaster(member) && !isHelper(member)) break;
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "impersonate <User> <Message>\n```";
 				help += "```\nFunctionality\n\nRepeats a message as a webhook pretending to be a certain user.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "impersonate 242983689921888256 Does this work?\n< Does this work?\n```";
 				help += "```diff\nAliases\n\n- imp\n```";
 			break;
 			case "connection":
-				if(!isGameMaster(member)) break;
+				if(!isGameMaster(member) && !isHelper(member)) break;
 				switch(args[1]) {
 					default:
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "connection [add|remove|reset]\n```";
