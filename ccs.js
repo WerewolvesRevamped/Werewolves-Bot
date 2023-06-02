@@ -402,7 +402,7 @@ module.exports = function() {
 		if(mode || isGameMaster(member, true) || ccOwner.includes(member.id)) {
 			channel.edit({ name: "🔒-" + channel.name })
 				.then(c => {
-					let ccList = c.permissionOverwrites.cache.toJSON().filter(el => OverwriteType.Member).map(el => el.id);
+					let ccList = c.permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Member).map(el => el.id);
 					ccList.forEach(el => {
 						c.permissionOverwrites.create(el, {ViewChannel: true, ReadMessageHistory: null, SendMessages: false})
 					});
