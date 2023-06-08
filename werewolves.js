@@ -447,8 +447,8 @@ client.on("messageCreate", async message => {
 	/* Sudo */
 	case "sudo":
 		if(checkSafe(message)) {
-			message.delete({timeout: 120000 });
-			setTimeout(message.channel.send(stats.prefix + message.content.substr(6)), 2000);
+            await sleep(2000)
+			message.channel.send(stats.prefix + message.content.substr(6));
 		}
 	break;
 	/* Confirm */
