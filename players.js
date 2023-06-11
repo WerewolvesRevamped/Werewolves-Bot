@@ -434,7 +434,9 @@ module.exports = function() {
 				sql("UPDATE players SET alive = 0 WHERE id = " + connection.escape(el), result => {
 					channel.send("✅ Killed `" +  channel.guild.members.cache.get(el).displayName + "`!");
 					updateGameStatus(channel.guild);
-                    mayorCheck(channel);
+                    setTimeout(function () {
+                        mayorCheck(channel);
+                    }, 5000);
 				}, () => {
 					channel.send("⛔ Database error. Could not kill `" +  channel.guild.members.cache.get(el).displayName + "`!");
 				});	

@@ -93,7 +93,7 @@ module.exports = function() {
             case "mayor": case "m":
                 sql("SELECT id,emoji FROM players WHERE alive = 1 AND type='player'", result => {        
                     let mayor;
-                    if(result.length >= stats.mayor_treshold) {
+                    if(result.length > stats.mayor_treshold) {
                         mayor = channel.guild.roles.cache.get(stats.mayor2);  
                     } else {
                       mayor = channel.guild.roles.cache.get(stats.mayor);  
@@ -131,7 +131,7 @@ module.exports = function() {
             let mayor1 = channel.guild.roles.cache.get(stats.mayor);  
             let mayor2 = channel.guild.roles.cache.get(stats.mayor2);  
             let wrongMayorMembers;
-            if(result.length >= stats.mayor_treshold) {
+            if(result.length > stats.mayor_treshold) {
                 wrongMayorMembers = mayor1.members.toJSON();
                 wrongMayorMembers.forEach(el => {
                     el.roles.remove(mayor1);
