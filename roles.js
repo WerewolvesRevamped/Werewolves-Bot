@@ -230,7 +230,7 @@ module.exports = function() {
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "elect <Elected Role> <Player>\n```";
 				help += "```\nFunctionality\n\nElects a player to an elected role. Elected Role available are: Mayor, Reporter, Guardian. You can use M, R and G to shorten the command.\nUse elect clear to remove all elected roles from a player.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "elect mayor ts\n```";
-				help += "```diff\nAliases\n\n- ia\n- el\n- elected\n```";
+				help += "```diff\nAliases\n\n- el\n- elected\n```";
 			break;
 			case "roles":
 				if(!isGameMaster(member)) break;
