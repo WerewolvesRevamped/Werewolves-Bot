@@ -504,7 +504,8 @@ module.exports = function() {
                 "modify": ["mod"],
                 "say": [">"],
                 "ping": ["?"],
-                "channels": ["channel","ch"]
+                "channels": ["channel","ch"],
+                "elect": ["el", "elected"]
         };
         for(let cmd in aliases) {
             if(aliases[cmd].indexOf(alias) != -1) return cmd;

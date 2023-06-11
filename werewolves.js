@@ -146,9 +146,9 @@ client.on("messageCreate", async message => {
     }
     
 	/* Gif Check */
-	if(!message.author.bot && isParticipant(message.member) && message.content.search("http") >= 0 && stats.ping.length > 0 && stats.gamephase == gp.INGAME) {
+	/*if(!message.author.bot && isParticipant(message.member) && message.content.search("http") >= 0 && stats.ping.length > 0 && stats.gamephase == gp.INGAME) {
         urlHandle(message, !!message.member.roles.cache.get(stats.gamemaster_ingame));
-	}
+	}**/
     
 	/* Find Command & Parameters */
 	// Not a command
@@ -459,6 +459,10 @@ client.on("messageCreate", async message => {
 	case "modrole": 
 		if(checkAdmin(message)) cmdModrole(message, args);
 	break;
+    /* Elect */
+    case "elect":
+		if(checkGM(message)) cmdElect(message.channel, args);
+    break;
 	/* Invalid Command */
 	default:
 		message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");

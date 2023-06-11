@@ -73,6 +73,83 @@ module.exports = function() {
 			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
 		}
 	}
+    
+   this.cmdElect = function(channel, args) {
+       // Check arguments
+		if(!args[0] || !args[1]) { 
+			channel.send("⛔ Syntax error. Not enough parameters!"); 
+			return; 
+		}
+        let electPlayer = getUser(channel, args[1]);
+        if(!electPlayer) {
+            channel.send("⛔ Syntax error. Invalid player `" + args[1] + "`!"); 
+			return; 
+        }
+        let electMember = channel.guild.members.cache.find(member => member.id == electPlayer);
+        switch(args[0].toLowerCase()) {
+            default:
+                channel.send("⛔ Syntax error. Invalid elected role `" + args[0] + "`!"); 
+            break;
+            case "mayor": case "m":
+                sql("SELECT id,emoji FROM players WHERE alive = 1 AND type='player'", result => {        
+                    let mayor;
+                    if(result.length >= stats.mayor_treshold) {
+                        mayor = channel.guild.roles.cache.get(stats.mayor2);  
+                    } else {
+                      mayor = channel.guild.roles.cache.get(stats.mayor);  
+                    }
+                    electMember.roles.add(mayor);
+                    channel.send(`✅ Elected ${electMember} as ${mayor}`);
+                    cmdConnectionSend(channel, ["", "mayor", "Host", `**${electMember} has been elected as ${mayor}!**`]);
+                });
+            break;
+            case "reporter": case "r":
+                let reporter = channel.guild.roles.cache.get(stats.reporter);
+                electMember.roles.add(reporter);
+                channel.send(`✅ Elected ${electMember} as ${reporter}`);
+                cmdConnectionSend(channel, ["", "reporter", "Host", `**${electMember} has been elected as ${reporter}!**`]);
+            break;
+            case "guardian": case "g":
+                let guardian = channel.guild.roles.cache.get(stats.guardian);
+                electMember.roles.add(guardian);
+                channel.send(`✅ Elected ${electMember} as ${guardian}`);
+                cmdConnectionSend(channel, ["", "guardian", "Host", `**${electMember} has been elected as ${guardian}!**`]);
+            break;
+            case "clear": case "c": case "delete": case "remove":
+                let electedRoles = [stats.mayor, stats.mayor2, stats.reporter, stats.guardian];
+                electedRoles.forEach(el => {
+                    let elRole = channel.guild.roles.cache.get(el); 
+                    electMember.roles.remove(elRole); 
+                });
+                channel.send(`✅ Cleared elected roles from ${electMember}`);
+            break;
+        }
+   }
+   
+   this.mayorCheck = function(channel) {
+       sql("SELECT id,emoji FROM players WHERE alive = 1 AND type='player'", result => {        
+            let mayor1 = channel.guild.roles.cache.get(stats.mayor);  
+            let mayor2 = channel.guild.roles.cache.get(stats.mayor2);  
+            let wrongMayorMembers;
+            if(result.length >= stats.mayor_treshold) {
+                wrongMayorMembers = mayor1.members.toJSON();
+                wrongMayorMembers.forEach(el => {
+                    el.roles.remove(mayor1);
+                    el.roles.add(mayor2);
+                    channel.send(`✅ Swiched ${el} to ${mayor2}`);
+                    cmdConnectionSend(channel, ["", "mayor", "Host", `**${el} has changed from ${mayor1} to ${mayor2}!**`]);
+                });
+            } else {
+                wrongMayorMembers = mayor2.members.toJSON();
+                wrongMayorMembers.forEach(el => {
+                    el.roles.remove(mayor2);
+                    el.roles.add(mayor1);
+                    channel.send(`✅ Swiched ${el} to ${mayor1}`);
+                    cmdConnectionSend(channel, ["", "mayor", "Host", `**${el} has changed from ${mayor2} to ${mayor1}!**`]);
+                });
+            }
+        });
+   }
 	
 	/* Help for this module */
 	this.helpRoles = function(member, args) {
@@ -92,6 +169,7 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "info_fancy_simplified - Returns role info (fancy, simplified)\n";
 				if(isGameMaster(member)) help += stats.prefix + "info_classic - Returns role info (classic)\n";
 				if(isGameMaster(member)) help += stats.prefix + "info_classic_simplified - Returns role info (classic, simplified)\n";
+				if(isGameMaster(member)) help += stats.prefix + "elect - Elects a player to a role\n";
 				help += "; - Returns role info\n";
 				help += ". - Returns simplified role info\n";
 				help += stats.prefix + "info - Returns role info\n";
@@ -146,6 +224,13 @@ module.exports = function() {
 				help += "```\nFunctionality\n\nSends an info message with an appended addition.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "infoadd citizen EXTRATEXT\n< Citizen | Townsfolk\n  Basics\n  The Citizen has no special abilities\n  All the innocents vote during the day on whomever they suspect to be an enemy,\n  and hope during the night that they won’t get killed.EXTRATEXT\n```";
 				help += "```diff\nAliases\n\n- ia\n- info_add\n```";
+			break;
+			case "elect":
+				if(!isGameMaster(member)) break;
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "elect <Elected Role> <Player>\n```";
+				help += "```\nFunctionality\n\nElects a player to an elected role. Elected Role available are: Mayor, Reporter, Guardian. You can use M, R and G to shorten the command.\nUse elect clear to remove all elected roles from a player.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "elect mayor ts\n```";
+				help += "```diff\nAliases\n\n- ia\n- el\n- elected\n```";
 			break;
 			case "roles":
 				if(!isGameMaster(member)) break;

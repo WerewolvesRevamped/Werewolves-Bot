@@ -256,8 +256,10 @@ module.exports = function() {
                         let webhookAvatar = client.user.displayAvatarURL();
                         
                         // role icon
+                        console.log(disguise);
                         let roleIcon = await getIconFromName(disguise);
                         if(roleIcon) webhookAvatar = roleIcon;
+                        console.log(roleIcon);
                         
                         channel.guild.channels.cache.get(destination.channel_id).fetchWebhooks()
                         .then(webhooks => {
