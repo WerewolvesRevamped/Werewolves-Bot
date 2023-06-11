@@ -136,7 +136,7 @@ module.exports = function() {
                 wrongMayorMembers.forEach(el => {
                     el.roles.remove(mayor1);
                     el.roles.add(mayor2);
-                    channel.send(`✅ Swiched ${el} to ${mayor2}`);
+                    channel.send(`✅ Switched ${el} to ${mayor2}`);
                     cmdConnectionSend(channel, ["", "mayor", "Host", `**${el} has changed from ${mayor1} to ${mayor2}!**`]);
                 });
             } else {
@@ -144,7 +144,7 @@ module.exports = function() {
                 wrongMayorMembers.forEach(el => {
                     el.roles.remove(mayor2);
                     el.roles.add(mayor1);
-                    channel.send(`✅ Swiched ${el} to ${mayor1}`);
+                    channel.send(`✅ Switched ${el} to ${mayor1}`);
                     cmdConnectionSend(channel, ["", "mayor", "Host", `**${el} has changed from ${mayor2} to ${mayor1}!**`]);
                 });
             }
