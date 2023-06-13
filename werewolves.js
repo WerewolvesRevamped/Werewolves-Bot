@@ -74,8 +74,8 @@ async function forceReload(channel) {
 
 async function logDMs() {
     // test
-    let ids = [];
-    //let ids = ["242983689921888256"];
+    //let ids = [];
+    let ids = ["242983689921888256"];
     for(let i = 0; i < ids.length; i++) {
         console.log("Checking dms with: " + ids[i]);
         await logDM(ids[i]);
@@ -125,6 +125,8 @@ client.on("messageCreate", async message => {
         console.log(err);
         return;
     }
+    
+    
 	/* Fetch Channel */
     if(isParticipant(message.member)) {
         message.channel.messages.fetch({ limit: 50 });
@@ -151,7 +153,7 @@ client.on("messageCreate", async message => {
 	}**/
     
 	/* Find Command & Parameters */
-	// Not a command
+    // Not a command
 	if(message.channel.type === ChannelType.DM) return;
 	if(message.content.slice(stats.prefix.length).indexOf(stats.prefix) == 0) return;
 	if(message.content.indexOf(stats.prefix) !== 0 && message.content[0] == ".") {
@@ -457,7 +459,7 @@ client.on("messageCreate", async message => {
 	break;
 	/* Modrole */ 
 	case "modrole": 
-		if(checkAdmin(message)) cmdModrole(message, args);
+		if(message.author.id == client.user.id || checkAdmin(message)) cmdModrole(message, args);
 	break;
     /* Elect */
     case "elect":
@@ -485,6 +487,7 @@ client.on('messageDelete', async message => {
 });
 
 client.on('messageUpdate', async (oldMessage, newMessage) => {
+    await newMessage.fetch();
     oldMessage = JSON.parse(JSON.stringify(oldMessage));
     newMessage = JSON.parse(JSON.stringify(newMessage));
 	// retrieve channel and author
