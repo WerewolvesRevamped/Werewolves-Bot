@@ -233,7 +233,7 @@ module.exports = function() {
 				players = players.filter(el => !playerList.includes(el));
 				players.forEach(el => { 
 					channel.permissionOverwrites.create(el, { ViewChannel: true}).then(c => {
-						if(!mode) channel.send(`✅ ➕ ${idToEmoji(channel.guild.members.cache.get(el))}`);
+						if(!mode) channel.send(`✅ ➕ ${idToEmoji(channel.guild.members.cache.get(el).id)}`);
 					}).catch(err => { 
 						logO(err); 
 						sendError(channel, err, "⛔");
@@ -262,7 +262,7 @@ module.exports = function() {
 			if(players && players.length > 0) {
 				players.forEach(el => { 
 					channel.permissionOverwrites.cache.get(el).delete().then(() => {
-						if(!mode) channel.send(`✅ ➖ ${idToEmoji(channel.guild.members.cache.get(el))}`);
+						if(!mode) channel.send(`✅ ➖ ${idToEmoji(channel.guild.members.cache.get(el).id)}`);
 					}).catch(err => { 
 						logO(err); 
 						sendError(channel, err, "⛔");
@@ -346,7 +346,7 @@ module.exports = function() {
 				players.forEach(el => { 
 					// Promote members
 					channel.permissionOverwrites.create(el, {ViewChannel: true, ReadMessageHistory: true}).then(c => {
-						if(!mode) channel.send(`✅ 🔼 ${idToEmoji(channel.guild.members.cache.get(el))}`);
+						if(!mode) channel.send(`✅ 🔼 ${idToEmoji(channel.guild.members.cache.get(el).id)}`);
 					}).catch(err => { 
 						// Permission error
 						logO(err); 
@@ -381,7 +381,7 @@ module.exports = function() {
 				players.forEach(el => { 
 					// Promote members
 					channel.permissionOverwrites.create(el, {ViewChannel: true}).then(c => {
-						if(!mode) channel.send(`✅ 🔽 ${idToEmoji(channel.guild.members.cache.get(el))}`);
+						if(!mode) channel.send(`✅ 🔽 ${idToEmoji(channel.guild.members.cache.get(el).id)}`);
 					}).catch(err => { 
 						// Permission error
 						logO(err); 
@@ -424,10 +424,10 @@ module.exports = function() {
 		}
 		// Get lists
 		let ccList = shuffleArray(channel.permissionOverwrites.cache.toJSON()).filter(el => el.type === OverwriteType.Member).filter(el => el.allow > 0).map(el => idToEmoji(el.id)).join("\n");
-		let ccOwner = shuffleArray(channel.permissionOverwrites.cache.toJSON()).filter(el => el.type === OverwriteType.Member).filter(el => el.allow == 66560).map(el => channel.guild.members.cache.get(el.id)).join("\n");
+		let ccOwner = shuffleArray(channel.permissionOverwrites.cache.toJSON()).filter(el => el.type === OverwriteType.Member).filter(el => el.allow == 66560).map(el =>  idToEmoji(el.id)).join(" ");
 		// Choose messages		
 		switch(mode) {
-			default: channel.send(idToEmoji(ccOwner.split("\n")[0].id) + " ✨💌\n\n" + ccList); break;
+			default: channel.send(ccOwner + " ✨💌\n\n" + ccList); break;
 		}
 		
 	}

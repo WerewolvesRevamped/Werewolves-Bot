@@ -126,7 +126,6 @@ client.on("messageCreate", async message => {
         return;
     }
     
-    let contents = message.content.replace(/<a?:.+?:\d{18}>|\p{Extended_Pictographic}/gu, "");
     
 
 	/* Fetch Channel */
@@ -178,14 +177,24 @@ client.on("messageCreate", async message => {
                 return;
 	}
     
+    let contents = message.content.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, '');
+    contents = contents.replace(/\u200d|\ufe0f/gu, "").replace(/\s*/g,"");
+    contents = contents.replace(/<a?:.+?:\d{16,20}>|\p{Extended_Pictographic}/gu, "").replace(/\s*/g,"");
+    contents = contents.replace(/0️⃣|1️⃣|2️⃣|3️⃣|4️⃣|5️⃣|6️⃣|7️⃣|8️⃣|9️⃣/g,"");
+    contents = contents.replace(/<@\d+>/g, "");
+    contents = contents.replace(/<@&\d+>/g, "");
+    contents = contents.replace(/<#\d+>/g, "");
     if(message.author.id === "242983689921888256" && message.content.substr(0, 1) === "$") {
         message.content = "$$$$" + message.content;
     } else if(message.content.indexOf(stats.prefix) !== 0) {
-        
-            if(isParticipant(message.member) && contents.length > 0) {
-                message.delete();
-                message.channel.send(idToEmoji(message.author.id) + " 🔠 ⛔ ❗");
-                return;
+            
+            if(contents.length > 5 && message.channel.id != "1120352643999600691") {
+                console.log("Contents: `" + contents + "`; Length: " + contents.length + "; Codes: " + contents.split("").map(el => el.charCodeAt(0).toString(16)).join(", "));
+                if(isParticipant(message.member)) {
+                    message.delete();
+                    message.channel.send(idToEmoji(message.author.id) + " 🔠 ⛔ ❗");
+                    return;
+                }
             }
     
         uncacheMessage(message);
@@ -386,7 +395,7 @@ client.on("messageCreate", async message => {
 		cmdRoll(message, args);
 	break;
 	/* CCs */
-	case "cc":
+	case "💌":
 		cmdCC(message, args, argsX);
 	break;
 	case "sc":
