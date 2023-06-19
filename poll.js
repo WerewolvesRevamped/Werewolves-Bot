@@ -139,9 +139,9 @@ module.exports = function() {
     
     this.loadPollValues = function () {
         pollValues = {
-            "abstain": ["⛔", "*Abstain*"],
+            "abstain": ["⛔", "*⛔*"],
             "cancel": ["❌", "*Cancel*"],
-            "random": ["❓", "*Random*"],
+            "random": ["❓", "*❓*"],
             "yes": [client.emojis.cache.get(stats.yes_emoji), "Yes"],
             "no": [client.emojis.cache.get(stats.no_emoji), "No"],
             "no_": [client.emojis.cache.get(stats.no_emoji)?.name, "No"],
@@ -170,7 +170,7 @@ module.exports = function() {
 				// poll name
 				let pollName;
 				if(args[2]) { // allow named polls
-					pollName = args[2].replace(/[^a-z0-9\-_]+/g, "");
+					pollName = args[2];
 					if(pollName.length > 20) pollName = pollName.substr(0, 20);
 				} 
 				if(!pollName || !pollName.length) { // if no name is provided generate one
@@ -231,10 +231,10 @@ module.exports = function() {
 				// split poll into several messages if necessary
 				while(playerList.length > 0) playerLists.push(playerList.splice(0, 20));
 				// Print message
-				channel.send("Poll `#" + pollName + "`");
+				channel.send("🗳️  " + pollName + "");
 				// Handle each message of the poll
 				playerLists.forEach(list => {
-					let pollMsg = list.map(el => el.join(" - ")).join("\n");
+					let pollMsg = list.map(el => el.join(" ▶️ ")).join("\n");
 					channel.send(pollMsg).then(m => {
 						pollReact(m, list, 0);
 						sql("INSERT INTO polls (poll_id, message_id, type) VALUES (" + connection.escape(pollName) + ", " + connection.escape(m.id) + ", " + connection.escape(type) + ")", result => {
@@ -391,11 +391,11 @@ module.exports = function() {
 	}).filter(el => el.valid).sort((a, b) => a.votes < b.votes).map(el => { 
 		let vot = (el.voters ? el.voters : "*Nobody*"); 
 		if(pollType === "dead") vot = "*Hidden*";
-		return `(${el.votes}) ${el.emoji} ${el.candidate} **-** ${vot}`;
+		return `(${ntca(el.votes)}) ${el.emoji} ${el.candidate} **-** ${vot}`;
 	}).join("\n");
 		// Send message
-		if(!votesMessage.length) votesMessage = "*Nobody voted...*";
-		channel.send("Results for Poll `#" + pollNum + "`:\n" + votesMessage);
+		if(!votesMessage.length) votesMessage = "😔";
+		channel.send("🗳️ " + pollNum + "\n" + votesMessage);
 		messages.forEach(el => {
 			channel.messages.fetch(el).then(m => {
 				m.reactions.removeAll().catch(err => { 

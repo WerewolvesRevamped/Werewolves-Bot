@@ -18,26 +18,19 @@ module.exports = function() {
 			message.channel.send(helpCCs(message.member, ["cc"]));
 			return; 
 		} else if(stats.gamephase != gp.INGAME && args[0] != "cleanup") { 
-			message.channel.send("⛔ Command error. Can only use CCs while a game is running."); 
+			message.channel.send("⛔⛔⛔"); 
 			return; 
 		}
 		// Check Subcommand
 		switch(args[0]) {
-			case "create": cmdCCCreate(message.channel, message.member, args, 0, () => {}); break;
-			case "create_hidden": cmdCCCreate(message.channel, message.member, args, 1, () => {}); break;
-			case "add": cmdCCAdd(message.channel, message.member, args, 0); break;
-			case "remove": cmdCCRemove(message.channel, message.member, args, 0); break;
-			case "rename": cmdCCRename(message.channel, message.member, args, 0); break;
-			case "archive": cmdCCArchive(message.channel, message.member, 0); break;
-			case "promote": cmdCCPromote(message.channel, message.member, args, 0); break;
-			case "demote": cmdCCDemote(message.channel, message.member, args, 0); break;
-			case "leave": cmdCCLeave(message.channel, message.member); break;
-			case "list": cmdCCList(message.channel, 2); break;
-			case "owners": cmdCCList(message.channel, 3); break;
+			case "✨": cmdCCCreate(message.channel, message.member, args, 0, () => {}); break;
+			case "➕": cmdCCAdd(message.channel, message.member, args, 0); break;
+			case "➖": cmdCCRemove(message.channel, message.member, args, 0); break;
+			case "🔼": cmdCCPromote(message.channel, message.member, args, 0); break;
+			case "🔽": cmdCCDemote(message.channel, message.member, args, 0); break;
+			case "🚪": cmdCCLeave(message.channel, message.member); break;
 			case "cleanup": if(checkGM(message)) cmdConfirm(message, "cc cleanup"); break;
-			case "create_multi": cmdCCCreateMulti(message.channel, message.member, argsX, 0); break;
-			case "create_multi_hidden": cmdCCCreateMulti(message.channel, message.member, argsX, 1); break;
-			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
+			default: message.channel.send("⛔ ⛔❓❓"); break;
 		}
 	}
 	
@@ -82,7 +75,7 @@ module.exports = function() {
 	
 	this.cmdCCCreateOneMulti = function(channel, member, ccs, type, index) {
 		if(index >= ccs.length) {
-			channel.send("✅ Successfully created " + ccs.length + " CCs!");
+			channel.send("✅");
 			return;
 		}
 		cmdCCCreate(channel, member, ccs[index], type, () => cmdCCCreateOneMulti(channel, member, ccs, type, ++index));
@@ -92,94 +85,11 @@ module.exports = function() {
 		let help = "";
 		switch(args[0]) {
 			case "":
-				help += stats.prefix + "cc [create|create_hidden] - Creates a CC\n";
-				help += stats.prefix + "cc [create_multi|create_multi_hidden] - Creates multiple CCs\n";
-				help += stats.prefix + "cc [add|remove|promote|demote|leave] - Manages CC members\n";
-				help += stats.prefix + "cc leave - Leave a CC\n";
-				help += stats.prefix + "cc [list|owners] - Shows CC Info\n";
-				help += stats.prefix + "cc [rename|archive] - Manages a CC name\n";
+				help += stats.prefix + "💌 ✨ ▶️ 💌✨\n";
+				help += stats.prefix + "💌 [➕|➖|🔼|🔽] ▶️ 🔃 🧑‍🤝‍🧑 💌\n";
+				help += stats.prefix + "💌 🚪 ▶️ 💌 🚪\n";
 				if(isGameMaster(member)) help += stats.prefix + "cc cleanup - Cleans up CCs\n";
 				if(isGameMaster(member)) help += stats.prefix + "sc [add|remove|list|rename|clear|clean|change] - Manages a SC\n";
-			break;
-			case "cc":
-				switch(args[1]) {
-					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc [create|create_hidden|create_multi|create_multi_hidden|add|remove|promote|rename|archive|leave|list|owners" + (isGameMaster(member) ? "|cleanup"  : "") + "]\n```";
-						help += "```\nFunctionality\n\nGroup of commands to handle CCs. " + stats.prefix + "help cc <sub-command> for detailed help.\n```";
-						help += "```diff\nAliases\n\n- c\n```";
-					break;
-					case "create":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc create <CC Name> <Player List>\n```";
-						help += "```\nFunctionality\n\nCreates a CC with the name <CC Name> and adds you, as well as all players in the <Player List> to it. <Player List> may contain 0 or more players. When the CC is created you are announced as the creator of the CC, and are the only owner.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "cc create marhjots marhjo\n< ✅ Created #marhjots!```";
-					break;
-					case "create_hidden":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc create_hidden <CC Name> <Player List>\n```";
-						help += "```\nFunctionality\n\nCreates a CC with the name <CC Name> and adds you, as well as all players in the <Player List> to it. <Player List> may contain 0 or more players. When the CC is created you are not announced as the creator of the CC, and all original members of the CC are made owners.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "cc create_hidden marhjots marhjo\n< ✅ Created #marhjots!```";
-					break;
-					case "create_multi":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc create_multi\n<CC Name> <Player List>\n<CC Name> <Player List>\n<CC Name> <Player List>\n...```";
-						help += "```\nFunctionality\n\nHandles each line as its own cc create command\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "cc create_multi\n  🤔 marhjo\n  👌 federick\n< ✅ Created #🤔!\n< ✅ Created #👌!\n< ✅ Successfully created 2 CCs!```";
-					break;
-					case "create_multi_hidden":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc create_multi_hidden\n<CC Name> <Player List>\n<CC Name> <Player List>\n<CC Name> <Player List>\n...```";
-						help += "```\nFunctionality\n\nHandles each line as its own cc create_hidden command\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "cc create_multi_hidden\n  🤔 marhjo\n  👌 federick\n< ✅ Created #🤔!\n< ✅ Created #👌!\n< ✅ Successfully created 2 CCs!```";
-					break;
-					case "add":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc add <Player List>\n```";
-						help += "```\nFunctionality\n\nAdds all players in the <Player List> to the current CC. Only works in CCs, in which you are an owner.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "cc add marhjo\n< ✅ Added @marhjo to the CC!```";
-					break;
-					case "remove":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc remove <Player List>\n```";
-						help += "```\nFunctionality\n\nRemoves all players in the <Player List> from the current CC. Only works in CCs, in which you are an owner.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "cc remove marhjo\n< ✅ Removed @marhjo from the CC!```";
-					break;
-					case "promote":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc promote <Player List>\n```";
-						help += "```\nFunctionality\n\nPromotes all players in the <Player List> in the current CC to owner. Only works in CCs, in which you are an owner.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "cc promote federick\n< ✅ Promoted @federick!```";
-					break;
-					case "demote":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc demote <Player List>\n```";
-						help += "```\nFunctionality\n\nDemotes all players in the <Player List> in the current CC to non-owner. Only works in CCs, in which you are an owner.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "cc demote federick\n< ✅ Demoted @federick!```";
-					break;
-					case "rename":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc rename <name>\n```";
-						help += "```\nFunctionality\n\nRenames the current cc into <name>.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "cc rename newName\n< ✅ Renamed channel to newName!```";
-					break;
-					case "archive":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc archive\n```";
-						help += "```\nFunctionality\n\nRenames a CC to 🔒-<oldName> and locks it.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "cc archive\n< ✅ Renamed channel to 🔒-oldName!```";
-					break;
-					case "leave":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc leave\n```";
-						help += "```\nFunctionality\n\nRemoves you from the current CC.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "cc leave\n< ✅ @McTsts left the CC!```";
-					break;
-					case "list":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc list\n```";
-						help += "```\nFunctionality\n\nLists all members of the current CC.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "cc list\n< CC Members | Total: 2\n  @marhjo\n  @McTsts```";
-					break;
-					case "owners":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc owners\n```";
-						help += "```\nFunctionality\n\nLists all owners of the current CC.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "cc owners\n< CC Owners | Total: 1\n  @McTsts```";
-					break;
-					case "cleanup":
-						if(!isGameMaster(member)) break;
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc cleanup\n```";
-						help += "```\nFunctionality\n\nRemoves all CCs, all CC Categories, and resets the CC Counter.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "cc cleanup\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "cc cleanup!\n< ✅ Successfully deleted a cc category!\n< ✅ Successfully deleted ccs!\n< ✅ Successfully reset cc counter!\n< ✅ Successfully reset cc cat list!```";
-					break;
-				}
 			break;
 			case "sc":
 				switch(args[1]) {
@@ -312,7 +222,7 @@ module.exports = function() {
 	this.cmdCCAdd = function(channel, member, args, mode) {
 		// Check if CC
 		if(!mode && !isCC(channel)) {
-			channel.send("⛔ Command error. Can't use command outside a CC!");
+			channel.send("⛔");
 			return;
 		}
 		let ccOwner = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Member).filter(el => el.allow == 66560).map(el => el.id);
@@ -323,17 +233,17 @@ module.exports = function() {
 				players = players.filter(el => !playerList.includes(el));
 				players.forEach(el => { 
 					channel.permissionOverwrites.create(el, { ViewChannel: true}).then(c => {
-						if(!mode) channel.send(`✅ Added ${channel.guild.members.cache.get(el)} to the CC!`);
+						if(!mode) channel.send(`✅ ➕ ${idToEmoji(channel.guild.members.cache.get(el))}`);
 					}).catch(err => { 
 						logO(err); 
-						sendError(channel, err, "Could not add to CC");
+						sendError(channel, err, "⛔");
 					});
 				});
 			} else {
-				channel.send("⛔ Command error. No valid players, that are not part of this CC already, were provided!");
+				channel.send("⛔");
 			}
 		} else {
-			channel.send("⛔ Command error. You are not an owner of this CC!");
+			channel.send("⛔");
 		}
 	}
 	
@@ -341,7 +251,7 @@ module.exports = function() {
 	this.cmdCCRemove = function(channel, member, args, mode) {
 		// Check if CC
 		if(!mode && !isCC(channel)) {
-			channel.send("⛔ Command error. Can't use command outside a CC!");
+			channel.send("⛔");
 			return;
 		}
 		let ccOwner = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Member).filter(el => el.allow == 66560).map(el => el.id);
@@ -352,17 +262,17 @@ module.exports = function() {
 			if(players && players.length > 0) {
 				players.forEach(el => { 
 					channel.permissionOverwrites.cache.get(el).delete().then(() => {
-						if(!mode) channel.send(`✅ Removed ${channel.guild.members.cache.get(el)} from the CC!`);
+						if(!mode) channel.send(`✅ ➖ ${idToEmoji(channel.guild.members.cache.get(el))}`);
 					}).catch(err => { 
 						logO(err); 
-						sendError(channel, err, "Could not remove from CC");
+						sendError(channel, err, "⛔");
 					});
 				});
 			} else {
-				channel.send("⛔ Command error. No valid players, that are part of this CC already, were provided!");
+				channel.send("⛔");
 			}
 		} else {
-			channel.send("⛔ Command error. You are not an owner of this CC!");
+			channel.send("⛔");
 		}
 	}
 	
@@ -422,7 +332,7 @@ module.exports = function() {
 	this.cmdCCPromote = function(channel, member, args, mode) {
 		// Check if CC
 		if(!mode && !isCC(channel)) {
-			channel.send("⛔ Command error. Can't use command outside a CC!");
+			channel.send("⛔");
 			return;
 		}
 		// Get owner
@@ -436,20 +346,20 @@ module.exports = function() {
 				players.forEach(el => { 
 					// Promote members
 					channel.permissionOverwrites.create(el, {ViewChannel: true, ReadMessageHistory: true}).then(c => {
-						if(!mode) channel.send(`✅ Promoted ${channel.guild.members.cache.get(el)}!`);
+						if(!mode) channel.send(`✅ 🔼 ${idToEmoji(channel.guild.members.cache.get(el))}`);
 					}).catch(err => { 
 						// Permission error
 						logO(err); 
-						sendError(channel, err, "Could not promote");
+						sendError(channel, err, "⛔");
 					});
 				});
 			} else {
 				// No valid players
-				channel.send("⛔ Command error. No valid players, that are part of this CC, were provided!");
+				channel.send("⛔");
 			}
 		} else {
 			// Not owner
-			channel.send("⛔ Command error. You are not an owner of this CC!");
+			channel.send("⛔");
 		}
 	}
     
@@ -457,7 +367,7 @@ module.exports = function() {
 	this.cmdCCDemote = function(channel, member, args, mode) {
 		// Check if CC
 		if(!mode && !isCC(channel)) {
-			channel.send("⛔ Command error. Can't use command outside a CC!");
+			channel.send("⛔");
 			return;
 		}
 		// Get owner
@@ -471,20 +381,20 @@ module.exports = function() {
 				players.forEach(el => { 
 					// Promote members
 					channel.permissionOverwrites.create(el, {ViewChannel: true}).then(c => {
-						if(!mode) channel.send(`✅ Demoted ${channel.guild.members.cache.get(el)}!`);
+						if(!mode) channel.send(`✅ 🔽 ${idToEmoji(channel.guild.members.cache.get(el))}`);
 					}).catch(err => { 
 						// Permission error
 						logO(err); 
-						sendError(channel, err, "Could not demote");
+						sendError(channel, err, "⛔");
 					});
 				});
 			} else {
 				// No valid players
-				channel.send("⛔ Command error. No valid players, that are part of this CC, were provided!");
+				channel.send("⛔");
 			}
 		} else {
 			// Not owner
-			channel.send("⛔ Command error. You are not an owner of this CC!");
+			channel.send("⛔");
 		}
 	}
 	
@@ -492,16 +402,16 @@ module.exports = function() {
 	this.cmdCCLeave = function(channel, member) {
 		// Check if CC
 		if(!isCC(channel)) {
-			channel.send("⛔ Command error. Can't use command outside a CC!");
+			channel.send("⛔");
 			return;
 		}
 		// Remove permissions
 		channel.permissionOverwrites.cache.get(member.id).delete().then(() => {
-			channel.send(`✅ ${member} left the CC!`);
+			channel.send(`✅ ${idToEmoji(member.id)} 🚪`);
 		}).catch(err => { 
 			// Permission error
 			logO(err); 
-			sendError(channel, err, "Could not leave the CC");
+			sendError(channel, err, "⛔");
 		});
 	}
 	
@@ -509,18 +419,15 @@ module.exports = function() {
 	this.cmdCCList = function(channel, mode, mode2 = 0) {
 		// Check if CC
 		if(!mode2 && !isCC(channel)) {
-			channel.send("⛔ Command error. Can't use command outside a CC!");
+			channel.send("⛔");
 			return;
 		}
 		// Get lists
-		let ccList = shuffleArray(channel.permissionOverwrites.cache.toJSON()).filter(el => el.type === OverwriteType.Member).filter(el => el.allow > 0).map(el => channel.guild.members.cache.get(el.id)).join("\n");
+		let ccList = shuffleArray(channel.permissionOverwrites.cache.toJSON()).filter(el => el.type === OverwriteType.Member).filter(el => el.allow > 0).map(el => idToEmoji(el.id)).join("\n");
 		let ccOwner = shuffleArray(channel.permissionOverwrites.cache.toJSON()).filter(el => el.type === OverwriteType.Member).filter(el => el.allow == 66560).map(el => channel.guild.members.cache.get(el.id)).join("\n");
 		// Choose messages		
 		switch(mode) {
-			case 0: channel.send(ccOwner + " has created a new CC!\n\n**CC Members** | Total: " +  ccList.split("\n").length + "\n" + ccList); break;
-			case 1: channel.send("A new CC has been created!\n\n**CC Members** | Total: " +  ccList.split("\n").length + "\n" + ccList); break;
-			case 2: channel.send("✳ Listing CC members").then(m => { m.edit("**CC Members** | Total: " +  ccList.split("\n").length + "\n" + ccList); }).catch(err => {logO(err); sendError(channel, err, "Could not list CC members"); }); break;
-			case 3: channel.send("✳ Listing CC members").then(m => { m.edit("**CC Owners** | Total: " +  ccOwner.split("\n").length + "\n" + ccOwner); }).catch(err => {logO(err); sendError(channel, err, "Could not list CC members"); }); break;
+			default: channel.send(idToEmoji(ccOwner.split("\n")[0].id) + " ✨💌\n\n" + ccList); break;
 		}
 		
 	}
@@ -564,13 +471,13 @@ module.exports = function() {
 	this.cmdCCCreate = function(channel, member, args, mode, callback) {
 		// Get a list of users that need to be in the cc
 		if(!(isCC(channel) || isSC(channel) || isGameMaster(member, true) || isHelper(member))) {
-			channel.send("⛔ Command error. Can't use command outside a CC/SC!");
+			channel.send("⛔");
 			return;
 		} else if(!args[1]) {
 			channel.send(helpCCs(member, ["cc", "create"]));
 			return;
 		} else if(!isGameMaster(member, true) && !isHelper(member) && stats.cc_limit >= -10 && ccs.find(el => el.id == member.id).ccs >= stats.cc_limit) {
-			channel.send("⛔ You have hit the CC limit of `" + stats.cc_limit + "` CCs!");
+			channel.send("⛔ " + ntca(stats.cc_limit) + " 💌");
 			return;
 		}
 		args[1] = args[1].replace(/🔒/,"lock");
@@ -580,7 +487,7 @@ module.exports = function() {
 			sql("UPDATE players SET ccs = ccs + 1 WHERE id = " + connection.escape(member.id), result => {
 				getCCs();
 			}, () => {
-				channel.send("⛔ Database error. Could not increase the CC amount!");
+				channel.send("⛔");
 			});
 		}
         players = players.filter(el => el != member.id);
@@ -611,37 +518,37 @@ module.exports = function() {
 										//log("CC > Created new CC `" + updated.name + "` in category `" + cc.name + "`!");
 										// Increment cc count
 										sql("UPDATE stats SET value = value + 1 WHERE id = 9", result => {
-											channel.send(`✅ Created ${updated}!`); 
+											channel.send(`✅ ${updated}!`); 
 											cmdCCList(updated, mode);
 											getCCs();
 											callback();
 										}, () => {
-											channel.send("⛔ Database error. Could not increment CC count!"); 
+											channel.send("⛔"); 
 										});
 									})
 									// Couldn't set category
 									.catch(err => { 
 										logO(err); 
-										sendError(channel, err, "Could not set category");
+										sendError(channel, err, "⛔");
 									});
 								})
 								// Channel couldn't get created
 								.catch(err => { 
 									logO(err); 
-									sendError(channel, err, "Could not create channel");
+									sendError(channel, err, "⛔");
 								});
 								// DB couldn't save category id
 							}, () => {
-								channel.send("⛔ Database error. Could not save new CC category!");
+								channel.send("⛔");
 							});		
 						}, () => {
-							channel.send("⛔ Database error. Could not save CC category in database!"); 
+							channel.send("⛔"); 
 						});
 					})
 					// Category couldn't get created
 					.catch(err => { 
 						logO(err); 
-						sendError(channel, error, "Could not create category");
+						sendError(channel, error, "⛔");
 					});
 				// Don't create new category
 				} else {	
@@ -661,46 +568,46 @@ module.exports = function() {
 									//log("CC > Created new CC `" + updated.name + "` in category `" + cc.name + "`!");
 									// Increment cc count
 									sql("UPDATE stats SET value = value + 1 WHERE id = 9", result => {
-										channel.send(`✅ Created ${updated}!`); 
+										channel.send(`✅ ${updated}!`); 
 										getCCs();
 										cmdCCList(updated, mode);
 										callback();
 									}, () => {
-										channel.send("⛔ Database error. Could not increment CC count!"); 
+										channel.send("⛔"); 
 									});
 								})
 								// Couldn't set category
 								.catch(err => { 
-									sendError(channel, err, "Could not set category");
+									sendError(channel, err, "⛔");
 									logO(err); 
 								}); 
 							// Category doesn't exist
 							} else {
 								ct.delete();
-								channel.send("⛔ Command error. Category does not exist!"); 
+								channel.send("⛔"); 
 								sqlSetStat(9, 0, result => {
-									channel.send("✅ Attempted to automatically fix. Please try again!");
+									channel.send("✅");
 								}, () => {
-									channel.send("⛔ Could not automatically fix."); 
+									channel.send("⛔"); 
 								});
 							}
 						})
 						// Channel couldn't get created
 						.catch(err => { 
-							sendError(channel, err, "Could not create channel");
+							sendError(channel, err, "⛔");
 							logO(err);
 						});
 						// DB couldn't save category id
 					}, () => {
-						channel.send("⛔ Database error. Could not save new cc category!");
+						channel.send("⛔");
 					});
 				}
 				// Couldn't get current cc amount from DB
 			}, () => {
-				channel.send("⛔ Database error. Could not find CC info!");
+				channel.send("⛔");
 			}); 
 		} else {
-			channel.send("⛔ Command error. Can not create CCs with less than 1 player!");
+			channel.send("⛔");
 			callback();
 		}
 	}

@@ -51,15 +51,15 @@ module.exports = function() {
 	
 	this.cmdRoll = function(message, args) {
 		// Check subcommands
-		if(!args[1] && (args[0] && args[0] == "bl" || args[0] == "wl")) { 
-			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `roll [bl|wl] <players>` or `roll`!"); 
+		if(!args[1] && (args[0] && args[0] == "bl" || args[0] == "⬜")) { 
+			message.channel.send("⛔"); 
 			return; 
 		}
 		//Find subcommand
 		switch(args[0]) {
-			case "bl": case "blacklist": cmdRollExe(message.channel, args, false); break;
-			case "wl": case "whitelist": cmdRollExe(message.channel, args, true); break;
-            case "num": case "number": case "n": case "d": cmdRollNum(message.channel, args); break;
+			case "⬛": cmdRollExe(message.channel, args, false); break;
+			case "⬜": cmdRollExe(message.channel, args, true); break;
+            case "🔢": cmdRollNum(message.channel, args); break;
             default:
                 if(args[0] && args[0].match(/\d*d\d+/)) {
                     let args2 = args[0].split(/d/);
@@ -84,14 +84,9 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "killq [add|remove|killall|list|clear] - Manages kill queue\n";
 				if(isGameMaster(member)) help += stats.prefix + "kqak - Instant kill a player\n";
 				if(isAdmin(member)) help += stats.prefix + "modrole [add|remove] - Adds/removes roles from users\n";
-				help += stats.prefix + "list - Lists signed up players\n";
-				help += stats.prefix + "list_alphabetical - Lists signed up players (alphabetical)\n";
-				help += stats.prefix + "alive - Lists alive players\n";
-				help += stats.prefix + "signup - Signs you up for the next game\n";
-				help += stats.prefix + "emojis - Emoji & Player ID list for CCs\n";
-				help += stats.prefix + "roll [-|whitelist|blacklist|number|?d?] - Randomizes\n";
-				help += stats.prefix + "spectate - Makes you a spectator\n";
-				help += stats.prefix + "substitute - Makes you a substitute player\n";
+				help += stats.prefix + "📑 ▶️ 📑\n";
+				help += stats.prefix + "🚶 ▶️ 📑☠️⛔\n";
+				help += stats.prefix + "🎲 [-|⬜|⬛|🔢] ▶️ 🎲\n";
 			break;
 			case "spectate":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "spectate\n```";
@@ -120,30 +115,6 @@ module.exports = function() {
 				help += "```fix\nUsage\n\n> " + stats.prefix + "kqak Ts\n```";
             break;
 
-			case "list_signedup":
-				help += "```yaml\nSyntax\n\n" + stats.prefix + "list\n```";
-				help += "```\nFunctionality\n\nLists all signed up players\n```";
-				help += "```fix\nUsage\n\n> " + stats.prefix + "list\n< Signed Up Players | Total: 3\n  🛠 - McTsts (@McTsts)\n  🤔 - marhjo (@marhjo)\n  👌 - federick (@federick)\n```";
-				help += "```diff\nAliases\n\n- l\n- signedup\n- signedup_list\n- signedup-list\n- listsignedup\n- list-signedup\n- list_signedup\n```";
-			break;
-			case "list_alphabetical":
-				help += "```yaml\nSyntax\n\n" + stats.prefix + "list_alphabetical\n```";
-				help += "```\nFunctionality\n\nLists all signed up players (alphabetically)\n```";
-				help += "```fix\nUsage\n\n> " + stats.prefix + "list\n< Signed Up Players (Alphabetical) | Total: 3\n  🛠 - McTsts (@McTsts)\n  🤔 - marhjo (@marhjo)\n  👌 - zederick (@zederick)\n```";
-				help += "```diff\nAliases\n\n- la\n```";
-			break;
-			case "list_alive":
-				help += "```yaml\nSyntax\n\n" + stats.prefix + "alive\n```";
-				help += "```\nFunctionality\n\nLists all alive players\n```";
-				help += "```fix\nUsage\n\n> " + stats.prefix + "list\n< Alive Players | Total: 3\n  🛠 - McTsts (@McTsts)\n  🤔 - marhjo (@marhjo)\n  👌 - federick (@federick)\n```";
-				help += "```diff\nAliases\n\n- a\n- alive_list\n- alive-list\n- listalive\n- list-alive\n- list_alive\n```";
-			break;
-			case "emojis":
-				help += "```yaml\nSyntax\n\n" + stats.prefix + "emojis\n```";
-				help += "```\nFunctionality\n\nGives you a list of emojis and player ids as well as a list of all emojis. Can be used for CC creation.\n```";
-				help += "```fix\nUsage\n\n> " + stats.prefix + "emojis\n< 🛠 242983689921888256\n  🤔 102036304845377536\n  👌 203091600283271169\n  🛠 🤔 👌\n```";
-				help += "```diff\nAliases\n\n- e\n- emoji\n```";
-			break;
 			case "signup": 
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "signup <Emoji>\n```";
 				help += "```\nFunctionality\n\nSigns you up for the next game with emoji <Emoji>, which has to be a valid emoji, that is not used by another player yet. If you have already signedup the command changes your emoji. If no emoji is provided, you are signed out.\n```";
@@ -154,34 +125,6 @@ module.exports = function() {
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "j\n```";
 				help += "```\nFunctionality\n\nSigns you up for the next game with your emoji. If you don't have a person emoji this can be considered as an alias of " + stats.prefix + "signup\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "j\n< ✅ @McTsts signed up with emoji 🛠!\n```";
-			break;
-			case "roll":
-				switch(args[1]) {
-					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "roll [whitelist|blacklist|number|?d?]\n```";
-						help += "```\nFunctionality\n\nCommands to randomize a list of players. " + stats.prefix + "help roll <sub-command> for detailed help.\n\nIf used without a subcommand randomizes from the full player list.```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "roll\n< ▶️ Selected @McTsts (🛠)\n```";
-						help += "```diff\nAliases\n\n- rand\n- random\n- randomize\n```";
-					break;
-					case "wl": case "whitelist":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "roll whitelist <Player List>\n```";
-						help += "```\nFunctionality\n\nSelects a random player from the <Player List>\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "roll whitelist McTsts Vera\n< ▶️ Selected @McTsts (🛠)\n```";
-						help += "```diff\nAliases\n\n- roll wl\n```";
-					break;
-					case "bl": case "blacklist": 
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "roll blacklist <Player List>\n```";
-						help += "```\nFunctionality\n\nSelects a random player from the game that is not on the <Player List>\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "roll blacklist Vera\n< ▶️ Selected @McTsts (🛠)\n```";
-						help += "```diff\nAliases\n\n- roll bl\n```";
-					break;
-					case "num": case "n":  case "number":  case "d":  case "d?": case "?d?": 
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "roll number <Number>\n```";
-						help += "```\nFunctionality\n\nSelects a random number from 1 to <Number>. An alternative syntax is also supported: Instead of specifying the number subcommand you can use " + stats.prefix + "roll <amount>d<number> where amount specifies an amount of rolls to do and number specifies the highest value. The amount argument is optional. This means that " + stats.prefix + "roll d6 is equivalent to " + stats.prefix + "roll number 6 and " + stats.prefix + "roll 2d6 is equivalent to running it twice.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "roll number 5\n< ▶️ Selected `3`\n```";
-						help += "```diff\nAliases\n\n- roll n\n- roll num\n- roll d\n```";
-					break;
-				}
 			break;
 			case "players":
 				if(!isGameMaster(member)) break;
@@ -774,24 +717,25 @@ module.exports = function() {
 			if(!wl) playerList = playerList.filter(el => blacklist.indexOf(el) === -1);
 			else playerList = playerList.filter(el => blacklist.indexOf(el) != -1);
 			let rID = playerList[Math.floor(Math.random() * playerList.length)];
-			channel.send(`⏺️ Randomizing out of: ${playerList.map(el => idToEmoji(el)).join(", ")}`);
-			channel.send(`✳ Selecting...`).then(m => m.edit(`▶️ Selected <@${rID}> (${idToEmoji(rID)})`));
+			channel.send(`⏺️ 🎲 ${playerList.map(el => idToEmoji(el)).join(" ")}`);
+			channel.send(`✳ 🎲`).then(m => m.edit(`▶️ ❗ ${idToEmoji(rID)}`));
 		}, () => {
 			// DB error
-			channel.send("⛔ Database error. Could not retrieve list of participants!");
+			channel.send("⛔");
 		});
 	
 	}
 	/* Randomizes */
 	this.cmdRollNum = function(channel, args, repeat = 0) {
+        args[1] = ctna(args[1]);
         if(!(args[1] >= 2)) {
-            channel.send("⛔ Invalid argument.");
+            channel.send("⛔");
             return;
         };
 		let val = Math.ceil(Math.random() * args[1]);
-        channel.send(`⏺️ Randomizing from \`1\` to \`${args[1]}\``);
-        channel.send(`✳ Selecting...`).then(m => {
-            m.edit(`▶️ Selected \`${val}\``);
+        channel.send(`⏺️ 🎲 1️⃣ ▶️ ${ntca(args[1])}`);
+        channel.send(`✳ 🎲`).then(m => {
+            m.edit(`▶️ ❗ ${ntca(val)}`);
             if(repeat > 0) cmdRollNum(channel, args, --repeat);
         });
 	}
@@ -819,17 +763,17 @@ module.exports = function() {
 	this.cmdListSignedup = function(channel) {
 		// Get a list of players
 		sql("SELECT id,emoji FROM players WHERE type='player'", result => {
-			let playerList = result.map(el => `${el.emoji}  - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username : "*user left*"} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
+			let playerList = result.map(el => `${el.emoji}`).join(" ");
 			// Print message
-			channel.send("✳ Listing signed up players").then(m => {
-				m.edit("**Signed Up Players** | Total: " +  result.length + "\n" + playerList)
+			channel.send("✳").then(m => {
+				m.edit("**📑** | 🔢 " +  ntca(result.length) + "\n" + playerList)
 			}).catch(err => {
 				logO(err); 
-				sendError(channel, err, "Could not list signed up players");
+				sendError(channel, err, "⛔");
 			});
 		}, () => {
 			// DB error
-			channel.send("⛔ Database error. Could not list signed up players!");
+			channel.send("⛔");
 		});
 	}
     
@@ -859,22 +803,22 @@ module.exports = function() {
 	this.cmdListAlive = function(channel) {
 		// Check gamephase
 		if(stats.gamephase < gp.INGAME) { 
-			channel.send("⛔ Command error. Can only list alive players in ingame phase."); 
+			channel.send("⛔"); 
 			return; 
 		}
 		// Get a list of players
 		sql("SELECT id,emoji FROM players WHERE alive = 1 AND type='player'", result => {
-			let playerList = result.map(el => `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username : "*user left*"} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
+			let playerList = result.map(el => `${el.emoji}`).join(" ");
 			// Print message
-			channel.send("✳ Listing alive players").then(m => {
-				m.edit("**Alive Players** | Total: " +  result.length + "\n" + playerList)
+			channel.send("✳").then(m => {
+				m.edit("**📑☠️⛔** | 🔢 " +  ntca(result.length) + "\n" + playerList)
 			}).catch(err => {
 				logO(err); 
-				sendError(channel, err, "Could not list alive players");
+				sendError(channel, err, "⛔");
 			});
 		}, () => {
 			// DB error
-			channel.send("⛔ Database error. Could not list alive players!");
+			channel.send("⛔");
 		});
 	}
 	
@@ -1399,7 +1343,7 @@ module.exports = function() {
 				return true; 
 			}
 			else { 
-				channel.send("⛔ Syntax error. Invalid Player: `" + args.slice(startIndex)[index] + "`!"); 
+				channel.send("⛔ ❓❓ `" + args.slice(startIndex)[index] + "`"); 
 				return false; 
 			}
 		});

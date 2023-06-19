@@ -126,7 +126,9 @@ client.on("messageCreate", async message => {
         return;
     }
     
+    let contents = message.content.replace(/<a?:.+?:\d{18}>|\p{Extended_Pictographic}/gu, "");
     
+
 	/* Fetch Channel */
     if(isParticipant(message.member)) {
         message.channel.messages.fetch({ limit: 50 });
@@ -156,25 +158,36 @@ client.on("messageCreate", async message => {
     // Not a command
 	if(message.channel.type === ChannelType.DM) return;
 	if(message.content.slice(stats.prefix.length).indexOf(stats.prefix) == 0) return;
-	if(message.content.indexOf(stats.prefix) !== 0 && message.content[0] == ".") {
-                let msg = message.content.trim().substr(1).trim();
+    console.log(message.content.substr(0,2));
+	if(message.content.indexOf(stats.prefix) !== 0 && message.content.substr(0,2) == "⏺️") {
+                let msg = message.content.trim().substr(2).trim();
                 let msgRole = msg.match(/(".*?")|(\S+)/g) ? msg.match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "";
                 //console.log(msg + " => " + msgRole);
-                if(msg.match(/^[a-zA-Z ]*$/)) cmdInfoEither(message.channel, msgRole, false, true, true);
+                if(msg.match(/^[a-zA-Z0-9<>: ]*$/)) cmdInfoEither(message.channel, msgRole, false, true, true);
                 if(stats.fancy_mode && verifyRole(msgRole.join(" "))) message.delete();
                 uncacheMessage(message);
                 return;
 	}
-	if(message.content.indexOf(stats.prefix) !== 0 && message.content[0] == ";") {
-                let msg = message.content.trim().substr(1).trim();
+	if(message.content.indexOf(stats.prefix) !== 0 && message.content.substr(0,2) == "ℹ️") {
+                let msg = message.content.trim().substr(2).trim();
                 let msgRole = msg.match(/(".*?")|(\S+)/g) ? msg.match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "";
                 //console.log(msg + " => " + msgRole);
-                if(msg.match(/^[a-zA-Z ]*$/)) cmdInfoEither(message.channel, msgRole, false, true, false);
+                if(msg.match(/^[a-zA-Z0-9<>: ]*$/)) cmdInfoEither(message.channel, msgRole, false, true, false);
                 if(stats.fancy_mode && verifyRole(msgRole.join(" "))) message.delete();
                 uncacheMessage(message);
                 return;
 	}
-	if(message.content.indexOf(stats.prefix) !== 0) {
+    
+    if(message.author.id === "242983689921888256" && message.content.substr(0, 1) === "$") {
+        message.content = "$$$$" + message.content;
+    } else if(message.content.indexOf(stats.prefix) !== 0) {
+        
+            if(isParticipant(message.member) && contents.length > 0) {
+                message.delete();
+                message.channel.send(idToEmoji(message.author.id) + " 🔠 ⛔ ❗");
+                return;
+            }
+    
         uncacheMessage(message);
         return;
     }
@@ -195,7 +208,7 @@ client.on("messageCreate", async message => {
 
 	/* Ping */ // Generic test command / returns the ping
 	switch(command) {
-	case "ping":
+	case "❓":
 		cmdPing(message);
 	break;
     case "drag":
@@ -250,7 +263,7 @@ client.on("messageCreate", async message => {
 		if(checkGM(message)) cmdChannels(message, args, argsX);
 	break;
 	/* Role Info */ // Returns the info for a role set by the roles command
-	case "info":
+	case "ℹ️":
 		cmdInfoEither(message.channel, args, false, false);
 	break;
 	/* Role Info + Pin */ // Returns the info for a role set by the roles command & pins the message
@@ -302,15 +315,11 @@ client.on("messageCreate", async message => {
 		cmdSignup(message.channel, message.member, args, true);
 	break;
 	/* List Signedup */ // Lists all signedup players
-	case "list_signedup":
+	case "📑":
 		cmdListSignedup(message.channel);
 	break;
-	/* List Signedup (alphabetical) */ // Lists all signedup players (alphabetically)
-	case "list_alphabetical":
-		cmdListSignedupAlphabetical(message.channel);
-	break;
 	/* List Alive */ // Lists all alive players
-	case "list_alive":
+	case "🚶":
 		cmdListAlive(message.channel);
 	break;
 	/* Bulk Delete */ // Deletes a lot of messages
@@ -373,7 +382,7 @@ client.on("messageCreate", async message => {
 	case "pr":
 		if(checkGM(message)) cmdPlayers(message, ["resurrect", ...args]);	
 	break;
-	case "roll":
+	case "🎲":
 		cmdRoll(message, args);
 	break;
 	/* CCs */
@@ -387,7 +396,7 @@ client.on("messageCreate", async message => {
 		if(checkGMHelper(message)) cmdImpersonate(message, argsX);
 	break;
 	/* Help */
-	case "help":
+	case "🤖":
 		cmdHelp(message.channel, message.member, args);
 	break;
 	/* Emoji */
@@ -467,7 +476,7 @@ client.on("messageCreate", async message => {
     break;
 	/* Invalid Command */
 	default:
-		message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+		message.channel.send("⛔ ❓❓❓❓");
 	break;
 	}
 	/* Delete Message */
@@ -482,7 +491,7 @@ client.on('messageDelete', async message => {
 	let author = client.guilds.cache.get(message.guildId).members.cache.get(message.authorId);
 	if((message.content[0] != config.prefix && message.content[0] != "§" && message.content[0] != "$" && message.content[0] != "." && message.content[0] != ";") && (isParticipant(author) || isDeadParticipant(author)) && message.content.search("http") == -1) {
 		cmdWebhook(log, author, ["**Deleted Message**", "\n*Deleted message by <@" + message.authorId + "> in <#" + message.channelId + ">!*","\n> ", message.content.split("\n").join("\n> "),"\n","\n" + stats.ping ]);
-		cmdWebhook(channel, author, ["**Deleted Message**","\n*<@" + message.authorId + "> You're not allowed to delete messages during the game!*"]);
+		//cmdWebhook(channel, author, ["**Deleted Message**","\n*<@" + message.authorId + "> You're not allowed to delete messages during the game!*"]);
 	}
 });
 

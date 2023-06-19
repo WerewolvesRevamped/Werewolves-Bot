@@ -170,15 +170,9 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "info_classic - Returns role info (classic)\n";
 				if(isGameMaster(member)) help += stats.prefix + "info_classic_simplified - Returns role info (classic, simplified)\n";
 				if(isGameMaster(member)) help += stats.prefix + "elect - Elects a player to a role\n";
-				help += "; - Returns role info\n";
-				help += ". - Returns simplified role info\n";
-				help += stats.prefix + "info - Returns role info\n";
-			break;
-			case "info":
-				help += "```yaml\nSyntax\n\n" + stats.prefix + "info <Role Name>\n```";
-				help += "```\nFunctionality\n\nShows the description of a role.\n```";
-				help += "```fix\nUsage\n\n> " + stats.prefix + "info citizen\n< Citizen | Townsfolk\n  Basics\n  The Citizen has no special abilities.\n  All the innocents vote during the day on whomever they suspect to be an enemy,\n  and hope during the night that they won’t get killed.\n```";
-				help += "```diff\nAliases\n\n- i\n```";
+				help += "ℹ️ ▶️ 🐺 ℹ️ 🔡\n";
+				help += "⏺️ ▶️ 🐺 ℹ️ 🔤\n";
+				help += stats.prefix + "ℹ️ ▶️ 🐺 ℹ️ 🔡\n";
 			break;
 			case "info_fancy":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "info_fancy <Role Name>\n```";
@@ -775,7 +769,7 @@ module.exports = function() {
 					roles = applyTheme(roles);
                     if(roleType == "merged") roles = [toTitleCase(customRole.join(" "))];
                     if(!stats.fancy_mode) { // default DM
-                        channel.guild.members.cache.get(players[index].id).user.send("This message is giving you your role" + ((result.length != 1 && roleType == "default") ? "s" : "") + " for the next game of Werewolves: Revamped!\n\n\nYour role" + ((result.length != 1 && roleType == "default") ? "s are" : " is") + " `" + roles + "`.\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.\n\nIf you're confused about your role at all, then check #announcements on the discord, which contains a role book with information on all the roles in this game.").catch(err => { 
+                        channel.guild.members.cache.get(players[index].id).user.send("📧 🐺❗\n\n" + roles).catch(err => { 
                             logO(err); 
                             sendError(channel, err, "Could not send role message to " + disName);
                         });	
@@ -785,8 +779,8 @@ module.exports = function() {
                             sendError(channel, err, "Could not find role for " + disName);
                         } else {
                             let embed = {
-                                "title": "The game has started!",
-                                "description": "This message is giving you your role" + ((result.length != 1 && roleType == "default") ? "s" : "") + " for the next game of Werewolves: Revamped!\n\nYour role" + ((result.length != 1 && roleType == "default") ? "s are" : " is") + " `" + roles + "`.\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.\n\nIf you're confused about your role at all, then check #how-to-play on the discord, which contains a role book with information on all the roles in this game. If you have any questions about the game, ping @Host.",
+                                "title": "🎲 ⏯️",
+                                "description": "📧 🐺❗\n\n"+ roles + "",
                                 "color": roleData.color,
                                 "footer": {
                                     "icon_url": `${channel.guild.iconURL()}`,
@@ -1385,7 +1379,7 @@ module.exports = function() {
     
     this.cmdInfoEdit = function(channel, args, argsX) {
         if(!args[0] || !args[1]) {
-            if(!noErr) channel.send("⛔ Syntax error. Not enough parameters!");
+            if(!noErr) channel.send("⛔ 🔤 ❓❓");
             return;
         }
         channel.messages.fetch(args[0])
@@ -1396,17 +1390,17 @@ module.exports = function() {
         })
         .catch(err => { 
             logO(err); 
-            sendError(channel, err, "Could not edit in info message");
+            sendError(channel, err, "🐺 ⛔");
         });
     }
     
     this.cmdInfoEither = function(channel, args, pin, noErr, simp = false, overwriteName = false, appendSection = false, editOnto = false) {
 		// fix role name if necessary
         if(!args) {
-            if(!noErr) channel.send("❗ Could not find role.");
+            if(!noErr) channel.send("❗ 🐺 ⛔");
             return;
         }
-		let roleName = args.join(" ").replace(/[^a-zA-Z0-9'\-_\$ ]+/g,"");
+		let roleName = args.join(" ");
 		if(!verifyRole(roleName)) { // not a valid role
 			// get all roles and aliases, to get an array of all possible role names
 			let allRoleNames = [...cachedRoles, ...cachedAliases.map(el => el.alias)];
@@ -1415,10 +1409,10 @@ module.exports = function() {
 			// check if match is close enough
 			if(bestMatch.value <= ~~(roleName.length/2)) { // auto alias if so, but send warning 
 				args = [parseRole(bestMatch.name)];
-                if(args[0].toLowerCase() === bestMatch.name.toLowerCase()) channel.send("❗ Could not find role `" + roleName + "`. Did you mean `" + args[0] + "`?");
-                else channel.send("❗ Could not find role `" + roleName + "`. Did you mean `" + args[0] + "` (aka `" + (bestMatch.name.length>2 ? toTitleCase(bestMatch.name) : bestMatch.name.toUpperCase()) + "`)?");
+                if(args[0].toLowerCase() === bestMatch.name.toLowerCase()) channel.send("❗ 🐺 ⛔\n🔽 ❓");
+                else channel.send("❗ 🐺 ⛔\n🔽 ❓");
 			} else { // early fail if otherwise
-				channel.send("❗ Could not find role `" + roleName + "`.");
+				channel.send("❗ 🐺 ⛔");
                 return;
 			}
 		}
@@ -1435,12 +1429,12 @@ module.exports = function() {
 	this.cmdInfo = function(channel, args, pin, noErr, simp = false, overwriteName = false, appendSection = false, editOnto = false) {
 		// Check arguments
 		if(!args[0]) { 
-			if(!noErr) channel.send("⛔ Syntax error. Not enough parameters!"); 
+			if(!noErr) channel.send("⛔ 🔤 ❓❓"); 
 			return
 		}
 		args[0] = args.join(" ");
 		if(!verifyRoleVisible(args[0])) {
-			if(!noErr) channel.send("⛔ Command error. Invalid role `" + args[0] + "`!"); 
+			if(!noErr) channel.send("⛔ 🐺 ⛔"); 
 			return; 
 		}
 		sql("SELECT description FROM roles WHERE name = " + connection.escape(parseRole(args[0])), result => {
@@ -1488,7 +1482,7 @@ module.exports = function() {
                                 });	
                             }).catch(err => { 
                                 logO(err); 
-                                if(!noErr) sendError(channel, err, "Could not pin info message");
+                                if(!noErr) sendError(channel, err, "🐺 ⛔");
                             });
                         }
                         if(simp) {
@@ -1497,16 +1491,16 @@ module.exports = function() {
                     // Couldnt send message
                     }).catch(err => { 
                         logO(err); 
-                        if(!noErr) sendError(channel, err, "Could not send info message");
+                        if(!noErr) sendError(channel, err, "🐺 ⛔");
                     });
                 }
 			} else { 
 			// Empty result
-				if(!noErr) channel.send("⛔ Database error. Could not find role `" + args[0] + "`!");
+				if(!noErr) channel.send("⛔ 🐺 ⛔");
 			}
 		}, () => {
 			// DB error
-			if(!noErr) channel.send("⛔ Database error. Couldn't look for role information!");
+			if(!noErr) channel.send("⛔ 🐺 ⛔");
 		});	
 	}
 	
@@ -1522,7 +1516,7 @@ module.exports = function() {
     
     this.applyNums = function(guild, text) {
         let playerCount = guild.roles.cache.get(stats.participant).members.size;
-        playerCount += guild.roles.cache.get(stats.signed_up).members.size;
+        if(stats.signed_up != "0") playerCount += guild.roles.cache.get(stats.signed_up).members.size;
         text = text.replace(/\{\|1\|\}/g, playerCount);
         text = text.replace(/\{\|2\|\}/g, Math.floor(playerCount / 2));
         text = text.replace(/\{\|3\|\}/g, Math.floor(playerCount / 3));
@@ -1649,12 +1643,12 @@ module.exports = function() {
 	this.cmdInfoFancy = function(channel, args, pin, noErr, simp = false, overwriteName = false, appendSection = false, editOnto = false) {
 		// Check arguments
 		if(!args[0]) { 
-			if(!noErr) channel.send("⛔ Syntax error. Not enough parameters!"); 
+			if(!noErr) channel.send("⛔ 🔤 ❓❓"); 
 			return
 		}
 		args[0] = args.join(" ");
 		if(!verifyRoleVisible(args[0])) {
-			if(!noErr) channel.send("⛔ Command error. Invalid role `" + args[0] + "`!"); 
+			if(!noErr) channel.send("⛔ 🐺 ⛔"); 
 			return; 
 		}
         let roleNameParsed = parseRole(args[0]);
@@ -1698,18 +1692,18 @@ module.exports = function() {
                 // 7 - mini wolves
                 let roleTypeID = 0; 
                 switch((desc.find(el => el[0] == "")[1].split(/ \| /)[2] ?? "-").trim().toLowerCase()) {
-                    case "technical": roleTypeID = 3; roleType = "Technical Role"; break;
-                    case "limited": roleTypeID = 2; roleType = "Limited Role"; break;
-                    case "transformation": roleTypeID = 1; roleType = "Transformation Role"; break;
+                    case "technical": roleTypeID = 3; roleType = "🤖 🐺"; break;
+                    case "limited": roleTypeID = 2; roleType = "🇱 🐺"; break;
+                    case "transformation": roleTypeID = 1; roleType = "🏳️‍⚧️ 🐺"; break;
                     case "transformation limited":
-                    case "limited transformation": roleTypeID = -1; roleType = "Limited & Transformation Role"; break;
+                    case "limited transformation": roleTypeID = -1; roleType = "🇱 🏳️‍⚧️ 🐺"; break;
                     
                     case "joke role": 
-                    case "joke": roleTypeID = 4; roleType = "Joke Role"; break;
-                    case "temporary": roleTypeID = 5; roleType = "Temporary Role"; break;
+                    case "joke": roleTypeID = 4; roleType = "🃏 🐺"; break;
+                    case "temporary": roleTypeID = 5; roleType = "⏰ 🐺"; break;
                     case "fake role":
-                    case "variant": roleTypeID = 6; roleType = "Variant Role"; break;
-                    case "mini": roleTypeID = 7; roleType = "Mini Wolves Exclusive"; break;
+                    case "variant": roleTypeID = 6; roleType = "💱 🐺"; break;
+                    case "mini": roleTypeID = 7; roleType = "🚐 🐺"; break;
                 }
                 
                 // get the url to the icon on the repo
@@ -1794,7 +1788,7 @@ module.exports = function() {
                             }
                         }
                     } else {
-                        embed.description = "**This role type is currently not in use.**";
+                        embed.description = "**🐺 ⛔**";
                     }
                     
                 } else { // apparntly not a role
@@ -1845,7 +1839,7 @@ module.exports = function() {
                     // if a majority dont have emojis, then just dont
                     if(emojiFound < 0) descSplit = descSplitCopy;
                     
-                    if(descSplit.join("\n").length > 1900) { // too long
+                    if(descSplit.join("\n").length > 1900) { // too long3
                        descSplitElements = [];
                        let i = 0;
                        let j = 0;
@@ -1859,7 +1853,7 @@ module.exports = function() {
                        }
                        embed.description = descSplitElements.shift() + "\n" + descSplitElements.shift();
                        embed.fields = [];
-                       descSplitElements.forEach(el => embed.fields.push({"name": `...`, "value": el}));
+                       descSplitElements.forEach(el => embed.fields.push({"name": `➖`, "value": el}));
                     } else { // not too long
                         embed.fields = [];
                         embed.description = descSplit.join("\n");
@@ -1880,7 +1874,7 @@ module.exports = function() {
                                     });	
                                 }).catch(err => { 
                                     logO(err); 
-                                    if(!noErr) sendError(channel, err, "Could not pin info message");
+                                    if(!noErr) sendError(channel, err, "📌 ⛔");
                                 });
                             }
                             if(simp) {
@@ -1902,11 +1896,11 @@ module.exports = function() {
                 }
 			} else { 
 			// Empty result
-				if(!noErr) channel.send("⛔ Database error. Could not find role `" + args[0] + "`!");
+				if(!noErr) channel.send("⛔ 🇩 🇧 🐺ℹ️❓");
 			}
 		}, () => {
 			// DB error
-			if(!noErr) channel.send("⛔ Database error. Couldn't look for role information!");
+			if(!noErr) channel.send("⛔ 🇩 🇧 🐺ℹ️❓");
 		});	
 	}
     
