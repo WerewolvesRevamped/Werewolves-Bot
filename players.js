@@ -120,7 +120,6 @@ module.exports = function() {
 				help += "```\nFunctionality\n\nAdds a user to the killq and runs killq killall\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "kqak Ts\n```";
             break;
-
 			case "list_signedup":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "list\n```";
 				help += "```\nFunctionality\n\nLists all signed up players\n```";
@@ -826,7 +825,7 @@ module.exports = function() {
 	this.cmdListSignedup = function(channel) {
 		// Get a list of players
 		sql("SELECT id,emoji FROM players WHERE type='player'", result => {
-			let playerList = result.map(el => `${el.emoji}  - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username : "*user left*"} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
+			let playerList = result.map(el => `${el.emoji}  - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username.replace(/(_|\*|~)/g,"\\$1") : "*user left*"} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
 			// Print message
 			channel.send("✳ Listing signed up players").then(m => {
 				m.edit("**Signed Up Players** | Total: " +  result.length + "\n" + playerList)
@@ -847,8 +846,8 @@ module.exports = function() {
 			let playerList = result.sort((a,b) => {
                 let pa = channel.guild.members.cache.get(a.id);
                 let pb = channel.guild.members.cache.get(b.id);
-               return (pa ? pa.nickname : "-") > (pb ? pb.nickname : "-") ? 1 : -1;
-            }).map(el => `${el.emoji}  - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).nickname : "*user left*"}`).join("\n");
+               return (pa ? pa.displayName.toLowerCase() : "-") > (pb ? pb.displayName.toLowerCase() : "-") ? 1 : -1;
+            }).map(el => `${el.emoji}  - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).displayName.replace(/(_|\*|~)/g,"\\$1") : "*user left*"}`).join("\n");
 			// Print message
 			channel.send("✳ Listing signed up players").then(m => {
 				m.edit("**Signed Up Players (Alphabetical)** | Total: " +  result.length + "\n" + playerList)
@@ -866,7 +865,7 @@ module.exports = function() {
 	this.cmdListSubs = function(channel) {
 		// Get a list of players
 		sql("SELECT id,emoji FROM players WHERE type='substitute'", result => {
-			let playerList = result.map(el => `${el.emoji}  - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username : "*user left*"} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
+			let playerList = result.map(el => `${el.emoji}  - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username.replace(/(_|\*|~)/g,"\\$1") : "*user left*"} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
 			// Print message
 			channel.send("✳ Listing substitute players").then(m => {
 				m.edit("**Substitute Players** | Total: " +  result.length + "\n" + playerList)
@@ -889,7 +888,7 @@ module.exports = function() {
 		}
 		// Get a list of players
 		sql("SELECT id,emoji FROM players WHERE alive = 1 AND type='player'", result => {
-			let playerList = result.map(el => `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username : "*user left*"} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
+			let playerList = result.map(el => `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username.replace(/(_|\*|~)/g,"\\$1") : "*user left*"} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
 			// Print message
 			channel.send("✳ Listing alive players").then(m => {
 				m.edit("**Alive Players** | Total: " +  result.length + "\n" + playerList)
