@@ -455,6 +455,7 @@ module.exports = function() {
         ["490180990237540352","🧋"], // the kremblin
         ["139855429357273088","☢️"], // Swurtle
         ["489047121840963585","🐙"], // Alphaviki
+        ["839150186613702749","🕯️"], //phantom
         ["405803301251055617","4️⃣"] // harperette
     ];
     
@@ -505,7 +506,8 @@ module.exports = function() {
                 "say": [">"],
                 "ping": ["?"],
                 "channels": ["channel","ch"],
-                "elect": ["el", "elected"]
+                "elect": ["el", "elected"],
+                "list_substitutes": ["subs","list_subs","substitutes"]
         };
         for(let cmd in aliases) {
             if(aliases[cmd].indexOf(alias) != -1) return cmd;

@@ -12,6 +12,8 @@ const { Client, Intents, Options, GatewayIntentBits, ChannelType, MessageType, O
     });
 require("./discord.js")();
 
+const { exec } = require('node:child_process')
+
 config = require("./config.json");
 
 /* Utility Modules */
@@ -56,6 +58,7 @@ client.on("ready", () => {
     if(reactionChannel) reactionChannel.messages.fetch({limit:10});
     
     //logDMs();
+    
 });
 
 async function forceReload(channel) {
@@ -115,6 +118,24 @@ function uncacheMessage(message) {
     }
 }
 
+var sqlChannel = null;
+function restartSQL(channel) {
+    sqlChannel = channel;
+    exec('sudo service mysql restart', (err, output) => {
+        // once the command has completed, the callback function is called
+        if (err) {
+            // log and return if we encounter an error
+            console.error("could not execute command: ", err)
+            sqlChannel.send("could not execute command: " + err);
+            return;
+        }
+        // log the output received from the command
+        console.log("Output: \n", output)
+        sqlChannel.send("Output: \n" + output);
+        forceReload(sqlChannel);
+    })
+}
+
 
 /* New Message */
 client.on("messageCreate", async message => {
@@ -148,9 +169,22 @@ client.on("messageCreate", async message => {
     }
     
 	/* Gif Check */
-	/*if(!message.author.bot && isParticipant(message.member) && message.content.search("http") >= 0 && stats.ping.length > 0 && stats.gamephase == gp.INGAME) {
+	if(!message.author.bot && isParticipant(message.member) && message.content.search("http") >= 0 && stats.ping.length > 0 && stats.gamephase == gp.INGAME) {
         urlHandle(message, !!message.member.roles.cache.get(stats.gamemaster_ingame));
-	}**/
+	}
+    
+    /* Host Ping Checker */
+    if(message.mentions.has(stats.host) && message.channel.id != stats.log_channel && stats.host_log && stats.host_log != "false" && !message.author.bot) {
+        if(stats.log_guild && stats.log_channel) {
+			let channel = message.guild.channels.cache.get(stats.host_log);
+            let embed = { "title": `In <#${message.channel.id}>`, "description": `${message.content}`, "color": 15220992, "url": `${message.url}`, "timestamp": new Date().toISOString(), "author": { "name": `${message.author.username}`, "url": `${message.url}`, "icon_url": `${message.member.displayAvatarURL()}` } };
+            channel.send({ embeds: [ embed ] }).then(m => {
+                m.react(client.emojis.cache.get(stats.yes_emoji));
+            });
+		}
+        
+        
+    };
     
 	/* Find Command & Parameters */
     // Not a command
@@ -175,7 +209,7 @@ client.on("messageCreate", async message => {
                 return;
 	}
 	if(message.content.indexOf(stats.prefix) !== 0) {
-        uncacheMessage(message);
+        if(message.embeds.length <= 0) uncacheMessage(message);
         return;
     }
     
@@ -198,7 +232,7 @@ client.on("messageCreate", async message => {
 	case "ping":
 		cmdPing(message);
 	break;
-    case "drag":
+    case "drag": // probably not documented?
         if(checkGM(message)) {
             sql("SELECT id FROM players WHERE alive = 1 AND type='player'", result => {
                 result.forEach(p => {
@@ -209,7 +243,7 @@ client.on("messageCreate", async message => {
         }
     break;
     case "embed": // generates an embed (not documented!!)
-        if(checkGMHelper(message)) { // temporary exception to let ethan test embeds on a secondary  server without a GM role
+        if(checkGMHelper(message)) { 
             let embed = message.content.split(" ");
             embed.shift();
             embed = JSON.parse(embed.join(" ").replace(/'/g,'"'));
@@ -219,6 +253,9 @@ client.on("messageCreate", async message => {
     break;
     case "force_reload": // reloads db and caches (not documented!!)
         if(checkGM(message)) forceReload(message.channel);
+    break;
+    case "sql_reload": // reloads db and caches (not documented!!)
+        if(checkGM(message)) restartSQL(message.channel);
     break;
     case "edit":
         if(checkGMHelper(message)) cmdEdit(message.channel, args, argsX);
@@ -312,6 +349,10 @@ client.on("messageCreate", async message => {
 	/* List Alive */ // Lists all alive players
 	case "list_alive":
 		cmdListAlive(message.channel);
+	break;
+	/* List Substitutes */ // Lists all substitute players
+	case "list_substitutes":
+		cmdListSubs(message.channel);
 	break;
 	/* Bulk Delete */ // Deletes a lot of messages
 	case "bulkdelete":
@@ -505,6 +546,7 @@ client.on('messageUpdate', async (oldMessage, newMessage) => {
 /* Reactions Add*/
 client.on("messageReactionAdd", async (reaction, user) => {
     await reaction.fetch();
+    await reaction.message.fetch();
     await user.fetch();
 	// reaction role
 	handleReactionRole(reaction, user, true);
@@ -526,8 +568,16 @@ client.on("messageReactionAdd", async (reaction, user) => {
 		} else if(reaction.emoji.name === "📌" && isParticipant(reaction.message.guild.members.cache.get(user.id)) && (isCC(reaction.message.channel) || isSC(reaction.message.channel))) {
 			reaction.message.pin();
 		} else if((isGameMaster(reaction.message.guild.members.cache.get(user.id)) || reaction.message.guild.members.cache.get(user.id).roles.cache.get(stats.gamemaster_ingame)) && reaction.emoji == client.emojis.cache.get(stats.yes_emoji)) {
-			reaction.message.edit(Buffer.from(reaction.message.content.split("||")[1], 'base64').toString('ascii'));
-			reaction.message.reactions.removeAll();
+            if(reaction.message.content.split("||").length == 3) { // link approval
+                reaction.message.edit(Buffer.from(reaction.message.content.split("||")[1], 'base64').toString('ascii'));
+                reaction.message.reactions.removeAll();
+            } else if(reaction.message.embeds[0].color == 15220992) { // confirm host log message
+                let embed = { author: reaction.message.embeds[0].author, title: reaction.message.embeds[0].title, url: reaction.message.embeds[0].url };
+                embed.color = 1900288;
+                embed.description = `**Resolved by ${user}!**`;
+                reaction.message.edit({ embeds: [ embed ] });
+                reaction.message.reactions.removeAll();
+            }
 		} else if(isGameMaster(reaction.message.guild.members.cache.get(user.id)) && !isParticipant(reaction.message.guild.members.cache.get(user.id)) && reaction.emoji == client.emojis.cache.get(stats.no_emoji)) {
 			reaction.message.delete();
 		}

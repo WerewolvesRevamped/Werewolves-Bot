@@ -1736,10 +1736,13 @@ module.exports = function() {
                         }
                     }
                     // create the embed
+                    let serverIcon = await channel.guild.iconURL();
+                    serverIcon = serverIcon.replace("webp","png");
+                    console.log(serverIcon);
                     embed = {
                         "color": roleData.color,
                         "footer": {
-                            "icon_url": `${channel.guild.iconURL()}`,
+                            "icon_url": `${serverIcon}`,
                             "text": `${channel.guild.name} - ${stats.game}`
                         },
                         "thumbnail": {
@@ -1754,7 +1757,7 @@ module.exports = function() {
                     
                     if(roleType) embed.title = roleType;
                     
-                    if(stats.gamephase == 0 || (stats.gamephase > 0 && ((roleTypeID >= 0 && (stats.role_filter & (1 << roleTypeID))) || (roleTypeID == -1 && (stats.role_filter & (1 << 1)) && (stats.role_filter & (1 << 2)))))) {
+                    if(stats.gamephase == 0 || (stats.gamephase > 0 && ((roleTypeID >= 0 && (stats.role_filter & (1 << (roleTypeID+1)))) || (roleTypeID == -1 && (stats.role_filter & (1 << 1)) && (stats.role_filter & (1 << 2)))))) {
                         // add text
                         if(!simp) {
                             desc.forEach(el => {
@@ -1807,10 +1810,12 @@ module.exports = function() {
                     if(overwriteName) title = overwriteName;
                     
                     // base embed
+                    let serverIcon = channel.guild.iconURL();
+                    serverIcon = serverIcon.replace("webp","png");
                     embed = {
                         "color": 7829367,
                         "footer": {
-                            "icon_url": `${channel.guild.iconURL()}`,
+                            "icon_url": `${serverIcon}`,
                             "text": `${channel.guild.name} - ${stats.game}`
                         },
                         "title": title

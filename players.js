@@ -87,6 +87,7 @@ module.exports = function() {
 				help += stats.prefix + "list - Lists signed up players\n";
 				help += stats.prefix + "list_alphabetical - Lists signed up players (alphabetical)\n";
 				help += stats.prefix + "alive - Lists alive players\n";
+				help += stats.prefix + "subs - Lists substitute players\n";
 				help += stats.prefix + "signup - Signs you up for the next game\n";
 				help += stats.prefix + "emojis - Emoji & Player ID list for CCs\n";
 				help += stats.prefix + "roll [-|whitelist|blacklist|number|?d?] - Randomizes\n";
@@ -125,6 +126,12 @@ module.exports = function() {
 				help += "```\nFunctionality\n\nLists all signed up players\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "list\n< Signed Up Players | Total: 3\n  🛠 - McTsts (@McTsts)\n  🤔 - marhjo (@marhjo)\n  👌 - federick (@federick)\n```";
 				help += "```diff\nAliases\n\n- l\n- signedup\n- signedup_list\n- signedup-list\n- listsignedup\n- list-signedup\n- list_signedup\n```";
+			break;
+			case "list_substitutes":
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "subs\n```";
+				help += "```\nFunctionality\n\nLists all substitute players\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "list\n< Substitute Players | Total: 3\n  🛠 - McTsts (@McTsts)\n  🤔 - marhjo (@marhjo)\n  👌 - federick (@federick)\n```";
+				help += "```diff\nAliases\n\n- l\n- subs\n- list_subs\n- substitutes\n```";
 			break;
 			case "list_alphabetical":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "list_alphabetical\n```";
@@ -852,6 +859,24 @@ module.exports = function() {
 		}, () => {
 			// DB error
 			channel.send("⛔ Database error. Could not list signed up players!");
+		});
+	}
+    
+	/* Lists all substitute players */
+	this.cmdListSubs = function(channel) {
+		// Get a list of players
+		sql("SELECT id,emoji FROM players WHERE type='substitute'", result => {
+			let playerList = result.map(el => `${el.emoji}  - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username : "*user left*"} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
+			// Print message
+			channel.send("✳ Listing substitute players").then(m => {
+				m.edit("**Substitute Players** | Total: " +  result.length + "\n" + playerList)
+			}).catch(err => {
+				logO(err); 
+				sendError(channel, err, "Could not list substitute players");
+			});
+		}, () => {
+			// DB error
+			channel.send("⛔ Database error. Could not list substitute players!");
 		});
 	}
 	

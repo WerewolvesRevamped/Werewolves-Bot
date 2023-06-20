@@ -277,6 +277,13 @@ module.exports = function() {
             stats.mayor_threshold = 15;
 			log("Stats > ❗❗❗ Unable to cache mayor threshold! Defaulting to `15`.")
 		});
+		sqlGetStat(43,  result => { 
+			stats.host_log = result; 
+			if(doLog) log("Stats > Cached host log as `" + result + "`!")
+		}, () => {
+            stats.mayor_threshold = false;
+			log("Stats > ❗❗❗ Unable to cache host log! Defaulting to `false`.")
+		});
 	}
 	
 	/* Gets the name of a gamephase by id */
@@ -338,6 +345,7 @@ module.exports = function() {
                 case "helper": stat = 40; break;
                 case "helper_ingame": stat = 41; break;
                 case "mayor_threshold": stat = 42; break;
+                case "host_log": stat = 43; break;
 				default: message.channel.send("⛔ Syntax error. Invalid parameter!"); return;
 			}
 		} else {
@@ -377,7 +385,7 @@ module.exports = function() {
 			break;
             case "options_list":
 				if(!isGameMaster(member)) break;
-                help += "```yaml\nprefix: The prefix the bot uses for commands\nparticipant: The id of the participant role\ngamemaster: The id of the gamemaster role\nspectator: The id of the spectator role\nsigned_up: The id of the signed up role\ndead_participant: The id of the dead participant role\nbot: The id of the bot role\nlog_guild: The id of the guild to use for logs\nlog_channel: The id of the channel to use for logs\nmayor: The id of the mayor role\nreporter: The id of the reporter role\nguardian: The id of the guardian role\ngame: The name of the game\ngamemaster_ingame: The id of the gamemaster ingame role\nadmin: The id of the admin role\nadmin_ingame: The id of the admin ingame role\nyes_emoji: The id of the yes emoji\nno_emoji: The id of the no emoji\nnew_game_ping: Role that gets pinged with certain commands\ngame_status: A VC that shows the status of the game\ncc_limit: Maximum amount of ccs one person can create (<-10 for none)\nmayor2: The id of the second mayor role (which doesn't give extra votes)\npoll: The poll mode (0 -> default, 1 -> cancel, 2 -> private random)\nsub: role for substitute players\nping: ping for gifs and deleted messages\nhost: The id of the host role\nfancy_mode: Changes info messages to fancy versions if set to true.\nicon: the version to use for icon images.\nsenior_gamemaster: The id of the senior gm role.\nsenior_gamemaster_ingame: The id of the senior gm ingame role\nrole_filter: see " + stats.prefix + "help optionsrf\nhelper: The id of the helper role\nhelper_ingame: The id of the helper ingame role\nmayor_threshold: If there are more players alive than this value, mayor2 role is used.\n```";
+                help += "```yaml\nprefix: The prefix the bot uses for commands\nparticipant: The id of the participant role\ngamemaster: The id of the gamemaster role\nspectator: The id of the spectator role\nsigned_up: The id of the signed up role\ndead_participant: The id of the dead participant role\nbot: The id of the bot role\nlog_guild: The id of the guild to use for logs\nlog_channel: The id of the channel to use for logs\nmayor: The id of the mayor role\nreporter: The id of the reporter role\nguardian: The id of the guardian role\ngame: The name of the game\ngamemaster_ingame: The id of the gamemaster ingame role\nadmin: The id of the admin role\nadmin_ingame: The id of the admin ingame role\nyes_emoji: The id of the yes emoji\nno_emoji: The id of the no emoji\nnew_game_ping: Role that gets pinged with certain commands\ngame_status: A VC that shows the status of the game\ncc_limit: Maximum amount of ccs one person can create (<-10 for none)\nmayor2: The id of the second mayor role (which doesn't give extra votes)\npoll: The poll mode (0 -> default, 1 -> cancel, 2 -> private random)\nsub: role for substitute players\nping: ping for gifs and deleted messages\nhost: The id of the host role\nfancy_mode: Changes info messages to fancy versions if set to true.\nicon: the version to use for icon images.\nsenior_gamemaster: The id of the senior gm role.\nsenior_gamemaster_ingame: The id of the senior gm ingame role\nrole_filter: see " + stats.prefix + "help optionsrf\nhelper: The id of the helper role\nhelper_ingame: The id of the helper ingame role\nmayor_threshold: If there are more players alive than this value, mayor2 role is used.\nhost_log: Logs host pings. Disabled if false.\n```";
             break;
             case "optionsrf":
                     help += "```yaml\nSyntax\n\n" + stats.prefix + "options role_filter <New Value>\n```";
