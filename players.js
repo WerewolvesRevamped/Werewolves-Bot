@@ -130,7 +130,7 @@ module.exports = function() {
 			case "list_substitutes":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "subs\n```";
 				help += "```\nFunctionality\n\nLists all substitute players\n```";
-				help += "```fix\nUsage\n\n> " + stats.prefix + "list\n< Substitute Players | Total: 3\n  🛠 - McTsts (@McTsts)\n  🤔 - marhjo (@marhjo)\n  👌 - federick (@federick)\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "subs\n< Substitute Players | Total: 3\n  🛠 - McTsts (@McTsts)\n  🤔 - marhjo (@marhjo)\n  👌 - federick (@federick)\n```";
 				help += "```diff\nAliases\n\n- l\n- subs\n- list_subs\n- substitutes\n```";
 			break;
 			case "list_alphabetical":
