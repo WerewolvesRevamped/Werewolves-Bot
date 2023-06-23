@@ -1708,8 +1708,8 @@ module.exports = function() {
                     case "joke": roleTypeID = 4; roleType = "Joke Role"; break;
                     case "temporary": roleTypeID = 5; roleType = "Temporary Role"; break;
                     case "fake role":
-                    case "variant": roleTypeID = 6; roleType = "Variant Role"; break;
-                    case "mini": roleTypeID = 7; roleType = "Mini Wolves Exclusive"; break;
+                    case "variant": roleTypeID = 7; roleType = "Variant Role"; break;
+                    case "mini": roleTypeID = 6; roleType = "Mini Wolves Exclusive"; break;
                 }
                 
                 // get the url to the icon on the repo
@@ -1757,7 +1757,7 @@ module.exports = function() {
                     
                     if(roleType) embed.title = roleType;
                     
-                    if(stats.gamephase == 0 || (stats.gamephase > 0 && ((roleTypeID >= 0 && (stats.role_filter & (1 << (roleTypeID+1)))) || (roleTypeID == -1 && (stats.role_filter & (1 << 1)) && (stats.role_filter & (1 << 2)))))) {
+                    if(stats.gamephase == 0 || (stats.gamephase > 0 && ((roleTypeID >= 0 && (stats.role_filter & (1 << roleTypeID))) || (roleTypeID == -1 && (stats.role_filter & (1 << 1)) && (stats.role_filter & (1 << 2)))))) {
                         // add text
                         if(!simp) {
                             desc.forEach(el => {
