@@ -397,7 +397,7 @@ module.exports = function() {
 				switch(args[1]) {
 					default:
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "gamephase [get|set]\n```";
-						help += "```\nFunctionality\n\nGroup of commands to handle the gamephase. " + stats.prefix + "help gamephase <sub-command> for detailed help. Also serves as an alias for " + stats.prefix + "gamephase get\n\nList of Gamephases:\nNothing, Signups, Ingame, Postgame```";
+						help += "```\nFunctionality\n\nGroup of commands to handle the gamephase. " + stats.prefix + "help gamephase <sub-command> for detailed help. Also serves as an alias for " + stats.prefix + "gamephase get\n\nList of Gamephases:\nNothing, Signups, Setup, Ingame, Postgame```";
 						help += "```diff\nAliases\n\n- gp\n- game-phase\n- game_phase\n```";
 					break;
 					case "get":
