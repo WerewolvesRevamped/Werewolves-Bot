@@ -209,7 +209,7 @@ client.on("messageCreate", async message => {
                 return;
 	}
 	if(message.content.indexOf(stats.prefix) !== 0) {
-        if(message.embeds.length <= 0) uncacheMessage(message);
+        if(message.embeds.length <= 0 && !message.author.bot) uncacheMessage(message);
         return;
     }
     
@@ -447,6 +447,18 @@ client.on("messageCreate", async message => {
 	case "demote":
 		cmdDemote(message.channel, message.member);
 	break;
+	/* Force Demote All */
+	case "force_demote_all":
+        if(checkAdmin(message)) {
+            cmdForceDemote(message.channel, true);
+        }
+	break;
+	/* Force Demote Signed Up */
+	case "force_demote_signedup":
+        if(checkGM(message)) {
+            cmdForceDemote(message.channel, false);
+        }
+	break;
     /* Host */
     case "host":
         cmdHost(message.channel, message.member);
@@ -571,7 +583,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
             if(reaction.message.content.split("||").length == 3) { // link approval
                 reaction.message.edit(Buffer.from(reaction.message.content.split("||")[1], 'base64').toString('ascii'));
                 reaction.message.reactions.removeAll();
-            } else if(reaction.message.embeds[0].color == 15220992) { // confirm host log message
+            } else if(reaction.message.embeds && reaction.message.embeds[0] && reaction.message.embeds[0].color && reaction.message.embeds[0].color == 15220992) { // confirm host log message
                 let embed = { author: reaction.message.embeds[0].author, title: reaction.message.embeds[0].title, url: reaction.message.embeds[0].url };
                 embed.color = 1900288;
                 embed.description = `**Resolved by ${user}!**`;

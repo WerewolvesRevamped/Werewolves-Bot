@@ -18,7 +18,7 @@ module.exports = function() {
 	/* Handle players command */
 	this.cmdPlayers = function(message, args) {
 		// Check subcommands
-		if(!args[0] || (!args[1] && ["list","log","log2","msgs","messages","votes","roles","rl","list_alive"].indexOf(args[0]) == -1)) { 
+		if(!args[0] || (!args[1] && ["list","log","log2","log3","msgs","messages","votes","roles","rl","list_alive"].indexOf(args[0]) == -1)) { 
 			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `players [get|get_clean|set|resurrect|signup|list|msgs|msgs2|log|log2|votes|rl]`!"); 
 			return; 
 		}
@@ -40,6 +40,7 @@ module.exports = function() {
 			case "roles": cmdConfirm(message, "players roles"); break;
 			case "log": cmdConfirm(message, "players log"); break;
 			case "log2": cmdConfirm(message, "players log2"); break;
+			case "log3": cmdConfirm(message, "players log3"); break;
 			case "votes": cmdConfirm(message, "players votes"); break;
 			case "messages": 
 			case "msgs": cmdPlayersListMsgs(message.channel); break;
@@ -78,7 +79,7 @@ module.exports = function() {
 		let help = "";
 		switch(args[0]) {
 			case "":
-				if(isGameMaster(member)) help += stats.prefix + "players [list|list_alive|msgs|log|log2|votes|msgs2|roles] - Information about players\n";
+				if(isGameMaster(member)) help += stats.prefix + "players [list|list_alive|msgs|log|log2|log3|votes|msgs2|roles] - Information about players\n";
 				if(isGameMaster(member)) help += stats.prefix + "players [get|get_clean|set|resurrect|signup|signup_sub] - Manages players\n";
 				if(isGameMaster(member)) help += stats.prefix + "players [substitute|switch] - Manages player changes\n";
 				if(isGameMaster(member)) help += stats.prefix + "killq [add|remove|killall|list|clear] - Manages kill queue\n";
@@ -193,7 +194,7 @@ module.exports = function() {
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
 					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "players [get|get_clean|set|resurrect|signup|list|list_alive|substitute|switch|messages|messages2|log|log2|votes|roles]\n```";
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "players [get|get_clean|set|resurrect|signup|list|list_alive|substitute|switch|messages|messages2|log|log2|log3|votes|roles]\n```";
             help += "```\nFunctionality\n\nGroup of commands to handle players. " + stats.prefix + "help players <sub-command> for detailed help.\n\nList of Player Properties:\nalive: Whether the player is alive`\ntype: What type of player. Can be 'player', 'substitute' and 'substituted'.\nemoji: The emoji the player uses\nrole: The role of the player\npublic_value: The value of the players vote on public polls (Typically 1)\nprivate_value: The value of the players vote on private polls (Typically 1)\npublic_votes: The base value of votes the player has against them on public votes (Typically 0)\nid: The discord id of the player\nccs: the amount of created ccs\npublic_msgs: Amount of messages sent in public channels\nprivate_msgs: Amount of messages sent in private channels\type: The type of player. 0 for default, 1 for substitute.```";
 					  help += "```diff\nAliases\n\n- p\n- player\n```";
 					break;
@@ -263,6 +264,11 @@ module.exports = function() {
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players log2\n```";
 						help += "```\nFunctionality\n\nLists all players with their role and all roles with their player. Can be used to copy into gamelog messages.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "players log2\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "players log2!```";
+					break;	
+					case "log3":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "players log3\n```";
+						help += "```\nFunctionality\n\nLists all players with their role sorted by alive status. Can be used as a base for the final results message.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "players log3\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "players log3!```";
 					break;		
 					case "votes":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players votes\n```";
@@ -431,7 +437,7 @@ module.exports = function() {
 		sql("SELECT id FROM killq", result => {
 			result = removeDuplicates(result.map(el => el.id));
 			channel.send("✳ Killing `" + result.length + "` player" + (result.length != 1 ? "s" : "") + "!");
-			result.forEach(el => {
+			result.forEach(async el => {
 				// Update DB
 				sql("DELETE FROM killq WHERE id = " + connection.escape(el), result => {
 				}, () => {
@@ -471,36 +477,69 @@ module.exports = function() {
                     cmdConnectionSend(channel, ["", "reporter", "Reporter", reportMsg]);
                 });
                 
+                await sleep(500);
 				// Remove roles
 				channel.guild.members.cache.get(el).roles.remove(stats.participant).catch(err => { 
 					// Missing permissions
 					logO(err); 
 					sendError(channel, err, "Could not remove role");
 				});
+                await sleep(500);
+				channel.guild.members.cache.get(el).roles.add(stats.dead_participant).catch(err => { 
+					// Missing permissions
+					logO(err); 
+					sendError(channel, err, "Could not add role #1");
+				});
+                await sleep(500);
 				channel.guild.members.cache.get(el).roles.remove(stats.mayor).catch(err => { 
 					// Missing permissions
 					logO(err); 
 					sendError(channel, err, "Could not remove role");
 				});
+                await sleep(500);
 				channel.guild.members.cache.get(el).roles.remove(stats.mayor2).catch(err => { 
 					// Missing permissions
 					logO(err); 
 					sendError(channel, err, "Could not remove role");
 				});
+                await sleep(500);
 				channel.guild.members.cache.get(el).roles.remove(stats.reporter).catch(err => { 
 					// Missing permissions
 					logO(err); 
 					sendError(channel, err, "Could not remove role");
 				});
+                await sleep(500);
 				channel.guild.members.cache.get(el).roles.remove(stats.guardian).catch(err => { 
 					// Missing permissions
 					logO(err); 
 					sendError(channel, err, "Could not remove role");
 				});
+                await sleep(500);
+                // just like uh try it again because it fails?
 				channel.guild.members.cache.get(el).roles.add(stats.dead_participant).catch(err => { 
 					// Missing permissions
 					logO(err); 
-					sendError(channel, err, "Could not add role");
+					sendError(channel, err, "Could not add role #2");
+				});
+                await sleep(500);
+				// Remove roles
+				channel.guild.members.cache.get(el).roles.remove(stats.participant).catch(err => { 
+					// Missing permissions
+					logO(err); 
+					sendError(channel, err, "Could not remove role #2");
+				});
+                await sleep(500);
+				channel.guild.members.cache.get(el).roles.add(stats.dead_participant).catch(err => { 
+					// Missing permissions
+					logO(err); 
+					sendError(channel, err, "Could not add role #3");
+				});
+                await sleep(500);
+				// Remove roles
+				channel.guild.members.cache.get(el).roles.remove(stats.participant).catch(err => { 
+					// Missing permissions
+					logO(err); 
+					sendError(channel, err, "Could not remove role #3");
 				});
 			});
 		}, () => {
@@ -640,6 +679,30 @@ module.exports = function() {
                 return `• ${el.emoji} ${player ? player : "<@" + el.id + ">"}${nickname} is \`${el.role.split(",").map(role => toTitleCase(role)).join(" + ")}\``;
             });
 			channel.send("```**Players** | Total: " + result.length + "\n" + playerList.join("\n") + "\n```")
+            .catch(err => {
+					logO(err); 
+					sendError(channel, err, "Could not log players");
+				});
+		}, () => {
+			// DB error
+			channel.send("⛔ Database error. Could not log players!");
+		});
+	
+	}
+    
+	/* Lists all signedup players in final results format */
+	this.cmdPlayersLog3 = function(channel) {
+		// Get a list of players
+		sql("SELECT id,emoji,role,alive,public_value,private_value,public_votes,ccs FROM players WHERE type='player'", result => {
+			let playerList1 = result.filter(el => el.alive == 1).map(el => {
+                let player = channel.guild.members.cache.get(el.id);
+                return `• ${player ? player : "<@" + el.id + ">"} (${el.role.split(",").map(role => toTitleCase(role)).join(", ")})`;
+            });
+            let playerList2 = result.filter(el => el.alive == 0).map(el => {
+                let player = channel.guild.members.cache.get(el.id);
+                return `• ${player ? player : "<@" + el.id + ">"} (${el.role.split(",").map(role => toTitleCase(role)).join(", ")})`;
+            });
+			channel.send("```**Final Results**\n<Team> Victory\n\n__Live Winners:__\n" + playerList1.join("\n") + "\n\n__Dead Losers:__\n" + playerList2.join("\n") + "```")
             .catch(err => {
 					logO(err); 
 					sendError(channel, err, "Could not log players");
@@ -1487,6 +1550,12 @@ module.exports = function() {
 	this.isAdmin = function(member, noAdminIngame = false) {
         if(!member) return false;
 		return member && member.roles && (member.roles.cache.get(stats.admin) || (!noAdminIngame && member.roles.cache.get(stats.admin_ingame)));
+	}
+    
+	/* Check if a member is a Senior GM */
+	this.isSenior = function(member) {
+        if(!member) return false;
+		return member && member.roles && (member.roles.cache.get(stats.senior_gamemaster));
 	}
 
 	/* Check if a member is a (living) participant */

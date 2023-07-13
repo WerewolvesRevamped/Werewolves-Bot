@@ -24,6 +24,7 @@ module.exports = function() {
 		// Check Subcommand
 		switch(args[0]) {
 			case "create": cmdCCCreate(message.channel, message.member, args, 0, () => {}); break;
+			case "spam": cmdCCCreate(message.channel, message.member, args, 0, () => {}, true); break;
 			case "create_hidden": cmdCCCreate(message.channel, message.member, args, 1, () => {}); break;
 			case "add": cmdCCAdd(message.channel, message.member, args, 0); break;
 			case "remove": cmdCCRemove(message.channel, message.member, args, 0); break;
@@ -93,6 +94,7 @@ module.exports = function() {
 		switch(args[0]) {
 			case "":
 				help += stats.prefix + "cc [create|create_hidden] - Creates a CC\n";
+				help += stats.prefix + "cc spam - Creates a CC for role info spam and similiar\n";
 				help += stats.prefix + "cc [create_multi|create_multi_hidden] - Creates multiple CCs\n";
 				help += stats.prefix + "cc [add|remove|promote|demote|leave] - Manages CC members\n";
 				help += stats.prefix + "cc leave - Leave a CC\n";
@@ -112,6 +114,11 @@ module.exports = function() {
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc create <CC Name> <Player List>\n```";
 						help += "```\nFunctionality\n\nCreates a CC with the name <CC Name> and adds you, as well as all players in the <Player List> to it. <Player List> may contain 0 or more players. When the CC is created you are announced as the creator of the CC, and are the only owner.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "cc create marhjots marhjo\n< ✅ Created #marhjots!```";
+					break;
+					case "spam":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc spam <CC Name>\n```";
+						help += "```\nFunctionality\n\nCreates a CC with the name <CC Name> and adds you to it. The cc will not have any owners.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "cc spam spamcc\n< ✅ Created #spamcc!```";
 					break;
 					case "create_hidden":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc create_hidden <CC Name> <Player List>\n```";
@@ -521,6 +528,7 @@ module.exports = function() {
 			case 1: channel.send("A new CC has been created!\n\n**CC Members** | Total: " +  ccList.split("\n").length + "\n" + ccList); break;
 			case 2: channel.send("✳ Listing CC members").then(m => { m.edit("**CC Members** | Total: " +  ccList.split("\n").length + "\n" + ccList); }).catch(err => {logO(err); sendError(channel, err, "Could not list CC members"); }); break;
 			case 3: channel.send("✳ Listing CC members").then(m => { m.edit("**CC Owners** | Total: " +  ccOwner.split("\n").length + "\n" + ccOwner); }).catch(err => {logO(err); sendError(channel, err, "Could not list CC members"); }); break;
+			case 4: channel.send("A new CC has been created!\n\n**CC Members** | Total: " +  ccList.split("\n").length + "\n" + ccList); break;
 		}
 		
 	}
@@ -561,7 +569,7 @@ module.exports = function() {
 	}
 		
 	/* Creates CC */
-	this.cmdCCCreate = function(channel, member, args, mode, callback) {
+	this.cmdCCCreate = function(channel, member, args, mode, callback, spam = false) {
 		// Get a list of users that need to be in the cc
 		if(!(isCC(channel) || isSC(channel) || isGameMaster(member, true) || isHelper(member))) {
 			channel.send("⛔ Command error. Can't use command outside a CC/SC!");
@@ -569,14 +577,14 @@ module.exports = function() {
 		} else if(!args[1]) {
 			channel.send(helpCCs(member, ["cc", "create"]));
 			return;
-		} else if(!isGameMaster(member, true) && !isHelper(member) && stats.cc_limit >= -10 && ccs.find(el => el.id == member.id).ccs >= stats.cc_limit) {
+		} else if(!spam && !isGameMaster(member, true) && !isHelper(member) && stats.cc_limit >= -10 && ccs.find(el => el.id == member.id).ccs >= stats.cc_limit) {
 			channel.send("⛔ You have hit the CC limit of `" + stats.cc_limit + "` CCs!");
 			return;
 		}
 		args[1] = args[1].replace(/🔒/,"lock");
 		players = parseUserList(channel, args, 2, member);
-        if(!players) players = [];
-		if(!isGameMaster(member, true) && !isHelper(member)) {
+        if(!players || spam) players = [];
+		if(!spam && !isGameMaster(member, true) && !isHelper(member)) {
 			sql("UPDATE players SET ccs = ccs + 1 WHERE id = " + connection.escape(member.id), result => {
 				getCCs();
 			}, () => {
@@ -600,10 +608,11 @@ module.exports = function() {
 							sqlSetStat(10, cc.id, result => {
 								// Create a new channel
 								let ccPerms = getCCCatPerms(channel.guild);
-								ccPerms.push(getPerms(member.id, ["history", "read"], []));
+								if(!spam) ccPerms.push(getPerms(member.id, ["history", "read"], []));
+								else ccPerms.push(getPerms(member.id, ["read"], []));
 								if(players.length > 0 && mode === 0) players.forEach(el => ccPerms.push(getPerms(el, ["read"], [])));
 								if(players.length > 0 && mode === 1) players.forEach(el => ccPerms.push(getPerms(el, ["read", "history"], [])));
-								channel.guild.channels.create({ name: args[1] + "", type: ChannelType.GuildText,  permissionOverwrites: ccPerms })
+								channel.guild.channels.create({ name: (spam?"🤖-":"") + args[1] + "", type: ChannelType.GuildText,  permissionOverwrites: ccPerms })
 								.then(ct => {
 									// Put the channel into the correct category
 									ct.setParent(cc.id,{ lockPermissions: false })
@@ -612,7 +621,7 @@ module.exports = function() {
 										// Increment cc count
 										sql("UPDATE stats SET value = value + 1 WHERE id = 9", result => {
 											channel.send(`✅ Created ${updated}!`); 
-											cmdCCList(updated, mode);
+											cmdCCList(updated, spam ? 4 : mode);
 											getCCs();
 											callback();
 										}, () => {
@@ -648,10 +657,11 @@ module.exports = function() {
 					sqlGetStat(10, result => {
 						// Create a new channel
 						let ccPerms = getCCCatPerms(channel.guild);
-						ccPerms.push(getPerms(member.id, ["history", "read"], []));
+                        if(!spam) ccPerms.push(getPerms(member.id, ["history", "read"], []));
+                        else ccPerms.push(getPerms(member.id, ["read"], []));
 						if(players.length > 0 && mode === 0) players.forEach(el => ccPerms.push(getPerms(el, ["read"], [])));
 						if(players.length > 0 && mode === 1) players.forEach(el => ccPerms.push(getPerms(el, ["read", "history"], [])));
-						channel.guild.channels.create({ name: args[1] + "", type: ChannelType.GuildText,  permissionOverwrites: ccPerms })
+						channel.guild.channels.create({ name: (spam?"🤖-":"") + args[1] + "", type: ChannelType.GuildText,  permissionOverwrites: ccPerms })
 						.then(ct => {
 							let cc = channel.guild.channels.cache.get(result);
 							if(cc) {
@@ -663,7 +673,7 @@ module.exports = function() {
 									sql("UPDATE stats SET value = value + 1 WHERE id = 9", result => {
 										channel.send(`✅ Created ${updated}!`); 
 										getCCs();
-										cmdCCList(updated, mode);
+										cmdCCList(updated, spam ? 4 : mode);
 										callback();
 									}, () => {
 										channel.send("⛔ Database error. Could not increment CC count!"); 

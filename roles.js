@@ -463,6 +463,9 @@ module.exports = function() {
 				
                 let cMsg = desc;
                 
+                let serverIcon = channel.guild.iconURL();
+                serverIcon = serverIcon.replace("webp","png");
+                
                 // fancy variant
                 if(stats.fancy_mode) {
 					let descSplit = desc.split(/\n/);
@@ -472,7 +475,7 @@ module.exports = function() {
                         "description": descSplit.join("\n"),
                         "color": 10921638,
                         "footer": {
-                            "icon_url": `${channel.guild.iconURL()}`,
+                            "icon_url": `${serverIcon}`,
                             "text": `${channel.guild.name} - ${stats.game}`
                         }
                     };
@@ -1224,7 +1227,7 @@ module.exports = function() {
 	this.cmdRolesList = function(channel, args) {
         let filter = false;
         if(args[1]) {
-            filter = parseRole(args[1]);
+            filter = args[1];
         }
 		// Get all roles
 		sql("SELECT name,description FROM roles ORDER BY name ASC", result => {

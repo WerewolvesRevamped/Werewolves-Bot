@@ -369,6 +369,15 @@ module.exports = function() {
 		} 
 		return true;
 	}
+    
+	/* Commands for only Admins */
+	this.checkSenior = function(message) {
+		if(!isSenior(message.member)) { 
+			message.channel.send("❌ You're not allowed to use this command! (Senior GM required)"); 
+			return false;
+		} 
+		return true;
+	}
 	
 	/* Commands for only GMSAFE channels */
 	this.checkSafe = function(message) {
@@ -507,7 +516,9 @@ module.exports = function() {
                 "ping": ["?"],
                 "channels": ["channel","ch"],
                 "elect": ["el", "elected"],
-                "list_substitutes": ["subs","list_subs","substitutes"]
+                "list_substitutes": ["subs","list_subs","substitutes"],
+                "force_demote_all": ["fda"],
+                "force_demote_signedup": ["fdsn"]
         };
         for(let cmd in aliases) {
             if(aliases[cmd].indexOf(alias) != -1) return cmd;

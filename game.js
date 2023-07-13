@@ -73,6 +73,8 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "host - Adds Host role\n";
 				if(isGameMaster(member)) help += stats.prefix + "gameping - Notifies players with the New Game Ping role about a new game\n";
 				if(isGameMaster(member)) help += stats.prefix + "open - Opens signups and notifies players\n";
+				if(isAdmin(member)) help += stats.prefix + "force_demote_all - Demotes all non-hosts\n";
+				if(isSenior(member)) help += stats.prefix + "force_demote_signedup - Demotes everyone that's signedup\n";
 			break;
 			case "start":
 				if(!isGameMaster(member)) break;
@@ -103,6 +105,20 @@ module.exports = function() {
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "end\n```";
 				help += "```\nFunctionality\n\nEnds the game. Sets the gamephase, and makes all Participants Dead Participants.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "end\n```";
+			break;
+			case "force_demote_all":
+				if(!isAdmin(member)) break;
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "force_demote_all\n```";
+				help += "```\nFunctionality\n\nDemotes all non-hosts.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "force_demote_all\n```";
+				help += "```diff\nAliases\n\n- fda\n```";
+			break;
+			case "force_demote_signedup":
+				if(!isGameMaster(member)) break;
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "force_demote_signedup\n```";
+				help += "```\nFunctionality\n\nDemotes all signedups. Also includes substitutes.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "force_demote_signedup\n```";
+				help += "```diff\nAliases\n\n- fdsn\n```";
 			break;
 			case "demote":
 				if(!isGameMaster(member) && !isHelper(member)) break;
@@ -276,6 +292,46 @@ module.exports = function() {
 		});
 	}
 	
+    this.cmdForceDemote = function(channel, all = true) {
+        // demotable
+        let admins = channel.guild.roles.cache.get(stats.admin).members.toJSON();
+        let seniorgms = channel.guild.roles.cache.get(stats.senior_gamemaster).members.toJSON();
+        let gms = channel.guild.roles.cache.get(stats.gamemaster).members.toJSON();
+        let helpers = channel.guild.roles.cache.get(stats.helper).members.toJSON();
+        // ignore
+        let host = channel.guild.roles.cache.get(stats.host).members.toJSON();
+        let ignore = host.map(el => el.id);
+        // filter
+        let signedup = channel.guild.roles.cache.get(stats.signed_up).members.toJSON();
+        let substitute = channel.guild.roles.cache.get(stats.sub).members.toJSON();
+        let filter = signedup.map(el => el.id);
+        filter.push(...substitute.map(el => el.id));
+        // list
+        let processedIds = [];
+        //
+        // list list
+        let demotable = [admins, seniorgms, gms, helpers];
+        for(let i = 0; i < demotable.length; i++) {
+            for(let j = 0; j < demotable[i].length; j++) {
+                let curid = demotable[i][j].id;
+                if(processedIds.includes(curid)) { // already previously handeled
+                    continue;
+                }
+                processedIds.push(curid); // save as processed
+                if(ignore.includes(curid)) { // is host, ignore
+                    //console.log(`FD ignore: ${demotable[i][j].displayName}`);
+                    continue;
+                }
+                if(all || filter.includes(curid)) { // only demote signedup if all=false
+                    //console.log(`FD demote: ${demotable[i][j].displayName}`);
+                    cmdDemote(channel, demotable[i][j]);
+                } else {
+                    //console.log(`FD filtered out: ${demotable[i][j].displayName}`);
+                }
+            }
+        }
+    }
+    
 	this.cmdDemote = function(channel, member) {
 		channel.send("✅ Attempting to demote you, " + member.displayName + "!");
 		if(member.roles.cache.get(stats.gamemaster)) {
