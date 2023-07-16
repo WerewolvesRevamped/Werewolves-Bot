@@ -478,69 +478,14 @@ module.exports = function() {
                 });
                 
                 await sleep(500);
-				// Remove roles
-				channel.guild.members.cache.get(el).roles.remove(stats.participant).catch(err => { 
-					// Missing permissions
-					logO(err); 
-					sendError(channel, err, "Could not remove role");
-				});
-                await sleep(500);
-				channel.guild.members.cache.get(el).roles.add(stats.dead_participant).catch(err => { 
-					// Missing permissions
-					logO(err); 
-					sendError(channel, err, "Could not add role #1");
-				});
-                await sleep(500);
-				channel.guild.members.cache.get(el).roles.remove(stats.mayor).catch(err => { 
-					// Missing permissions
-					logO(err); 
-					sendError(channel, err, "Could not remove role");
-				});
-                await sleep(500);
-				channel.guild.members.cache.get(el).roles.remove(stats.mayor2).catch(err => { 
-					// Missing permissions
-					logO(err); 
-					sendError(channel, err, "Could not remove role");
-				});
-                await sleep(500);
-				channel.guild.members.cache.get(el).roles.remove(stats.reporter).catch(err => { 
-					// Missing permissions
-					logO(err); 
-					sendError(channel, err, "Could not remove role");
-				});
-                await sleep(500);
-				channel.guild.members.cache.get(el).roles.remove(stats.guardian).catch(err => { 
-					// Missing permissions
-					logO(err); 
-					sendError(channel, err, "Could not remove role");
-				});
-                await sleep(500);
-                // just like uh try it again because it fails?
-				channel.guild.members.cache.get(el).roles.add(stats.dead_participant).catch(err => { 
-					// Missing permissions
-					logO(err); 
-					sendError(channel, err, "Could not add role #2");
-				});
-                await sleep(500);
-				// Remove roles
-				channel.guild.members.cache.get(el).roles.remove(stats.participant).catch(err => { 
-					// Missing permissions
-					logO(err); 
-					sendError(channel, err, "Could not remove role #2");
-				});
-                await sleep(500);
-				channel.guild.members.cache.get(el).roles.add(stats.dead_participant).catch(err => { 
-					// Missing permissions
-					logO(err); 
-					sendError(channel, err, "Could not add role #3");
-				});
-                await sleep(500);
-				// Remove roles
-				channel.guild.members.cache.get(el).roles.remove(stats.participant).catch(err => { 
-					// Missing permissions
-					logO(err); 
-					sendError(channel, err, "Could not remove role #3");
-				});
+                let player = channel.guild.members.cache.get(el);
+                removeRoleRecursive(player, channel, stats.participant, "participant");
+                removeRoleRecursive(player, channel, stats.mayor, "mayor");
+                removeRoleRecursive(player, channel, stats.mayor2, "mayor 2");
+                removeRoleRecursive(player, channel, stats.reporter, "reporter");
+                removeRoleRecursive(player, channel, stats.guardian, "guardian");
+                addRoleRecursive(player, channel, stats.dead_participant, "dead participant");
+
 			});
 		}, () => {
 			channel.send("⛔ Database error. Could not kill the players in the kill queue");
@@ -874,11 +819,11 @@ module.exports = function() {
 		if(!role) return;
 		switch(args[0]) {
 			 case "add": 
-				author.roles.add(role); 
+                addRoleRecursive(author, message.channel, role, role.name);
 				message.channel.send("✅ Added `" + role.name + "` to <@" + author.id + "> (" + author.user.username + ")!");
 			break;
 			 case "remove": 
-				author.roles.remove(role); 
+                removeRoleRecursive(author, message.channel, role, role.name);
 				message.channel.send("✅ Remove `" + role.name + "` from <@" + author.id + "> (" + author.user.username + ")!");
 			break;
 		}
@@ -989,18 +934,8 @@ module.exports = function() {
 		setTimeout(function () {
 			cmdPlayersSet(message.channel, ["set", "type", newPlayer, "player"]); 
 			cmdPlayersSet(message.channel, ["set", "role", newPlayer, subRole]); 
-            // add particpant role
-            newPlayerMember.roles.add(stats.participant).catch(err => { 
-                // Missing permissions
-                logO(err); 
-                editError(message, err, "Could not add role!");
-            });
-            // remove sub role
-            newPlayerMember.roles.remove(stats.sub).catch(err => { 
-                // Missing permissions
-                logO(err); 
-                editError(message, err, "Could not remove role!");
-            });
+            // add particpant role, remove sub role
+            switchRoles(newPlayerMember, message.channel, stats.sub, stats.participant, "substitute", "participant");
 		}, 10000);
 		setTimeout(function () {
 			let categories = cachedCCs;
@@ -1228,14 +1163,7 @@ module.exports = function() {
 			let playerName = channel.guild.members.cache.get(user).displayName;
 			channel.send("✳ Resurrecting " + playerName + "!");
 			// Set Roles
-			channel.guild.members.cache.get(user).roles.add(stats.participant).catch(err => {
-				logO(err); 
-				sendError(channel, err, "Could not add role");
-			});
-			channel.guild.members.cache.get(user).roles.remove(stats.dead_participant).catch(err => {
-				logO(err); 
-				sendError(channel, err, "Could not remove role");
-			});
+            switchRoles(channel.guild.members.cache.get(user), channel, stats.dead_participant, stats.participant, "dead participant", "participant");
 			// Set DB Value
 			channel.send(stats.prefix + "players set alive " + user + " 1");
 		}
@@ -1274,11 +1202,7 @@ module.exports = function() {
 			return;
 		}
 		channel.send("✅ Attempting to make you a spectator, " + member.displayName + "!");
-		member.roles.add(stats.spectator).catch(err => { 
-			// Missing permissions
-			logO(err); 
-			sendError(channel, err, "Could not add spectator role to " + member.displayName);
-		});
+        addRoleRecursive(member, channel, stats.spectator, "spectator");
 	}
 	
 	this.cmdSubstitute = function(channel, member, args) {
@@ -1309,18 +1233,10 @@ module.exports = function() {
 				if(signupMode == "signup") {
                     channel.send(`✅ Successfully signed out, ${member.user}. You will no longer participate in the next game!`); 
                     updateGameStatusDelayed(channel.guild);
-                    member.roles.remove(stats.signed_up).catch(err => { 
-                        // Missing permissions
-                        logO(err); 
-                        sendError(channel, err, "Could not remove role!");
-                    });
+                    removeRoleRecursive(member, channel, stats.signed_up, "signed up");
                 } else if(signupMode == "substitute") {
                     channel.send(`✅ Successfully signed out, ${member.user}. You will no longer substitute for the next game!`); 
-                    member.roles.remove(stats.sub).catch(err => { 
-                        // Missing permissions
-                        logO(err); 
-                        sendError(channel, err, "Could not remove role!");
-                    });
+                    removeRoleRecursive(member, channel, stats.sub, "substitute");
                 }
 			}, () => {
 				// DB error
@@ -1375,11 +1291,7 @@ module.exports = function() {
 									logO(err);
 									sendError(channel, err, "Could not clear reactions!");
 								});
-								member.roles.add(signupRole).catch(err => { 
-									// Missing permissions
-									logO(err); 
-									editError(message, err, "Could not add role!");
-								});
+                                addRoleRecursive(member, channel, signupRole, signupMode);
 							}, () => {
 								// DB error
 								message.edit("⛔ Database error. Could not sign you up!");

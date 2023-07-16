@@ -568,6 +568,67 @@ module.exports = function() {
 	    let best = w.reduce((iMax, x, i, arr) => x < arr[iMax] ? i : iMax, 0);
 	    return {value: w[best], index: best, name: list[best]};
 	}
+    
+    /* Role Manip Utility Functions */
+    this.switchRolesX = function(member, channel, initialRole, newRole, initialName, newName) {
+        switchRoles(member, channel, newRole, initialRole, newName, initialName);
+    }
+    
+    this.switchRoles = function(member, channel, initialRole, newRole, initialName, newName) {
+		return new Promise((resolve) => {
+            if(member.roles.cache.get(initialRole)) {
+                member.roles.add(newRole).then(async r => {
+                    if(member.roles.cache.get(newRole)) {
+                        // successfully removed roles
+                        await removeRoleRecursive(member, channel, initialRole, initialName);
+                    } else {
+                        channel.send(`❗ Could not add ${newName} role to ${member.displayName}. Trying again!`);
+                        await switchRoles(member, channel, initialRole, newRole, initialName, newName);
+                    }
+                    resolve(true);
+                }).catch(err => { 
+                    // Missing permissions
+                    logO(err); 
+                    sendError(channel, err, `Could not add ${newName} role to ${member.displayName}`);
+                    resolve(false);
+                });
+            }
+        });
+    }
+    
+    this.removeRoleRecursive = function(member, channel, remRole, name) {
+		return new Promise((resolve) => {
+            member.roles.remove(remRole).then(async r => {
+                if(member.roles.cache.get(remRole)) {
+                    channel.send(`❗ Could not remove ${name} role from ${member.displayName}. Trying again!`);
+                    await removeRoleRecursive(member, channel, remRole, name);
+                }
+                resolve(true);
+            }).catch(err => { 
+                // Missing permissions
+                logO(err); 
+                sendError(channel, err, `Could not remove ${name} role from ${member.displayName}`);
+                resolve(false);
+            });
+        });
+    }
+    
+    this.addRoleRecursive = function(member, channel, addRole, name) {
+		return new Promise((resolve) => {
+            member.roles.add(addRole).then(async r => {
+                if(!member.roles.cache.get(addRole)) {
+                    channel.send(`❗ Could not add ${name} role to ${member.displayName}. Trying again!`);
+                    await addRoleRecursive(member, channel, addRole, name);
+                }
+                resolve(true);
+            }).catch(err => { 
+                // Missing permissions
+                logO(err); 
+                sendError(channel, err, `Could not add ${name} role to ${member.displayName}`);
+                resolve(false);
+            });
+		});
+	}
 
 	
 }

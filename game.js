@@ -220,22 +220,10 @@ module.exports = function() {
 			channel.send("✅ Prepared `" + members.length + "` players!");
 			return;
 		}
-		members[index].roles.add(stats.participant).then(m => {
-			members[index].roles.remove(stats.signed_up).then(m => {
-				channel.send("✅ `" + members[index].displayName + "` is now a participant!");
-				startOnePlayer(channel, members, ++index);
-			}).catch(err => { 
-				// Missing permissions
-				logO(err); 
-				sendError(channel, err, "Could not remove signed up role from " + members[index] + "! Trying again");
-				startOnePlayer(channel, members, index);
-			});
-		}).catch(err => { 
-			// Missing permissions
-			logO(err); 
-			sendError(channel, err, "Could not add role to" + members[index]  + "! Trying again");
-			startOnePlayer(channel, members, index);
-		});
+        switchRoles(members[index], channel, stats.signed_up, stats.participant, "signed up", "participant").then(r => {
+            if(r) channel.send("✅ `" + members[index].displayName + "` is now a participant!");
+            startOnePlayer(channel, members, ++index);
+        });
 	}
 	
 	/* Public Permissions */
@@ -274,7 +262,7 @@ module.exports = function() {
 				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read","write"], []), getPerms(stats.spectator, ["read","write"], []), getPerms(stats.participant, [], ["read"]), getPerms(stats.sub, [], ["read"]) ]; 
 			break;
 			case "sub": 
-				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.spectator, ["read","write"], []), getPerms(stats.participant, [], ["read"]), getPerms(stats.sub, ["read","write"], []) ]; 
+				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.participant, [], ["read"]), getPerms(stats.sub, ["read","write"], []) ]; 
 			break;
 		}
 		channel.guild.channels.create({ name: channels[index].name, type: ChannelType.GuildText,  permissionOverwrites: cPerms })
@@ -334,54 +322,10 @@ module.exports = function() {
     
 	this.cmdDemote = function(channel, member) {
 		channel.send("✅ Attempting to demote you, " + member.displayName + "!");
-		if(member.roles.cache.get(stats.gamemaster)) {
-			member.roles.remove(stats.gamemaster).catch(err => { 
-				// Missing permissions
-				logO(err); 
-				sendError(channel, err, "Could not remove game master role from " + member.displayName);
-			});
-			member.roles.add(stats.gamemaster_ingame).catch(err => { 
-				// Missing permissions
-				logO(err); 
-				sendError(channel, err, "Could not add game master ingame role to " + member.displayName);
-			});
-		}
-        if(member.roles.cache.get(stats.senior_gamemaster)) {
-			member.roles.remove(stats.senior_gamemaster).catch(err => { 
-				// Missing permissions
-				logO(err); 
-				sendError(channel, err, "Could not remove senior game master role from " + member.displayName);
-			});
-			member.roles.add(stats.senior_gamemaster_ingame).catch(err => { 
-				// Missing permissions
-				logO(err); 
-				sendError(channel, err, "Could not add senior game master ingame role to " + member.displayName);
-			});
-		}
-		if(member.roles.cache.get(stats.admin)) {
-			member.roles.remove(stats.admin).catch(err => { 
-				// Missing permissions
-				logO(err); 
-				sendError(channel, err, "Could not remove admin role from " + member.displayName);
-			});
-			member.roles.add(stats.admin_ingame).catch(err => { 
-				// Missing permissions
-				logO(err); 
-				sendError(channel, err, "Could not add admin ingame role to " + member.displayName);
-			});
-		}
-		if(member.roles.cache.get(stats.helper)) {
-			member.roles.remove(stats.helper).catch(err => { 
-				// Missing permissions
-				logO(err); 
-				sendError(channel, err, "Could not remove helper role from " + member.displayName);
-			});
-			member.roles.add(stats.helper_ingame).catch(err => { 
-				// Missing permissions
-				logO(err); 
-				sendError(channel, err, "Could not add helper ingame role to " + member.displayName);
-			});
-		}
+        switchRolesX(member, channel, stats.gamemaster_ingame, stats.gamemaster, "gamemaster ingame", "gamemaster");
+        switchRolesX(member, channel, stats.senior_gamemaster_ingame, stats.senior_gamemaster, "senior gamemaster ingame", "senior gamemaster");
+        switchRolesX(member, channel, stats.admin_ingame, stats.admin, "admin ingame", "admin");
+        switchRolesX(member, channel, stats.helper_ingame, stats.helper, "helper ingame", "helper");
 	}
 	
 	this.cmdPromote = function(channel, member) {
@@ -394,64 +338,17 @@ module.exports = function() {
 			return;
 		}
 		channel.send("✅ Attempting to promote you, " + member.displayName + "!");
-		if(member.roles.cache.get(stats.gamemaster_ingame)) {
-			member.roles.remove(stats.gamemaster_ingame).catch(err => { 
-				// Missing permissions
-				logO(err); 
-				sendError(channel, err, "Could not remove game master ingame role from " + member.displayName);
-			});
-			member.roles.add(stats.gamemaster).catch(err => { 
-				// Missing permissions
-				logO(err); 
-				sendError(channel, err, "Could not add game master role to " + member.displayName);
-			});
-		}
-		if(member.roles.cache.get(stats.senior_gamemaster_ingame)) {
-			member.roles.remove(stats.senior_gamemaster_ingame).catch(err => { 
-				// Missing permissions
-				logO(err); 
-				sendError(channel, err, "Could not remove senior game master ingame role from " + member.displayName);
-			});
-			member.roles.add(stats.senior_gamemaster).catch(err => { 
-				// Missing permissions
-				logO(err); 
-				sendError(channel, err, "Could not add senior game master role to " + member.displayName);
-			});
-		}
-		if(member.roles.cache.get(stats.admin_ingame)) {
-			member.roles.remove(stats.admin_ingame).catch(err => { 
-				// Missing permissions
-				logO(err); 
-				sendError(channel, err, "Could not remove admin ingame role from " + member.displayName);
-			});
-			member.roles.add(stats.admin).catch(err => { 
-				// Missing permissions
-				logO(err); 
-				sendError(channel, err, "Could not add admin role to " + member.displayName);
-			});
-		}
-		if(member.roles.cache.get(stats.helper_ingame)) {
-			member.roles.remove(stats.helper_ingame).catch(err => { 
-				// Missing permissions
-				logO(err); 
-				sendError(channel, err, "Could not remove helper ingame role from " + member.displayName);
-			});
-			member.roles.add(stats.helper).catch(err => { 
-				// Missing permissions
-				logO(err); 
-				sendError(channel, err, "Could not add helper role to " + member.displayName);
-			});
-		}
+        switchRoles(member, channel, stats.gamemaster_ingame, stats.gamemaster, "gamemaster ingame", "gamemaster");
+        switchRoles(member, channel, stats.senior_gamemaster_ingame, stats.senior_gamemaster, "senior gamemaster ingame", "senior gamemaster");
+        switchRoles(member, channel, stats.admin_ingame, stats.admin, "admin ingame", "admin");
+        switchRoles(member, channel, stats.helper_ingame, stats.helper, "helper ingame", "helper");
 	}
+
 	
 	this.cmdUnhost = function(channel, member) {
 		channel.send("✅ Attempting to unhost you, " + member.displayName + "!");
 		if(member.roles.cache.get(stats.host)) {
-			member.roles.remove(stats.host).catch(err => { 
-				// Missing permissions
-				logO(err); 
-				sendError(channel, err, "Could not remove host role from " + member.displayName);
-			});
+            removeRoleRecursive(member, channel, stats.host, "host");
 		}
 	}
 	
@@ -462,11 +359,7 @@ module.exports = function() {
 		}
 		channel.send("✅ Attempting to host you, " + member.displayName + "!");
 		if(member.roles.cache.get(stats.gamemaster)) {
-			member.roles.add(stats.host).catch(err => { 
-				// Missing permissions
-				logO(err); 
-				sendError(channel, err, "Could not remove host role from " + member.displayName);
-			});
+            addRoleRecursive(member, channel, stats.host, "host");
 		}
 	}
     
@@ -489,18 +382,10 @@ module.exports = function() {
 	this.cmdEnd = function(channel) {
 		cmdGamephaseSet(channel, ["set", gp.POSTGAME]);
 		channel.guild.roles.cache.get(stats.participant).members.forEach(el => {
-			el.roles.add(stats.dead_participant).catch(err => { 
-				// Missing permissions
-				logO(err); 
-				sendError(channel, err, "Could not add role to" + el);
-			});
+            addRoleRecursive(el, channel, stats.dead_participant, "dead participant");
 		});
         channel.guild.roles.cache.get(stats.sub).members.forEach(el => {
-			el.roles.add(stats.dead_participant).catch(err => { 
-				// Missing permissions
-				logO(err); 
-				sendError(channel, err, "Could not add role to" + el);
-			});
+            addRoleRecursive(el, channel, stats.dead_participant, "dead participant");
 		});
 	}
 	
@@ -584,9 +469,8 @@ module.exports = function() {
 			if(members.length > 0) channel.send("✅ Removed `" + name + "` role from `" + members.length + "` players!");
 			return;
 		}
-		members[index].roles.remove(id).then(m => {
-			//channel.send("✅ `" + members[index].displayName + "` is no longer a " + name + "!");
-			wroles_removeOnce(channel, id, name, members, ++index, callback);
+		removeRoleRecursive(members[index], channel, id, name).then(m => {
+            wroles_removeOnce(channel, id, name, members, ++index, callback);
 		}).catch(err => { 
 			// Missing permissions
 			logO(err); 
