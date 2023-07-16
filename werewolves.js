@@ -195,7 +195,7 @@ client.on("messageCreate", async message => {
                 let msgRole = msg.match(/(".*?")|(\S+)/g) ? msg.match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "";
                 //console.log(msg + " => " + msgRole);
                 if(msg.match(/^[a-zA-Z ]*$/)) cmdInfoEither(message.channel, msgRole, false, true, true);
-                if(stats.fancy_mode && verifyRole(msgRole.join(" "))) message.delete();
+                if(msgRole && stats.fancy_mode && verifyRole(msgRole.join(" "))) message.delete();
                 uncacheMessage(message);
                 return;
 	}
@@ -204,7 +204,7 @@ client.on("messageCreate", async message => {
                 let msgRole = msg.match(/(".*?")|(\S+)/g) ? msg.match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "";
                 //console.log(msg + " => " + msgRole);
                 if(msg.match(/^[a-zA-Z ]*$/)) cmdInfoEither(message.channel, msgRole, false, true, false);
-                if(stats.fancy_mode && verifyRole(msgRole.join(" "))) message.delete();
+                if(msgRole && stats.fancy_mode && verifyRole(msgRole.join(" "))) message.delete();
                 uncacheMessage(message);
                 return;
 	}
@@ -540,7 +540,11 @@ client.on('messageDelete', async message => {
 });
 
 client.on('messageUpdate', async (oldMessage, newMessage) => {
-    await newMessage.fetch();
+    try {
+        await newMessage.fetch();
+    } catch (err) {
+        return; // the message that got edited doesnt exist
+    }
     oldMessage = JSON.parse(JSON.stringify(oldMessage));
     newMessage = JSON.parse(JSON.stringify(newMessage));
 	// retrieve channel and author
@@ -557,9 +561,13 @@ client.on('messageUpdate', async (oldMessage, newMessage) => {
 
 /* Reactions Add*/
 client.on("messageReactionAdd", async (reaction, user) => {
-    await reaction.fetch();
-    await reaction.message.fetch();
-    await user.fetch();
+    try {
+        await reaction.fetch();
+        await reaction.message.fetch();
+        await user.fetch();
+    } catch (err) {
+        return; // the reaction doenst exist
+    }
 	if(user.bot) return;
 	// Handle confirmation messages
 	else if(reaction.emoji.name === "✅" && isGameMaster(reaction.message.guild.members.cache.get(user.id))) {

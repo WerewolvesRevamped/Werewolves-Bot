@@ -469,8 +469,19 @@ module.exports = function() {
 			if(members.length > 0) channel.send("✅ Removed `" + name + "` role from `" + members.length + "` players!");
 			return;
 		}
+<<<<<<< Updated upstream
 		removeRoleRecursive(members[index], channel, id, name).then(m => {
             wroles_removeOnce(channel, id, name, members, ++index, callback);
+=======
+		members[index].roles.remove(id).then(m => {
+			//channel.send("✅ `" + members[index].displayName + "` is no longer a " + name + "!");
+			if(members[index].roles.cache.get(id)) {
+                channel.send("✅ `" + members[index].displayName + "` is no longer a " + name + ", except they actually are and discord lied so I'm trying again!");
+                wroles_removeOnce(channel, id, name, members, index, callback);
+            } else {
+                wroles_removeOnce(channel, id, name, members, ++index, callback);
+            }
+>>>>>>> Stashed changes
 		}).catch(err => { 
 			// Missing permissions
 			logO(err); 
