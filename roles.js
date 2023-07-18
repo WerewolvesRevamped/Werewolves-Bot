@@ -94,32 +94,35 @@ module.exports = function() {
                 sql("SELECT id,emoji FROM players WHERE alive = 1 AND type='player'", result => {        
                     let mayor;
                     if(result.length > stats.mayor_threshold) {
-                        mayor = channel.guild.roles.cache.get(stats.mayor2);  
+                        mayor = stats.mayor2;  
                     } else {
-                      mayor = channel.guild.roles.cache.get(stats.mayor);  
+                      mayor = stats.mayor;  
                     }
                     addRoleRecursive(electMember, channel, mayor, "mayor");
-                    channel.send(`✅ Elected ${electMember} as ${mayor}`);
-                    cmdConnectionSend(channel, ["", "mayor", "Host", `**${electMember} has been elected as ${mayor}!**`]);
+                    channel.send(`✅ Elected ${electMember} as ${channel.guild.roles.cache.get(mayor)}`);
+                    cmdConnectionSend(channel, ["", "mayor", "Host", `**${electMember} has been elected as ${channel.guild.roles.cache.get(mayor)}!**`]);
                 });
             break;
             case "reporter": case "r":
-                let reporter = channel.guild.roles.cache.get(stats.reporter);
-                    addRoleRecursive(electMember, channel, reporter, "reporter");
-                channel.send(`✅ Elected ${electMember} as ${reporter}`);
-                cmdConnectionSend(channel, ["", "reporter", "Host", `**${electMember} has been elected as ${reporter}!**`]);
+                let reporter = stats.reporter;
+                addRoleRecursive(electMember, channel, reporter, "reporter");
+                channel.send(`✅ Elected ${electMember} as ${channel.guild.roles.cache.get(reporter)}`);
+                cmdConnectionSend(channel, ["", "reporter", "Host", `**${electMember} has been elected as ${channel.guild.roles.cache.get(reporter)}!**`]);
             break;
             case "guardian": case "g":
-                let guardian = channel.guild.roles.cache.get(stats.guardian);
-                    addRoleRecursive(electMember, channel, guardian, "guardian");
-                channel.send(`✅ Elected ${electMember} as ${guardian}`);
-                cmdConnectionSend(channel, ["", "guardian", "Host", `**${electMember} has been elected as ${guardian}!**`]);
+                let guardian = stats.guardian;
+                addRoleRecursive(electMember, channel, guardian, "guardian");
+                channel.send(`✅ Elected ${electMember} as ${channel.guild.roles.cache.get(guardian)}`);
+                cmdConnectionSend(channel, ["", "guardian", "Host", `**${electMember} has been elected as ${channel.guild.roles.cache.get(guardian)}!**`]);
             break;
             case "clear": case "c": case "delete": case "remove":
                 let electedRoles = [stats.mayor, stats.mayor2, stats.reporter, stats.guardian];
+                let electedRolesWhispers = ["mayor", "mayor", "reporter", "guardian"];
                 electedRoles.forEach(el => {
-                    let elRole = channel.guild.roles.cache.get(el); 
-                    addRoleRecursive(electMember, channel, elRole, "elected role");
+                    if(electMember.roles.cache.get(el)) {
+                        cmdConnectionSend(channel, ["", electedRolesWhispers[electedRoles.indexOf(el)], "Host", `**${electMember} has resigned as ${channel.guild.roles.cache.get(el)}!**`]);
+                    }
+                    removeRoleRecursive(electMember, channel, el, "elected role");
                 });
                 channel.send(`✅ Cleared elected roles from ${electMember}`);
             break;
@@ -128,22 +131,22 @@ module.exports = function() {
    
    this.mayorCheck = function(channel) {
        sql("SELECT id,emoji FROM players WHERE alive = 1 AND type='player'", result => {        
-            let mayor1 = channel.guild.roles.cache.get(stats.mayor);  
-            let mayor2 = channel.guild.roles.cache.get(stats.mayor2);  
+            let mayor1 = stats.mayor;  
+            let mayor2 = stats.mayor2;  
             let wrongMayorMembers;
             if(result.length > stats.mayor_threshold) {
                 wrongMayorMembers = mayor1.members.toJSON();
                 wrongMayorMembers.forEach(el => {
                     switchRoles(el, channel, mayor1, mayor2, "mayor 1", "mayor 2");
-                    channel.send(`✅ Switched ${el} to ${mayor2}`);
-                    cmdConnectionSend(channel, ["", "mayor", "Host", `**${el} has changed from ${mayor1} to ${mayor2}!**`]);
+                    channel.send(`✅ Switched ${el} to ${channel.guild.roles.cache.get(mayor2)}`);
+                    cmdConnectionSend(channel, ["", "mayor", "Host", `**${el} has changed from ${channel.guild.roles.cache.get(mayor1)} to ${channel.guild.roles.cache.get(mayor2)}!**`]);
                 });
             } else {
                 wrongMayorMembers = mayor2.members.toJSON();
                 wrongMayorMembers.forEach(el => {
                     switchRoles(el, channel, mayor2, mayor1, "mayor 2", "mayor 1");
                     channel.send(`✅ Switched ${el} to ${mayor1}`);
-                    cmdConnectionSend(channel, ["", "mayor", "Host", `**${el} has changed from ${mayor2} to ${mayor1}!**`]);
+                    cmdConnectionSend(channel, ["", "mayor", "Host", `**${el} has changed from ${channel.guild.roles.cache.get(mayor2)} to ${channel.guild.roles.cache.get(mayor1)}!**`]);
                 });
             }
         });
