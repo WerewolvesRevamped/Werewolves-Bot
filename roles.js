@@ -135,14 +135,14 @@ module.exports = function() {
             let mayor2 = stats.mayor2;  
             let wrongMayorMembers;
             if(result.length > stats.mayor_threshold) {
-                wrongMayorMembers = mayor1.members.toJSON();
+                wrongMayorMembers = channel.guild.roles.cache.get(mayor1).members.toJSON();
                 wrongMayorMembers.forEach(el => {
                     switchRoles(el, channel, mayor1, mayor2, "mayor 1", "mayor 2");
                     channel.send(`✅ Switched ${el} to ${channel.guild.roles.cache.get(mayor2)}`);
                     cmdConnectionSend(channel, ["", "mayor", "Host", `**${el} has changed from ${channel.guild.roles.cache.get(mayor1)} to ${channel.guild.roles.cache.get(mayor2)}!**`]);
                 });
             } else {
-                wrongMayorMembers = mayor2.members.toJSON();
+                wrongMayorMembers = channel.guild.roles.cache.get(mayor2).members.toJSON();
                 wrongMayorMembers.forEach(el => {
                     switchRoles(el, channel, mayor2, mayor1, "mayor 2", "mayor 1");
                     channel.send(`✅ Switched ${el} to ${mayor1}`);

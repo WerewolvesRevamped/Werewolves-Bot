@@ -607,7 +607,6 @@ client.on("messageReactionRemove", async (reaction, user) => {
     await reaction.fetch();
     await user.fetch();
 	// reaction role
-	handleReactionRole(reaction, user, false);
 	if(user.bot) return;
 	// Automatic unpinning
 	else if(reaction.emoji.name === "📌" && reaction.count == 0 && isParticipant(reaction.message.guild.members.cache.get(user.id))) {
@@ -617,7 +616,6 @@ client.on("messageReactionRemove", async (reaction, user) => {
 
 /* Leave Detection */
 client.on("guildMemberRemove", async member => {
-    await member.fetch();
     if(member.guild.id != stats.log_guild) return;
 	log(`❌ ${member.user} has left the server!`);
 	sql("UPDATE players SET alive = 0 WHERE id = " + connection.escape(member.id), result => {

@@ -18,7 +18,7 @@ module.exports = function() {
 	/* Handle players command */
 	this.cmdPlayers = function(message, args) {
 		// Check subcommands
-		if(!args[0] || (!args[1] && ["list","log","log2","log3","msgs","messages","votes","roles","rl","list_alive"].indexOf(args[0]) == -1)) { 
+		if(!args[0] || (!args[1] && ["list","log","log2","log3","log4","msgs","messages","votes","roles","rl","list_alive"].indexOf(args[0]) == -1)) { 
 			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `players [get|get_clean|set|resurrect|signup|list|msgs|msgs2|log|log2|votes|rl]`!"); 
 			return; 
 		}
@@ -41,6 +41,7 @@ module.exports = function() {
 			case "log": cmdConfirm(message, "players log"); break;
 			case "log2": cmdConfirm(message, "players log2"); break;
 			case "log3": cmdConfirm(message, "players log3"); break;
+			case "log4": cmdConfirm(message, "players log4"); break;
 			case "votes": cmdConfirm(message, "players votes"); break;
 			case "messages": 
 			case "msgs": cmdPlayersListMsgs(message.channel); break;
@@ -79,7 +80,7 @@ module.exports = function() {
 		let help = "";
 		switch(args[0]) {
 			case "":
-				if(isGameMaster(member)) help += stats.prefix + "players [list|list_alive|msgs|log|log2|log3|votes|msgs2|roles] - Information about players\n";
+				if(isGameMaster(member)) help += stats.prefix + "players [list|list_alive|msgs|log|log2|log3|log4|votes|msgs2|roles] - Information about players\n";
 				if(isGameMaster(member)) help += stats.prefix + "players [get|get_clean|set|resurrect|signup|signup_sub] - Manages players\n";
 				if(isGameMaster(member)) help += stats.prefix + "players [substitute|switch] - Manages player changes\n";
 				if(isGameMaster(member)) help += stats.prefix + "killq [add|remove|killall|list|clear] - Manages kill queue\n";
@@ -194,7 +195,7 @@ module.exports = function() {
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
 					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "players [get|get_clean|set|resurrect|signup|list|list_alive|substitute|switch|messages|messages2|log|log2|log3|votes|roles]\n```";
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "players [get|get_clean|set|resurrect|signup|list|list_alive|substitute|switch|messages|messages2|log|log2|log3|log4|votes|roles]\n```";
             help += "```\nFunctionality\n\nGroup of commands to handle players. " + stats.prefix + "help players <sub-command> for detailed help.\n\nList of Player Properties:\nalive: Whether the player is alive`\ntype: What type of player. Can be 'player', 'substitute' and 'substituted'.\nemoji: The emoji the player uses\nrole: The role of the player\npublic_value: The value of the players vote on public polls (Typically 1)\nprivate_value: The value of the players vote on private polls (Typically 1)\npublic_votes: The base value of votes the player has against them on public votes (Typically 0)\nid: The discord id of the player\nccs: the amount of created ccs\npublic_msgs: Amount of messages sent in public channels\nprivate_msgs: Amount of messages sent in private channels\type: The type of player. 0 for default, 1 for substitute.```";
 					  help += "```diff\nAliases\n\n- p\n- player\n```";
 					break;
@@ -269,6 +270,11 @@ module.exports = function() {
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players log3\n```";
 						help += "```\nFunctionality\n\nLists all players with their role sorted by alive status. Can be used as a base for the final results message.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "players log3\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "players log3!```";
+					break;		
+					case "log4":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "players log4\n```";
+						help += "```\nFunctionality\n\nLists all players with their role sorted by alive status. Can be used as a base for the final results message. Differs from log3 in that it also contains emojis.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "players log4\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "players log4!```";
 					break;		
 					case "votes":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players votes\n```";
@@ -480,11 +486,11 @@ module.exports = function() {
                 await sleep(500);
                 let player = channel.guild.members.cache.get(el);
                 removeRoleRecursive(player, channel, stats.participant, "participant");
+                addRoleRecursive(player, channel, stats.dead_participant, "dead participant");
                 removeRoleRecursive(player, channel, stats.mayor, "mayor");
                 removeRoleRecursive(player, channel, stats.mayor2, "mayor 2");
                 removeRoleRecursive(player, channel, stats.reporter, "reporter");
                 removeRoleRecursive(player, channel, stats.guardian, "guardian");
-                addRoleRecursive(player, channel, stats.dead_participant, "dead participant");
 
 			});
 		}, () => {
@@ -646,6 +652,30 @@ module.exports = function() {
             let playerList2 = result.filter(el => el.alive == 0).map(el => {
                 let player = channel.guild.members.cache.get(el.id);
                 return `• ${player ? player : "<@" + el.id + ">"} (${el.role.split(",").map(role => toTitleCase(role)).join(", ")})`;
+            });
+			channel.send("```**Final Results**\n<Team> Victory\n\n__Live Winners:__\n" + playerList1.join("\n") + "\n\n__Dead Losers:__\n" + playerList2.join("\n") + "```")
+            .catch(err => {
+					logO(err); 
+					sendError(channel, err, "Could not log players");
+				});
+		}, () => {
+			// DB error
+			channel.send("⛔ Database error. Could not log players!");
+		});
+	
+	}
+    
+	/* Lists all signedup players in final results format */
+	this.cmdPlayersLog4 = function(channel) {
+		// Get a list of players
+		sql("SELECT id,emoji,role,alive,public_value,private_value,public_votes,ccs FROM players WHERE type='player'", result => {
+			let playerList1 = result.filter(el => el.alive == 1).map(el => {
+                let player = channel.guild.members.cache.get(el.id);
+                return `• ${getRoleEmoji(el.role.split(",")[0])} ${player ? player : "<@" + el.id + ">"} (${el.role.split(",").map(role => toTitleCase(role)).join(", ")})`;
+            });
+            let playerList2 = result.filter(el => el.alive == 0).map(el => {
+                let player = channel.guild.members.cache.get(el.id);
+                return `• ${getRoleEmoji(el.role.split(",")[0])} ${player ? player : "<@" + el.id + ">"} (${el.role.split(",").map(role => toTitleCase(role)).join(", ")})`;
             });
 			channel.send("```**Final Results**\n<Team> Victory\n\n__Live Winners:__\n" + playerList1.join("\n") + "\n\n__Dead Losers:__\n" + playerList2.join("\n") + "```")
             .catch(err => {

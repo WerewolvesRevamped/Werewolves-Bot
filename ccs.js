@@ -563,9 +563,10 @@ module.exports = function() {
 			channel.send("⛔ Command error. Can't use command outside a SC!");
 			return;
 		}
-		cmdCCRename(channel, false, args, 1);
-		cmdInfoEither(channel, [args[1]], true, true);
-        channel.send(`**<@&${stats.participant}> Your role has changed to \`${toTitleCase(args[1])}\`.**`);
+        args.shift();
+		cmdCCRename(channel, false, ["", args.join(" ")], 1);
+		cmdInfoEither(channel, [args.join(" ")], true, true);
+        channel.send(`**<@&${stats.participant}> Your role has changed to \`${toTitleCase(args.join(" "))}\`.**`);
 	}
 		
 	/* Creates CC */
