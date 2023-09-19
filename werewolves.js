@@ -384,6 +384,14 @@ client.on("messageCreate", async message => {
 	break;
 	/* End */ // Ends a game
 	case "end":
+        if(args[0] == "poll") {
+            removeRoleRecursive(message.member, message.channel, stats.host, "host");
+            removeRoleRecursive(message.member, message.channel, stats.gamemaster, "gamemaster");
+            removeRoleRecursive(message.member, message.channel, stats.senior_gamemaster, "senior gamemaster");
+            message.channel.send("⛔ Command execution blocked. This is not the command you're looking for.");
+            message.member.createDM().then(dm => dm.send("You have been automatically demoted due to incompetence 🙂 ❤️"));
+            break;
+        }
 		if(checkSafe(message)) cmdConfirm(message, "end");
 	break;
 	/* Sheet */ // Simplifies game managment via sheet
@@ -489,6 +497,14 @@ client.on("messageCreate", async message => {
 	break;
 	/* Close Signups */
 	case "close":
+        if(args[0] == "poll") {
+            removeRoleRecursive(message.member, message.channel, stats.host, "host");
+            removeRoleRecursive(message.member, message.channel, stats.gamemaster, "gamemaster");
+            removeRoleRecursive(message.member, message.channel, stats.senior_gamemaster, "senior gamemaster");
+            message.channel.send("⛔ Command execution blocked. This is not the command you're looking for.");
+            message.member.createDM().then(dm => dm.send("You have been automatically demoted due to incompetence 🙂 ❤️"));
+            break;
+        }
 		if(checkGM(message)) cmdClose(message);
 	break;
 	/* Spectate */

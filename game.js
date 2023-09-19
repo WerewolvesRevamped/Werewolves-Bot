@@ -176,6 +176,12 @@ module.exports = function() {
 				help += "```fix\nUsage\n\n> " + stats.prefix + "open\n```";
 				help += "```diff\nAliases\n\n- @\n```";
 			break;
+			case "close":
+				if(!isGameMaster(member)) break;
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "close\n```";
+				help += "```\nFunctionality\n\nCloses signups.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "close\n```";
+			break;
 			case "sheet":
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
