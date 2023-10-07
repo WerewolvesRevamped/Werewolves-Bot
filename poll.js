@@ -160,6 +160,18 @@ module.exports = function() {
         };
     }
 	
+    /** BITS
+    Bit 0 - Public Abstain
+    Bit 1 - Private Abstain
+    Bit 2 - Public Cancel
+    Bit 3 - Private Cancel
+    Bit 4 - Public Random
+    Bit 5 - Private Random
+    **/
+    this.pollHasBit = function(bit) {
+        return stats.poll & (1 << bit)
+    }
+    
 	/* Create new poll */
 	this.pollCreate = async function(channel, args, type) {
 		// Cache vote values
@@ -180,12 +192,14 @@ module.exports = function() {
 				let playerLists = [], playerList = result.map(el => [el.emoji, channel.guild.members.cache.get(el.id)]);
 				let addValues = [];
 				let overwriteValues = [];
-				if(type === "public" && (stats.poll == 0 || stats.poll == 2)) addValues.push("abstain");
-				if(type === "dead_vote" && (stats.poll == 0 || stats.poll == 2)) addValues.push("abstain");
-				else if(type === "public" && stats.poll == 1) addValues.push("cancel");
-				else if(type === "private" && stats.poll == 2) addValues.push("random");
-				else if(type === "dead_vote" && stats.poll == 1) addValues.push("cancel");
-				else if(type === "dead") overwriteValues = ["yes", "no"];
+				if((type === "public" || type === "dead_vote") && pollHasBit(0)) addValues.push("abstain");
+				if((type === "public" || type === "dead_vote") && pollHasBit(2)) addValues.push("cancel");
+				if((type === "public" || type === "dead_vote") && pollHasBit(4)) addValues.push("random");
+				if(type === "private" && pollHasBit(1)) addValues.push("abstain");
+				if(type === "private" && pollHasBit(3)) addValues.push("cancel");
+				if(type === "private" && pollHasBit(5)) addValues.push("random");
+                
+				if(type === "dead") overwriteValues = ["yes", "no"];
 				else if(type === "dead_list") overwriteValues = ["yes", "no"];
 				else if(type === "yn" || type === "all_yn") overwriteValues = ["yes", "no"];
 				else if(type === "yna") overwriteValues = ["yes", "no", "abstain"];
@@ -368,17 +382,25 @@ module.exports = function() {
 		let votesMessage = reactions.filter(el => el.users.cache.toJSON().length > 1 || (emojiToID(el.emoji) && publicVotes.find(el2 => el2.id === emojiToID(el.emoji)).public_votes > 0)).map(el => {
 			// Get non duplicate voters
 			let votersList = el.users.cache.toJSON().filter(el => !duplicates.includes(el)).map(el3 => channel.guild.members.cache.get(el3.id));
-			if(!votersList.length && (!emojiToID(el.emoji) || publicVotes.find(el2 => el2.id === emojiToID(el.emoji)).public_votes <= 0)) return { valid: false };
+			let duplicateList = el.users.cache.toJSON().filter(el => duplicates.includes(el)).map(el3 => channel.guild.members.cache.get(el3.id));
+			if(!votersList.length && !duplicateList.length && (!emojiToID(el.emoji) || publicVotes.find(el2 => el2.id === emojiToID(el.emoji)).public_votes <= 0)) return { valid: false };
 			// Count votes
 			let votes = 0;
 			if(votersList.length) votes += votersList.map(el => pollValue(el, pollType)).reduce((a, b) => a + b);
 			if(pollType === "public") votes += emojiToID(el.emoji) ? publicVotes.find(el2 => el2.id === emojiToID(el.emoji)).public_votes : 0;
-			if(votes <= 0) return { valid: false };
+			if(votes <= 0 && (votersList.length > 0 || (votersList.length == 0 && duplicateList.length == 0))) return { valid: false };
 			// Get string of voters
-			let voters;
-            if(pollType == "gm" || pollType == "host" || pollType == "admin" || pollType == "all_yn" || pollType == "them") voters = votersList.filter(el => !el.user.bot).join(", ");
-			else if(pollType != "dead" && pollType != "dead_vote" && pollType != "dead_list" && pollType != "dead_a" && pollType != "dead_ab" && pollType != "dead_abc" && pollType != "dead_abcd" && pollType != "dead_abcde" && pollType != "dead_abcdef") voters = votersList.filter(el => isParticipant(el)).join(", ");
-			else voters = votersList.filter(el => isDeadParticipant(el)).join(", ");
+			let voters, invalidVoters;
+            if(pollType == "gm" || pollType == "host" || pollType == "admin" || pollType == "all_yn" || pollType == "them") {
+                voters = votersList.filter(el => !el.user.bot).join(", ");
+                invalidVoters = duplicateList.filter(el => !el.user.bot).join(", ");
+            } else if(pollType != "dead" && pollType != "dead_vote" && pollType != "dead_list" && pollType != "dead_a" && pollType != "dead_ab" && pollType != "dead_abc" && pollType != "dead_abcd" && pollType != "dead_abcde" && pollType != "dead_abcdef") {
+                voters = votersList.filter(el => isParticipant(el)).join(", ");
+                invalidVoters = duplicateList.filter(el => isParticipant(el)).join(", ");
+            } else {
+                voters = votersList.filter(el => isDeadParticipant(el)).join(", ");
+                invalidVoters = duplicateList.filter(el => isDeadParticipant(el)).join(", ");
+            }
 			// Get candidate from emoji
 			let candidate = "not set";
 			let pollVal = Object.values(pollValues).find(el2 => el2[0] == el.emoji || el2[0] == el.emoji.split(":")[1]);
@@ -387,11 +409,11 @@ module.exports = function() {
 			else if(emojiToID(el.emoji)) candidate = channel.guild.members.cache.get(emojiToID(el.emoji));
 			else candidate = "*Unknown*";
 			// Return one message line
-			return { valid: true, votes: votes, candidate: candidate, emoji: el.emoji, voters: voters };
+			return { valid: true, votes: votes, candidate: candidate, emoji: el.emoji, voters: voters, invalidVoters: invalidVoters };
 	}).filter(el => el.valid).sort((a, b) => a.votes < b.votes).map(el => { 
 		let vot = (el.voters ? el.voters : "*Nobody*"); 
 		if(pollType === "dead") vot = "*Hidden*";
-		return `(${el.votes}) ${el.emoji} ${el.candidate} **-** ${vot}`;
+		return `(${el.votes}) ${el.emoji} ${el.candidate} **-** ${vot}` + (el.invalidVoters.length>0 ? ` (Invalid Votes: ${el.invalidVoters})` : "");
 	}).join("\n");
 		// Send message
 		if(!votesMessage.length) votesMessage = "*Nobody voted...*";
