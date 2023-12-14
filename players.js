@@ -513,6 +513,7 @@ module.exports = function() {
 		sql("SELECT id,emoji,role,alive,ccs FROM players WHERE type='player'", result => {
 			let playerListArray = result.map(el => {  
                 let rName = toTitleCase(el.role.split(",")[0]);
+                if(rName == "Merged") rName = el.role.split(",")[2];
                 let rEmoji = getRoleEmoji(rName);
                 rEmoji = (rEmoji ? `<:${rEmoji.name}:${rEmoji.id}> | ` : "❓ | ");
                 return `${channel.guild.members.cache.get(el.id) ? (el.alive ? client.emojis.cache.get(stats.yes_emoji) : client.emojis.cache.get(stats.no_emoji)) : "⚠️"} | ${rEmoji}${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"} (${el.role.split(",").map(role => toTitleCase(role)).join(" + ")})`
@@ -624,16 +625,37 @@ module.exports = function() {
 	this.cmdPlayersLog = function(channel) {
 		// Get a list of players
 		sql("SELECT id,emoji,role,alive,public_value,private_value,public_votes,ccs FROM players WHERE type='player'", result => {
-			let playerList = result.map(el => {
+			let playerListArray = result.map(el => {
                 let player = channel.guild.members.cache.get(el.id);
                 let nickname = player.nickname ? " (as `" + player.nickname + "`)" : "";
                 return `• ${el.emoji} ${player ? player : "<@" + el.id + ">"}${nickname} is \`${el.role.split(",").map(role => toTitleCase(role)).join(" + ")}\``;
             });
-			channel.send("```**Players** | Total: " + result.length + "\n" + playerList.join("\n") + "\n```")
-            .catch(err => {
-					logO(err); 
-					sendError(channel, err, "Could not log players");
-				});
+            
+            let playerList = [], counter = 0;
+			for(let i = 0; i < playerListArray.length; i++) {
+				if(!playerList[Math.floor(counter/20)]) playerList[Math.floor(counter/20)] = [];
+				playerList[Math.floor(counter/20)].push(playerListArray[i]);
+				counter++;
+			}
+            
+            for(let i = 0; i < playerList.length; i++) {
+				// Print message
+                if(i == 0) {
+                    channel.send("```**Players** | Total: " + result.length + "\n" + playerList[i].join("\n") + "\n```")
+                    .catch(err => {
+                        logO(err); 
+                        sendError(channel, err, "Could not log players");
+                    });
+                } else {
+                    channel.send("```" + playerList[i].join("\n") + "\n```")
+                    .catch(err => {
+                        logO(err); 
+                        sendError(channel, err, "Could not log players");
+                    });
+                }
+			}
+                
+                
 		}, () => {
 			// DB error
 			channel.send("⛔ Database error. Could not log players!");

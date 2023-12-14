@@ -1404,7 +1404,7 @@ module.exports = function() {
         });
     }
     
-    this.cmdInfoEither = function(channel, args, pin, noErr, simp = false, overwriteName = false, appendSection = false, editOnto = false) {
+    this.cmdInfoEither = function(channel, args, pin, noErr, simp = false, overwriteName = false, appendSection = false, editOnto = false, technical = false) {
 		// fix role name if necessary
         if(!args) {
             if(!noErr) channel.send("❗ Could not find role.");
@@ -1429,9 +1429,9 @@ module.exports = function() {
 		
 		// run info command
         if(stats.fancy_mode) {
-            cmdInfoFancy(channel, args, pin, noErr, simp, overwriteName, appendSection, editOnto);
+            cmdInfoFancy(channel, args, pin, noErr, simp, overwriteName, appendSection, editOnto, technical);
         } else {
-            cmdInfo(channel, args, pin, noErr, simp, overwriteName, appendSection, editOnto);
+            cmdInfo(channel, args, pin, noErr, simp, overwriteName, appendSection, editOnto, technical);
         }
     }
 	
@@ -1650,7 +1650,7 @@ module.exports = function() {
     }
     
 	/* Prints info for a role by name or alias */
-	this.cmdInfoFancy = function(channel, args, pin, noErr, simp = false, overwriteName = false, appendSection = false, editOnto = false) {
+	this.cmdInfoFancy = function(channel, args, pin, noErr, simp = false, overwriteName = false, appendSection = false, editOnto = false, technical = false) {
 		// Check arguments
 		if(!args[0]) { 
 			if(!noErr) channel.send("⛔ Syntax error. Not enough parameters!"); 
@@ -1678,10 +1678,12 @@ module.exports = function() {
                     return applyTheme(el);
                 });
                 
-                if(!simp) {
-                    desc = desc.filter(el => el[0] != "Simplified");
-                } else {
+                if(!simp && !technical) {
+                    desc = desc.filter(el => el[0] != "Simplified" && el[0] != "Formalized");
+                } else if(simp) {
                     desc = desc.filter(el => el[0] === "Simplified" || el[0] === ""); 
+                } else if(technical) {
+                    desc = desc.filter(el => el[0] === "Formalized" || el[0] === ""); 
                 }
                 
                 let category = (desc.find(el => el[0] == "")[1].split(/ \| /)[1] ?? "Unknown").replace(/[\n\r]*/g,"").trim();
@@ -1767,7 +1769,8 @@ module.exports = function() {
                             desc.forEach(el => {
                                 if(!el[0]) return;
                                 if(el[1].length <= 1000) {
-                                    embed.fields.push({"name": `__${el[0]}__`, "value": el[1]});
+                                    if(!technical) embed.fields.push({"name": `__${el[0]}__`, "value": el[1]});
+                                    else embed.fields.push({"name": `__${el[0]}__`, "value": "```" + el[1] + "```"});
                                 } else {
                                     let descSplit = el[1].split(/\n/);
                                    descSplitElements = [];

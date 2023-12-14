@@ -611,7 +611,7 @@ module.exports = function() {
 	
 	/* Pings all players with the New Game Ping role */
 	this.cmdGamePing = function(channel, member) {
-        if(!stats.new_game_ping) return;
+        if(!stats.new_game_ping || stats.new_game_ping === "false") return;
 		channel.guild.roles.cache.get(stats.new_game_ping).setMentionable(true).then(u => {
 			channel.send("**" + member.displayName + "** is going to start a new game! <@&" + stats.new_game_ping + ">").then(m => {
 				channel.guild.roles.cache.get(stats.new_game_ping).setMentionable(false).catch(err => {

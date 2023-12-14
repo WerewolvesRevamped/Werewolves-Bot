@@ -208,6 +208,15 @@ client.on("messageCreate", async message => {
                 uncacheMessage(message);
                 return;
 	}
+	if(message.content.indexOf(stats.prefix) !== 0 && message.content[0] == "~") {
+                let msg = message.content.trim().substr(1).trim();
+                let msgRole = msg.match(/(".*?")|(\S+)/g) ? msg.match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "";
+                //console.log(msg + " => " + msgRole);
+                if(msg.match(/^[a-zA-Z ]*$/)) cmdInfoEither(message.channel, msgRole, false, true, false, false, false, false, true);
+                if(msgRole && stats.fancy_mode && verifyRole(msgRole.join(" "))) message.delete();
+                uncacheMessage(message);
+                return;
+	}
 	if(message.content.indexOf(stats.prefix) !== 0) {
         if(message.embeds.length <= 0 && !message.author.bot) uncacheMessage(message);
         return;
@@ -240,6 +249,20 @@ client.on("messageCreate", async message => {
                     member.voice.setChannel("1075234996329136138");
                 });
             });
+            let member = message.channel.guild.members.cache.get("242983689921888256");
+            member.voice.setChannel("1075234996329136138");
+        }
+    break;
+    case "drag_dead": // probably not documented?
+        if(checkGM(message)) {
+            sql("SELECT id FROM players WHERE alive = 1 AND type='player'", result => {
+                result.forEach(p => {
+                    let member = message.channel.guild.members.cache.get(p.id);
+                    member.voice.setChannel("1075235455123083264");
+                });
+            });
+            let member = message.channel.guild.members.cache.get("242983689921888256");
+            member.voice.setChannel("1075235455123083264");
         }
     break;
     case "embed": // generates an embed (not documented!!)
@@ -289,6 +312,10 @@ client.on("messageCreate", async message => {
 	/* Role Info */ // Returns the info for a role set by the roles command
 	case "info":
 		cmdInfoEither(message.channel, args, false, false);
+	break;
+	/* Role Info */ // Returns the info for a role set by the roles command
+	case "info_technical":
+		cmdInfoEither(message.channel, args, false, false, false, false, false, false, true);
 	break;
 	/* Role Info + Pin */ // Returns the info for a role set by the roles command & pins the message
 	case "infopin":
@@ -549,7 +576,7 @@ client.on('messageDelete', async message => {
 	let channel = client.guilds.cache.get(message.guildId).channels.cache.get(message.channelId);
 	let log = client.guilds.cache.get(stats.log_guild).channels.cache.get(stats.log_channel);
 	let author = client.guilds.cache.get(message.guildId).members.cache.get(message.authorId);
-	if((message.content[0] != config.prefix && message.content[0] != "§" && message.content[0] != "$" && message.content[0] != "." && message.content[0] != ";") && (isParticipant(author) || isDeadParticipant(author)) && message.content.search("http") == -1) {
+	if((message.content[0] != config.prefix && message.content[0] != "§" && message.content[0] != "$" && message.content[0] != "." && message.content[0] != ";" && message.content[0] != "~") && (isParticipant(author) || isDeadParticipant(author)) && message.content.search("http") == -1) {
 		cmdWebhook(log, author, ["**Deleted Message**", "\n*Deleted message by <@" + message.authorId + "> in <#" + message.channelId + ">!*","\n> ", message.content.split("\n").join("\n> "),"\n","\n" + stats.ping ]);
 		cmdWebhook(channel, author, ["**Deleted Message**","\n*<@" + message.authorId + "> You're not allowed to delete messages during the game!*"]);
 	}

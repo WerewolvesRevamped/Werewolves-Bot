@@ -106,7 +106,7 @@ module.exports = function() {
 			case "cc":
 				switch(args[1]) {
 					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc [create|create_hidden|create_multi|create_multi_hidden|add|remove|promote|rename|archive|leave|list|owners" + (isGameMaster(member) ? "|cleanup"  : "") + "]\n```";
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc [create|create_hidden|create_multi|create_multi_hidden|add|remove|promote|rename|archive|leave|list|owners|spam" + (isGameMaster(member) ? "|cleanup"  : "") + "]\n```";
 						help += "```\nFunctionality\n\nGroup of commands to handle CCs. " + stats.prefix + "help cc <sub-command> for detailed help.\n```";
 						help += "```diff\nAliases\n\n- c\n```";
 					break;
@@ -117,7 +117,7 @@ module.exports = function() {
 					break;
 					case "spam":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "cc spam <CC Name>\n```";
-						help += "```\nFunctionality\n\nCreates a CC with the name <CC Name> and adds you to it. The cc will not have any owners.\n```";
+						help += "```\nFunctionality\n\nCreates a CC with the name <CC Name> and adds you to it. The cc will not have any owners (you cannot add members to it). This cc will not count towards the cc limit.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "cc spam spamcc\n< ✅ Created #spamcc!```";
 					break;
 					case "create_hidden":

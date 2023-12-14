@@ -328,6 +328,9 @@ module.exports = function() {
                 if(member.user.bot) return 0;
                 voteValue = 1;
             break;
+            case "abcd": // temp fix
+                voteValue = 1;
+            break;
 			default: 
 				if(!isParticipant(member)) return 0;
 				voteValue = 1;
@@ -391,7 +394,10 @@ module.exports = function() {
 			if(votes <= 0 && (votersList.length > 0 || (votersList.length == 0 && duplicateList.length == 0))) return { valid: false };
 			// Get string of voters
 			let voters, invalidVoters;
-            if(pollType == "gm" || pollType == "host" || pollType == "admin" || pollType == "all_yn" || pollType == "them") {
+            if(pollType == "abcd") { // temp fix
+                voters = votersList.join(", ");
+                invalidVoters = duplicateList.join(", ");
+            } else if(pollType == "gm" || pollType == "host" || pollType == "admin" || pollType == "all_yn" || pollType == "them") {
                 voters = votersList.filter(el => !el.user.bot).join(", ");
                 invalidVoters = duplicateList.filter(el => !el.user.bot).join(", ");
             } else if(pollType != "dead" && pollType != "dead_vote" && pollType != "dead_list" && pollType != "dead_a" && pollType != "dead_ab" && pollType != "dead_abc" && pollType != "dead_abcd" && pollType != "dead_abcde" && pollType != "dead_abcdef") {
