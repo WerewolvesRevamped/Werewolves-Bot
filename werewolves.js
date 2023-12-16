@@ -217,6 +217,15 @@ client.on("messageCreate", async message => {
                 uncacheMessage(message);
                 return;
 	}
+	if(message.content.indexOf(stats.prefix) !== 0 && message.content[0] == "&") {
+                let msg = message.content.trim().substr(1).trim();
+                let msgRole = msg.match(/(".*?")|(\S+)/g) ? msg.match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "";
+                console.log(msg + " => " + msgRole);
+                if(msg.match(/^[a-zA-Z ]*$/)) cmdGetCard(message.channel, msgRole.join(" "));
+                if(msgRole && stats.fancy_mode && verifyRole(msgRole.join(" "))) message.delete();
+                uncacheMessage(message);
+                return;
+	}
 	if(message.content.indexOf(stats.prefix) !== 0) {
         if(message.embeds.length <= 0 && !message.author.bot) uncacheMessage(message);
         return;
@@ -267,6 +276,9 @@ client.on("messageCreate", async message => {
     break;
     case "image": // probably not documented?
         cmdGetImg(message.channel, args.join(" "));
+    break;
+    case "card": // probably not documented?
+        cmdGetCard(message.channel, args.join(" "));
     break;
     case "embed": // generates an embed (not documented!!)
         if(checkGMHelper(message)) { 

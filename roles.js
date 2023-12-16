@@ -1667,6 +1667,24 @@ module.exports = function() {
         });
     }
     
+    this.cmdGetCard = function(channel, role) {
+        let roleNameParsed = parseRole(role);
+        var lutName = getCategoryRole(role);
+        if(lutName) {
+            channel.send("https://werewolves.me/cards/card.php?name="+ lutName);
+        } else if(roleNameParsed) {
+            sql("SELECT description FROM roles WHERE name = " + connection.escape(roleNameParsed), async result => {
+                if(result.length > 0) {
+                    channel.send("https://werewolves.me/cards/card.php?name="+ toTitleCase(roleNameParsed));
+                } else {
+                    channel.send("⛔ Command error. Invalid role `" + role + "`!"); 
+                }
+            });
+        } else {
+            channel.send("⛔ Command error. Invalid role `" + role + "`!"); 
+        }
+    }
+    
 	/* Prints info for a role by name or alias */
 	this.cmdInfoFancy = function(channel, args, pin, noErr, simp = false, overwriteName = false, appendSection = false, editOnto = false, technical = false) {
 		// Check arguments
@@ -1697,7 +1715,7 @@ module.exports = function() {
                 });
                 
                 if(!simp && !technical) {
-                    desc = desc.filter(el => el[0] != "Simplified" && el[0] != "Formalized");
+                    desc = desc.filter(el => el[0] != "Simplified" && el[0] != "Formalized" && el[0] != "Card");
                 } else if(simp) {
                     desc = desc.filter(el => el[0] === "Simplified" || el[0] === ""); 
                 } else if(technical) {
