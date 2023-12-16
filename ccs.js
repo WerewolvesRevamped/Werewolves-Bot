@@ -613,7 +613,7 @@ module.exports = function() {
 								else ccPerms.push(getPerms(member.id, ["read"], []));
 								if(players.length > 0 && mode === 0) players.forEach(el => ccPerms.push(getPerms(el, ["read"], [])));
 								if(players.length > 0 && mode === 1) players.forEach(el => ccPerms.push(getPerms(el, ["read", "history"], [])));
-								channel.guild.channels.create({ name: (spam?"🤖-":"") + args[1] + "", type: ChannelType.GuildText,  permissionOverwrites: ccPerms })
+								channel.guild.channels.create({ name: (spam?"🤖-":"") + args[1] + "", type: ChannelType.GuildText,  permissionOverwrites: ccPerms, parent: cc.id })
 								.then(ct => {
 									// Put the channel into the correct category
 									ct.setParent(cc.id,{ lockPermissions: false })
@@ -662,7 +662,7 @@ module.exports = function() {
                         else ccPerms.push(getPerms(member.id, ["read"], []));
 						if(players.length > 0 && mode === 0) players.forEach(el => ccPerms.push(getPerms(el, ["read"], [])));
 						if(players.length > 0 && mode === 1) players.forEach(el => ccPerms.push(getPerms(el, ["read", "history"], [])));
-						channel.guild.channels.create({ name: (spam?"🤖-":"") + args[1] + "", type: ChannelType.GuildText,  permissionOverwrites: ccPerms })
+						channel.guild.channels.create({ name: (spam?"🤖-":"") + args[1] + "", type: ChannelType.GuildText,  permissionOverwrites: ccPerms, parent: cc.id })
 						.then(ct => {
 							let cc = channel.guild.channels.cache.get(result);
 							if(cc) {

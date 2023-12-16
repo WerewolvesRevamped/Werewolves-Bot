@@ -271,7 +271,7 @@ module.exports = function() {
 				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.participant, [], ["read"]), getPerms(stats.sub, ["read","write"], []) ]; 
 			break;
 		}
-		channel.guild.channels.create({ name: channels[index].name, type: ChannelType.GuildText,  permissionOverwrites: cPerms })
+		channel.guild.channels.create({ name: channels[index].name, type: ChannelType.GuildText,  permissionOverwrites: cPerms, parent: category })
 		.then(sc => { 
 			if(channels[index].setup.length > 1) channels[index].setup.replace(/%n/g, index).split(",").forEach(el => sc.send(stats.prefix + el));
 			sc.setParent(category,{ lockPermissions: false }).then(m => {
