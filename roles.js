@@ -1541,7 +1541,7 @@ module.exports = function() {
         return text;
     }
     
-    const repoBaseUrl = "https://raw.githubusercontent.com/venomousbirds/Werewolves-Icons/main/";
+    const repoBaseUrl = "https://raw.githubusercontent.com/WerewolvesRevamped/Werewolves-Icons/main/";
     this.getRoleData = function(role, description) {
         // prep 
         let category = description.split(/\n|~/)[0].split(/ \| /)[1]?.trim() ?? false;
@@ -1646,6 +1646,23 @@ module.exports = function() {
                 if(urlExists) res(roleData.url);
                 else res(false);
             });
+        });
+    }
+    
+    this.cmdGetImg = function(channel, role) {
+        let roleNameParsed = parseRole(role);
+        var lutName = getCategoryRole(role);
+        sql("SELECT description FROM roles WHERE name = " + connection.escape(roleNameParsed), async result => {
+            if(lutName) {
+                channel.send(repoBaseUrl + lutName + ".png");
+            } else if(result.length > 0) {
+                var desc = result[0].description.replace(/~/g,"\n");
+                var roleData = getRoleData(roleNameParsed, desc);
+                if(roleData.url && roleData.url.length > (repoBaseUrl.length + 5)) channel.send(roleData.url);
+                else channel.send("⛔ Command error. Cannot find url for `" + role + "`!"); 
+            } else {
+                channel.send("⛔ Command error. Invalid role `" + role + "`!"); 
+            }
         });
     }
     

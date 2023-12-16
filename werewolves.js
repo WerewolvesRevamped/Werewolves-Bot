@@ -265,6 +265,9 @@ client.on("messageCreate", async message => {
             member.voice.setChannel("1075235455123083264");
         }
     break;
+    case "image": // probably not documented?
+        cmdGetImg(message.channel, args.join(" "));
+    break;
     case "embed": // generates an embed (not documented!!)
         if(checkGMHelper(message)) { 
             let embed = message.content.split(" ");

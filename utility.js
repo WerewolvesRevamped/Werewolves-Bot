@@ -518,7 +518,8 @@ module.exports = function() {
                 "elect": ["el", "elected"],
                 "list_substitutes": ["subs","list_subs","substitutes"],
                 "force_demote_all": ["fda"],
-                "force_demote_signedup": ["fdsn"]
+                "force_demote_signedup": ["fdsn"],
+                "image": ["img"]
         };
         for(let cmd in aliases) {
             if(aliases[cmd].indexOf(alias) != -1) return cmd;
