@@ -784,7 +784,8 @@ module.exports = function() {
                             sendError(channel, err, "Could not send role message to " + disName);
                         });	
                     } else { // fancy DM
-                        let roleData = getRoleData(rolesArray[0], result.find(el => toTitleCase(el.name) == rolesArray[0]).description);
+                        let mainRoleDesc = result.find(el => toTitleCase(el.name) == rolesArray[0]).description;
+                        let roleData = getRoleData(rolesArray[0], mainRoleDesc);
                         if(!roleData) {
                             sendError(channel, err, "Could not find role for " + disName);
                         } else {
@@ -796,8 +797,8 @@ module.exports = function() {
                                     "icon_url": `${channel.guild.iconURL()}`,
                                     "text": `${channel.guild.name} - ${stats.game}`
                                 },
-                                "thumbnail": {
-                                    "url": roleData.url
+                                "image": {
+                                    "url": "https://werewolves.me/cards/card.php?name=" + rolesArray[0]
                                 }
                             };
                             channel.guild.members.cache.get(players[index].id).user.send({embeds: [ embed ]}).catch(err => {
