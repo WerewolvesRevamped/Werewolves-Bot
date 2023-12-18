@@ -1671,11 +1671,11 @@ module.exports = function() {
         let roleNameParsed = parseRole(role);
         var lutName = getCategoryRole(role);
         if(lutName) {
-            channel.send("https://werewolves.me/cards/card.php?name="+ lutName);
+            channel.send("https://werewolves.me/cards/card.php?name="+ lutName.replace(/ /g, "%20"));
         } else if(roleNameParsed) {
             sql("SELECT description FROM roles WHERE name = " + connection.escape(roleNameParsed), async result => {
                 if(result.length > 0) {
-                    channel.send("https://werewolves.me/cards/card.php?name="+ toTitleCase(roleNameParsed));
+                    channel.send("https://werewolves.me/cards/card.php?name="+ toTitleCase(roleNameParsed).replace(/ /g, "%20"));
                 } else {
                     channel.send("⛔ Command error. Invalid role `" + role + "`!"); 
                 }
