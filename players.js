@@ -1249,7 +1249,7 @@ module.exports = function() {
 		if(isParticipant(member)) {
 			channel.send("⛔ Command error. Can't make you a spectator while you're a participant."); 
 			return;
-		} else if(stats.gamephase < gp.SETUP) {
+		} else if(stats.gamephase < gp.SIGNUP) {
 			channel.send("⛔ Command error. Can't make you a spectator while there is no game."); 
 			return;
 		}

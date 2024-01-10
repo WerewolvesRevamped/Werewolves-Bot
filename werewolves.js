@@ -31,7 +31,7 @@ require("./poll.js")();
 require("./theme.js")();
 
 /* Setup */
-client.on("ready", () => {
+client.on("ready", async () => {
 	sqlSetup();
 	getStats();
 	setTimeout(function() {
@@ -53,10 +53,6 @@ client.on("ready", () => {
 		});
 		log("Bot > Caching completed, Bot is ready!")
 	}, 3000);
-    // fetch reaction roles
-    let reactionChannel = client.channels.cache.get("611536670201872385");
-    if(reactionChannel) reactionChannel.messages.fetch({limit:10});
-    
     //logDMs();
     
 });
