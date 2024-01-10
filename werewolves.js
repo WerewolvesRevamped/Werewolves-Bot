@@ -26,6 +26,7 @@ require("./players.js")();
 require("./ccs.js")();
 require("./whispers.js")();
 require("./roles.js")();
+require("./roles_new.js")();
 require("./game.js")();
 require("./poll.js")();
 require("./theme.js")();
