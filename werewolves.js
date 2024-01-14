@@ -32,6 +32,7 @@ require("./roles_new.js")();
 require("./game.js")();
 require("./poll.js")();
 require("./theme.js")();
+require("./parser.js")();
 
 /* Setup */
 client.on("ready", async () => {

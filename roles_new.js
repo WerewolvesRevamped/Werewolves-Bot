@@ -33,6 +33,7 @@ module.exports = function() {
 		switch(args[0]) {
 			// Role Subcommand
 			case "query": cmdRolesQuery(message.channel); break;
+			case "parse": cmdRolesParse(message.channel); break;
 			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
 		}
 	}
@@ -50,6 +51,23 @@ module.exports = function() {
             channel.send(`⛔ Querying roles failed.`);
         }
         channel.send(`✅ Querying roles completed.`);
+    }
+    
+    /**
+    Command: $roles parse
+    Parses all roles currently stored in the DB from desc_formalized to parsed
+    **/
+    this.cmdRolesParse = async function(channel) {
+        channel.send(`🔄 Parsing roles. Please wait. This may take several minutes.`);
+        try {
+            output = await parseRoles();
+            output.output.forEach(el => channel.send(`❗ ${el}`));
+            channel.send(`✅ Successfully parsed \`${output.success}\` roles. `);
+            channel.send(`😔 Failed to parse \`${output.failure}\` roles. `);
+        } catch(err) {
+            channel.send(`⛔ Querying roles failed.`);
+        }
+        channel.send(`✅ Parsing roles completed. `);
     }
     
     /**
@@ -386,6 +404,40 @@ module.exports = function() {
         cacheRoleInfo();
         // output errors
         return outputs;
+    }
+    
+    /**
+    Parse Roles
+    Parses all roles
+    **/
+    this.parseRoles = async function() {
+        var output = [];
+        var successCounter = 0;
+        var failureCounter = 0;
+        // iterate through all roles and parse them
+        // due to async map we only get an array of promises back - we wait for all of them to resolve
+        const promises = cachedRoles.map(async el => {
+            let parsedRole = null;
+            try {
+                // get the formalized description from the DB
+                let formalizedDesc = (await sqlPromEsc("SELECT desc_formalized FROM roles_new WHERE name = ", el))[0].desc_formalized;
+                if(formalizedDesc == "No description available.") {
+                    throw new Error("No formalized description available");
+                }
+                // parse the role using the role parser
+                parsedRole = parseRoleText(formalizedDesc.split("\n"));
+                successCounter++;
+                sql("UPDATE roles_new SET parsed = " + connection.escape(JSON.stringify(parsedRole)) + " WHERE name = " + connection.escape(el));
+            } catch (err) {
+                output.push(`**${toTitleCase(el)}:** ${err}`);
+                failureCounter++;
+            }
+        });
+        
+        // wait for all promises to resolve
+        await Promise.all(promises);
+        
+        return { output: output, success: successCounter, failure: failureCounter };
     }
     
     /**

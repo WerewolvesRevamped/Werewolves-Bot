@@ -65,5 +65,17 @@ module.exports = function() {
 			}
 		});
 	}
+    
+    this.sqlProm = function(query) {
+        return new Promise(res => {
+              sql(query, result => {
+                  res(result);
+              });
+        });
+    }
+    
+    this.sqlPromEsc = function(query, val) {
+        return sqlProm(query + connection.escape(val));
+    }
 	
 }
