@@ -1,5 +1,6 @@
 {
 	"token": "TOKEN",
+    "github_token": "GHP TOKEN",
 	"db": {
 		"host": "localhost",
 		"user": "USER",

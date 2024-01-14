@@ -9,6 +9,12 @@
 		- Handelling command permissions
 */
 module.exports = function() {
+       
+    /**
+    Fetch Library
+    **/
+    const fetch = require('node-fetch');
+    
 	/* Converts a string to title case */
 	this.toTitleCase = function(str) {
 		return str.replace(/[a-zA-Z0-9][^\s-_]*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
@@ -528,7 +534,6 @@ module.exports = function() {
     }
     
     /* HTTP */
-    const fetch = require('node-fetch');
     this.checkUrlExists = async function(url) {
         const response = await fetch(url, {
             method: 'HEAD'
@@ -633,6 +638,16 @@ module.exports = function() {
             });
 		});
 	}
+    
+    /**
+    Fetch Body
+    Uses the fetch library to fetch a url and return the body as text
+    **/
+    this.fetchBody = async function(url, args = {}) {
+        const response = await fetch(url, args);
+        const body = await response.text();
+        return body;
+    }
 
 	
 }

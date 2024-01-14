@@ -47,7 +47,7 @@ module.exports = function() {
 	}
 	
 	/* Does SQL Queries */
-	this.sqlQuery = function(query, resCallback, errCallback, mode) {
+	this.sqlQuery = function(query, resCallback = ()=>{}, errCallback = ()=>{}, mode) {
 		// Do query
 		connection.query(query, function(err, result, fields) {
 			// Check success

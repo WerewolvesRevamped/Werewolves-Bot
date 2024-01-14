@@ -11,34 +11,7 @@ module.exports = function() {
 	this.cachedRoles = [];
 	this.cachedSCs = [];
 	this.scCatCount = 0;
-    this.iconLUT = {};
-	
-	/* Handle roles command */
-	this.cmdRoles = function(message, args, argsX) {
-		// Check subcommand
-		if(!args[0]) { 
-			message.channel.send("⛔ Syntax error. Not enough parameters!"); 
-			return; 
-		}
-		// Find subcommand
-		switch(args[0]) {
-			// Role Subcommand
-			case "set1": cmdRolesSet1(message.channel, args, argsX); break;
-			case "set2": cmdRolesSet2(message.channel, args, argsX); break;
-			case "set": cmdRolesSet(message.channel, args, argsX); break;
-			case "get": cmdRolesGet(message.channel, args); break;
-			case "remove": cmdRolesRemove(message.channel, args); break;
-			case "list": cmdRolesList(message.channel, args); break;
-			case "list_names": cmdRolesListNames(message.channel); break;
-			case "clear": cmdConfirm(message, "roles clear"); break;
-			// Alias Subcommands
-			case "set_alias": cmdRolesSetAlias(message.channel, args); break;
-			case "remove_alias": cmdRolesRemoveAlias(message.channel, args); break;
-			case "list_alias": cmdRolesListAlias(message.channel); break;
-			case "clear_alias": cmdConfirm(message, "roles clear_alias"); break;
-			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
-		}
-	}
+
 	
 	this.cmdChannels = function(message, args, argsX) {
 		// Check subcommand
@@ -166,10 +139,6 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "infopin - Returns role info & pins the message\n";
 				if(isGameMaster(member)) help += stats.prefix + "infoedit - Edits a bot info message\n";
 				if(isGameMaster(member)) help += stats.prefix + "infoeadd - Returns role info with additional text\n";
-				if(isGameMaster(member)) help += stats.prefix + "info_fancy - Returns role info (fancy)\n";
-				if(isGameMaster(member)) help += stats.prefix + "info_fancy_simplified - Returns role info (fancy, simplified)\n";
-				if(isGameMaster(member)) help += stats.prefix + "info_classic - Returns role info (classic)\n";
-				if(isGameMaster(member)) help += stats.prefix + "info_classic_simplified - Returns role info (classic, simplified)\n";
 				if(isGameMaster(member)) help += stats.prefix + "elect - Elects a player to a role\n";
 				help += "; - Returns role info\n";
 				help += ". - Returns simplified role info\n";
@@ -180,30 +149,6 @@ module.exports = function() {
 				help += "```\nFunctionality\n\nShows the description of a role.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "info citizen\n< Citizen | Townsfolk\n  Basics\n  The Citizen has no special abilities.\n  All the innocents vote during the day on whomever they suspect to be an enemy,\n  and hope during the night that they won’t get killed.\n```";
 				help += "```diff\nAliases\n\n- i\n```";
-			break;
-			case "info_fancy":
-				help += "```yaml\nSyntax\n\n" + stats.prefix + "info_fancy <Role Name>\n```";
-				help += "```\nFunctionality\n\nShows the description of a role in the fancy view.\n```";
-				help += "```fix\nUsage\n\n> " + stats.prefix + "info_fancy citizen\n```";
-				help += "```diff\nAliases\n\n- if\n```";
-			break;
-			case "info_fancy_simplified":
-				help += "```yaml\nSyntax\n\n" + stats.prefix + "info_fancy_simplified <Role Name>\n```";
-				help += "```\nFunctionality\n\nShows the description of a role in the fancy view and simplified.\n```";
-				help += "```fix\nUsage\n\n> " + stats.prefix + "info_fancy_simplified citizen\n```";
-				help += "```diff\nAliases\n\n- ifs\n```";
-			break;
-			case "info_classic":
-				help += "```yaml\nSyntax\n\n" + stats.prefix + "info_classic <Role Name>\n```";
-				help += "```\nFunctionality\n\nShows the description of a role in the classic view.\n```";
-				help += "```fix\nUsage\n\n> " + stats.prefix + "info_classic citizen\n```";
-				help += "```diff\nAliases\n\n- ic\n```";
-			break;
-			case "info_classic_simplified":
-				help += "```yaml\nSyntax\n\n" + stats.prefix + "info_classic_simplified <Role Name>\n```";
-				help += "```\nFunctionality\n\nShows the description of a role in the classic view and simplified.\n```";
-				help += "```fix\nUsage\n\n> " + stats.prefix + "info_classic_simplified citizen\n```";
-				help += "```diff\nAliases\n\n- ics\n```";
 			break;
 			case "infopin":
 				if(!isGameMaster(member)) break;
@@ -481,7 +426,7 @@ module.exports = function() {
                         }
                     };
                     let cRole = getCategoryRole(titleRaw);
-                    if(cRole) embed.thumbnail = {url: repoBaseUrl + "/" + cRole + ".png"};
+                    if(cRole) embed.thumbnail = {url: iconRepoBaseUrl + "/" + cRole + ".png"};
                     cMsg = {embeds: [ embed ]};
                 }
                 
@@ -888,58 +833,8 @@ module.exports = function() {
 			channel.send("⛔ Database error. Could not get role info!");
 		});
 	}
-	
-	/* Cache Role Info */
-	this.cacheRoleInfo = function() {
-		getAliases();
-		getRoles();
-		getSCCats();
-	}
-	
-	/* Cache role aliases */
-	this.getAliases = function() {
-		sql("SELECT alias,name FROM roles_alias", result => {
-				cachedAliases = result;
-		}, () => {
-			log("Roles > ❗❗❗ Unable to cache role aliases!");
-		});
-	}
-	
-	/* Caches valid roles */
-	this.getRoles = function() {
-		sql("SELECT name FROM roles", result => {
-				cachedRoles = result.map(el => el.name);
-		}, () => {
-			log("Roles > ❗❗❗ Unable to cache role!");
-		});
-	}
-	
-	/* Cache Public category */
-	this.getPublicCat = function() {
-		sqlGetStat(15, result => {
-			cachedPublic = result;
-		}, () => {
-			log("Roles > ❗❗❗ Unable to cache Public Category!");
-		});
-	}
-	
-	/* Converts a role/alias to role */
-	this.parseRole = function(input) {
-		//console.log(input);
-		input = input.toLowerCase();
-        if(input.length < 50 && input.substr(0, 2) != "!_") input = input.replace(/_/g," ");
-		let alias = cachedAliases.find(el => el.alias === input);
-		if(alias) return parseRole(alias.name);
-		else return input;
-	}
-	
-	/* Verify role */
-	this.verifyRole = function(input) {
-		let inputRole = parseRole(input);
-		let role = cachedRoles.find(el => el === inputRole);
-		return role ? true : false;
-	}
-	
+
+
 	/* Verifies roles, but removes technical roles */
 	this.verifyRoleVisible = function(input) {
 		return !~input.search("!_") ? parseRole(input) : false;
@@ -1542,7 +1437,7 @@ module.exports = function() {
         return text;
     }
     
-    const repoBaseUrl = "https://raw.githubusercontent.com/WerewolvesRevamped/Werewolves-Icons/main/";
+    const iconRepoBaseUrl = "https://raw.githubusercontent.com/WerewolvesRevamped/Werewolves-Icons/main/";
     this.getRoleData = function(role, description) {
         // prep 
         let category = description.split(/\n|~/)[0].split(/ \| /)[1]?.trim() ?? false;
@@ -1551,7 +1446,7 @@ module.exports = function() {
         
         
         // get url
-         let repoPath = repoBaseUrl;
+         let repoPath = iconRepoBaseUrl;
         let cSplitSolo = category.split(/ \- /);
         let catRole = getCategoryRole(role);
         if(catRole) repoPath += catRole + ".png";
@@ -1655,11 +1550,11 @@ module.exports = function() {
         var lutName = getCategoryRole(role);
         sql("SELECT description FROM roles WHERE name = " + connection.escape(roleNameParsed), async result => {
             if(lutName) {
-                channel.send(repoBaseUrl + lutName + ".png");
+                channel.send(iconRepoBaseUrl + lutName + ".png");
             } else if(result.length > 0) {
                 var desc = result[0].description.replace(/~/g,"\n");
                 var roleData = getRoleData(roleNameParsed, desc);
-                if(roleData.url && roleData.url.length > (repoBaseUrl.length + 5)) channel.send(roleData.url);
+                if(roleData.url && roleData.url.length > (iconRepoBaseUrl.length + 5)) channel.send(roleData.url);
                 else channel.send("⛔ Command error. Cannot find url for `" + role + "`!"); 
             } else {
                 channel.send("⛔ Command error. Invalid role `" + role + "`!"); 
@@ -1771,10 +1666,10 @@ module.exports = function() {
                             case "Werewolf":
                             case "Unaligned":
                             case "Solo":
-                                emUrl = `${repoBaseUrl}Placeholder/${pCat}.png?version=${stats.icon_version}`;
+                                emUrl = `${iconRepoBaseUrl}Placeholder/${pCat}.png?version=${stats.icon_version}`;
                             break;
                             default:
-                                emUrl = `${repoBaseUrl}Placeholder/Unaligned.png?version=${stats.icon_version}`;
+                                emUrl = `${iconRepoBaseUrl}Placeholder/Unaligned.png?version=${stats.icon_version}`;
                             break;
                         }
                     }
@@ -1915,7 +1810,7 @@ module.exports = function() {
                     }
                     
                     
-                    if(catRole) embed.thumbnail = {url: repoBaseUrl + catRole + `.png?version=${stats.icon_version}`};
+                    if(catRole) embed.thumbnail = {url: iconRepoBaseUrl + catRole + `.png?version=${stats.icon_version}`};
                 }
                 
                 // send embed
@@ -1962,15 +1857,6 @@ module.exports = function() {
     this.getRoleEmoji = function(roleName) {
         roleName = toTitleCase(roleName).replace(/[^\w]+/g,"").trim().toLowerCase();
         return client.emojis.cache.find(el => el.name.toLowerCase() == roleName);
-    }
-    
-    const fetch = require('node-fetch');
-    this.cacheIconLUT = async function() {
-        const response = await fetch(repoBaseUrl + "replacements.csv");
-        const body = await response.text();
-        iconLUT = {};
-        body.split("\n").filter(el => el && el.length).map(el => el.split(",")).forEach(el => iconLUT[el[0]] = el[1].trim().replace(/ /g,"%20"));
-        console.log(iconLUT);
     }
 	
 }

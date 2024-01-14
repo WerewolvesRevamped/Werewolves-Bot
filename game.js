@@ -55,6 +55,15 @@ module.exports = function() {
 		startOnePlayer(channel, channel.guild.roles.cache.get(stats.signed_up).members.toJSON(), 0);
 		createSCs(channel, debug);
 	}
+    
+	/* Cache Public category */
+	this.getPublicCat = function() {
+		sqlGetStat(15, result => {
+			cachedPublic = result;
+		}, () => {
+			log("Roles > ❗❗❗ Unable to cache Public Category!");
+		});
+	}
 	
 	this.helpGame = function(member, args) {
 		let help = "";

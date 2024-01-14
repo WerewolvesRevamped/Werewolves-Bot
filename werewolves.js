@@ -12,6 +12,9 @@ const { Client, Intents, Options, GatewayIntentBits, ChannelType, MessageType, O
     });
 require("./discord.js")();
 
+/**
+    Libraries
+**/
 const { exec } = require('node:child_process')
 
 config = require("./config.json");
@@ -25,7 +28,6 @@ require("./confirm.js")();
 require("./players.js")();
 require("./ccs.js")();
 require("./whispers.js")();
-require("./roles.js")();
 require("./roles_new.js")();
 require("./game.js")();
 require("./poll.js")();
@@ -42,7 +44,6 @@ client.on("ready", async () => {
 		getCCs();
 		getPRoles();
 		getCCCats();
-		getSCCats();
 		getPublicCat();
         loadPollValues();
         cacheIconLUT();
@@ -65,7 +66,6 @@ async function forceReload(channel) {
     try { cacheRoleInfo(); channel.send("✅ Cached role info."); } catch (err) { logO(err); channel.send("⛔ Failed to cache role info."); } await sleep(1000);
     try { getVotes(); channel.send("✅ Cached votes."); } catch (err) { logO(err); channel.send("⛔ Failed to cache votes."); } await sleep(1000);
     try { getCCs(); channel.send("✅ Cached cc cats."); } catch (err) { logO(err); channel.send("⛔ Failed to cache cc cats."); } await sleep(1000);
-    try { getSCCats(); channel.send("✅ Cached sc cats."); } catch (err) { logO(err); channel.send("⛔ Failed to cache sc cats."); } await sleep(1000);
     try { getPublicCat(); channel.send("✅ Cached public cat."); } catch (err) { logO(err); channel.send("⛔ Failed to cache public cat."); } await sleep(1000);
     try { loadPollValues(); channel.send("✅ Cached poll values."); } catch (err) { logO(err); channel.send("⛔ Failed to cache poll values."); } await sleep(1000);
     try { cacheIconLUT(); channel.send("✅ Loaded icon lut."); } catch (err) { logO(err); channel.send("⛔ Failed to load icon lut."); } await sleep(1000);
@@ -191,7 +191,7 @@ client.on("messageCreate", async message => {
                 let msg = message.content.trim().substr(1).trim();
                 let msgRole = msg.match(/(".*?")|(\S+)/g) ? msg.match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "";
                 //console.log(msg + " => " + msgRole);
-                if(msg.match(/^[a-zA-Z ]*$/)) cmdInfoEither(message.channel, msgRole, false, true, true);
+                if(msg.match(/^[a-zA-Z ]*$/)) cmdInfoIndirectSimplified(message.channel, msgRole);
                 if(msgRole && stats.fancy_mode && verifyRole(msgRole.join(" "))) message.delete();
                 uncacheMessage(message);
                 return;
@@ -200,7 +200,7 @@ client.on("messageCreate", async message => {
                 let msg = message.content.trim().substr(1).trim();
                 let msgRole = msg.match(/(".*?")|(\S+)/g) ? msg.match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "";
                 //console.log(msg + " => " + msgRole);
-                if(msg.match(/^[a-zA-Z ]*$/)) cmdInfoEither(message.channel, msgRole, false, true, false);
+                if(msg.match(/^[a-zA-Z ]*$/)) cmdInfoIndirect(message.channel, msgRole, false, true, false);
                 if(msgRole && stats.fancy_mode && verifyRole(msgRole.join(" "))) message.delete();
                 uncacheMessage(message);
                 return;
@@ -209,7 +209,7 @@ client.on("messageCreate", async message => {
                 let msg = message.content.trim().substr(1).trim();
                 let msgRole = msg.match(/(".*?")|(\S+)/g) ? msg.match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "";
                 //console.log(msg + " => " + msgRole);
-                if(msg.match(/^[a-zA-Z ]*$/)) cmdInfoEither(message.channel, msgRole, false, true, false, false, false, false, true);
+                if(msg.match(/^[a-zA-Z ]*$/)) cmdInfoIndirectTechnical(message.channel, msgRole, false, true, false, false, false, false, true);
                 if(msgRole && stats.fancy_mode && verifyRole(msgRole.join(" "))) message.delete();
                 uncacheMessage(message);
                 return;
@@ -323,39 +323,24 @@ client.on("messageCreate", async message => {
 	break;
 	/* Role Info */ // Returns the info for a role set by the roles command
 	case "info":
-		cmdInfoEither(message.channel, args, false, false);
+		cmdInfo(message.channel, args);
 	break;
 	/* Role Info */ // Returns the info for a role set by the roles command
 	case "info_technical":
-		cmdInfoEither(message.channel, args, false, false, false, false, false, false, true);
+		cmdInfoTechnical(message.channel, args);
 	break;
 	/* Role Info + Pin */ // Returns the info for a role set by the roles command & pins the message
 	case "infopin":
-		if(checkGM(message)) cmdInfoEither(message.channel, args, true, false);
+		if(checkGM(message)) cmdInfopin(message.channel, args);
 	break;
 	/* Role Info */ // Returns the info for a role set by the roles command
-	case "infoedit":
+	case "infoedit": // WIP: READD this command
 		if(checkGM(message)) cmdInfoEdit(message.channel, args, argsX);
 	break;
 	/* Role Info (Add) */ // Returns the info for a role set by the roles command, but with additions
-	case "infoadd":
+	case "infoadd": // WIP: READD this command
 		if(checkGM(message)) cmdInfoFancy(message.channel, [args[0]], false, false, false, false, ["", argsX[1].replace(/~/g, "\n").replace(/<\/>/g,"~")]);
 	break;
-	/* Role Info (Classic) */ // Returns the info for a role set by the roles command
-	case "info_classic":
-		if(checkGM(message)) cmdInfo(message.channel, args, false, false);
-	break;
-	/* Role Info (Classic) */ // Returns the info for a role set by the roles command (simplified)
-	case "info_classic_simplified":
-		if(checkGM(message)) cmdInfo(message.channel, args, false, false, true);
-	break;
-	/* Role Info (Fancy) */ // Returns the info for a role set by the roles command, but more fancy
-	case "info_fancy":
-		if(checkGM(message)) cmdInfoFancy(message.channel, args, false, false);
-	break;
-	/* Role Info (Fancy) */ // Returns the info for a role set by the roles command, but more fancy (simplified)
-	case "info_fancy_simplified":
-		if(checkGM(message)) cmdInfoFancy(message.channel, args, false, false, true);
 	break;
 	/* Options */ // Modify options such as role ids and prefix
 	case "options": 
