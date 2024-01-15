@@ -19,7 +19,6 @@ module.exports = function() {
     const electionTriggers = ["On Election", "On Mayor Election", "On Reporter Election", "On Guardian Election"];
     const defenseTriggers = ["On Defense", "On Passive Defense", "On Partial Defense", "On Recruitment Defense"];
     const basicTriggerTypes = [...actionTimings, "Compound", "Starting", ...passiveTriggers, "On Death", "On Killed","On Visited", "On Action", "On Disbandment", "On Lynch", ...electionTriggers, ...defenseTriggers, "On Betrayal", "Afterwards", "On Poll Closed", "On Role Change", "On Removal", "On End"]; // basic trigger types
-    const adancedTriggerTypes = ["On <Target> Death","On Visited [<Ability Type>]", "On <Target> Visited","On <Target> Visited [<Ability Type>]","On Action [<Ability Type>]"]; // trigger types containing parameters
     const bullets = ["•","‣","◦","·","⁃","⹀"];
 
     /**
@@ -135,17 +134,17 @@ module.exports = function() {
 
     /** REGEX - Reminder: You need double \'s here **/
     // general
-    const targetType = "(`[^`]*`|@\\S*|%[^%]%)";
+    const targetType = "(`[^`]*`|@\\S*|%[^%]+%|randomize\\(.+?\\)|shuffle\\(.+?\\)|most_freq_role\\(.+?\\))";
     const attrDuration = "( \\(~[^\)]+\\))?";
     const locationType = "(`[^`]*`|@\\S*|#\\S*)"; // extended version of target type
     const groupType = "(@\\S*|#\\S*)"; // reduced version of location type
     const attributeName = targetType;
-    const num = "(-?\\d+)";
+    const num = "(-?\\d+|calc\\(.*?\\))";
     const rawStr = "[\\w\\s\\d@]+";
     const str = "(" + rawStr + ")";
     const decNum = "(-?\\d+\\.\\d+)";
-    const abilityType = "(Killing|Investigating|Targeting|Disguising|Protecting|Applying|Redirecting|Vote Manipulating|Whispering|Joining|Granting|Loyalty|Obstructing|Poll Manipulating|Announcements|Changing|Copying|Choices|Ascend|Descend|Disband|Counting|Conversation Reset|Cancel|Switching|Process|Evaluate|Action|Feedback)";
-    const abilitySubtype = "((Kill|Attack|Lynch|True) Killing|(Role|Alignment|Category|Class|Count|Attribute) Investigating|(Target|Untarget) Targeting|() Disguising|(Absence|Active|Passive|Partial|Recruitment) Protecting|(Add|Remove|Change) Applying|() Redirecting|(Absolute|Relative) Vote Manipulating|() Whispering|(Add|Remove) Joining|(Add|Remove|Transfer) Granting|() Loyalty|() Obstructing|(Addition|Creation|Cancelling|Deletion|Manipulation) Poll Manipulating|() Announcements|(Role|Alignment|Group) Changing|(Ability|Full) Copying|(Creating|Choosing) Choices|() Ascend|() Descend|() Disband|(Increment|Decrement|Set) Counting|() Conversation Reset|() Cancel|() Switching|() Process|() Evaluate|() Action|() Feedback)";
+    const abilityType = "(Killing|Investigating|Targeting|Disguising|Protecting|Applying|Redirecting|Vote Manipulating|Whispering|Joining|Granting|Loyalty|Obstructing|Poll Manipulating|Announcements|Changing|Copying|Choices|Ascend|Descend|Disband|Counting|Conversation Reset|Cancel|Switching|Process|Evaluate|Action|Feedback|Action|Success|Failure)";
+    const abilitySubtype = "((Kill|Attack|Lynch|True) Killing|(Role|Alignment|Category|Class|Count|Attribute) Investigating|(Target|Untarget) Targeting|() Disguising|(Absence|Active|Passive|Partial|Recruitment) Protecting|(Add|Remove|Change) Applying|() Redirecting|(Absolute|Relative) Vote Manipulating|() Whispering|(Add|Remove) Joining|(Add|Remove|Transfer) Granting|() Loyalty|() Obstructing|(Addition|Creation|Cancelling|Deletion|Manipulation) Poll Manipulating|() Announcements|(Role|Alignment|Group) Changing|(Ability|Full) Copying|(Creating|Choosing) Choices|() Ascend|() Descend|() Disband|(Increment|Decrement|Set) Counting|() Conversation Reset|() Cancel|() Switching|() Process|() Evaluate|() Action|() Feedback|() Action|() Success|() Failure)";
     const bulletsRegex = /(•|‣|◦|·|⁃|⹀)/;
 
     // specific
@@ -874,6 +873,19 @@ module.exports = function() {
             if(fd) {
                 ability = { type: "action" };
             }
+            /** FAILURE / SUCCESS */
+            // just values
+            exp = new RegExp("^Failure$", "g");
+            fd = exp.exec(abilityLine);
+            if(fd) {
+                ability = { type: "failure" };
+            }
+            // just values
+            exp = new RegExp("^Success$", "g");
+            fd = exp.exec(abilityLine);
+            if(fd) {
+                ability = { type: "success" };
+            }
             
             /** Ability Types End */
             if(ability) {
@@ -968,19 +980,56 @@ module.exports = function() {
                 }
                 
                 let curInputLineSplit = curInputLine.split(": ");
-                let curTriggerName = curInputLineSplit.shift().split(":")[0];
+                let curTriggerName = curInputLineSplit.shift().split(/:$/)[0]; // remove a : at end of line
                 
                 // basic trigger type
-                if(basicTriggerTypes.includes(curTriggerName)) {
+                if(basicTriggerTypes.includes(curTriggerName)) { // normal triggers
                     curTriggerType = curTriggerName;
                     curTrigger.push(curInputLineSplit.join(": "));
-                } else if(curTriggerName == "Inherit") {
+                } else if(curTriggerName == "Inherit") { // Inherit special trigger
                     inherit.push(curInputLineSplit.join(": "));
-                }  else if(curTriggerName == "Require") {
+                }  else if(curTriggerName == "Require") { // Require special trigger
                     require.push(curInputLineSplit.join(": "));
                 } else {
-                    if(!debugMode) throw new Error(`Invalid Trigger Type \`\`\`\n${curTriggerName}\n\`\`\` in \`\`\`\n${curInputLine}\n\`\`\``);
-                    else console.log("UNIDENT");
+                    //   const adancedTriggerTypes = ["On <Target> Visited [<Ability Type>]"]; // trigger types containing parameters
+                    // attempt to parse complex triggers
+                    /** On Target Death / On Target Visited **/
+                    var exp, fd, complexTrigger;
+                    exp = new RegExp("^On " + targetType +  " (Death|Visited)$", "g");
+                    fd = exp.exec(curTriggerName);
+                    if(fd) {
+                        complexTrigger = "On " + fd[2] + ";" + fd[1];
+                    }
+                    /** On Visited [Ability], On Action [Ability] **/
+                    exp = new RegExp("^On (Visited|Action) \\[" + abilityType + "\\]$", "g");
+                    fd = exp.exec(curTriggerName);
+                    if(fd) {
+                        complexTrigger = "On " + fd[1] + ";" + fd[2];
+                    }
+                    exp = new RegExp("^On (Visited|Action) \\[" + abilitySubtype + "\\]$", "g");
+                    fd = exp.exec(curTriggerName);
+                    if(fd) {
+                        complexTrigger = "On " + fd[1] + ";" + fd[2];
+                    }
+                    /** On Target Visited [Ability]**/
+                    exp = new RegExp("^On " + targetType + " Visited \\[" + abilityType + "\\]$", "g");
+                    fd = exp.exec(curTriggerName);
+                    if(fd) {
+                        complexTrigger = "On Visited;" + fd[1] + ";" + fd[2];
+                    }
+                    exp = new RegExp("^On " + targetType + " Visited \\[" + abilitySubtype + "\\]$", "g");
+                    fd = exp.exec(curTriggerName);
+                    if(fd) {
+                        complexTrigger = "On Visited;" + fd[1] + ";" + fd[2];
+                    }
+                    /** Otherwise **/
+                    if(!complexTrigger) { // could not find a complex trigger match
+                        if(!debugMode) throw new Error(`Invalid Trigger Type \`\`\`\n${curTriggerName}\n\`\`\` in \`\`\`\n${curInputLine}\n\`\`\``);
+                        else console.log("UNIDENT");
+                    } else {
+                        curTriggerType = complexTrigger;
+                        curTrigger.push(curInputLineSplit.join(": "));
+                    }
                 }
                 
                 // TODO advanced trigger type

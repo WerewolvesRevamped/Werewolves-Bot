@@ -51,6 +51,7 @@ module.exports = function() {
             channel.send(`⛔ Querying roles failed.`);
         }
         channel.send(`✅ Querying roles completed.`);
+        cacheRoleInfo();
     }
     
     /**
