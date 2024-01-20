@@ -659,6 +659,16 @@ module.exports = function() {
         return body;
     }
     
+    /**
+    Get Emoji
+    Gets an emoji by name
+    **/
+    this.getEmoji = function(name) {
+        let emoji = client.emojis.cache.find(el => el.name === name);
+        if(emoji) emoji = `<:${emoji.name}:${emoji.id}>`;
+        else emoji = "❓";
+        return emoji;
+    }
     
 
     /**

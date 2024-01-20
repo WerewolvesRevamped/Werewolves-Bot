@@ -28,7 +28,7 @@ require("./confirm.js")();
 require("./players.js")();
 require("./ccs.js")();
 require("./whispers.js")();
-require("./roles_new.js")();
+require("./roles.js")();
 require("./game.js")();
 require("./poll.js")();
 require("./theme.js")();
