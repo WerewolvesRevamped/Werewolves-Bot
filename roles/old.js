@@ -934,37 +934,6 @@ module.exports = function() {
         });
     }
     
-    this.cmdInfoEither = function(channel, args, pin, noErr, simp = false, overwriteName = false, appendSection = false, editOnto = false, technical = false) {
-		// fix role name if necessary
-        if(!args) {
-            if(!noErr) channel.send("❗ Could not find role.");
-            return;
-        }
-		let roleName = args.join(" ").replace(/[^a-zA-Z0-9'\-_\$ ]+/g,"");
-		if(!verifyRole(roleName)) { // not a valid role
-			// get all roles and aliases, to get an array of all possible role names
-			let allRoleNames = [...cachedRoles, ...cachedAliases.map(el => el.alias)];
-			let bestMatch = findBestMatch(roleName.toLowerCase(), allRoleNames.map(el => el.toLowerCase())); // find closest match
-            //console.log(bestMatch);
-			// check if match is close enough
-			if(bestMatch.value <= ~~(roleName.length/2)) { // auto alias if so, but send warning 
-				args = [parseRole(bestMatch.name)];
-                if(args[0].toLowerCase() === bestMatch.name.toLowerCase()) channel.send("❗ Could not find role `" + roleName + "`. Did you mean `" + args[0] + "`?");
-                else channel.send("❗ Could not find role `" + roleName + "`. Did you mean `" + args[0] + "` (aka `" + (bestMatch.name.length>2 ? toTitleCase(bestMatch.name) : bestMatch.name.toUpperCase()) + "`)?");
-			} else { // early fail if otherwise
-				channel.send("❗ Could not find role `" + roleName + "`.");
-                return;
-			}
-		}
-		
-		// run info command
-        if(stats.fancy_mode) {
-            cmdInfoFancy(channel, args, pin, noErr, simp, overwriteName, appendSection, editOnto, technical);
-        } else {
-            cmdInfo(channel, args, pin, noErr, simp, overwriteName, appendSection, editOnto, technical);
-        }
-    }
-	
 	/* Prints info for a role by name or alias */
 	this.cmdInfo = function(channel, args, pin, noErr, simp = false, overwriteName = false, appendSection = false, editOnto = false) {
 		// Check arguments
@@ -1070,93 +1039,6 @@ module.exports = function() {
         text = text.replace(/\{\|5\^\|\}/g, Math.ceil(playerCount / 5));
         return text;
     }
-    
-    const iconRepoBaseUrl = "https://raw.githubusercontent.com/WerewolvesRevamped/Werewolves-Icons/main/";
-    this.getRoleData = function(role, description) {
-        // prep 
-        let category = description.split(/\n|~/)[0].split(/ \| /)[1]?.trim() ?? false;
-        if(!category) return false;
-        let cSplit = category.split(/ /);
-        
-        
-        // get url
-         let repoPath = iconRepoBaseUrl;
-        let cSplitSolo = category.split(/ \- /);
-        let catRole = applyLUT(role);
-        if(catRole) repoPath += catRole + ".png";
-        else if(cSplitSolo.length != 1 && cSplit[0] === "Solo") repoPath += "Solo/" + cSplitSolo[1].replace(/ Team/,"") + "/";
-        else if(cSplit.length == 1) repoPath += cSplit[0] + "/";
-        else repoPath += cSplit[0] + "/" + cSplit[1].split(/ - /)[0] + "/";
-        if(!catRole) repoPath += toTitleCase(role) + ".png";
-        repoPath = repoPath.replace(/ /g, "%20");
-        repoPath += `?version=${stats.icon_version}`;
-        
-        // glitched overwrite
-        //repoPath = 'http://ww.mctsts.com/icon_glitched.php?name=' + toTitleCase(role).replace(/ /g, "%20");
-        //repoPath += `&version=${stats.icon_version}`;
-        
-        // get color
-        let color = 0;
-        switch(cSplit[0]) {
-            case "Townsfolk": 
-                color = 3138709;
-            break;
-            case "Werewolf":
-                color = 14882377;
-            break;
-            case "Unaligned":
-                color = 15451648;
-            break;
-            case "Elected":
-                color = 9719883;
-            break;
-            case "Solo":
-                console.log(cSplit);
-                console.log(cSplitSolo);
-                let soloTeam = cSplitSolo[1].replace(/ Team/,"");
-                switch(soloTeam) {
-                    case "Hell":
-                        color = 7607345;
-                    break;
-                    case "Underworld":
-                        color = 6361226;
-                    break;
-                    case "Pyro":
-                        color = 15173690;
-                    break;
-                    case "Flute":
-                        color = 3947978;
-                    break;
-                    case "White Wolves":
-                        color = 16777215;
-                    break;
-                    case "Plague":
-                        color = 30001;
-                    break;
-                    case "Nightmare":
-                        color = 1649994;
-                    break;
-                    case "Flock":
-                        color = 13093063;
-                    break;
-                    case "Graveyard":
-                        color = 8497497;
-                    break;
-                    default:
-                        color = 7829367;
-                        console.log("Category: " + category + "; Team: " + cSplit[0] + " - " + soloTeam);
-                    break;
-                }
-            break;
-            default:
-                color = 7829367;
-                console.log("Category: " + category + "; Team: " + cSplit[0]);
-            break;
-        }
-        
-        return {url: repoPath, color: color};
-    }
-    
     
     this.getIconFromName = function(name) {
         return new Promise(res => {

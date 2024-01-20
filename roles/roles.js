@@ -25,6 +25,7 @@ module.exports = function() {
     this.cachedRoles = [];
     this.cachedAliases = [];
     this.iconLUT = [];
+    this.colorsLUT = [];
     
     	
 	/**
@@ -264,15 +265,7 @@ module.exports = function() {
         url += `?version=${stats.icon_version}`;
         
         // get color
-        let color = 0;
-        // WIP: This should do a lookup in colors csv
-        switch(rTeam) {
-            case "townsfolk": color = 3138709; break;
-            case "werewolf": color = 14882377; break;            case "unaligned": color = 15451648; break;            case "extra": color = 9719883; break;            case "hell": color = 7607345; break;            case "underworld": color = 6361226; break;            case "pyro": color = 15173690; break;            case "flute": color = 3947978; break;            case "white wolves": color = 16777215; break;            case "plague": color = 30001; break;            case "nightmare": color = 1649994; break;            case "flock": color = 13093063; break;            case "graveyard": color = 8497497; break;            default:
-                color = 7829367;
-                log(`Missing Color. Role: ${roleName}; Category: ${rCategory}; Team: ${rTeam}`);
-            break;
-        }
+        let color = getTeamColor(rTeam);
         
         return { url: url, color: color };
     }
@@ -503,7 +496,7 @@ module.exports = function() {
     this.cacheIconLUT = async function() {
         const body = await fetchBody(`${iconRepoBaseUrl}replacements.csv`);
         iconLUT = {};
-        body.split("\n").filter(el => el && el.length).map(el => el.split(",")).forEach(el => iconLUT[el[0]] = el[1].trim().replace(/ /g,"%20"));
+        body.split("\n").filter(el => el && el.length).map(el => el.split(",")).forEach(el => iconLUT[el[0]] = urlConv(el[1].trim()));
         //console.log(iconLUT);
     }
     
@@ -515,6 +508,30 @@ module.exports = function() {
         let val = name.toLowerCase().replace(/[^a-z ]/g,"").trim();
         //console.log(`look lut: "${val}"`);
         return iconLUT[val] ?? false;
+    }
+    
+    /**
+    Cache Colors LUT (Look Up Table)
+    A lookup table for team names to colors
+    **/
+    this.cacheColorsLUT = async function() {
+        const body = await fetchBody(`${iconRepoBaseUrl}colors.csv`);
+        colorsLUT = {};
+        body.split("\n").filter(el => el && el.length).map(el => el.split(",")).forEach(el => colorsLUT[el[0].toLowerCase()] = el[6]);
+        console.log(colorsLUT);
+    }
+    
+    /**
+    Get Team Color
+    Retrieves a team color using the icon lut
+    **/
+    this.getTeamColor = function(team) {
+        let teamColor = colorsLUT[team];
+        if(!teamColor) {
+            teamColor = 7829367;
+            log(`Missing Color. Team: ${team}`);
+        }
+        return teamColor;
     }
     
     /**
