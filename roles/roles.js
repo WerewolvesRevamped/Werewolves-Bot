@@ -43,6 +43,7 @@ module.exports = function() {
 			// Role Subcommand
 			case "query": cmdRolesQuery(message.channel); break;
 			case "parse": cmdRolesParse(message.channel); break;
+			case "get": cmdRolesGet(message.channel, args); break;
 			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
 		}
 	}
@@ -78,6 +79,37 @@ module.exports = function() {
             channel.send(`⛔ Querying roles failed.`);
         }
         channel.send(`✅ Parsing roles completed. `);
+    }
+    
+    /**
+    Command: $roles get
+    Gets all role values
+    **/
+    this.cmdRolesGet = function(channel, args) {
+		// Check arguments
+		if(!args[1]) { 
+			channel.send("⛔ Syntax error. Not enough parameters!"); 
+			return; 
+		} else if(!verifyRole(args[1])) {
+			channel.send("⛔ Command error. Invalid role `" + args[1] + "`!"); 
+			return; 
+		}
+        // Get all roles values
+        sql("SELECT * FROM roles WHERE name = " + connection.escape(args[1]), async result => {
+            result = result[0];
+            // get the basic embed
+             var embed = await getBasicRoleEmbed(result, channel.guild);
+             // set embed title
+            embed.author.name = result.display_name;
+            
+            // Add a field for every role value
+            for(attr in result) {
+                embed.fields.push({ "name": toTitleCase(attr), "value": (result[attr]+"").substr(0, 1000) + ((result[attr]+"").length > 1000 ? " **...**" : "") });
+            }
+            
+            // Send the embed
+            channel.send({ embeds: [ embed ] }); 
+        });
     }
     
     /**
@@ -150,6 +182,37 @@ module.exports = function() {
     this.cmdInfopin = function(channel, args) { cmdInfo(channel, args, true); } // via $infopin
     
     /**
+    Get Basic Role Embed
+    Returns the role embed template based on a role SELECT * query and the current guild
+    **/
+    this.getBasicRoleEmbed = async function(result, guild) {
+        // Get the role data
+        let roleData = await getRoleData(result.display_name, result.class, result.category, result.team);
+
+        // Get the server icon for the footer
+        let serverIcon = await getServerIcon(guild);
+  
+        // Build the basic embed
+        var embed = {
+            "color": roleData.color,
+            "footer": {
+                "icon_url": `${serverIcon}`,
+                "text": `${guild.name} - ${stats.game}`
+            },
+            "thumbnail": {
+                "url": roleData.url
+            },
+            "author": {
+                "icon_url": roleData.url
+            },
+            "fields": []
+        };
+        
+        // return embed
+        return embed;
+    }
+    
+    /**
     Get Role Embed 
     Returns an info embed for a role 
     WIP: Re-implement role filter
@@ -160,45 +223,14 @@ module.exports = function() {
                 result = result[0]; // there should always only be one role by a certain name
                 if(!result) return null; // no data found
  
-                // Get the role data
-                let roleData = getRoleData(result.display_name, result.class, result.category, result.team);
-                
-                // check if the role img exists
-                let urlExists = await checkUrlExists(roleData.url);
-                 let emUrl = roleData.url;
-                 // if the url doesnt exist, use a placeholder
-                if(!urlExists) {
-                    console.log("MISSING URL", roleData.url);
-                    let classesWithPlaceholders = ["townsfolk","werewolf","unaligned","solo"]; // list of classes with a specific placeholder icon
-                    let placeholderName = classesWithPlaceholders.includes(result.class) ? toTitleCase(result.class) : "Unaligned"; // if no specific placeholder icon exists default to UA
-                    emUrl = `${iconRepoBaseUrl}Placeholder/${placeholderName}?version=${stats.icon_version}`; // construct placeholder url
-                }
+                var embed = await getBasicRoleEmbed(result, guild);
                 
                 // Build role name for title
                 let fancyRoleName = `${result.display_name} [${toTitleCase(result.class)} ${toTitleCase(result.category)}]`; // Default: Name [Class Category]
                 if(result.class == "solo") fancyRoleName = `${result.display_name} [${toTitleCase(result.class)} ${toTitleCase(result.category)} - ${toTitleCase(result.team)} Team]`; // Solos: Name [Class Category - Team]
                 fancyRoleName = applyTheme(fancyRoleName); // apply theme replacement rules
-                
-                // Get the server icon for the footer
-                let serverIcon = await getServerIcon(guild);
-                
-                // Build the basic embed
-                var embed = {
-                    "color": roleData.color,
-                    "footer": {
-                        "icon_url": `${serverIcon}`,
-                        "text": `${guild.name} - ${stats.game}`
-                    },
-                    "thumbnail": {
-                        "url": emUrl
-                    },
-                    "author": {
-                        "name": fancyRoleName,
-                        "icon_url": emUrl
-                    },
-                    "fields": []
-                };
-                
+                embed.author.name = fancyRoleName;
+
                 // Role Type
                 const roleTypeData = getRoleTypeData(result.type); // display the role type
                 if(result.type != "default") embed.title = roleTypeData.name; // but dont display "Default"
@@ -252,7 +284,7 @@ module.exports = function() {
     /**
     Get Role Data
     **/
-    this.getRoleData = function(roleName, rClass, rCategory, rTeam) {
+    this.getRoleData = async function(roleName, rClass, rCategory, rTeam) {
             
         // get the right folder
         var url = iconRepoBaseUrl;
@@ -263,6 +295,16 @@ module.exports = function() {
         // replace spaces
         url = url.replace(/ /g, "%20")
         url += `?version=${stats.icon_version}`;
+        
+        // check if the role img exists
+        let urlExists = await checkUrlExists(url);
+         // if the url doesnt exist, use a placeholder
+        if(!urlExists) {
+            console.log("MISSING URL", url);
+            let classesWithPlaceholders = ["townsfolk","werewolf","unaligned","solo"]; // list of classes with a specific placeholder icon
+            let placeholderName = classesWithPlaceholders.includes(rClass) ? toTitleCase(rClass) : "Unaligned"; // if no specific placeholder icon exists default to UA
+            url = `${iconRepoBaseUrl}Placeholder/${placeholderName}?version=${stats.icon_version}`; // construct placeholder url
+        }
         
         // get color
         let color = getTeamColor(rTeam);
@@ -518,7 +560,7 @@ module.exports = function() {
         const body = await fetchBody(`${iconRepoBaseUrl}colors.csv`);
         colorsLUT = {};
         body.split("\n").filter(el => el && el.length).map(el => el.split(",")).forEach(el => colorsLUT[el[0].toLowerCase()] = el[6]);
-        console.log(colorsLUT);
+        //console.log(colorsLUT);
     }
     
     /**

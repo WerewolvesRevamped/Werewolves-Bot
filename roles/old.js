@@ -759,30 +759,6 @@ module.exports = function() {
 		});
 	}
 	
-	/* Gets the raw descripton of a role */
-	this.cmdRolesGet = function(channel, args) {
-		// Check arguments
-		if(!args[1]) { 
-			channel.send("⛔ Syntax error. Not enough parameters!"); 
-			return; 
-		} else if(!verifyRole(args[1])) {
-			channel.send("⛔ Command error. Invalid role `" + args[1] + "`!"); 
-			return; 
-		}
-		// Get info
-		sql("SELECT description FROM roles WHERE name = " + connection.escape(args[1].toLowerCase()), result => {
-			if(result.length > 0) { 
-				let roleDesc = result[0].description.replace(/~/g,"\n");
-				channel.send("✅ Getting raw `"+ toTitleCase(args[1]) + "` description!\n```" + roleDesc + "```");
-			} else { 
-				channel.send("⛔ Database error. Role `" + args[1] + "` does not exist!");
-			}
-		}, () => {
-			// DB error
-			channel.send("⛔ Database error. Couldn't look for role!");
-		});
-	}
-	
 	
 	/* Lists all roles */
 	this.cmdRolesList = function(channel, args) {
