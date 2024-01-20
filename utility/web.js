@@ -29,5 +29,13 @@ module.exports = function() {
         const body = await response.text();
         return body;
     }
+    
+    /**
+    URL Convert
+    Converts spaces to %20 for urls
+    **/
+    this.urlConv = function(str) {
+        return str.replace(/ /g, "%20");
+    }
 
 }

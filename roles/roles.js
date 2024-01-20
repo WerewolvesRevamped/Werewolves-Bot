@@ -16,12 +16,15 @@ module.exports = function() {
     const roleRepo = "WerewolvesRevamped/Werewolves-Roles";
     const roleRepoBranch = "main";
     const roleRepoBaseUrl = `https://raw.githubusercontent.com/${roleRepo}/${roleRepoBranch}/`;
+    const website = "https://werewolves.me/";
+    const cardBaseUrl = `${website}cards/card.php?name=`;
     
     /**
     Global Role Values
     **/
     this.cachedRoles = [];
     this.cachedAliases = [];
+    this.iconLUT = [];
     
     	
 	/**
@@ -502,6 +505,33 @@ module.exports = function() {
         iconLUT = {};
         body.split("\n").filter(el => el && el.length).map(el => el.split(",")).forEach(el => iconLUT[el[0]] = el[1].trim().replace(/ /g,"%20"));
         //console.log(iconLUT);
+    }
+    
+    /**
+    Apply Icon LUT
+    Applies the icon lut and returns a stripped version of the name
+    **/
+    this.applyLUT = function(name) {
+        let val = name.toLowerCase().replace(/[^a-z ]/g,"").trim();
+        //console.log(`look lut: "${val}"`);
+        return iconLUT[val] ?? false;
+    }
+    
+    /**
+    Command: $card
+    Gets a card for a role
+    **/
+    this.cmdGetCard = function(channel, role) {
+        let roleNameParsed = parseRole(role); // parse role name
+        var lutName = applyLUT(role); // get lut value if exists
+        if(lutName) { // if lut value exists
+            lutName = lutName.split("/").pop(); // split by /'s to extract name
+            channel.send(`${cardBaseUrl}${urlConv(lutName)}`);
+        } else if(roleNameParsed && verifyRole(roleNameParsed)) { // chekc if the role exists
+            channel.send(`${cardBaseUrl}${urlConv(toTitleCase(roleNameParsed))}`);
+        } else {
+            channel.send("⛔ Command error. Invalid role `" + role + "`!"); 
+        }
     }
 
     

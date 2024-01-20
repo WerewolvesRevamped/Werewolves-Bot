@@ -21,10 +21,6 @@ module.exports = function() {
 		}
 		// Find subcommand
 		switch(args[0]) {
-			// Ind SC Subcommands
-			case "set_ind": cmdRolesSetIndsc(message.channel, args); break;
-			case "get_ind": cmdRolesGetIndsc(message.channel, args); break;
-			case "list_ind": cmdRolesListIndsc(message.channel); break;
 			// Extra/Multi SC Subcommands
 			case "set_extra": cmdRolesAddSc(message.channel, "extra", args, argsX); break;
 			case "set_multi": cmdRolesAddSc(message.channel, "multi", args, argsX); break;
@@ -207,7 +203,7 @@ module.exports = function() {
                             "text": `${channel.guild.name} - ${stats.game}`
                         }
                     };
-                    let cRole = getCategoryRole(titleRaw);
+                    let cRole = applyLUT(titleRaw);
                     if(cRole) embed.thumbnail = {url: iconRepoBaseUrl + "/" + cRole + ".png"};
                     cMsg = {embeds: [ embed ]};
                 }
@@ -763,60 +759,6 @@ module.exports = function() {
 		});
 	}
 	
-    /* Sets the description of a role / creates a role */
-    var roleTempSegment = "";
-	this.cmdRolesSet1 = function(channel, args, argsX) {
-        // Check arguments
-		if(!args[1] || !args[2]) { 
-			channel.send("⛔ Syntax error. Not enough parameters!"); 
-			return; 
-		}
-        roleTempSegment = argsX[2];
-    }
-    
-	this.cmdRolesSet2 = function(channel, args, argsX) {
-        // Check arguments
-		if(!args[1] || !args[2]) { 
-			channel.send("⛔ Syntax error. Not enough parameters!"); 
-			return; 
-		}
-        argsX[2] = roleTempSegment + argsX[2].substr(1);
-        cmdRolesSet(channel, args, argsX);
-    }
-    
-	/* Sets the description of a role / creates a role */
-	this.cmdRolesSet = function(channel, args, argsX) {
-		// Check arguments
-		if(!args[1] || !args[2]) { 
-			channel.send("⛔ Syntax error. Not enough parameters!"); 
-			return; 
-		}
-        // dont allow _'s in role names as they are auto aliased
-        if(args[1].indexOf("_") > -1) {
-            channel.send("⛔ Input error. You may not use `_`'s in role names. When running an info command `_`'s are automatically substituted with spaces!"); 
-			return; 
-        }
-        
-		// Insert Entry & Preview it
-		if(!verifyRole(args[1])) {
-			sql("INSERT INTO roles (name, description) VALUES (" + connection.escape(args[1]) + "," + connection.escape(argsX[2]) + ")", result => {
-				channel.send("✅ Set `" + toTitleCase(args[1]) + "`! Preview:\n" + argsX[2].replace(/~/g,"\n").substr(0, 1800) + "\n---------------------------------------------------------------------------------"); 
-				getRoles();
-			}, () => {
-				// Couldn't add to database
-				channel.send("⛔ Database error. Could not set role!");
-			});		
-		} else {
-			sql("UPDATE roles SET description = " + connection.escape(argsX[2]) + " WHERE name = " + connection.escape(parseRole(args[1])), result => {
-				channel.send("✅ Updated `" + toTitleCase(args[1]) + "`! Preview:\n" + argsX[2].replace(/~/g,"\n").substr(0, 1800) + "\n---------------------------------------------------------------------------------"); 
-				getRoles();
-			}, () => {
-				// Couldn't add to database
-				channel.send("⛔ Database error. Could not update role!");
-			});	
-		}
-	}
-	
 	/* Gets the raw descripton of a role */
 	this.cmdRolesGet = function(channel, args) {
 		// Check arguments
@@ -841,66 +783,6 @@ module.exports = function() {
 		});
 	}
 	
-	/* Removes a role */
-	this.cmdRolesRemove = function(channel, args) {
-		// Check arguments
-		if(!args[1]) { 
-			channel.send("⛔ Syntax error. Not enough parameters!"); 
-			return; 
-		} else if(!verifyRole(args[1])) {
-			channel.send("⛔ Command error. Invalid role `" + args[1] + "`!"); 
-			return; 
-		}
-		// Delete info
-		sql("DELETE FROM roles WHERE name = " + connection.escape(args[1].toLowerCase()), result => {
-			channel.send("✅ Removed `" + toTitleCase(args[1]) + "`!");
-			getRoles();
-		}, () => {
-			// Couldn't delete
-			channel.send("⛔ Database error. Could not remove role!");
-		});
-	}
-	
-	/* Sets an ind SC for a role */
-	this.cmdRolesSetIndsc = function(channel, args) {
-		// Check arguments
-		if(!args[1] || !args[2]) { 
-			channel.send("⛔ Syntax error. Not enough parameters!"); 
-			return; 
-		} else if(!(args[2] === "0" || args[2] === "1")) {
-			channel.send("⛔ Syntax error. Indsc state can only be 0/1!"); 
-			return; 
-		} else if(!verifyRole(args[1])) {
-			channel.send("⛔ Command error. Invalid role `" + args[1] + "`!"); 
-			return; 
-		}
-		// Delete info
-		sql("UPDATE roles SET ind_sc = " + connection.escape(args[2]) + " WHERE name = " + connection.escape(parseRole(args[1])), result => {
-			channel.send("✅ Set Indsc of `" + toTitleCase(parseRole(args[1])) + "` to `" + args[2] + "`!");
-		}, () => {
-			// Couldn't delete
-			channel.send("⛔ Database error. Could not update role!");
-		});
-	}
-	
-	/* Sets wether a role has an individual sc  */
-	this.cmdRolesGetIndsc = function(channel, args) {
-		// Check arguments
-		if(!args[1]) { 
-			channel.send("⛔ Syntax error. Not enough parameters!"); 
-			return; 
-		} else if(!verifyRole(args[1])) {
-			channel.send("⛔ Command error. Invalid role `" + args[1] + "`!"); 
-			return; 
-		}
-		// Delete info
-		sql("SELECT ind_sc FROM roles WHERE name = " + connection.escape(parseRole(args[1])), result => {
-			channel.send("✅ Indsc of `" + toTitleCase(parseRole(args[1])) + "` is set to `" + result[0].ind_sc + "`!");
-		}, () => {
-			// Couldn't delete
-			channel.send("⛔ Database error. Could not get role info!");
-		});
-	}
 	
 	/* Lists all roles */
 	this.cmdRolesList = function(channel, args) {
@@ -958,38 +840,8 @@ module.exports = function() {
 			channel.send("⛔ Database error. Couldn't look for role list!");
 		});
 	}
-	
-	/* Lists all roles */
-	this.cmdRolesListIndsc = function(channel) {
-		// Get all roles
-		sql("SELECT name,description FROM roles WHERE ind_sc = 1 ORDER BY name ASC", result => {
-			if(result.length > 0) {
-				// At least one role exists
-				channel.send("✳ Sending a list of currently existing roles that have a individual secret channel:");
-				// Send message
-				chunkArray(result.map(role => {
-					let roleDesc = role.description.replace(/\*|_|Basics|Details/g,"");
-					return "**" +  toTitleCase(role.name) + ":** " + roleDesc.replace(/~/g," ").substr(roleDesc.search("~") + 1, 100);
-				}), 15).map(el => el.join("\n")).forEach(el => channel.send(el));
-			} else { 
-				// No roles exist
-				channel.send("⛔ Database error. Could not find any roles!");
-			}
-		}, () => {
-			// DB error
-			channel.send("⛔ Database error. Couldn't look for role list!");
-		});
-	}
-	
-	/* Removes all roles */
-	this.cmdRolesClear = function(channel) {
-		sql("DELETE FROM roles", result => {
-			channel.send("⛔ Database error. Could not execute `" + data.action + "`!");
-			getRoles();
-		}, () => {
-			channel.send("✅ Successfully executed `" + data.action + "`!");
-		});
-	}
+
+
 	
 	/* Creates/Sets an alias */
 	this.cmdRolesSetAlias = function(channel, args) {
@@ -1230,7 +1082,7 @@ module.exports = function() {
         // get url
          let repoPath = iconRepoBaseUrl;
         let cSplitSolo = category.split(/ \- /);
-        let catRole = getCategoryRole(role);
+        let catRole = applyLUT(role);
         if(catRole) repoPath += catRole + ".png";
         else if(cSplitSolo.length != 1 && cSplit[0] === "Solo") repoPath += "Solo/" + cSplitSolo[1].replace(/ Team/,"") + "/";
         else if(cSplit.length == 1) repoPath += cSplit[0] + "/";
@@ -1305,12 +1157,6 @@ module.exports = function() {
         return {url: repoPath, color: color};
     }
     
-    this.getCategoryRole = function(val) {
-        val = val.toLowerCase().replace(/[^a-z ]/g,"").trim();
-        console.log(`look lut: "${val}"`);
-        return iconLUT[val] ?? false;
-    }
-    
     
     this.getIconFromName = function(name) {
         return new Promise(res => {
@@ -1329,7 +1175,7 @@ module.exports = function() {
     
     this.cmdGetImg = function(channel, role) {
         let roleNameParsed = parseRole(role);
-        var lutName = getCategoryRole(role);
+        var lutName = applyLUT(role);
         sql("SELECT description FROM roles WHERE name = " + connection.escape(roleNameParsed), async result => {
             if(lutName) {
                 channel.send(iconRepoBaseUrl + lutName + ".png");
@@ -1342,25 +1188,6 @@ module.exports = function() {
                 channel.send("⛔ Command error. Invalid role `" + role + "`!"); 
             }
         });
-    }
-    
-    this.cmdGetCard = function(channel, role) {
-        let roleNameParsed = parseRole(role);
-        var lutName = getCategoryRole(role);
-        if(lutName) {
-            lutName = lutName.split("/");
-            channel.send("https://werewolves.me/cards/card.php?name="+ lutName[lutName.length - 1].replace(/ /g, "%20"));
-        } else if(roleNameParsed) {
-            sql("SELECT description FROM roles WHERE name = " + connection.escape(roleNameParsed), async result => {
-                if(result.length > 0) {
-                    channel.send("https://werewolves.me/cards/card.php?name="+ toTitleCase(roleNameParsed).replace(/ /g, "%20"));
-                } else {
-                    channel.send("⛔ Command error. Invalid role `" + role + "`!"); 
-                }
-            });
-        } else {
-            channel.send("⛔ Command error. Invalid role `" + role + "`!"); 
-        }
     }
     
 	/* Prints info for a role by name or alias */
@@ -1526,7 +1353,7 @@ module.exports = function() {
                     desc = applyEmoji(desc);
                     desc = applyNums(channel.guild, desc);
                     let descSplit = desc.split(/~/);
-                    let catRole = getCategoryRole(descSplit[0]);
+                    let catRole = applyLUT(descSplit[0]);
                     let title = descSplit.shift();
                     if(overwriteName) title = overwriteName;
                     

@@ -9,9 +9,9 @@ module.exports = function() {
 		let help = "";
 		switch(args[0]) {
 			case "":
-				if(isGameMaster(member)) help += stats.prefix + "roles [set|set1|set2|get|remove|list|list_names|clear] - Manages roles\n";
+				if(isGameMaster(member)) help += stats.prefix + "roles [get|list|list_names] - Manages roles\n";
 				if(isGameMaster(member)) help += stats.prefix + "roles [set_alias|remove_alias|list_alias|clear_alias] - Manages role aliases\n";
-				if(isGameMaster(member)) help += stats.prefix + "channels [set_ind|get_ind|list_ind] - Manages individual SCs\n";
+				if(isGameMaster(member)) help += stats.prefix + "roles [query|parse] - Updates/Parses roles\n";
 				if(isGameMaster(member)) help += stats.prefix + "channels [set_extra|set_multi|set_public|get|raw|remove|list|elected] - Manages Extra/Public/Multi SCs\n";
 				if(isGameMaster(member)) help += stats.prefix + "channels [info|infopin|info_set|info_get|info_remove|info_list] - Manages SC Info\n";
 				if(isGameMaster(member)) help += stats.prefix + "channels cleanup - Cleans up SCs\n";
@@ -21,13 +21,28 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "elect - Elects a player to a role\n";
 				help += "; - Returns role info\n";
 				help += ". - Returns simplified role info\n";
+				help += "~ - Returns formalized role info\n";
+				help += "card - Returns a role's card\n";
 				help += stats.prefix + "info - Returns role info\n";
+				help += stats.prefix + "info_technical - Returns formalized role info\n";
+			break;
+			case "card":
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "card <Role Name>\n```";
+				help += "```\nFunctionality\n\nShows the role's card.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "card citizen\n```";
+				help += "```diff\nAliases\n\n- &\n```";
 			break;
 			case "info":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "info <Role Name>\n```";
 				help += "```\nFunctionality\n\nShows the description of a role.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "info citizen\n< Citizen | Townsfolk\n  Basics\n  The Citizen has no special abilities.\n  All the innocents vote during the day on whomever they suspect to be an enemy,\n  and hope during the night that they won’t get killed.\n```";
 				help += "```diff\nAliases\n\n- i\n```";
+			break;
+			case "info_technical":
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "info_technical <Role Name>\n```";
+				help += "```\nFunctionality\n\nShows the formalized description of a role.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "info_technical citizen\n```";
+				help += "```diff\nAliases\n\n- ~\n```";
 			break;
 			case "infopin":
 				if(!isGameMaster(member)) break;
@@ -61,40 +76,14 @@ module.exports = function() {
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
 					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles [set|get|remove|list|list_names|clear]\n" + stats.prefix + "roles [set_alias|remove_alias|list_alias|clear_alias]\n```";
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles [get|list|list_names]\n" + stats.prefix + "roles [set_alias|remove_alias|list_alias|clear_alias]\n" + stats.prefix + "roles [query|parse]\n```";
 						help += "```\nFunctionality\n\nGroup of commands to handle roles and aliases. " + stats.prefix + "help roles <sub-command> for detailed help.```";
 						help += "```diff\nAliases\n\n- role\n- r\n```";
 					break;
-					case "set":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles set <Role Name> <Role Description>\n```";
-						help += "```\nFunctionality\n\nSets or updates the description of a role called <Role Name> to <Role Description>. <Role Description> can contain several new lines.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "roles set citizen \"**Citizen** | Townsfolk \n  __Basics__\n  The Citizen has no special abilities.\n  All the innocents vote during the day on whomever they suspect to be an enemy,\n  and hope during the night that they won’t get killed.\"\n< ✅ Set Citizen! Preview:\n  Citizen | Townsfolk \n  Basics\n  The Citizen has no special abilities\n  All the innocents vote during the day on whomever they suspect to be an enemy,\n  and hope during the night that they won’t get killed. \n  ---------------------------------------------------------------------------\n```";
-					break;
-					case "set_alias":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles set_alias <Alias Name> <Role Name>\n```";
-						help += "```\nFunctionality\n\nSets an alias for a role.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "roles set_alias citizen-alias citizen\n< ✅ Alias Citizen-Alias set to Citizen!\n```";
-					break;
-					case "set1":
-					case "set2":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles set2 <Role Name> <Role Description>\n```";
-						help += "```\nFunctionality\n\nCan be used to set very large role descriptions that do not fit in one message. Use set1 for the first half and set2 for the second half. Otherwise works just like set. For technical reasons, the first character of the description in set2 is ignored.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "roles set1 long_citizen long_text_part_1\n> " + stats.prefix + "roles set2 long_citizen long_text_part_2\n```";
-					break;
 					case "get":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles get <Role Name>\n```";
-						help += "```\nFunctionality\n\nReturns the raw description of a role called <Role Name> to allow easy editing.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "roles get citizen\n< ✅ Getting raw Citizen description!\n  **Citizen** | Townsfolk \n  __Basics__\n  The Citizen has no special abilities\n  All the innocents vote during the day on whomever they suspect to be an enemy,\n  and hope during the night that they won’t get killed.\n```";
-					break;
-					case "remove":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles remove <Role Name>\n```";
-						help += "```\nFunctionality\n\nRemoves a role.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "roles remove citizen\n< ✅ Removed Citizen!\n```";
-					break;
-					case "remove_alias":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles remove_alias <Alias Name>\n```";
-						help += "```\nFunctionality\n\nRemoves a role alias.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "roles remove_alias citizen-alias\n< ✅ Removed Citizen-Alias!\n```";
+						help += "```\nFunctionality\n\nRetrieves a role's data\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "roles get citizen\n```";
 					break;
 					case "list":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles list [Role Name]\n```";
@@ -106,20 +95,35 @@ module.exports = function() {
 						help += "```\nFunctionality\n\nLists all role names.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "roles list_names\n```";
 					break;
+					case "set_alias":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles set_alias <Alias Name> <Role Name>\n```";
+						help += "```\nFunctionality\n\nSets an alias for a role.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "roles set_alias citizen-alias citizen\n< ✅ Alias Citizen-Alias set to Citizen!\n```";
+					break;
+					case "remove_alias":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles remove_alias <Alias Name>\n```";
+						help += "```\nFunctionality\n\nRemoves a role alias.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "roles remove_alias citizen-alias\n< ✅ Removed Citizen-Alias!\n```";
+					break;
 					case "list_alias":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles list_alias\n```";
 						help += "```\nFunctionality\n\nLists all role aliases and their role.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "roles list_alias\n```";
 					break;
-					case "clear":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles clear\n```";
-						help += "```\nFunctionality\n\nDeletes all roles.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "roles clear\n```";
-					break;
 					case "clear_alias":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles clear_alias\n```";
 						help += "```\nFunctionality\n\nDeletes all role aliases.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "roles clear_alias\n```";
+					break;
+					case "query":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles query\n```";
+						help += "```\nFunctionality\n\nQueries all roles from github.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "roles query\n```";
+					break;
+					case "parse":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles parse\n```";
+						help += "```\nFunctionality\n\nParses all locally stored roles.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "roles parse\n```";
 					break;
 				}
 			break;
@@ -127,24 +131,9 @@ module.exports = function() {
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
 					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "channels [set_ind|get_ind|list_ind]\n" + stats.prefix + "channels [set_extra|set_multi|set_public|get|raw|remove|list|elected]\n" + stats.prefix + "channels [info|infopin|info_set|info_get|info_remove|info_list]\n```";
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "channels [set_extra|set_multi|set_public|get|raw|remove|list|elected]\n" + stats.prefix + "channels [info|infopin|info_set|info_get|info_remove|info_list]\n```";
 						help += "```\nFunctionality\n\nGroup of commands to handle individual, extra, multi and public channels as well as channel information. " + stats.prefix + "help channels <sub-command> for detailed help.```";
 						help += "```diff\nAliases\n\n- channel\n- ch\n```";
-					break;
-					case "set_ind":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "channels set_ind <Role Name> <0|1>\n```";
-						help += "```\nFunctionality\n\nSets if a certain role gets an individual channel. Set to 1 if true.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "channels set_ind citizen 1\n< ✅ Set Indsc of Citizen to 1!\n```";
-					break;
-					case "get_ind":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "channels get_ind <Role Name>\n```";
-						help += "```\nFunctionality\n\nReturns if a certain role gets an individual channel. Returns 1 if true.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "channels get_ind citizen\n< ✅ Indsc of Citizen is set to 1!\n```";
-					break;
-					case "list_ind":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "channels list_ind\n```";
-						help += "```\nFunctionality\n\nReturns a list of all roles that have ind set to 1.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "channels list_ind\n```";
 					break;
 					case "set_extra":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "channels set_extra <Channel Name> <Role> [%r|\" \"] [Setup Commands]\n```";
