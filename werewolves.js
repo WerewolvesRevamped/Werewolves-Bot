@@ -19,6 +19,9 @@ const { exec } = require('node:child_process')
 
 config = require("./config.json");
 
+    
+
+
 /* Utility Modules */
 require("./stats.js")();
 require("./confirm.js")();
@@ -31,6 +34,9 @@ require("./poll.js")();
 require("./theme.js")();
 
 require("./temp.js")();
+
+
+require("./paths.js")();
 
 // V2 Modules
 require("./roles/roles.js")();
