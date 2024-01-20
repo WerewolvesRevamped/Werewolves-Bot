@@ -79,7 +79,7 @@ module.exports = function() {
 				help += "```\nFunctionality\n\nUpdates all github linked data and re-parses it if applicable.\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "update\n```";
 			break;
-			case "roles":
+			case "infomanage":
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
 					default:
