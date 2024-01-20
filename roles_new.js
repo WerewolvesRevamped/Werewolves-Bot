@@ -9,8 +9,10 @@ module.exports = function() {
     **/
     const iconRepo = "WerewolvesRevamped/Werewolves-Icons";
     const iconRepoBranch = "main"
-    const roleRepo = "McTsts/Werewolves-Roles";
+    const iconRepoBaseUrl = `https://raw.githubusercontent.com/${iconRepo}/${iconRepoBranch}/`;
+    const roleRepo = "WerewolvesRevamped/Werewolves-Roles";
     const roleRepoBranch = "main";
+    const roleRepoBaseUrl = `https://raw.githubusercontent.com/${roleRepo}/${roleRepoBranch}/`;
     
     /**
     Global Role Values
@@ -79,8 +81,8 @@ module.exports = function() {
     simp: if the info message should be simplified
     technical: if the formalized desc should be shown instead
     overwriteName: overwrites the name with a specified value
-    appendSection: ??? (appends an additional section)
-    editOnto: ??? (edits the message onto another one instead of sending it)
+    appendSection: WIP ??? (appends an additional section)
+    editOnto: WIP ??? (edits the message onto another one instead of sending it)
     **/
     this.cmdInfo = async function(channel, args, pin = false, noErr = false, simp = false, overwriteName = false, appendSection = false, editOnto = false, technical = false) {
 		// fix role name if necessary
@@ -98,10 +100,10 @@ module.exports = function() {
 			// check if match is close enough
 			if(bestMatch.value <= ~~(roleName.length/2)) { // auto alias if so, but send warning 
 				roleName = parseRole(bestMatch.name);
-                if(roleName.toLowerCase() === bestMatch.name.toLowerCase()) channel.send("❗ Could not find role `" + origRoleName + "`. Did you mean `" + roleName + "`?");
-                else channel.send("❗ Could not find role `" + origRoleName + "`. Did you mean `" + roleName + "` (aka `" + (bestMatch.name.length>2 ? toTitleCase(bestMatch.name) : bestMatch.name.toUpperCase()) + "`)?");
+                if(roleName.toLowerCase() === bestMatch.name.toLowerCase()) channel.send(`❗ Could not find role \`${origRoleName}\`. Did you mean \`${roleName}\`?`);
+                else channel.send(`❗ Could not find role \`${origRoleName}\`. Did you mean \`${roleName}\` (aka \`${(bestMatch.name.length>2 ? toTitleCase(bestMatch.name) : bestMatch.name.toUpperCase())}\`)?`);
 			} else { // early fail if otherwise
-				channel.send("❗ Could not find role `" + origRoleName + "`.");
+				channel.send(`❗ Could not find role \`${origRoleName}\`.`);
                 return;
 			}
 		}
@@ -148,10 +150,9 @@ module.exports = function() {
     this.getRoleEmbed = function(roleName, visibleSections, guild) {
         return new Promise(res => {
             sql("SELECT * FROM roles_new WHERE name = " + connection.escape(roleName), async result => {
-                result = result[0];
-                if(!result) {
-                    return null; // no data found
-                }
+                result = result[0]; // there should always only be one role by a certain name
+                if(!result) return null; // no data found
+ 
                 // Get the role data
                 let roleData = getRoleData(result.display_name, result.class, result.category, result.team);
                 
@@ -161,24 +162,18 @@ module.exports = function() {
                  // if the url doesnt exist, use a placeholder
                 if(!urlExists) {
                     console.log("MISSING URL", roleData.url);
-                    switch(result.class) {
-                        case "townsfolk": case "werewolf": case "unaligned": case "solo":
-                            emUrl = `https://raw.githubusercontent.com/${iconRepo}/${iconRepoBranch}/Placeholder/${toTitleCase(result.class)}.png?version=${stats.icon_version}`;
-                        break;
-                        default:
-                            emUrl = `https://raw.githubusercontent.com/${iconRepo}/${iconRepoBranch}/Placeholder/Unaligned.png?version=${stats.icon_version}`;
-                        break;
-                    }
+                    let classesWithPlaceholders = ["townsfolk","werewolf","unaligned","solo"]; // list of classes with a specific placeholder icon
+                    let placeholderName = classesWithPlaceholders.includes(result.class) ? toTitleCase(result.class) : "Unaligned"; // if no specific placeholder icon exists default to UA
+                    emUrl = `${iconRepoBaseUrl}Placeholder/${placeholderName}?version=${stats.icon_version}`; // construct placeholder url
                 }
                 
                 // Build role name for title
-                let fancyRoleName = `${result.display_name} [${toTitleCase(result.class)} ${toTitleCase(result.category)}]`;
-                if(result.class == "solo") fancyRoleName = `${result.display_name} [${toTitleCase(result.class)} ${toTitleCase(result.category)} - ${toTitleCase(result.team)} Team]`;
-                fancyRoleName = applyTheme(fancyRoleName);
+                let fancyRoleName = `${result.display_name} [${toTitleCase(result.class)} ${toTitleCase(result.category)}]`; // Default: Name [Class Category]
+                if(result.class == "solo") fancyRoleName = `${result.display_name} [${toTitleCase(result.class)} ${toTitleCase(result.category)} - ${toTitleCase(result.team)} Team]`; // Solos: Name [Class Category - Team]
+                fancyRoleName = applyTheme(fancyRoleName); // apply theme replacement rules
                 
                 // Get the server icon for the footer
-                let serverIcon = await guild.iconURL();
-                serverIcon = serverIcon.replace("webp","png");
+                let serverIcon = await getServerIcon(guild);
                 
                 // Build the basic embed
                 var embed = {
@@ -217,24 +212,25 @@ module.exports = function() {
                         if(sectionText.length < 1000) { // check if text fits directly in one section
                             embed.fields.push({"name": `__${toTitleCase(visibleSections[sec])}__`, "value": sectionText});
                         } else { // split section into several
-                            let sectionTextSplit = sectionText.split(/\n/);
+                            let sectionTextSplit = sectionText.split(/\n/); // split by new lines
                            sectionTextSplitElements = [];
                            let i = 0;
                            let j = 0;
-                           while(i < sectionTextSplit.length) {
+                           while(i < sectionTextSplit.length) { // iterate through the lines
                                sectionTextSplitElements[j] = "";
-                               while(i < sectionTextSplit.length && (sectionTextSplitElements[j].length + sectionTextSplit[i].length) <= 1000) {
+                               while(i < sectionTextSplit.length && (sectionTextSplitElements[j].length + sectionTextSplit[i].length) <= 1000) { // try appending a new line and see if it still fits then
                                    sectionTextSplitElements[j] += "\n" + sectionTextSplit[i];
                                    i++;
                                }
                                j++;
                            }
+                           // for each generated section, add a "field" to the embed
                            sectionTextSplitElements.forEach(d => embed.fields.push({"name": `__${toTitleCase(visibleSections[sec])}__ (${sectionTextSplitElements.indexOf(d)+1}/${sectionTextSplitElements.length})`, "value": d}));
                         }
                     }
                 }
                 
-                // resolve promise with the embed
+                // resolve promise with the embed, returning the embed
                 res(embed);
                 
             }, () => {
@@ -250,7 +246,7 @@ module.exports = function() {
     this.getRoleData = function(roleName, rClass, rCategory, rTeam) {
             
         // get the right folder
-        var url = `https://raw.githubusercontent.com/${iconRepo}/${iconRepoBranch}/`;
+        var url = iconRepoBaseUrl;
         if(rClass == "solo") url += `Solo/${toTitleCase(rTeam)}`;
         else url += `${toTitleCase(rClass)}/${toTitleCase(rCategory)}`;
         // add file name
@@ -469,7 +465,7 @@ module.exports = function() {
     **/
     this.getRolesTree = async function() {
         const auth = { headers: { 'Authorization': 'token ' + config.github_token } };
-        const body = await fetchBody("https://api.github.com/repos/" + roleRepo + "/git/trees/" + roleRepoBranch + "?recursive=1", auth);
+        const body = await fetchBody(`https://api.github.com/repos/${roleRepo}/git/trees/${roleRepoBranch}?recursive=1`, auth);
         return JSON.parse(body).tree;
     }
     
@@ -478,7 +474,7 @@ module.exports = function() {
     Retrieves all the paths at which roles are located as an array
     **/
     this.getRolePaths = async function() {
-        const body = await fetchBody("https://raw.githubusercontent.com/" + roleRepo + "/" + roleRepoBranch + "/role_paths");
+        const body = await fetchBody(`${roleRepoBaseUrl}role_paths`);
         const paths = body.split("\n").filter(el => el);
         return paths;
     }
@@ -488,7 +484,7 @@ module.exports = function() {
     Retrieves a single role from github
     **/
     this.queryRole = async function(path, name) {
-        const body = await fetchBody("https://raw.githubusercontent.com/" + roleRepo + "/" + roleRepoBranch + "/" + path + "/" + name);
+        const body = await fetchBody(`${roleRepoBaseUrl}${path}/${name}`);
         return body;
     }
     
@@ -497,7 +493,7 @@ module.exports = function() {
     A lookup table for role names to icons
     **/
     this.cacheIconLUT = async function() {
-        const body = await fetchBody("https://raw.githubusercontent.com/" + iconRepo + "/" + iconRepoBranch + "/replacements.csv");
+        const body = await fetchBody(`${iconRepoBaseUrl}replacements.csv`);
         iconLUT = {};
         body.split("\n").filter(el => el && el.length).map(el => el.split(",")).forEach(el => iconLUT[el[0]] = el[1].trim().replace(/ /g,"%20"));
         //console.log(iconLUT);

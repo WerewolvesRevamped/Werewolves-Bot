@@ -640,6 +640,16 @@ module.exports = function() {
 	}
     
     /**
+    Get Server Icon
+    Returns the url to the server icon as png
+    **/
+    this.getServerIcon = async function(guild) {
+            let serverIcon = await guild.iconURL();
+            serverIcon = serverIcon.replace("webp","png");
+            return serverIcon;
+    }
+    
+    /**
     Fetch Body
     Uses the fetch library to fetch a url and return the body as text
     **/
