@@ -19,8 +19,9 @@ module.exports = function() {
     this.roleRepoBaseUrl = `${githubRaw}${roleRepo}/${roleRepoBranch}/`;
     /** Files **/
     this.iconLUTPath = `${iconRepoBaseUrl}replacements.csv`;
-    this.colorLUTPath = `${iconRepoBaseUrl}colors.csv`;
-    this.rolepathsPath = `${roleRepoBaseUrl}paths/roles`;
+    this.colorsLUTPath = `${iconRepoBaseUrl}colors.csv`;
+    this.rolepathsPath = `${roleRepoBaseUrl}_paths/roles`;
+    this.infopathsPath = `${roleRepoBaseUrl}_paths/info`;
     /**
     Website Paths
     **/

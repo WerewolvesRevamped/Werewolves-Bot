@@ -87,7 +87,8 @@ module.exports = function() {
                 "list_substitutes": ["subs","list_subs","substitutes"],
                 "force_demote_all": ["fda"],
                 "force_demote_signedup": ["fdsn"],
-                "image": ["img"]
+                "image": ["img"],
+                "infomanage": ["im"]
         };
         for(let cmd in aliases) {
             if(aliases[cmd].indexOf(alias) != -1) return cmd;

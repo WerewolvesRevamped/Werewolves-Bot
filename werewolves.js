@@ -327,6 +327,14 @@ client.on("messageCreate", async message => {
 	case "roles":
 		if(checkGM(message)) cmdRoles(message, args, argsX);
 	break;
+	/* Infomanage */ // Modify info information for commands such as 'info'
+	case "infomanage":
+		if(checkGM(message)) cmdInfomanage(message, args, argsX);
+	break;
+	/* Infomanage */ // Updates all github linked data
+	case "update":
+		if(checkGM(message)) cmdUpdate(message.channel);
+	break;
 	/* Roles */ // Modify channel information for commands
 	case "channels":
 		if(checkGM(message)) cmdChannels(message, args, argsX);

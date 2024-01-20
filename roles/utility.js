@@ -4,6 +4,26 @@
 **/
 module.exports = function() {   
     /**
+    Get Basic Info Embed
+    Returns the basic embed template based on the current guild
+    **/
+    this.getBasicEmbed = async function(guild) {
+        // Get the server icon for the footer
+        let serverIcon = await getServerIcon(guild);
+        
+       // Build the basic embed
+        var embed = {
+            "footer": {
+                "icon_url": `${serverIcon}`,
+                "text": `${guild.name} - ${stats.game}`
+            },
+            "fields": []
+        };
+        
+        return embed;
+    }
+
+    /**
     Get Basic Role Embed
     Returns the role embed template based on a role SELECT * query and the current guild
     **/
@@ -11,30 +31,15 @@ module.exports = function() {
         // Get the role data
         let roleData = await getRoleData(result.display_name, result.class, result.category, result.team);
 
-        // Get the server icon for the footer
-        let serverIcon = await getServerIcon(guild);
-  
-        // Build the basic embed
-        var embed = {
-            "color": roleData.color,
-            "footer": {
-                "icon_url": `${serverIcon}`,
-                "text": `${guild.name} - ${stats.game}`
-            },
-            "thumbnail": {
-                "url": roleData.url
-            },
-            "author": {
-                "icon_url": roleData.url
-            },
-            "fields": []
-        };
+        var embed = await getBasicEmbed(guild);
+        
+        embed.color = roleData.color;
+        embed.thumbnail = { "url": roleData.url };
+        embed.author = { "icon_url": roleData.url };
         
         // return embed
         return embed;
     }
-    
-    
     
     /**
     Get Role Data
@@ -92,14 +97,23 @@ module.exports = function() {
     }
     
     /**
+    Applies Aliases
+    applies alises to an input
+    **/
+    this.applyAlias = function(input) {
+        let alias = cachedAliases.find(el => el.alias === input);
+        return alias ? alias : input;
+    }
+    
+    /**
     Parse Role
     Parses a role name
     **/
     this.parseRole = function(input) {
 		input = input.toLowerCase(); // change role name to lower case
-        input = input.replace(/[^a-z ]/g, ""); // remove any non a-z characters
-        let alias = cachedAliases.find(el => el.alias === input);
-		if(alias) return parseRole(alias.name);
+        input = input.replace(/[^a-z\$ ]/g, ""); // remove any non a-z characters
+        let alias = applyAlias(input);
+		if(alias != input) return parseRole(alias.name);
 		else return input;
 	}
     
@@ -111,6 +125,74 @@ module.exports = function() {
 		let inputRole = parseRole(input); // parse role name
 		let role = cachedRoles.find(el => el === inputRole); // check if role is in cache
 		return role ? true : false;
+	}  
+    
+    /** Verify Info
+    Verifies if an info exists
+    **/
+    this.verifyInfo = function(input) {
+        if(cachedInfoNames.length == 0) return true; // if cache is currently not loaded just allow it
+		let inputInfo = input.replace(/[^a-z\$ ]/g,"").trim(); // parse info name
+		let info = cachedInfoNames.find(el => el === inputInfo); // check if role is in cache
+		return info ? true : false;
 	}
+    
+    /** Verify Info Message
+    Verifies if an info message exists
+    **/
+    this.verifyInfoMessage = function(input) {
+		return verifyRole(input) || verifyInfo(input);
+	}
+    
+    /**
+    Apply Emoji, Theme
+    Runs two commonly applied functions in a row
+    **/
+    this.applyET = function(text) {
+        return applyEmoji(applyTheme(text));
+    }
+    
+    /**
+    Apply Emoji, Numbers, Theme
+    Runs three commonly applied functions in a row
+    **/
+    this.applyETN = function(text, guild) {
+        return applyNums(applyET(text), guild);
+    }
+    
+    /**
+    Apply Emojis
+    Replaces the special emoji format with actual emojis
+    **/
+	this.applyEmoji = function(text) {
+		[...text.matchAll(/\<\?([\w\d]*):([^>]{0,10})\>/g)].forEach(match => {
+			let emoji = client.emojis.cache.find(el => el.name === match[1]);
+			if(emoji) emoji = `<:${emoji.name}:${emoji.id}>`;
+			else emoji = match[2];
+			text = text.replace(match[0], emoji)
+		}); 
+		return text;
+	}
+    
+    /**
+    Apply Numbers
+    Replaces the special number format with actual numbers
+    **/
+    this.applyNums = function(text, guild) {
+        let playerCount = guild.roles.cache.get(stats.participant).members.size;
+        playerCount += guild.roles.cache.get(stats.signed_up).members.size;
+        text = text.replace(/\{\|1\|\}/g, playerCount);
+        text = text.replace(/\{\|2\|\}/g, Math.floor(playerCount / 2));
+        text = text.replace(/\{\|3\|\}/g, Math.floor(playerCount / 3));
+        text = text.replace(/\{\|4\|\}/g, Math.floor(playerCount / 4));
+        text = text.replace(/\{\|5\|\}/g, Math.floor(playerCount / 5));
+        text = text.replace(/\{\|10\|\}/g, Math.floor(playerCount / 10));
+        text = text.replace(/\{\|20\|\}/g, Math.floor(playerCount / 20));
+        text = text.replace(/\{\|2\^\|\}/g, Math.ceil(playerCount / 2));
+        text = text.replace(/\{\|3\^\|\}/g, Math.ceil(playerCount / 3));
+        text = text.replace(/\{\|4\^\|\}/g, Math.ceil(playerCount / 4));
+        text = text.replace(/\{\|5\^\|\}/g, Math.ceil(playerCount / 5));
+        return text;
+    }
     
 }

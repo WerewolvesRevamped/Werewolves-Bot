@@ -23,9 +23,9 @@ module.exports = function() {
 		let roleName = args.join(" ").replace(/[^a-zA-Z0-9'\-_\$ ]+/g,""); // get rid of characters that are not allowed in role names
         let origRoleName = roleName;
         roleName = parseRole(roleName);
-		if(!verifyRole(roleName)) { // not a valid role
+		if(!verifyInfoMessage(roleName)) { // not a valid role
 			// get all roles and aliases, to get an array of all possible role names
-			let allRoleNames = [...cachedRoles, ...cachedAliases.map(el => el.alias)];
+			let allRoleNames = [...cachedRoles, ...cachedAliases.map(el => el.alias), ...cachedInfoNames];
 			let bestMatch = findBestMatch(roleName.toLowerCase(), allRoleNames.map(el => el.toLowerCase())); // find closest match
 			// check if match is close enough
 			if(bestMatch.value <= ~~(roleName.length/2)) { // auto alias if so, but send warning 
@@ -42,15 +42,23 @@ module.exports = function() {
         let sections = ["basics", "details"];
         if(simp) sections = ["simplified"];
         if(technical) sections = ["formalized"];
-        let roleEmbed = await getRoleEmbed(roleName, sections, channel.guild);
+        
+        let infoEmbed = {};
+        // get the embed
+        if(cachedRoles.includes(roleName)) {
+            // message is a role
+            infoEmbed = await getRoleEmbed(roleName, sections, channel.guild);
+        } else {
+            infoEmbed = await getInfoEmbed(roleName, channel.guild);
+        }
         
         // overwrite name
         if(overwriteName) {
-            roleEmbed.author.name = overwriteName;
+            infoEmbed.author.name = overwriteName;
         }
         
         // send embed
-        channel.send({ embeds: [ roleEmbed ] }).then(m => {
+        channel.send({ embeds: [ infoEmbed ] }).then(m => {
             if(pin) { // pin message if pin is set to true
                 m.pin().then(mp => {
                     mp.channel.messages.fetch().then(messages => {
@@ -72,6 +80,85 @@ module.exports = function() {
     this.cmdInfoIndirectTechnical = function(channel, args) { cmdInfo(channel, args, false, true, false, false, false, false, true); } // via ~
     this.cmdInfopin = function(channel, args) { cmdInfo(channel, args, true); } // via $infopin
     
+    /**
+    Get Info Embed
+    Returns an info embed for an info message
+    */
+    this.getInfoEmbed = function(infoName, guild) {
+        return new Promise(res => {
+            sql("SELECT * FROM info WHERE name = " + connection.escape(infoName), async result => {
+                result = result[0]; // there should always only be one role by a certain name
+                var embed = await getBasicEmbed(guild);
+                
+                // split the contents by section headers
+                var desc = result.contents.split(/(?=__[\w\d _]+__)/).map(el => { // split by section and keep title via lookahead
+                    let matches = el.match(/^__([\w\d _]+)__\s*\n([\w\W]*)\n?$/); // extract section name and contents
+                    return matches ? [matches[1], matches[2]] : ["", el];
+                })
+                
+                if(desc.length == 1 && desc[0][0] == "" && desc[0][1].length < 2000) { // just a single titleless section
+                    embed.description = applyETN(desc[0][1], guild);
+                } else { // one or more titled sections
+                    // split a single section into several fields if necessary
+                    for(let d in desc) {
+                        embed.fields.push(...handleFields(applyETN(desc[d][1], guild), applyTheme(desc[d][0])));
+                    }
+                }
+               
+                // get icon if applicable
+                let lutval = applyLUT(infoName);
+                if(!lutval) lutval = applyLUT(result.display_name);
+                if(lutval) { // set icon and name
+                    //console.log(`${iconRepoBaseUrl}${lutval}`);
+                    embed.thumbnail = { "url": `${iconRepoBaseUrl}${lutval}.png` };
+                    embed.author = { "icon_url": `${iconRepoBaseUrl}${lutval}.png`, "name": applyTheme(result.display_name) };
+                } else { // just set title afterwards
+                    embed.title = applyTheme(result.display_name);
+                }
+                
+                // resolve promise, return embed
+                res(embed);
+            })
+        });
+    }
+    
+    /**
+    Field Splitter
+    Splits long texts into several elements for embed fields.
+    **/
+    this.fieldSplitter = function(text) {
+        let textSplit = text.split(/\n/); // split by new lines
+        let splitElements = [];
+        let i = 0;
+        let j = 0;
+        while(i < textSplit.length) { // iterate through the lines
+            splitElements[j] = "";
+            while(i < textSplit.length && (splitElements[j].length + textSplit[i].length) <= 1000) { // try appending a new line and see if it still fits then
+                splitElements[j] += "\n" + textSplit[i];
+                i++;
+            }
+            j++;
+        }
+        return splitElements;
+    }
+    
+    /**
+    Handle Fields
+    Returns either a single or several fields depending on text length
+    **/
+    this.handleFields = function(text, sectionName, showTitle = true) {
+        let fields = [];
+        if(text.length < 1000) { // check if text fits directly in one section
+            if(showTitle) fields.push({"name": `__${sectionName}__`, "value": text});
+            else fields.push({"name": `_ _`, "value": text});
+        } else { // split section into several
+            let sections = fieldSplitter(text);
+           // for each generated section, add a "field" to the embed
+           if(showTitle) sections.forEach(d => fields.push({"name": `__${sectionName}__ (${sections.indexOf(d)+1}/${sections.length})`, "value": d})); // normal case
+           else sections.forEach(d => fields.push({"name": `${sections.indexOf(d)+1}/${sections.length}`, "value": d})); // special case for formalized text
+        }
+        return fields;
+    }
     
     /**
     Get Role Embed 
@@ -94,7 +181,7 @@ module.exports = function() {
 
                 // Role Type
                 const roleTypeData = getRoleTypeData(result.type); // display the role type
-                if(result.type != "default") embed.title = roleTypeData.name; // but dont display "Default"
+                if(result.type != "default") embed.title = applyTheme(roleTypeData.name); // but dont display "Default"
                 
                 let isFormalized = false;
                 // add visible sections as sections
@@ -109,27 +196,7 @@ module.exports = function() {
                         case "card": sectionText = result.desc_card; break;
                     }
                     // only add the section if it exists
-                    if(sectionText) {
-                        if(sectionText.length < 1000) { // check if text fits directly in one section
-                            embed.fields.push({"name": `__${toTitleCase(visibleSections[sec])}__`, "value": sectionText});
-                        } else { // split section into several
-                            let sectionTextSplit = sectionText.split(/\n/); // split by new lines
-                           sectionTextSplitElements = [];
-                           let i = 0;
-                           let j = 0;
-                           while(i < sectionTextSplit.length) { // iterate through the lines
-                               sectionTextSplitElements[j] = "";
-                               while(i < sectionTextSplit.length && (sectionTextSplitElements[j].length + sectionTextSplit[i].length) <= 1000) { // try appending a new line and see if it still fits then
-                                   sectionTextSplitElements[j] += "\n" + sectionTextSplit[i];
-                                   i++;
-                               }
-                               j++;
-                           }
-                           // for each generated section, add a "field" to the embed
-                           if(!isFormalized) sectionTextSplitElements.forEach(d => embed.fields.push({"name": `__${toTitleCase(visibleSections[sec])}__ (${sectionTextSplitElements.indexOf(d)+1}/${sectionTextSplitElements.length})`, "value": d})); // normal case
-                           else sectionTextSplitElements.forEach(d => embed.fields.push({"name": `${sectionTextSplitElements.indexOf(d)+1}/${sectionTextSplitElements.length}`, "value": d})); // special case for formalized text
-                        }
-                    }
+                    if(sectionText) embed.fields.push(...handleFields(applyETN(sectionText, guild), toTitleCase(applyTheme(visibleSections[sec])), !isFormalized));
                 }
                 
                 // resolve promise with the embed, returning the embed

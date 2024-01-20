@@ -19,6 +19,7 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "infoedit - Edits a bot info message\n";
 				if(isGameMaster(member)) help += stats.prefix + "infoadd - Returns role info with additional text\n";
 				if(isGameMaster(member)) help += stats.prefix + "elect - Elects a player to a role\n";
+				if(isGameMaster(member)) help += stats.prefix + "infomanage [query] - Manages info\n";
 				help += "; - Returns role info\n";
 				help += ". - Returns simplified role info\n";
 				help += "~ - Returns formalized role info\n";
@@ -72,6 +73,27 @@ module.exports = function() {
 				help += "```fix\nUsage\n\n> " + stats.prefix + "elect mayor ts\n```";
 				help += "```diff\nAliases\n\n- el\n- elected\n```";
 			break;
+			case "update":
+				if(!isGameMaster(member)) break;
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "update\n```";
+				help += "```\nFunctionality\n\nUpdates all github linked data and re-parses it if applicable.\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "update\n```";
+			break;
+			case "roles":
+				if(!isGameMaster(member)) break;
+				switch(args[1]) {
+					default:
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "infomanage [query]\n```";
+						help += "```\nFunctionality\n\nGroup of commands to handle info. " + stats.prefix + "help infomanage <sub-command> for detailed help.```";
+						help += "```diff\nAliases\n\n- im\n```";
+					break;
+					case "query":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "infomanage query\n```";
+						help += "```\nFunctionality\n\nQueries all info from github.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "infomanage query\n```";
+					break;
+                }
+            break;
 			case "roles":
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {

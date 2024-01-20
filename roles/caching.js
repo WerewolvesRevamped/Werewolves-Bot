@@ -10,6 +10,7 @@ module.exports = function() {
     **/
     this.cachedRoles = [];
     this.cachedAliases = [];
+    this.cachedInfoNames = [];
     this.iconLUT = [];
     this.colorsLUT = [];
     
@@ -26,7 +27,22 @@ module.exports = function() {
 		});
 	}
     
-    /* Cache role aliases */
+    /**
+    Cache Info Names
+    caches the current state of the roles database
+    **/
+    this.cacheInfoNames = function() {
+		sql("SELECT name FROM info", result => {
+				cachedInfoNames = result.map(el => el.name);
+		}, () => {
+			log("Roles > ❗❗❗ Unable to cache info names!");
+		});
+	}
+    
+    /**
+    Cache Aliases
+    Cache role aliases
+    */
 	this.cacheAliases = function() {
 		sql("SELECT alias,name FROM roles_alias", result => {
 				cachedAliases = result;
@@ -42,6 +58,7 @@ module.exports = function() {
     this.cacheRoleInfo = function() {
 		cacheAliases();
 		cacheRoles();
+        cacheInfoNames();
 		//getSCCats();
 	}
     

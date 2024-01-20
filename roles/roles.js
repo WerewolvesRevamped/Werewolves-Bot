@@ -30,6 +30,24 @@ module.exports = function() {
 		}
 	}
     
+	/**
+    Command: $infomanage
+    Handle infomanage command
+    **/
+	this.cmdInfomanage = function(message, args, argsX) {
+		// Check subcommand
+		if(!args[0]) { 
+			message.channel.send("⛔ Syntax error. Not enough parameters!"); 
+			return; 
+		}
+		// Find subcommand
+		switch(args[0]) {
+			// Role Subcommand
+			case "query": cmdInfomanageQuery(message.channel); break;
+			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
+		}
+	}
+    
     /**
     Command: $roles get
     Gets all role values

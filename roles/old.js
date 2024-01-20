@@ -988,33 +988,7 @@ module.exports = function() {
 			if(!noErr) channel.send("⛔ Database error. Couldn't look for role information!");
 		});	
 	}
-	
-	this.applyEmoji = function(text) {
-		[...text.matchAll(/\<\?([\w\d]*):([^>]{0,10})\>/g)].forEach(match => {
-			let emoji = client.emojis.cache.find(el => el.name === match[1]);
-			if(emoji) emoji = `<:${emoji.name}:${emoji.id}>`;
-			else emoji = match[2];
-			text = text.replace(match[0], emoji)
-		}); 
-		return text;
-	}
-    
-    this.applyNums = function(guild, text) {
-        let playerCount = guild.roles.cache.get(stats.participant).members.size;
-        playerCount += guild.roles.cache.get(stats.signed_up).members.size;
-        text = text.replace(/\{\|1\|\}/g, playerCount);
-        text = text.replace(/\{\|2\|\}/g, Math.floor(playerCount / 2));
-        text = text.replace(/\{\|3\|\}/g, Math.floor(playerCount / 3));
-        text = text.replace(/\{\|4\|\}/g, Math.floor(playerCount / 4));
-        text = text.replace(/\{\|5\|\}/g, Math.floor(playerCount / 5));
-        text = text.replace(/\{\|10\|\}/g, Math.floor(playerCount / 10));
-        text = text.replace(/\{\|20\|\}/g, Math.floor(playerCount / 20));
-        text = text.replace(/\{\|2\^\|\}/g, Math.ceil(playerCount / 2));
-        text = text.replace(/\{\|3\^\|\}/g, Math.ceil(playerCount / 3));
-        text = text.replace(/\{\|4\^\|\}/g, Math.ceil(playerCount / 4));
-        text = text.replace(/\{\|5\^\|\}/g, Math.ceil(playerCount / 5));
-        return text;
-    }
+
     
     this.getIconFromName = function(name) {
         return new Promise(res => {
