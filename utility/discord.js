@@ -1,0 +1,194 @@
+/**
+	Utility Module - Discord
+    This module has utility functions related to discord actions
+*/
+module.exports = function() {
+    /**
+    Discord/Console Log
+    Prints a message in the log channel + console logs it
+    */
+	this.log = function(txt) {
+		console.log(txt);
+		if(stats.log_guild && stats.log_channel) {
+			client.guilds.cache.get(stats.log_guild).channels.cache.get(stats.log_channel).send(txt);
+		}
+	}
+
+	/**
+    Log Object
+    Passes an object to the log function in stringified form
+    */
+	this.logO = function(logObj) {
+		let obj = JSON.stringify(logObj, null, 4);
+		log(obj);
+	}
+    
+	/**
+    Send Error
+    Sends an error message on discord to a specified channel
+    */
+	this.sendError = function(channel, err, info) {
+		if(err && err.name && err.message) { 
+			channel.send("⛔ " + err.name + ". " + err.message.replace(/[\n\r]/g, ". ").substr(0,1500) + ". " + info + "!");
+		} else {
+			channel.send("⛔ Unknown error. " + info + "!");
+		}
+	}
+	
+	/**
+    Edit in Error
+    Edits in an error message into a specified discord message
+    */
+	this.editError = function(message, err, info) {
+		if(err && err.name && err.message) { 
+			message.edit("⛔ " + err.name + ". " + err.message.replace(/[\n\r]/g, ". ").substr(0,1500) + ". " + info + "!");
+		} else {
+			message.edit("⛔ Unknown error. " + info + "!");
+		}
+	}
+    		
+	/**
+    Cleanup Category
+    Cleansup a discord category by deleting every channel in it
+    */
+	this.cleanupCat = function(channel, categoryID, name) {
+		// Category deleted
+		if(!channel.guild.channels.cache.get(categoryID)) { 
+		channel.send("⛔ Command error. No " + name + " category found!");
+			return;
+		}
+		// Delete channels in category
+		cleanupOneChannel(channel, categoryID, channel.guild.channels.cache.get(categoryID).children.cache.toJSON(), 0, name);
+	}
+	
+	/**
+    Cleanup Channel
+    Used by cleanupCat to delete a single channel
+    */
+	this.cleanupOneChannel = function(channel, cat, channels, index, name) {
+		if(channels.length <= 0) return;
+		if(index >= channels.length) {
+			// Delete category
+			channel.guild.channels.cache.get(cat).delete().then(c => {
+				channel.send("✅ Successfully deleted " + name + " category!");
+			}).catch(err => { 
+				logO(err); 
+				sendError(channel, err, "Could not delete " + name + " Category");
+			});
+			return;
+		}
+		// Deleted channel
+		if(!channels[index] || !channel.guild.channels.cache.get(channels[index].id)) {
+			cleanupOneChannel(channel, cat, channels, ++index, name);
+			return;
+		}
+		// Delete channel
+		channel.guild.channels.cache.get(channels[index].id).delete().then(c => {
+			cleanupOneChannel(channel, cat, channels, ++index, name);
+		}).catch(err => { 
+			logO(err); 
+			sendError(channel, err, "Could not delete channel");
+		});
+	}
+    
+    /**
+    Inverted Switch Roles
+    Runs switchRoles with the roles ids and role names swapped
+    */
+    this.switchRolesX = function(member, channel, initialRole, newRole, initialName, newName) {
+        switchRoles(member, channel, newRole, initialRole, newName, initialName);
+    }
+    
+    /**
+    Switch Roles
+    Switches one discord role to another discord role and reattempts the switch until it succeeds
+    **/
+    this.switchRoles = function(member, channel, initialRole, newRole, initialName, newName, iteration = 1) {
+		return new Promise((resolve) => {
+            if(member.roles.cache.get(initialRole)) {
+                member.roles.add(newRole).then(async r => {
+                    if(member.roles.cache.get(newRole)) {
+                        // successfully removed roles
+                        await removeRoleRecursive(member, channel, initialRole, initialName);
+                    } else {
+                        channel.send(`❗ Could not add ${newName} role to ${member.displayName}. Trying again!`);
+                        await sleep(500 * iteration);
+                        await switchRoles(member, channel, initialRole, newRole, initialName, newName, ++iteration);
+                    }
+                    resolve(true);
+                }).catch(err => { 
+                    // Missing permissions
+                    logO(err); 
+                    sendError(channel, err, `Could not add ${newName} role to ${member.displayName}`);
+                    resolve(false);
+                });
+            }
+        });
+    }
+    
+    /**
+    Remove Role
+    Removes a discord role until it succeeds
+    **/
+    this.removeRoleRecursive = function(member, channel, remRole, name, iteration = 1) {
+		return new Promise((resolve) => {
+            member.roles.remove(remRole).then(async r => {
+                if(member.roles.cache.get(remRole)) {
+                    channel.send(`❗ Could not remove ${name} role from ${member.displayName}. Trying again!`);
+                    await sleep(500 * iteration);
+                    await removeRoleRecursive(member, channel, remRole, name, ++iteration);
+                }
+                resolve(true);
+            }).catch(err => { 
+                // Missing permissions
+                logO(err); 
+                sendError(channel, err, `Could not remove ${name} role from ${member.displayName}`);
+                resolve(false);
+            });
+        });
+    }
+    
+    /**
+    Add Role
+    Adds a discord role until it succeeds
+    */
+    this.addRoleRecursive = function(member, channel, addRole, name, iteration = 1) {
+		return new Promise((resolve) => {
+            member.roles.add(addRole).then(async r => {
+                if(!member.roles.cache.get(addRole)) {
+                    channel.send(`❗ Could not add ${name} role to ${member.displayName}. Trying again!`);
+                    await sleep(500 * iteration);
+                    await addRoleRecursive(member, channel, addRole, name, ++iteration);
+                }
+                resolve(true);
+            }).catch(err => { 
+                // Missing permissions
+                logO(err); 
+                sendError(channel, err, `Could not add ${name} role to ${member.displayName}`);
+                resolve(false);
+            });
+		});
+	}
+    
+    /**
+    Get Server Icon
+    Returns the url to the server icon as png
+    **/
+    this.getServerIcon = async function(guild) {
+            let serverIcon = await guild.iconURL();
+            serverIcon = serverIcon.replace("webp","png");
+            return serverIcon;
+    }
+      
+    /**
+    Get Emoji
+    Gets an emoji by name
+    **/
+    this.getEmoji = function(name) {
+        let emoji = client.emojis.cache.find(el => el.name === name);
+        if(emoji) emoji = `<:${emoji.name}:${emoji.id}>`;
+        else emoji = "❓";
+        return emoji;
+    }
+        
+}

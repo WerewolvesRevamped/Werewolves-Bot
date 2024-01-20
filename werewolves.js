@@ -20,19 +20,21 @@ const { exec } = require('node:child_process')
 config = require("./config.json");
 
 /* Utility Modules */
-require("./utility.js")();
-require("./sql.js")();
 require("./stats.js")();
 require("./confirm.js")();
 /* Functionality Modules */
 require("./players.js")();
 require("./ccs.js")();
 require("./whispers.js")();
-require("./roles.js")();
 require("./game.js")();
 require("./poll.js")();
 require("./theme.js")();
-require("./parser.js")();
+
+require("./temp.js")();
+
+// V2 Modules
+require("./roles/roles.js")();
+require("./utility/utility.js")();
 
 /* Setup */
 client.on("ready", async () => {
@@ -713,6 +715,10 @@ function findUrls(text) {
 	var urlRegex = /(https?:\/\/[^\s\)\]\}]+)/g;
   return text.match(urlRegex);
 }
+
+    	    
+
+    
 
 /* 
 	LOGIN

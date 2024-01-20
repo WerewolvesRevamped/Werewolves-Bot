@@ -1,7 +1,10 @@
 /**
-New Roles Module
-
+    Roles Module - Main
+    The module for WWR roles
 **/
+require("./parser.js")();
+require("./help.js")();
+
 module.exports = function() {
     
     /**
