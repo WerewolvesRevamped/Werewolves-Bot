@@ -4,14 +4,23 @@
 **/
 module.exports = function() {
     /**
+    Github Paths
+    **/
+    this.githubRaw = "https://raw.githubusercontent.com/";
+    this.githubAPI = "https://api.github.com/";
+    /**
     Repo Paths
     **/
     this.iconRepo = "WerewolvesRevamped/Werewolves-Icons";
     this.iconRepoBranch = "main"
-    this.iconRepoBaseUrl = `https://raw.githubusercontent.com/${iconRepo}/${iconRepoBranch}/`;
+    this.iconRepoBaseUrl = `${githubRaw}${iconRepo}/${iconRepoBranch}/`;
     this.roleRepo = "WerewolvesRevamped/Werewolves-Roles";
     this.roleRepoBranch = "main";
-    this.roleRepoBaseUrl = `https://raw.githubusercontent.com/${roleRepo}/${roleRepoBranch}/`;
+    this.roleRepoBaseUrl = `${githubRaw}${roleRepo}/${roleRepoBranch}/`;
+    /** Files **/
+    this.iconLUTPath = `${iconRepoBaseUrl}replacements.csv`;
+    this.colorLUTPath = `${iconRepoBaseUrl}colors.csv`;
+    this.rolepathsPath = `${roleRepoBaseUrl}paths/roles`;
     /**
     Website Paths
     **/

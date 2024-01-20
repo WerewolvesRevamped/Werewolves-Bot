@@ -51,7 +51,7 @@ module.exports = function() {
     A lookup table for role names to icons
     **/
     this.cacheIconLUT = async function() {
-        const body = await fetchBody(`${iconRepoBaseUrl}replacements.csv`);
+        const body = await fetchBody(iconLUTPath);
         iconLUT = {};
         body.split("\n").filter(el => el && el.length).map(el => el.split(",")).forEach(el => iconLUT[el[0]] = urlConv(el[1].trim()));
         //console.log(iconLUT);
@@ -72,7 +72,7 @@ module.exports = function() {
     A lookup table for team names to colors
     **/
     this.cacheColorsLUT = async function() {
-        const body = await fetchBody(`${iconRepoBaseUrl}colors.csv`);
+        const body = await fetchBody(colorsLUTPath);
         colorsLUT = {};
         body.split("\n").filter(el => el && el.length).map(el => el.split(",")).forEach(el => colorsLUT[el[0].toLowerCase()] = el[6]);
         //console.log(colorsLUT);

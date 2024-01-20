@@ -156,7 +156,7 @@ module.exports = function() {
     **/
     async function getRolesTree() {
         const auth = { headers: { 'Authorization': 'token ' + config.github_token } };
-        const body = await fetchBody(`https://api.github.com/repos/${roleRepo}/git/trees/${roleRepoBranch}?recursive=1`, auth);
+        const body = await fetchBody(`${githubAPI}repos/${roleRepo}/git/trees/${roleRepoBranch}?recursive=1`, auth);
         return JSON.parse(body).tree;
     }
     
@@ -165,7 +165,7 @@ module.exports = function() {
     Retrieves all the paths at which roles are located as an array
     **/
     async function getRolePaths() {
-        const body = await fetchBody(`${roleRepoBaseUrl}role_paths`);
+        const body = await fetchBody(rolepathsPath);
         const paths = body.split("\n").filter(el => el);
         return paths;
     }
