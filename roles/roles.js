@@ -44,6 +44,7 @@ module.exports = function() {
 		switch(args[0]) {
 			// Role Subcommand
 			case "query": cmdInfomanageQuery(message.channel); break;
+            case "get": cmdInfomanageGet(message.channel, args); break
 			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
 		}
 	}
@@ -77,6 +78,23 @@ module.exports = function() {
             // Send the embed
             channel.send({ embeds: [ embed ] }); 
         });
+    }
+    
+    /**
+    Command: $im get
+    Gets a specific info. This is useful when a role shares the name
+    **/
+    this.cmdInfomanageGet = async function(channel, args) {
+		// Check arguments
+		if(!args[1]) { 
+			channel.send("⛔ Syntax error. Not enough parameters!"); 
+			return; 
+		} else if(!verifyInfo(args[1])) {
+			channel.send("⛔ Command error. Invalid info `" + args[1] + "`!"); 
+			return; 
+		}
+        infoEmbed = await getInfoEmbed(args[1], channel.guild);
+        channel.send({ embeds: [ infoEmbed ] });
     }
     
 }

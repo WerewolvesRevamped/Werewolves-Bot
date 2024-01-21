@@ -1295,9 +1295,5 @@ module.exports = function() {
 		});	
 	}
     
-    this.getRoleEmoji = function(roleName) {
-        roleName = toTitleCase(roleName).replace(/[^\w]+/g,"").trim().toLowerCase();
-        return client.emojis.cache.find(el => el.name.toLowerCase() == roleName);
-    }
 	
 }

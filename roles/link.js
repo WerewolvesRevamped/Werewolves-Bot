@@ -195,19 +195,19 @@ module.exports = function() {
                     var displayName = "";
                     var matches;
                     // check if a name is present in the file
-                    if(matches = infoContents.match(/^\*\*([A-Za-z\- \(\)]+)\*\* \| (.+)\n/)) {
+                    if(matches = infoContents.match(/^\*\*([A-Za-z\- \(\)&!\?,\.']+)\*\* \| (.+)\n/)) {
                         displayName = `${matches[1]} [${matches[2]}]`;
-                    } else if(matches = infoContents.match(/^\*\*([A-Za-z\- \(\)]+)\*\*\s*\n/)) {
+                    } else if(matches = infoContents.match(/^\*\*([A-Za-z\- \(\)&!\?,\.']+)\*\*\s*\n/)) {
                         displayName = `${matches[1]}`;
+                    } else if(matches = infoContents.match(/^(<\?[\w\d]*:[^>]{0,10}\>) +\*{0,2}([A-Za-z\- \(\)&!\?,\.']+)\*{0,2} +(<\?[\w\d]*:[^>]{0,10}\>)\s*\n/)) {
+                        displayName = `${matches[1]} ${matches[2]} ${matches[3]}`;
                     }
                     // remove first line, if display name found
                     if(displayName) {
                         let temp = infoContents.split("\n");
                         temp.shift();
                         infoContents = temp.join("\n");
-                    } else {
-                        displayName = toTitleCase(dbName); // default display name is to title cased db name
-                    } 
+                    }
                     // split by simplified
                     const splitInfoContents = infoContents.split("__Simplified__");
                     const mainContents = splitInfoContents[0].trim();

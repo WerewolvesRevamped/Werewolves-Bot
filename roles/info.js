@@ -80,6 +80,17 @@ module.exports = function() {
     this.cmdInfoIndirectTechnical = function(channel, args) { cmdInfo(channel, args, false, true, false, false, false, false, true); } // via ~
     this.cmdInfopin = function(channel, args) { cmdInfo(channel, args, true); } // via $infopin
     
+    
+    this.replaceAsync = async function(str, regex, asyncFn) {
+    const promises = [];
+    str.replace(regex, (full, ...args) => {
+        promises.push(asyncFn(full, ...args));
+        return full;
+    });
+    const data = await Promise.all(promises);
+    return str.replace(regex, () => data.shift());
+}
+    
     /**
     Get Info Embed
     Returns an info embed for an info message
@@ -89,19 +100,24 @@ module.exports = function() {
             sql("SELECT * FROM info WHERE name = " + connection.escape(infoName), async result => {
                 result = result[0]; // there should always only be one role by a certain name
                 var embed = await getBasicEmbed(guild);
+                var contents = result.contents;
+                
+                // search for and replace queries
+                contents = await applyQuery(contents);
+                contents = contents.replace("\n\n\n","\n"); // remove extra newline for when a section is empty
                 
                 // split the contents by section headers
-                var desc = result.contents.split(/(?=__[\w\d _]+__)/).map(el => { // split by section and keep title via lookahead
+                var desc = contents.split(/(?=__[\w\d _]+__)/).map(el => { // split by section and keep title via lookahead
                     let matches = el.match(/^__([\w\d _]+)__\s*\n([\w\W]*)\n?$/); // extract section name and contents
                     return matches ? [matches[1], matches[2]] : ["", el];
-                })
-                
-                if(desc.length == 1 && desc[0][0] == "" && desc[0][1].length < 2000) { // just a single titleless section
-                    embed.description = applyETN(desc[0][1], guild);
-                } else { // one or more titled sections
-                    // split a single section into several fields if necessary
-                    for(let d in desc) {
+                });
+
+                // split a single section into several fields if necessary
+                for(let d in desc) {
+                    if(desc[d][0] || desc[0][1].length > 2000 || d > 0) {
                         embed.fields.push(...handleFields(applyETN(desc[d][1], guild), applyTheme(desc[d][0])));
+                    } else { // untitled field0 is description
+                        embed.description = applyETN(desc[d][1], guild);
                     }
                 }
                
@@ -111,53 +127,19 @@ module.exports = function() {
                 if(lutval) { // set icon and name
                     //console.log(`${iconRepoBaseUrl}${lutval}`);
                     embed.thumbnail = { "url": `${iconRepoBaseUrl}${lutval}.png` };
-                    embed.author = { "icon_url": `${iconRepoBaseUrl}${lutval}.png`, "name": applyTheme(result.display_name) };
+                    if(result.display_name.match(/\<\?[\w\d]*:[^>]{0,10}\>/)) { // emoji in title, use title
+                        embed.title = applyET(result.display_name);
+                    } else { // no emojis, use author title + icon
+                        embed.author = { "icon_url": `${iconRepoBaseUrl}${lutval}.png`, "name": applyTheme(result.display_name) };
+                    }
                 } else { // just set title afterwards
-                    embed.title = applyTheme(result.display_name);
+                    embed.title = applyET(result.display_name);
                 }
                 
                 // resolve promise, return embed
                 res(embed);
             })
         });
-    }
-    
-    /**
-    Field Splitter
-    Splits long texts into several elements for embed fields.
-    **/
-    this.fieldSplitter = function(text) {
-        let textSplit = text.split(/\n/); // split by new lines
-        let splitElements = [];
-        let i = 0;
-        let j = 0;
-        while(i < textSplit.length) { // iterate through the lines
-            splitElements[j] = "";
-            while(i < textSplit.length && (splitElements[j].length + textSplit[i].length) <= 1000) { // try appending a new line and see if it still fits then
-                splitElements[j] += "\n" + textSplit[i];
-                i++;
-            }
-            j++;
-        }
-        return splitElements;
-    }
-    
-    /**
-    Handle Fields
-    Returns either a single or several fields depending on text length
-    **/
-    this.handleFields = function(text, sectionName, showTitle = true) {
-        let fields = [];
-        if(text.length < 1000) { // check if text fits directly in one section
-            if(showTitle) fields.push({"name": `__${sectionName}__`, "value": text});
-            else fields.push({"name": `_ _`, "value": text});
-        } else { // split section into several
-            let sections = fieldSplitter(text);
-           // for each generated section, add a "field" to the embed
-           if(showTitle) sections.forEach(d => fields.push({"name": `__${sectionName}__ (${sections.indexOf(d)+1}/${sections.length})`, "value": d})); // normal case
-           else sections.forEach(d => fields.push({"name": `${sections.indexOf(d)+1}/${sections.length}`, "value": d})); // special case for formalized text
-        }
-        return fields;
     }
     
     /**

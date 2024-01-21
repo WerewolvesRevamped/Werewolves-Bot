@@ -71,7 +71,7 @@ module.exports = function() {
         const body = await fetchBody(iconLUTPath);
         iconLUT = {};
         body.split("\n").filter(el => el && el.length).map(el => el.split(",")).forEach(el => iconLUT[el[0]] = urlConv(el[1].trim()));
-        //console.log(iconLUT);
+        console.log(iconLUT);
     }
     
     /**
@@ -79,8 +79,9 @@ module.exports = function() {
     Applies the icon lut and returns a stripped version of the name
     **/
     this.applyLUT = function(name) {
-        let val = name.toLowerCase().replace(/[^a-z ]/g,"").trim();
-        //console.log(`look lut: "${val}"`);
+        let val = name.replace(/\<\?[\w\d]*:[^>]{0,10}\>/g,"").trim(); // remove emoji placeholders
+        val = val.toLowerCase().replace(/[^a-z ]/g,"").trim();
+        if(!iconLUT[val]) console.log(`look lut, failed: "${val}"`);
         return iconLUT[val] ?? false;
     }
     

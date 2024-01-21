@@ -195,4 +195,74 @@ module.exports = function() {
         return text;
     }
     
+    /**
+    Apply Queries
+    applies the @Query queries
+    **/
+    this.applyQuery = async function(str) {
+        let out = await replaceAsync(str, /@Query;(.*?);(.*?)@/g, async function(match, query, format) { 
+            // build query
+            query = query.split(",").map(el => el.split("="));
+            let queryCategory = query.filter(el => el[0] == "Category");
+            let queryTeam = query.filter(el => el[0] == "Team");
+            let queryClass = query.filter(el => el[0] == "Class");
+            let queryType = query.filter(el => el[0] == "Type");
+            let whereQuery = [];
+            if(queryCategory[0]) whereQuery.push(`category = ${connection.escape(queryCategory[0][1])}`);
+            if(queryTeam[0]) whereQuery.push(`team = ${connection.escape(queryTeam[0][1])}`);
+            if(queryClass[0]) whereQuery.push(`class = ${connection.escape(queryClass[0][1])}`);
+            if(queryType[0]) whereQuery.push(`type = ${connection.escape(queryType[0][1])}`);
+            // do the sql query
+            let roles = (await sqlProm("SELECT display_name,class,category,team FROM roles WHERE " + whereQuery.join(" AND ")));
+            // apply formatting
+            return roles.sort((a, b) => a.display_name.localeCompare(b.display_name)).map(el => {
+                let ret = format;
+                ret = ret.replace(/\$\.Team/g, toTitleCase(el.team));
+                ret = ret.replace(/\$\.Name/g, el.display_name);
+                ret = ret.replace(/\$\.Emoji/g, `<?${el.display_name.replace(/ /g,"")}:>`);
+                ret = ret.replace(/\$\.ClassCat/g, (el.class == "unaligned" ? "UA" : el.class[0].toUpperCase()) + el.category[0].toUpperCase());
+                return ret;
+            }).join("\n");
+        });
+        return out;
+    }
+    
+    /**
+    Field Splitter
+    Splits long texts into several elements for embed fields.
+    **/
+    this.fieldSplitter = function(text) {
+        let textSplit = text.split(/\n/); // split by new lines
+        let splitElements = [];
+        let i = 0;
+        let j = 0;
+        while(i < textSplit.length) { // iterate through the lines
+            splitElements[j] = "";
+            while(i < textSplit.length && (splitElements[j].length + textSplit[i].length) <= 1000) { // try appending a new line and see if it still fits then
+                splitElements[j] += "\n" + textSplit[i];
+                i++;
+            }
+            j++;
+        }
+        return splitElements;
+    }
+    
+    /**
+    Handle Fields
+    Returns either a single or several fields depending on text length
+    **/
+    this.handleFields = function(text, sectionName, showTitle = true) {
+        let fields = [];
+        if(text.length < 1000) { // check if text fits directly in one section
+            if(showTitle) fields.push({"name": `__${sectionName}__`, "value": text});
+            else fields.push({"name": `_ _`, "value": text});
+        } else { // split section into several
+            let sections = fieldSplitter(text);
+           // for each generated section, add a "field" to the embed
+           if(showTitle) sections.forEach(d => fields.push({"name": `__${sectionName}__ (${sections.indexOf(d)+1}/${sections.length})`, "value": d})); // normal case
+           else sections.forEach(d => fields.push({"name": `${sections.indexOf(d)+1}/${sections.length}`, "value": d})); // special case for formalized text
+        }
+        return fields;
+    }
+    
 }
