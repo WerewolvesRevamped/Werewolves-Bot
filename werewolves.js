@@ -29,7 +29,7 @@ require("./confirm.js")();
 require("./players.js")();
 require("./ccs.js")();
 require("./whispers.js")();
-require("./game.js")();
+require("./game/game.js")();
 require("./poll.js")();
 require("./theme.js")();
 
@@ -49,6 +49,7 @@ client.on("ready", async () => {
 	setTimeout(function() {
 		getIDs();
 		cacheRoleInfo();
+        getSCCats();
 		getVotes();
 		getCCs();
 		getPRoles();
@@ -74,6 +75,7 @@ async function forceReload(channel) {
     try { getStats(); channel.send("✅ Loaded stats."); } catch (err) { logO(err); channel.send("⛔ Failed to load stats."); } await sleep(1000);
     try { getIDs(); channel.send("✅ Loaded ids."); } catch (err) { logO(err); channel.send("⛔ Failed to load ids."); } await sleep(1000);
     try { cacheRoleInfo(); channel.send("✅ Cached role info."); } catch (err) { logO(err); channel.send("⛔ Failed to cache role info."); } await sleep(1000);
+    try { getSCCats(); channel.send("✅ Cached sc cats."); } catch (err) { logO(err); channel.send("⛔ Failed to sc cats."); } await sleep(1000);
     try { getVotes(); channel.send("✅ Cached votes."); } catch (err) { logO(err); channel.send("⛔ Failed to cache votes."); } await sleep(1000);
     try { getCCs(); channel.send("✅ Cached cc cats."); } catch (err) { logO(err); channel.send("⛔ Failed to cache cc cats."); } await sleep(1000);
     try { getPublicCat(); channel.send("✅ Cached public cat."); } catch (err) { logO(err); channel.send("⛔ Failed to cache public cat."); } await sleep(1000);
@@ -331,13 +333,13 @@ client.on("messageCreate", async message => {
 	case "infomanage":
 		if(checkGM(message)) cmdInfomanage(message, args, argsX);
 	break;
-	/* Infomanage */ // Updates all github linked data
+	/* Update */ // Updates all github linked data
 	case "update":
 		if(checkGM(message)) cmdUpdate(message.channel);
 	break;
 	/* Roles */ // Modify channel information for commands
 	case "channels":
-		if(checkGM(message)) cmdChannels(message, args, argsX);
+		//if(checkGM(message)) cmdChannels(message, args, argsX);
 	break;
 	/* Role Info */ // Returns the info for a role set by the roles command
 	case "info":

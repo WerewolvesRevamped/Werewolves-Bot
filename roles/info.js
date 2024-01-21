@@ -192,17 +192,30 @@ module.exports = function() {
     }
     
     /**
-    Command: $card
-    Gets a card for a role
+    Get Card Url
+    returns the url to the card of a role if the role exists or false if not
     **/
-    this.cmdGetCard = function(channel, role) {
+    this.getCardUrl = function(role) {
         let roleNameParsed = parseRole(role); // parse role name
         var lutName = applyLUT(role); // get lut value if exists
         if(lutName) { // if lut value exists
             lutName = lutName.split("/").pop(); // split by /'s to extract name
-            channel.send(`${cardBaseUrl}${urlConv(lutName)}`);
-        } else if(roleNameParsed && verifyRole(roleNameParsed)) { // chekc if the role exists
-            channel.send(`${cardBaseUrl}${urlConv(toTitleCase(roleNameParsed))}`);
+            return `${cardBaseUrl}${urlConv(lutName)}`;
+        } else if(roleNameParsed && verifyRole(roleNameParsed)) { // check if the role exists
+            return `${cardBaseUrl}${urlConv(toTitleCase(roleNameParsed))}`;
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+    Command: $card
+    Gets a card for a role
+    **/
+    this.cmdGetCard = function(channel, role) {
+        let url = getCardUrl(role);
+        if(url) {
+            channel.send(url);
         } else {
             channel.send("⛔ Command error. Invalid role `" + role + "`!"); 
         }

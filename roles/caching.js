@@ -59,7 +59,6 @@ module.exports = function() {
 		cacheAliases();
 		cacheRoles();
         cacheInfoNames();
-		//getSCCats();
 	}
     
     

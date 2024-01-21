@@ -6,6 +6,9 @@
 		- Stats/Sql/Utility/Confirm Base Modules
 		- Players Module
 */
+require("./startup.js")();
+require("./caching.js")();
+require("./cleanup.js")();
 module.exports = function() {
 
 	/* Handles start command */
@@ -49,21 +52,14 @@ module.exports = function() {
 		getEmojis();	
 		getVotes();
 		getCCs();
-		getRoles();
+		cacheRoleInfo();
         getPRoles();
 		// Assign roles
 		startOnePlayer(channel, channel.guild.roles.cache.get(stats.signed_up).members.toJSON(), 0);
 		createSCs(channel, debug);
 	}
     
-	/* Cache Public category */
-	this.getPublicCat = function() {
-		sqlGetStat(15, result => {
-			cachedPublic = result;
-		}, () => {
-			log("Roles > ❗❗❗ Unable to cache Public Category!");
-		});
-	}
+
 	
 	this.helpGame = function(member, args) {
 		let help = "";
@@ -445,7 +441,7 @@ module.exports = function() {
 		wroles_remove(channel, [stats.participant, stats.dead_participant], ["participant", "dead participant"]);
 		// Cleanup channels
 		cmdCCCleanup(channel);
-		cmdRolesScCleanup(channel);
+		scCleanup(channel);
 		cmdKillqClear(channel);
 		sqlGetStat(15, result => {
 			cleanupCat(channel, result, "public");
