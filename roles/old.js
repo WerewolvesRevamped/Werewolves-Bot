@@ -285,63 +285,6 @@ module.exports = function() {
 	}
 	
 	
-	/* Lists all roles */
-	this.cmdRolesList = function(channel, args) {
-        let filter = false;
-        if(args[1]) {
-            filter = args[1];
-        }
-		// Get all roles
-		sql("SELECT name,description FROM roles ORDER BY name ASC", result => {
-			if(result.length > 0) {
-				// At least one role exists
-				if(!filter) channel.send("✳ Sending a list of currently existing roles:");
-				else channel.send("✳ Sending a list `" + filter + "` of subroles:");
-				// Send message
-				chunkArray(result.filter(el => {
-                    // when a filter is set filter out
-                    if(!filter) return true;
-                    let role = el.name.split("$");
-                    role = role[0];
-                    if(role == filter) return true;
-                    return false;
-                }).map(role => {
-					let roleDesc = role.description.replace(/\*|_|Basics|Details/g,"")
-					if(!filter) return "**" +  toTitleCase(role.name) + ":** " + roleDesc.replace(/~/g," ").substr(roleDesc.search("~") + 1, 90)
-					else return role.name;
-				}), 15).map(el => {
-                    if(!filter) return el.join("\n");
-                    else return el.join(", ");
-                }).forEach(el => channel.send(el));
-			} else { 
-				// No roles exist
-				channel.send("⛔ Database error. Could not find any roles!");
-			}
-		}, () => {
-			// DB error
-			channel.send("⛔ Database error. Couldn't look for role list!");
-		});
-	}
-	
-	/* Lists all roles names */
-	this.cmdRolesListNames = function(channel) {
-		// Get all roles
-		sql("SELECT name FROM roles ORDER BY name ASC", result => {
-			if(result.length > 0) {
-				// At least one role exists
-				channel.send("✳ Sending a list of currently existing role names:");
-				// Send message
-				chunkArray(result.map(role => toTitleCase(role.name)), 40).map(el => el.join("\n")).forEach(el => channel.send(el));
-			} else { 
-				// No roles exist
-				channel.send("⛔ Database error. Could not find any roles!");
-			}
-		}, () => {
-			// DB error
-			channel.send("⛔ Database error. Couldn't look for role list!");
-		});
-	}
-
 
 	
 	/* Creates/Sets an alias */

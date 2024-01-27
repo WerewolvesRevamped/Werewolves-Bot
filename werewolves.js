@@ -41,6 +41,7 @@ require("./paths.js")();
 // V2 Modules
 require("./roles/roles.js")();
 require("./utility/utility.js")();
+require("./abilities/abilities.js")();
 
 /* Setup */
 client.on("ready", async () => {
@@ -303,6 +304,9 @@ client.on("messageCreate", async message => {
     break;
     case "sql_reload": // reloads db and caches (not documented!!)
         if(checkGM(message)) restartSQL(message.channel);
+    break;
+    case "emit": // emits a trigger (not documented!!)
+        if(checkGM(message)) cmdEmit(message.channel, argsX);
     break;
     case "edit":
         if(checkGMHelper(message)) cmdEdit(message.channel, args, argsX);

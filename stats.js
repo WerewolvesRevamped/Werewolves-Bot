@@ -284,6 +284,13 @@ module.exports = function() {
             stats.mayor_threshold = false;
 			log("Stats > ❗❗❗ Unable to cache host log! Defaulting to `false`.")
 		});
+		sqlGetStat(44,  result => { 
+			stats.host_log = result; 
+			if(doLog) log("Stats > Cached automation level as `" + result + "`!")
+		}, () => {
+            stats.automation_level = 0;
+			log("Stats > ❗❗❗ Unable to cache automation level! Defaulting to `0` (none).")
+		});
 	}
 	
 	/* Gets the name of a gamephase by id */

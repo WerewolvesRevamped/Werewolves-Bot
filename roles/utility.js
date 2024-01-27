@@ -63,7 +63,7 @@ module.exports = function() {
             console.log("MISSING URL", url);
             let classesWithPlaceholders = ["townsfolk","werewolf","unaligned","solo"]; // list of classes with a specific placeholder icon
             let placeholderName = classesWithPlaceholders.includes(rClass) ? toTitleCase(rClass) : "Unaligned"; // if no specific placeholder icon exists default to UA
-            url = `${iconRepoBaseUrl}Placeholder/${placeholderName}?version=${stats.icon_version}`; // construct placeholder url
+            url = `${iconRepoBaseUrl}Placeholder/${placeholderName}.png?version=${stats.icon_version}`; // construct placeholder url
         }
         
         // get color
@@ -263,6 +263,15 @@ module.exports = function() {
            else sections.forEach(d => fields.push({"name": `${sections.indexOf(d)+1}/${sections.length}`, "value": d})); // special case for formalized text
         }
         return fields;
+    }
+    
+    /**
+    Get Role Emoji
+    Returns the emoji for a specific role
+    **/
+     this.getRoleEmoji = function(roleName) {
+        roleName = toTitleCase(roleName).replace(/[^\w]+/g,"").trim().toLowerCase();
+        return client.emojis.cache.find(el => el.name.toLowerCase() == roleName);
     }
     
 }
