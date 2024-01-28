@@ -25,10 +25,11 @@ module.exports = function() {
         roleName = parseRole(roleName);
 		if(!verifyInfoMessage(roleName)) { // not a valid role
 			// get all roles and aliases, to get an array of all possible role names
-			let allRoleNames = [...cachedRoles, ...cachedAliases.map(el => el.alias), ...cachedInfoNames, ...cachedGroups];
+			let allRoleNames = [...cachedRoles, ...cachedGroups, ...cachedAliases.map(el => el.alias), ...cachedInfoNames];
 			let bestMatch = findBestMatch(roleName.toLowerCase(), allRoleNames.map(el => el.toLowerCase())); // find closest match
 			// check if match is close enough
 			if(bestMatch.value <= ~~(roleName.length/2)) { // auto alias if so, but send warning 
+                console.log(roleName, bestMatch.name);
 				roleName = parseRole(bestMatch.name);
                 if(roleName.toLowerCase() === bestMatch.name.toLowerCase()) channel.send(`❗ Could not find role \`${origRoleName}\`. Did you mean \`${roleName}\`?`);
                 else channel.send(`❗ Could not find role \`${origRoleName}\`. Did you mean \`${roleName}\` (aka \`${(bestMatch.name.length>2 ? toTitleCase(bestMatch.name) : bestMatch.name.toUpperCase())}\`)?`);
@@ -48,15 +49,17 @@ module.exports = function() {
         if(cachedRoles.includes(roleName)) {
             // message is a role
             infoEmbed = await getRoleEmbed(roleName, sections, channel.guild);
+        } else if(cachedGroups.includes(roleName)) {
+            // its a group
+            infoEmbed = await getGroupEmbed(roleName, sections, channel.guild);
         } else if(cachedInfoNames.includes(roleName)) {
             // its an info
             infoEmbed = await getInfoEmbed(roleName, channel.guild);
-        } else if(cachedGroups.includes(roleName)) {
-            // its a group
-            infoEmbed = await getGroupEmbed(roleName, channel.guild);
         } else {
             // its nothing? should be impossible since verifyInfoMessage checks its one of the above minimum
+            // can happen if running info pre caching
             infoEmbed = await getBasicEmbed(channel.guild);
+            infoEmbed.description = "Could not find any matching info. This most likely means the bot has not yet loaded its caches. Please try again in a minute.";
         }
         
         // overwrite name
@@ -86,17 +89,6 @@ module.exports = function() {
     this.cmdInfoIndirectSimplified = function(channel, args) { cmdInfo(channel, args, false, true, true); } // via . 
     this.cmdInfoIndirectTechnical = function(channel, args) { cmdInfo(channel, args, false, true, false, false, false, false, true); } // via ~
     this.cmdInfopin = function(channel, args) { cmdInfo(channel, args, true); } // via $infopin
-    
-    
-    this.replaceAsync = async function(str, regex, asyncFn) {
-    const promises = [];
-    str.replace(regex, (full, ...args) => {
-        promises.push(asyncFn(full, ...args));
-        return full;
-    });
-    const data = await Promise.all(promises);
-    return str.replace(regex, () => data.shift());
-}
     
     /**
     Get Info Embed
@@ -150,6 +142,48 @@ module.exports = function() {
     }
     
     /**
+    Get Group Embed
+    Returns a group embed for a group message
+    */
+    this.getGroupEmbed = function(groupName, sections, guild) {
+        return new Promise(res => {
+            sql("SELECT * FROM groups WHERE name = " + connection.escape(groupName), async result => {
+                result = result[0]; // there should always only be one role by a certain name
+                var embed = await getBasicEmbed(guild);
+                var members = result.desc_members;
+                
+                // search for and replace queries
+                members = await applyQuery(members);
+                members = members.replace("\n\n\n","\n"); // remove extra newline for when a section is empty
+                
+                var desc = [];
+                if(sections.includes("basics") || sections.includes("simplified")) desc.push(["Basics", result.desc_basics]);
+                if(sections.includes("details")) desc.push(["Members", members]);
+                if(sections.includes("formalized")) desc.push(["Formalized", formatFormalized(result.desc_formalized)]);
+
+                // split a single section into several fields if necessary
+                for(let d in desc) {
+                    embed.fields.push(...handleFields(applyETN(desc[d][1], guild), applyTheme(desc[d][0])));
+                }
+               
+                // get icon if applicable
+                let lutval = applyLUT(groupName);
+                if(!lutval) lutval = applyLUT(result.display_name);
+                if(lutval) { // set icon and name
+                    //console.log(`${iconRepoBaseUrl}${lutval}`);
+                    embed.thumbnail = { "url": `${iconRepoBaseUrl}${lutval}.png` };
+                    embed.author = { "icon_url": `${iconRepoBaseUrl}${lutval}.png`, "name": applyTheme(result.display_name) };
+                } else { // just set title afterwards
+                    embed.title = applyET(result.display_name);
+                }
+                
+                // resolve promise, return embed
+                res(embed);
+            })
+        });
+    }
+    
+    /**
     Get Role Embed 
     Returns an info embed for a role 
     WIP: Re-implement role filter
@@ -181,7 +215,7 @@ module.exports = function() {
                         case "basics": sectionText = result.desc_basics; break;
                         case "details": sectionText = result.desc_details; break;
                         case "simplified": sectionText = result.desc_simplified; break;
-                        case "formalized": sectionText = result.desc_formalized.replace(/ {2}/g, getEmoji("empty")); isFormalized = true; break;
+                        case "formalized": sectionText = formatFormalized(result.desc_formalized); isFormalized = true; break;
                         case "card": sectionText = result.desc_card; break;
                     }
                     // only add the section if it exists

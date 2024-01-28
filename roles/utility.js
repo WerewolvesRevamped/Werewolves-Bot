@@ -141,9 +141,9 @@ module.exports = function() {
     Verifies if a group exists
     **/
     this.verifyGroup = function(input) {
-        if(cachedGroupNames.length == 0) return true; // if cache is currently not loaded just allow it
+        if(cachedGroups.length == 0) return true; // if cache is currently not loaded just allow it
 		let inputGroup = input.replace(/[^a-z\$ ]/g,"").trim(); // parse group name
-		let group = cachedGroupNames.find(el => el === inputGroup); // check if group is in cache
+		let group = cachedGroups.find(el => el === inputGroup); // check if group is in cache
 		return group ? true : false;
 	}
     
@@ -238,6 +238,20 @@ module.exports = function() {
     }
     
     /**
+    Replace Async
+    allows async replacing with a custom replacing function
+    **/
+    this.replaceAsync = async function(str, regex, asyncFn) {
+        const promises = [];
+        str.replace(regex, (full, ...args) => {
+            promises.push(asyncFn(full, ...args));
+            return full;
+        });
+        const data = await Promise.all(promises);
+        return str.replace(regex, () => data.shift());
+    }
+    
+    /**
     Field Splitter
     Splits long texts into several elements for embed fields.
     **/
@@ -263,7 +277,7 @@ module.exports = function() {
     **/
     this.handleFields = function(text, sectionName, showTitle = true) {
         let fields = [];
-        if(text.length < 1000) { // check if text fits directly in one section
+        if(text.length < 1020) { // check if text fits directly in one section
             if(showTitle) fields.push({"name": `__${sectionName}__`, "value": text});
             else fields.push({"name": `_ _`, "value": text});
         } else { // split section into several
@@ -282,6 +296,35 @@ module.exports = function() {
      this.getRoleEmoji = function(roleName) {
         roleName = toTitleCase(roleName).replace(/[^\w]+/g,"").trim().toLowerCase();
         return client.emojis.cache.find(el => el.name.toLowerCase() == roleName);
+    }
+    
+    /**
+    Get LUT Emoji
+    gets an emoji by looking up a file path in the lut and then retrieving the emoji by file name
+    **/
+    this.getLUTEmoji = function(name, displayName) {
+        // attempt direct lookup by name
+        let direct = getRoleEmoji(name);
+        if(direct) return direct;
+        
+        // attempt direct lookup by display name
+        direct = getRoleEmoji(displayName);
+        if(direct) return direct;
+        
+        // attempt lookup via LUT
+        let lutval = applyLUT(name);
+        if(!lutval) lutval = applyLUT(displayName);
+        if(!lutval) return "❓";
+        lutval = lutval.split("/").pop().replace(/%20/g,"");
+        return getRoleEmoji(lutval);
+    }
+    
+    /**
+    Format Formalized
+    applies special formating for formalized descs
+    **/
+    this.formatFormalized = function(desc) {
+        return desc.replace(/ {2}/g, getEmoji("empty"));
     }
     
 }

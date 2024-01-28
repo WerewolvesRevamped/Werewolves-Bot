@@ -16,6 +16,8 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "infoadd - Returns role info with additional text\n";
 				if(isGameMaster(member)) help += stats.prefix + "elect - Elects a player to a role\n";
 				if(isGameMaster(member)) help += stats.prefix + "infomanage [query|get] - Manages info\n";
+				if(isGameMaster(member)) help += stats.prefix + "groups [get|list] - Manages groups\n";
+				if(isGameMaster(member)) help += stats.prefix + "groups [query|parse] - Updates/Parses groups\n";
 				help += "; - Returns role info\n";
 				help += ". - Returns simplified role info\n";
 				help += "~ - Returns formalized role info\n";
@@ -99,8 +101,8 @@ module.exports = function() {
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
 					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles [get|list|list_names]\n" + stats.prefix + "roles [query|parse]\n```";
-						help += "```\nFunctionality\n\nGroup of commands to handle roles and aliases. " + stats.prefix + "help roles <sub-command> for detailed help.```";
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles [get|list]\n" + stats.prefix + "roles [query|parse]\n```";
+						help += "```\nFunctionality\n\nGroup of commands to handle roles. " + stats.prefix + "help roles <sub-command> for detailed help.```";
 						help += "```diff\nAliases\n\n- role\n- r\n```";
 					break;
 					case "get":
@@ -122,6 +124,36 @@ module.exports = function() {
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles parse\n```";
 						help += "```\nFunctionality\n\nParses all locally stored roles.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "roles parse\n```";
+					break;
+				}
+			break;
+			case "groups":
+				if(!isGameMaster(member)) break;
+				switch(args[1]) {
+					default:
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "groups [get|list|list_names]\n" + stats.prefix + "groups [query|parse]\n```";
+						help += "```\nFunctionality\n\nGroup of commands to handle groups. " + stats.prefix + "help groups <sub-command> for detailed help.```";
+						help += "```diff\nAliases\n\n- group\n- r\n```";
+					break;
+					case "get":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "groups get <Group Name>\n```";
+						help += "```\nFunctionality\n\nRetrieves a groups's data\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "groups get bakers\n```";
+					break;
+					case "list":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "groups list\n```";
+						help += "```\nFunctionality\n\nLists all groups, their team and emoji.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "groups list\n```";
+					break;
+					case "query":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "groups query\n```";
+						help += "```\nFunctionality\n\nQueries all groups from github.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "groups query\n```";
+					break;
+					case "parse":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "groups parse\n```";
+						help += "```\nFunctionality\n\nParses all locally stored groups.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "groups parse\n```";
 					break;
 				}
 			break;

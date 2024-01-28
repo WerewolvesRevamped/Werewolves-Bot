@@ -67,6 +67,7 @@ module.exports = function() {
 			case "query": cmdGroupsQuery(message.channel); break;
 			case "parse": cmdGroupsParse(message.channel); break;
             case "get": cmdGroupsGet(message.channel, args); break
+			case "list": cmdGroupsList(message.channel); break;
 			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
 		}
 	}
@@ -141,6 +142,15 @@ module.exports = function() {
              // set embed title
             embed.author = { name: result.display_name };
             
+            // get lut icon if applicable
+            let lutval = applyLUT(result.name);
+            if(!lutval) lutval = applyLUT(result.display_name);
+            if(lutval) { // set icon and name
+                //console.log(`${iconRepoBaseUrl}${lutval}`);
+                embed.thumbnail = { "url": `${iconRepoBaseUrl}${lutval}.png` };
+                embed.author.icon_url = `${iconRepoBaseUrl}${lutval}.png`;
+            } 
+            
             // Add a field for every role value
             for(attr in result) {
                 embed.fields.push({ "name": toTitleCase(attr), "value": (result[attr]+"").substr(0, 1000) + ((result[attr]+"").length > 1000 ? " **...**" : "") });
@@ -171,6 +181,32 @@ module.exports = function() {
 		}, () => {
 			// DB error
 			channel.send("⛔ Database error. Couldn't look for role list!");
+		});
+	}
+    
+    /**
+    Command: $groups list
+    Lists all groups
+    **/
+	/* Lists all groups names */
+	this.cmdGroupsList = function(channel) {
+		// Get all groups
+		sql("SELECT * FROM groups ORDER BY name ASC", result => {
+			if(result.length > 0) {
+				// At least one role exists
+				channel.send("✳️ Sending a list of currently existing groups:");
+				// Send message
+				chunkArray(result.map(group => {
+                    let emoji = getLUTEmoji(group.name, group.display_name);
+                    return `**${emoji} ${toTitleCase(group.display_name)}** (${toTitleCase(group.team)})`;
+                }), 20).map(el => el.join(", ")).forEach(el => channel.send(el));
+			} else { 
+				// No groups exist
+				channel.send("⛔ Database error. Could not find any groups!");
+			}
+		}, () => {
+			// DB error
+			channel.send("⛔ Database error. Couldn't look for group list!");
 		});
 	}
     
