@@ -25,7 +25,7 @@ module.exports = function() {
         roleName = parseRole(roleName);
 		if(!verifyInfoMessage(roleName)) { // not a valid role
 			// get all roles and aliases, to get an array of all possible role names
-			let allRoleNames = [...cachedRoles, ...cachedAliases.map(el => el.alias), ...cachedInfoNames];
+			let allRoleNames = [...cachedRoles, ...cachedAliases.map(el => el.alias), ...cachedInfoNames, ...cachedGroups];
 			let bestMatch = findBestMatch(roleName.toLowerCase(), allRoleNames.map(el => el.toLowerCase())); // find closest match
 			// check if match is close enough
 			if(bestMatch.value <= ~~(roleName.length/2)) { // auto alias if so, but send warning 
@@ -48,8 +48,15 @@ module.exports = function() {
         if(cachedRoles.includes(roleName)) {
             // message is a role
             infoEmbed = await getRoleEmbed(roleName, sections, channel.guild);
-        } else {
+        } else if(cachedInfoNames.includes(roleName)) {
+            // its an info
             infoEmbed = await getInfoEmbed(roleName, channel.guild);
+        } else if(cachedGroups.includes(roleName)) {
+            // its a group
+            infoEmbed = await getGroupEmbed(roleName, channel.guild);
+        } else {
+            // its nothing? should be impossible since verifyInfoMessage checks its one of the above minimum
+            infoEmbed = await getBasicEmbed(channel.guild);
         }
         
         // overwrite name

@@ -133,15 +133,25 @@ module.exports = function() {
     this.verifyInfo = function(input) {
         if(cachedInfoNames.length == 0) return true; // if cache is currently not loaded just allow it
 		let inputInfo = input.replace(/[^a-z\$ ]/g,"").trim(); // parse info name
-		let info = cachedInfoNames.find(el => el === inputInfo); // check if role is in cache
+		let info = cachedInfoNames.find(el => el === inputInfo); // check if info is in cache
 		return info ? true : false;
+	}
+    
+    /** Verify Group
+    Verifies if a group exists
+    **/
+    this.verifyGroup = function(input) {
+        if(cachedGroupNames.length == 0) return true; // if cache is currently not loaded just allow it
+		let inputGroup = input.replace(/[^a-z\$ ]/g,"").trim(); // parse group name
+		let group = cachedGroupNames.find(el => el === inputGroup); // check if group is in cache
+		return group ? true : false;
 	}
     
     /** Verify Info Message
     Verifies if an info message exists
     **/
     this.verifyInfoMessage = function(input) {
-		return verifyRole(input) || verifyInfo(input);
+		return verifyRole(input) || verifyInfo(input) || verifyGroup(input);
 	}
     
     /**

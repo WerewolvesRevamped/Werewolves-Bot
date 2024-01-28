@@ -22,6 +22,7 @@ module.exports = function() {
     this.colorsLUTPath = `${iconRepoBaseUrl}colors.csv`;
     this.rolepathsPath = `${roleRepoBaseUrl}_paths/roles`;
     this.infopathsPath = `${roleRepoBaseUrl}_paths/info`;
+    this.grouppathsPath = `${roleRepoBaseUrl}_paths/groups`;
     /**
     Website Paths
     **/

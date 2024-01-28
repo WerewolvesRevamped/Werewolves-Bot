@@ -337,13 +337,13 @@ client.on("messageCreate", async message => {
 	case "infomanage":
 		if(checkGM(message)) cmdInfomanage(message, args, argsX);
 	break;
+	/* groups */ // Command for groups
+	case "groups":
+		if(checkGM(message)) cmdGroups(message, args, argsX);
+	break;
 	/* Update */ // Updates all github linked data
 	case "update":
 		if(checkGM(message)) cmdUpdate(message.channel);
-	break;
-	/* Roles */ // Modify channel information for commands
-	case "channels":
-		//if(checkGM(message)) cmdChannels(message, args, argsX);
 	break;
 	/* Role Info */ // Returns the info for a role set by the roles command
 	case "info":

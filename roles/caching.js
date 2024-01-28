@@ -9,6 +9,7 @@ module.exports = function() {
     Global Role Values
     **/
     this.cachedRoles = [];
+    this.cachedGroups = [];
     this.cachedAliases = [];
     this.cachedInfoNames = [];
     this.iconLUT = [];
@@ -24,6 +25,18 @@ module.exports = function() {
 				cachedRoles = result.map(el => el.name);
 		}, () => {
 			log("Roles > ❗❗❗ Unable to cache role!");
+		});
+	}
+    
+    /**
+    Cache Groups
+    caches the current state of the groups database
+    **/
+    this.cacheGroups = function() {
+		sql("SELECT name FROM groups", result => {
+				cachedGroups = result.map(el => el.name);
+		}, () => {
+			log("Roles > ❗❗❗ Unable to cache groups!");
 		});
 	}
     
@@ -58,6 +71,7 @@ module.exports = function() {
     this.cacheRoleInfo = function() {
 		cacheAliases();
 		cacheRoles();
+        cacheGroups();
         cacheInfoNames();
 	}
     
@@ -70,7 +84,7 @@ module.exports = function() {
         const body = await fetchBody(iconLUTPath);
         iconLUT = {};
         body.split("\n").filter(el => el && el.length).map(el => el.split(",")).forEach(el => iconLUT[el[0]] = urlConv(el[1].trim()));
-        console.log(iconLUT);
+        //console.log(iconLUT);
     }
     
     /**

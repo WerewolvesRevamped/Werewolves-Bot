@@ -44,9 +44,29 @@ module.exports = function() {
 		}
 		// Find subcommand
 		switch(args[0]) {
-			// Role Subcommand
+			// Info Subcommand
 			case "query": cmdInfomanageQuery(message.channel); break;
             case "get": cmdInfomanageGet(message.channel, args); break
+			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
+		}
+	}
+    
+	/**
+    Command: $groups
+    Handle groups command
+    **/
+	this.cmdGroups = function(message, args, argsX) {
+		// Check subcommand
+		if(!args[0]) { 
+			message.channel.send("⛔ Syntax error. Not enough parameters!"); 
+			return; 
+		}
+		// Find subcommand
+		switch(args[0]) {
+			// Groups Subcommand
+			case "query": cmdGroupsQuery(message.channel); break;
+			case "parse": cmdGroupsParse(message.channel); break;
+            case "get": cmdGroupsGet(message.channel, args); break
 			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
 		}
 	}
@@ -97,6 +117,38 @@ module.exports = function() {
 		}
         infoEmbed = await getInfoEmbed(args[1], channel.guild);
         channel.send({ embeds: [ infoEmbed ] });
+    }
+    
+    
+    /**
+    Command: $groups get
+    Gets a specific group.
+    **/
+    this.cmdGroupsGet = async function(channel, args) {
+		// Check arguments
+		if(!args[1]) { 
+			channel.send("⛔ Syntax error. Not enough parameters!"); 
+			return; 
+		} else if(!verifyGroup(args[1])) {
+			channel.send("⛔ Command error. Invalid group `" + args[1] + "`!"); 
+			return; 
+		}
+        // Get all roles values
+        sql("SELECT * FROM groups WHERE name = " + connection.escape(args[1]), async result => {
+            result = result[0];
+            // get the basic embed
+             var embed = await getBasicEmbed(channel.guild);
+             // set embed title
+            embed.author = { name: result.display_name };
+            
+            // Add a field for every role value
+            for(attr in result) {
+                embed.fields.push({ "name": toTitleCase(attr), "value": (result[attr]+"").substr(0, 1000) + ((result[attr]+"").length > 1000 ? " **...**" : "") });
+            }
+            
+            // Send the embed
+            channel.send({ embeds: [ embed ] }); 
+        });
     }
     
     /**
