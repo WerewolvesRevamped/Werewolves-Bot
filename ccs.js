@@ -575,7 +575,7 @@ module.exports = function() {
 		if(!(isCC(channel) || isSC(channel) || isGameMaster(member, true) || isHelper(member))) {
 			channel.send("⛔ Command error. Can't use command outside a CC/SC!");
 			return;
-		} else if(!args[1] && spam = false) {
+		} else if(!args[1] && spam == false) {
 			channel.send(helpCCs(member, ["cc", "create"]));
 			return;
 		} else if(!spam && !isGameMaster(member, true) && !isHelper(member) && stats.cc_limit >= -10 && ccs.find(el => el.id == member.id).ccs >= stats.cc_limit) {
