@@ -946,8 +946,7 @@ module.exports = function() {
         let curTriggerType = null;
         let curTrigger = [];
         let unique = false;
-        let inherit = [];
-        let require = [];
+        let inherit = [], require = [], roleAttribute = [];
         let triggers = [];
 
         // iterate through all the lines of the role
@@ -988,8 +987,10 @@ module.exports = function() {
                     curTrigger.push(curInputLineSplit.join(": "));
                 } else if(curTriggerName == "Inherit") { // Inherit special trigger
                     inherit.push(curInputLineSplit.join(": "));
-                }  else if(curTriggerName == "Require") { // Require special trigger
+                } else if(curTriggerName == "Require") { // Require special trigger
                     require.push(curInputLineSplit.join(": "));
+                } else if(curTriggerName == "Role Attribute") { // Role Attribute special trigger
+                    roleAttribute.push(curInputLineSplit.join(": "));
                 } else {
                     //   const adancedTriggerTypes = ["On <Target> Visited [<Ability Type>]"]; // trigger types containing parameters
                     // attempt to parse complex triggers
@@ -1042,7 +1043,7 @@ module.exports = function() {
             triggers.push([curTriggerType, curTrigger]);
         }
 
-        return { triggers: triggers, unique: unique, inherits: inherit, requires: require };
+        return { triggers: triggers, unique: unique, inherits: inherit, requires: require, role_attribute: roleAttribute };
 
     }
     

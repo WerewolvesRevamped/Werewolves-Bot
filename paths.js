@@ -11,10 +11,11 @@ module.exports = function() {
     /**
     Repo Paths
     **/
-    this.iconRepo = "WerewolvesRevamped/Werewolves-Icons";
+    this.wwrOrg = "WerewolvesRevamped";
+    this.iconRepo = `${wwrOrg}/Werewolves-Icons`;
     this.iconRepoBranch = "main"
     this.iconRepoBaseUrl = `${githubRaw}${iconRepo}/${iconRepoBranch}/`;
-    this.roleRepo = "WerewolvesRevamped/Werewolves-Roles";
+    this.roleRepo = `${wwrOrg}/Werewolves-Roles`;
     this.roleRepoBranch = "main";
     this.roleRepoBaseUrl = `${githubRaw}${roleRepo}/${roleRepoBranch}/`;
     /** Files **/

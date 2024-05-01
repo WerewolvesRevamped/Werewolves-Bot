@@ -43,8 +43,12 @@ require("./roles/roles.js")();
 require("./utility/utility.js")();
 require("./abilities/abilities.js")();
 
+
+
 /* Setup */
 client.on("ready", async () => {
+    setMainGuild();
+    
 	sqlSetup();
 	getStats();
 	setTimeout(function() {

@@ -3,6 +3,7 @@
     The module for implementing ability automations
 **/
 require("./triggers.js")();
+require("./joining.js")();
 
 module.exports = function() {
     
@@ -10,50 +11,16 @@ module.exports = function() {
     Execute Ability
     executes an ability
     **/
-    this.executeAbility = function(pid, ability) {
+    this.executeAbility = async function(pid, ability) {
         switch(ability.type) {
             default:
                 log("UNKNOWN ABILITY TYPE", JSON.stringify(ability));
             break;
             case "joining":
-                abilityJoining(pid, ability)
+                await abilityJoining(pid, ability)
             break;
         }
     }
-    
-    /**
-    Ability: Joining
-    **/
-    this.abilityJoining = function(pid, ability) {
-        switch(ability.subtype) {
-            default:
-                log("UNKNOWN ABILITY SUBTYPE", JSON.stringify(ability));
-            break;
-            case "add":
-                joiningAdd(parseSelector(ability.target, pid), parseGroupName(ability.group), ability.membership_type, ability.duration);
-            break;
-            case "remove":
-                joiningRemove(parseSelector(ability.target), parseGroupName(ability.group));
-            break;
-        }
-    }
-    
-    /**
-    Ability: Joining - Add
-    adds a player to a group
-    **/
-    this.joiningAdd = function(target, group, type, duration) {
-        console.log("JOINING ADD", target, group, type, duration);
-    }
-    
-    /**
-    Ability: Joining - Remove
-    removes a player from a group
-    **/
-    this.joiningRemove = function(target, group) {
-        console.log("JOINING REMOVE", target, group);
-    }
-    
     
     /**
     Parse Selector

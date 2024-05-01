@@ -57,6 +57,12 @@ module.exports = function() {
 		// Assign roles
 		startOnePlayer(channel, channel.guild.roles.cache.get(stats.signed_up).members.toJSON(), 0);
 		createSCs(channel, debug);
+        
+        // emit a starting event
+        setTimeout(function() {
+            triggerStarting();
+        }, 1000 * 60);
+        
 	}
     
 
@@ -423,6 +429,8 @@ module.exports = function() {
 		},() => {
 			channel.send("⛔ Database error. Could not reset poll list!");
 		});
+        // reset active groups
+        groupsReset();
 		// Reset Poll Count
 		sqlSetStat(13, 1, result => {
 			channel.send("✅ Successfully reset poll counter!");

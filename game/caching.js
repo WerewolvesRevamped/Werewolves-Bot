@@ -16,7 +16,7 @@ module.exports = function() {
     **/
 	this.getSCCats = function() {
 		// Get SC Cats
-		sql("SELECT id FROM sc_cats", result => {
+		sql("SELECT id FROM sc_cats ORDER BY ai_id ASC", result => {
 			// Cache SC Cats
 			cachedSCs = result.map(el => el.id);
 		}, () => {

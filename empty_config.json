@@ -1,6 +1,7 @@
 {
 	"token": "TOKEN",
     "github_token": "GHP TOKEN",
+    "guild": "GUILD ID",
 	"db": {
 		"host": "localhost",
 		"user": "USER",

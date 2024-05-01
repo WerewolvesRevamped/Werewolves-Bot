@@ -88,6 +88,7 @@ module.exports = function() {
             });
         });
 	}
+    
 
     /**
     Create Secret Channels - Send DM
@@ -162,7 +163,7 @@ module.exports = function() {
     Get Secret Channel Category Permissions
     returns the default permissions for a secret channel category
     **/
-	 function getSCCatPerms(guild) {
+	 this.getSCCatPerms = function(guild) {
 		return [ getPerms(guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.participant, ["write"], ["read"]), getPerms(stats.sub, ["write"], ["read"]) ];
 	}
     

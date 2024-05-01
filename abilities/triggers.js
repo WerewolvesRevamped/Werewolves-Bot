@@ -11,22 +11,34 @@ module.exports = function() {
     **/
     function triggerHandler(triggerName, args = []) {
         // get all players
-        sql("SELECT role,id FROM players WHERE type='player' AND alive=1", r => {
+        sql("SELECT role,id FROM players WHERE type='player' AND alive=1", async r => {
             // get their role's data
             for(let pr of r) {
-                sql("SELECT * FROM roles WHERE name=" + connection.escape(pr.role), result => {
-                    // parse the formalized desc into an object
-                    let parsed = JSON.parse(result[0].parsed);
-                    // grab the triggers
-                    let triggers = parsed.triggers;
-                    // filter out the relevant triggers
-                    triggers = triggers.filter(el => el.trigger == triggerName);
-                    triggers.forEach(el => {
-                        // execute all relevant triggers
-                        executeTrigger(pr.id, el);
-                    });
-                });
+                await triggerHandlerPlayer(pr, triggerName);
             }
+        });
+    }
+    
+    /**
+    Trigger Handler - Player
+    handles trigger triggering for a single player
+    **/
+    async function triggerHandlerPlayer(pr, triggerName) {
+        await new Promise(res => {
+            sql("SELECT * FROM roles WHERE name=" + connection.escape(pr.role), async result => {
+                // parse the formalized desc into an object
+                let parsed = JSON.parse(result[0].parsed);
+                // grab the triggers
+                let triggers = parsed.triggers;
+                // filter out the relevant triggers
+                triggers = triggers.filter(el => el.trigger == triggerName);
+                for(const trigger of triggers) {
+                    // execute all relevant triggers
+                    await executeTrigger(pr.id, trigger);
+                }
+                // resolve outer promise
+                res();
+            });            
         });
     }
     
@@ -34,12 +46,12 @@ module.exports = function() {
     Execute Trigger
     executes the abilities of a trigger if applicable
     **/
-    function executeTrigger(pid, trigger) {
+    async function executeTrigger(pid, trigger) {
         // iterate through abilities of the trigger
-        trigger.abilities.forEach(el => {
+        for(const ability of trigger.abilities) {
             // execute them
-            executeAbility(pid, el);
-        });
+            await executeAbility(pid, ability);
+        }
     }
     
     /**
@@ -47,6 +59,7 @@ module.exports = function() {
     Manually emits a certain trigger type
     **/
     this.cmdEmit = function(channel, argsX) {
+        console.log(`Emitting a ${argsX[0]} event.`);
         triggerHandler(argsX[0]);
     }
     

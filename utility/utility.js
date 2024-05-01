@@ -13,6 +13,16 @@ require("./help.js")();
 
 module.exports = function() {
     
+    this.mainGuild = null;
+    
+    /**
+    Set Main Guild
+    makes the main guild available as a global object so we dont need to pass a reference everywhere
+    **/
+    this.setMainGuild = async function() {
+        mainGuild = await global.client.guilds.fetch(config.guild);
+    }
+    
 	/**
     to Title Case
     Converts a string to title case

@@ -92,7 +92,7 @@ module.exports = function() {
     
     /**
     SQL Promise
-    Does a sql query as a promose
+    Does a sql query as a promise
     **/
     this.sqlProm = function(query) {
         return new Promise(res => {

@@ -68,16 +68,7 @@ module.exports = function() {
         }
         
         // send embed
-        channel.send({ embeds: [ infoEmbed ] }).then(m => {
-            if(pin) { // pin message if pin is set to true
-                m.pin().then(mp => {
-                    mp.channel.messages.fetch().then(messages => {
-                        mp.channel.bulkDelete(messages.filter(el => el.type === MessageType.ChannelPinnedMessage)); // delete pinning message
-                    });	
-                })
-            }
-        });
-        
+        sendEmbed(channel, infoEmbed, pin);
         
     }
     
