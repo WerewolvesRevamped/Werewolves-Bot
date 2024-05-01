@@ -9,7 +9,7 @@ module.exports = function() {
 		let help = "";
 		switch(args[0]) {
 			case "":
-				if(isGameMaster(member)) help += stats.prefix + "roles [get|list] - Manages roles\n";
+				if(isGameMaster(member)) help += stats.prefix + "roles [get|list|list_names] - Manages roles\n";
 				if(isGameMaster(member)) help += stats.prefix + "roles [query|parse] - Updates/Parses roles\n";
 				if(isGameMaster(member)) help += stats.prefix + "infopin - Returns role info & pins the message\n";
 				if(isGameMaster(member)) help += stats.prefix + "infoedit - Edits a bot info message\n";
@@ -101,7 +101,7 @@ module.exports = function() {
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
 					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles [get|list]\n" + stats.prefix + "roles [query|parse]\n```";
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles [get|list|list_names]\n" + stats.prefix + "roles [query|parse]\n```";
 						help += "```\nFunctionality\n\nGroup of commands to handle roles. " + stats.prefix + "help roles <sub-command> for detailed help.```";
 						help += "```diff\nAliases\n\n- role\n- r\n```";
 					break;
@@ -114,6 +114,11 @@ module.exports = function() {
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles list\n```";
 						help += "```\nFunctionality\n\nLists all roles, their category and emoji.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "roles list\n```";
+					break;
+					case "list_names":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles list_names\n```";
+						help += "```\nFunctionality\n\nLists all role names\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "roles list_names\n```";
 					break;
 					case "query":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles query\n```";

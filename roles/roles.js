@@ -28,6 +28,7 @@ module.exports = function() {
 			case "parse": cmdRolesParse(message.channel); break;
 			case "get": cmdRolesGet(message.channel, args); break;
 			case "list": cmdRolesList(message.channel); break;
+			case "list_names": cmdRolesListNames(message.channel); break;
 			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
 		}
 	}
@@ -174,6 +175,29 @@ module.exports = function() {
 				channel.send("✳️ Sending a list of currently existing roles:");
 				// Send message
 				chunkArray(result.map(role => `**${getRoleEmoji(role.name) ?? "❓"} ${toTitleCase(role.display_name)}** (${toTitleCase(role.class)[0]}${toTitleCase(role.category)[0]})`), 30).map(el => el.join(", ")).forEach(el => channel.send(el));
+			} else { 
+				// No roles exist
+				channel.send("⛔ Database error. Could not find any roles!");
+			}
+		}, () => {
+			// DB error
+			channel.send("⛔ Database error. Couldn't look for role list!");
+		});
+	}
+    
+    /**
+    Command: $roles list_names
+    Lists all role names
+    **/
+	/* Lists all roles names */
+	this.cmdRolesListNames = function(channel) {
+		// Get all roles
+		sql("SELECT * FROM roles ORDER BY name ASC", result => {
+			if(result.length > 0) {
+				// At least one role exists
+				channel.send("✳️ Sending a list of currently existing role names:");
+				// Send message
+				chunkArray(result.map(role => `${toTitleCase(role.display_name)}`), 200).map(el => el.join(",")).forEach(el => channel.send(el));
 			} else { 
 				// No roles exist
 				channel.send("⛔ Database error. Could not find any roles!");

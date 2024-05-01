@@ -973,7 +973,7 @@ module.exports = function() {
                 if(curInputLine === "No Abilities") { // No Abilities
                     // nothing - no abilities
                     continue;
-                } else if(curInputLine === "Unique Role") { // Unique Role
+                } else if(curInputLine === "Unique Role" || curInputLine === "Unique Group") { // Unique
                     // set unique value to true
                     unique = true;
                     continue;
