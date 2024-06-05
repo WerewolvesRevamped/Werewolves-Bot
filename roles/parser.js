@@ -34,8 +34,9 @@ module.exports = function() {
     Parses a role from a string into an object
     **/
     this.parseRoleText = function(inputLines) {
-        // split the role into its triggers
         if(debugMode) console.log("-=- S T A R T -=-");
+
+        // split the role into its triggers
         if(debugMode) console.log("PARSE TRIGGERS");
         let triggers = parseTriggers(inputLines);
         if(debugMode) console.log(JSON.stringify(triggers));
@@ -946,7 +947,7 @@ module.exports = function() {
         let curTriggerType = null;
         let curTrigger = [];
         let unique = false;
-        let inherit = [], require = [], roleAttribute = [];
+        let require = [], roleAttribute = [];
         let triggers = [];
 
         // iterate through all the lines of the role
@@ -985,8 +986,6 @@ module.exports = function() {
                 if(basicTriggerTypes.includes(curTriggerName)) { // normal triggers
                     curTriggerType = curTriggerName;
                     curTrigger.push(curInputLineSplit.join(": "));
-                } else if(curTriggerName == "Inherit") { // Inherit special trigger
-                    inherit.push(curInputLineSplit.join(": "));
                 } else if(curTriggerName == "Require") { // Require special trigger
                     require.push(curInputLineSplit.join(": "));
                 } else if(curTriggerName == "Role Attribute") { // Role Attribute special trigger
@@ -1043,7 +1042,7 @@ module.exports = function() {
             triggers.push([curTriggerType, curTrigger]);
         }
 
-        return { triggers: triggers, unique: unique, inherits: inherit, requires: require, role_attribute: roleAttribute };
+        return { triggers: triggers, unique: unique, requires: require, role_attribute: roleAttribute };
 
     }
     

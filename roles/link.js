@@ -20,6 +20,22 @@ module.exports = function() {
     }
     
     /**
+    Command: $sets query
+    Runs queryRoles to query all ability sets from github
+    **/
+    this.cmdSetsQuery = async function(channel) {
+        channel.send(`🔄 Querying ability sets. Please wait. This may take several minutes.`);
+        try {
+            const output = await querySets();
+            output.forEach(el => channel.send(`❗ ${el}`));
+        } catch(err) {
+            channel.send(`⛔ Querying ability sets failed.`);
+        }
+        channel.send(`✅ Querying ability sets completed.`);
+        cacheRoleInfo();
+    }
+    
+    /**
     Command: $infomanage query
     Runs queryInfo to query all info from github
     **/
@@ -91,6 +107,12 @@ module.exports = function() {
     **/
     this.cmdUpdate = async function(channel) {
         var output;
+        /** Pre Parsing */
+        // query ability sets
+        channel.send(`🔄 Querying ability sets. Please wait. This may take several minutes.`);
+        output = await querySets();
+        channel.send(`❗ Querying ability sets completed with \`${output.length}\` errors.`);
+        /** Parsed Elements */
         // query roles
         channel.send(`🔄 Querying roles. Please wait. This may take several minutes.`);
         output = await queryRoles();
@@ -99,10 +121,6 @@ module.exports = function() {
         channel.send(`🔄 Parsing roles. Please wait. This may take several minutes.`);
         output = await parseRoles();
         channel.send(`❗ Parsing roles completed with \`${output.output.length}\` errors.`);
-        // query info
-        channel.send(`🔄 Querying info. Please wait. This may take several minutes.`);
-        output = await queryInfo();
-        channel.send(`❗ Querying info completed with \`${output.length}\` errors.`);
         // query groups
         channel.send(`🔄 Querying groups. Please wait. This may take several minutes.`);
         output = await queryGroups();
@@ -111,6 +129,12 @@ module.exports = function() {
         channel.send(`🔄 Parsing groups. Please wait. This may take several minutes.`);
         output = await parseGroups();
         channel.send(`❗ Parsing groups completed with \`${output.output.length}\` errors.`);
+        /** No Parsing */
+        // query info
+        channel.send(`🔄 Querying info. Please wait. This may take several minutes.`);
+        output = await queryInfo();
+        channel.send(`❗ Querying info completed with \`${output.length}\` errors.`);
+        /** Post Update */
         // cache values
         cacheRoleInfo();
         channel.send(`❗ Caching role info.`);
@@ -255,6 +279,42 @@ module.exports = function() {
         return output;
     }
     
+    
+    /** 
+    Query Ability Sets
+    queries all ability sets from github
+    **/
+    async function querySets() {
+        return await runQuery(clearSets, setspathsPath, querySetsCallback, 5);
+    }
+        
+    /**
+    Clear Roles
+    deletes the entire contents of the roles database
+    **/
+     function clearSets() {
+		sql("DELETE FROM sets");
+	}
+    
+    /**
+    Query Sets - Callback
+    the callback for role queries - run once for each role with the name and path passed.
+    **/
+    async function querySetsCallback(path, name) {
+        var output = null;
+        // extract values
+        const roleContents = await queryFile(path, name); // get the role contents
+        const roleDescs = roleContents.split("\n"); // split the role descriptions, into the different types of role description
+        roleDescs.shift();
+        const contents = roleDescs.join("\n");
+        const setName = getRoleDescName(roleContents); // grabs the role name inbetween the **'s in the first line
+        const parsedSetName = getDBName(setName); // parsed role name
+        // insert the role into the databse
+        sql("INSERT INTO sets (name,display_name,contents) VALUES (" + connection.escape(parsedSetName) + "," + connection.escape(setName) + "," + connection.escape(contents) + ")");
+        // return output
+        return output;
+    }
+    
     /** 
     Query Info
     queries all infos from github
@@ -360,8 +420,23 @@ module.exports = function() {
                 if(formalizedDesc == "No description available.") {
                     throw new Error("No formalized description available");
                 }
+                
+                // substitute in ability sets
+                formalizedDesc = await replaceAsync(formalizedDesc, /Inherit: `(.+)`/g, async function(match, set) { 
+                    console.log(match, set);
+                    set = getDBName(set);
+                    // check if ability set exists
+                    if(!verifySet(set)) {
+                        throw new Error(`Invalid Ability Set \`\`\`\n${set}\n\`\`\``);
+                    }
+                    // get ability set from db
+                    const abilitySet = await sqlPromEsc("SELECT * FROM sets WHERE name = ", set);
+                    // return ability set contents
+                    return abilitySet[0].contents;
+                });
+                
                 // parse the role using the role parser
-                parsed = parseRoleText(formalizedDesc.split("\n"));
+                parsed = await parseRoleText(formalizedDesc.split("\n"));
                 successCounter++;
                 sql("UPDATE " + dbName + " SET parsed = " + connection.escape(JSON.stringify(parsed)) + " WHERE name = " + connection.escape(el));
             } catch (err) {

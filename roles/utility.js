@@ -147,6 +147,16 @@ module.exports = function() {
 		return group ? true : false;
 	}
     
+    /** Verify Set
+    Verifies if a set exists
+    **/
+    this.verifySet = function(input) {
+        if(cachedSets.length == 0) return true; // if cache is currently not loaded just allow it
+		let inputSet = input.replace(/[^a-z\$ ]/g,"").trim(); // parse set name
+		let group = cachedSets.find(el => el === inputSet); // check if set is in cache
+		return group ? true : false;
+	}
+    
     /** Verify Info Message
     Verifies if an info message exists
     **/

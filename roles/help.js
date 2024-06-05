@@ -18,6 +18,9 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "infomanage [query|get] - Manages info\n";
 				if(isGameMaster(member)) help += stats.prefix + "groups [get|list] - Manages groups\n";
 				if(isGameMaster(member)) help += stats.prefix + "groups [query|parse] - Updates/Parses groups\n";
+				if(isGameMaster(member)) help += stats.prefix + "groups [active|delete] - Returns currently active groups\n";
+				if(isGameMaster(member)) help += stats.prefix + "sets [get|list] - Manages sets\n";
+				if(isGameMaster(member)) help += stats.prefix + "sets [query] - Updates sets\n";
 				help += "; - Returns role info\n";
 				help += ". - Returns simplified role info\n";
 				help += "~ - Returns formalized role info\n";
@@ -136,7 +139,7 @@ module.exports = function() {
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
 					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "groups [get|list|list_names]\n" + stats.prefix + "groups [query|parse]\n```";
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "groups [get|list|list_names]\n" + stats.prefix + "groups [query|parse]\n" + stats.prefix + "groups [active|delete]\n```";
 						help += "```\nFunctionality\n\nGroup of commands to handle groups. " + stats.prefix + "help groups <sub-command> for detailed help.```";
 						help += "```diff\nAliases\n\n- group\n- r\n```";
 					break;
@@ -159,6 +162,41 @@ module.exports = function() {
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "groups parse\n```";
 						help += "```\nFunctionality\n\nParses all locally stored groups.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "groups parse\n```";
+					break;
+					case "active":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "groups active\n```";
+						help += "```\nFunctionality\n\nReturns all active groups instances.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "groups active\n```";
+					break;
+					case "delete":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "groups delete\n```";
+						help += "```\nFunctionality\n\nDelets an active group instance (but leaves behind the channel!). Use '" + stats.prefix + "groups active' subcommand to retrieve group ids.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "groups delete [id]\n```";
+					break;
+				}
+			break;
+			case "sets":
+				if(!isGameMaster(member)) break;
+				switch(args[1]) {
+					default:
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "sets [get|list]\n" + stats.prefix + "sets [query]\n```";
+						help += "```\nFunctionality\n\nGroup of commands to handle sets. " + stats.prefix + "help sets <sub-command> for detailed help.```";
+						help += "```diff\nAliases\n\n- group\n- r\n```";
+					break;
+					case "get":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "sets get <Set Name>\n```";
+						help += "```\nFunctionality\n\nRetrieves a sets's data\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "sets get lycan\n```";
+					break;
+					case "list":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "sets list\n```";
+						help += "```\nFunctionality\n\nLists all sets.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "sets list\n```";
+					break;
+					case "query":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "sets query\n```";
+						help += "```\nFunctionality\n\nQueries all sets from github.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "sets query\n```";
 					break;
 				}
 			break;

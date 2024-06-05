@@ -345,6 +345,10 @@ client.on("messageCreate", async message => {
 	case "groups":
 		if(checkGM(message)) cmdGroups(message, args, argsX);
 	break;
+	/* sets */ // Command for sets
+	case "sets":
+		if(checkGM(message)) cmdSets(message, args, argsX);
+	break;
 	/* Update */ // Updates all github linked data
 	case "update":
 		if(checkGM(message)) cmdUpdate(message.channel);
