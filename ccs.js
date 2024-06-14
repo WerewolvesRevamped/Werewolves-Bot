@@ -405,6 +405,7 @@ module.exports = function() {
 			channel.send("⛔ Command error. Can't use command outside a CC!");
 			return;
 		}
+        console.log("CC Archive: " + member.id);
 		let ccOwner = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Member).filter(el => el.allow == 66560).map(el => el.id);
 		if(mode || isGameMaster(member, true) || ccOwner.includes(member.id)) {
 			channel.edit({ name: "🔒-" + channel.name })
