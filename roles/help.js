@@ -15,7 +15,8 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "infoedit - Edits a bot info message\n";
 				if(isGameMaster(member)) help += stats.prefix + "infoadd - Returns role info with additional text\n";
 				if(isGameMaster(member)) help += stats.prefix + "elect - Elects a player to a role\n";
-				if(isGameMaster(member)) help += stats.prefix + "infomanage [query|get] - Manages info\n";
+				if(isGameMaster(member)) help += stats.prefix + "infomanage [get|list] - Manages info\n";
+				if(isGameMaster(member)) help += stats.prefix + "infomanage [query] - Updates info\n";
 				if(isGameMaster(member)) help += stats.prefix + "groups [get|list] - Manages groups\n";
 				if(isGameMaster(member)) help += stats.prefix + "groups [query|parse] - Updates/Parses groups\n";
 				if(isGameMaster(member)) help += stats.prefix + "groups [active|delete] - Returns currently active groups\n";
@@ -84,7 +85,7 @@ module.exports = function() {
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
 					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "infomanage [query|get]\n```";
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "infomanage [query|get|lust]\n```";
 						help += "```\nFunctionality\n\nGroup of commands to handle info. " + stats.prefix + "help infomanage <sub-command> for detailed help.```";
 						help += "```diff\nAliases\n\n- im\n```";
 					break;
@@ -97,6 +98,12 @@ module.exports = function() {
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "infomanage get <Role Name>\n```";
 						help += "```\nFunctionality\n\nGets a specific info message.\n```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "infomanage get tavern\n```";
+					break;
+					break;
+					case "list":
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "infomanage list\n```";
+						help += "```\nFunctionality\n\nLists all current infos.\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "infomanage list\n```";
 					break;
                 }
             break;

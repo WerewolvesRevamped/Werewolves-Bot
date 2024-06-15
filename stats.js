@@ -299,7 +299,7 @@ module.exports = function() {
 			log("Stats > ❗❗❗ Unable to cache ghost!")
 		});
 		sqlGetStat(46,  result => { 
-			stats.haunting = result; 
+			stats.haunting = (result == "true"); 
 			if(doLog) log("Stats > Cached haunting as `" + result + "`!")
 		}, () => {
             stats.haunting = false;

@@ -436,7 +436,7 @@ module.exports = function() {
                 });
                 
                 // parse the role using the role parser
-                parsed = await parseRoleText(formalizedDesc.split("\n"));
+                parsed = parseRoleText(formalizedDesc.split("\n"));
                 successCounter++;
                 sql("UPDATE " + dbName + " SET parsed = " + connection.escape(JSON.stringify(parsed)) + " WHERE name = " + connection.escape(el));
             } catch (err) {

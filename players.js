@@ -463,7 +463,7 @@ module.exports = function() {
                 var reportMsg;
                 // Get info
                 sql("SELECT role FROM players WHERE id = " + connection.escape(el), result => {
-                    let rolesFiltered = result[0].role.split(",").filter(role => verifyRoleVisible(role));
+                    let rolesFiltered = result[0].role.split(",").filter(role => verifyRole(role));
                     let roleList = rolesFiltered.map(role => toTitleCase(role)).join("` + `");
                     let emojiList = rolesFiltered.map(role => {
                         let rEmoji = getRoleEmoji(role);
@@ -547,7 +547,7 @@ module.exports = function() {
 		// Get a list of players
 		sql("SELECT id,emoji,role,ccs FROM players WHERE type='player' AND alive=1", result => {
 			let playerListArray = result.map(el => {  
-                let rolesFiltered = el.role.split(",").filter(role => verifyRoleVisible(role));
+                let rolesFiltered = el.role.split(",").filter(role => verifyRole(role));
                 let rName = rolesFiltered[0];
                 let rEmoji = getRoleEmoji(rName);
                 rEmoji = (rEmoji ? `<:${rEmoji.name}:${rEmoji.id}> | ` : "❓ | ");
@@ -1164,7 +1164,7 @@ module.exports = function() {
 			// Get info
 			sql("SELECT " + args[1] + " FROM players WHERE id = " + connection.escape(user), result => {
 				let playerName = channel.guild.members.cache.get(user)?.displayName ?? "USER LEFT";
-				channel.send("✅ `" + playerName + "`'s " + args[1] + " is `" + (args[1] === "role" ? (mode ? result[0][args[1]].split(",").filter(role => verifyRoleVisible(role)).join("` + `") : result[0][args[1]].split(",").join(", ")) : result[0][args[1]]) + "`!");
+				channel.send("✅ `" + playerName + "`'s " + args[1] + " is `" + (args[1] === "role" ? (mode ? result[0][args[1]].split(",").filter(role => verifyRole(role)).join("` + `") : result[0][args[1]].split(",").join(", ")) : result[0][args[1]]) + "`!");
 			}, () => {
 				// Database error
 				channel.send("⛔ Database error. Could not get player information!");
@@ -1216,7 +1216,8 @@ module.exports = function() {
 			let playerName = channel.guild.members.cache.get(user).displayName;
 			channel.send("✳ Resurrecting " + playerName + "!");
 			// Set Roles
-            switchRoles(channel.guild.members.cache.get(user), channel, stats.dead_participant, stats.participant, "dead participant", "participant");
+            if(!stats.haunting) switchRoles(channel.guild.members.cache.get(user), channel, stats.dead_participant, stats.participant, "dead participant", "participant");
+            else switchRoles(channel.guild.members.cache.get(user), channel, stats.ghost, stats.participant, "ghost", "participant");
 			// Set DB Value
 			channel.send(stats.prefix + "players set alive " + user + " 1");
 		}

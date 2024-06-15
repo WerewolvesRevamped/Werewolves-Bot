@@ -49,6 +49,7 @@ module.exports = function() {
 			// Info Subcommand
 			case "query": cmdInfomanageQuery(message.channel); break;
             case "get": cmdInfomanageGet(message.channel, args); break
+			case "list": cmdInfomanageList(message.channel); break;
 			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
 		}
 	}
@@ -230,6 +231,32 @@ module.exports = function() {
 		}, () => {
 			// DB error
 			channel.send("⛔ Database error. Couldn't look for set list!");
+		});
+	}
+    
+    /**
+    Command: $infomanage list
+    Lists all infos
+    **/
+	/* Lists all sets names */
+	this.cmdInfomanageList = function(channel) {
+		// Get all sets
+		sql("SELECT * FROM info ORDER BY name ASC", result => {
+			if(result.length > 0) {
+				// At least one role exists
+				channel.send("✳️ Sending a list of currently existing infos:");
+				// Send message
+				chunkArray(result.map(info => {
+                    let emoji = getLUTEmoji(info.name, info.display_name);
+                    return `**${emoji} ${applyEmoji(info.display_name)}**`;
+                }), 20).map(el => el.join(", ")).forEach(el => channel.send(el));
+			} else { 
+				// No sets exist
+				channel.send("⛔ Database error. Could not find any infos!");
+			}
+		}, () => {
+			// DB error
+			channel.send("⛔ Database error. Couldn't look for info list!");
 		});
 	}
     
