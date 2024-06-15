@@ -486,7 +486,8 @@ module.exports = function() {
                 await sleep(500);
                 let player = channel.guild.members.cache.get(el);
                 removeRoleRecursive(player, channel, stats.participant, "participant");
-                addRoleRecursive(player, channel, stats.dead_participant, "dead participant");
+                if(!stats.haunting) addRoleRecursive(player, channel, stats.dead_participant, "dead participant");
+                else addRoleRecursive(player, channel, stats.ghost, "ghost");
                 removeRoleRecursive(player, channel, stats.mayor, "mayor");
                 removeRoleRecursive(player, channel, stats.mayor2, "mayor 2");
                 removeRoleRecursive(player, channel, stats.reporter, "reporter");
