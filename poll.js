@@ -27,6 +27,9 @@ module.exports = function() {
 		switch(args[1]) {
 			case "public": // public (lynch, election)
 			case "private": // private (cult, wolfpack)
+            case "public_dead": case "private_dead": // special public/private variants with dead participants as options
+            case "ghostly_public": case "ghostly_private": // special public/private variants, for dead participants
+            case "ghostly_public_dead": case "ghostly_private_dead": // special public/private variants with dead participants as options, for dead participants
 			case "dead": // medium
 			case "dead_list": // medium + shows voters
 			case "dead_vote": // list of dead participants
@@ -63,7 +66,7 @@ module.exports = function() {
 					break;
 					case "new":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "poll new <Poll Type>\n```";
-						help += "```\nFunctionality\n\nCreates a new poll. If no poll type is provided, and the command is executed in a secret channel, poll type is set to private, otherwise it is set to public. Assigns a sort of random name to each new poll.\n\nList of Poll Types:\npublic: Has all alive players, as well as an Abstain option. Uses public_value player property to evaluate poll results. Adds a players public_votes value to their own result. Only allows alive participants to vote. Mayor get an extra vote, unless they have less than 0 vote, then they get an extra negative vote.\nprivate: Has all alive players. Uses private_value player property to evaluate poll results. Only allows alive participants to vote.\ndead: Has Yes/No options. Every vote has a value of 1. Only allows dead participants to vote.\nyn: Yes/No for Participants\nyna: Yes/No/Abstain for Participants\ndead_vote: A list of dead participants, and only dead participants can vote on it.\ndead_list: Same as dead but shows who voted what.\na, ab, abc, abcd, abcde, abcdef, dead_a, dead_ab, dead_abc, dead_abcd, dead_abcde, dead_abcdef: Polls with options a-f, for alive or dead participants.\ngm, host, admin: Polls with gms/host/admin candidates\nall_yn: yn, but anyone may vote\nthem: specify an id after poll name. Them.```";
+						help += "```\nFunctionality\n\nCreates a new poll. If no poll type is provided, and the command is executed in a secret channel, poll type is set to private, otherwise it is set to public. Assigns a sort of random name to each new poll.\n\nList of Poll Types:\npublic: Has all alive players, as well as an Abstain option. Uses public_value player property to evaluate poll results. Adds a players public_votes value to their own result. Only allows alive participants to vote. Mayor get an extra vote, unless they have less than 0 vote, then they get an extra negative vote.\nprivate: Has all alive players. Uses private_value player property to evaluate poll results. Only allows alive participants to vote.\ndead: Has Yes/No options. Every vote has a value of 1. Only allows dead participants to vote.\nyn: Yes/No for Participants\nyna: Yes/No/Abstain for Participants\ndead_vote: A list of dead participants, and only dead participants can vote on it.\ndead_list: Same as dead but shows who voted what.\na, ab, abc, abcd, abcde, abcdef, dead_a, dead_ab, dead_abc, dead_abcd, dead_abcde, dead_abcdef: Polls with options a-f, for alive or dead participants.\ngm, host, admin: Polls with gms/host/admin candidates\nall_yn: yn, but anyone may vote\nthem: specify an id after poll name. Them.\n: ghostly_public, ghostly_private: public/private for ghosts\n: public_dead, private_dead, ghostly_public_dead, ghostly_private_dead: variants that list dead instead of living players```";
 						help += "```fix\nUsage\n\n> " + stats.prefix + "poll new\n\n> " +  stats.prefix + "poll new public```";
 					break;
 					case "close":
@@ -177,7 +180,7 @@ module.exports = function() {
 		// Cache vote values
 		getVotes();
 		// Get a list of players
-		sql("SELECT id,emoji FROM players WHERE type='player' AND alive = " + (type=="dead_vote"?"0":"1"), result => {
+		sql("SELECT id,emoji FROM players WHERE type='player' AND alive = " + ((type=="dead_vote"||type==="public_dead"||type==="private_dead"||type=="ghostly_public_dead"||type=="ghostly_private_dead")?"0":"1"), result => {
 			sqlGetStat(13, pollNum => {
 				// poll name
 				let pollName;
@@ -192,12 +195,12 @@ module.exports = function() {
 				let playerLists = [], playerList = result.map(el => [el.emoji, channel.guild.members.cache.get(el.id)]);
 				let addValues = [];
 				let overwriteValues = [];
-				if((type === "public" || type === "dead_vote") && pollHasBit(0)) addValues.push("abstain");
-				if((type === "public" || type === "dead_vote") && pollHasBit(2)) addValues.push("cancel");
-				if((type === "public" || type === "dead_vote") && pollHasBit(4)) addValues.push("random");
-				if(type === "private" && pollHasBit(1)) addValues.push("abstain");
-				if(type === "private" && pollHasBit(3)) addValues.push("cancel");
-				if(type === "private" && pollHasBit(5)) addValues.push("random");
+				if((type === "public" || type === "public_dead" || type === "ghostly_public" || type === "ghostly_public_dead" || type === "dead_vote") && pollHasBit(0)) addValues.push("abstain");
+				if((type === "public" || type === "public_dead" || type === "ghostly_public" || type === "ghostly_public_dead" || type === "dead_vote") && pollHasBit(2)) addValues.push("cancel");
+				if((type === "public" || type === "public_dead" || type === "ghostly_public" || type === "ghostly_public_dead" || type === "dead_vote") && pollHasBit(4)) addValues.push("random");
+				if((type === "private" || type === "private_dead" || type === "ghostly_private" || type === "ghostly_private_dead") && pollHasBit(1)) addValues.push("abstain");
+				if((type === "private" || type === "private_dead" || type === "ghostly_private" || type === "ghostly_private_dead") && pollHasBit(3)) addValues.push("cancel");
+				if((type === "private" || type === "private_dead" || type === "ghostly_private" || type === "ghostly_private_dead") && pollHasBit(5)) addValues.push("random");
                 
 				if(type === "dead") overwriteValues = ["yes", "no"];
 				else if(type === "dead_list") overwriteValues = ["yes", "no"];
@@ -296,6 +299,7 @@ module.exports = function() {
 		let voteValue = 0;
 		switch(type) {
 			case "public": 
+			case "public_dead": 
 				if(!isParticipant(member)) return 0;
 				voteValue = + publicValues.find(el => el.id === member.id).public_value;
 				if(member.roles.cache.get(stats.mayor) && voteValue >= 0) {
@@ -305,7 +309,23 @@ module.exports = function() {
 				}
 			break;
 			case "private": 
+			case "private_dead": 
 				if(!isParticipant(member)) return 0;
+				voteValue = + privateValues.find(el => el.id === member.id).private_value;
+			break;
+			case "ghostly_public": 
+			case "ghostly_public_dead": 
+				if(!isGhost(member)) return 0;
+				voteValue = + publicValues.find(el => el.id === member.id).public_value;
+				if(member.roles.cache.get(stats.mayor) && voteValue >= 0) {
+					voteValue++;
+				} else if(member.roles.cache.get(stats.mayor) && voteValue < 0) {
+					voteValue--;
+				}
+			break;
+			case "ghostly_private": 
+			case "ghostly_private_dead": 
+				if(!isGhost(member)) return 0;
 				voteValue = + privateValues.find(el => el.id === member.id).private_value;
 			break;
 			case "dead": 
@@ -400,7 +420,10 @@ module.exports = function() {
             } else if(pollType == "gm" || pollType == "host" || pollType == "admin" || pollType == "all_yn" || pollType == "them") {
                 voters = votersList.filter(el => !el.user.bot).join(", ");
                 invalidVoters = duplicateList.filter(el => !el.user.bot).join(", ");
-            } else if(pollType != "dead" && pollType != "dead_vote" && pollType != "dead_list" && pollType != "dead_a" && pollType != "dead_ab" && pollType != "dead_abc" && pollType != "dead_abcd" && pollType != "dead_abcde" && pollType != "dead_abcdef") {
+            } else if(pollType === "ghostly_public" || pollType === "ghostly_private" || pollType === "ghostly_public_dead" || pollType === "ghostly_private_dead") {
+                voters = votersList.filter(el => isGhost(el)).join(", ");
+                invalidVoters = duplicateList.filter(el => isGhost(el)).join(", ");
+            }  else if(pollType != "dead" && pollType != "dead_vote" && pollType != "dead_list" && pollType != "dead_a" && pollType != "dead_ab" && pollType != "dead_abc" && pollType != "dead_abcd" && pollType != "dead_abcde" && pollType != "dead_abcdef") {
                 voters = votersList.filter(el => isParticipant(el)).join(", ");
                 invalidVoters = duplicateList.filter(el => isParticipant(el)).join(", ");
             } else {

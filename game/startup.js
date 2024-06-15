@@ -52,6 +52,7 @@ module.exports = function() {
                 // Create permissions
                 let scPerms = getSCCatPerms(channel.guild);
                 scPerms.push(getPerms(player.id, ["history", "read"], []));
+                scPerms.push(getPerms(stats.ghost, ["write"], ["read"]));
                 
                 // Determine channel name
                 let channelName = rolesNameArray.join("-").substr(0, 100);

@@ -89,6 +89,7 @@ module.exports = function() {
 				help += stats.prefix + "list - Lists signed up players\n";
 				help += stats.prefix + "list_alphabetical - Lists signed up players (alphabetical)\n";
 				help += stats.prefix + "alive - Lists alive players\n";
+				help += stats.prefix + "dead - Lists dead players\n";
 				help += stats.prefix + "subs - Lists substitute players\n";
 				help += stats.prefix + "signup - Signs you up for the next game\n";
 				help += stats.prefix + "emojis - Emoji & Player ID list for CCs\n";
@@ -145,6 +146,12 @@ module.exports = function() {
 				help += "```\nFunctionality\n\nLists all alive players\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "list\n< Alive Players | Total: 3\n  🛠 - McTsts (@McTsts)\n  🤔 - marhjo (@marhjo)\n  👌 - federick (@federick)\n```";
 				help += "```diff\nAliases\n\n- a\n- alive_list\n- alive-list\n- listalive\n- list-alive\n- list_alive\n```";
+			break;
+			case "list_dead":
+				help += "```yaml\nSyntax\n\n" + stats.prefix + "dead\n```";
+				help += "```\nFunctionality\n\nLists all dead players\n```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "list\n< Dead Players | Total: 3\n  🛠 - McTsts (@McTsts)\n  🤔 - marhjo (@marhjo)\n  👌 - federick (@federick)\n```";
+				help += "```diff\nAliases\n\n- ld\n- dead_list\n- dead-list\n- listdead\n- list-dead\n- list_dead\n- g\n- ghost_list\n- ghost-list\n- listghost\n- list-ghost\n- list_ghost\n```";
 			break;
 			case "emojis":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "emojis\n```";
@@ -962,6 +969,29 @@ module.exports = function() {
 			channel.send("⛔ Database error. Could not list alive players!");
 		});
 	}
+    
+	/* Lists all dead players */
+	this.cmdListDead = function(channel) {
+		// Check gamephase
+		if(stats.gamephase < gp.INGAME) { 
+			channel.send("⛔ Command error. Can only list dead players in ingame phase."); 
+			return; 
+		}
+		// Get a list of players
+		sql("SELECT id,emoji FROM players WHERE alive = 0 AND type='player'", result => {
+			let playerList = result.map(el => `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username.replace(/(_|\*|~)/g,"\\$1") : "*user left*"} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
+			// Print message
+			channel.send("✳ Listing dead players").then(m => {
+				m.edit("**Dead Players** | Total: " +  result.length + "\n" + playerList)
+			}).catch(err => {
+				logO(err); 
+				sendError(channel, err, "Could not list dead players");
+			});
+		}, () => {
+			// DB error
+			channel.send("⛔ Database error. Could not list dead players!");
+		});
+	}
 	
 	/* Substitutes a player */
 	this.cmdPlayersSubstitute = async function(message, args) {
@@ -1443,12 +1473,16 @@ module.exports = function() {
 	}
 
 	/* Convert a List of Users, Into a List of Valid User IDs; Provide executor to allow GMs to specify non-participants */
-	this.getUserList = function(channel, args, startIndex, executor = false) {
+	this.getUserList = function(channel, args, startIndex, executor = false, type = "participant") {
 		// Cut off entries at the start
 		let players = args.slice(startIndex).map(el => getUser(channel, el));
 		// Filter out non participants
 		players = players.filter((el, index) => {
-			if(el && (isParticipant(channel.guild.members.cache.get(el)) || (executor && isGameMaster(executor)))) {
+			if(el && (
+                (isParticipant(channel.guild.members.cache.get(el)) && type == "participant") || 
+                (isGhost(channel.guild.members.cache.get(el)) && type == "ghost") || 
+                (executor && isGameMaster(executor, true))
+            )) {
 				return true; 
 			}
 			else { 
@@ -1471,10 +1505,10 @@ module.exports = function() {
 	
 	/* Convert a List of (badly written) Users, Into a List of Valid User IDs; Provide executor to allow GMs to specify non-participants */
 	/* Equivalent to getUserList, but auto adds quotes, fixes typos and such */
-	this.parseUserList = function(channel, args, startIndex, executor = false) {
+	this.parseUserList = function(channel, args, startIndex, executor = false, type = "participant") {
 		let players = args.slice(startIndex);
 		players = fixUserList(players, channel);
-		return getUserList(channel, players, 0, executor);
+		return getUserList(channel, players, 0, executor, type);
 	}
 	
 	/* parseUserList for a single user */
@@ -1528,6 +1562,12 @@ module.exports = function() {
 	this.isParticipant = function(member) {
         if(!member) return false;
 		return member.roles.cache.get(stats.participant);
+	}
+    
+	/* Check if a member is a ghost */
+	this.isGhost = function(member) {
+        if(!member) return false;
+		return member.roles.cache.get(stats.ghost);
 	}
 	
 	/* Check if a member is a dead participant */

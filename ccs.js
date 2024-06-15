@@ -381,6 +381,8 @@ module.exports = function() {
 			return;
 		}
 		args[1] = args[1].replace(/🔒/,"lock");
+		args[1] = args[1].replace(/🤖/,"bot");
+		args[1] = args[1].replace(/👻/,"ghost");
 		let ccOwner = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Member).filter(el => el.allow == 66560).map(el => el.id);
 		if(mode || isGameMaster(member, true) || ccOwner.includes(member.id)) {
 			channel.edit({ name: args[1] })
@@ -583,7 +585,10 @@ module.exports = function() {
 			return;
 		}
 		args[1] = args[1].replace(/🔒/,"lock");
-		players = parseUserList(channel, args, 2, member);
+		args[1] = args[1].replace(/🤖/,"bot");
+		args[1] = args[1].replace(/👻/,"ghost");
+		players = parseUserList(channel, args, 2, member, isGhost(member) ? "ghost" : "participant");
+        console.log(players);
         if(!players || spam) players = [];
 		if(!spam && !isGameMaster(member, true) && !isHelper(member)) {
 			sql("UPDATE players SET ccs = ccs + 1 WHERE id = " + connection.escape(member.id), result => {
@@ -593,7 +598,7 @@ module.exports = function() {
 			});
 		}
         players = players.filter(el => el != member.id);
-		if(isParticipant(member) || players.length > 0) {
+		if(isParticipant(member) || isGhost(member) || ((isGameMaster(member, true) || isHelper(member)) && players.length > 0)) {
 			sqlGetStat(9, result => {
 				// Check if a new category is needed
 				if(result % 50 === 0) {
@@ -609,11 +614,12 @@ module.exports = function() {
 							sqlSetStat(10, cc.id, result => {
 								// Create a new channel
 								let ccPerms = getCCCatPerms(channel.guild);
+                                if(isGhost(member)) ccPerms = getCCCatPermsGhostly(channel.guild);
 								if(!spam) ccPerms.push(getPerms(member.id, ["history", "read"], []));
 								else ccPerms.push(getPerms(member.id, ["read"], []));
 								if(players.length > 0 && mode === 0) players.forEach(el => ccPerms.push(getPerms(el, ["read"], [])));
 								if(players.length > 0 && mode === 1) players.forEach(el => ccPerms.push(getPerms(el, ["read", "history"], [])));
-								channel.guild.channels.create({ name: (spam?"🤖-":"") + args[1] + "", type: ChannelType.GuildText,  permissionOverwrites: ccPerms, parent: cc.id })
+								channel.guild.channels.create({ name: (spam?"🤖-":"") + (isGhost(member)?"👻-":"") + args[1] + "", type: ChannelType.GuildText,  permissionOverwrites: ccPerms, parent: cc.id })
 								.then(ct => {
 									// Put the channel into the correct category
 									ct.setParent(cc.id,{ lockPermissions: false })
@@ -658,12 +664,13 @@ module.exports = function() {
 					sqlGetStat(10, result => {
 						// Create a new channel
 						let ccPerms = getCCCatPerms(channel.guild);
+                        if(isGhost(member)) ccPerms = getCCCatPermsGhostly(channel.guild);
                         if(!spam) ccPerms.push(getPerms(member.id, ["history", "read"], []));
                         else ccPerms.push(getPerms(member.id, ["read"], []));
 						if(players.length > 0 && mode === 0) players.forEach(el => ccPerms.push(getPerms(el, ["read"], [])));
 						if(players.length > 0 && mode === 1) players.forEach(el => ccPerms.push(getPerms(el, ["read", "history"], [])));
                         let cc = channel.guild.channels.cache.get(result);
-						channel.guild.channels.create({ name: (spam?"🤖-":"") + args[1] + "", type: ChannelType.GuildText,  permissionOverwrites: ccPerms, parent: cc.id })
+						channel.guild.channels.create({ name: (spam?"🤖-":"") + (isGhost(member)?"👻-":"") + args[1] + "", type: ChannelType.GuildText,  permissionOverwrites: ccPerms, parent: cc.id })
 						.then(ct => {
 							let cc = channel.guild.channels.cache.get(result);
 							if(cc) {
@@ -720,6 +727,11 @@ module.exports = function() {
 	/* Returns default CC permissions */
 	this.getCCCatPerms = function(guild) {
 		return [ getPerms(guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.participant, ["write"], ["read"]), getPerms(stats.sub, ["write"], ["read"]) ];
+	}
+    
+	/* Returns default CC permissions */
+	this.getCCCatPermsGhostly = function(guild) {
+		return [ getPerms(guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.ghost, ["write"], ["read"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.participant, ["write"], ["read"]), getPerms(stats.sub, ["write"], ["read"]) ];
 	}
 	
 	/* Checks if something is a cc*/

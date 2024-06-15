@@ -245,7 +245,7 @@ module.exports = function() {
 	
 	/* Public Permissions */
 	this.getPublicCatPerms = function(guild) {
-		return [ getPerms(guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.participant, ["write", "read"], []) ];
+		return [ getPerms(guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.ghost, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.participant, ["write", "read"], []) ];
 	}
 	
 	/* Starts the creation of extra scs */
@@ -267,19 +267,22 @@ module.exports = function() {
 		let cPerms;
 		switch(channels[index].members) {
 			case "mayor": 
-				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.mayor, ["read", "write"], []), getPerms(stats.mayor2, ["read", "write"], []), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.sub, ["read"], ["write"]), getPerms(stats.participant, ["read"], ["write"]) ]; 
+				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.mayor, ["read", "write"], []), getPerms(stats.mayor2, ["read", "write"], []), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.ghost, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.sub, ["read"], ["write"]), getPerms(stats.participant, ["read"], ["write"]) ]; 
 			break;
 			case "info": 
-				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.sub, ["read"], ["write"]), getPerms(stats.participant, ["read"], ["write"]) ]; 
+				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.ghost, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.sub, ["read"], ["write"]), getPerms(stats.participant, ["read"], ["write"]) ]; 
 			break;
 			case "alive": 
-				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.sub, ["read"], ["write"]), getPerms(stats.participant, ["read","write"], []) ]; 
+				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.ghost, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.sub, ["read"], ["write"]), getPerms(stats.participant, ["read","write"], []) ]; 
 			break;
 			case "dead": 
-				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read","write"], []), getPerms(stats.spectator, ["read","write"], []), getPerms(stats.participant, [], ["read"]), getPerms(stats.sub, [], ["read"]) ]; 
+				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read","write"], []), getPerms(stats.ghost, [], ["read"]), getPerms(stats.spectator, ["read","write"], []), getPerms(stats.participant, [], ["read"]), getPerms(stats.sub, [], ["read"]) ]; 
+			break;
+			case "ghost": 
+				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.ghost, ["read","write"], []), getPerms(stats.spectator, ["read","write"], []), getPerms(stats.participant, [], ["read"]), getPerms(stats.sub, [], ["read"]) ]; 
 			break;
 			case "sub": 
-				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.participant, [], ["read"]), getPerms(stats.sub, ["read","write"], []) ]; 
+				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.ghost, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.participant, [], ["read"]), getPerms(stats.sub, ["read","write"], []) ]; 
 			break;
 		}
 		channel.guild.channels.create({ name: channels[index].name, type: ChannelType.GuildText,  permissionOverwrites: cPerms, parent: category })
@@ -439,14 +442,15 @@ module.exports = function() {
 		});
 		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.participant).members.toJSON(), 0, "participant");
 		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.dead_participant).members.toJSON(), 0, "dead participant");
+		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.ghost).members.toJSON(), 0, "ghost");
 		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.gamemaster).members.toJSON(), 0, "game master");
 		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.spectator).members.toJSON(), 0, "spectator");
 		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.sub).members.toJSON(), 0, "substitute");
-		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.helper).members.toJSON(), 0, "substitute");
+		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.helper).members.toJSON(), 0, "helper");
 		// Remove Roles & Nicknames
-		wroles_remove(channel, [stats.signed_up, stats.spectator, stats.mayor, stats.mayor2, stats.reporter, stats.guardian, stats.sub, stats.participant, stats.dead_participant, stats.host], ["signed up", "spectator", "mayor", "mayor2", "reporter", "guardian", "substitute", "participant", "dead participant", "host"]);
+		wroles_remove(channel, [stats.signed_up, stats.spectator, stats.mayor, stats.mayor2, stats.reporter, stats.guardian, stats.sub, stats.participant, stats.dead_participant, stats.host, stats.ghost], ["signed up", "spectator", "mayor", "mayor2", "reporter", "guardian", "substitute", "participant", "dead participant", "host", "ghost"]);
         // run role removal again for critical roles because sometimes it fails even though it says it succeeds
-		wroles_remove(channel, [stats.participant, stats.dead_participant], ["participant", "dead participant"]);
+		wroles_remove(channel, [stats.participant, stats.dead_participant, stats.ghost], ["participant", "dead participant", "ghost"]);
 		// Cleanup channels
 		cmdCCCleanup(channel);
 		scCleanup(channel);
@@ -461,8 +465,8 @@ module.exports = function() {
     
     this.resetRoleNames = async function(channel) {
         // rename roles correctly
-        let roles = [stats.signed_up, stats.spectator, stats.mayor, stats.mayor2, stats.reporter, stats.guardian, stats.sub, stats.participant, stats.dead_participant, stats.host, stats.gamemaster];
-        let names = ["Signed-up","Spectator","Mayor (<=" + stats.mayor_threshold + ")","Mayor (>" + stats.mayor_threshold + ")","Reporter","Guardian","Substitute","Participant","Dead Participant","Host", "Game Master"];
+        let roles = [stats.signed_up, stats.spectator, stats.mayor, stats.mayor2, stats.reporter, stats.guardian, stats.sub, stats.participant, stats.dead_participant, stats.host, stats.gamemaster, stats.ghost];
+        let names = ["Signed-up","Spectator","Mayor (<=" + stats.mayor_threshold + ")","Mayor (>" + stats.mayor_threshold + ")","Reporter","Guardian","Substitute","Participant","Dead Participant","Host", "Game Master", "Ghost"];
         for(let i = 0; i < roles.length; i++) {
             await channel.guild.roles.cache.get(roles[i]).setName(names[i]);
         }  

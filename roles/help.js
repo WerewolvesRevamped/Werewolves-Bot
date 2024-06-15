@@ -85,7 +85,7 @@ module.exports = function() {
 				if(!isGameMaster(member)) break;
 				switch(args[1]) {
 					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "infomanage [query|get|lust]\n```";
+						help += "```yaml\nSyntax\n\n" + stats.prefix + "infomanage [query|get|list]\n```";
 						help += "```\nFunctionality\n\nGroup of commands to handle info. " + stats.prefix + "help infomanage <sub-command> for detailed help.```";
 						help += "```diff\nAliases\n\n- im\n```";
 					break;
