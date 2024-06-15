@@ -16,7 +16,7 @@ module.exports = function() {
     this.iconRepoBranch = "main"
     this.iconRepoBaseUrl = `${githubRaw}${iconRepo}/${iconRepoBranch}/`;
     this.roleRepo = `${wwrOrg}/Werewolves-Roles`;
-    this.roleRepoBranch = "main";
+    this.roleRepoBranch = "haunting";
     this.roleRepoBaseUrl = `${githubRaw}${roleRepo}/${roleRepoBranch}/`;
     /** Files **/
     this.iconLUTPath = `${iconRepoBaseUrl}replacements.csv`;
