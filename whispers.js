@@ -166,6 +166,22 @@ module.exports = function() {
 			});
 	}
 	
+    
+    this.getIconFromName = function(name) {
+        return new Promise(res => {
+            let roleNameParsed = parseRole(name);
+            if(!roleNameParsed) return res(false);
+            var output;
+            sql("SELECT * FROM roles WHERE name = " + connection.escape(roleNameParsed), async result => {
+                if(!result[0] || !result[0].description) return res(false);
+                let roleData = await getRoleData(result[0].display_name, result[0].class, result[0].category, result[0].team);
+                let urlExists = await checkUrlExists(roleData.url);
+                if(urlExists) res(roleData.url);
+                else res(false);
+            });
+        });
+    }
+    
 	/* Copies over messages */
 	this.connectionExecute = function(message) {
 		if(connection && !message.author.bot && message.content.indexOf(stats.prefix) !== 0) {

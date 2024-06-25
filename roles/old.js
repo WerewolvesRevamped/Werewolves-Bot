@@ -378,20 +378,6 @@ module.exports = function() {
         });
     }
     
-    this.getIconFromName = function(name) {
-        return new Promise(res => {
-            let roleNameParsed = parseRole(name);
-            if(!roleNameParsed) return res(false);
-            var output;
-            sql("SELECT description FROM roles WHERE name = " + connection.escape(roleNameParsed), async result => {
-                if(!result[0] || !result[0].description) return res(false);
-                let roleData = getRoleData(roleNameParsed, result[0].description);
-                let urlExists = await checkUrlExists(roleData.url);
-                if(urlExists) res(roleData.url);
-                else res(false);
-            });
-        });
-    }
     
     this.cmdGetImg = function(channel, role) {
         let roleNameParsed = parseRole(role);

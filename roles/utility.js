@@ -92,6 +92,7 @@ module.exports = function() {
             case "fake role":
             case "variant": roleTypeID = 7; roleType = "Variant Role"; break;
             case "mini": roleTypeID = 6; roleType = "Mini Wolves Exclusive"; break;
+            case "haunted": roleTypeID = 8; roleType = "Haunted"; break;
         }
         return { id: roleTypeID, name: roleType };
     }
