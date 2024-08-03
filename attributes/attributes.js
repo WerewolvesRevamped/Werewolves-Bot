@@ -136,4 +136,40 @@ module.exports = function() {
         await createAttribute(src_role, src_player, target_player, dur, "obstruction", affected_abilities, feedback);
     }
     
+    /**
+    Attribute Query for Player
+    queries an attribute for a specific player
+    **/
+    this.queryAttributePlayer = async function(player, column, val) {
+        // make sure column is valid
+        if(!(["owner","src_role","src_player","attr_type","duration","val1","val2","val3","val4"].includes(column))) {
+            abilityLog(`❗ **Error:** Unexpected attribute query column \`${column}\`!`);  
+            return [];
+        }
+        // query attribute
+        return new Promise(res => {
+             sql("SELECT * FROM active_attributes WHERE owner=" + connection.escape(player) + " AND " + column + "=" + connection.escape(val), result => {
+                 res(result);
+             });
+        }); 
+    }
+    
+    /**
+    Attribute Deletion for Player
+    delets an attribute for a specific player
+    **/
+    this.deleteAttributePlayer = async function(player, column, val) {
+        // make sure column is valid
+        if(!(["owner","src_role","src_player","attr_type","duration","val1","val2","val3","val4"].includes(column))) {
+            abilityLog(`❗ **Error:** Unexpected attribute deletion column \`${column}\`!`);  
+            return [];
+        }
+        // query attribute
+        return new Promise(res => {
+             sql("DELETE FROM active_attributes WHERE owner=" + connection.escape(player) + " AND " + column + "=" + connection.escape(val), result => {
+                 res(result);
+             });
+        }); 
+    }
+    
 }
