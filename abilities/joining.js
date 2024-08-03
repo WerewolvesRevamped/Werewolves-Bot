@@ -29,7 +29,7 @@ module.exports = function() {
                 await joiningAdd(src_role, pid, parsePlayerSelector(ability.target, pid), parseGroupName(ability.group), ability.membership_type, ability.duration);
             break;
             case "remove":
-                await joiningRemove(src_role, pid, parsePlayerSelector(ability.target), parseGroupName(ability.group));
+                await joiningRemove(src_role, pid, parsePlayerSelector(ability.target, pid), parseGroupName(ability.group));
             break;
         }
     }
@@ -39,7 +39,6 @@ module.exports = function() {
     adds a player (or several) to a group
     **/
     this.joiningAdd = async function(src_role, src_player, targets, group, type, duration) {
-        console.log("JOINING ADD", targets, group, type, duration);
         let dur_type = parseDuration(duration);
         for(let i = 0; i < targets.length; i++) {
             // check if target is already part of the group
@@ -50,9 +49,9 @@ module.exports = function() {
                 let oldMembership = getMembershipTier(attrs[0].val2)
                 let newMembership = getMembershipTier(type);
                 if(newMembership > oldMembership) { // new membership is higher than before, upgrade
-                    abilityLog(`✅ <@${targets[i]}> promoted ${toTitleCase(group)} membership to \`${toTitleCase(type)}\` for \`${toTitleCase(duration)}\`.`);
                     await deleteAttributePlayer(targets[i], "val1", group); // delete old membership
                     await createGroupMembershipAttribute(src_role, src_player, targets[i], dur_type, group, type); // create new membership
+                    abilityLog(`✅ <@${targets[i]}> promoted ${toTitleCase(group)} membership to \`${toTitleCase(type)}\` for \`${toTitleCase(duration)}\`.`);
                     // note: upgrading membership may downgrade duration. this is intentional (for simplicity)
                 } else { // old tier is higher or equal, skip
                     abilityLog(`❎ <@${targets[i]}> could not join ${toTitleCase(group)} as \`${toTitleCase(type)}\` - equal or higher membership present.`);  
@@ -70,7 +69,17 @@ module.exports = function() {
     removes a player from a group
     **/
     this.joiningRemove = async function(src_role, src_player, targets, group) {
-        console.log("JOINING REMOVE", target, group);
+        for(let i = 0; i < targets.length; i++) {
+            // check if target is already part of the group
+            let attrs = await queryAttributePlayer(targets[i], "val1", group);
+            if(attrs.length > 0) { // in group, can be removed
+                await deleteAttributePlayer(targets[i], "val1", group); // delete old membership(s)
+                groupsSend(group, `<@${targets[i]}> has left $name.`);
+                abilityLog(`✅ <@${targets[i]}> was removed from ${toTitleCase(group)}.`);
+            } else { // no membership, cannot be removed
+                abilityLog(`❎ <@${targets[i]}> could not be removed from ${toTitleCase(group)} - no membership present.`);  
+            }
+        }
     }
     
     /**
@@ -106,6 +115,7 @@ module.exports = function() {
     /**
     Groups: Send
     sends a message in a group that already exists
+    Replaces $name with the channel name link
     **/
     this.groupsSend = async function(group, message) {
         return new Promise(res => {
@@ -113,7 +123,8 @@ module.exports = function() {
                 if(result && result[0]) {
                     // group exists, add target to group
                     let groupChannel = await mainGuild.channels.fetch(result[0].channel_id);
-                    groupChannel.send(`${message}`);
+                    let msg = message.replace(`\$name`, `<#${groupChannel.id}>`);
+                    groupChannel.send(`${msg}`);
                 }
             });
         });

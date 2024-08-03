@@ -141,7 +141,7 @@ module.exports = function() {
             sql("SELECT * FROM groups WHERE name = " + connection.escape(groupName), async result => {
                 result = result[0]; // there should always only be one role by a certain name
                 var embed = await getBasicEmbed(guild);
-                var members = result.desc_members;
+                var members = result.desc_members ?? "";
                 
                 // search for and replace queries
                 members = await applyQuery(members);
