@@ -24,6 +24,7 @@ module.exports = function() {
 		}
 		// Commands
 		msgB += helpRoles(member, args);
+		msgB += helpAttributes(member, args);
 		msgB += helpUtility(member, args);
 		msgB += helpStats(member, args);
 		msgB += helpCCs(member, args);

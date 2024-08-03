@@ -42,6 +42,7 @@ require("./paths.js")();
 require("./roles/roles.js")();
 require("./utility/utility.js")();
 require("./abilities/abilities.js")();
+require("./attributes/attributes.js")();
 
 
 
@@ -344,6 +345,10 @@ client.on("messageCreate", async message => {
 	/* groups */ // Command for groups
 	case "groups":
 		if(checkGM(message)) cmdGroups(message, args, argsX);
+	break;
+	/* attributes */ // Command for attribute
+	case "attributes":
+		if(checkGM(message)) cmdAttributes(message, args, argsX);
 	break;
 	/* sets */ // Command for sets
 	case "sets":

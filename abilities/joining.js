@@ -7,45 +7,40 @@ module.exports = function() {
     /**
     Ability: Joining
     **/
-    this.abilityJoining = async function(pid, ability) {
+    this.abilityJoining = async function(pid, src_role, ability) {
         switch(ability.subtype) {
             default:
                 log("UNKNOWN ABILITY SUBTYPE", JSON.stringify(ability));
             break;
             case "add":
-                await joiningAdd(parseSelector(ability.target, pid), parseGroupName(ability.group), ability.membership_type, ability.duration);
+                await joiningAdd(src_role, pid, parsePlayerSelector(ability.target, pid), parseGroupName(ability.group), ability.membership_type, ability.duration);
             break;
             case "remove":
-                await joiningRemove(parseSelector(ability.target), parseGroupName(ability.group));
+                await joiningRemove(src_role, pid, parsePlayerSelector(ability.target), parseGroupName(ability.group));
             break;
         }
     }
     
     /**
     Ability: Joining - Add
-    adds a player to a group
+    adds a player (or several) to a group
     **/
-    this.joiningAdd = async function(target, group, type, duration) {
-        console.log("JOINING ADD", target, group, type, duration);
-        // IMPORTANT: THIS IS CHANNEL JOINING ONLY - JOINING ALSO NEEDS TO ASSIGN AN ATTRIBUTE
-        await groupsJoin(target, group);
+    this.joiningAdd = async function(src_role, src_player, targets, group, type, duration) {
+        console.log("JOINING ADD", targets, group, type, duration);
+        let dur_type = parseDuration(duration);
+        for(let i = 0; i < targets.length; i++) {
+            /** WIP: THIS SHOULD FIRST CHECK FOR AN ALREADY EXISTING MEMBERSHIP ATTRIBUTE **/
+            await createGroupMembershipAttribute(src_role, src_player, targets[i], dur_type, group, type);
+            await groupsJoin(targets[i], group);
+        }
     }
     
     /**
     Ability: Joining - Remove
     removes a player from a group
     **/
-    this.joiningRemove = async function(target, group) {
+    this.joiningRemove = async function(src_role, src_player, targets, group) {
         console.log("JOINING REMOVE", target, group);
-    }
-    
-    /**
-    Groups: Reset
-    resets all active groups
-    **/
-    this.groupsReset = function() {
-		// Reset active Group Database
-		sql("DELETE FROM active_groups");
     }
     
     /**

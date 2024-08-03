@@ -34,7 +34,7 @@ module.exports = function() {
                 triggers = triggers.filter(el => el.trigger == triggerName);
                 for(const trigger of triggers) {
                     // execute all relevant triggers
-                    await executeTrigger(pr.id, trigger);
+                    await executeTrigger(pr.id, pr.role, trigger);
                 }
                 // resolve outer promise
                 res();
@@ -46,11 +46,11 @@ module.exports = function() {
     Execute Trigger
     executes the abilities of a trigger if applicable
     **/
-    async function executeTrigger(pid, trigger) {
+    async function executeTrigger(pid, src_role, trigger) {
         // iterate through abilities of the trigger
         for(const ability of trigger.abilities) {
             // execute them
-            await executeAbility(pid, ability);
+            await executeAbility(pid, src_role, ability);
         }
     }
     

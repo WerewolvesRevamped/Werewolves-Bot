@@ -76,7 +76,7 @@ module.exports = function() {
 		// Get all groups
 		sql("SELECT * FROM groups ORDER BY name ASC", result => {
 			if(result.length > 0) {
-				// At least one role exists
+				// At least one group exists
 				channel.send("✳️ Sending a list of currently existing groups:");
 				// Send message
 				chunkArray(result.map(group => {
@@ -140,6 +140,16 @@ module.exports = function() {
 			channel.send("⛔ Database error. Couldn't delete active group instance!");
 		});
 	}
+    
+    /**
+    Groups: Reset
+    resets all active groups
+    **/
+    this.groupsReset = function() {
+		// Reset active Group Database
+		sql("DELETE FROM active_groups");
+    }
+    
     
     
 }

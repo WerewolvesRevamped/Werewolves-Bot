@@ -434,6 +434,8 @@ module.exports = function() {
 		});
         // reset active groups
         groupsReset();
+        // reset active attributes
+        attributesReset();
 		// Reset Poll Count
 		sqlSetStat(13, 1, result => {
 			channel.send("✅ Successfully reset poll counter!");

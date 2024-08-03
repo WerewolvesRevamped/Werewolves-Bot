@@ -89,7 +89,8 @@ module.exports = function() {
                 "force_demote_signedup": ["fdsn"],
                 "image": ["img"],
                 "infomanage": ["im"],
-                "groups": ["group"]
+                "groups": ["group"],
+                "attributes": ["attribute","attr"]
         };
         for(let cmd in aliases) {
             if(aliases[cmd].indexOf(alias) != -1) return cmd;
