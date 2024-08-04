@@ -23,13 +23,22 @@ module.exports = function() {
     this.abilityJoining = async function(pid, src_role, ability) {
         switch(ability.subtype) {
             default:
-                log("UNKNOWN ABILITY SUBTYPE", JSON.stringify(ability));
+                abilityLog(`❗ **Error:** Unknown ability subtype \`${ability.subtype}\`!`);
+                return "";
             break;
             case "add":
-                await joiningAdd(src_role, pid, parsePlayerSelector(ability.target, pid), parseGroupName(ability.group), ability.membership_type, ability.duration);
+                if(!ability.target || !ability.group) {
+                    abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
+                }
+                await joiningAdd(src_role, pid, parsePlayerSelector(ability.target, pid), parseGroupName(ability.group), ability.membership_type ?? "member", ability.duration ?? "persistent");
+                return "";
             break;
             case "remove":
+                if(!ability.target || !ability.group) {
+                    abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
+                }
                 await joiningRemove(src_role, pid, parsePlayerSelector(ability.target, pid), parseGroupName(ability.group));
+                return "";
             break;
         }
     }

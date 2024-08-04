@@ -50,7 +50,8 @@ module.exports = function() {
         // iterate through abilities of the trigger
         for(const ability of trigger.abilities) {
             // execute them
-            await executeAbility(pid, src_role, ability);
+            let feedback = await executeAbility(pid, src_role, ability);
+            abilitySend(pid, feedback);
         }
     }
     

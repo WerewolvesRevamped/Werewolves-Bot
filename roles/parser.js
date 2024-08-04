@@ -646,7 +646,7 @@ module.exports = function() {
             exp = new RegExp("^Cancel `" + str + "` Poll$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "poll", subtype: "cancelling", target: fd[1] };
+                ability = { type: "poll", subtype: "cancellation", target: fd[1] };
             }
             // Delete a poll
             exp = new RegExp("^Delete `" + str + "` Poll$", "g");
