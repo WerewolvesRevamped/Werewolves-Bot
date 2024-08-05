@@ -316,6 +316,9 @@ client.on("messageCreate", async message => {
     case "execute": // executes an ability (not documented!!)
         if(checkGM(message)) cmdExecute(message, message.content.substr(8 + stats.prefix.length));
     break;
+    case "phase": // executes an ability (not documented!!)
+        if(checkGM(message)) cmdPhase(message, args);
+    break;
     case "edit":
         if(checkGMHelper(message)) cmdEdit(message.channel, args, argsX);
     break;

@@ -9,6 +9,7 @@
 require("./startup.js")();
 require("./caching.js")();
 require("./cleanup.js")();
+require("./phase.js")();
 module.exports = function() {
 
 	/* Handles start command */
