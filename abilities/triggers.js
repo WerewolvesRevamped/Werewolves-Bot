@@ -10,12 +10,16 @@ module.exports = function() {
     handle a trigger triggering
     **/
     function triggerHandler(triggerName, args = []) {
-        // get all players
-        sql("SELECT role,id FROM players WHERE type='player' AND alive=1", async r => {
-            // get their role's data
-            for(let pr of r) {
-                await triggerHandlerPlayer(pr, triggerName);
-            }
+        return new Promise(res => {
+            // get all players
+            sql("SELECT role,id FROM players WHERE type='player' AND alive=1", async r => {
+                // get their role's data
+                for(let pr of r) {
+                    await triggerHandlerPlayer(pr, triggerName);
+                }
+            });
+            // resolve outer promise
+            res();
         });
     }
     
@@ -49,9 +53,34 @@ module.exports = function() {
     async function executeTrigger(pid, src_role, trigger) {
         // iterate through abilities of the trigger
         for(const ability of trigger.abilities) {
-            // execute them
-            let feedback = await executeAbility(pid, src_role, ability);
-            abilitySend(pid, feedback);
+            // check if prompts are necessary
+            let prompts = getPrompts(ability);
+            switch(prompts.length) {
+                // if no prompts are necessary -> directly execute ability
+                case 0:
+                    let feedback = await executeAbility(pid, src_role, ability);
+                    abilitySend(pid, feedback);
+                break;
+                // single prompt (@Selection)
+                case 1: {
+                    let type = toTitleCase(selectorGetType(prompts[0][1]));
+                    abilityLog(`🟢 **Prompting Ability:** <@${pid}> (${toTitleCase(src_role)}) - ${toTitleCase(ability.type)} [${type}]`);
+                    let mid = await abilitySendProm(pid, `${getEmoji(src_role)} Give ${type}`);
+                    await createPrompt(mid, pid, src_role, ability);
+                } break;
+                // double prompt (@Selection and @SecondarySelection)
+                case 2: {
+                    let type1 = toTitleCase(selectorGetType(prompts[0][1]));
+                    let type2 = toTitleCase(selectorGetType(prompts[1][1]));
+                    abilityLog(`🟢 **Prompting Ability:** <@${pid}> (${toTitleCase(src_role)}) - ${toTitleCase(ability.type)} [${type1}, ${type2}]`);
+                    let mid = await abilitySendProm(pid, `${getEmoji(src_role)} Give ${type1} and ${type2}`);
+                    await createPrompt(mid, pid, src_role, ability);
+                } break;
+                // more than 2 prompts -> error
+                default:
+                    abilityLog(`❗ **Error:** Invalid amount of prompts (${prompts.length}) in ability!`);
+                break;
+            }
         }
     }
     
@@ -59,17 +88,46 @@ module.exports = function() {
     Command: $emit <trigger type>
     Manually emits a certain trigger type
     **/
-    this.cmdEmit = function(channel, argsX) {
+    this.cmdEmit = async function(channel, argsX) {
         console.log(`Emitting a ${argsX[0]} event.`);
-        triggerHandler(argsX[0]);
+        let evt = toTitleCase(argsX.join(" "));
+        switch(argsX[0]) {
+            default: await triggerHandler(evt); break;
+            case "start": await eventStarting(); break;
+            case "sday": await eventStartDay(); break;
+            case "snight": await eventStartNight(); break;
+        }
+
     }
     
     /**
-    Trigger: Starting
+    Event: Starting
     triggers at the start of the game
     **/
-    this.triggerStarting = function() {
-        triggerHandler("Starting");
+    this.eventStarting = async function() {
+    await triggerHandler("Starting");
+    }
+    
+    /**
+    Event: Start Night
+    triggers at the start of the night
+    **/
+    this.eventStartNight = async function() {
+        await clearPrompts();
+        await triggerHandler("Start Night");
+        await triggerHandler("Immediate Night");
+        await triggerHandler("Immediate");
+    }
+    
+    /**
+    Event: Start Day
+    triggers at the start of the day
+    **/
+    this.eventStartDay = async function() {
+        await clearPrompts();
+        await triggerHandler("Start Day");
+        await triggerHandler("Immediate Day");
+        await triggerHandler("Immediate");
     }
     
 }

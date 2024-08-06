@@ -4,6 +4,7 @@
 **/
 require("./triggers.js")();
 require("./parsers.js")();
+require("./prompts.js")();
 
 /** Ability Types **/
 require("./joining.js")();
@@ -11,7 +12,7 @@ require("./investigating.js")();
 
 module.exports = function() {
     
-    const abilityError = "If you believe this to be an error, please contact a Host.";
+    this.abilityError = "If you believe this to be an error, please contact a Host.";
     
     /**
     Execute Ability
@@ -59,6 +60,21 @@ module.exports = function() {
             let player_sc = client.guilds.cache.get("569626539541397515").channels.cache.get(player_sc_id);
             player_sc.send(message);
         });
+    }
+    
+    /**
+    Ability Feedback + Return new message ID
+    **/
+    this.abilitySendProm = function(player_id, message) {
+        return new Promise(res => {
+            sql("SELECT channel_id FROM connected_channels WHERE id = " + connection.escape(player_id), result => {
+                let player_sc_id = result[0].channel_id;
+                let player_sc = client.guilds.cache.get("569626539541397515").channels.cache.get(player_sc_id);
+                player_sc.send(message).then(msg => {
+                    res(msg.id);
+                });
+            });
+        });      
     }
     
 }

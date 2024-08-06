@@ -61,7 +61,7 @@ module.exports = function() {
         
         // emit a starting event
         setTimeout(function() {
-            triggerStarting();
+            eventStarting();
         }, 1000 * 60);
         
 	}
