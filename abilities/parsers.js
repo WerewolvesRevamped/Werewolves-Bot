@@ -15,7 +15,7 @@ module.exports = function() {
         let selectorType = selectorGetType(selector);
         switch(selectorType) {
             case "player": 
-                parsePlayerSelector(selector, self);
+                return parsePlayerSelector(selector, self);
             break;
             default:
                 abilityLog(`❗ **Error:** Invalid selector type \`${selectorType}\`!`);
