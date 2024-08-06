@@ -16,11 +16,9 @@ module.exports = function() {
         switch(selectorType) {
             case "player": 
                 return parsePlayerSelector(selector, self);
-            break;
             default:
                 abilityLog(`❗ **Error:** Invalid selector type \`${selectorType}\`!`);
                 return [];
-            break;
         }
     }
     
@@ -33,8 +31,13 @@ module.exports = function() {
         let selectorTarget = selectorGetTarget(selector);
         /** WIP: Needs to be able to parse much more! **/
         switch(selectorTarget) {
-            case "@self": return [self];
-            default: return [];
+            // base selectors
+            case "@self":
+            return [self];
+            // unknown selector
+            default:
+                abilityLog(`❗ **Error:** Invalid player selector target \`${selectorTarget}\`!`);
+                return [];
         }
     }
     
