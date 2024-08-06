@@ -16,7 +16,7 @@ module.exports = function() {
     this.iconRepoBranch = "main"
     this.iconRepoBaseUrl = `${githubRaw}${iconRepo}/${iconRepoBranch}/`;
     this.roleRepo = `${wwrOrg}/Werewolves-Roles`;
-    this.roleRepoBranch = "haunting";
+    this.roleRepoBranch = "main";
     this.roleRepoBaseUrl = `${githubRaw}${roleRepo}/${roleRepoBranch}/`;
     /** Files **/
     this.iconLUTPath = `${iconRepoBaseUrl}replacements.csv`;
@@ -30,5 +30,4 @@ module.exports = function() {
     **/
     this.website = "https://werewolves.me/";
     this.cardBaseUrl = `${website}cards/card.php?name=`;
-
 }
