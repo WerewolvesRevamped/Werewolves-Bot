@@ -142,6 +142,14 @@ module.exports = function() {
     this.deepCopy = function(el) {
         return JSON.parse(JSON.stringify(el));
     }
+    
+    /**
+    Get Time
+    returns unix time stamp in seconds
+    **/
+    this.getTime = function() {
+        return Math.floor(Date.now()/1000);
+    }
 
 	
 }

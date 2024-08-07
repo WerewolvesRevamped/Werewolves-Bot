@@ -20,6 +20,9 @@ module.exports = function() {
 			case "get": cmdPhaseGet(message.channel); break;
 			case "set": cmdPhaseSet(message.channel, args); break;
 			case "next": cmdPhaseNext(message.channel); break;
+			case "main": cmdPhaseMain(message.channel); break;
+			case "late": cmdPhaseLate(message.channel); break;
+			case "lock": cmdPhaseLock(message.channel); break;
 			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
 		}
 	}
@@ -29,7 +32,7 @@ module.exports = function() {
     **/
     this.cmdPhaseGet = function(channel) {
         let phaseName = toTitleCase(getPhase());
-        channel.send(`✅ Current phase is \`${phaseName}\`.`);
+        channel.send(`✅ Current phase is \`${phaseName}\` (${getSubphase()}).`);
     }
     
     /**
@@ -52,9 +55,10 @@ module.exports = function() {
             return;
         }
         // update phase
-        let result = await setPhase(phaseName);
+        let result1 = await setPhase(phaseName);
+        let result2 = await setSubphase(SUBPHASE.MAIN);
         // feedback
-        if(result) {
+        if(result1 && result2) {
             channel.send(`✅ Updated phase to \`${toTitleCase(phaseName)}\`!`);
         } else {
             channel.send(`⛔ Command error.  Could not update phase.`);
@@ -75,12 +79,58 @@ module.exports = function() {
             newPhaseName = "d" + phaseNum;
         }
         // update phase
-        let result = await setPhase(newPhaseName);
+        let result1 = await setPhase(newPhaseName);
+        let result2 = await setSubphase(SUBPHASE.MAIN);
         // feedback
-        if(result) {
+        if(result1 && result2) {
             channel.send(`✅ Incremented phase to \`${toTitleCase(newPhaseName)}\`!`);
         } else {
             channel.send(`⛔ Command error.  Could not increment phase.`);
+        }
+    }
+    
+    /**
+    Command: $phase main
+    Main subphase
+    **/
+    this.cmdPhaseMain = async function(channel) {
+        let result = await setSubphase(SUBPHASE.MAIN);
+        // feedback
+        if(result) {
+            channel.send(`✅ Set to main subphase!`);
+        } else {
+            channel.send(`⛔ Command error.  Could not update subphase.`);
+        }
+    }
+    
+    /**
+    Command: $phase late
+    In a late phase abilities can no longer be delayed.
+    **/
+    this.cmdPhaseLate = async function(channel) {
+        // switch phase
+        let result = await setSubphase(SUBPHASE.LATE);
+        // execute delayed abilities
+        await executeDelayedQueuedAction();
+        // feedback
+        if(result) {
+            channel.send(`✅ Set to late subphase!`);
+        } else {
+            channel.send(`⛔ Command error.  Could not update subphase.`);
+        }
+    }
+    
+    /**
+    Command: $phase lock
+    In a late phase abilities can no longer be scheduled.
+    **/
+    this.cmdPhaseLock = async function(channel) {
+        let result = await setSubphase(SUBPHASE.LOCKED);
+        // feedback
+        if(result) {
+            channel.send(`✅ Set to locked subphase!`);
+        } else {
+            channel.send(`⛔ Command error.  Could not update subphase.`);
         }
     }
 
@@ -97,7 +147,17 @@ module.exports = function() {
                 res(false);
             }); 
         }); 
-
+    }
+    
+    this.setSubphase = async function(subphase) {
+        stats.subphase = subphase;
+        return new Promise(res => {
+            sqlSetStat(statID.SUBPHASE, subphase, () => {
+                res(true);
+            }, () => {
+                res(false);
+            }); 
+        }); 
     }
     
     /**
@@ -107,6 +167,46 @@ module.exports = function() {
     this.getPhase = function() {
         return toTitleCase(stats.phase);
     }
+    
+    /**
+    Get Subphase
+    returns the current subphase as a string
+    **/
+    const SUBPHASE = {
+        MAIN: 0,
+        LATE: 1,
+        LOCKED: 2
+    };
+    this.getSubphase = function() {
+        switch(+stats.subphase) {
+            case SUBPHASE.MAIN: return "Main";
+            case SUBPHASE.LATE: return "Late";
+            case SUBPHASE.LOCKED: return "Locked";
+            default: return "Unknown";
+        }
+    }
+    
+    /**
+    Is Main Subphase?
+    **/
+    this.subphaseIsMain = function() {
+        return stats.subphase == SUBPHASE.MAIN;
+    }
+    
+    /**
+    Is Late Subphase?
+    **/
+    this.subphaseIsLate = function() {
+        return stats.subphase == SUBPHASE.LATE;
+    }
+    
+    /**
+    Is Locked Subphase
+    **/
+    this.subphaseIsLocked = function() {
+        return stats.subphase == SUBPHASE.LOCKED;
+    }
+    
     
     /**
     Is Day?

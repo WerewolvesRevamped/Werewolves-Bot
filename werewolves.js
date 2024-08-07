@@ -52,6 +52,9 @@ client.on("ready", async () => {
     
 	sqlSetup();
 	getStats();
+
+    createActionQueueChecker();
+    
 	setTimeout(function() {
 		getIDs();
 		cacheRoleInfo();
@@ -736,6 +739,37 @@ client.on("guildMemberAdd", async member => {
 	log(`👋 ${member.user} has joined the server!`);
     let oog = member.guild.channels.cache.get("584793703923580965");
     if(oog) oog.send(`Welcome ${member.user} 👋!`);
+});
+
+/* New Slash Command */
+client.on('interactionCreate', async interaction => {
+    if(interaction.isButton()) {
+        let orig_text = interaction.message.embeds[0].description.split(".")[0];
+        let embed;
+        switch(interaction.customId) {
+            default:
+                console.log("Unknown Interaction", interaction.customId);
+            break;
+            case "confirm": // instantly execute ability
+                await instantQueuedAction(interaction.message.id);
+                embed = basicEmbed(`${orig_text}. Execution confirmed.`, EMBED_GREEN);
+                embed.components = [];
+                interaction.update(embed);
+            break;
+            case "cancel": // cancel ability
+                await deleteQueuedAction(interaction.message.id);
+                embed = basicEmbed(`${orig_text}. Execution cancelled.`, EMBED_RED);
+                embed.components = [];
+                interaction.update(embed); 
+            break;
+            case "delay": // delay ability
+                await delayQueuedAction(interaction.message.id);
+                embed = basicEmbed(`${orig_text}. Execution delayed.`, EMBED_GRAY);
+                embed.components = [];
+                interaction.update(embed);
+            break;
+        }
+    }
 });
 
 

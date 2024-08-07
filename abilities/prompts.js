@@ -1,6 +1,6 @@
 /**
     Abilities Module - Main
-    The submodule for implement ability prompts
+    The submodule for implement ability prompts and queued actions
 **/
 
 module.exports = function() {
@@ -71,11 +71,54 @@ module.exports = function() {
         
     /**
     Deletes a Prompt by prompt message id
-    retrieves a prompt
     **/
     async function deletePrompt(id) {
         return new Promise(res => {
             sql("DELETE FROM prompts WHERE message_id=" + connection.escape(id), result => {
+                res();
+            });
+        });
+    }
+        
+    /**
+    Deletes a Queued Action by message id
+    **/
+    this.deleteQueuedAction = async function(id) {
+        return new Promise(res => {
+            sql("DELETE FROM action_queue WHERE message_id=" + connection.escape(id), result => {
+                res();
+            });
+        });
+    }
+    
+    /**
+    Sets the execution time of a queued action to the past, immediately executing it on the next check
+    **/
+    this.instantQueuedAction = async function(id) {
+        return new Promise(res => {
+            sql("UPDATE action_queue SET execute_time=" + connection.escape(getTime() - 1) + " WHERE message_id=" + connection.escape(id), result => {
+                res();
+            });
+        });
+    }
+    
+    /**
+    Sets the execution time of a queued action to max int, delaying it until max delayed actions are manually executed
+    **/
+    this.delayQueuedAction = async function(id) {
+        return new Promise(res => {
+            sql("UPDATE action_queue SET execute_time=2147483647 WHERE message_id=" + connection.escape(id), result => {
+                res();
+            });
+        });
+    }
+    
+    /**
+    Sets the execution time of all delayed queued action to the past, executing them all on the next check
+    **/
+    this.executeDelayedQueuedAction = async function() {
+        return new Promise(res => {
+            sql("UPDATE action_queue SET execute_time=" + connection.escape(getTime() - 1) + " WHERE execute_time=2147483647", result => {
                 res();
             });
         });
@@ -103,10 +146,56 @@ module.exports = function() {
     }
     
     /**
+    Create Queued Action
+    creates an action in the action queue which will be executed at a specified time
+    **/
+    async function createAction(mid, pid, src_role, ability, time) {
+        await new Promise(res => {
+            sql("INSERT INTO action_queue (message_id,player_id,src_role,ability,execute_time) VALUES (" + connection.escape(mid) + "," + connection.escape(pid) + "," + connection.escape(src_role) + "," + connection.escape(JSON.stringify(ability)) + "," + connection.escape(time) + ")", result => {
+                res();
+            });            
+        });
+    }
+    
+    /**
+    Action Queue Checker / Creator
+    checks the action queue every 10 seconds to see if an action should be executed
+    **/
+    this.createActionQueueChecker = function() {
+        setInterval(() => {
+            actionQueueChecker();
+        }, 10 * 1000)
+    }
+    
+    async function actionQueueChecker() {
+        // retrieve all queued actions that need to be executed
+        let actionsToExecute = await new Promise(res => {
+            sql("SELECT * FROM action_queue WHERE execute_time<=" + connection.escape(getTime()), result => {
+                res(result);
+            });            
+        });
+        // iterate through them and execute them
+        for(let i = 0; i < actionsToExecute.length; i++) {
+            // delete the queued action entry
+            await deleteQueuedAction(actionsToExecute[i].message_id);
+            // parse ability
+            let ability = JSON.parse(actionsToExecute[i].ability);
+            // execute the ability
+            let feedback = await executeAbility(actionsToExecute[i].player_id, actionsToExecute[i].src_role, ability);
+            // send feedback
+            if(feedback) abilitySend(actionsToExecute[i].player_id, feedback, EMBED_GREEN);
+        }
+    }
+    
+    /**
     Handle Prompt Reply
     takes a message as an input that is a reply to a bot prompt
     **/
     this.handlePromptReply = async function(message) {
+        if(subphaseIsLocked()) {
+            message.reply(basicEmbed("❌ You can no longer submit actions in this phase.", EMBED_RED));
+            return;
+        }
         // load prompt from DB
         let prompt = await getPrompt(message.reference.messageId);
         // get values from prompt
@@ -121,17 +210,16 @@ module.exports = function() {
             if(parsedReply !== false) {
                 // delete prompt 
                 await deletePrompt(message.reference.messageId);
-                message.reply(`✅ Reply received \`${parsedReply[0]}\`.`);
+                let repl_msg = await sendPromptReplyConfirmMessage(message, `Reply received \`${parsedReply[0]}\`.`);
                 // apply prompt reply onto ability
                 let promptAppliedAbility = applyPromptValue(ability, 0, parsedReply[1]);
-                // execute ability
-                let feedback = await executeAbility(pid, src_role, promptAppliedAbility);
-                abilitySend(pid, feedback);
+                // queue action
+                createAction(repl_msg, pid, src_role, promptAppliedAbility, getTime() + 60);
             }
         } else { // two replies needed
             let reply = message.content.split(";");
             if(reply.length != 2) {
-                message.reply("❌ You must specify exactly two arguments, separated by `;`.");
+                message.reply(basicEmbed("❌ You must specify exactly two arguments, separated by `;`.", EMBED_RED));
             }
             let reply1 = reply[0].trim();
             let reply2 = reply[1].trim();
@@ -141,15 +229,33 @@ module.exports = function() {
             if(parsedReply1 !== false && parsedReply2 !== false) {
                 // delete prompt 
                 await deletePrompt(message.reference.messageId);
-                message.reply(`✅ Reply received \`${parsedReply1[0]}\` and \`${parsedReply2[0]}\`.`);
+                let repl_msg = await sendPromptReplyConfirmMessage(message, `Reply received \`${parsedReply1[0]}\` and \`${parsedReply2[0]}\`.`);
                 // apply prompt reply onto ability
                 let promptAppliedAbility = applyPromptValue(ability, 0, parsedReply1[1]);
                 promptAppliedAbility = applyPromptValue(ability, 1, parsedReply2[1]);
-                // execute ability
-                let feedback = await executeAbility(pid, src_role, promptAppliedAbility);
-                abilitySend(pid, feedback);
+                // queue action
+                await createAction(repl_msg, pid, src_role, promptAppliedAbility, getTime() + 60);
             }
         }
+    }
+    
+    /**
+    Sends a reply message to a prompt reply with reactions
+    **/
+    async function sendPromptReplyConfirmMessage(message, txt) {
+        // reply message with buttons
+        let options = "confirm, cancel or delay";
+        if(!subphaseIsMain()) options = "confirm or cancel";
+        let msg = basicEmbed(`${txt} You may ${options} the ability, otherwise it will be automatically executed in \`1\` minute.`, EMBED_YELLOW);
+        // create buttons
+        let confirmButton = { type: 2, label: "Confirm", style: 3, custom_id: "confirm" };
+        let cancelButton = { type: 2, label: "Cancel", style: 4, custom_id: "cancel" };
+        let delayButton = { type: 2, label: "Delay", style: 2, custom_id: "delay" }
+        msg.components = [ { type: 1, components: [ confirmButton, cancelButton ] } ];
+        if(subphaseIsMain()) msg.components[0].components.push(delayButton);
+        // send reply
+        let repl_msg = await message.reply(msg);
+        return repl_msg.id;
     }
     
     /**
@@ -161,19 +267,19 @@ module.exports = function() {
             case "player":
                 let player = parsePlayerReply(text, message.channel);
                 if(player === false) {
-                    message.reply("❌ You must specify a valid player.");
+                    message.reply(basicEmbed("❌ You must specify a valid player.", EMBED_RED));
                     return false;
                 }
                 return player;
             case "role":
                 let role = parseRoleReply(text);
                 if(role === false) {
-                    message.reply("❌ You must specify a valid role.");
+                    message.reply(basicEmbed("❌ You must specify a valid role.", EMBED_RED));
                     return false;
                 }
                 return role;
             default:
-                message.reply("❌ Invalid prompt.");
+                message.reply(basicEmbed("❌ Invalid prompt.", EMBED_RED));
                 return false;
         }
     }
@@ -193,7 +299,7 @@ module.exports = function() {
             let parsedPlayer = parseUser(channel, player); // parse player name/id/emoji to discord id
             let playerName = channel.guild.members.cache.get(parsedPlayer)?.displayName ?? false; // get name through id
             if(playerName === false) { // this applies in case the player has left the server
-                message.reply("❌ Player valid but cannot be found.");
+                message.reply(basicEmbed("❌ Player valid but cannot be found.", EMBED_RED));
                 return false;
             }
             return [playerName, `@id:${parsedPlayer}`]; // return display name

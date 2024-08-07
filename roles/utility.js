@@ -338,4 +338,24 @@ module.exports = function() {
         return desc.replace(/ {2}/g, getEmoji("empty"));
     }
     
+        
+    /**
+    Basic embed template
+    **/
+    this.EMBED_RED = 13632027; // error 
+    this.EMBED_YELLOW = 16312092; // update / not error/success
+    this.EMBED_GREEN = 8311585; // success
+    this.EMBED_GRAY = 10197915; // info / start
+    this.basicEmbed = function(msg, color) {
+        let dmsg = { 
+            embeds: [
+                {
+                  "description": msg,
+                  "color": color
+                }
+            ]
+        };
+        return dmsg;
+    }
+    
 }

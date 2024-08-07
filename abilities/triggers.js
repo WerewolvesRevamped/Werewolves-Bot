@@ -59,12 +59,12 @@ module.exports = function() {
                 // if no prompts are necessary -> directly execute ability
                 case 0:
                     let feedback = await executeAbility(pid, src_role, ability);
-                    abilitySend(pid, feedback);
+                    if(feedback) abilitySend(pid, feedback);
                 break;
                 // single prompt (@Selection)
                 case 1: {
                     let type = toTitleCase(selectorGetType(prompts[0][1]));
-                    abilityLog(`🟢 **Prompting Ability:** <@${pid}> (${toTitleCase(src_role)}) - ${toTitleCase(ability.type)} [${type}]`);
+                    abilityLog(`🟩 **Prompting Ability:** <@${pid}> (${toTitleCase(src_role)}) - ${toTitleCase(ability.type)} [${type}]`);
                     let mid = await abilitySendProm(pid, `${getEmoji(src_role)} Give ${type}`);
                     await createPrompt(mid, pid, src_role, ability, type);
                 } break;
@@ -72,7 +72,7 @@ module.exports = function() {
                 case 2: {
                     let type1 = toTitleCase(selectorGetType(prompts[0][1]));
                     let type2 = toTitleCase(selectorGetType(prompts[1][1]));
-                    abilityLog(`🟢 **Prompting Ability:** <@${pid}> (${toTitleCase(src_role)}) - ${toTitleCase(ability.type)} [${type1}, ${type2}]`);
+                    abilityLog(`🟩 **Prompting Ability:** <@${pid}> (${toTitleCase(src_role)}) - ${toTitleCase(ability.type)} [${type1}, ${type2}]`);
                     let mid = await abilitySendProm(pid, `${getEmoji(src_role)} Give ${type1} and ${type2}`);
                     await createPrompt(mid, pid, src_role, ability, type1, type2);
                 } break;
