@@ -4,6 +4,36 @@
 **/
 
 module.exports = function() {
+    const prompts = require("./prompts.json");
+    
+    /**
+    Get Promp Message
+    returns a prompt message
+    **/
+    this.getPromptMessage = function(ability, type1 = "", type2 = "") {
+        const ty = ability.type;
+        const su = ability.subtype;
+        const tysu = `${ty}.${su}`;
+        const tysu1 = `${tysu}.1`;
+        const tysu2 = `${tysu}.2`;
+        const ty1 = `${ty}.1`;
+        const ty2 = `${ty}.2`;
+        // default prompt
+        let promptMsg = `Give ${type1}`;
+        if(type2.length > 0) promptMsg += `and ${type2}`;
+        // search for prompt in JSON
+        if(type2 === "" && ty && su && prompts[tysu1]) return prompts[tysu1];
+        else if(type2 === "" && ty && su && prompts[tysu]) return prompts[tysu];
+        else if(type2 !== "" && ty && su && prompts[tysu2]) return prompts[tysu2];
+        else if(type2 !== "" && ty && su && prompts[tysu]) return prompts[tysu];
+        else if(type2 === "" && ty  && prompts[ty1]) return prompts[ty1];
+        else if(type2 === "" && ty  && prompts[ty]) return prompts[ty];
+        else if(type2 !== "" && ty  && prompts[ty2]) return prompts[ty2];
+        else if(type2 !== "" && ty  && prompts[ty]) return prompts[ty];
+        // return default prompt
+        return promptMsg;
+    }
+    
     /** 
     Create Prompt
     creates a new prompt in the prompt table
@@ -184,6 +214,8 @@ module.exports = function() {
             let feedback = await executeAbility(actionsToExecute[i].player_id, actionsToExecute[i].src_role, ability);
             // send feedback
             if(feedback) abilitySend(actionsToExecute[i].player_id, feedback, EMBED_GREEN);
+            // confirm automatic execution
+            confirmAutoExecution(actionsToExecute[i].player_id, actionsToExecute[i].message_id);
         }
     }
     
@@ -210,11 +242,13 @@ module.exports = function() {
             if(parsedReply !== false) {
                 // delete prompt 
                 await deletePrompt(message.reference.messageId);
-                let repl_msg = await sendPromptReplyConfirmMessage(message, `Reply received \`${parsedReply[0]}\`.`);
+                let repl_msg = await sendPromptReplyConfirmMessage(message, `You submitted: \`${parsedReply[0]}\`.`);
                 // apply prompt reply onto ability
                 let promptAppliedAbility = applyPromptValue(ability, 0, parsedReply[1]);
                 // queue action
-                createAction(repl_msg, pid, src_role, promptAppliedAbility, getTime() + 60);
+                await createAction(repl_msg, pid, src_role, promptAppliedAbility, getTime() + 60);
+                // log prompt reply
+                abilityLog(`✅ **Prompt Reply:** <@${pid}> (${toTitleCase(src_role)}) submitted \`${parsedReply[0]}\`.`);
             }
         } else { // two replies needed
             let reply = message.content.split(";");
@@ -229,12 +263,14 @@ module.exports = function() {
             if(parsedReply1 !== false && parsedReply2 !== false) {
                 // delete prompt 
                 await deletePrompt(message.reference.messageId);
-                let repl_msg = await sendPromptReplyConfirmMessage(message, `Reply received \`${parsedReply1[0]}\` and \`${parsedReply2[0]}\`.`);
+                let repl_msg = await sendPromptReplyConfirmMessage(message, `You submitted: \`${parsedReply1[0]}\` and \`${parsedReply2[0]}\`.`);
                 // apply prompt reply onto ability
                 let promptAppliedAbility = applyPromptValue(ability, 0, parsedReply1[1]);
                 promptAppliedAbility = applyPromptValue(ability, 1, parsedReply2[1]);
                 // queue action
                 await createAction(repl_msg, pid, src_role, promptAppliedAbility, getTime() + 60);
+                // log prompt reply
+                abilityLog(`✅ **Prompt Reply:** <@${pid}> (${toTitleCase(src_role)}) submitted \`${parsedReply1[0]}\` and \`${parsedReply2[0]}\`.`);
             }
         }
     }
@@ -316,5 +352,24 @@ module.exports = function() {
         } else {
             return false;
         }
+    }
+    
+    /**
+    Prompt Message Confirm Automatic Execution
+    **/
+    this.confirmAutoExecution = function(player_id, message_id) {
+        return new Promise(res => {
+            sql("SELECT channel_id FROM connected_channels WHERE id = " + connection.escape(player_id), result => {
+                for(let i = 0; i < result.length; i++) {
+                    let player_sc_id = result[i].channel_id;
+                    let player_sc = client.guilds.cache.get("569626539541397515").channels.cache.get(player_sc_id);
+                    let player_sc_msg = player_sc.messages.cache.get(message_id);
+                    let orig_text = player_sc_msg.embeds[0].description.split(".")[0];
+                    embed = basicEmbed(`${orig_text}. Automatically executed.`, EMBED_GREEN);
+                    embed.components = [];
+                    player_sc_msg.edit(embed);
+                }
+            });
+        });      
     }
 }

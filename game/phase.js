@@ -20,6 +20,7 @@ module.exports = function() {
 			case "get": cmdPhaseGet(message.channel); break;
 			case "set": cmdPhaseSet(message.channel, args); break;
 			case "next": cmdPhaseNext(message.channel); break;
+			case "switch": cmdPhaseSwitch(message.channel); break;
 			case "main": cmdPhaseMain(message.channel); break;
 			case "late": cmdPhaseLate(message.channel); break;
 			case "lock": cmdPhaseLock(message.channel); break;
@@ -33,6 +34,22 @@ module.exports = function() {
     this.cmdPhaseGet = function(channel) {
         let phaseName = toTitleCase(getPhase());
         channel.send(`✅ Current phase is \`${phaseName}\` (${getSubphase()}).`);
+    }
+    
+    /**
+    Command: $phase switch
+    phase lock + phase next
+    **/
+    this.cmdPhaseSwitch = async function(channel) {
+        if(subphaseIsMain()) {
+            channel.send(`🕐 Setting to late phase and waiting for 60 seconds to lock phase.`);
+            cmdPhaseLate(channel);
+            await sleep(60 * 1000);
+        }
+        cmdPhaseLock(channel);
+        channel.send(`🕐 Locking phase and waiting for 60 seconds to change to next phase.`);
+        await sleep(60 * 1000);
+        cmdPhaseNext(channel);
     }
     
     /**
@@ -86,6 +103,13 @@ module.exports = function() {
             channel.send(`✅ Incremented phase to \`${toTitleCase(newPhaseName)}\`!`);
         } else {
             channel.send(`⛔ Command error.  Could not increment phase.`);
+        }
+        
+        // trigger start phase events
+        if(isDay(newPhaseName)) {
+            eventStartDay();
+        } else {
+            eventStartNight();
         }
     }
     

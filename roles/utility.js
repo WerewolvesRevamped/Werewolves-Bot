@@ -358,4 +358,12 @@ module.exports = function() {
         return dmsg;
     }
     
+    /**
+    Sleep
+    waits by a specified amount of ms
+    **/
+    function sleep(ms) {
+        return new Promise(res => setTimeout(res, ms));
+    }
+    
 }

@@ -54,27 +54,32 @@ module.exports = function() {
     Ability Feedback
     used to send feedback for abilities (and probably prompts?)
     **/
-    this.abilitySend = function(player_id, message, color = EMBED_GRAY) {
+    this.abilitySend = function(player_id, message, color = EMBED_GRAY, ping = false) {
         sql("SELECT channel_id FROM connected_channels WHERE id = " + connection.escape(player_id), result => {
             let player_sc_id = result[0].channel_id;
             let player_sc = client.guilds.cache.get("569626539541397515").channels.cache.get(player_sc_id);
-            player_sc.send(basicEmbed(message, color));
+            embed = basicEmbed(message, color);
+            if(ping) embed.content =  `<@&${stats.participant}>`;
+            player_sc.send(embed);
         });
     }
     
     /**
     Ability Feedback + Return new message ID
     **/
-    this.abilitySendProm = function(player_id, message, color = EMBED_GRAY) {
+    this.abilitySendProm = function(player_id, message, color = EMBED_GRAY, ping = false) {
         return new Promise(res => {
             sql("SELECT channel_id FROM connected_channels WHERE id = " + connection.escape(player_id), result => {
                 let player_sc_id = result[0].channel_id;
                 let player_sc = client.guilds.cache.get("569626539541397515").channels.cache.get(player_sc_id);
-                player_sc.send(basicEmbed(message, color)).then(msg => {
+                embed = basicEmbed(message, color);
+                if(ping) embed.content =  `<@&${stats.participant}>`;
+                player_sc.send(embed).then(msg => {
                     res(msg.id);
                 });
             });
         });      
     }
+    
     
 }
