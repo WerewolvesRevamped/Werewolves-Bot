@@ -66,7 +66,7 @@ module.exports = function() {
                     let type = toTitleCase(selectorGetType(prompts[0][1]));
                     abilityLog(`🟢 **Prompting Ability:** <@${pid}> (${toTitleCase(src_role)}) - ${toTitleCase(ability.type)} [${type}]`);
                     let mid = await abilitySendProm(pid, `${getEmoji(src_role)} Give ${type}`);
-                    await createPrompt(mid, pid, src_role, ability);
+                    await createPrompt(mid, pid, src_role, ability, type);
                 } break;
                 // double prompt (@Selection and @SecondarySelection)
                 case 2: {
@@ -74,7 +74,7 @@ module.exports = function() {
                     let type2 = toTitleCase(selectorGetType(prompts[1][1]));
                     abilityLog(`🟢 **Prompting Ability:** <@${pid}> (${toTitleCase(src_role)}) - ${toTitleCase(ability.type)} [${type1}, ${type2}]`);
                     let mid = await abilitySendProm(pid, `${getEmoji(src_role)} Give ${type1} and ${type2}`);
-                    await createPrompt(mid, pid, src_role, ability);
+                    await createPrompt(mid, pid, src_role, ability, type1, type2);
                 } break;
                 // more than 2 prompts -> error
                 default:

@@ -151,6 +151,7 @@ function restartSQL(channel) {
     })
 }
 
+var automationBusy = false;
 
 /* New Message */
 client.on("messageCreate", async message => {
@@ -160,6 +161,22 @@ client.on("messageCreate", async message => {
         console.log("UNKNOWN MESSAGE");
         console.log(err);
         return;
+    }
+    
+    // Check if message is a prompt reply
+    if(
+        message.mentions && message.mentions.repliedUser && message.mentions.repliedUser == client.user.id // check if replied to bot
+        && message.reference && message.reference.messageId && (await isPrompt(message.reference.messageId)) // check if replied to message is a prompt
+    ) {
+        if(!automationBusy) { // make sure only one action runs at a time
+            automationBusy = true;
+            await handlePromptReply(message); // handle the prompt 
+            automationBusy = false;
+        } else {  // in my testing i was unable to reply fast enough to trigger this, but theoretically it should be possible
+            abilityLog(`🕐 **Bot Busy:** <@${message.author.id}> tried to reply to a prompt while bot was busy.`);
+            message.reply("🕐 Bot is busy. Please retry.");
+        }
+        return; // dont do further steps for prompts
     }
     
     
