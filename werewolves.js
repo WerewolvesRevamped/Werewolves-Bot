@@ -751,21 +751,30 @@ client.on('interactionCreate', async interaction => {
                 console.log("Unknown Interaction", interaction.customId);
             break;
             case "confirm": // instantly execute ability
+            case "delay-confirm": // instantly execute ability, after delay
                 await instantQueuedAction(interaction.message.id);
                 embed = basicEmbed(`${orig_text}. Execution confirmed.`, EMBED_GREEN);
                 embed.components = [];
                 interaction.update(embed);
             break;
             case "cancel": // cancel ability
+            case "delay-cancel": // cancel ability, after delay
+                // turn this message from an action queue message into a prompt
+                let action = await getAction(interaction.message.id);
+                await createPrompt(interaction.message.id, action.player_id, action.src_role, JSON.parse(action.orig_ability), action.type1, action.type2);
+                // delete from action queue
                 await deleteQueuedAction(interaction.message.id);
-                embed = basicEmbed(`${orig_text}. Execution cancelled.`, EMBED_RED);
+                // update message
+                embed = basicEmbed(`${orig_text}. Execution cancelled. Reply to this message to submit a new choice.`, EMBED_RED);
                 embed.components = [];
                 interaction.update(embed); 
             break;
             case "delay": // delay ability
                 await delayQueuedAction(interaction.message.id);
-                embed = basicEmbed(`${orig_text}. Execution delayed.`, EMBED_GRAY);
-                embed.components = [];
+                embed = basicEmbed(`${orig_text}. Execution delayed. You may execute the ability immediately or cancel the execution (allowing you to change your selection). If you choose no action the ability will be executed automatically towards the end of the phase.`, EMBED_GRAY);
+                let confirmButton = { type: 2, label: "Execute Immediately", style: 3, custom_id: "delay-confirm" };
+                let cancelButton = { type: 2, label: "Cancel", style: 4, custom_id: "delay-cancel" };
+                embed.components = [ { type: 1, components: [ confirmButton, cancelButton ] } ];
                 interaction.update(embed);
             break;
         }

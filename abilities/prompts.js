@@ -109,6 +109,18 @@ module.exports = function() {
             });
         });
     }
+    
+    /**
+    Get Action by action queue message id
+    retrieves a prompt
+    **/
+    this.getAction = async function(id) {
+        return new Promise(res => {
+            sql("SELECT * FROM action_queue WHERE message_id=" + connection.escape(id), result => {
+                res(result.length > 0 ? result[0] : false);
+            });
+        });
+    }
         
     /**
     Deletes a Queued Action by message id
@@ -179,9 +191,9 @@ module.exports = function() {
     Create Queued Action
     creates an action in the action queue which will be executed at a specified time
     **/
-    async function createAction(mid, pid, src_role, ability, time) {
+    async function createAction(mid, pid, src_role, ability, orig_ability, type1, type2, time) {
         await new Promise(res => {
-            sql("INSERT INTO action_queue (message_id,player_id,src_role,ability,execute_time) VALUES (" + connection.escape(mid) + "," + connection.escape(pid) + "," + connection.escape(src_role) + "," + connection.escape(JSON.stringify(ability)) + "," + connection.escape(time) + ")", result => {
+            sql("INSERT INTO action_queue (message_id,player_id,src_role,ability,orig_ability,type1,type2,execute_time) VALUES (" + connection.escape(mid) + "," + connection.escape(pid) + "," + connection.escape(src_role) + "," + connection.escape(JSON.stringify(ability)) + "," + connection.escape(JSON.stringify(orig_ability)) + "," + connection.escape(type1) + "," + connection.escape(type2) + "," + connection.escape(time) + ")", result => {
                 res();
             });            
         });
@@ -246,7 +258,7 @@ module.exports = function() {
                 // apply prompt reply onto ability
                 let promptAppliedAbility = applyPromptValue(ability, 0, parsedReply[1]);
                 // queue action
-                await createAction(repl_msg, pid, src_role, promptAppliedAbility, getTime() + 60);
+                await createAction(repl_msg, pid, src_role, promptAppliedAbility, ability, prompt.type1, prompt.type2, getTime() + 60);
                 // log prompt reply
                 abilityLog(`✅ **Prompt Reply:** <@${pid}> (${toTitleCase(src_role)}) submitted \`${parsedReply[0]}\`.`);
             }
@@ -268,7 +280,7 @@ module.exports = function() {
                 let promptAppliedAbility = applyPromptValue(ability, 0, parsedReply1[1]);
                 promptAppliedAbility = applyPromptValue(ability, 1, parsedReply2[1]);
                 // queue action
-                await createAction(repl_msg, pid, src_role, promptAppliedAbility, getTime() + 60);
+                await createAction(repl_msg, pid, src_role, promptAppliedAbility, ability, prompt.type1, prompt.type2, getTime() + 60);
                 // log prompt reply
                 abilityLog(`✅ **Prompt Reply:** <@${pid}> (${toTitleCase(src_role)}) submitted \`${parsedReply1[0]}\` and \`${parsedReply2[0]}\`.`);
             }
@@ -286,7 +298,7 @@ module.exports = function() {
         // create buttons
         let confirmButton = { type: 2, label: "Confirm", style: 3, custom_id: "confirm" };
         let cancelButton = { type: 2, label: "Cancel", style: 4, custom_id: "cancel" };
-        let delayButton = { type: 2, label: "Delay", style: 2, custom_id: "delay" }
+        let delayButton = { type: 2, label: "Delay", style: 2, custom_id: "delay" };
         msg.components = [ { type: 1, components: [ confirmButton, cancelButton ] } ];
         if(subphaseIsMain()) msg.components[0].components.push(delayButton);
         // send reply
@@ -365,7 +377,7 @@ module.exports = function() {
                     let player_sc = client.guilds.cache.get("569626539541397515").channels.cache.get(player_sc_id);
                     let player_sc_msg = player_sc.messages.cache.get(message_id);
                     let orig_text = player_sc_msg.embeds[0].description.split(".")[0];
-                    embed = basicEmbed(`${orig_text}. Automatically executed.`, EMBED_GREEN);
+                    embed = basicEmbed(`${orig_text}. Ability executed.`, EMBED_GREEN);
                     embed.components = [];
                     player_sc_msg.edit(embed);
                 }
