@@ -6,6 +6,21 @@
 require("./help.js")();
 
 module.exports = function() {
+    
+    /**
+    All valid duration types
+    **/
+    this.attributesValidDurationTypes = ["permanent","persistent","phase","nextday","nextnight","untiluse","untilseconduse","attribute","untiluseattribute"];
+    const attributesNiceNames = ["Permanent", "Persistent", "Phase", "Next Day", "Next Night", "Until Use", "Until Second Use", "Attribute", "Until Use & Attribute"];
+    
+    this.getDurationName = function(attr) {
+        let index = attributesValidDurationTypes.indexOf(attr);
+        if(index >= 0) {
+            return attributesNiceNames[index];
+        } else {
+            return "Unknown";
+        }
+    }
         
 	/**
     Command: $attributes

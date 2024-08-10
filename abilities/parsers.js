@@ -16,6 +16,8 @@ module.exports = function() {
         switch(selectorType) {
             case "player": 
                 return parsePlayerSelector(selector, self);
+            case "role": 
+                return parseRoleSelector(selector);
             default:
                 abilityLog(`❗ **Error:** Invalid selector type \`${selectorType}\`!`);
                 return [];
@@ -48,6 +50,25 @@ module.exports = function() {
     }
     
     /**
+    Parse Role Selector
+    parses a role type selector
+    **/
+    this.parseRoleSelector = function(selector) {
+        let selectorTarget = selectorGetTarget(selector);
+        /** WIP: Needs to be able to parse much more! **/
+        switch(selectorTarget) {
+            default:
+                let parsedRole = parseRole(selector);
+                if(verifyRole(parsedRole)) {
+                    return [ parsedRole ];
+                } else {
+                    abilityLog(`❗ **Error:** Invalid role selector target \`${selectorTarget}\`!`);
+                    return [ ];
+                }
+        }
+    }
+    
+    /**
     Get Selector Target
     returns the target of a selector (removing the type)
     **/
@@ -73,10 +94,33 @@ module.exports = function() {
     
     /**
     Parse Duration
-    parses a duration type, WIP: I suppose this should verify its a valid duration type!!
+    parses a duration type
+    defaults to phase for invalid types
     **/
     this.parseDuration = function(dur) {
-        return dur.toLowerCase();
+        let dur_type = dur.toLowerCase();
+        if(dur_type[0] === "~") dur_type = dur_type.substr(1);
+        if(attributesValidDurationTypes.indexOf(dur_type) >= 0) {
+            return dur_type;
+        } else {
+            abilityLog(`❗ **Error:** Invalid duration type \`${mem_type}\`. Defaulted to \`phase\`!`);
+            return "phase";   
+        }
+    }
+    
+    /**
+    Parse Membership Type
+    parses a group membership type
+    defaults to member for invalid types
+    **/
+    this.parseMembershipType = function(mem_type) {
+        mem_type = mem_type.toLowerCase();
+        if(["member","owner","visitor"].indexOf(mem_type) >= 0) {
+            return mem_type;
+        } else {
+            abilityLog(`❗ **Error:** Invalid membership type \`${mem_type}\`. Defaulted to \`member\`!`);
+            return "member";
+        }
     }
     
 }

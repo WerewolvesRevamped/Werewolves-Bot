@@ -10,6 +10,7 @@ module.exports = function() {
     handle a trigger triggering
     **/
     function triggerHandler(triggerName, args = []) {
+        abilityLog(`🔷 **Trigger:** ${triggerName}`);  
         return new Promise(res => {
             // get all players
             sql("SELECT role,id FROM players WHERE type='player' AND alive=1", async r => {
@@ -17,9 +18,9 @@ module.exports = function() {
                 for(let pr of r) {
                     await triggerHandlerPlayer(pr, triggerName);
                 }
+                // resolve outer promise
+                res();
             });
-            // resolve outer promise
-            res();
         });
     }
     
@@ -116,6 +117,10 @@ module.exports = function() {
     **/
     this.eventStartNight = async function() {
         await clearPrompts();
+        await triggerHandler("Passive End Day");
+        await triggerHandler("Passive End Phase");
+        await triggerHandler("Passive Start Night");
+        await triggerHandler("Passive Start Phase");
         await triggerHandler("Start Night");
         await triggerHandler("Immediate Night");
         await triggerHandler("Immediate");
@@ -127,6 +132,10 @@ module.exports = function() {
     **/
     this.eventStartDay = async function() {
         await clearPrompts();
+        await triggerHandler("Passive End Night");
+        await triggerHandler("Passive End Phase");
+        await triggerHandler("Passive Start Day");
+        await triggerHandler("Passive Start Phase");
         await triggerHandler("Start Day");
         await triggerHandler("Immediate Day");
         await triggerHandler("Immediate");

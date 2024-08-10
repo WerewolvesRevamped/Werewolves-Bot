@@ -9,6 +9,7 @@ require("./prompts.js")();
 /** Ability Types **/
 require("./joining.js")();
 require("./investigating.js")();
+require("./disguising.js")();
 
 module.exports = function() {
     
@@ -29,6 +30,9 @@ module.exports = function() {
             break;
             case "investigating":
                 return await abilityInvestigating(pid, src_role, ability)
+            break;
+            case "disguising":
+                return await abilityDisguising(pid, src_role, ability)
             break;
         }
     }
