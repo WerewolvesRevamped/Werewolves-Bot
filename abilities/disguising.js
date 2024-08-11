@@ -50,4 +50,28 @@ module.exports = function() {
         return "Disguising succeeded!";
     }
     
+    /**
+    Get top disguise of a certain type
+    **/
+    this.getTopDisguise = async function(player_id, type) {
+        let allDisguises = await queryAttributePlayer(player_id, "attr_type", "disguise", "val2", type); // get all disguises of specified type
+        if(allDisguises.length <= 0) return ""; // no disguises
+        let topDisguise = allDisguises[allDisguises.length - 1]; // get most recent disguise
+        return topDisguise.val1;
+    }
+    
+    /**
+    Get top weak disguise
+    **/
+    this.getTopWeakDisguise = async function(player_id) {
+        return await getTopDisguise(player_id, "weak");
+    }
+    
+    /**
+    Get top strong disguise
+    **/
+    this.getTopStrongDisguise = async function(player_id) {
+        return await getTopDisguise(player_id, "strong");
+    }
+    
 }

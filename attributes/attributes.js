@@ -152,18 +152,47 @@ module.exports = function() {
     }
     
     /**
+    Checks if a attribute column name is valid**/
+    function isValidAttributeColumnName(name) {
+        return ["owner","src_role","src_player","attr_type","duration","val1","val2","val3","val4"].includes(name);
+    }
+    
+    function validateAttributeColumnName(name) {
+        if(isValidAttributeColumnName(name)) {
+            return true;
+        } else {
+            abilityLog(`❗ **Error:** Unexpected attribute query column \`${name}\`!`);  
+            return false;
+        }
+    }
+    
+    /**
     Attribute Query for Player
     queries an attribute for a specific player
     **/
-    this.queryAttributePlayer = async function(player, column, val) {
+    this.queryAttributePlayer = async function(player, column, val, column2 = null, val2 = null) {
+        if(column2) return await twoColumnQuery(player, column, val, column2, val2);
+        else return await twoColumnQuery(player, column, val);
+    }
+    
+    async function singleColumnQuery(player, column, val) {
         // make sure column is valid
-        if(!(["owner","src_role","src_player","attr_type","duration","val1","val2","val3","val4"].includes(column))) {
-            abilityLog(`❗ **Error:** Unexpected attribute query column \`${column}\`!`);  
-            return [];
-        }
+        if(!validateAttributeColumnName(column)) return [];
         // query attribute
         return new Promise(res => {
-             sql("SELECT * FROM active_attributes WHERE owner=" + connection.escape(player) + " AND " + column + "=" + connection.escape(val), result => {
+             sql("SELECT * FROM active_attributes WHERE owner=" + connection.escape(player) + " AND " + column + "=" + connection.escape(val) + " ORDER BY ai_id ASC", result => {
+                 res(result);
+             });
+        }); 
+    }
+    
+    async function twoColumnQuery(player, column, val, column2, val2) {
+        // make sure column is valid
+        if(!validateAttributeColumnName(column)) return [];
+        if(!validateAttributeColumnName(column2)) return [];
+        // query attribute
+        return new Promise(res => {
+             sql("SELECT * FROM active_attributes WHERE owner=" + connection.escape(player) + " AND " + column + "=" + connection.escape(val) + " AND " + column2 + "=" + connection.escape(val2) + " ORDER BY ai_id ASC", result => {
                  res(result);
              });
         }); 

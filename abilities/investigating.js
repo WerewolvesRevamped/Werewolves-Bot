@@ -62,13 +62,11 @@ module.exports = function() {
         if(targets.length != 1) {
             return singleTargetCheck(targets);
         }
-        // query attribute
-        return new Promise(res => {
-             sql("SELECT role FROM players WHERE id=" + connection.escape(targets[0]), result => {
-                abilityLog(`✅ <@${src_player}> investigated <@${targets[0]}>'s role as \`${toTitleCase(result[0].role)}\`.`);
-                 res(`Investigated <@${targets[0]}>'s role: \`${toTitleCase(result[0].role)}\``);
-             });
-        }); 
+        // get data
+        let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);
+        // feedback
+        abilityLog(`✅ <@${src_player}> investigated <@${targets[0]}>'s role as \`${toTitleCase(rdata.role.role)}\`${rdata.type?' ('+rdata.type+')':''}.`);
+        return `Investigated <@${targets[0]}>'s role: \`${toTitleCase(rdata.role.role)}\``;
     }
     
     /**
@@ -80,10 +78,10 @@ module.exports = function() {
             return singleTargetCheck(targets);
         }
         // get data
-        let rdata = await getRoleDataFromPlayer(targets[0]);
+        let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);
         // feedback
-        abilityLog(`✅ <@${src_player}> investigated <@${targets[0]}>'s class as \`${toTitleCase(rdata.class)}\`.`);
-        return `Investigated <@${targets[0]}>'s class: \`${toTitleCase(rdata.class)}\``;
+        abilityLog(`✅ <@${src_player}> investigated <@${targets[0]}>'s class as \`${toTitleCase(rdata.role.class)}\`${rdata.type?' ('+rdata.type+')':''}.`);
+        return `Investigated <@${targets[0]}>'s class: \`${toTitleCase(rdata.role.class)}\``;
     }
     
     /**
@@ -95,19 +93,56 @@ module.exports = function() {
             return singleTargetCheck(targets);
         }
         // get data
-        let rdata = await getRoleDataFromPlayer(targets[0]);
+        let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);
         // feedback
-        abilityLog(`✅ <@${src_player}> investigated <@${targets[0]}>'s category as \`${toTitleCase(rdata.category)}\`.`);
-        return `Investigated <@${targets[0]}>'s category: \`${toTitleCase(rdata.category)}\``;
+        abilityLog(`✅ <@${src_player}> investigated <@${targets[0]}>'s category as \`${toTitleCase(rdata.role.category)}\`${rdata.type?' ('+rdata.type+')':''}.`);
+        return `Investigated <@${targets[0]}>'s category: \`${toTitleCase(rdata.role.category)}\``;
     }
     
+    /**
+    Get visible role when considering disguises
+    **/
+    async function getVisibleRoleData(player, affected_by_wd, affected_by_sd) {
+        // get role data
+        let rdata = await getRoleDataFromPlayer(player);
+        let type = "";
+        // get weak disguise data (if applicable)
+        if(affected_by_wd) {
+            let disguise = await getTopWeakDisguise(player);
+            if(disguise) {
+                rdata = await getRoleDataFromRole(disguise);
+                type = "WD";
+            }
+        }
+        // get strong disguise data (if applicable)
+        if(affected_by_sd) {
+            let disguise = await getTopStrongDisguise(player);
+            if(disguise) {
+                rdata = await getRoleDataFromRole(disguise);
+                type = "SD";
+            }
+        }
+        return {role: rdata, type: type};
+    }
     
     /**
     Returns a player's role's key fields
     **/
     this.getRoleDataFromPlayer = async function(player) {
         return new Promise(res => {
-            sql("SELECT class,category,team FROM players INNER JOIN roles ON roles.name=players.role WHERE players.id=" + connection.escape(player), async result => {
+            sql("SELECT players.role,roles.class,roles.category,roles.team FROM players INNER JOIN roles ON roles.name=players.role WHERE players.id=" + connection.escape(player), async result => {
+                res(result[0]);
+            });
+        });
+    }    
+    
+    /**
+    Returns a role's key fields
+    **/
+    this.getRoleDataFromRole = async function(role) {
+        return new Promise(res => {
+            sql("SELECT name,class,category,team FROM roles WHERE name=" + connection.escape(role), async result => {
+                result[0].role = result[0].name; // alias the name field to have same format as getRoleDataFromPlayer
                 res(result[0]);
             });
         });
