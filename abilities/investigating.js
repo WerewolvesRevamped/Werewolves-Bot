@@ -19,21 +19,21 @@ module.exports = function() {
                 if(!ability.target) {
                     abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
                 }
-                result = await investigatingRole(src_role, pid, parsePlayerSelector(ability.target, pid), ability.affected_by_wd ?? false, ability.affected_by_sd ?? false);
+                result = await investigatingRole(src_role, pid, await parsePlayerSelector(ability.target, pid), ability.affected_by_wd ?? false, ability.affected_by_sd ?? false);
                 return result;
             break;
             case "class":
                 if(!ability.target) {
                     abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
                 }
-                result = await investigatingClass(src_role, pid, parsePlayerSelector(ability.target, pid), ability.affected_by_wd ?? false, ability.affected_by_sd ?? false);
+                result = await investigatingClass(src_role, pid, await parsePlayerSelector(ability.target, pid), ability.affected_by_wd ?? false, ability.affected_by_sd ?? false);
                 return result;
             break;
             case "category":
                 if(!ability.target) {
                     abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
                 }
-                result = await investigatingCategory(src_role, pid, parsePlayerSelector(ability.target, pid), ability.affected_by_wd ?? false, ability.affected_by_sd ?? false);
+                result = await investigatingCategory(src_role, pid, await parsePlayerSelector(ability.target, pid), ability.affected_by_wd ?? false, ability.affected_by_sd ?? false);
                 return result;
             break;
         }

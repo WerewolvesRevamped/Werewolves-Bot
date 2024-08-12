@@ -172,7 +172,7 @@ module.exports = function() {
     **/
     this.queryAttributePlayer = async function(player, column, val, column2 = null, val2 = null) {
         if(column2) return await twoColumnQuery(player, column, val, column2, val2);
-        else return await twoColumnQuery(player, column, val);
+        else return await singleColumnQuery(player, column, val);
     }
     
     async function singleColumnQuery(player, column, val) {

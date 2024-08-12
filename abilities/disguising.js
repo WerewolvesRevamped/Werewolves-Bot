@@ -19,14 +19,14 @@ module.exports = function() {
                 if(!ability.target || !ability.disguise) {
                     abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
                 }
-                result = await disguising(src_role, pid, parsePlayerSelector(ability.target, pid), parseRoleSelector(ability.disguise), parseDuration(ability.duration ?? "permanent"), "weak");
+                result = await disguising(src_role, pid, await parsePlayerSelector(ability.target, pid), parseRoleSelector(ability.disguise), parseDuration(ability.duration ?? "permanent"), "weak");
                 return result;
             break;
             case "strongly":
                 if(!ability.target || !ability.disguise) {
                     abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
                 }
-                result = await disguising(src_role, pid, parsePlayerSelector(ability.target, pid), parseRoleSelector(ability.disguise), parseDuration(ability.duration ?? "permanent"), "strong");
+                result = await disguising(src_role, pid, await parsePlayerSelector(ability.target, pid), parseRoleSelector(ability.disguise), parseDuration(ability.duration ?? "permanent"), "strong");
                 return result;
             break;
         }

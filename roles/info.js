@@ -141,16 +141,16 @@ module.exports = function() {
             sql("SELECT * FROM groups WHERE name = " + connection.escape(groupName), async result => {
                 result = result[0]; // there should always only be one role by a certain name
                 var embed = await getBasicEmbed(guild);
-                var members = result.desc_members ?? "";
+                var members = result?.desc_members ?? "";
                 
                 // search for and replace queries
                 members = await applyQuery(members);
                 members = members.replace("\n\n\n","\n"); // remove extra newline for when a section is empty
                 
                 var desc = [];
-                if(sections.includes("basics") || sections.includes("simplified")) desc.push(["Basics", result.desc_basics]);
+                if(sections.includes("basics") || sections.includes("simplified")) desc.push(["Basics", result?.desc_basics ?? "No info found"]);
                 if(sections.includes("details")) desc.push(["Members", members]);
-                if(sections.includes("formalized")) desc.push(["Formalized", formatFormalized(result.desc_formalized)]);
+                if(sections.includes("formalized")) desc.push(["Formalized", formatFormalized(result?.desc_formalized ?? "No info found")]);
 
                 // split a single section into several fields if necessary
                 for(let d in desc) {
@@ -159,13 +159,13 @@ module.exports = function() {
                
                 // get icon if applicable
                 let lutval = applyLUT(groupName);
-                if(!lutval) lutval = applyLUT(result.display_name);
+                if(!lutval) lutval = applyLUT(result?.display_name ?? "Unknown");
                 if(lutval) { // set icon and name
                     //console.log(`${iconRepoBaseUrl}${lutval}`);
                     embed.thumbnail = { "url": `${iconRepoBaseUrl}${lutval}.png` };
-                    embed.author = { "icon_url": `${iconRepoBaseUrl}${lutval}.png`, "name": applyTheme(result.display_name) };
+                    embed.author = { "icon_url": `${iconRepoBaseUrl}${lutval}.png`, "name": applyTheme(result?.display_name ?? "Unknown") };
                 } else { // just set title afterwards
-                    embed.title = applyET(result.display_name);
+                    embed.title = applyET(result?.display_name ?? "Unknown");
                 }
                 
                 // resolve promise, return embed

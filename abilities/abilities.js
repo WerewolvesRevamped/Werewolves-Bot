@@ -51,7 +51,7 @@ module.exports = function() {
     **/
     this.cmdExecute = async function(message, ability) {
         let feedback = await executeAbility(message.author.id, "host", JSON.parse(ability));
-        message.channel.send(basicEmbed(message, EMBED_GREEN));
+        message.channel.send(basicEmbed(feedback, EMBED_GREEN));
     }
     
     /**
