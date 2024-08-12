@@ -119,6 +119,7 @@ module.exports = function() {
         await clearPrompts();
         await triggerHandler("Passive End Day");
         await triggerHandler("Passive End Phase");
+        await attributeCleanup();
         await triggerHandler("Passive Start Night");
         await triggerHandler("Passive Start Phase");
         await triggerHandler("Start Night");
@@ -134,6 +135,7 @@ module.exports = function() {
         await clearPrompts();
         await triggerHandler("Passive End Night");
         await triggerHandler("Passive End Phase");
+        await attributeCleanup();
         await triggerHandler("Passive Start Day");
         await triggerHandler("Passive Start Phase");
         await triggerHandler("Start Day");

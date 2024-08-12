@@ -105,7 +105,7 @@ module.exports = function() {
     **/
     this.createAttribute = async function(src_role, src_player, target_player, dur, attr_type, val1 = "", val2 = "", val3 = "", val4 = "") {
          return new Promise(res => {
-            sql("INSERT INTO active_attributes (owner, src_role, src_player, attr_type, duration, val1, val2, val3, val4) VALUES (" + connection.escape(target_player) + "," + connection.escape(src_role) +  "," + connection.escape(src_player) + "," + connection.escape(attr_type) + "," + connection.escape(dur) +  "," + connection.escape(val1) +  "," + connection.escape(val2) +  "," + connection.escape(val3) +  "," + connection.escape(val4) + ")", result => {
+            sql("INSERT INTO active_attributes (owner, src_role, src_player, attr_type, duration, val1, val2, val3, val4, applied_phase) VALUES (" + connection.escape(target_player) + "," + connection.escape(src_role) +  "," + connection.escape(src_player) + "," + connection.escape(attr_type) + "," + connection.escape(dur) +  "," + connection.escape(val1) +  "," + connection.escape(val2) +  "," + connection.escape(val3) +  "," + connection.escape(val4) + "," + connection.escape(getPhaseAsNumber()) + ")", result => {
                 res();
             });
          });
@@ -214,6 +214,29 @@ module.exports = function() {
                  res(result);
              });
         }); 
+    }
+    
+    /**
+    Attribute Cleanup
+    removes attributes that no longer apply
+    **/
+    this.attributeCleanup = async function() {
+        let phaseNumeric = getPhaseAsNumber();
+        await cleanupDeleteAttribute("phase", phaseNumeric); // remove phase attributes of past phase(s)
+        if(isNight()) await cleanupDeleteAttribute("nextday", phaseNumeric - 1); // at the start of a night cleanup next day attributes, unless they were applied previous day
+        if(isDay()) await cleanupDeleteAttribute("nextnight", phaseNumeric - 1); // at the start of a day cleanup next night attributes, unless they were applied previous night
+    }
+    
+    function cleanupDeleteAttribute(dur_type, val) {
+        return new Promise(res => {
+            sql("DELETE FROM active_attributes WHERE duration=" + connection.escape(dur_type) + " AND applied_phase<" + connection.escape(val), result => {
+                res(true);
+            }, () => {
+                // DB error
+                abilityLog(`❗ **Error:** Failed while cleaning up \`${dur_type}\` attributes!`);  
+                res(false)
+            });
+        })
     }
     
 }

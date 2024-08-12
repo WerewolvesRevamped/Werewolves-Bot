@@ -193,6 +193,15 @@ module.exports = function() {
     }
     
     /**
+    Phase Num
+    converts a phase to a number using 2 * phaseNum - isNight
+    **/
+    this.getPhaseAsNumber = function() {
+        let phase = getPhase();
+        return 2 * getPhaseNum() - (+isNight());
+    }
+    
+    /**
     Get Subphase
     returns the current subphase as a string
     **/
@@ -237,6 +246,7 @@ module.exports = function() {
     Returns whether a phase is day or not
     **/
     this.isDay = function(phase) {
+        if(!phase) phase = getPhase(); // if no phase is specified default to current phase
         let phaseType = phase[0].toLowerCase();
         return phaseType == "d";
     }
@@ -246,6 +256,7 @@ module.exports = function() {
     Returns whether a phase is night or not
     **/
     this.isNight = function(phase) {
+        if(!phase) phase = getPhase(); // if no phase is specified default to current phase
         return !isDay(phase);
     }
     
@@ -254,6 +265,7 @@ module.exports = function() {
     extracts the number from a phase
     **/
     this.getPhaseNum = function(phase) {
+        if(!phase) phase = getPhase(); // if no phase is specified default to current phase
         return (+phase.substr(1));
     }
 
