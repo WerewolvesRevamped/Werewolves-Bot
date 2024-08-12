@@ -6,6 +6,9 @@
 module.exports = function() {
     const prompts = require("./prompts.json");
     
+    this.delayedActionTime = 2147483646;
+    this.endActionTime = 2147483647;
+    
     /**
     Get Promp Message
     returns a prompt message
@@ -38,9 +41,9 @@ module.exports = function() {
     Create Prompt
     creates a new prompt in the prompt table
     **/
-    this.createPrompt = async function(mid, pid, src_role, ability, type1, type2 = "none") {
+    this.createPrompt = async function(mid, pid, src_role, ability, prompt_type, type1, type2 = "none") {
         await new Promise(res => {
-            sql("INSERT INTO prompts (message_id,player_id,src_role,ability,type1,type2) VALUES (" + connection.escape(mid) + "," + connection.escape(pid) + "," + connection.escape(src_role) + "," + connection.escape(JSON.stringify(ability)) + "," + connection.escape(type1.toLowerCase()) + "," + connection.escape(type2.toLowerCase()) + ")", result => {
+            sql("INSERT INTO prompts (message_id,player_id,src_role,ability,type1,type2,prompt_type) VALUES (" + connection.escape(mid) + "," + connection.escape(pid) + "," + connection.escape(src_role) + "," + connection.escape(JSON.stringify(ability)) + "," + connection.escape(type1.toLowerCase()) + "," + connection.escape(type2.toLowerCase()) + "," + connection.escape(prompt_type) + ")", result => {
                 res();
             });            
         });
@@ -149,7 +152,7 @@ module.exports = function() {
     **/
     this.delayQueuedAction = async function(id) {
         return new Promise(res => {
-            sql("UPDATE action_queue SET execute_time=2147483647 WHERE message_id=" + connection.escape(id), result => {
+            sql("UPDATE action_queue SET execute_time=" + delayedActionTime + " WHERE message_id=" + connection.escape(id), result => {
                 res();
             });
         });
@@ -160,7 +163,18 @@ module.exports = function() {
     **/
     this.executeDelayedQueuedAction = async function() {
         return new Promise(res => {
-            sql("UPDATE action_queue SET execute_time=" + connection.escape(getTime() - 1) + " WHERE execute_time=2147483647", result => {
+            sql("UPDATE action_queue SET execute_time=" + connection.escape(getTime() - 1) + " WHERE execute_time=" + delayedActionTime, result => {
+                res();
+            });
+        });
+    }
+    
+    /**
+    Sets the execution time of all end queued action to the past, executing them all on the next check
+    **/
+    this.executeEndQueuedAction = async function() {
+        return new Promise(res => {
+            sql("UPDATE action_queue SET execute_time=" + connection.escape(getTime() - 1) + " WHERE execute_time=" + endActionTime, result => {
                 res();
             });
         });
@@ -191,9 +205,9 @@ module.exports = function() {
     Create Queued Action
     creates an action in the action queue which will be executed at a specified time
     **/
-    async function createAction(mid, pid, src_role, ability, orig_ability, type1, type2, time) {
+    async function createAction(mid, pid, src_role, ability, orig_ability, prompt_type, type1, type2, time) {
         await new Promise(res => {
-            sql("INSERT INTO action_queue (message_id,player_id,src_role,ability,orig_ability,type1,type2,execute_time) VALUES (" + connection.escape(mid) + "," + connection.escape(pid) + "," + connection.escape(src_role) + "," + connection.escape(JSON.stringify(ability)) + "," + connection.escape(JSON.stringify(orig_ability)) + "," + connection.escape(type1) + "," + connection.escape(type2) + "," + connection.escape(time) + ")", result => {
+            sql("INSERT INTO action_queue (message_id,player_id,src_role,ability,orig_ability,type1,type2,execute_time, prompt_type) VALUES (" + connection.escape(mid) + "," + connection.escape(pid) + "," + connection.escape(src_role) + "," + connection.escape(JSON.stringify(ability)) + "," + connection.escape(JSON.stringify(orig_ability)) + "," + connection.escape(type1) + "," + connection.escape(type2) + "," + connection.escape(time) + "," + connection.escape(prompt_type) + ")", result => {
                 res();
             });            
         });
@@ -203,13 +217,15 @@ module.exports = function() {
     Action Queue Checker / Creator
     checks the action queue every 10 seconds to see if an action should be executed
     **/
+    this.skipActionQueueChecker = false;
     this.createActionQueueChecker = function() {
         setInterval(() => {
+            if(skipActionQueueChecker) return;
             actionQueueChecker();
         }, 10 * 1000)
     }
     
-    async function actionQueueChecker() {
+    this.actionQueueChecker = async function () {
         // retrieve all queued actions that need to be executed
         let actionsToExecute = await new Promise(res => {
             sql("SELECT * FROM action_queue WHERE execute_time<=" + connection.escape(getTime()), result => {
@@ -254,11 +270,12 @@ module.exports = function() {
             if(parsedReply !== false) {
                 // delete prompt 
                 await deletePrompt(message.reference.messageId);
-                let repl_msg = await sendPromptReplyConfirmMessage(message, `You submitted: \`${parsedReply[0]}\`.`);
+                let repl_msg = await sendPromptReplyConfirmMessage(message, prompt.prompt_type, `You submitted: \`${parsedReply[0]}\`.`);
                 // apply prompt reply onto ability
                 let promptAppliedAbility = applyPromptValue(ability, 0, parsedReply[1]);
                 // queue action
-                await createAction(repl_msg, pid, src_role, promptAppliedAbility, ability, prompt.type1, prompt.type2, getTime() + 60);
+                let exeTime = prompt.prompt_type == "immediate" ? getTime() + 60 : endActionTime;
+                await createAction(repl_msg, pid, src_role, promptAppliedAbility, ability, prompt.prompt_type, prompt.type1, prompt.type2, exeTime);
                 // log prompt reply
                 abilityLog(`✅ **Prompt Reply:** <@${pid}> (${toTitleCase(src_role)}) submitted \`${parsedReply[0]}\`.`);
             }
@@ -275,12 +292,13 @@ module.exports = function() {
             if(parsedReply1 !== false && parsedReply2 !== false) {
                 // delete prompt 
                 await deletePrompt(message.reference.messageId);
-                let repl_msg = await sendPromptReplyConfirmMessage(message, `You submitted: \`${parsedReply1[0]}\` and \`${parsedReply2[0]}\`.`);
+                let repl_msg = await sendPromptReplyConfirmMessage(message, prompt.prompt_type, `You submitted: \`${parsedReply1[0]}\` and \`${parsedReply2[0]}\`.`);
                 // apply prompt reply onto ability
                 let promptAppliedAbility = applyPromptValue(ability, 0, parsedReply1[1]);
                 promptAppliedAbility = applyPromptValue(ability, 1, parsedReply2[1]);
                 // queue action
-                await createAction(repl_msg, pid, src_role, promptAppliedAbility, ability, prompt.type1, prompt.type2, getTime() + 60);
+                let exeTime = prompt.prompt_type == "immediate" ? getTime() + 60 : endActionTime;
+                await createAction(repl_msg, pid, src_role, promptAppliedAbility, ability, prompt.prompt_type, prompt.type1, prompt.type2, exeTime);
                 // log prompt reply
                 abilityLog(`✅ **Prompt Reply:** <@${pid}> (${toTitleCase(src_role)}) submitted \`${parsedReply1[0]}\` and \`${parsedReply2[0]}\`.`);
             }
@@ -290,17 +308,20 @@ module.exports = function() {
     /**
     Sends a reply message to a prompt reply with reactions
     **/
-    async function sendPromptReplyConfirmMessage(message, txt) {
+    async function sendPromptReplyConfirmMessage(message, prompt_type, txt) {
         // reply message with buttons
         let options = "confirm, cancel or delay";
         if(!subphaseIsMain()) options = "confirm or cancel";
-        let msg = basicEmbed(`${txt} You may ${options} the ability, otherwise it will be automatically executed in \`1\` minute.`, EMBED_YELLOW);
+        let msg;
+        if(prompt_type == "immediate") msg = basicEmbed(`${txt} You may ${options} the ability, otherwise it will be automatically executed in \`1\` minute.`, EMBED_YELLOW);
+        else msg = basicEmbed(`${txt} You may cancel the ability to change selection, otherwise it will be automatically executed at the end of the phase.`, EMBED_YELLOW);
         // create buttons
         let confirmButton = { type: 2, label: "Confirm", style: 3, custom_id: "confirm" };
         let cancelButton = { type: 2, label: "Cancel", style: 4, custom_id: "cancel" };
         let delayButton = { type: 2, label: "Delay", style: 2, custom_id: "delay" };
         msg.components = [ { type: 1, components: [ confirmButton, cancelButton ] } ];
         if(subphaseIsMain()) msg.components[0].components.push(delayButton);
+        if(prompt_type == "end") msg.components[0].components = [ cancelButton ];
         // send reply
         let repl_msg = await message.reply(msg);
         return repl_msg.id;
