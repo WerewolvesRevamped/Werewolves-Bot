@@ -5,6 +5,7 @@
 require("./triggers.js")();
 require("./parsers.js")();
 require("./prompts.js")();
+require("./restrictions.js")();
 
 /** Ability Types **/
 require("./joining.js")();
@@ -20,6 +21,11 @@ module.exports = function() {
     executes an ability
     **/
     this.executeAbility = async function(pid, src_role, ability) {
+        // get/increase quantity
+        let quantity = await getActionQuantity(pid, ability);
+        if(quantity === 0) await initActionQuantity(pid, ability);
+        else await increaseActionQuantity(pid, ability);
+        // execute ability
         abilityLog(`🟢 **Executing Ability:** <@${pid}> (${toTitleCase(src_role)}) \`\`\`${JSON.stringify(ability)}\`\`\``);
         switch(ability.type) {
             default:
@@ -36,7 +42,7 @@ module.exports = function() {
             break;
         }
     }
-    
+
     /**
     Ability Log
     logs a message in the ability log. WIP: dont hardcode

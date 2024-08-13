@@ -55,6 +55,15 @@ module.exports = function() {
         const ptype = getPromptType(triggerName);
         // iterate through abilities of the trigger
         for(const ability of trigger.abilities) {
+            // check trigger restrictions
+            let restrictions = trigger?.parameters?.restrictions ?? [];
+            for(let i = 0; i < restrictions.length; i++) {
+                let passed = await handleRestriction(pid, ability, restrictions[i]);
+                if(!passed) {
+                    abilityLog(`🔴 **Skipped Ability:** <@${pid}> (${toTitleCase(src_role)}). Failed restriction \`${restrictions[i].type}\`.`);
+                    return;
+                }
+            }
             // check if prompts are necessary
             let prompts = getPrompts(ability);
             switch(prompts.length) {
@@ -63,7 +72,7 @@ module.exports = function() {
                     if(ptype == "end") {
                         abilityLog(`❗ **Error:** Cannot use \`${triggerName}\` trigger without prompt!`);
                     } else {
-                        let feedback = await executeAbility(pid, src_role, ability);
+                        let feedback = await executeAbility(pid, src_role, ability, trigger);
                         if(feedback) abilitySend(pid, feedback);
                     }
                 break;

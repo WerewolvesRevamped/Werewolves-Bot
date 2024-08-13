@@ -196,9 +196,9 @@ module.exports = function() {
     Phase Num
     converts a phase to a number using 2 * phaseNum - isNight
     **/
-    this.getPhaseAsNumber = function() {
-        let phase = getPhase();
-        return 2 * getPhaseNum() - (+isNight());
+    this.getPhaseAsNumber = function(phase) {
+        if(!phase) phase = getPhase(); // if no phase is specified default to current phase
+        return 2 * getPhaseNum(phase) - (+isNight(phase));
     }
     
     /**
