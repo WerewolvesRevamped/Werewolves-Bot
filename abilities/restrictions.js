@@ -53,7 +53,7 @@ module.exports = function() {
     }
         
     /**
-    Increase action quantity
+    Get action quantity
     **/
     this.getActionQuantity = function(player_id, ability) {
         return new Promise(res => {
@@ -65,7 +65,7 @@ module.exports = function() {
     }
     
     /**
-    Increase action quantity
+    Initialize action quantity to 1
     **/
     this.initActionQuantity = function(player_id, ability) {
         return new Promise(res => {
