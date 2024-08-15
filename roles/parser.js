@@ -140,7 +140,7 @@ module.exports = function() {
     const locationType = "(`[^`]*`|@\\S*|#\\S*)"; // extended version of target type
     const groupType = "(@\\S*|#\\S*)"; // reduced version of location type
     const attributeName = targetType;
-    const num = "(-?\\d+|calc\\(.*?\\))";
+    const num = "(-?\\d+|calc\\(.*?\\)|@Selection|@SecondarySelection|@Selection\\[[^\\]+]\\]|@SecondarySelection\\[[^\\]+]\\])";
     const rawStr = "[\\w\\s\\d@]+";
     const str = "(" + rawStr + ")";
     const decNum = "(-?\\d+\\.\\d+)";
@@ -153,7 +153,7 @@ module.exports = function() {
     const defenseAttackSubtypes = "(Attacks|Kills|Lynches|Attacks & Lynches|All)";
     const defenseSubtypes = "(Absence at " + locationType + "|Active Defense|Passive Defense|Partial Defense|Recruitment Defense)";
     const defensePhases = "(Day|Night)";
-    const attrValue = "([\\w\\d]+)";
+    const attrValue = "(.+?)";
     const attrData = "\\(" + attrValue + "\\)";
     const attrIndex = num;
     const redirectSubtype = "(all|non-killing abilities)";
@@ -173,8 +173,10 @@ module.exports = function() {
             /**
             Split Line
             **/
-            let abilityLineSplit = trigger[1][a].split(/ \[| \{| ⟨/);
-            if(abilityLineSplit.length == 1) abilityLineSplit = trigger[1][a].split(/\[|\{|⟨/);
+            let abilityLineSplit = trigger[1][a].split(/ \[| \{| ⟨/); // split off things after the ability part
+            if(abilityLineSplit.length >= 1 && abilityLineSplit[0].match(/\[|\{|⟨/)) {
+                abilityLineSplit = (" " + trigger[1][a]).split(/ \[| \{| ⟨/);
+            }
             let ability = null;
             let exp, fd;
             
@@ -512,6 +514,18 @@ module.exports = function() {
             fd = exp.exec(abilityLine);
             if(fd) {
                 ability = { type: "manipulating", subtype: "relative", target: ttpp(fd[1]), manip_type: fd[2], manip_value: +fd[3], duration: dd(fd[4], "permanent") };
+            }
+            // manipulation by absolute value - selector variant
+            exp = new RegExp("^Manipulate " + targetType + "'s `" + manipSubtype + "` to " + targetType + attrDuration + "$", "g");
+            fd = exp.exec(abilityLine);
+            if(fd) {
+                ability = { type: "manipulating", subtype: "absolute", target: ttpp(fd[1]), manip_type: fd[2], manip_value: fd[3], duration: dd(fd[4], "permanent") };
+            }
+            // manipulation by relative value - selector variant
+            exp = new RegExp("^Manipulate " + targetType + "'s `" + manipSubtype + "` by " + targetType + attrDuration + "$", "g");
+            fd = exp.exec(abilityLine);
+            if(fd) {
+                ability = { type: "manipulating", subtype: "relative", target: ttpp(fd[1]), manip_type: fd[2], manip_value: fd[3], duration: dd(fd[4], "permanent") };
             }
             /** WHISPERING **/
             // manipulation by absolute value
