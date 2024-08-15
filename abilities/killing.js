@@ -10,16 +10,24 @@ module.exports = function() {
     **/
     this.abilityKilling = async function(pid, src_role, ability) {
         let result;
+        // all subtypes have the same arguments
+        if(!ability.target) {
+            abilityLog(`❗ **Error:** Missing arguments for type \`${ability.type}\`!`);
+            return "";
+        }
+        let targets = await parsePlayerSelector(ability.target, pid);
+        // subtypes
         switch(ability.subtype) {
             default:
                 abilityLog(`❗ **Error:** Unknown ability subtype \`${ability.subtype}\`!`);
                 return "";
             break;
             case "attack":
-                if(!ability.target) {
-                    abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
-                }
-                result = await killingAttack(src_role, pid, await parsePlayerSelector(ability.target, pid));
+                result = await killingAttack(src_role, pid, targets);
+                return result;
+            break;
+            case "true kill":
+                result = await killingTrueKill(src_role, pid, targets);
                 return result;
             break;
         }
@@ -39,14 +47,30 @@ module.exports = function() {
         return success ? "Attack successful!" : "Attack failed!"; // if at least one player dies its a success
     }
     
+    /**
+    Ability: Killing - True Kill
+    just kills without anything else being evaluated
+    **/
+    this.killingTrueKill = async function(src_role, src_player, targets) {
+        let success = false;
+        for(let i = 0; i < targets.length; i++) {
+            await killPlayer(targets[i]);
+            abilityLog(`✅ <@${src_player}> true killed <@${targets[i]}>.`);
+            success = true; // True Kill always succeeds
+        }
+        return success ? "True Kill successful!" : "True Kill failed!"; // if at least one player dies its a success
+    }
     
-    /** WIP: this relies on various async functions that need replacing **/
+    
+    /** Kill Player
+    kills a player (does not consider or defenses or anything, just kills)
+    **/
 	this.killPlayer = async function(player_id) {
        // set to dead
        await setLivingStatus(player_id, 0);
         // check mayor treshhold (and change roles if applicable)
        await mayorCheck();
-       // WIP: should probably be in elected module
+       // send a reporter message
        reporterMessage(player_id);
             
         // get player
