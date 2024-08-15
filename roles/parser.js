@@ -183,7 +183,7 @@ module.exports = function() {
             let isInlineEval = false;
             
             // check for P/E Condition
-            let abilityLineSplitPE = abilityLine.split(/: |:$/);
+            let abilityLineSplitPE = abilityLine.split(/(?<!List): |:$/);
             let peCond;
             if(abilityLineSplitPE.length == 2) { // evaluate condition
                 abilityLine = abilityLineSplitPE[1].trim();
