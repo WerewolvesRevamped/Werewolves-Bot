@@ -5,11 +5,28 @@
 
 module.exports = function() {
     
+     /**
+    Trigger
+    triggers a trigger for a specified player
+    **/
+    this.trigger = function(player_id, triggerName, additionalTriggerData = {}) {
+        abilityLog(`🔶 **Trigger:** ${triggerName} for <@${player_id}>`);  
+        return new Promise(res => {
+            // get all players
+            sql("SELECT role,id FROM players WHERE type='player' AND id=" + connection.escape(player_id), async r => {
+                //trigger handler
+                await triggerHandlerPlayer(r[0], triggerName, additionalTriggerData);
+                // resolve outer promise
+                res();
+            });
+        });
+    }
+    
     /**
     Trigger Handler
-    handle a trigger triggering
+    handle a trigger triggering (for everyone)
     **/
-    function triggerHandler(triggerName, args = []) {
+    function triggerHandler(triggerName) {
         abilityLog(`🔷 **Trigger:** ${triggerName}`);  
         return new Promise(res => {
             // get all players
@@ -28,7 +45,7 @@ module.exports = function() {
     Trigger Handler - Player
     handles trigger triggering for a single player
     **/
-    async function triggerHandlerPlayer(pr, triggerName) {
+    async function triggerHandlerPlayer(pr, triggerName, additionalTriggerData = {}) {
         await new Promise(res => {
             sql("SELECT * FROM roles WHERE name=" + connection.escape(pr.role), async result => {
                 // parse the formalized desc into an object
@@ -37,9 +54,14 @@ module.exports = function() {
                 let triggers = parsed.triggers;
                 // filter out the relevant triggers
                 triggers = triggers.filter(el => el.trigger == triggerName);
+                // execute all relevant triggers
                 for(const trigger of triggers) {
-                    // execute all relevant triggers
-                    await executeTrigger(pr.id, pr.role, trigger, triggerName);
+                    if(trigger.complex) { // WIP: do additional evaluation for complex triggers
+                        // WIP: additional evaluation here
+                        await executeTrigger(pr.id, pr.role, trigger, triggerName);
+                    } else { // always execute for normal triggers
+                        await executeTrigger(pr.id, pr.role, trigger, triggerName);
+                    }
                 }
                 // resolve outer promise
                 res();

@@ -40,6 +40,11 @@ module.exports = function() {
     this.killingAttack = async function(src_role, src_player, targets) {
         let success = false;
         for(let i = 0; i < targets.length; i++) {
+            // WIP: insert defense evaluation here
+            // run the on death trigger
+            await trigger(targets[i], "On Death", { attacker: src_player, death_type: "Attack", attack_source: src_role, this: targets[i] }); 
+            await trigger(targets[i], "On Killed", { attacker: src_player, death_type: "Attack", attack_source: src_role }); 
+            // execute the kill
             await killPlayer(targets[i]);
             abilityLog(`✅ <@${src_player}> attacked <@${targets[i]}> - successful.`);
             success = true; // if attack succeeds set to true
@@ -54,6 +59,10 @@ module.exports = function() {
     this.killingTrueKill = async function(src_role, src_player, targets) {
         let success = false;
         for(let i = 0; i < targets.length; i++) {
+            // run the on death trigger
+            await trigger(targets[i], "On Death", { attacker: src_player, death_type: "True Kill", attack_source: src_role, this: targets[i] }); 
+            await trigger(targets[i], "On Killed", { attacker: src_player, death_type: "True Kill", attack_source: src_role }); 
+            // execute the kill
             await killPlayer(targets[i]);
             abilityLog(`✅ <@${src_player}> true killed <@${targets[i]}>.`);
             success = true; // True Kill always succeeds

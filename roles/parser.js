@@ -46,6 +46,7 @@ module.exports = function() {
         
         if(debugMode) console.log("PARSE ABILITIES");
         for(let t in triggers.triggers) {
+            // abilities
             let abilities = parseAbilities(triggers.triggers[t]); // parse abilities of a trigger
             if(debugMode) console.log("ABILITIES", JSON.stringify(abilities));
             /** Preprocessing **/
@@ -126,6 +127,14 @@ module.exports = function() {
             
             // removes the ability type 'action' as that gets moved into parameters
             triggers.triggers[t].abilities = triggers.triggers[t].abilities.filter(el => el.type != "action");
+            
+            // adjust data for complex triggers
+            if(triggers.triggers[t].trigger.match(/;/)) {
+                let trsplit = triggers.triggers[t].trigger.split(/;/);
+                triggers.triggers[t].trigger = trsplit[0];
+                triggers.triggers[t].trigger_parameter = trsplit[1];
+                triggers.triggers[t].complex = true;
+            }
             
         }
         
