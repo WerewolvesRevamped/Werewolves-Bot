@@ -56,6 +56,7 @@ module.exports = function() {
         // iterate through abilities of the trigger
         for(const ability of trigger.abilities) {
             // check trigger restrictions
+            let promptInfo = [];
             let restrictions = trigger?.parameters?.restrictions ?? [];
             for(let i = 0; i < restrictions.length; i++) {
                 let passed = await handleRestriction(pid, ability, restrictions[i]);
@@ -63,7 +64,13 @@ module.exports = function() {
                     abilityLog(`🔴 **Skipped Ability:** <@${pid}> (${toTitleCase(src_role)}). Failed restriction \`${restrictions[i].type}\`.`);
                     return;
                 }
+                // get additional restriction info
+                let info = await getRestrictionInfo(pid, ability, restrictions[i]);
+                if(info) promptInfo.push(info);
             }
+            // merge prompt info
+            let promptInfoMsg = "";
+            if(promptInfo.length > 0) promptInfoMsg = promptInfo.join("; ");
             // check if prompts are necessary
             let prompts = getPrompts(ability);
             switch(prompts.length) {
@@ -80,7 +87,7 @@ module.exports = function() {
                 case 1: {
                     let type = toTitleCase(selectorGetType(prompts[0][1]));
                     let promptMsg = getPromptMessage(ability, type);
-                    let mid = await abilitySendProm(pid, `${getEmoji(src_role)} ${promptMsg}`, EMBED_GRAY, true);
+                    let mid = await abilitySendProm(pid, `${getEmoji(src_role)} ${promptMsg}`, EMBED_GRAY, true, promptInfoMsg);
                     if(ptype == "immediate") { // immediate prompt
                         abilityLog(`🟩 **Prompting Ability:** <@${pid}> (${toTitleCase(src_role)}) - ${toTitleCase(ability.type)} [${type}] {Immediate}`);
                         await createPrompt(mid, pid, src_role, ability, "immediate", type);
@@ -96,7 +103,7 @@ module.exports = function() {
                     let type1 = toTitleCase(selectorGetType(prompts[0][1]));
                     let type2 = toTitleCase(selectorGetType(prompts[1][1]));
                     let promptMsg = getPromptMessage(ability, type1, type2);
-                    let mid = await abilitySendProm(pid, `${getEmoji(src_role)} ${promptMsg}`, EMBED_GRAY, true);
+                    let mid = await abilitySendProm(pid, `${getEmoji(src_role)} ${promptMsg}`, EMBED_GRAY, true, promptInfoMsg);
                     if(ptype == "immediate") { // immediate prompt
                         abilityLog(`🟩 **Prompting Ability:** <@${pid}> (${toTitleCase(src_role)}) - ${toTitleCase(ability.type)} [${type1}, ${type2}] {Immediate}`);
                         await createPrompt(mid, pid, src_role, ability, "immediate", type1, type2);

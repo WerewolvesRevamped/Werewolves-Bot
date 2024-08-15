@@ -51,6 +51,26 @@ module.exports = function() {
             break;
         }
     }
+    
+    /**
+    Get Restriction info
+    provides additional footer info for prompts
+    **/
+    this.getRestrictionInfo = async function(pid, ability, restriction) {
+        switch(restriction.type) {
+            default:
+                return "";
+            break;
+            // QUANTITY
+            case "quantity":
+                let quantity = await getActionQuantity(pid, ability);
+                let max_allowed = restriction.quantity;
+                if(quantity < max_allowed) return `${max_allowed - quantity}/${max_allowed} uses left`;
+                else return "";
+            break;
+        }
+    }
+    
         
     /**
     Get action quantity

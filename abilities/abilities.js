@@ -68,12 +68,13 @@ module.exports = function() {
     Ability Feedback
     used to send feedback for abilities (and probably prompts?)
     **/
-    this.abilitySend = function(player_id, message, color = EMBED_GRAY, ping = false) {
+    this.abilitySend = function(player_id, message, color = EMBED_GRAY, ping = false, footer = false) {
         sql("SELECT channel_id FROM connected_channels WHERE id = " + connection.escape(player_id), result => {
             let player_sc_id = result[0].channel_id;
             let player_sc = stats.guild.channels.cache.get(player_sc_id);
             embed = basicEmbed(message, color);
-            if(ping) embed.content =  `<@&${stats.participant}>`;
+            if(ping) embed.embed.content =  `<@&${stats.participant}>`; // add ping
+            if(footer) embed.embeds[0].footer = { text: footer }; // add footer
             player_sc.send(embed);
         });
     }
@@ -81,13 +82,14 @@ module.exports = function() {
     /**
     Ability Feedback + Return new message ID
     **/
-    this.abilitySendProm = function(player_id, message, color = EMBED_GRAY, ping = false) {
+    this.abilitySendProm = function(player_id, message, color = EMBED_GRAY, ping = false, footer = false) {
         return new Promise(res => {
             sql("SELECT channel_id FROM connected_channels WHERE id = " + connection.escape(player_id), result => {
                 let player_sc_id = result[0].channel_id;
                 let player_sc = stats.guild.channels.cache.get(player_sc_id);
                 embed = basicEmbed(message, color);
-                if(ping) embed.content =  `<@&${stats.participant}>`;
+                if(ping) embed.content =  `<@&${stats.participant}>`; // add ping
+                if(footer) embed.embeds[0].footer = { text: footer }; // add footer
                 player_sc.send(embed).then(msg => {
                     res(msg.id);
                 });
