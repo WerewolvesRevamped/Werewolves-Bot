@@ -9,6 +9,12 @@ module.exports = function() {
     If set to true does console.log, if set to false does throw
     **/
     const debugMode = false;
+    
+    /**
+    Ability Counter
+    used to assign unique ids to abilities
+    **/
+    var abilityCounter = 0;
 
     /**
     Format Constants
@@ -910,9 +916,11 @@ module.exports = function() {
             if(fd) {
                 ability = { type: "success" };
             }
+
             
             /** Ability Types End */
             if(ability) {
+                ability.id = abilityCounter++; // assign ability id
                 //console.log("IDENT", ability);
                 trigger[1][a] = { depth: (+bullets.indexOf(trigger[1][a].trim()[0])) + 1, ability: ability, parameters: { restrictions: parsedRestrictions, scaling: parsedScaling, direct: cDirect, repeating: cRepeating, visitless: cVisitless, forced: cForced, forced_sel: cForcedSelection } };
                 if(peCond) trigger[1][a].condition = peCond;
@@ -921,7 +929,7 @@ module.exports = function() {
                     trigger[1][a].inline_eval = true;
                 }
             } else if(abilityLine == "") {
-                trigger[1][a] = { depth: (+bullets.indexOf(trigger[1][a].trim()[0])) + 1, ability: { type: "blank" }, parameters: { } };
+                trigger[1][a] = { depth: (+bullets.indexOf(trigger[1][a].trim()[0])) + 1, ability: { type: "blank", id: abilityCounter++ }, parameters: { } };
             } else {
                 //console.log("UNIDENT", abilityLine);
                 if(!debugMode) throw new Error(`Invalid Ability Type \`\`\`\n${trigger[1][a]}\n\`\`\` with ability line \`\`\`\n${abilityLine}\n\`\`\``);

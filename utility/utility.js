@@ -167,9 +167,9 @@ module.exports = function() {
         return 4294967296 * (2097151 & h2) + (h1 >>> 0);
     };
     
-    this.hash = function(str) {
-        return cyrb53(JSON.stringify(str));
+    this.hash = function(ability) {
+        return (ability.id ?? "0") + "-" + cyrb53(JSON.stringify(ability));
     }
 
-	
+
 }
