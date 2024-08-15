@@ -15,9 +15,11 @@ module.exports = function() {
 		// Get Log Channel & Guild
 		sqlGetStat(11,  result => { 
 			stats.log_guild = result;
+			stats.guild = client.guilds.cache.get(result);
 			if(doLog) log("Stats > Cached log guild id as `" + result + "`!")
 		}, () => {
             stats.log_guild = false;
+            stats.guild = false;
 			log("Stats > ❗❗❗ Unable to cache log guild id!")
 		});
 		sqlGetStat(12,  result => { 
@@ -521,7 +523,7 @@ module.exports = function() {
 				let phase = getPhaseName(args[1]);
 				channel.send("✅ Game Phase is now `" + phase + "` (" + args[1] + ")!"); 
 				getStats();
-				updateGameStatus(channel.guild);
+				updateGameStatus();
 			}, () => {
 				// Database didn't update gamephase
 				channel.send("⛔ Database error. Game Phase could not be set to `" + args[1] + "`!");
@@ -546,11 +548,11 @@ module.exports = function() {
     
     var updateID = 0;
     var allowImmediate = false;
-    this.updateGameStatusDelayed = async function(guild) {
+    this.updateGameStatusDelayed = async function() {
         console.log("Attempted update");
         if(allowImmediate) {
             console.log("Update allowed immediately");
-            updateGameStatus(guild);
+            updateGameStatus();
             return;
         }
         updateGameStatusDelayedAllowImmediate();
@@ -561,7 +563,7 @@ module.exports = function() {
             return;
         }
         console.log("Executing delayed update");
-        updateGameStatus(guild);
+        updateGameStatus();
     }
     
     this.updateGameStatusDelayedAllowImmediate = async function() {
@@ -571,9 +573,9 @@ module.exports = function() {
         allowImmediate = true;
     }
 	
-	this.updateGameStatus = function(guild) {
+	this.updateGameStatus = function() {
 		sql("SELECT alive FROM players WHERE type='player'", result => {
-			let gameStatus = guild.channels.cache.get(stats.game_status);
+			let gameStatus = stats.guild.channels.cache.get(stats.game_status);
 			switch(+stats.gamephase) {
 				case gp.NONE: gameStatus.setName("⛔ No Game"); break;
 				case gp.SIGNUP: 

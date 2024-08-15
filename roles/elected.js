@@ -67,28 +67,64 @@ module.exports = function() {
    Mayor Check
    Checks if mayor should be switched and performs the switch if necessary.
    **/
-   this.mayorCheck = function(channel) {
-       sql("SELECT id,emoji FROM players WHERE alive = 1 AND type='player'", result => {        
-            let mayor1 = stats.mayor;  
-            let mayor2 = stats.mayor2;  
-            let wrongMayorMembers;
-            if(result.length > stats.mayor_threshold) {
-                wrongMayorMembers = channel.guild.roles.cache.get(mayor1).members.toJSON();
-                wrongMayorMembers.forEach(el => {
-                    switchRoles(el, channel, mayor1, mayor2, "mayor 1", "mayor 2");
-                    channel.send(`✅ Switched ${el} to ${channel.guild.roles.cache.get(mayor2)}`);
-                    cmdConnectionSend(channel, ["", "mayor", "Host", `**${el} has changed from ${channel.guild.roles.cache.get(mayor1)} to ${channel.guild.roles.cache.get(mayor2)}!**`]);
-                });
-            } else {
-                wrongMayorMembers = channel.guild.roles.cache.get(mayor2).members.toJSON();
-                wrongMayorMembers.forEach(el => {
-                    switchRoles(el, channel, mayor2, mayor1, "mayor 2", "mayor 1");
-                    channel.send(`✅ Switched ${el} to ${mayor1}`);
-                    cmdConnectionSend(channel, ["", "mayor", "Host", `**${el} has changed from ${channel.guild.roles.cache.get(mayor2)} to ${channel.guild.roles.cache.get(mayor1)}!**`]);
-                });
-            }
+   this.mayorCheck = function() {
+        return new Promise(res => {
+           sql("SELECT id,emoji FROM players WHERE alive = 1 AND type='player'", result => {        
+                let mayor1 = stats.mayor;  
+                let mayor2 = stats.mayor2;  
+                let wrongMayorMembers;
+                // amount of players is above treshhold
+                if(result.length > stats.mayor_threshold) {
+                    // get players with wrong mayor role
+                    wrongMayorMembers = stats.guild.roles.cache.get(mayor1).members.toJSON();
+                    // switch their roles
+                    let results = [];
+                    wrongMayorMembers.forEach(el => {
+                        switchRoles(el, channel, mayor1, mayor2, "mayor 1", "mayor 2");
+                        let msg = `**${el} has changed from ${stats.guild.roles.cache.get(mayor1)} to ${stats.guild.roles.cache.get(mayor2)}!**`;
+                        connectionSend("mayor", msg, "Mayor");
+                        results.push(`✅ Switched ${el} to ${stats.guild.roles.cache.get(mayor2)}`);
+                    });
+                    if(results.length > 0) res(results); // return results
+                    else res([]); // apparently no changes occured
+                } else { // amount of players is below or equal to treshold
+                    // get players with wrong mayor role
+                    wrongMayorMembers = stats.guild.roles.cache.get(mayor2).members.toJSON();
+                    // switch their roles
+                    let results = [];
+                    wrongMayorMembers.forEach(el => {
+                        switchRoles(el, channel, mayor2, mayor1, "mayor 2", "mayor 1");
+                        let msg = `**${el} has changed from ${stats.guild.roles.cache.get(mayor2)} to ${stats.guild.roles.cache.get(mayor1)}!**`;
+                        connectionSend("mayor", msg, "Mayor");
+                        results.push(`✅ Switched ${el} to ${mayor1}`);
+                    });
+                    if(results.length > 0) res(results); // return results
+                    else res([]); // apparently no changes occured
+                }
+            });
         });
    }
+   
+       
+    /**
+    Reporter Message
+    Sends a reporter message
+    **/
+    this.reporterMessage = function(player_id) {
+        var reportMsg;
+        // Get info
+        sql("SELECT role FROM players WHERE id = " + connection.escape(player_id), result => {
+            let rName = toTitleCase(result[0].role);
+            let rEmoji = getRoleEmoji(rName);
+            // Send reporter message
+            reportMsg = `<@${player_id}> was a \`${rName}\` ${rEmoji}`;
+            connectionSend("reporter", reportMsg, "Reporter");
+        }, () => {
+            // Send reporter message
+            reportMsg = "⛔ Database error. Could not generate report!";
+            connectionSend("reporter", reportMsg, "Reporter");
+        });
+    }
 	
     
 }

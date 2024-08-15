@@ -458,9 +458,12 @@ module.exports = function() {
 				});	
 				sql("UPDATE players SET alive = 0 WHERE id = " + connection.escape(el), result => {
 					channel.send("✅ Killed `" +  channel.guild.members.cache.get(el).displayName + "`!");
-					updateGameStatus(channel.guild);
-                    setTimeout(function () {
-                        mayorCheck(channel);
+					updateGameStatus();
+                    setTimeout(async function () {
+                        let results = await mayorCheck();
+                        results.forEach(el => {
+                            channel.send(el); 
+                        });
                     }, 5000);
 				}, () => {
 					channel.send("⛔ Database error. Could not kill `" +  channel.guild.members.cache.get(el).displayName + "`!");
@@ -1223,11 +1226,11 @@ module.exports = function() {
 		sql("UPDATE players SET " + args[1] + " = " + connection.escape(args[3]) + " WHERE id = " + connection.escape(user), result => {
 			let playerName = channel.guild.members.cache.get(user)?.displayName ?? "USER LEFT";
 			channel.send("✅ `" + playerName + "`'s " + args[1] + " value now is `" + args[3] + "`!");
-			updateGameStatus(channel.guild);
+			updateGameStatus();
 			getVotes();
 			getCCs();
 			getPRoles();
-            mayorCheck(channel);
+            mayorCheck();
 		}, () => {
 			channel.send("⛔ Database error. Could not update player information!");
 		});
@@ -1316,7 +1319,7 @@ module.exports = function() {
 			sql("DELETE FROM players WHERE id = " + connection.escape(member.id), result => {			
 				if(signupMode == "signup") {
                     channel.send(`✅ Successfully signed out, ${member.user}. You will no longer participate in the next game!`); 
-                    updateGameStatusDelayed(channel.guild);
+                    updateGameStatusDelayed();
                     removeRoleRecursive(member, channel, stats.signed_up, "signed up");
                 } else if(signupMode == "substitute") {
                     channel.send(`✅ Successfully signed out, ${member.user}. You will no longer substitute for the next game!`); 
@@ -1369,7 +1372,7 @@ module.exports = function() {
 							// Signup emoji
 							sql("INSERT INTO players (id, emoji, role, type) VALUES (" + connection.escape(member.id) + "," + connection.escape("" + args[0]) + "," + connection.escape(defRole) +  "," + connection.escape(dbType) + ")", result => {
 								message.edit(`✅ ${member.user} ${msg2} ${args[0]}!`);
-								if(signupMode == "signup") updateGameStatusDelayed(message.guild);
+								if(signupMode == "signup") updateGameStatusDelayed();
 								message.reactions.removeAll().catch(err => { 
 									// Couldn't clear reactions
 									logO(err);

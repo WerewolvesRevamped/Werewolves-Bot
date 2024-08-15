@@ -173,7 +173,7 @@ module.exports = function() {
             if(!roleNameParsed) return res(false);
             var output;
             sql("SELECT * FROM roles WHERE name = " + connection.escape(roleNameParsed), async result => {
-                if(!result[0] || !result[0].description) return res(false);
+                if(!result[0]) return res(false);
                 let roleData = await getRoleData(result[0].display_name, result[0].class, result[0].category, result[0].team);
                 let urlExists = await checkUrlExists(roleData.url);
                 if(urlExists) res(roleData.url);
@@ -194,45 +194,8 @@ module.exports = function() {
 						result.forEach(async destination => {
 							// Ignore if it's same channel as source
 							if(destination.channel_id != message.channel.id) { 	
-								// Create webhook
-                                let disguiseName = source.name.replace(/\-/," ");
-                                let disguiseAvatar = client.user.displayAvatarURL();
-                                
-                                // role icon
-                                let roleIcon = await getIconFromName(disguiseName);
-                                if(roleIcon) disguiseAvatar = roleIcon;
-
-								let webhookName = disguiseName != "" ? toTitleCase(disguiseName) : message.member.displayName;
-								let webhookAvatar = disguiseName != "" ? disguiseAvatar : message.author.displayAvatarURL();
-								let webhookMsg = message.content;
-								webhookMsg = webhookMsg.replace(/:~/g, ":");
-                                
-								
-								message.guild.channels.cache.get(destination.channel_id).fetchWebhooks()
-								.then(webhooks => {
-									// search for webhook 
-									let webhook = webhooks.find(w => w.name == webhookName);
-									// webhook exists
-									if(webhook) {
-										webhook.send(webhookMsg);
-									} else { // no webhook
-										if(webhooks.size < 10) { // empty slot
-											message.guild.channels.cache.get(destination.channel_id).createWebhook({name: webhookName, avatar: webhookAvatar})
-											.then(webhook => {
-												// Send webhook
-												webhook.send(webhookMsg)
-											})
-											.catch(err => { 
-												// Webhook couldn't be created
-												logO(err); 
-												sendError(messsage.channel, err, "Could not create webhook");
-											});
-										} else { // no empty slot
-											message.guild.channels.cache.get(destination.channel_id).send("**" + webhookName + "**: " + webhookMsg);
-											webhooks.first().delete();
-										}
-									}
-								});
+                                // send message
+                                sendMessageDisguise(description.channel_id, message.content, source.name);
 							}		
 						});
 					}, () => {
@@ -259,59 +222,23 @@ module.exports = function() {
         let disguise = typeof args[2] === 'string' ? toTitleCase(args[2]) : "";
         let text = args[3];
         
-
-        sql("SELECT channel_id, name FROM connected_channels WHERE id = " + connection.escape(conn), result => {
-            // Write message in each channel
-            result.forEach(async destination => {
-                    // Create webhook
-                    let webhookMsg = text;
-                    webhookMsg = webhookMsg.replace(/:~/g, ":");
-                    
-                    if(disguise.length > 1) {
-                        let webhookName = disguise;
-                        let webhookAvatar = client.user.displayAvatarURL();
-                        
-                        // role icon
-                        console.log(disguise);
-                        let roleIcon = await getIconFromName(disguise);
-                        if(roleIcon) webhookAvatar = roleIcon;
-                        console.log(roleIcon);
-                        
-                        channel.guild.channels.cache.get(destination.channel_id).fetchWebhooks()
-                        .then(webhooks => {
-                            // search for webhook 
-                            let webhook = webhooks.find(w => w.name == webhookName);
-                            // webhook exists
-                            if(webhook) {
-                                webhook.send(webhookMsg);
-                            } else { // no webhook
-                                if(webhooks.size < 10) { // empty slot
-                                    channel.guild.channels.cache.get(destination.channel_id).createWebhook({ name: webhookName, avatar: webhookAvatar})
-                                    .then(webhook => {
-                                        // Send webhook
-                                        webhook.send(webhookMsg)
-                                    })
-                                    .catch(err => { 
-                                        // Webhook couldn't be created
-                                        logO(err); 
-                                        sendError(channel, err, "Could not create webhook");
-                                    });
-                                } else { // no empty slot
-                                    channel.guild.channels.cache.get(destination.channel_id).send("**" + webhookName + "**: " + webhookMsg);
-                                    webhooks.first().delete();
-                                }
-                            }
-                        });	
-                    } else {
-                        let wchannel = channel.guild.channels.cache.get(destination.channel_id);
-                        wchannel.send(webhookMsg);
-                    }
-            });
-        }, () => {
-            // Database error
-            log("⛔ Database error. Could not access connected channels via id!");
+        // send message
+        connectionSend(conn, text, disguise);
+    }
+    
+    /**
+    Connection Send
+    sends a message through a connection
+    **/
+    this.connectionSend = function(conName, msg, disguise = false) {
+        // get connected channels from DB
+        sql("SELECT channel_id FROM connected_channels WHERE id = " + connection.escape(conName), result => {
+            // iterate through all connected channels
+            for(let i = 0; i < result.length; i++) {
+                if(disguise) sendMessageDisguise(result[i].channel_id, msg, disguise); // has disguise
+                else sendMessage(result[i].channel_id, msg); // no disguise
+            }
         });
-            
     }
 	
 }

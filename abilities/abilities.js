@@ -52,7 +52,7 @@ module.exports = function() {
     logs a message in the ability log. WIP: dont hardcode
     **/
     this.abilityLog = function(msg) {
-        client.guilds.cache.get("569626539541397515").channels.cache.get("1269376980906672228").send(msg);
+        stats.guild.channels.cache.get("1269376980906672228").send(msg);
     }
     
     /**
@@ -71,7 +71,7 @@ module.exports = function() {
     this.abilitySend = function(player_id, message, color = EMBED_GRAY, ping = false) {
         sql("SELECT channel_id FROM connected_channels WHERE id = " + connection.escape(player_id), result => {
             let player_sc_id = result[0].channel_id;
-            let player_sc = client.guilds.cache.get("569626539541397515").channels.cache.get(player_sc_id);
+            let player_sc = stats.guild.channels.cache.get(player_sc_id);
             embed = basicEmbed(message, color);
             if(ping) embed.content =  `<@&${stats.participant}>`;
             player_sc.send(embed);
@@ -85,7 +85,7 @@ module.exports = function() {
         return new Promise(res => {
             sql("SELECT channel_id FROM connected_channels WHERE id = " + connection.escape(player_id), result => {
                 let player_sc_id = result[0].channel_id;
-                let player_sc = client.guilds.cache.get("569626539541397515").channels.cache.get(player_sc_id);
+                let player_sc = stats.guild.channels.cache.get(player_sc_id);
                 embed = basicEmbed(message, color);
                 if(ping) embed.content =  `<@&${stats.participant}>`;
                 player_sc.send(embed).then(msg => {

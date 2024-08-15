@@ -111,7 +111,7 @@ module.exports = function() {
                         // successfully removed roles
                         await removeRoleRecursive(member, channel, initialRole, initialName);
                     } else {
-                        channel.send(`❗ Could not add ${newName} role to ${member.displayName}. Trying again!`);
+                        if(channel) channel.send(`❗ Could not add ${newName} role to ${member.displayName}. Trying again!`);
                         await sleep(500 * iteration);
                         await switchRoles(member, channel, initialRole, newRole, initialName, newName, ++iteration);
                     }
@@ -119,7 +119,7 @@ module.exports = function() {
                 }).catch(err => { 
                     // Missing permissions
                     logO(err); 
-                    sendError(channel, err, `Could not add ${newName} role to ${member.displayName}`);
+                    if(channel) sendError(channel, err, `Could not add ${newName} role to ${member.displayName}`);
                     resolve(false);
                 });
             }
@@ -134,7 +134,7 @@ module.exports = function() {
 		return new Promise((resolve) => {
             member.roles.remove(remRole).then(async r => {
                 if(member.roles.cache.get(remRole)) {
-                    channel.send(`❗ Could not remove ${name} role from ${member.displayName}. Trying again!`);
+                    if(channel) channel.send(`❗ Could not remove ${name} role from ${member.displayName}. Trying again!`);
                     await sleep(500 * iteration);
                     await removeRoleRecursive(member, channel, remRole, name, ++iteration);
                 }
@@ -142,7 +142,7 @@ module.exports = function() {
             }).catch(err => { 
                 // Missing permissions
                 logO(err); 
-                sendError(channel, err, `Could not remove ${name} role from ${member.displayName}`);
+                if(channel) sendError(channel, err, `Could not remove ${name} role from ${member.displayName}`);
                 resolve(false);
             });
         });
@@ -156,7 +156,7 @@ module.exports = function() {
 		return new Promise((resolve) => {
             member.roles.add(addRole).then(async r => {
                 if(!member.roles.cache.get(addRole)) {
-                    channel.send(`❗ Could not add ${name} role to ${member.displayName}. Trying again!`);
+                    if(channel) channel.send(`❗ Could not add ${name} role to ${member.displayName}. Trying again!`);
                     await sleep(500 * iteration);
                     await addRoleRecursive(member, channel, addRole, name, ++iteration);
                 }
@@ -164,7 +164,7 @@ module.exports = function() {
             }).catch(err => { 
                 // Missing permissions
                 logO(err); 
-                sendError(channel, err, `Could not add ${name} role to ${member.displayName}`);
+                if(channel) sendError(channel, err, `Could not add ${name} role to ${member.displayName}`);
                 resolve(false);
             });
 		});
@@ -175,9 +175,9 @@ module.exports = function() {
     Returns the url to the server icon as png
     **/
     this.getServerIcon = async function(guild) {
-            let serverIcon = await guild.iconURL();
-            serverIcon = serverIcon.replace("webp","png");
-            return serverIcon;
+        let serverIcon = await guild.iconURL();
+        serverIcon = serverIcon.replace("webp","png");
+        return serverIcon;
     }
       
     /**
@@ -207,6 +207,50 @@ module.exports = function() {
                 })
             }
         });
+    }
+    
+    /**
+    Sends a message to a specified channel id
+    **/
+    this.sendMessage = function(channel_id, msg) {
+        let con_sc = stats.guild.channels.cache.get(con_id); // get channel
+        con_sc.send(msg); // send message
+    }
+    
+    /**
+    Sends a message to a specified channel id with a disguise by using a webhook
+    **/
+    this.sendMessageDisguise = async function(channel_id, msg, disguise) {
+        // webhook defaults
+        let webhookAvatar = client.user.displayAvatarURL();
+        
+        // get role icon (if applicable)
+        let roleIcon = await getIconFromName(disguise);
+        if(roleIcon) webhookAvatar = roleIcon;
+        
+        // get channel
+        let con_sc = stats.guild.channels.cache.get(channel_id);
+        
+        // get webhooks of channel
+        let webhooks = await con_sc.fetchWebhooks();
+        
+        // search for correct webhook 
+        let webhook = webhooks.find(w => w.name == disguise);
+        
+        // webhook doesnt exist
+        if(!webhook) {
+            if(webhooks.size < 10) { // empty slot
+                // create new wbehook
+                webhook = await con_sc.createWebhook({ name: disguise, avatar: webhookAvatar})
+            } else { // no empty slot - skip disguised message and instead send normal message + delete another webhook
+                sendMessage(channel_id, `**${disguise}**: ${msg}`);
+                webhooks.first().delete();
+                return;
+            }
+        }
+        
+         // send message
+        webhook.send(msg);
     }
         
 }
