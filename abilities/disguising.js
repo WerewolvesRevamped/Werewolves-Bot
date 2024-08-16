@@ -10,23 +10,27 @@ module.exports = function() {
     **/
     this.abilityDisguising = async function(pid, src_role, ability) {
         let result;
+        // check parameters
+        if(!ability.target || !ability.disguise) {
+            abilityLog(`❗ **Error:** Missing arguments for type \`${ability.type}\`!`);
+            return "Disguising failed! " + abilityError;
+        }
+        // parse parameters
+        let target = await parsePlayerSelector(ability.target, pid);
+        let role = parseRoleSelector(ability.disguise);
+        let duration = parseDuration(ability.duration ?? "permanent");
+        // select subtype
         switch(ability.subtype) {
             default:
                 abilityLog(`❗ **Error:** Unknown ability subtype \`${ability.subtype}\`!`);
                 return "Disguising failed! " + abilityError;
             break;
             case "weakly":
-                if(!ability.target || !ability.disguise) {
-                    abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
-                }
-                result = await disguising(src_role, pid, await parsePlayerSelector(ability.target, pid), parseRoleSelector(ability.disguise), parseDuration(ability.duration ?? "permanent"), "weak");
+                result = await disguising(src_role, pid, target, role, duration, "weak");
                 return result;
             break;
             case "strongly":
-                if(!ability.target || !ability.disguise) {
-                    abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
-                }
-                result = await disguising(src_role, pid, await parsePlayerSelector(ability.target, pid), parseRoleSelector(ability.disguise), parseDuration(ability.duration ?? "permanent"), "strong");
+                result = await disguising(src_role, pid, target, role, duration, "strong");
                 return result;
             break;
         }

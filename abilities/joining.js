@@ -22,25 +22,28 @@ module.exports = function() {
     **/
     this.abilityJoining = async function(pid, src_role, ability) {
         let result;
+        // check parameters
+        if(!ability.target || !ability.group) {
+            abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
+            return "Joining failed! " + abilityError;
+        }
+        // parse parameters
+        let target = await parsePlayerSelector(ability.target, pid);
+        let group_name = parseGroupName(ability.group);
+        // select subtype
         switch(ability.subtype) {
             default:
                 abilityLog(`❗ **Error:** Unknown ability subtype \`${ability.subtype}\`!`);
                 return "Joining failed! " + abilityError;
             break;
             case "add":
-                if(!ability.target || !ability.group) {
-                    abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
-                }
                 let mem_type = parseMembershipType(ability.membership_type ?? "member");
                 let dur_type = parseDuration(ability.duration ?? "persistent");
-                result = await joiningAdd(src_role, pid, await parsePlayerSelector(ability.target, pid), parseGroupName(ability.group), mem_type, dur_type);
+                result = await joiningAdd(src_role, pid, target, group_name, mem_type, dur_type);
                 return result;
             break;
             case "remove":
-                if(!ability.target || !ability.group) {
-                    abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
-                }
-                result = await joiningRemove(src_role, pid, await parsePlayerSelector(ability.target, pid), parseGroupName(ability.group));
+                result = await joiningRemove(src_role, pid, target, group_name);
                 return result;
             break;
         }

@@ -14,8 +14,8 @@ module.exports = function() {
     returns a prompt message
     **/
     this.getPromptMessage = function(ability, type1 = "", type2 = "") {
-        const ty = ability.type;
-        const su = ability.subtype;
+        const ty = ability.type ? ability.type.replace(/ /g,"_") : null;
+        const su = ability.subtype ? ability.subtype.replace(/ /g,"_") : null;
         const tysu = `${ty}.${su}`;
         const tysu1 = `${tysu}.1`;
         const tysu2 = `${tysu}.2`;
@@ -24,6 +24,7 @@ module.exports = function() {
         // default prompt
         let promptMsg = `Give ${type1}`;
         if(type2.length > 0) promptMsg += `and ${type2}`;
+        promptMsg += ` (\`${ty}${su?'.'+su:''}.${type2===''?'1':'2'}\`)`;
         // search for prompt in JSON
         if(type2 === "" && ty && su && prompts[tysu1]) return prompts[tysu1];
         else if(type2 === "" && ty && su && prompts[tysu]) return prompts[tysu];

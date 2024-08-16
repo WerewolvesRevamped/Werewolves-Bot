@@ -12,6 +12,7 @@ require("./joining.js")();
 require("./investigating.js")();
 require("./disguising.js")();
 require("./killing.js")();
+require("./protecting.js")();
 
 module.exports = function() {
     
@@ -43,6 +44,9 @@ module.exports = function() {
             break;
             case "killing":
                 return await abilityKilling(pid, src_role, ability)
+            break;
+            case "protecting":
+                return await abilityProtecting(pid, src_role, ability)
             break;
         }
     }

@@ -10,30 +10,29 @@ module.exports = function() {
     **/
     this.abilityInvestigating = async function(pid, src_role, ability) {
         let result;
+        // check parameters
+        if(!ability.target) {
+            abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
+            return "Investigation failed! " + abilityError;
+        }
+        // parse parameters
+        let target = await parsePlayerSelector(ability.target, pid);
+        // select subtype
         switch(ability.subtype) {
             default:
                 abilityLog(`❗ **Error:** Unknown ability subtype \`${ability.subtype}\`!`);
-                return "";
+                return "Investigation failed! " + abilityError;
             break;
             case "role":
-                if(!ability.target) {
-                    abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
-                }
-                result = await investigatingRole(src_role, pid, await parsePlayerSelector(ability.target, pid), ability.affected_by_wd ?? false, ability.affected_by_sd ?? false);
+                result = await investigatingRole(src_role, pid, target, ability.affected_by_wd ?? false, ability.affected_by_sd ?? false);
                 return result;
             break;
             case "class":
-                if(!ability.target) {
-                    abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
-                }
-                result = await investigatingClass(src_role, pid, await parsePlayerSelector(ability.target, pid), ability.affected_by_wd ?? false, ability.affected_by_sd ?? false);
+                result = await investigatingClass(src_role, pid, target, ability.affected_by_wd ?? false, ability.affected_by_sd ?? false);
                 return result;
             break;
             case "category":
-                if(!ability.target) {
-                    abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
-                }
-                result = await investigatingCategory(src_role, pid, await parsePlayerSelector(ability.target, pid), ability.affected_by_wd ?? false, ability.affected_by_sd ?? false);
+                result = await investigatingCategory(src_role, pid, target, ability.affected_by_wd ?? false, ability.affected_by_sd ?? false);
                 return result;
             break;
         }

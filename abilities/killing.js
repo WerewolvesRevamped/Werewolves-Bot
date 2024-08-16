@@ -10,17 +10,18 @@ module.exports = function() {
     **/
     this.abilityKilling = async function(pid, src_role, ability) {
         let result;
-        // all subtypes have the same arguments
+        // check parameters
         if(!ability.target) {
             abilityLog(`❗ **Error:** Missing arguments for type \`${ability.type}\`!`);
-            return "";
+            return "Killing failed! " + abilityError;
         }
+        // parse parameters
         let targets = await parsePlayerSelector(ability.target, pid);
-        // subtypes
+        // select subtype
         switch(ability.subtype) {
             default:
                 abilityLog(`❗ **Error:** Unknown ability subtype \`${ability.subtype}\`!`);
-                return "";
+                return "Killing failed! " + abilityError;
             break;
             case "attack":
                 result = await killingAttack(src_role, pid, targets);

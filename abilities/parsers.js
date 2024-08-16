@@ -137,4 +137,35 @@ module.exports = function() {
         }
     }
     
+    /**
+    Parse Defense From Type
+    parses a "defense from x" type
+    defaults to "all"
+    **/
+    this.parseDefenseFromType = function(defro_type) {
+        defro_type = defro_type.toLowerCase().replace(/ /g,"_").replace(/[^a-z]/g,"");
+        if(["attacks","kills","lynches","attacks_lynches","all"].indexOf(defro_type) >= 0) {
+            return defro_type;
+        } else {
+            abilityLog(`❗ **Error:** Invalid defense from type \`${defro_type}\`. Defaulted to \`all\`!`);
+            return "all";
+        }
+    }
+    
+    /**
+    Parse Phase Type
+    parses a phase type
+    defaults to "all"
+    **/
+    this.parsePhaseType = function(phase_type) {
+        phase_type = phase_type.toLowerCase();
+        if(["day","night","all"].indexOf(phase_type) >= 0) {
+            return phase_type;
+        } else {
+            abilityLog(`❗ **Error:** Invalid phase type \`${phase_type}\`. Defaulted to \`all\`!`);
+            return "all";
+        }
+    }
+    
+    
 }
