@@ -96,6 +96,16 @@ module.exports = function() {
                 if(quantity < max_allowed) return true;
                 else return false;
             break;
+            // CONDITION
+            case "condition":
+                // cannot be evaluated pre-prompt: always true
+                if(prePrompt) {
+                    return true;
+                } else {
+                    abilityLog(`❗ **Error:** Unknown restriction type \`${restriction.type}\`!`);
+                    return true;
+                }
+            break;
         }
     }
     
@@ -124,7 +134,7 @@ module.exports = function() {
     **/
     this.initActionData = function(player_id, ability) {
         return new Promise(res => {
-            sql("INSERT INTO action_data (player_id,ability_id,quantity,last_phase,last_target) VALUES (" + connection.escape(player_id) + "," + connection.escape(ability.id) + ",1", getPhaseAsNumber() + ",'')", result => {
+            sql("INSERT INTO action_data (player_id,ability_id,quantity,last_phase) VALUES (" + connection.escape(player_id) + "," + connection.escape(ability.id) + ",1," + getPhaseAsNumber() + ")", result => {
                  res();
             });
         });
