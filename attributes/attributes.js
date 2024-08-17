@@ -128,6 +128,14 @@ module.exports = function() {
     }
     
     /**
+    Create Absence Attribute
+    creates an absence attribute with a location, a killing subtype, a selector for affected players and a phase
+    **/
+    this.createAbsenceAttribute = async function(src_role, src_player, target_player, dur, loc, kill_subtype = "all", affected = "@All", phase = "both") {
+        await createAttribute(src_role, src_player, target_player, dur, "absence", loc, kill_subtype, affected, phase);
+    }
+    
+    /**
     Create Manipulation Attribute
     creates a manipulation attribute with a specific manipulation subtype and a value for the manipulation
     **/

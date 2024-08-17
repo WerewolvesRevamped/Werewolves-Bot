@@ -12,7 +12,7 @@ module.exports = function() {
         let result;
         // check parameters
         if(!ability.target) {
-            abilityLog(`❗ **Error:** Missing arguments for btype \`${ability.btype}\`!`);
+            abilityLog(`❗ **Error:** Missing arguments for type \`${ability.type}\`!`);
             return "Protecting failed! " + abilityError;
         }
         // parse parameters
@@ -24,24 +24,33 @@ module.exports = function() {
         // select subtype
         switch(ability.subtype) {
             default:
-            case "absence":
                 abilityLog(`❗ **Error:** Unknown ability subtype \`${ability.subtype}\`!`);
                 return "Protecting failed! " + abilityError;
             break;
             case "active defense":
-                result = await protecting(src_role, pid, target, "active", from_type, from_selector, during_phase, dur_type);
+                result = await protectingGeneric(src_role, pid, target, "active", from_type, from_selector, during_phase, dur_type);
                 return result;
             break;
             case "passive defense":
-                result = await protecting(src_role, pid, target, "passive", from_type, from_selector, during_phase, dur_type);
+                result = await protectingGeneric(src_role, pid, target, "passive", from_type, from_selector, during_phase, dur_type);
                 return result;
             break;
             case "partial defense":
-                result = await protecting(src_role, pid, target, "partial", from_type, from_selector, during_phase, dur_type);
+                result = await protectingGeneric(src_role, pid, target, "partial", from_type, from_selector, during_phase, dur_type);
                 return result;
             break;
             case "recruitment defense":
-                result = await protecting(src_role, pid, target, "recruitment", from_type, from_selector, during_phase, dur_type);
+                result = await protectingGeneric(src_role, pid, target, "recruitment", from_type, from_selector, during_phase, dur_type);
+                return result;
+            break;
+            case "absence":
+                // check parameters
+                if(!ability.absence_at) {
+                    abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
+                    return "Absence failed! " + abilityError;
+                }
+                let loc = await parseLocation(ability.absence_at, pid);
+                result = await protectingAbsence(src_role, pid, target, loc, from_type, from_selector, during_phase, dur_type);
                 return result;
             break;
         }
@@ -49,15 +58,27 @@ module.exports = function() {
     
     
     /**
-    Ability: Protecting
+    Ability: Protecting - Active/Passive/Partial/Recruitment
     adds a disguise to a player
     **/
-    this.protecting = async function(src_role, src_player, targets, def_type, from_type, from_selector, during_phase, dur_type) {
+    this.protectingGeneric = async function(src_role, src_player, targets, def_type, from_type, from_selector, during_phase, dur_type) {
         for(let i = 0; i < targets.length; i++) {
             await createDefenseAttribute(src_role, src_player, targets[i], dur_type, def_type, from_type, from_selector, during_phase);
-            abilityLog(`✅ <@${targets[i]}> was protecting with \`${toTitleCase(def_type)}\` defense for \`${getDurationName(dur_type)}\`.`);
+            abilityLog(`✅ <@${targets[i]}> was protected with \`${toTitleCase(def_type)}\` defense for \`${getDurationName(dur_type)}\`.`);
         }
         return "Protecting executed!";
+    }
+    
+    /**
+    Ability: Protecting - Absence
+    adds a disguise to a player
+    **/
+    this.protectingAbsence = async function(src_role, src_player, targets, loc, from_type, from_selector, during_phase, dur_type) {
+        for(let i = 0; i < targets.length; i++) {
+            await createAbsenceAttribute(src_role, src_player, targets[i], dur_type, loc, from_type, from_selector, during_phase);
+            abilityLog(`✅ <@${targets[i]}> is absent at \`${toTitleCase(loc)}\` for \`${getDurationName(dur_type)}\`.`);
+        }
+        return "Absence registered!";
     }
     
 

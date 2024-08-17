@@ -16,7 +16,7 @@ require("./protecting.js")();
 
 module.exports = function() {
     
-    this.abilityError = "If you believe this to be an error, please contact a Host.";
+    this.abilityError = "This is likely caused by an error. Please contact a Host.";
     
     /**
     Execute Ability

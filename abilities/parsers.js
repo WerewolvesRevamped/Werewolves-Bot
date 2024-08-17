@@ -167,5 +167,23 @@ module.exports = function() {
         }
     }
     
+    /**
+    Parse Location
+    parses a location
+    **/
+    const locations = ["#story_time","#town_square","#tavern","#voting_booth"];
+    this.parseLocation = async function(loc, self) {
+        if(loc[0] === "#") { // location is a channel 
+            if(locations.indexOf(loc) >= 0) {
+                return loc;
+            } else {
+                abilityLog(`❗ **Error:** Invalid location \`${loc}\`. Defaulted to \`#town_square\`!`);
+                return "#town_square";              
+            }
+        } else { // location is a player
+            return await parsePlayerSelector(loc, self);
+        }
+    }
+    
     
 }
