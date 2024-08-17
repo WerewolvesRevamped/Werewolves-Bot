@@ -77,7 +77,7 @@ module.exports = function() {
     **/
     this.getActionQuantity = function(player_id, ability) {
         return new Promise(res => {
-            sql("SELECT * FROM action_quantities WHERE player_id= " + connection.escape(player_id) + " AND ability_hash=" + connection.escape(hash(ability)), result => {
+            sql("SELECT * FROM action_quantities WHERE player_id= " + connection.escape(player_id) + " AND ability_hash=" + connection.escape(ability.id), result => {
                 if(!result[0]) res(0);
                 else res(result[0].quantity);
             });
@@ -89,7 +89,7 @@ module.exports = function() {
     **/
     this.initActionQuantity = function(player_id, ability) {
         return new Promise(res => {
-            sql("INSERT INTO action_quantities (player_id,ability_hash,quantity) VALUES (" + connection.escape(player_id) + "," + connection.escape(hash(ability)) + ",1)", result => {
+            sql("INSERT INTO action_quantities (player_id,ability_hash,quantity) VALUES (" + connection.escape(player_id) + "," + connection.escape(ability.id) + ",1)", result => {
                  res();
             });
         });
@@ -100,7 +100,7 @@ module.exports = function() {
     **/
     this.increaseActionQuantity = function(player_id, ability) {
         return new Promise(res => {
-            sql("UPDATE action_quantities SET quantity=quantity+1 WHERE player_id= " + connection.escape(player_id) + " AND ability_hash=" + connection.escape(hash(ability)), result => {
+            sql("UPDATE action_quantities SET quantity=quantity+1 WHERE player_id= " + connection.escape(player_id) + " AND ability_hash=" + connection.escape(ability.id), result => {
                  res();
             });
         });

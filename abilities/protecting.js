@@ -81,6 +81,55 @@ module.exports = function() {
         return "Absence registered!";
     }
     
+        
+    /**
+    Get top defense of a certain type
+    **/
+    this.getTopDefense = async function(player_id, type) {
+        let allDefenses = await queryAttributePlayer(player_id, "attr_type", "defense", "val1", type); // get all defenses of specified type
+        if(allDefenses.length <= 0) return false; // no defenses
+        let topDefense = allDefenses[allDefenses.length - 1]; // get most recent defenses
+        return topDefense;
+    }
+    
+    /**
+    Get top absence 
+    **/
+    this.getTopAbsence = async function(player_id) {
+        let allAbsences = await queryAttributePlayer(player_id, "attr_type", "absence"); // get all absences
+        if(allAbsences.length <= 0) return false; // no absences
+        let topAbsence = allAbsences[allAbsences.length - 1]; // get most recent absence
+        return topAbsence;
+    }
+    
+    /**
+    Get top active defense
+    **/
+    this.getTopActiveDefense = async function(player_id) {
+        return await getTopDefense(player_id, "active");
+    }
+    
+    /**
+    Get top passive defense
+    **/
+    this.getTopPassiveDefense = async function(player_id) {
+        return await getTopDefense(player_id, "passive");
+    }
+    
+    /**
+    Get top partial defense
+    **/
+    this.getTopPartialDefense = async function(player_id) {
+        return await getTopDefense(player_id, "partial");
+    }
+    
+    /**
+    Get top recruitment defense
+    **/
+    this.getTopRecruitmentDefense = async function(player_id) {
+        return await getTopDefense(player_id, "recruitment");
+    }
+    
 
     
 }

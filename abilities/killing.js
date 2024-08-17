@@ -41,7 +41,17 @@ module.exports = function() {
     this.killingAttack = async function(src_role, src_player, targets) {
         let success = false;
         for(let i = 0; i < targets.length; i++) {
-            // WIP: insert defense evaluation here
+            // evaluate all applicable defenses in order
+            let defense;
+            defense = await getTopAbsence(targets[i]);
+            if(!defense) defense = await getTopActiveDefense(targets[i]);
+            if(!defense) defense = await getTopPassiveDefense(targets[i]);
+            if(!defense) defense = await getTopPartialDefense(targets[i]);
+            if(!defense) defense = await getTopRecruitmentDefense(targets[i]);
+            if(defense) { // defense successful, log and continue
+                abilityLog(`✅ <@${src_player}> attacked <@${targets[i]}> - failed due to:\`\`\`${JSON.stringify(defense)}\`\`\``);
+                continue;
+            }
             // run the on death trigger
             await trigger(targets[i], "On Death", { attacker: src_player, death_type: "Attack", attack_source: src_role, this: targets[i] }); 
             await trigger(targets[i], "On Killed", { attacker: src_player, death_type: "Attack", attack_source: src_role }); 

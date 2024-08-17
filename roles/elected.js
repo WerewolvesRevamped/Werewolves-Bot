@@ -116,6 +116,7 @@ module.exports = function() {
         sql("SELECT role FROM players WHERE id = " + connection.escape(player_id), result => {
             let rName = toTitleCase(result[0].role);
             let rEmoji = getRoleEmoji(rName);
+            if(!rEmoji) rEmoji = "";
             // Send reporter message
             reportMsg = `<@${player_id}> was a \`${rName}\` ${rEmoji}`;
             connectionSend("reporter", reportMsg, "Reporter");
