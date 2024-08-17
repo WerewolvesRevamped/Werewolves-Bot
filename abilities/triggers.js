@@ -81,7 +81,7 @@ module.exports = function() {
             let promptInfo = [];
             let restrictions = trigger?.parameters?.restrictions ?? [];
             for(let i = 0; i < restrictions.length; i++) {
-                let passed = await handleRestriction(pid, ability, restrictions[i]);
+                let passed = await handleRestriction(pid, ability, restrictions[i], RESTR_PRE);
                 if(!passed) {
                     abilityLog(`🔴 **Skipped Ability:** <@${pid}> (${toTitleCase(src_role)}). Failed restriction \`${restrictions[i].type}\`.`);
                     return;
@@ -101,7 +101,7 @@ module.exports = function() {
                     if(ptype == "end") {
                         abilityLog(`❗ **Error:** Cannot use \`${triggerName}\` trigger without prompt!`);
                     } else {
-                        let feedback = await executeAbility(pid, src_role, ability, trigger);
+                        let feedback = await executeAbility(pid, src_role, ability, trigger, restrictions);
                         if(feedback) abilitySend(pid, feedback);
                     }
                 break;
@@ -112,10 +112,10 @@ module.exports = function() {
                     let mid = await abilitySendProm(pid, `${getEmoji(src_role)} ${promptMsg}`, EMBED_GRAY, true, promptInfoMsg);
                     if(ptype == "immediate") { // immediate prompt
                         abilityLog(`🟩 **Prompting Ability:** <@${pid}> (${toTitleCase(src_role)}) - ${toTitleCase(ability.type)} [${type}] {Immediate}`);
-                        await createPrompt(mid, pid, src_role, ability, "immediate", type);
+                        await createPrompt(mid, pid, src_role, ability, restrictions, "immediate", type);
                     } else if(ptype == "end") { // end phase prompt
                         abilityLog(`🟩 **Prompting Ability:** <@${pid}> (${toTitleCase(src_role)}) - ${toTitleCase(ability.type)} [${type}] {End}`);
-                        await createPrompt(mid, pid, src_role, ability, "end", type);
+                        await createPrompt(mid, pid, src_role, ability, restrictions, "end", type);
                     } else {
                         abilityLog(`❗ **Error:** Invalid prompt type!`);
                     }
@@ -128,10 +128,10 @@ module.exports = function() {
                     let mid = await abilitySendProm(pid, `${getEmoji(src_role)} ${promptMsg}`, EMBED_GRAY, true, promptInfoMsg);
                     if(ptype == "immediate") { // immediate prompt
                         abilityLog(`🟩 **Prompting Ability:** <@${pid}> (${toTitleCase(src_role)}) - ${toTitleCase(ability.type)} [${type1}, ${type2}] {Immediate}`);
-                        await createPrompt(mid, pid, src_role, ability, "immediate", type1, type2);
+                        await createPrompt(mid, pid, src_role, ability, restrictions, "immediate", type1, type2);
                     } else if(ptype == "end") { // end phase prompt
                         abilityLog(`🟩 **Prompting Ability:** <@${pid}> (${toTitleCase(src_role)}) - ${toTitleCase(ability.type)} [${type1}, ${type2}] {End}`);
-                        await createPrompt(mid, pid, src_role, ability, "end", type1, type2);
+                        await createPrompt(mid, pid, src_role, ability, restrictions, "end", type1, type2);
                     } else {
                         abilityLog(`❗ **Error:** Invalid prompt type!`);
                     }

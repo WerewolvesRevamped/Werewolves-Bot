@@ -3,11 +3,18 @@
     The module for implementing trigger restrictions
 **/
 module.exports = function() {
+    
+    /**
+    globals
+    **/
+    this.RESTR_PRE = true; // for evaluation of restrictions pre-prompting
+    this.RESTR_POST = false; // for evaluation of restrictions post-prompting
+    
     /**
     Handle Restrictions
     apply ability restrictions
     **/
-    this.handleRestriction = async function(pid, ability, restriction) {
+    this.handleRestriction = async function(pid, ability, restriction, prePrompt, target = null) {
         switch(restriction.type) {
             // UNKNOWN
             default: 
@@ -34,6 +41,46 @@ module.exports = function() {
                     case "during":
                         // check if current phase is equal or higher than specified phase
                         if(getPhaseAsNumber() === getPhaseAsNumber(restriction.phase)) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    break;
+                }
+                return true;
+            break;
+            // SUCCESSION
+            case "succession":
+                switch(restriction.subtype) {
+                    default: 
+                        abilityLog(`❗ **Error:** Unknown restriction subtype \`${restriction.subtype}\`!`);
+                        return false;
+                    break;
+                    // SUCCESSION - DEFAULT
+                    case "default":
+                        let lastPhase = await getLastPase(pid, ability);
+                        // check if current phase is at least 2 higher than the phase the ability was last used in
+                        if(getPhaseAsNumber() >= lastPhase+2) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    break;
+                    // SUCCESSION - TARGET
+                    case "target":
+                        // cannot be evaluated pre-prompt: always true
+                        if(prePrompt) {
+                            return true;
+                        }
+                        // check if target exists
+                        if(!target) {
+                            return true; // restriciton application not applicable without target
+                        }
+                        // actual evaluation
+                        let lastTarget = await parsePlayerSelector(await getLastTarget(pid, ability), pid);
+                        let targets = await parsePlayerSelector(target, pid);
+                        // check if last target is included in the target selector
+                        if(!targets.includes(lastTarget[0])) {
                             return true;
                         } else {
                             return false;
@@ -71,25 +118,13 @@ module.exports = function() {
         }
     }
     
-        
-    /**
-    Get action quantity
-    **/
-    this.getActionQuantity = function(player_id, ability) {
-        return new Promise(res => {
-            sql("SELECT * FROM action_quantities WHERE player_id= " + connection.escape(player_id) + " AND ability_hash=" + connection.escape(ability.id), result => {
-                if(!result[0]) res(0);
-                else res(result[0].quantity);
-            });
-        });
-    }
     
     /**
     Initialize action quantity to 1
     **/
-    this.initActionQuantity = function(player_id, ability) {
+    this.initActionData = function(player_id, ability) {
         return new Promise(res => {
-            sql("INSERT INTO action_quantities (player_id,ability_hash,quantity) VALUES (" + connection.escape(player_id) + "," + connection.escape(ability.id) + ",1)", result => {
+            sql("INSERT INTO action_data (player_id,ability_id,quantity,last_phase,last_target) VALUES (" + connection.escape(player_id) + "," + connection.escape(ability.id) + ",1", getPhaseAsNumber() + ",'')", result => {
                  res();
             });
         });
@@ -100,9 +135,56 @@ module.exports = function() {
     **/
     this.increaseActionQuantity = function(player_id, ability) {
         return new Promise(res => {
-            sql("UPDATE action_quantities SET quantity=quantity+1 WHERE player_id= " + connection.escape(player_id) + " AND ability_hash=" + connection.escape(ability.id), result => {
+            sql("UPDATE action_data SET quantity=quantity+1,last_phase=" + getPhaseAsNumber() + " WHERE player_id= " + connection.escape(player_id) + " AND ability_id=" + connection.escape(ability.id), result => {
                  res();
             });
         });
     }    
+        
+    /**
+    Get action quantity
+    **/
+    this.getActionQuantity = function(player_id, ability) {
+        return new Promise(res => {
+            sql("SELECT * FROM action_data WHERE player_id= " + connection.escape(player_id) + " AND ability_id=" + connection.escape(ability.id), result => {
+                if(!result[0]) res(0);
+                else res(result[0].quantity);
+            });
+        });
+    }
+    
+    /**
+    Sets the last target
+    **/
+    this.setLastTarget = function(player_id, ability, lastTarget) {
+        return new Promise(res => {
+            sql("UPDATE action_data SET last_target=" + connection.escape(lastTarget) + ",last_phase=" + getPhaseAsNumber() + " WHERE player_id= " + connection.escape(player_id) + " AND ability_id=" + connection.escape(ability.id), result => {
+                 res();
+            });
+        });
+    }    
+      
+    /**
+    Get last target
+    **/
+    this.getLastTarget = function(player_id, ability) {
+        return new Promise(res => {
+            sql("SELECT * FROM action_data WHERE player_id= " + connection.escape(player_id) + " AND ability_id=" + connection.escape(ability.id), result => {
+                if(!result[0]) res("");
+                else res(result[0].last_target);
+            });
+        });
+    }
+      
+    /**
+    Get last used phase
+    **/
+    this.getLastPase = function(player_id, ability) {
+        return new Promise(res => {
+            sql("SELECT * FROM action_data WHERE player_id= " + connection.escape(player_id) + " AND ability_id=" + connection.escape(ability.id), result => {
+                if(!result[0]) res(-2);
+                else res(+result[0].last_phase);
+            });
+        });
+    }
 }

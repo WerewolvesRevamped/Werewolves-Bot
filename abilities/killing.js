@@ -36,7 +36,6 @@ module.exports = function() {
     
     /**
     Ability: Killing - Attack
-    WIP: doesnt consider defenses or anything
     **/
     this.killingAttack = async function(src_role, src_player, targets) {
         let success = false;

@@ -42,9 +42,9 @@ module.exports = function() {
     Create Prompt
     creates a new prompt in the prompt table
     **/
-    this.createPrompt = async function(mid, pid, src_role, ability, prompt_type, type1, type2 = "none") {
+    this.createPrompt = async function(mid, pid, src_role, ability, restrictions, prompt_type, type1, type2 = "none") {
         await new Promise(res => {
-            sql("INSERT INTO prompts (message_id,player_id,src_role,ability,type1,type2,prompt_type) VALUES (" + connection.escape(mid) + "," + connection.escape(pid) + "," + connection.escape(src_role) + "," + connection.escape(JSON.stringify(ability)) + "," + connection.escape(type1.toLowerCase()) + "," + connection.escape(type2.toLowerCase()) + "," + connection.escape(prompt_type) + ")", result => {
+            sql("INSERT INTO prompts (message_id,player_id,src_role,ability,type1,type2,prompt_type,restrictions) VALUES (" + connection.escape(mid) + "," + connection.escape(pid) + "," + connection.escape(src_role) + "," + connection.escape(JSON.stringify(ability)) + "," + connection.escape(type1.toLowerCase()) + "," + connection.escape(type2.toLowerCase()) + "," + connection.escape(prompt_type) + "," + connection.escape(JSON.stringify(restrictions)) + ")", result => {
                 res();
             });            
         });
@@ -206,9 +206,9 @@ module.exports = function() {
     Create Queued Action
     creates an action in the action queue which will be executed at a specified time
     **/
-    async function createAction(mid, pid, src_role, ability, orig_ability, prompt_type, type1, type2, time) {
+    async function createAction(mid, pid, src_role, ability, orig_ability, prompt_type, type1, type2, time, restrictions, target) {
         await new Promise(res => {
-            sql("INSERT INTO action_queue (message_id,player_id,src_role,ability,orig_ability,type1,type2,execute_time, prompt_type) VALUES (" + connection.escape(mid) + "," + connection.escape(pid) + "," + connection.escape(src_role) + "," + connection.escape(JSON.stringify(ability)) + "," + connection.escape(JSON.stringify(orig_ability)) + "," + connection.escape(type1) + "," + connection.escape(type2) + "," + connection.escape(time) + "," + connection.escape(prompt_type) + ")", result => {
+            sql("INSERT INTO action_queue (message_id,player_id,src_role,ability,orig_ability,type1,type2,execute_time, prompt_type, restrictions, target) VALUES (" + connection.escape(mid) + "," + connection.escape(pid) + "," + connection.escape(src_role) + "," + connection.escape(JSON.stringify(ability)) + "," + connection.escape(JSON.stringify(orig_ability)) + "," + connection.escape(type1) + "," + connection.escape(type2) + "," + connection.escape(time) + "," + connection.escape(prompt_type) + "," + connection.escape(JSON.stringify(restrictions)) + "," + connection.escape(target) + ")", result => {
                 res();
             });            
         });
@@ -235,16 +235,22 @@ module.exports = function() {
         });
         // iterate through them and execute them
         for(let i = 0; i < actionsToExecute.length; i++) {
+            // current action
+            let curAction = actionsToExecute[i];
             // delete the queued action entry
-            await deleteQueuedAction(actionsToExecute[i].message_id);
+            await deleteQueuedAction(curAction.message_id);
             // parse ability
-            let ability = JSON.parse(actionsToExecute[i].ability);
+            let ability = JSON.parse(curAction.ability);
+            // parse restrictions
+            let restrictions = JSON.parse(curAction.restrictions);
+            // save last target
+            setLastTarget(curAction.player_id, ability, curAction.target);
             // execute the ability
-            let feedback = await executeAbility(actionsToExecute[i].player_id, actionsToExecute[i].src_role, ability);
+            let feedback = await executeAbility(curAction.player_id, curAction.src_role, ability, restrictions);
             // send feedback
-            if(feedback) abilitySend(actionsToExecute[i].player_id, feedback, EMBED_GREEN);
+            if(feedback) abilitySend(curAction.player_id, feedback, EMBED_GREEN);
             // confirm automatic execution
-            confirmAutoExecution(actionsToExecute[i].player_id, actionsToExecute[i].message_id);
+            confirmAutoExecution(curAction.player_id, curAction.message_id);
         }
     }
     
@@ -261,6 +267,7 @@ module.exports = function() {
         let prompt = await getPrompt(message.reference.messageId);
         // get values from prompt
         let ability = JSON.parse(prompt.ability);
+        let restrictions = JSON.parse(prompt.restrictions);
         let src_role = prompt.src_role;
         let pid = prompt.player_id;
         // check which type of prompt
@@ -269,14 +276,25 @@ module.exports = function() {
             let parsedReply = parsePromptReply(reply, prompt.type1, message);
             // reply received
             if(parsedReply !== false) {
-                // delete prompt 
-                await deletePrompt(message.reference.messageId);
-                let repl_msg = await sendPromptReplyConfirmMessage(message, prompt.prompt_type, `You submitted: \`${parsedReply[0]}\`.`);
                 // apply prompt reply onto ability
                 let promptAppliedAbility = applyPromptValue(ability, 0, parsedReply[1]);
+                // check restrictions again
+                for(let i = 0; i < restrictions.length; i++) {
+                    let passed = await handleRestriction(pid, promptAppliedAbility, restrictions[i], RESTR_POST, parsedReply[1]);
+                    if(!passed) {
+                        let msg = getPromptMessage(restrictions[i]);
+                        let embed = basicEmbed(`You cannot execute this ability due to a restriction: ${msg}`, EMBED_RED);
+                        message.reply(embed);
+                        return;
+                    }
+                }
+                // delete prompt 
+                await deletePrompt(message.reference.messageId);
+                // reply to prompt
+                let repl_msg = await sendPromptReplyConfirmMessage(message, prompt.prompt_type, `You submitted: \`${parsedReply[0]}\`.`);
                 // queue action
                 let exeTime = prompt.prompt_type == "immediate" ? getTime() + 60 : endActionTime;
-                await createAction(repl_msg, pid, src_role, promptAppliedAbility, ability, prompt.prompt_type, prompt.type1, prompt.type2, exeTime);
+                await createAction(repl_msg, pid, src_role, promptAppliedAbility, ability, prompt.prompt_type, prompt.type1, prompt.type2, exeTime, restrictions, parsedReply[1]);
                 // log prompt reply
                 abilityLog(`✅ **Prompt Reply:** <@${pid}> (${toTitleCase(src_role)}) submitted \`${parsedReply[0]}\`.`);
             }
@@ -291,15 +309,26 @@ module.exports = function() {
             let parsedReply2 = parsePromptReply(reply2, prompt.type2, message);
             // reply received
             if(parsedReply1 !== false && parsedReply2 !== false) {
-                // delete prompt 
-                await deletePrompt(message.reference.messageId);
-                let repl_msg = await sendPromptReplyConfirmMessage(message, prompt.prompt_type, `You submitted: \`${parsedReply1[0]}\` and \`${parsedReply2[0]}\`.`);
                 // apply prompt reply onto ability
                 let promptAppliedAbility = applyPromptValue(ability, 0, parsedReply1[1]);
                 promptAppliedAbility = applyPromptValue(ability, 1, parsedReply2[1]);
+                // check restrictions again
+                for(let i = 0; i < restrictions.length; i++) {
+                    let passed = await handleRestriction(pid, promptAppliedAbility, restrictions[i], RESTR_POST, parsedReply1[1]);
+                    if(!passed) {
+                        let msg = getPromptMessage(restrictions[i]);
+                        let embed = basicEmbed(`You cannot execute this ability due to a restriction: ${msg}`, EMBED_RED);
+                        message.reply(embed);
+                        return;
+                    }
+                }
+                // delete prompt 
+                await deletePrompt(message.reference.messageId);
+                // reply to prompt
+                let repl_msg = await sendPromptReplyConfirmMessage(message, prompt.prompt_type, `You submitted: \`${parsedReply1[0]}\` and \`${parsedReply2[0]}\`.`);
                 // queue action
                 let exeTime = prompt.prompt_type == "immediate" ? getTime() + 60 : endActionTime;
-                await createAction(repl_msg, pid, src_role, promptAppliedAbility, ability, prompt.prompt_type, prompt.type1, prompt.type2, exeTime);
+                await createAction(repl_msg, pid, src_role, promptAppliedAbility, ability, prompt.prompt_type, prompt.type1, prompt.type2, exeTime, restrictions, parsedReply1[1]);
                 // log prompt reply
                 abilityLog(`✅ **Prompt Reply:** <@${pid}> (${toTitleCase(src_role)}) submitted \`${parsedReply1[0]}\` and \`${parsedReply2[0]}\`.`);
             }

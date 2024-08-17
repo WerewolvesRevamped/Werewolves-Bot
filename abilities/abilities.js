@@ -22,10 +22,18 @@ module.exports = function() {
     Execute Ability
     executes an ability
     **/
-    this.executeAbility = async function(pid, src_role, ability) {
+    this.executeAbility = async function(pid, src_role, ability, restrictions) {
+        // check restrictions again
+        for(let i = 0; i < restrictions.length; i++) {
+            let passed = await handleRestriction(pid, ability, restrictions[i], RESTR_POST);
+            if(!passed) {
+                abilityLog(`🔴 **Skipped Ability:** <@${pid}> (${toTitleCase(src_role)}). Failed restriction \`${restrictions[i].type}\`.`);
+                return;
+            }
+        }
         // get/increase quantity
         let quantity = await getActionQuantity(pid, ability);
-        if(quantity === 0) await initActionQuantity(pid, ability);
+        if(quantity === 0) await initActionData(pid, ability);
         else await increaseActionQuantity(pid, ability);
         // execute ability
         abilityLog(`🟢 **Executing Ability:** <@${pid}> (${toTitleCase(src_role)}) \`\`\`${JSON.stringify(ability)}\`\`\``);
