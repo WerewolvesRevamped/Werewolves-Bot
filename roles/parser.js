@@ -150,7 +150,7 @@ module.exports = function() {
 
     /** REGEX - Reminder: You need double \'s here **/
     // general
-    const targetType = "(`[^`]*`|@\\S*|%[^%]+%|randomize\\(.+?\\)|shuffle\\(.+?\\)|most_freq_role\\(.+?\\))";
+    const targetType = "(`[^`]*`|@\\S*|#\\S*|%[^%]+%|randomize\\(.+?\\)|shuffle\\(.+?\\)|most_freq_role\\(.+?\\))";
     const attrDuration = "( \\(~[^\)]+\\))?";
     const locationType = "(`[^`]*`|@\\S*|#\\S*)"; // extended version of target type
     const groupType = "(@\\S*|#\\S*)"; // reduced version of location type
@@ -446,7 +446,7 @@ module.exports = function() {
                 ability = { type: "protecting", subtype: lc(fd[4]), target: ttpp(fd[1]), defense_from_type: rblc(fd[2]), defense_from_target: ttpp(fd[3]), defense_during: fd[fd.length-2], duration: dd(fd[fd.length-1], "permanent") };
                 if(ability.subtype.substr(0,7)  == "absence") {
                     ability.subtype = "absence";
-                    ability.absence_at = fd[5];
+                    ability.absence_at = ttpp(fd[5]);
                 }
             }
             // From By Through
@@ -456,7 +456,7 @@ module.exports = function() {
                 ability = { type: "protecting", subtype: lc(fd[4]), target: ttpp(fd[1]), defense_from_type: rblc(fd[2]), defense_from_target: ttpp(fd[3]), defense_during: "all", duration: dd(fd[fd.length-1], "permanent") };
                 if(ability.subtype.substr(0,7)  == "absence") {
                     ability.subtype = "absence";
-                    ability.absence_at = fd[5];
+                    ability.absence_at = ttpp(fd[5]);
                 }
             }
             // From Through During
@@ -466,7 +466,7 @@ module.exports = function() {
                 ability = { type: "protecting", subtype: lc(fd[3]), target: ttpp(fd[1]), defense_from_type: rblc(fd[2]), defense_from_target: "@All[player]", defense_during: fd[fd.length-2], duration: dd(fd[fd.length-1], "permanent") };
                 if(ability.subtype.substr(0,7)  == "absence") {
                     ability.subtype = "absence";
-                    ability.absence_at = fd[4];
+                    ability.absence_at = ttpp(fd[4]);
                 }
             }
             // From Through
@@ -476,7 +476,7 @@ module.exports = function() {
                 ability = { type: "protecting", subtype: lc(fd[3]), target: ttpp(fd[1]), defense_from_type: rblc(fd[2]), defense_from_target: "@All[player]", defense_during: "all", duration: dd(fd[fd.length-1], "permanent") };
                 if(ability.subtype.substr(0,7)  == "absence") {
                     ability.subtype = "absence";
-                    ability.absence_at = fd[4];
+                    ability.absence_at = ttpp(fd[4]);
                 }
             }
             /** APPLYING **/

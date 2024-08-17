@@ -41,6 +41,12 @@ module.exports = function() {
     this.killingAttack = async function(src_role, src_player, targets) {
         let success = false;
         for(let i = 0; i < targets.length; i++) {
+            // for every target, add all other player that are absent at their location to targets
+            let absentPlayers = await getLocationAbsences(targets[i], "attack", src_player);
+            if(absentPlayers) absentPlayers.forEach(el => {
+                abilityLog(`✅ <@${el.owner}> is absent at <@${targets[i]}>.`);
+                targets.push(el.owner);
+            });
             // evaluate all applicable defenses in order
             let defense;
             defense = await getTopAbsence(targets[i], "attack", src_player);

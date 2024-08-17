@@ -76,7 +76,7 @@ module.exports = function() {
     this.protectingAbsence = async function(src_role, src_player, targets, loc, from_type, from_selector, during_phase, dur_type) {
         for(let i = 0; i < targets.length; i++) {
             await createAbsenceAttribute(src_role, src_player, targets[i], dur_type, loc, from_type, from_selector, during_phase);
-            abilityLog(`✅ <@${targets[i]}> is absent at \`${toTitleCase(loc)}\` for \`${getDurationName(dur_type)}\`.`);
+            abilityLog(`✅ <@${targets[i]}> is absent at \`${loc}\` for \`${getDurationName(dur_type)}\`.`);
         }
         return "Absence registered!";
     }
@@ -96,6 +96,17 @@ module.exports = function() {
     this.getAllAbsences = async function(player_id) {
         let allAbsences = await queryAttributePlayer(player_id, "attr_type", "absence"); // get all absences
         return allAbsences;
+    }
+    
+    /**
+    Get locational absences
+    **/
+    this.getLocationAbsences = async function(loc, kill_type, from) {
+        let locationAbsences = await queryAttribute("attr_type", "absence", "val1", loc);
+        locationAbsences = await filterDefenses(locationAbsences, kill_type, from);
+        // return absences
+        if(locationAbsences.length > 0) return locationAbsences;
+        else return false;
     }
     
     /**
@@ -120,14 +131,12 @@ module.exports = function() {
             let allowed_from = selectorList.includes(from);
             // check if phase matches current phase
             let allowed_phase = 
-                    attrPhase == "both"
+                    attrPhase == "all"
                 || (isDay() && attrPhase == "day")
                 || (isNight() && attrPhase == "night");
             // all conditions match
             if(allowed_type && allowed_from && allowed_phase) {
                 matchingDefenses.push(defenses[i]);
-            } else {
-                console.log("Defense failed: ", allowed_type, allowed_from, allowed_phase);
             }
         }
         // return matching conditions

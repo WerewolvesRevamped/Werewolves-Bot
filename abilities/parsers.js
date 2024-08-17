@@ -99,7 +99,8 @@ module.exports = function() {
     returns the type of a selector (removing the target)
     **/
     this.selectorGetType = function(selector) {
-        return selector.split("[")[1].split("]")[0].toLowerCase();
+        let spl = selector.split("[");
+        return spl.length >= 2 ? spl[1].split("]")[0].toLowerCase() : "unknown";
     }
     
     /**
@@ -163,11 +164,11 @@ module.exports = function() {
     **/
     this.parsePhaseType = function(phase_type) {
         phase_type = phase_type.toLowerCase();
-        if(["day","night","both"].includes(phase_type)) {
+        if(["day","night","all"].includes(phase_type)) {
             return phase_type;
         } else {
-            abilityLog(`❗ **Error:** Invalid phase type \`${phase_type}\`. Defaulted to \`both\`!`);
-            return "both";
+            abilityLog(`❗ **Error:** Invalid phase type \`${phase_type}\`. Defaulted to \`all\`!`);
+            return "all";
         }
     }
     

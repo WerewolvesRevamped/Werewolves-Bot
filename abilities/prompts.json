@@ -2,5 +2,6 @@
     "investigating.role.1": "Which player would you like to investigate?",
     "disguising.weakly.2": "You may weakly disguise another player. Please specify a player and a role, separated by `;`.",
     "killing.attack.1": "Who do you want to attack?",
-    "targeting.target.1": "Who would you like to target?"
+    "targeting.target.1": "Who would you like to target?",
+    "protecting.absence.1": "Who do you want to sleep with?"
 }

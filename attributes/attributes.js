@@ -123,7 +123,7 @@ module.exports = function() {
     Create Defense Attribute
     creates a defense attribute with a specific defense and killing subtype, a selector for affected players and a phase
     **/
-    this.createDefenseAttribute = async function(src_role, src_player, target_player, dur, def_subtype = "passive", kill_subtype = "all", affected = "@All", phase = "both") {
+    this.createDefenseAttribute = async function(src_role, src_player, target_player, dur, def_subtype = "passive", kill_subtype = "all", affected = "@All", phase = "all") {
         await createAttribute(src_role, src_player, target_player, dur, "defense", def_subtype, kill_subtype, affected, phase);
     }
     
@@ -131,7 +131,7 @@ module.exports = function() {
     Create Absence Attribute
     creates an absence attribute with a location, a killing subtype, a selector for affected players and a phase
     **/
-    this.createAbsenceAttribute = async function(src_role, src_player, target_player, dur, loc, kill_subtype = "all", affected = "@All", phase = "both") {
+    this.createAbsenceAttribute = async function(src_role, src_player, target_player, dur, loc, kill_subtype = "all", affected = "@All", phase = "all") {
         await createAttribute(src_role, src_player, target_player, dur, "absence", loc, kill_subtype, affected, phase);
     }
     
@@ -175,6 +175,39 @@ module.exports = function() {
     }
     
     /**
+    Attribute Query for anyone
+    queries an attribute for anyone
+    **/
+    this.queryAttribute = async function(column, val, column2 = null, val2 = null) {
+        if(column2) return await twoColumnQueryGeneric(column, val, column2, val2);
+        else return await singleColumnQueryGeneric(column, val);
+    }
+    
+    async function singleColumnQueryGeneric(column, val) {
+        // make sure column is valid
+        if(!validateAttributeColumnName(column)) return [];
+        // query attribute
+        return new Promise(res => {
+             sql("SELECT * FROM active_attributes WHERE " + column + "=" + connection.escape(val) + " ORDER BY ai_id ASC", result => {
+                 res(result);
+             });
+        }); 
+    }
+    
+    async function twoColumnQueryGeneric(column, val, column2, val2) {
+        // make sure column is valid
+        if(!validateAttributeColumnName(column)) return [];
+        if(!validateAttributeColumnName(column2)) return [];
+        // query attribute
+        return new Promise(res => {
+             sql("SELECT * FROM active_attributes WHERE " + column + "=" + connection.escape(val) + " AND " + column2 + "=" + connection.escape(val2) + " ORDER BY ai_id ASC", result => {
+                 res(result);
+             });
+        }); 
+    }
+    
+    
+    /**
     Attribute Query for Player
     queries an attribute for a specific player
     **/
@@ -205,7 +238,6 @@ module.exports = function() {
              });
         }); 
     }
-    
     /**
     Attribute Deletion for Player
     delets an attribute for a specific player
