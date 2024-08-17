@@ -244,14 +244,14 @@ module.exports = function() {
                 exp = new RegExp("^Attribute: has " + targetType + "$", "g");
                 fd = exp.exec(restrictions[rest]);
                 if(fd) {
-                    parsedRestrictions.push({ type: "attribute", subtype: "has", target: "@Self", attribute: ttpp(fd[1], "attribute") });
+                    parsedRestrictions.push({ type: "attribute", subtype: "has", target: "@Self[player]", attribute: ttpp(fd[1], "attribute") });
                     restFound = true;
                 }
                 // self lacks attribute
                 exp = new RegExp("^Attribute: lacks " + targetType + "$", "g");
                 fd = exp.exec(restrictions[rest]);
                 if(fd) {
-                    parsedRestrictions.push({ type: "attribute", subtype: "lacks", target: "@Self", attribute: ttpp(fd[1], "attribute") });
+                    parsedRestrictions.push({ type: "attribute", subtype: "lacks", target: "@Self[player]", attribute: ttpp(fd[1], "attribute") });
                     restFound = true;
                 }
                 // self has attribute
@@ -463,7 +463,7 @@ module.exports = function() {
             exp = new RegExp("^Protect " + targetType + " from `" + defenseAttackSubtypes + "` through " + defenseSubtypes + " during " + defensePhases + attrDuration + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "protecting", subtype: lc(fd[3]), target: ttpp(fd[1]), defense_from_type: rblc(fd[2]), defense_from_target: "@All", defense_during: fd[fd.length-2], duration: dd(fd[fd.length-1], "permanent") };
+                ability = { type: "protecting", subtype: lc(fd[3]), target: ttpp(fd[1]), defense_from_type: rblc(fd[2]), defense_from_target: "@All[player]", defense_during: fd[fd.length-2], duration: dd(fd[fd.length-1], "permanent") };
                 if(ability.subtype.substr(0,7)  == "absence") {
                     ability.subtype = "absence";
                     ability.absence_at = fd[4];
@@ -473,7 +473,7 @@ module.exports = function() {
             exp = new RegExp("^Protect " + targetType + " from `" + defenseAttackSubtypes + "` through " + defenseSubtypes + attrDuration + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "protecting", subtype: lc(fd[3]), target: ttpp(fd[1]), defense_from_type: rblc(fd[2]), defense_from_target: "@All", defense_during: "all", duration: dd(fd[fd.length-1], "permanent") };
+                ability = { type: "protecting", subtype: lc(fd[3]), target: ttpp(fd[1]), defense_from_type: rblc(fd[2]), defense_from_target: "@All[player]", defense_during: "all", duration: dd(fd[fd.length-1], "permanent") };
                 if(ability.subtype.substr(0,7)  == "absence") {
                     ability.subtype = "absence";
                     ability.absence_at = fd[4];
@@ -509,7 +509,7 @@ module.exports = function() {
             exp = new RegExp("^Redirect `" + redirectSubtype + "` to " + targetType + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "redirecting", subtype: fd[1], target: ttpp(fd[2]), source: "@All" };
+                ability = { type: "redirecting", subtype: fd[1], target: ttpp(fd[2]), source: "@All[player]" };
             }
             // redirect from certain players
             exp = new RegExp("^Redirect `" + redirectSubtype + "` from " + targetType + " to " + targetType + "$", "g");
@@ -554,13 +554,13 @@ module.exports = function() {
             exp = new RegExp("^Join " + groupType + attrDuration + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "joining", subtype: "add", target: "@Self", group: fd[1], membership_type: "member", duration: dd(fd[2], "persistent") };
+                ability = { type: "joining", subtype: "add", target: "@Self[player]", group: fd[1], membership_type: "member", duration: dd(fd[2], "persistent") };
             }
             // joining with specific membership type
             exp = new RegExp("^Join " + groupType + " as `" + joiningSubtype + "`" + attrDuration + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "joining", subtype: "add", target: "@Self", group: fd[1], membership_type: lc(fd[2]), duration: dd(fd[3], "persistent") };
+                ability = { type: "joining", subtype: "add", target: "@Self[player]", group: fd[1], membership_type: lc(fd[2]), duration: dd(fd[3], "persistent") };
             }
             // add somebody else 
             exp = new RegExp("^Add " + targetType + " to " + groupType + attrDuration + "$", "g");
@@ -578,7 +578,7 @@ module.exports = function() {
             exp = new RegExp("^Leave " + groupType + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "joining", subtype: "remove", target: "@Self", group: fd[1] };
+                ability = { type: "joining", subtype: "remove", target: "@Self[player]", group: fd[1] };
             }
             // remove somebody else
             exp = new RegExp("^Remove " + targetType + " from " + groupType + "$", "g");
@@ -700,7 +700,7 @@ module.exports = function() {
             exp = new RegExp("^(Learn|Know) " + targetType + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "announcement", target: "@Self", info: ttpp(fd[2]) };
+                ability = { type: "announcement", target: "@Self[player]", info: ttpp(fd[2]) };
             }
             /** ROLE CHANGE **/
             // role change
@@ -726,7 +726,7 @@ module.exports = function() {
             exp = new RegExp("^Copy " + targetType + attrDuration + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "copying", subtype: "ability", target: ttpp(fd[1]), copy_to: "@Self", duration: dd(fd[2], "permanent") };
+                ability = { type: "copying", subtype: "ability", target: ttpp(fd[1]), copy_to: "@Self[player]", duration: dd(fd[2], "permanent") };
             }
             // copy abilities, target to target2
             exp = new RegExp("^Copy " + targetType + " to " + targetType + attrDuration + "$", "g");
@@ -744,13 +744,13 @@ module.exports = function() {
             exp = new RegExp("^Full Copy " + targetType + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "copying", subtype: "full", target: ttpp(fd[1]), copy_to: "@Self", suppressed: false, duration: dd(fd[2], "permanent") };
+                ability = { type: "copying", subtype: "full", target: ttpp(fd[1]), copy_to: "@Self[player]", suppressed: false, duration: dd(fd[2], "permanent") };
             }
             // full copy, surpressed
             exp = new RegExp("^Full Copy " + targetType + " \\(Suppressed\\)$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "copying", subtype: "full", target: ttpp(fd[1]), copy_to: "@Self", suppressed: true, duration: dd(fd[2], "permanent") };
+                ability = { type: "copying", subtype: "full", target: ttpp(fd[1]), copy_to: "@Self[player]", suppressed: true, duration: dd(fd[2], "permanent") };
             }
             /** CHOICES **/
             
@@ -774,7 +774,7 @@ module.exports = function() {
             exp = new RegExp("^Disband$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "disband", target: "@Self" };
+                ability = { type: "disband", target: "@Self[player]" };
             }
             // disband
             exp = new RegExp("^Disband " + targetType + "$", "g");
@@ -787,31 +787,31 @@ module.exports = function() {
             exp = new RegExp("^Increment Counter$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "counting", subtype: "increment", counter_value: 1, target: "@Self" };
+                ability = { type: "counting", subtype: "increment", counter_value: 1, target: "@Self[player]" };
             }
             // decrement self by 1
             exp = new RegExp("^Decrement Counter$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "counting", subtype: "decrement", counter_value: 1, target: "@Self" };
+                ability = { type: "counting", subtype: "decrement", counter_value: 1, target: "@Self[player]" };
             }
             // increment self by value
             exp = new RegExp("^Increment Counter by " + num + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "counting", subtype: "increment", counter_value: fd[1], target: "@Self" };
+                ability = { type: "counting", subtype: "increment", counter_value: fd[1], target: "@Self[player]" };
             }
             // decrement self by value
             exp = new RegExp("^Decrement Counter by " + num + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "counting", subtype: "decrement", counter_value: fd[1], target: "@Self" };
+                ability = { type: "counting", subtype: "decrement", counter_value: fd[1], target: "@Self[player]" };
             }
             // set counter to value
             exp = new RegExp("^Set Counter to " + num + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "counting", subtype: "set", counter_value: fd[1], target: "@Self" };
+                ability = { type: "counting", subtype: "set", counter_value: fd[1], target: "@Self[player]" };
             }
             // increment self by 1, for target
             exp = new RegExp("^Increment Counter for " + targetType + "$", "g");
@@ -848,7 +848,7 @@ module.exports = function() {
             exp = new RegExp("^Conversation Reset$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "reset", target: "@Self" };
+                ability = { type: "reset", target: "@Self[player]" };
             }
             // conversation reset target
             exp = new RegExp("^Conversation Reset " + targetType + "$", "g");
