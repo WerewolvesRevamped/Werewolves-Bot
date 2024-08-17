@@ -30,12 +30,16 @@ module.exports = function() {
     and returns a list of discord player ids
     **/
     const ID_SELECTOR = /^@id:(\d+)$/;
-    this.parsePlayerSelector = async function(selector, self) {
+    this.parsePlayerSelector = async function(selector, self = null) {
         let selectorTarget = selectorGetTarget(selector);
         /** WIP: Needs to be able to parse much more! **/
         switch(selectorTarget) {
             // base selectors
             case "@self":
+            if(!self) { // if no self is specified, @Self is invalid
+                abilityLog(`❗ **Error:** Used \`@Self\` in invalid context!`);
+                return [ ];
+            }
             return [ self ];
             // all players
             case "@all":
@@ -114,7 +118,7 @@ module.exports = function() {
     this.parseDuration = function(dur) {
         let dur_type = dur.toLowerCase();
         if(dur_type[0] === "~") dur_type = dur_type.substr(1);
-        if(attributesValidDurationTypes.indexOf(dur_type) >= 0) {
+        if(attributesValidDurationTypes.includes(dur_type)) {
             return dur_type;
         } else {
             abilityLog(`❗ **Error:** Invalid duration type \`${mem_type}\`. Defaulted to \`phase\`!`);
@@ -129,7 +133,7 @@ module.exports = function() {
     **/
     this.parseMembershipType = function(mem_type) {
         mem_type = mem_type.toLowerCase();
-        if(["member","owner","visitor"].indexOf(mem_type) >= 0) {
+        if(["member","owner","visitor"].includes(mem_type)) {
             return mem_type;
         } else {
             abilityLog(`❗ **Error:** Invalid membership type \`${mem_type}\`. Defaulted to \`member\`!`);
@@ -144,7 +148,7 @@ module.exports = function() {
     **/
     this.parseDefenseFromType = function(defro_type) {
         defro_type = defro_type.toLowerCase().replace(/ /g,"_").replace(/[^a-z]/g,"");
-        if(["attacks","kills","lynches","attacks_lynches","all"].indexOf(defro_type) >= 0) {
+        if(["attacks","kills","lynches","attacks_lynches","all"].includes(defro_type)) {
             return defro_type;
         } else {
             abilityLog(`❗ **Error:** Invalid defense from type \`${defro_type}\`. Defaulted to \`all\`!`);
@@ -159,7 +163,7 @@ module.exports = function() {
     **/
     this.parsePhaseType = function(phase_type) {
         phase_type = phase_type.toLowerCase();
-        if(["day","night","both"].indexOf(phase_type) >= 0) {
+        if(["day","night","both"].includes(phase_type)) {
             return phase_type;
         } else {
             abilityLog(`❗ **Error:** Invalid phase type \`${phase_type}\`. Defaulted to \`both\`!`);
@@ -174,7 +178,7 @@ module.exports = function() {
     const locations = ["#story_time","#town_square","#tavern","#voting_booth"];
     this.parseLocation = async function(loc, self) {
         if(loc[0] === "#") { // location is a channel 
-            if(locations.indexOf(loc) >= 0) {
+            if(locations.includes(loc)) {
                 return loc;
             } else {
                 abilityLog(`❗ **Error:** Invalid location \`${loc}\`. Defaulted to \`#town_square\`!`);

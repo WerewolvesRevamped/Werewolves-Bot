@@ -116,7 +116,8 @@ module.exports = function() {
                 || (kill_type == "kill" && (attrKillType == "kills"))
                 || (kill_type == "lynches" && (attrKillType == "lynches" || attrKillType == "attacks_lynches"));
             // check if from matches selector
-            let allowed_from = true;
+            let selectorList = await parsePlayerSelector(attrSelector);
+            let allowed_from = selectorList.includes(from);
             // check if phase matches current phase
             let allowed_phase = 
                     attrPhase == "both"
