@@ -83,51 +83,109 @@ module.exports = function() {
     
         
     /**
-    Get top defense of a certain type
+    Get all defenses of a certain type
     **/
-    this.getTopDefense = async function(player_id, type) {
+    this.getAllDefenses = async function(player_id, type) {
         let allDefenses = await queryAttributePlayer(player_id, "attr_type", "defense", "val1", type); // get all defenses of specified type
-        if(allDefenses.length <= 0) return false; // no defenses
-        let topDefense = allDefenses[allDefenses.length - 1]; // get most recent defenses
-        return topDefense;
+        return allDefenses;
     }
     
     /**
-    Get top absence 
+    Get all absences
     **/
-    this.getTopAbsence = async function(player_id) {
+    this.getAllAbsences = async function(player_id) {
         let allAbsences = await queryAttributePlayer(player_id, "attr_type", "absence"); // get all absences
-        if(allAbsences.length <= 0) return false; // no absences
-        let topAbsence = allAbsences[allAbsences.length - 1]; // get most recent absence
-        return topAbsence;
+        return allAbsences;
+    }
+    
+    /**
+    Filter through defenses
+    **/
+    async function filterDefenses(defenses, kill_type, from) {
+        let matchingDefenses = [];
+        // iterate through all conditions
+        for(let i = 0; i < defenses.length; i++) {
+            // get values
+            let attrKillType = defenses[i].val2;
+            let attrSelector = defenses[i].val3;
+            let attrPhase = defenses[i].val4;
+            // check if killing type matches alllowed types
+            let allowed_type =
+                    attrKillType == "all"
+                || (kill_type == "attack" && (attrKillType == "attacks" || attrKillType == "kills" || attrKillType == "attacks_lynches"))
+                || (kill_type == "kill" && (attrKillType == "kills"))
+                || (kill_type == "lynches" && (attrKillType == "lynches" || attrKillType == "attacks_lynches"));
+            // check if from matches selector
+            let allowed_from = true;
+            // check if phase matches current phase
+            let allowed_phase = 
+                    attrPhase == "both"
+                || (isDay() && attrPhase == "day")
+                || (isNight() && attrPhase == "night");
+            // all conditions match
+            if(allowed_type && allowed_from && allowed_phase) {
+                matchingDefenses.push(defenses[i]);
+            } else {
+                console.log("Defense failed: ", allowed_type, allowed_from, allowed_phase);
+            }
+        }
+        // return matching conditions
+        return matchingDefenses;
+    }
+    
+    
+    /**
+    Get top absence
+    **/
+    this.getTopAbsence = async function(player_id, kill_type, from) {
+        // get defenses
+        let defs = await getAllAbsences(player_id);
+        // filter defenses
+        defs = await filterDefenses(defs, kill_type, from);
+        // return defenses
+        if(defs.length > 0) return defs[defs.length - 1];
+        else return false;
+    }
+    
+    /**
+    Get top defense of a certain type
+    **/
+    this.getTopDefense = async function(type, player_id, kill_type, from) {
+        // get defenses
+        let defs = await getAllDefenses(player_id, type);
+        // filter defenses
+        defs = await filterDefenses(defs, kill_type, from);
+        // return defenses
+        if(defs.length > 0) return defs[defs.length - 1];
+        else return false;
     }
     
     /**
     Get top active defense
     **/
-    this.getTopActiveDefense = async function(player_id) {
-        return await getTopDefense(player_id, "active");
+    this.getTopActiveDefense = async function(player_id, kill_type, from) {
+        return await getTopDefense("active", player_id, kill_type, from);
     }
     
     /**
     Get top passive defense
     **/
-    this.getTopPassiveDefense = async function(player_id) {
-        return await getTopDefense(player_id, "passive");
+    this.getTopPassiveDefense = async function(player_id, kill_type, from) {
+        return await getTopDefense("passive", player_id, kill_type, from);
     }
     
     /**
     Get top partial defense
     **/
-    this.getTopPartialDefense = async function(player_id) {
-        return await getTopDefense(player_id, "partial");
+    this.getTopPartialDefense = async function(player_id, kill_type, from) {
+        return await getTopDefense("partial", player_id, kill_type, from);
     }
     
     /**
     Get top recruitment defense
     **/
-    this.getTopRecruitmentDefense = async function(player_id) {
-        return await getTopDefense(player_id, "recruitment");
+    this.getTopRecruitmentDefense = async function(player_id, kill_type, from) {
+        return await getTopDefense("recruitment", player_id, kill_type, from);
     }
     
 

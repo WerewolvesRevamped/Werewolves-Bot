@@ -43,11 +43,11 @@ module.exports = function() {
         for(let i = 0; i < targets.length; i++) {
             // evaluate all applicable defenses in order
             let defense;
-            defense = await getTopAbsence(targets[i]);
-            if(!defense) defense = await getTopActiveDefense(targets[i]);
-            if(!defense) defense = await getTopPassiveDefense(targets[i]);
-            if(!defense) defense = await getTopPartialDefense(targets[i]);
-            if(!defense) defense = await getTopRecruitmentDefense(targets[i]);
+            defense = await getTopAbsence(targets[i], "attack", src_player);
+            if(!defense) defense = await getTopActiveDefense(targets[i], "attack", src_player);
+            if(!defense) defense = await getTopPassiveDefense(targets[i], "attack", src_player);
+            if(!defense) defense = await getTopPartialDefense(targets[i], "attack", src_player);
+            if(!defense) defense = await getTopRecruitmentDefense(targets[i], "attack", src_player);
             if(defense) { // defense successful, log and continue
                 abilityLog(`✅ <@${src_player}> attacked <@${targets[i]}> - failed due to:\`\`\`${JSON.stringify(defense)}\`\`\``);
                 continue;

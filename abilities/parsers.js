@@ -159,11 +159,11 @@ module.exports = function() {
     **/
     this.parsePhaseType = function(phase_type) {
         phase_type = phase_type.toLowerCase();
-        if(["day","night","all"].indexOf(phase_type) >= 0) {
+        if(["day","night","both"].indexOf(phase_type) >= 0) {
             return phase_type;
         } else {
-            abilityLog(`❗ **Error:** Invalid phase type \`${phase_type}\`. Defaulted to \`all\`!`);
-            return "all";
+            abilityLog(`❗ **Error:** Invalid phase type \`${phase_type}\`. Defaulted to \`both\`!`);
+            return "both";
         }
     }
     
