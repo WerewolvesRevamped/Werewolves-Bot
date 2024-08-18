@@ -5,7 +5,7 @@
 
 module.exports = function() {
     
-    /**
+    /** PUBLIC
     Ability: Log
     **/
     this.abilityLogging = async function(pid, src_role, ability, additionalTriggerData) {
