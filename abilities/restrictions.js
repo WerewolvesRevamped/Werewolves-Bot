@@ -14,7 +14,7 @@ module.exports = function() {
     Handle Restrictions
     apply ability restrictions
     **/
-    this.handleRestriction = async function(pid, ability, restriction, prePrompt, target = null, additionalTriggerData = {}) {
+    this.handleRestriction = async function(src_ref, ability, restriction, prePrompt, target = null, additionalTriggerData = {}) {
         switch(restriction.type) {
             // UNKNOWN
             default: 
@@ -58,7 +58,7 @@ module.exports = function() {
                     break;
                     // SUCCESSION - DEFAULT
                     case "default":
-                        let lastPhase = await getLastPase(pid, ability);
+                        let lastPhase = await getLastPase(src_ref, ability);
                         // check if current phase is at least 2 higher than the phase the ability was last used in
                         if(getPhaseAsNumber() >= lastPhase+2) {
                             return true;
@@ -77,9 +77,9 @@ module.exports = function() {
                             return true; // restriciton application not applicable without target
                         }
                         // actual evaluation
-                        let lt = await getLastTarget(pid, ability);
-                        let lastTarget = lt ? await parsePlayerSelector(lt, pid, null, additionalTriggerData) : null;
-                        let targets = await parsePlayerSelector(target, pid, null, additionalTriggerData);
+                        let lt = await getLastTarget(src_ref, ability);
+                        let lastTarget = lt ? await parsePlayerSelector(lt, src_ref, null, additionalTriggerData) : null;
+                        let targets = await parsePlayerSelector(target, src_ref, null, additionalTriggerData);
                         // check if last target is included in the target selector
                         if(!lastTarget || !targets.includes(lastTarget[0])) {
                             return true;
@@ -92,7 +92,7 @@ module.exports = function() {
             break;
             // QUANTITY
             case "quantity":
-                let quantity = await getActionQuantity(pid, ability);
+                let quantity = await getActionQuantity(src_ref, ability);
                 let max_allowed = restriction.quantity;
                 if(quantity < max_allowed) return true;
                 else return false;
@@ -114,14 +114,14 @@ module.exports = function() {
     Get Restriction info
     provides additional footer info for prompts
     **/
-    this.getRestrictionInfo = async function(pid, ability, restriction) {
+    this.getRestrictionInfo = async function(src_ref, ability, restriction) {
         switch(restriction.type) {
             default:
                 return "";
             break;
             // QUANTITY
             case "quantity":
-                let quantity = await getActionQuantity(pid, ability);
+                let quantity = await getActionQuantity(src_ref, ability);
                 if(quantity === -1) quantity = 0;
                 let max_allowed = restriction.quantity;
                 if(quantity < max_allowed) return `${max_allowed - quantity}/${max_allowed} uses left`;
@@ -134,9 +134,9 @@ module.exports = function() {
     /**
     Initialize action quantity to 1
     **/
-    this.initActionData = function(player_id, ability) {
+    this.initActionData = function(src_ref, ability) {
         return new Promise(res => {
-            sql("INSERT INTO action_data (player_id,ability_id,quantity,last_phase) VALUES (" + connection.escape(player_id) + "," + connection.escape(ability.id) + ",0," + getPhaseAsNumber() + ")", result => {
+            sql("INSERT INTO action_data (src_ref,ability_id,quantity,last_phase) VALUES (" + connection.escape(src_ref) + "," + connection.escape(ability.id) + ",0," + getPhaseAsNumber() + ")", result => {
                  res();
             });
         });
@@ -145,9 +145,9 @@ module.exports = function() {
     /**
     Increase action quantity
     **/
-    this.increaseActionQuantity = function(player_id, ability) {
+    this.increaseActionQuantity = function(src_ref, ability) {
         return new Promise(res => {
-            sql("UPDATE action_data SET quantity=quantity+1,last_phase=" + getPhaseAsNumber() + " WHERE player_id= " + connection.escape(player_id) + " AND ability_id=" + connection.escape(ability.id), result => {
+            sql("UPDATE action_data SET quantity=quantity+1,last_phase=" + getPhaseAsNumber() + " WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=" + connection.escape(ability.id), result => {
                  res();
             });
         });
@@ -156,9 +156,9 @@ module.exports = function() {
     /**
     Get action quantity
     **/
-    this.getActionQuantity = function(player_id, ability) {
+    this.getActionQuantity = function(src_ref, ability) {
         return new Promise(res => {
-            sql("SELECT * FROM action_data WHERE player_id= " + connection.escape(player_id) + " AND ability_id=" + connection.escape(ability.id), result => {
+            sql("SELECT * FROM action_data WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=" + connection.escape(ability.id), result => {
                 if(!result[0]) res(-1);
                 else res(result[0].quantity);
             });
@@ -168,9 +168,9 @@ module.exports = function() {
     /**
     Sets the last target
     **/
-    this.setLastTarget = function(player_id, ability, lastTarget) {
+    this.setLastTarget = function(src_ref, ability, lastTarget) {
         return new Promise(res => {
-            sql("UPDATE action_data SET last_target=" + connection.escape(lastTarget) + ",last_phase=" + getPhaseAsNumber() + " WHERE player_id= " + connection.escape(player_id) + " AND ability_id=" + connection.escape(ability.id), result => {
+            sql("UPDATE action_data SET last_target=" + connection.escape(lastTarget) + ",last_phase=" + getPhaseAsNumber() + " WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=" + connection.escape(ability.id), result => {
                  res();
             });
         });
@@ -179,9 +179,9 @@ module.exports = function() {
     /**
     Get last target
     **/
-    this.getLastTarget = function(player_id, ability) {
+    this.getLastTarget = function(src_ref, ability) {
         return new Promise(res => {
-            sql("SELECT * FROM action_data WHERE player_id= " + connection.escape(player_id) + " AND ability_id=" + connection.escape(ability.id), result => {
+            sql("SELECT * FROM action_data WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=" + connection.escape(ability.id), result => {
                 if(!result[0]) res("");
                 else res(result[0].last_target);
             });
@@ -191,9 +191,9 @@ module.exports = function() {
     /**
     Get last used phase
     **/
-    this.getLastPase = function(player_id, ability) {
+    this.getLastPase = function(src_ref, ability) {
         return new Promise(res => {
-            sql("SELECT * FROM action_data WHERE player_id= " + connection.escape(player_id) + " AND ability_id=" + connection.escape(ability.id), result => {
+            sql("SELECT * FROM action_data WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=" + connection.escape(ability.id), result => {
                 if(!result[0]) res(-2);
                 else res(+result[0].last_phase);
             });

@@ -2,7 +2,9 @@
     "investigating.role.1": "Which player would you like to investigate?",
     "disguising.weakly.2": "You may weakly disguise another player. Please specify a player and a role, separated by `;`.",
     "killing.attack.1": "Who do you want to attack?",
-    "targeting.target.1": "Who would you like to target?",
+    "targeting.target.1": "You may submit a new target.",
+    "targeting.target.player": "Who would you like to target?",
+    "targeting.target.role": "Which role would you like to target?",
     "protecting.absence.1": "Who do you want to sleep with?",
     
     "succession.target": "You may not select the same target several times in a row. You may resubmit another target as a reply to the original prompt."

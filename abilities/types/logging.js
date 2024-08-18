@@ -8,7 +8,7 @@ module.exports = function() {
     /** PUBLIC
     Ability: Log
     **/
-    this.abilityLogging = async function(pid, src_role, ability, additionalTriggerData) {
+    this.abilityLogging = async function(src_ref, src_name, ability, additionalTriggerData) {
         let result;
         // check parameters
         if(!ability.selector) {
@@ -17,7 +17,7 @@ module.exports = function() {
         }
         if(!ability.info) ability.info = "";
         // parse parameters
-        let selector = await parsePlayerSelector(ability.selector, pid, additionalTriggerData);
+        let selector = await parsePlayerSelector(ability.selector, src_ref, additionalTriggerData);
         console.log(`Logging ${selector}${ability.info?' as '+ability.info:''}`);
     }
     

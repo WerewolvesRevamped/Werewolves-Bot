@@ -1102,7 +1102,7 @@ module.exports = function() {
     abilityType
     abilitySubtype
     location (locations includes unique locations as well as all players and groups)
-    source (may be any active game element that can execute abilities, additionally annotated)
+    source (may be a group, alignment, attribute, player, poll)
     info (just text)
     list (not annotated)
     **/

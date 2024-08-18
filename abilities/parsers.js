@@ -16,17 +16,17 @@ module.exports = function() {
         switch(selectorType) {
             // PLAYER
             case "player": 
-                return await parsePlayerSelector(selector, self);
+                return { value: await parsePlayerSelector(selector, self), type: "player" };
             // ROLE
             case "role": 
-                return parseRoleSelector(selector);
+                return { value: parseRoleSelector(selector), type: "role" };
             // GROUP
             case "group":
-                return await parseGroupName(selector);
+                return { value: await parseGroupName(selector, self), type: "group" };
             // LOCATION
             case "location":
                 // WIP: all groups are locations but not all locations are groups
-                return await parseGroupName(selector);
+                return { value: await parseGroupName(selector, self), type: "role" };
             // UNKNOWN
             case "attribute":
             case "alignment":
@@ -36,7 +36,7 @@ module.exports = function() {
             case "info":
             default:
                 abilityLog(`❗ **Error:** Invalid selector type \`${selectorType}\`!`);
-                return [];
+                return { value: [], type: "unknown" };
         }
     }
     
@@ -56,6 +56,7 @@ module.exports = function() {
                 abilityLog(`❗ **Error:** Used \`@Self\` in invalid context!`);
                 return [ ];
             }
+            self = srcToValue(self);
             return [ self ];
             // all players
             case "@all":
@@ -135,7 +136,7 @@ module.exports = function() {
         /** WIP: Needs to be able to parse much more! **/
         switch(selectorTarget) {
             default:
-                let parsedRole = parseRole(selector);
+                let parsedRole = parseRole(selectorTarget);
                 if(verifyRole(parsedRole)) {
                     return [ parsedRole ];
                 } else {
@@ -151,9 +152,17 @@ module.exports = function() {
     WIP: DOESNT VALIDATE IF THE GROUP EXISTS
     WIP: DOESNT CONSIDER THE :'ed GROUP NAMES
     **/
-    this.parseGroupName = async function(selector) {
+    this.parseGroupName = async function(selector, self = null) {
         // get target
         let selectorTarget = selectorGetTarget(selector);
+        if(selector === "@self") {
+            if(!self) { // if no self is specified, @Self is invalid
+                abilityLog(`❗ **Error:** Used \`@Self\` in invalid context!`);
+                return null;
+            }
+            self = srcToValue(self);
+            return self; // THIS RETURNS A GROUP ID PROBABLY AND NOT A NAME LIKE BELOW
+        }
         // WIP: weak group parser
         return selectorTarget.replace("#", "").replace(/\-/g, " ").toLowerCase();
     }

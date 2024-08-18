@@ -20,7 +20,7 @@ module.exports = function() {
     /**
     Ability: Joining
     **/
-    this.abilityJoining = async function(pid, src_role, ability, additionalTriggerData) {
+    this.abilityJoining = async function(src_ref, src_name, ability, additionalTriggerData) {
         let result;
         // check parameters
         if(!ability.target || !ability.group) {
@@ -28,7 +28,7 @@ module.exports = function() {
             return "Joining failed! " + abilityError;
         }
         // parse parameters
-        let target = await parsePlayerSelector(ability.target, pid, additionalTriggerData);
+        let target = await parsePlayerSelector(ability.target, src_ref, additionalTriggerData);
         let group_name = await parseGroupName(ability.group);
         // select subtype
         switch(ability.subtype) {
@@ -39,11 +39,11 @@ module.exports = function() {
             case "add":
                 let mem_type = parseMembershipType(ability.membership_type ?? "member");
                 let dur_type = parseDuration(ability.duration ?? "persistent");
-                result = await joiningAdd(src_role, pid, target, group_name, mem_type, dur_type);
+                result = await joiningAdd(src_name, src_ref, target, group_name, mem_type, dur_type);
                 return result;
             break;
             case "remove":
-                result = await joiningRemove(src_role, pid, target, group_name);
+                result = await joiningRemove(src_name, src_ref, target, group_name);
                 return result;
             break;
         }
@@ -53,7 +53,7 @@ module.exports = function() {
     Ability: Joining - Add
     adds a player (or several) to a group
     **/
-    this.joiningAdd = async function(src_role, src_player, targets, group, type, dur_type) {
+    this.joiningAdd = async function(src_name, src_ref, targets, group, type, dur_type) {
         for(let i = 0; i < targets.length; i++) {
             // check if target is already part of the group
             let attrs = await queryAttributePlayer(targets[i], "val1", group);
@@ -65,7 +65,7 @@ module.exports = function() {
                 let newMembership = getMembershipTier(type);
                 if(newMembership > oldMembership) { // new membership is higher than before, upgrade
                     await deleteAttributePlayer(targets[i], "val1", group); // delete old membership
-                    await createGroupMembershipAttribute(src_role, src_player, targets[i], dur_type, group, type); // create new membership
+                    await createGroupMembershipAttribute(src_name, src_ref, targets[i], dur_type, group, type); // create new membership
                     abilityLog(`✅ <@${targets[i]}> promoted ${toTitleCase(group)} membership to \`${toTitleCase(type)}\` for \`${getDurationName(dur_type)}\`.`);
                     if(targets.length === 1) return "Joining succeeded!";
                     // note: upgrading membership may downgrade duration. this is intentional (for simplicity)
@@ -74,7 +74,7 @@ module.exports = function() {
                     if(targets.length === 1) return "Joining failed! " + abilityError;
                 }
             } else { // not part of the group,join
-                await createGroupMembershipAttribute(src_role, src_player, targets[i], dur_type, group, type);
+                await createGroupMembershipAttribute(src_name, src_ref, targets[i], dur_type, group, type);
                 await groupsJoin(targets[i], group);
                 abilityLog(`✅ <@${targets[i]}> joined ${toTitleCase(group)} as \`${toTitleCase(type)}\` for \`${getDurationName(dur_type)}\`.`);
                 if(targets.length === 1) return "Joining succeeded!";
@@ -87,7 +87,7 @@ module.exports = function() {
     Ability: Joining - Remove
     removes a player from a group
     **/
-    this.joiningRemove = async function(src_role, src_player, targets, group) {
+    this.joiningRemove = async function(src_name, src_ref, targets, group) {
         for(let i = 0; i < targets.length; i++) {
             // check if target is already part of the group
             let attrs = await queryAttributePlayer(targets[i], "val1", group);

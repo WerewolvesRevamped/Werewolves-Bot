@@ -8,7 +8,7 @@ module.exports = function() {
     /**
     Ability: Protecting
     **/
-    this.abilityProtecting = async function(pid, src_role, ability, additionalTriggerData) {
+    this.abilityProtecting = async function(src_ref, src_name, ability, additionalTriggerData) {
         let result;
         // check parameters
         if(!ability.target) {
@@ -19,7 +19,7 @@ module.exports = function() {
         let from_type = parseDefenseFromType(ability.defense_from_type ?? "all");
         let from_selector = ability.defense_from_target ?? "@All"; // this selector should be parsed at argument runtime, not now
         let during_phase = parsePhaseType(ability.defense_during ?? "all");
-        let target = await parsePlayerSelector(ability.target, pid, additionalTriggerData);
+        let target = await parsePlayerSelector(ability.target, src_ref, additionalTriggerData);
         let dur_type = parseDuration(ability.duration ?? "permanent");
         // select subtype
         switch(ability.subtype) {
@@ -28,19 +28,19 @@ module.exports = function() {
                 return "Protecting failed! " + abilityError;
             break;
             case "active defense":
-                result = await protectingGeneric(src_role, pid, target, "active", from_type, from_selector, during_phase, dur_type);
+                result = await protectingGeneric(src_name, src_ref, target, "active", from_type, from_selector, during_phase, dur_type);
                 return result;
             break;
             case "passive defense":
-                result = await protectingGeneric(src_role, pid, target, "passive", from_type, from_selector, during_phase, dur_type);
+                result = await protectingGeneric(src_name, src_ref, target, "passive", from_type, from_selector, during_phase, dur_type);
                 return result;
             break;
             case "partial defense":
-                result = await protectingGeneric(src_role, pid, target, "partial", from_type, from_selector, during_phase, dur_type);
+                result = await protectingGeneric(src_name, src_ref, target, "partial", from_type, from_selector, during_phase, dur_type);
                 return result;
             break;
             case "recruitment defense":
-                result = await protectingGeneric(src_role, pid, target, "recruitment", from_type, from_selector, during_phase, dur_type);
+                result = await protectingGeneric(src_name, src_ref, target, "recruitment", from_type, from_selector, during_phase, dur_type);
                 return result;
             break;
             case "absence":
@@ -49,8 +49,8 @@ module.exports = function() {
                     abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
                     return "Absence failed! " + abilityError;
                 }
-                let loc = await parseLocation(ability.absence_at, pid, additionalTriggerData);
-                result = await protectingAbsence(src_role, pid, target, loc, from_type, from_selector, during_phase, dur_type);
+                let loc = await parseLocation(ability.absence_at, src_ref, additionalTriggerData);
+                result = await protectingAbsence(src_name, src_ref, target, loc, from_type, from_selector, during_phase, dur_type);
                 return result;
             break;
         }
@@ -61,9 +61,9 @@ module.exports = function() {
     Ability: Protecting - Active/Passive/Partial/Recruitment
     adds a disguise to a player
     **/
-    this.protectingGeneric = async function(src_role, src_player, targets, def_type, from_type, from_selector, during_phase, dur_type) {
+    this.protectingGeneric = async function(src_name, src_ref, targets, def_type, from_type, from_selector, during_phase, dur_type) {
         for(let i = 0; i < targets.length; i++) {
-            await createDefenseAttribute(src_role, src_player, targets[i], dur_type, def_type, from_type, from_selector, during_phase);
+            await createDefenseAttribute(src_name, src_ref, targets[i], dur_type, def_type, from_type, from_selector, during_phase);
             abilityLog(`✅ <@${targets[i]}> was protected with \`${toTitleCase(def_type)}\` defense for \`${getDurationName(dur_type)}\`.`);
         }
         return "Protecting executed!";
@@ -73,9 +73,9 @@ module.exports = function() {
     Ability: Protecting - Absence
     adds a disguise to a player
     **/
-    this.protectingAbsence = async function(src_role, src_player, targets, loc, from_type, from_selector, during_phase, dur_type) {
+    this.protectingAbsence = async function(src_name, src_ref, targets, loc, from_type, from_selector, during_phase, dur_type) {
         for(let i = 0; i < targets.length; i++) {
-            await createAbsenceAttribute(src_role, src_player, targets[i], dur_type, loc, from_type, from_selector, during_phase);
+            await createAbsenceAttribute(src_name, src_ref, targets[i], dur_type, loc, from_type, from_selector, during_phase);
             abilityLog(`✅ <@${targets[i]}> is absent at \`${loc}\` for \`${getDurationName(dur_type)}\`.`);
         }
         return "Absence registered!";
@@ -128,7 +128,11 @@ module.exports = function() {
                 || (kill_type == "lynches" && (attrKillType == "lynches" || attrKillType == "attacks_lynches"));
             // check if from matches selector
             let selectorList = await parsePlayerSelector(attrSelector);
-            let allowed_from = selectorList.includes(from);
+            let srcVal = srcToValue(from);
+            let srcType = srcToType(from);
+            let allowed_from = 
+                        srcType === "player" && selectorList.includes(srcVal)
+                    || srcVal === "@all";
             // check if phase matches current phase
             let allowed_phase = 
                     attrPhase == "all"

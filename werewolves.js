@@ -767,7 +767,7 @@ client.on('interactionCreate', async interaction => {
             case "delay-cancel": // cancel ability, after delay
                 // turn this message from an action queue message into a prompt
                 let action = await getAction(interaction.message.id);
-                await createPrompt(interaction.message.id, action.player_id, action.src_role, JSON.parse(action.orig_ability), JSON.parse(action.restrictions), JSON.parse(action.additional_trigger_data), action.prompt_type, action.type1, action.type2);
+                await createPrompt(interaction.message.id, action.src_ref, action.src_name, JSON.parse(action.orig_ability), JSON.parse(action.restrictions), JSON.parse(action.additional_trigger_data), action.prompt_type, action.type1, action.type2);
                 // delete from action queue
                 await deleteQueuedAction(interaction.message.id);
                 // update message

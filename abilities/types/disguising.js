@@ -8,7 +8,7 @@ module.exports = function() {
     /**
     Ability: Disguising
     **/
-    this.abilityDisguising = async function(pid, src_role, ability, additionalTriggerData) {
+    this.abilityDisguising = async function(src_ref, src_name, ability, additionalTriggerData) {
         let result;
         // check parameters
         if(!ability.target || !ability.disguise) {
@@ -16,7 +16,7 @@ module.exports = function() {
             return "Disguising failed! " + abilityError;
         }
         // parse parameters
-        let target = await parsePlayerSelector(ability.target, pid, additionalTriggerData);
+        let target = await parsePlayerSelector(ability.target, src_ref, additionalTriggerData);
         let role = parseRoleSelector(ability.disguise);
         let duration = parseDuration(ability.duration ?? "permanent");
         // select subtype
@@ -26,11 +26,11 @@ module.exports = function() {
                 return "Disguising failed! " + abilityError;
             break;
             case "weakly":
-                result = await disguising(src_role, pid, target, role, duration, "weak");
+                result = await disguising(src_name, src_ref, target, role, duration, "weak");
                 return result;
             break;
             case "strongly":
-                result = await disguising(src_role, pid, target, role, duration, "strong");
+                result = await disguising(src_name, src_ref, target, role, duration, "strong");
                 return result;
             break;
         }
@@ -40,15 +40,15 @@ module.exports = function() {
     Ability: Disguising - Weak/Strong
     adds a disguise to a player
     **/
-    this.disguising = async function(src_role, src_player, targets, disguises, duration, strength) {
+    this.disguising = async function(src_name, src_ref, targets, disguises, duration, strength) {
         // check its just a single disguise
         let disguise = disguises[0];
         if(disguises.length != 1) {
-            abilityLog(`❗ **Error:** <@${src_player}> tried to disguise as ${disguises.length} roles!`);  
+            abilityLog(`❗ **Error:** ${srcRefToText(src_ref)} tried to disguise as ${disguises.length} roles!`);  
             return "Disguising failed! " + abilityError;
         }
         for(let i = 0; i < targets.length; i++) {
-            await createDisguiseAttribute(src_role, src_player, targets[i], duration, disguise, strength);
+            await createDisguiseAttribute(src_name, src_ref, targets[i], duration, disguise, strength);
             abilityLog(`✅ <@${targets[i]}> was ${strength === 'weak' ? 'weakly' : 'strongly'} disguised as \`${toTitleCase(disguise)}\` for \`${getDurationName(duration)}\`.`);
         }
         return "Disguising succeeded!";
