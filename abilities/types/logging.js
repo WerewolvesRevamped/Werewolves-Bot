@@ -19,6 +19,7 @@ module.exports = function() {
         // parse parameters
         let selector = await parsePlayerSelector(ability.selector, src_ref, additionalTriggerData);
         console.log(`Logging ${selector}${ability.info?' as '+ability.info:''}`);
+        return `Logging ${selector}${ability.info?' as '+ability.info:''}`;
     }
     
 }

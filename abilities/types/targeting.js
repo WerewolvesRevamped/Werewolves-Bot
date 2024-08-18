@@ -120,7 +120,7 @@ module.exports = function() {
     function getPlayerTarget(player_id) {
         return new Promise(res => {
             sql("SELECT target FROM players WHERE id=" + connection.escape(player_id), result => {
-                res();
+                res(result[0].target);
             });	
         });
     }
@@ -144,7 +144,7 @@ module.exports = function() {
     function getGroupTarget(channel_id) {
         return new Promise(res => {
             sql("SELECT target FROM active_groups WHERE channel_id=" + connection.escape(channel_id), result => {
-                res();
+                res(result[0].target);
             });	
         });
     }

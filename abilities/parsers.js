@@ -61,43 +61,43 @@ module.exports = function() {
             // all players
             case "@all":
             return await getAllLivingIDs();
+            // all players
+            case "@target":
+            let target = await getTarget(self);
+            target = srcToValue(target);
+            return target;
             
             // trigger dependent selectors
             case "@deathtype":
                 if(additionalTriggerData.death_type) {
                     return additionalTriggerData.death_type;
                 } else {
-                    invalidSelector(selectorTarget);
+                    return invalidSelector(selectorTarget);
                 }
-            break;
             case "@killingtype":
                 if(additionalTriggerData.killing_type) {
                     return additionalTriggerData.killing_type;
                 } else {
-                    invalidSelector(selectorTarget);
+                    return invalidSelector(selectorTarget);
                 }
-            break;
             case "@attacker":
                 if(additionalTriggerData.attacker) {
                     return additionalTriggerData.attacker;
                 } else {
-                    invalidSelector(selectorTarget);
+                    return invalidSelector(selectorTarget);
                 }
-            break;
             case "@attacksource":
                 if(additionalTriggerData.attack_source) {
                     return additionalTriggerData.attack_source;
                 } else {
-                    invalidSelector(selectorTarget);
+                    return invalidSelector(selectorTarget);
                 }
-            break;
             case "@this":
                 if(additionalTriggerData.this) {
                     return additionalTriggerData.this;
                 } else {
-                    invalidSelector(selectorTarget);
+                    return invalidSelector(selectorTarget);
                 }
-            break;
             
             // unknown selector
             default:
@@ -105,7 +105,7 @@ module.exports = function() {
                     let id = selectorTarget.match(ID_SELECTOR)[1];
                     return [ id ];
                 } else {
-                    invalidSelector(selectorTarget);
+                    return invalidSelector(selectorTarget);
                 }
         }
     }
