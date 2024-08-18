@@ -26,14 +26,14 @@ module.exports = function() {
     Trigger Handler
     handle a trigger triggering (for everyone)
     **/
-    function triggerHandler(triggerName) {
+    this.triggerHandler = function(triggerName, additionalTriggerData = {}) {
         abilityLog(`🔷 **Trigger:** ${triggerName}`);  
         return new Promise(res => {
             // get all players
             sql("SELECT role,id FROM players WHERE type='player' AND alive=1", async r => {
                 // get their role's data
                 for(let pr of r) {
-                    await triggerHandlerPlayer(pr, triggerName);
+                    await triggerHandlerPlayer(pr, triggerName, additionalTriggerData);
                 }
                 // resolve outer promise
                 res();
@@ -57,8 +57,21 @@ module.exports = function() {
                 // execute all relevant triggers
                 for(const trigger of triggers) {
                     if(trigger.complex) { // WIP: do additional evaluation for complex triggers
-                        // WIP: additional evaluation here
-                        await executeTrigger(pr.id, pr.role, trigger, triggerName, additionalTriggerData);
+                        let param = trigger.trigger_parameter;
+                        switch(triggerName) {
+                            case "On Death Complex":
+                            case "On Killed Complex":
+                                let selector = await parsePlayerSelector(param);
+                                if(selector.includes(additionalTriggerData.this)) {
+                                    await executeTrigger(pr.id, pr.role, trigger, triggerName, additionalTriggerData);
+                                } else {
+                                    abilityLog(`🔴 **Skipped Trigger:** <@${pr.id}> (${toTitleCase(triggerName)}). Failed complex condition \`${param}\`.`);
+                                }
+                            break;
+                            default:
+                                abilityLog(`❗ **Skipped Trigger:** <@${pr.id}> (${toTitleCase(triggerName)}). Unknown complex trigger.`);
+                            break;
+                        }
                     } else { // always execute for normal triggers
                         await executeTrigger(pr.id, pr.role, trigger, triggerName, additionalTriggerData);
                     }

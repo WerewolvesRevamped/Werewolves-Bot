@@ -137,7 +137,7 @@ module.exports = function() {
             // adjust data for complex triggers
             if(triggers.triggers[t].trigger.match(/;/)) {
                 let trsplit = triggers.triggers[t].trigger.split(/;/);
-                triggers.triggers[t].trigger = trsplit[0];
+                triggers.triggers[t].trigger = trsplit[0] + " Complex";
                 triggers.triggers[t].trigger_parameter = trsplit[1];
                 triggers.triggers[t].complex = true;
             }

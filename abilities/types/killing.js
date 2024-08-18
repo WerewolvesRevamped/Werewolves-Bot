@@ -54,8 +54,10 @@ module.exports = function() {
             if(hasDef) continue;
             
             // run the on death trigger
-            await trigger(targets[i], "On Death", { attacker: src_player, death_type: "attack", attack_source: src_role, this: targets[i] }); 
-            await trigger(targets[i], "On Killed", { attacker: src_player, death_type: "attack", attack_source: src_role, this: targets[i] }); 
+            await trigger(targets[i], "On Death", { attacker: src_player, death_type: "attack", attack_source: src_role }); 
+            await trigger(targets[i], "On Killed", { attacker: src_player, death_type: "attack", attack_source: src_role }); 
+            await triggerHandler("On Death Complex", { attacker: src_player, death_type: "attack", attack_source: src_role, this: targets[i] }); 
+            await triggerHandler("On Killed Complex", { attacker: src_player, death_type: "attack", attack_source: src_role, this: targets[i] }); 
             
             // execute the kill
             await killPlayer(targets[i]);
@@ -74,8 +76,10 @@ module.exports = function() {
         let success = false;
         for(let i = 0; i < targets.length; i++) {
             // run the on death trigger
-            await trigger(targets[i], "On Death", { attacker: src_player, death_type: "true kill", attack_source: src_role, this: targets[i] }); 
-            await trigger(targets[i], "On Killed", { attacker: src_player, death_type: "true kill", attack_source: src_role, this: targets[i] }); 
+            await trigger(targets[i], "On Death", { attacker: src_player, death_type: "true kill", attack_source: src_role }); 
+            await trigger(targets[i], "On Killed", { attacker: src_player, death_type: "true kill", attack_source: src_role }); 
+            await triggerHandler("On Death Complex", { attacker: src_player, death_type: "true kill", attack_source: src_role, this: targets[i] }); 
+            await triggerHandler("On Killed Complex", { attacker: src_player, death_type: "true kill", attack_source: src_role, this: targets[i] }); 
             // execute the kill
             await killPlayer(targets[i]);
             abilityLog(`✅ <@${src_player}> true killed <@${targets[i]}>.`);
