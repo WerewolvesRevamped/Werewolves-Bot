@@ -13,7 +13,7 @@ module.exports = function() {
         // check parameters
         if(!ability.target || !ability.disguise) {
             abilityLog(`❗ **Error:** Missing arguments for type \`${ability.type}\`!`);
-            return "Disguising failed! " + abilityError;
+            return { msg: "Disguising failed! " + abilityError, success: false };
         }
         // parse parameters
         let target = await parsePlayerSelector(ability.target, src_ref, additionalTriggerData);
@@ -23,7 +23,7 @@ module.exports = function() {
         switch(ability.subtype) {
             default:
                 abilityLog(`❗ **Error:** Unknown ability subtype \`${ability.subtype}\`!`);
-                return "Disguising failed! " + abilityError;
+                return { msg: "Disguising failed! " + abilityError, success: false };
             break;
             case "weakly":
                 result = await disguising(src_name, src_ref, target, role, duration, "weak");
@@ -45,13 +45,13 @@ module.exports = function() {
         let disguise = disguises[0];
         if(disguises.length != 1) {
             abilityLog(`❗ **Error:** ${srcRefToText(src_ref)} tried to disguise as ${disguises.length} roles!`);  
-            return "Disguising failed! " + abilityError;
+            return { msg: "Disguising failed! " + abilityError, success: false };
         }
         for(let i = 0; i < targets.length; i++) {
             await createDisguiseAttribute(src_name, src_ref, targets[i], duration, disguise, strength);
             abilityLog(`✅ <@${targets[i]}> was ${strength === 'weak' ? 'weakly' : 'strongly'} disguised as \`${toTitleCase(disguise)}\` for \`${getDurationName(duration)}\`.`);
         }
-        return "Disguising succeeded!";
+        return { msg: "Disguising succeeded!", success: true };
     }
     
     /**

@@ -115,7 +115,7 @@ module.exports = function() {
                         abilityLog(`❗ **Error:** Cannot use \`${triggerName}\` trigger without prompt!`);
                     } else {
                         let feedback = await executeAbility(src_ref, src_name, ability, restrictions, additionalTriggerData);
-                        if(feedback) abilitySend(src_ref, feedback);
+                        if(feedback.msg) abilitySend(src_ref, feedback.msg);
                     }
                 break;
                 // single prompt (@Selection)

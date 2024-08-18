@@ -13,7 +13,7 @@ module.exports = function() {
         // check parameters
         if(!ability.target) {
             abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
-            return "Investigation failed! " + abilityError;
+            return { msg: "Investigation failed! " + abilityError, success: false };
         }
         // parse parameters
         let target = await parsePlayerSelector(ability.target, src_ref, additionalTriggerData);
@@ -21,7 +21,7 @@ module.exports = function() {
         switch(ability.subtype) {
             default:
                 abilityLog(`❗ **Error:** Unknown ability subtype \`${ability.subtype}\`!`);
-                return "Investigation failed! " + abilityError;
+                return { msg: "Investigation failed! " + abilityError, success: false };
             break;
             case "role":
                 result = await investigatingRole(src_name, src_ref, target, ability.affected_by_wd ?? false, ability.affected_by_sd ?? false);
@@ -45,11 +45,11 @@ module.exports = function() {
         // can only investigate exactly one player
         if(targets.length > 1) {
             abilityLog(`❗ **Error:** ${srcRefToText(src_ref)} tried to investigate more than one player at a time!`);  
-            return "Investigation failed! " + abilityError;
+            return { msg: "Investigation failed! " + abilityError, success: false };
         }
         if(targets.length < 1) {
             abilityLog(`❗ **Error:** ${srcRefToText(src_ref)} tried to investigate nobody!`);  
-            return "Investigation failed! " + abilityError;
+            return { msg: "Investigation failed! " + abilityError, success: false };
         }
     }
     
@@ -65,7 +65,7 @@ module.exports = function() {
         let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);
         // feedback
         abilityLog(`✅ ${srcRefToText(src_ref)} investigated <@${targets[0]}>'s role as \`${toTitleCase(rdata.role.role)}\`${rdata.type?' ('+rdata.type+')':''}.`);
-        return `Investigated <@${targets[0]}>'s role: \`${toTitleCase(rdata.role.role)}\``;
+        return { msg: `Investigated <@${targets[0]}>'s role: \`${toTitleCase(rdata.role.role)}\``, success: true };
     }
     
     /**
@@ -80,7 +80,7 @@ module.exports = function() {
         let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);
         // feedback
         abilityLog(`✅ ${srcRefToText(src_ref)} investigated <@${targets[0]}>'s class as \`${toTitleCase(rdata.role.class)}\`${rdata.type?' ('+rdata.type+')':''}.`);
-        return `Investigated <@${targets[0]}>'s class: \`${toTitleCase(rdata.role.class)}\``;
+        return { msg: `Investigated <@${targets[0]}>'s class: \`${toTitleCase(rdata.role.class)}\``, success: true };
     }
     
     /**
@@ -95,7 +95,7 @@ module.exports = function() {
         let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);
         // feedback
         abilityLog(`✅ ${srcRefToText(src_ref)} investigated <@${targets[0]}>'s category as \`${toTitleCase(rdata.role.category)}\`${rdata.type?' ('+rdata.type+')':''}.`);
-        return `Investigated <@${targets[0]}>'s category: \`${toTitleCase(rdata.role.category)}\``;
+        return { msg: `Investigated <@${targets[0]}>'s category: \`${toTitleCase(rdata.role.category)}\``, success: true };
     }
     
     /**

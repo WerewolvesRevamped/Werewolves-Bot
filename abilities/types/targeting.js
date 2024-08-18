@@ -14,13 +14,13 @@ module.exports = function() {
         switch(ability.subtype) {
             default:
                 abilityLog(`❗ **Error:** Unknown ability subtype \`${ability.subtype}\`!`);
-                return "Targeting failed! " + abilityError;
+                return { msg: "Targeting failed! " + abilityError, success: false };
             break;
             case "target":
                 // check parameters
                 if(!ability.target) {
                     abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
-                    return "Targeting failed! " + abilityError;
+                    return { msg: "Targeting failed! " + abilityError, success: false };
                 }
                 // parse parameters
                 let targetParsed = await parseSelector(ability.target, src_ref, additionalTriggerData);
@@ -41,11 +41,11 @@ module.exports = function() {
         // can only target exactly one target
         if(targets.length > 1) {
             abilityLog(`❗ **Error:** ${srcRefToText(src_ref)} tried to target more than one target at a time!`);  
-            return "Targeting failed! " + abilityError;
+            return { msg: "Targeting failed! " + abilityError, success: false };
         }
         if(targets.length < 1) {
             abilityLog(`❗ **Error:** ${srcRefToText(src_ref)} tried to target nobody!`);  
-            return "Targeting failed! " + abilityError;
+            return { msg: "Targeting failed! " + abilityError, success: false };
         }
         
         // update target
@@ -55,7 +55,7 @@ module.exports = function() {
         abilityLog(`✅ ${srcRefToText(src_ref)} targeted ${srcRefToText(targetType+':'+target)}.`);
         
         // feedback
-        return "Target updated!";
+        return { msg: "Targeting updated!", success: true };
     }
     
     /** PRIVATE
@@ -68,7 +68,7 @@ module.exports = function() {
         abilityLog(`✅ ${srcRefToText(src_ref)} untargeted.`);
         
         // feedback
-        return "Target cleared!";
+        return { msg: "Targeting cleared!", success: true };
     }
     
     /** PUBLIC

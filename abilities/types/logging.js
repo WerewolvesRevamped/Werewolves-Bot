@@ -13,13 +13,13 @@ module.exports = function() {
         // check parameters
         if(!ability.selector) {
             abilityLog(`❗ **Error:** Missing arguments for type \`${ability.type}\`!`);
-            return "Logging failed! " + abilityError;
+            return { msg: "Logging failed! " + abilityError, success: false };
         }
         if(!ability.info) ability.info = "";
         // parse parameters
         let selector = await parsePlayerSelector(ability.selector, src_ref, additionalTriggerData);
         console.log(`Logging ${selector}${ability.info?' as '+ability.info:''}`);
-        return `Logging ${selector}${ability.info?' as '+ability.info:''}`;
+        return { msg: `Logging ${selector}${ability.info?' as '+ability.info:''}`, success: true };
     }
     
 }

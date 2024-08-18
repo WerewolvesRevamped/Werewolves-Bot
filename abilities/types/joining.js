@@ -25,7 +25,7 @@ module.exports = function() {
         // check parameters
         if(!ability.target || !ability.group) {
             abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
-            return "Joining failed! " + abilityError;
+            return { msg: "Joining failed! " + abilityError, success: false };
         }
         // parse parameters
         let target = await parsePlayerSelector(ability.target, src_ref, additionalTriggerData);
@@ -34,7 +34,7 @@ module.exports = function() {
         switch(ability.subtype) {
             default:
                 abilityLog(`❗ **Error:** Unknown ability subtype \`${ability.subtype}\`!`);
-                return "Joining failed! " + abilityError;
+                return { msg: "Joining failed! " + abilityError, success: false };
             break;
             case "add":
                 let mem_type = parseMembershipType(ability.membership_type ?? "member");
@@ -59,7 +59,7 @@ module.exports = function() {
             let attrs = await queryAttributePlayer(targets[i], "val1", group);
             if(attrs.length > 1) { // already part of the group, skip
                 abilityLog(`❎ <@${targets[i]}> could not join ${toTitleCase(group)} - multiple memberships found.`);  
-                if(targets.length === 1) return "Joining failed! " + abilityError;
+                if(targets.length === 1) return { msg: "Joining failed! " + abilityFailure, success: false };
             } if(attrs.length == 1) { // already part of the group
                 let oldMembership = getMembershipTier(attrs[0].val2)
                 let newMembership = getMembershipTier(type);
@@ -67,20 +67,20 @@ module.exports = function() {
                     await deleteAttributePlayer(targets[i], "val1", group); // delete old membership
                     await createGroupMembershipAttribute(src_name, src_ref, targets[i], dur_type, group, type); // create new membership
                     abilityLog(`✅ <@${targets[i]}> promoted ${toTitleCase(group)} membership to \`${toTitleCase(type)}\` for \`${getDurationName(dur_type)}\`.`);
-                    if(targets.length === 1) return "Joining succeeded!";
+                    if(targets.length === 1) return { msg: "Joining succeeded!", success: true };
                     // note: upgrading membership may downgrade duration. this is intentional (for simplicity)
                 } else { // old tier is higher or equal, skip
                     abilityLog(`❎ <@${targets[i]}> could not join ${toTitleCase(group)} as \`${toTitleCase(type)}\` - equal or higher membership present.`);  
-                    if(targets.length === 1) return "Joining failed! " + abilityError;
+                    if(targets.length === 1) return { msg: "Joining failed! " + abilityFailure, success: false };
                 }
             } else { // not part of the group,join
                 await createGroupMembershipAttribute(src_name, src_ref, targets[i], dur_type, group, type);
                 await groupsJoin(targets[i], group);
                 abilityLog(`✅ <@${targets[i]}> joined ${toTitleCase(group)} as \`${toTitleCase(type)}\` for \`${getDurationName(dur_type)}\`.`);
-                if(targets.length === 1) return "Joining succeeded!";
+                if(targets.length === 1) return { msg: "Joining succeeded!", success: true };
             }
         }
-        return "Joinings executed!";
+        return { msg: "Joinings executed!", success: null };
     }
     
     /**
@@ -95,13 +95,13 @@ module.exports = function() {
                 await deleteAttributePlayer(targets[i], "val1", group); // delete old membership(s)
                 groupsSend(group, `<@${targets[i]}> has left $name.`);
                 abilityLog(`✅ <@${targets[i]}> was removed from ${toTitleCase(group)}.`);
-                if(targets.length === 1) return "Joining succeeded!";
+                if(targets.length === 1) return { msg: "Joining succeeded!", success: true };
             } else { // no membership, cannot be removed
                 abilityLog(`❎ <@${targets[i]}> could not be removed from ${toTitleCase(group)} - no membership present.`);  
-                if(targets.length === 1) return "Joining failed! " + abilityError;
+                if(targets.length === 1) return { msg: "Joining failed! " + abilityFailure, success: false };
             }
         }
-        return "Joinings executed!";
+        return { msg: "Joinings executed!", success: null };
     }
     
     /**

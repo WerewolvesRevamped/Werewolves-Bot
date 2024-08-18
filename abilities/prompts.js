@@ -258,7 +258,7 @@ module.exports = function() {
             // execute the ability
             let feedback = await executeAbility(curAction.src_ref, curAction.src_name, ability, restrictions, additionalTriggerData);
             // send feedback
-            if(feedback) abilitySend(curAction.src_ref, feedback, EMBED_GREEN);
+            if(feedback.msg) abilitySend(curAction.src_ref, feedback.msg, EMBED_GREEN);
             // confirm automatic execution
             confirmAutoExecution(curAction.src_ref, curAction.message_id);
         }

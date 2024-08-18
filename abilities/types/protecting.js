@@ -13,7 +13,7 @@ module.exports = function() {
         // check parameters
         if(!ability.target) {
             abilityLog(`❗ **Error:** Missing arguments for type \`${ability.type}\`!`);
-            return "Protecting failed! " + abilityError;
+            return { msg: "Protecting failed! " + abilityError, success: false };
         }
         // parse parameters
         let from_type = parseDefenseFromType(ability.defense_from_type ?? "all");
@@ -25,7 +25,7 @@ module.exports = function() {
         switch(ability.subtype) {
             default:
                 abilityLog(`❗ **Error:** Unknown ability subtype \`${ability.subtype}\`!`);
-                return "Protecting failed! " + abilityError;
+                return { msg: "Protecting failed! " + abilityError, success: false };
             break;
             case "active defense":
                 result = await protectingGeneric(src_name, src_ref, target, "active", from_type, from_selector, during_phase, dur_type);
@@ -47,7 +47,7 @@ module.exports = function() {
                 // check parameters
                 if(!ability.absence_at) {
                     abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
-                    return "Absence failed! " + abilityError;
+                    return { msg: "Absence failed! " + abilityError, success: false };
                 }
                 let loc = await parseLocation(ability.absence_at, src_ref, additionalTriggerData);
                 result = await protectingAbsence(src_name, src_ref, target, loc, from_type, from_selector, during_phase, dur_type);
@@ -66,7 +66,7 @@ module.exports = function() {
             await createDefenseAttribute(src_name, src_ref, targets[i], dur_type, def_type, from_type, from_selector, during_phase);
             abilityLog(`✅ <@${targets[i]}> was protected with \`${toTitleCase(def_type)}\` defense for \`${getDurationName(dur_type)}\`.`);
         }
-        return "Protecting executed!";
+        return { msg: "Protecting executed!", success: true };
     }
     
     /**
@@ -78,7 +78,7 @@ module.exports = function() {
             await createAbsenceAttribute(src_name, src_ref, targets[i], dur_type, loc, from_type, from_selector, during_phase);
             abilityLog(`✅ <@${targets[i]}> is absent at \`${loc}\` for \`${getDurationName(dur_type)}\`.`);
         }
-        return "Absence registered!";
+        return { msg: "Absence registered!", success: true };
     }
     
         

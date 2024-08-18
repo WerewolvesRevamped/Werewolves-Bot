@@ -13,7 +13,7 @@ module.exports = function() {
         // check parameters
         if(!ability.target) {
             abilityLog(`❗ **Error:** Missing arguments for type \`${ability.type}\`!`);
-            return "Killing failed! " + abilityError;
+            return { msg: "Killing failed! " + abilityError, success: false };
         }
         // parse parameters
         let targets = await parsePlayerSelector(ability.target, src_ref, additionalTriggerData);
@@ -21,7 +21,7 @@ module.exports = function() {
         switch(ability.subtype) {
             default:
                 abilityLog(`❗ **Error:** Unknown ability subtype \`${ability.subtype}\`!`);
-                return "Killing failed! " + abilityError;
+                return { msg: "Killing failed! " + abilityError, success: false };
             break;
             case "attack":
                 result = await killingAttack(src_name, src_ref, targets);
@@ -67,7 +67,7 @@ module.exports = function() {
             success = true; // if attack succeeds set to true
         }
         
-        return success ? "Attack successful!" : "Attack failed!"; // if at least one player dies its a success
+        return success ? { msg: "Attack successful!", success: true } : { msg: "Attack failed!", success: false }; // if at least one player dies its a success
     }
     
     /** PRIVATE
@@ -97,7 +97,7 @@ module.exports = function() {
             success = true; // if attack succeeds set to true
         }
         
-        return success ? "Lynch successful!" : "Lynch failed!"; // if at least one player dies its a success
+        return success ? { msg: "Lynch successful!", success: true } : { msg: "Lynch failed!", success: false }; // if at least one player dies its a success
     }
     
     /** PRIVATE
@@ -125,7 +125,7 @@ module.exports = function() {
             success = true; // if attack succeeds set to true
         }
         
-        return success ? "Kill successful!" : "Kill failed!"; // if at least one player dies its a success
+        return success ? { msg: "Kill successful!", success: true } : { msg: "Kill failed!", success: false }; // if at least one player dies its a success
     }
     
     /** PRIVATE
@@ -147,7 +147,7 @@ module.exports = function() {
             abilityLog(`✅ ${srcRefToText(src_ref)} true killed <@${targets[i]}>.`);
             success = true; // True Kill always succeeds
         }
-        return success ? "True Kill successful!" : "True Kill failed!"; // if at least one player dies its a success
+        return success ? { msg: "True Kill successful!", success: true } : { msg: "True Kill failed!", success: false }; // if at least one player dies its a success
     }
     
     /** PRIVATE

@@ -19,6 +19,7 @@ require("./types/targeting.js")();
 module.exports = function() {
     
     this.abilityError = "This is likely caused by an error. Please contact a Host.";
+    this.abilityFailure = "If you believe this to be a mistake, please contact a Host.";
     
     /**
     Execute Ability
@@ -48,6 +49,7 @@ module.exports = function() {
         switch(ability.type) {
             default:
                 abilityLog(`❗ **Error:** Unknown ability type \`${ability.type}\`!`);
+                return { msg: "", success: false };
             break;
             case "joining":
                 return await abilityJoining(src_ref, src_name, ability, additionalTriggerData)
@@ -87,7 +89,8 @@ module.exports = function() {
     **/
     this.cmdExecute = async function(message, ability) {
         let feedback = await executeAbility("player:" + message.author.id, "role:host", JSON.parse(ability));
-        message.channel.send(basicEmbed(feedback, EMBED_GREEN));
+        if(feedback.msg) message.channel.send(basicEmbed(feedback.msg, EMBED_GREEN));
+        else if(feedback.success) message.channel.send(basicEmbed(feedback.success, EMBED_GREEN));
     }
     
     /**
