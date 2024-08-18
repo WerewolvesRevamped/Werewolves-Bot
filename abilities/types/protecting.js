@@ -8,7 +8,7 @@ module.exports = function() {
     /**
     Ability: Protecting
     **/
-    this.abilityProtecting = async function(pid, src_role, ability) {
+    this.abilityProtecting = async function(pid, src_role, ability, additionalTriggerData) {
         let result;
         // check parameters
         if(!ability.target) {
@@ -19,7 +19,7 @@ module.exports = function() {
         let from_type = parseDefenseFromType(ability.defense_from_type ?? "all");
         let from_selector = ability.defense_from_target ?? "@All"; // this selector should be parsed at argument runtime, not now
         let during_phase = parsePhaseType(ability.defense_during ?? "all");
-        let target = await parsePlayerSelector(ability.target, pid);
+        let target = await parsePlayerSelector(ability.target, pid, additionalTriggerData);
         let dur_type = parseDuration(ability.duration ?? "permanent");
         // select subtype
         switch(ability.subtype) {
@@ -49,7 +49,7 @@ module.exports = function() {
                     abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
                     return "Absence failed! " + abilityError;
                 }
-                let loc = await parseLocation(ability.absence_at, pid);
+                let loc = await parseLocation(ability.absence_at, pid, additionalTriggerData);
                 result = await protectingAbsence(src_role, pid, target, loc, from_type, from_selector, during_phase, dur_type);
                 return result;
             break;

@@ -8,7 +8,7 @@ module.exports = function() {
     /**
     Ability: Investigating
     **/
-    this.abilityInvestigating = async function(pid, src_role, ability) {
+    this.abilityInvestigating = async function(pid, src_role, ability, additionalTriggerData) {
         let result;
         // check parameters
         if(!ability.target) {
@@ -16,7 +16,7 @@ module.exports = function() {
             return "Investigation failed! " + abilityError;
         }
         // parse parameters
-        let target = await parsePlayerSelector(ability.target, pid);
+        let target = await parsePlayerSelector(ability.target, pid, additionalTriggerData);
         // select subtype
         switch(ability.subtype) {
             default:

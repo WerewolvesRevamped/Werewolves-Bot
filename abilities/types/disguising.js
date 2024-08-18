@@ -8,7 +8,7 @@ module.exports = function() {
     /**
     Ability: Disguising
     **/
-    this.abilityDisguising = async function(pid, src_role, ability) {
+    this.abilityDisguising = async function(pid, src_role, ability, additionalTriggerData) {
         let result;
         // check parameters
         if(!ability.target || !ability.disguise) {
@@ -16,7 +16,7 @@ module.exports = function() {
             return "Disguising failed! " + abilityError;
         }
         // parse parameters
-        let target = await parsePlayerSelector(ability.target, pid);
+        let target = await parsePlayerSelector(ability.target, pid, additionalTriggerData);
         let role = parseRoleSelector(ability.disguise);
         let duration = parseDuration(ability.duration ?? "permanent");
         // select subtype

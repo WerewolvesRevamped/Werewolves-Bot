@@ -20,7 +20,7 @@ module.exports = function() {
     /**
     Ability: Joining
     **/
-    this.abilityJoining = async function(pid, src_role, ability) {
+    this.abilityJoining = async function(pid, src_role, ability, additionalTriggerData) {
         let result;
         // check parameters
         if(!ability.target || !ability.group) {
@@ -28,7 +28,7 @@ module.exports = function() {
             return "Joining failed! " + abilityError;
         }
         // parse parameters
-        let target = await parsePlayerSelector(ability.target, pid);
+        let target = await parsePlayerSelector(ability.target, pid, additionalTriggerData);
         let group_name = parseGroupName(ability.group);
         // select subtype
         switch(ability.subtype) {

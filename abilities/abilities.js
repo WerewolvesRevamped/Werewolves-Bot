@@ -8,11 +8,12 @@ require("./prompts.js")();
 require("./restrictions.js")();
 
 /** Ability Types **/
-require("./joining.js")();
-require("./investigating.js")();
-require("./disguising.js")();
-require("./killing.js")();
-require("./protecting.js")();
+require("./types/joining.js")();
+require("./types/investigating.js")();
+require("./types/disguising.js")();
+require("./types/killing.js")();
+require("./types/protecting.js")();
+require("./types/log.js")();
 
 module.exports = function() {
     
@@ -22,19 +23,29 @@ module.exports = function() {
     Execute Ability
     executes an ability
     **/
-    this.executeAbility = async function(pid, src_role, ability, restrictions) {
+    this.executeAbility = async function(pid, src_role, ability, restrictions = [], additionalTriggerData = {}) {
+        // find src role type
+        let parsedRole = parseRole(src_role);
+        if(verifyRole(parsedRole)) {
+            src_role = "role:" + parsedRole;
+        } else {
+            src_role = "unknown:" + src_role;
+        }
         // check restrictions again
         for(let i = 0; i < restrictions.length; i++) {
-            let passed = await handleRestriction(pid, ability, restrictions[i], RESTR_POST);
+            let passed = await handleRestriction(pid, ability, restrictions[i], RESTR_POST, null, additionalTriggerData);
             if(!passed) {
                 abilityLog(`🔴 **Skipped Ability:** <@${pid}> (${toTitleCase(src_role)}). Failed restriction \`${restrictions[i].type}\`.`);
                 return;
             }
         }
         // get/increase quantity
-        let quantity = await getActionQuantity(pid, ability);
-        if(quantity === 0) await initActionData(pid, ability);
-        else await increaseActionQuantity(pid, ability);
+        let quantity = 0;
+        if(ability.id) {
+            quantity = await getActionQuantity(pid, ability);
+            if(quantity === -1) await initActionData(pid, ability);
+            await increaseActionQuantity(pid, ability);
+        }
         // execute ability
         abilityLog(`🟢 **Executing Ability:** <@${pid}> (${toTitleCase(src_role)}) \`\`\`${JSON.stringify(ability)}\`\`\``);
         switch(ability.type) {
@@ -42,19 +53,22 @@ module.exports = function() {
                 abilityLog(`❗ **Error:** Unknown ability type \`${ability.type}\`!`);
             break;
             case "joining":
-                return await abilityJoining(pid, src_role, ability)
+                return await abilityJoining(pid, src_role, ability, additionalTriggerData)
             break;
             case "investigating":
-                return await abilityInvestigating(pid, src_role, ability)
+                return await abilityInvestigating(pid, src_role, ability, additionalTriggerData)
             break;
             case "disguising":
-                return await abilityDisguising(pid, src_role, ability)
+                return await abilityDisguising(pid, src_role, ability, additionalTriggerData)
             break;
             case "killing":
-                return await abilityKilling(pid, src_role, ability)
+                return await abilityKilling(pid, src_role, ability, additionalTriggerData)
             break;
             case "protecting":
-                return await abilityProtecting(pid, src_role, ability)
+                return await abilityProtecting(pid, src_role, ability, additionalTriggerData)
+            break;
+            case "log":
+                return await abilityLogging(pid, src_role, ability, additionalTriggerData)
             break;
         }
     }

@@ -42,9 +42,9 @@ module.exports = function() {
     Create Prompt
     creates a new prompt in the prompt table
     **/
-    this.createPrompt = async function(mid, pid, src_role, ability, restrictions, prompt_type, type1, type2 = "none") {
+    this.createPrompt = async function(mid, pid, src_role, ability, restrictions, additionalTriggerData, prompt_type, type1, type2 = "none") {
         await new Promise(res => {
-            sql("INSERT INTO prompts (message_id,player_id,src_role,ability,type1,type2,prompt_type,restrictions) VALUES (" + connection.escape(mid) + "," + connection.escape(pid) + "," + connection.escape(src_role) + "," + connection.escape(JSON.stringify(ability)) + "," + connection.escape(type1.toLowerCase()) + "," + connection.escape(type2.toLowerCase()) + "," + connection.escape(prompt_type) + "," + connection.escape(JSON.stringify(restrictions)) + ")", result => {
+            sql("INSERT INTO prompts (message_id,player_id,src_role,ability,type1,type2,prompt_type,restrictions,additional_trigger_data) VALUES (" + connection.escape(mid) + "," + connection.escape(pid) + "," + connection.escape(src_role) + "," + connection.escape(JSON.stringify(ability)) + "," + connection.escape(type1.toLowerCase()) + "," + connection.escape(type2.toLowerCase()) + "," + connection.escape(prompt_type) + "," + connection.escape(JSON.stringify(restrictions)) + "," + connection.escape(JSON.stringify(additionalTriggerData)) + ")", result => {
                 res();
             });            
         });
@@ -206,9 +206,9 @@ module.exports = function() {
     Create Queued Action
     creates an action in the action queue which will be executed at a specified time
     **/
-    async function createAction(mid, pid, src_role, ability, orig_ability, prompt_type, type1, type2, time, restrictions, target) {
+    async function createAction(mid, pid, src_role, ability, orig_ability, prompt_type, type1, type2, time, restrictions, additionalTriggerData, target) {
         await new Promise(res => {
-            sql("INSERT INTO action_queue (message_id,player_id,src_role,ability,orig_ability,type1,type2,execute_time, prompt_type, restrictions, target) VALUES (" + connection.escape(mid) + "," + connection.escape(pid) + "," + connection.escape(src_role) + "," + connection.escape(JSON.stringify(ability)) + "," + connection.escape(JSON.stringify(orig_ability)) + "," + connection.escape(type1) + "," + connection.escape(type2) + "," + connection.escape(time) + "," + connection.escape(prompt_type) + "," + connection.escape(JSON.stringify(restrictions)) + "," + connection.escape(target) + ")", result => {
+            sql("INSERT INTO action_queue (message_id,player_id,src_role,ability,orig_ability,type1,type2,execute_time, prompt_type, restrictions, target, additional_trigger_data) VALUES (" + connection.escape(mid) + "," + connection.escape(pid) + "," + connection.escape(src_role) + "," + connection.escape(JSON.stringify(ability)) + "," + connection.escape(JSON.stringify(orig_ability)) + "," + connection.escape(type1) + "," + connection.escape(type2) + "," + connection.escape(time) + "," + connection.escape(prompt_type) + "," + connection.escape(JSON.stringify(restrictions)) + "," + connection.escape(target) + "," + connection.escape(JSON.stringify(additionalTriggerData)) + ")", result => {
                 res();
             });            
         });
@@ -243,10 +243,14 @@ module.exports = function() {
             let ability = JSON.parse(curAction.ability);
             // parse restrictions
             let restrictions = JSON.parse(curAction.restrictions);
+            // parse additional trigger data
+            let additionalTriggerData = JSON.parse(curAction.additional_trigger_data);
             // save last target
+            quantity = await getActionQuantity(curAction.player_id, ability);
+            if(quantity === -1) await initActionData(curAction.player_id, ability);
             setLastTarget(curAction.player_id, ability, curAction.target);
             // execute the ability
-            let feedback = await executeAbility(curAction.player_id, curAction.src_role, ability, restrictions);
+            let feedback = await executeAbility(curAction.player_id, curAction.src_role, ability, restrictions, additionalTriggerData);
             // send feedback
             if(feedback) abilitySend(curAction.player_id, feedback, EMBED_GREEN);
             // confirm automatic execution
@@ -268,8 +272,10 @@ module.exports = function() {
         // get values from prompt
         let ability = JSON.parse(prompt.ability);
         let restrictions = JSON.parse(prompt.restrictions);
+        let additionalTriggerData = JSON.parse(prompt.additional_trigger_data);
         let src_role = prompt.src_role;
         let pid = prompt.player_id;
+        
         // check which type of prompt
         if(prompt.type2 == "none") { // single reply needed
             let reply = message.content.trim();
@@ -280,7 +286,7 @@ module.exports = function() {
                 let promptAppliedAbility = applyPromptValue(ability, 0, parsedReply[1]);
                 // check restrictions again
                 for(let i = 0; i < restrictions.length; i++) {
-                    let passed = await handleRestriction(pid, promptAppliedAbility, restrictions[i], RESTR_POST, parsedReply[1]);
+                    let passed = await handleRestriction(pid, promptAppliedAbility, restrictions[i], RESTR_POST, parsedReply[1], additionalTriggerData);
                     if(!passed) {
                         let msg = getPromptMessage(restrictions[i]);
                         let embed = basicEmbed(`You cannot execute this ability due to a restriction: ${msg}`, EMBED_RED);
@@ -294,7 +300,7 @@ module.exports = function() {
                 let repl_msg = await sendPromptReplyConfirmMessage(message, prompt.prompt_type, `You submitted: \`${parsedReply[0]}\`.`);
                 // queue action
                 let exeTime = prompt.prompt_type == "immediate" ? getTime() + 60 : endActionTime;
-                await createAction(repl_msg, pid, src_role, promptAppliedAbility, ability, prompt.prompt_type, prompt.type1, prompt.type2, exeTime, restrictions, parsedReply[1]);
+                await createAction(repl_msg, pid, src_role, promptAppliedAbility, ability, prompt.prompt_type, prompt.type1, prompt.type2, exeTime, restrictions, additionalTriggerData, parsedReply[1]);
                 // log prompt reply
                 abilityLog(`✅ **Prompt Reply:** <@${pid}> (${toTitleCase(src_role)}) submitted \`${parsedReply[0]}\`.`);
             }
@@ -314,7 +320,7 @@ module.exports = function() {
                 promptAppliedAbility = applyPromptValue(ability, 1, parsedReply2[1]);
                 // check restrictions again
                 for(let i = 0; i < restrictions.length; i++) {
-                    let passed = await handleRestriction(pid, promptAppliedAbility, restrictions[i], RESTR_POST, parsedReply1[1]);
+                    let passed = await handleRestriction(pid, promptAppliedAbility, restrictions[i], RESTR_POST, parsedReply1[1], additionalTriggerData);
                     if(!passed) {
                         let msg = getPromptMessage(restrictions[i]);
                         let embed = basicEmbed(`You cannot execute this ability due to a restriction: ${msg}`, EMBED_RED);
@@ -328,7 +334,7 @@ module.exports = function() {
                 let repl_msg = await sendPromptReplyConfirmMessage(message, prompt.prompt_type, `You submitted: \`${parsedReply1[0]}\` and \`${parsedReply2[0]}\`.`);
                 // queue action
                 let exeTime = prompt.prompt_type == "immediate" ? getTime() + 60 : endActionTime;
-                await createAction(repl_msg, pid, src_role, promptAppliedAbility, ability, prompt.prompt_type, prompt.type1, prompt.type2, exeTime, restrictions, parsedReply1[1]);
+                await createAction(repl_msg, pid, src_role, promptAppliedAbility, ability, prompt.prompt_type, prompt.type1, prompt.type2, exeTime, restrictions, additionalTriggerData, parsedReply1[1]);
                 // log prompt reply
                 abilityLog(`✅ **Prompt Reply:** <@${pid}> (${toTitleCase(src_role)}) submitted \`${parsedReply1[0]}\` and \`${parsedReply2[0]}\`.`);
             }

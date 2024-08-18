@@ -14,7 +14,7 @@ module.exports = function() {
     Handle Restrictions
     apply ability restrictions
     **/
-    this.handleRestriction = async function(pid, ability, restriction, prePrompt, target = null) {
+    this.handleRestriction = async function(pid, ability, restriction, prePrompt, target = null, additionalTriggerData = {}) {
         switch(restriction.type) {
             // UNKNOWN
             default: 
@@ -77,10 +77,11 @@ module.exports = function() {
                             return true; // restriciton application not applicable without target
                         }
                         // actual evaluation
-                        let lastTarget = await parsePlayerSelector(await getLastTarget(pid, ability), pid);
-                        let targets = await parsePlayerSelector(target, pid);
+                        let lt = await getLastTarget(pid, ability);
+                        let lastTarget = lt ? await parsePlayerSelector(lt, pid, null, additionalTriggerData) : null;
+                        let targets = await parsePlayerSelector(target, pid, null, additionalTriggerData);
                         // check if last target is included in the target selector
-                        if(!targets.includes(lastTarget[0])) {
+                        if(!lastTarget || !targets.includes(lastTarget[0])) {
                             return true;
                         } else {
                             return false;
@@ -103,7 +104,7 @@ module.exports = function() {
                     return true;
                 } else {
                     abilityLog(`❗ **Error:** Unknown restriction type \`${restriction.type}\`!`);
-                    return true;
+                    return false;
                 }
             break;
         }
@@ -121,6 +122,7 @@ module.exports = function() {
             // QUANTITY
             case "quantity":
                 let quantity = await getActionQuantity(pid, ability);
+                if(quantity === -1) quantity = 0;
                 let max_allowed = restriction.quantity;
                 if(quantity < max_allowed) return `${max_allowed - quantity}/${max_allowed} uses left`;
                 else return "";
@@ -134,7 +136,7 @@ module.exports = function() {
     **/
     this.initActionData = function(player_id, ability) {
         return new Promise(res => {
-            sql("INSERT INTO action_data (player_id,ability_id,quantity,last_phase) VALUES (" + connection.escape(player_id) + "," + connection.escape(ability.id) + ",1," + getPhaseAsNumber() + ")", result => {
+            sql("INSERT INTO action_data (player_id,ability_id,quantity,last_phase) VALUES (" + connection.escape(player_id) + "," + connection.escape(ability.id) + ",0," + getPhaseAsNumber() + ")", result => {
                  res();
             });
         });
@@ -157,7 +159,7 @@ module.exports = function() {
     this.getActionQuantity = function(player_id, ability) {
         return new Promise(res => {
             sql("SELECT * FROM action_data WHERE player_id= " + connection.escape(player_id) + " AND ability_id=" + connection.escape(ability.id), result => {
-                if(!result[0]) res(0);
+                if(!result[0]) res(-1);
                 else res(result[0].quantity);
             });
         });

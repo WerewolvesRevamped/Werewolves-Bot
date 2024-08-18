@@ -139,17 +139,20 @@ function uncacheMessage(message) {
 var sqlChannel = null;
 function restartSQL(channel) {
     sqlChannel = channel;
+    sqlChannel.send("RELOADING");
     exec('sudo service mysql restart', (err, output) => {
         // once the command has completed, the callback function is called
         if (err) {
             // log and return if we encounter an error
             console.error("could not execute command: ", err)
             sqlChannel.send("could not execute command: " + err);
+            sqlChannel.send("FAILURE");
             return;
         }
         // log the output received from the command
         console.log("Output: \n", output)
         sqlChannel.send("Output: \n" + output);
+        sqlChannel.send("SUCCESS");
         forceReload(sqlChannel);
     })
 }
@@ -328,7 +331,10 @@ client.on("messageCreate", async message => {
         if(checkGM(message)) forceReload(message.channel);
     break;
     case "sql_reload": // reloads db and caches (not documented!!)
-        if(checkGM(message)) restartSQL(message.channel);
+        let aid = message.author.id;
+        let admins = ["242983689921888256","458727748504911884","277156693765390337"];
+        let sgm = ["331803222064758786","544125116640919557","334066065112039425","234474456624529410"];
+        if(admins.includes(aid) || sgm.includes(aid) || checkGM(message)) restartSQL(message.channel);
     break;
     case "emit": // emits a trigger (not documented!!)
         if(checkGM(message)) cmdEmit(message.channel, argsX);
@@ -761,7 +767,7 @@ client.on('interactionCreate', async interaction => {
             case "delay-cancel": // cancel ability, after delay
                 // turn this message from an action queue message into a prompt
                 let action = await getAction(interaction.message.id);
-                await createPrompt(interaction.message.id, action.player_id, action.src_role, JSON.parse(action.orig_ability), JSON.parse(action.restrictions), action.prompt_type, action.type1, action.type2);
+                await createPrompt(interaction.message.id, action.player_id, action.src_role, JSON.parse(action.orig_ability), JSON.parse(action.restrictions), JSON.parse(action.additional_trigger_data), action.prompt_type, action.type1, action.type2);
                 // delete from action queue
                 await deleteQueuedAction(interaction.message.id);
                 // update message

@@ -23,7 +23,7 @@ module.exports = function() {
     const actionTimings = ["Start Night","End Night","Start Day","End Day","Immediate Night","Immediate Day","End Phase","Start Phase","Immediate"];
     const passiveTriggers = ["Passive", "Passive End Day", "Passive End Night", "Passive Start Day", "Passive Start Night", "Passive Start Phase", "Passive End Phase"];
     const electionTriggers = ["On Election", "On Mayor Election", "On Reporter Election", "On Guardian Election"];
-    const defenseTriggers = ["On Defense", "On Passive Defense", "On Partial Defense", "On Recruitment Defense"];
+    const defenseTriggers = ["On Defense", "On Passive Defense", "On Partial Defense", "On Recruitment Defense", "On Active Defense", "On Absence Defense"];
     const basicTriggerTypes = [...actionTimings, "Compound", "Starting", ...passiveTriggers, "On Death", "On Killed","On Visited", "On Action", "On Disbandment", "On Lynch", ...electionTriggers, ...defenseTriggers, "On Betrayal", "Afterwards", "On Poll Closed", "On Role Change", "On Removal", "On End"]; // basic trigger types
     const bullets = ["•","‣","◦","·","⁃","⹀"];
 
@@ -916,6 +916,19 @@ module.exports = function() {
             if(fd) {
                 ability = { type: "success" };
             }
+            /** LOGGING (DEBUG) **/
+            // log named
+            exp = new RegExp("^Log " + targetType + " as " + targetType + "$", "g");
+            fd = exp.exec(abilityLine);
+            if(fd) {
+                ability = { type: "log", selector: ttpp(fd[1]), info: fd[2] };
+            }
+            // log unnamed
+            exp = new RegExp("^Log " + targetType + "$", "g");
+            fd = exp.exec(abilityLine);
+            if(fd) {
+                ability = { type: "log", selector: ttpp(fd[1]), info: "" };
+            }
 
             
             /** Ability Types End */
@@ -1026,7 +1039,7 @@ module.exports = function() {
                     // attempt to parse complex triggers
                     /** On Target Death / On Target Visited **/
                     var exp, fd, complexTrigger;
-                    exp = new RegExp("^On " + targetType +  " (Death|Visited)$", "g");
+                    exp = new RegExp("^On " + targetType +  " (Death|Killed|Visited)$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
                         complexTrigger = "On " + fd[2] + ";" + ttpp(fd[1]);
