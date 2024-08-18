@@ -215,18 +215,23 @@ module.exports = function() {
             switch(defenseType) {
                 case "absence":
                     await trigger(pid, "On Absence Defense", { attacker: src_player, killing_type: type, attack_source: src_role }); 
+                    await useAttribute(defense.ai_id);
                 break;
                 case "active":
                     await trigger(pid, "On Active Defense", { attacker: src_player, killing_type: type, attack_source: src_role }); 
+                    await useAttribute(defense.ai_id);
                 break;
                 case "passive":
                     await trigger(pid, "On Passive Defense", { attacker: src_player, killing_type: type, attack_source: src_role }); 
+                    await useAttribute(defense.ai_id);
                 break;
                 case "partial":
                     await trigger(pid, "On Partial Defense", { attacker: src_player, killing_type: type, attack_source: src_role }); 
+                    await useAttribute(defense.ai_id);
                 break;
                 case "recruitment":
                     await trigger(pid, "On Recruitment Defense", { attacker: src_player, killing_type: type, attack_source: src_role }); 
+                    await useAttribute(defense.ai_id);
                 break;
             }
             return true; // return true

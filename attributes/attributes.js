@@ -279,4 +279,64 @@ module.exports = function() {
         })
     }
     
+    /**
+    Use attribute
+    uses an attribute and removes it if applicable
+    **/
+    this.useAttribute = async function(id) {
+        // get attribute
+        let attr = await getAttribute(id);
+        // delete until use type attribute
+        if(attr.duration === "untiluse") {
+            await deleteAttribute(id);
+        }
+        // delete until second use type attribute if already used once
+        else if(attr.duration === "untilseconduse" && attr.used == 1) {
+            await deleteAttribute(id);
+        }
+        // otherwise just increment used value
+        else {
+            await incrementAttribute(id);
+        }
+    }
+    
+    /** PRIVATE
+    Get Attribute
+    gets an attribute by ai id
+    **/
+    async function getAttribute(id) {
+        // get attribute
+        return new Promise(res => {
+             sql("SELECT * FROM active_attributes WHERE ai_id=" + connection.escape(id), result => {
+                 res(result[0]);
+             });
+        }); 
+    }
+    
+    /** PRIVATE
+    Delete Attribute
+    deletes an attribute by ai id
+    **/
+    async function deleteAttribute(id) {
+        // delete attribute
+        return new Promise(res => {
+             sql("DELETE FROM active_attributes WHERE ai_id=" + connection.escape(id), result => {
+                 res();
+             });
+        }); 
+    }
+    
+    /** PRIVATE
+    Increment Attribute
+    increments an attribute's used value by ai id
+    **/
+    async function incrementAttribute(id) {
+        // update attribute
+        return new Promise(res => {
+             sql("UPDATE active_attributes SET used=used+1 WHERE ai_id=" + connection.escape(id), result => {
+                 res();
+             });
+        }); 
+    }
+    
 }
