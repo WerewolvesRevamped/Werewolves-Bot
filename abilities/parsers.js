@@ -14,10 +14,26 @@ module.exports = function() {
         let selectorTarget = selectorGetTarget(selector);
         let selectorType = selectorGetType(selector);
         switch(selectorType) {
+            // PLAYER
             case "player": 
                 return await parsePlayerSelector(selector, self);
+            // ROLE
             case "role": 
                 return parseRoleSelector(selector);
+            // GROUP
+            case "group":
+                return await parseGroupName(selector);
+            // LOCATION
+            case "location":
+                // WIP: all groups are locations but not all locations are groups
+                return await parseGroupName(selector);
+            // UNKNOWN
+            case "attribute":
+            case "alignment":
+            case "abilityType":
+            case "abilitySubtype":
+            case "source":
+            case "info":
             default:
                 abilityLog(`❗ **Error:** Invalid selector type \`${selectorType}\`!`);
                 return [];
@@ -114,6 +130,7 @@ module.exports = function() {
     parses a role type selector
     **/
     this.parseRoleSelector = function(selector) {
+        // get target
         let selectorTarget = selectorGetTarget(selector);
         /** WIP: Needs to be able to parse much more! **/
         switch(selectorTarget) {
@@ -125,6 +142,42 @@ module.exports = function() {
                     abilityLog(`❗ **Error:** Invalid role selector target \`${selectorTarget}\`!`);
                     return [ ];
                 }
+        }
+    }
+    
+    /**
+    Parse Group Name
+    parses a group name
+    WIP: DOESNT VALIDATE IF THE GROUP EXISTS
+    WIP: DOESNT CONSIDER THE :'ed GROUP NAMES
+    **/
+    this.parseGroupName = async function(selector) {
+        // get target
+        let selectorTarget = selectorGetTarget(selector);
+        // WIP: weak group parser
+        return selectorTarget.replace("#", "").replace(/\-/g, " ").toLowerCase();
+    }
+    
+    
+    /**
+    Parse Location
+    parses a location
+    WIP: Locations can also be a group
+    **/
+    const locations = ["#story_time","#town_square","#tavern","#voting_booth"];
+    this.parseLocation = async function(selector, self = null, additionalTriggerData = {}) {
+        // get target
+        let selectorTarget = selectorGetTarget(selector);
+        // check what type of location it is
+        if(selectorTarget[0] === "#") { // location is a channel 
+            if(locations.includes(selectorTarget)) {
+                return selectorTarget;
+            } else {
+                abilityLog(`❗ **Error:** Invalid location \`${selectorTarget}\`. Defaulted to \`#town_square\`!`);
+                return "#town_square";              
+            }
+        } else { // location is a player
+            return await parsePlayerSelector(selectorTarget, self, additionalTriggerData);
         }
     }
     
@@ -143,14 +196,6 @@ module.exports = function() {
     this.selectorGetType = function(selector) {
         let spl = selector.split("[");
         return spl.length >= 2 ? spl[1].split("]")[0].toLowerCase() : "unknown";
-    }
-    
-    /**
-    Parse Group Name
-    parses a group name
-    **/
-    this.parseGroupName = function(name) {
-        return name.replace("#", "").replace(/\-/g, " ").toLowerCase();
     }
     
     /**
@@ -174,9 +219,10 @@ module.exports = function() {
     parses a group membership type
     defaults to member for invalid types
     **/
+    const memTypes = ["member","owner","visitor"];
     this.parseMembershipType = function(mem_type) {
         mem_type = mem_type.toLowerCase();
-        if(["member","owner","visitor"].includes(mem_type)) {
+        if(memTypes.includes(mem_type)) {
             return mem_type;
         } else {
             abilityLog(`❗ **Error:** Invalid membership type \`${mem_type}\`. Defaulted to \`member\`!`);
@@ -189,9 +235,10 @@ module.exports = function() {
     parses a "defense from x" type
     defaults to "all"
     **/
+    const defenseFromTypes = ["attacks","kills","lynches","attacks_lynches","all"];
     this.parseDefenseFromType = function(defro_type) {
         defro_type = defro_type.toLowerCase().replace(/ /g,"_").replace(/[^a-z]/g,"");
-        if(["attacks","kills","lynches","attacks_lynches","all"].includes(defro_type)) {
+        if(defenseFromTypes.includes(defro_type)) {
             return defro_type;
         } else {
             abilityLog(`❗ **Error:** Invalid defense from type \`${defro_type}\`. Defaulted to \`all\`!`);
@@ -204,31 +251,14 @@ module.exports = function() {
     parses a phase type
     defaults to "all"
     **/
+    const phases = ["day","night","all"];
     this.parsePhaseType = function(phase_type) {
         phase_type = phase_type.toLowerCase();
-        if(["day","night","all"].includes(phase_type)) {
+        if(phases.includes(phase_type)) {
             return phase_type;
         } else {
             abilityLog(`❗ **Error:** Invalid phase type \`${phase_type}\`. Defaulted to \`all\`!`);
             return "all";
-        }
-    }
-    
-    /**
-    Parse Location
-    parses a location
-    **/
-    const locations = ["#story_time","#town_square","#tavern","#voting_booth"];
-    this.parseLocation = async function(loc, self = null, additionalTriggerData = {}) {
-        if(loc[0] === "#") { // location is a channel 
-            if(locations.includes(loc)) {
-                return loc;
-            } else {
-                abilityLog(`❗ **Error:** Invalid location \`${loc}\`. Defaulted to \`#town_square\`!`);
-                return "#town_square";              
-            }
-        } else { // location is a player
-            return await parsePlayerSelector(loc, self, additionalTriggerData);
         }
     }
     

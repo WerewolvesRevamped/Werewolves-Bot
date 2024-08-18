@@ -29,7 +29,7 @@ module.exports = function() {
         }
         // parse parameters
         let target = await parsePlayerSelector(ability.target, pid, additionalTriggerData);
-        let group_name = parseGroupName(ability.group);
+        let group_name = await parseGroupName(ability.group);
         // select subtype
         switch(ability.subtype) {
             default:

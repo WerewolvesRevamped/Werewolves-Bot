@@ -13,7 +13,7 @@ require("./types/investigating.js")();
 require("./types/disguising.js")();
 require("./types/killing.js")();
 require("./types/protecting.js")();
-require("./types/log.js")();
+require("./types/logging.js")();
 
 module.exports = function() {
     

@@ -424,7 +424,7 @@ module.exports = function() {
             exp = new RegExp("^Target " + targetType + " \\(" + targetingType + "\\)$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "targeting", subtype: "target", target: ttpp(fd[1], fd[2]) };
+                ability = { type: "targeting", subtype: "target", target: ttpp(fd[1], fd[2].toLowerCase()) };
             }
             // untarget
             exp = new RegExp("^Untarget$", "g");
@@ -694,7 +694,7 @@ module.exports = function() {
             exp = new RegExp("^Reveal " + targetType + " to " + locationType + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "announcement", target: ttpp(fd[2]), info: fd[1] };
+                ability = { type: "announcement", target: ttpp(fd[2], "location"), info: fd[1] };
             }
             // reveal
             exp = new RegExp("^(Learn|Know) " + targetType + "$", "g");
@@ -1048,23 +1048,23 @@ module.exports = function() {
                     exp = new RegExp("^On (Visited|Action) \\[" + abilityType + "\\]$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
-                        complexTrigger = "On " + fd[1] + ";" + ttpp(fd[2]);
+                        complexTrigger = "On " + fd[1] + ";" + ttpp(fd[2], "abilityType");
                     }
                     exp = new RegExp("^On (Visited|Action) \\[" + abilitySubtype + "\\]$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
-                        complexTrigger = "On " + fd[1] + ";" + ttpp(fd[2]);
+                        complexTrigger = "On " + fd[1] + ";" + ttpp(fd[2], "abilitySubype");
                     }
                     /** On Target Visited [Ability]**/
                     exp = new RegExp("^On " + targetType + " Visited \\[" + abilityType + "\\]$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
-                        complexTrigger = "On Visited;" + fd[1] + ";" + ttpp(fd[2]);
+                        complexTrigger = "On Visited;" + ttpp(fd[1]) + ";" + ttpp(fd[2], "abilityType");
                     }
                     exp = new RegExp("^On " + targetType + " Visited \\[" + abilitySubtype + "\\]$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
-                        complexTrigger = "On Visited;" + fd[1] + ";" + ttpp(fd[2]);
+                        complexTrigger = "On Visited;" + ttpp(fd[1]) + ";" + ttpp(fd[2], "abilitySubype");
                     }
                     /** Otherwise **/
                     if(!complexTrigger) { // could not find a complex trigger match
@@ -1099,6 +1099,11 @@ module.exports = function() {
     attribute
     alignment
     group
+    abilityType
+    abilitySubtype
+    location (locations includes unique locations as well as all players and groups)
+    source (may be any active game element that can execute abilities, additionally annotated)
+    info (just text)
     list (not annotated)
     **/
     function ttpp(targetType, defaultType = "infer") {
@@ -1123,13 +1128,24 @@ module.exports = function() {
         if(first == "&") {
             return "alignment";
         } else if(first == "@") {
-            return "player";
+            switch(targetType) {
+                case "ActionAbilityType": return "abilityType";
+                case "ActionFeedback": return "info";
+                case "AttackSource": return "source";
+                case "DeathType": return "info";
+                case "KillingType": return "info";
+                case "VisitType": return "abilityType";
+                case "VisitParameter": return "unknown";
+                case "ThisAttr": return "attribute";
+                case "ActionResult": return "info";
+                default: return "player";
+            }
         } else if(first == "#") {
-            return "group";
+            return "location";
         } else if(first == "`") {
             return "role";
         } else {
-            return "attribute"; // this should never occur
+            return "unknown"; // this should never occur
         }
     }
     
