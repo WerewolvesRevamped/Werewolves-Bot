@@ -73,6 +73,23 @@ module.exports = function() {
     }
     
     /**
+    Get Role Data from Name
+    **/
+    this.getRoleDataFromName = async function(roleName) {
+        let roleNameParsed = parseRole(roleName);
+        if(verifyRole(roleNameParsed)) {
+            let roleData = await (new Promise(res => {
+                 sql("SELECT * FROM roles WHERE name = " + connection.escape(roleNameParsed), result => {
+                     res(result[0]);
+                 });
+            })); 
+            return await getRoleData(roleData.display_name, roleData.class, roleData.category, roleData.team);
+        } else {
+            return null;
+        }
+    }
+    
+    /**
     Get Role Type Data
     Returns additional information for role types
     **/

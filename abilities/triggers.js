@@ -122,7 +122,8 @@ module.exports = function() {
                 case 1: {
                     let type = toTitleCase(selectorGetType(prompts[0][1]));
                     let promptMsg = getPromptMessage(ability, type);
-                    let mid = await abilitySendProm(src_ref, `${getEmoji(srcToValue(src_name))} ${promptMsg}`, EMBED_GRAY, true, promptInfoMsg);
+                    let refImg = await refToImg(src_name);
+                    let mid = await abilitySendProm(src_ref, `${getAbilityEmoji(ability.type)} ${promptMsg}`, EMBED_GRAY, true, promptInfoMsg, refImg, "Ability Prompt");
                     if(ptype == "immediate") { // immediate prompt
                         abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(ability.type)} [${type}] {Immediate}`);
                         await createPrompt(mid, src_ref, src_name, ability, restrictions, additionalTriggerData, "immediate", type);
@@ -138,7 +139,8 @@ module.exports = function() {
                     let type1 = toTitleCase(selectorGetType(prompts[0][1]));
                     let type2 = toTitleCase(selectorGetType(prompts[1][1]));
                     let promptMsg = getPromptMessage(ability, type1, type2);
-                    let mid = await abilitySendProm(src_ref, `${getEmoji(srcToValue(src_name))} ${promptMsg}`, EMBED_GRAY, true, promptInfoMsg);
+                    let refImg = await refToImg(src_name);
+                    let mid = await abilitySendProm(src_ref, `${getAbilityEmoji(ability.type)} ${promptMsg}`, EMBED_GRAY, true, promptInfoMsg, refImg, "Ability Prompt");
                     if(ptype == "immediate") { // immediate prompt
                         abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(ability.type)} [${type1}, ${type2}] {Immediate}`);
                         await createPrompt(mid, src_ref, src_name, ability, restrictions,additionalTriggerData, "immediate", type1, type2);
@@ -155,6 +157,48 @@ module.exports = function() {
                 break;
             }
         }
+    }
+    
+    /**
+    Get Ability Emoji
+    **/
+    function getAbilityEmoji(type) {
+        let emojiName;
+        switch(type) {
+            case "killing": emojiName = "CategoryKilling"; break;
+            case "investigating": emojiName = "CategoryInvestigative"; break;
+            case "targeting": emojiName = "CategoryMiscellaneous"; break;
+            case "disguising": emojiName = "Disguise"; break;
+            case "protecting": emojiName = "Defense"; break;
+            case "applying": emojiName = "CategoryPower"; break;
+            case "redirecting": emojiName = "Redirect"; break;
+            case "manipulating": emojiName = "VoteManipulation"; break;
+            case "whispering": emojiName = "Whispering"; break;
+            case "joining": emojiName = "CategoryGroup"; break;
+            case "granting": emojiName = "Extra"; break;
+            case "loyalty": emojiName = "Soul"; break;
+            case "obstructing": emojiName = "BotDeveloper"; break;
+            case "poll": emojiName = "VotingBooth"; break;
+            case "announcement": emojiName = "KWList"; break;
+            case "changing": emojiName = "CategoryAlign"; break;
+            case "copying": emojiName = "LookAlike"; break;
+            case "choices": emojiName = "UnalignedPlaceholder"; break;
+            case "ascend": emojiName = ""; break;
+            case "descend": emojiName = ""; break;
+            case "disband": emojiName = ""; break;
+            case "counting": emojiName = ""; break;
+            case "reset": emojiName = ""; break;
+            case "cancel": emojiName = ""; break;
+            case "switching": emojiName = ""; break;
+            case "process": emojiName = ""; break;
+            case "evaluate": emojiName = ""; break;
+            case "feedback": emojiName = ""; break;
+            case "action": emojiName = ""; break;
+            case "failure": emojiName = ""; break;
+            case "success": emojiName = ""; break;
+            case "log": emojiName = ""; break;
+        }
+        return emojiName ? getEmoji(emojiName) : "";
     }
     
     /**

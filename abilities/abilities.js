@@ -97,7 +97,7 @@ module.exports = function() {
     Ability Feedback
     used to send feedback for abilities (and probably prompts?)
     **/
-    this.abilitySend = function(src_ref, message, color = EMBED_GRAY, ping = false, footer = false) {
+    this.abilitySend = function(src_ref, message, color = EMBED_GRAY, ping = false, footer = false, thumbnail = null, title = null) {
         let player_id = srcToValue(src_ref);
         let type = srcToType(src_ref);
         
@@ -109,6 +109,8 @@ module.exports = function() {
                     embed = basicEmbed(message, color);
                     if(ping) embed.embed.content =  `<@&${stats.participant}>`; // add ping
                     if(footer) embed.embeds[0].footer = { text: footer }; // add footer
+                    if(thumbnail) embed.embeds[0].thumbnail = { url: thumbnail }; // add thumbnail
+                    if(title) embed.embeds[0].title = title; // add title
                     player_sc.send(embed);
                 });
             break;
@@ -121,7 +123,7 @@ module.exports = function() {
     /**
     Ability Feedback + Return new message ID
     **/
-    this.abilitySendProm = function(src_ref, message, color = EMBED_GRAY, ping = false, footer = false) {
+    this.abilitySendProm = function(src_ref, message, color = EMBED_GRAY, ping = false, footer = false, thumbnail = null, title = null) {
         let player_id = srcToValue(src_ref);
         let type = srcToType(src_ref);
         
@@ -135,6 +137,8 @@ module.exports = function() {
                             embed = basicEmbed(message, color);
                             if(ping) embed.content =  `<@&${stats.participant}>`; // add ping
                             if(footer) embed.embeds[0].footer = { text: footer }; // add footer
+                            if(thumbnail) embed.embeds[0].thumbnail = { url: thumbnail }; // add thumbnail
+                            if(title) embed.embeds[0].title = title; // add title
                             player_sc.send(embed).then(msg => {
                                 res(msg.id);
                             });
@@ -223,6 +227,22 @@ module.exports = function() {
     this.isSrc = function(src_either) {
         let spl = src_either.toLowerCase().split(":");
         return spl.length == 2;
+    }
+    
+    /** PUBLIC
+    Ref to Img
+    returns an image url for the ref
+    **/
+    this.refToImg = async function(ref) {
+        let type = srcToType(ref);
+        let val = srcToValue(ref);
+        switch(type) {
+            case "role":
+                let rData = await getRoleDataFromName(val);
+                return rData ? rData.url : null;
+            default:
+                return null;
+        }
     }
     
     
