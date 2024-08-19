@@ -15,6 +15,7 @@ require("./types/killing.js")();
 require("./types/protecting.js")();
 require("./types/logging.js")();
 require("./types/targeting.js")();
+require("./types/process_evaluate.js")();
 
 module.exports = function() {
     
@@ -71,6 +72,9 @@ module.exports = function() {
             break;
             case "targeting":
                 return await abilityTargeting(src_ref, src_name, ability, additionalTriggerData)
+            break;
+            case "process_evaluate":
+                return await abilityProcessEvaluate(src_ref, src_name, ability, additionalTriggerData)
             break;
         }
     }

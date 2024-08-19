@@ -55,7 +55,7 @@ module.exports = function() {
         abilityLog(`✅ ${srcRefToText(src_ref)} targeted ${srcRefToText(targetType+':'+target)}.`);
         
         // feedback
-        return { msg: "Targeting updated!", success: true };
+        return { msg: "Target updated!", success: true };
     }
     
     /** PRIVATE
@@ -68,7 +68,7 @@ module.exports = function() {
         abilityLog(`✅ ${srcRefToText(src_ref)} untargeted.`);
         
         // feedback
-        return { msg: "Targeting cleared!", success: true };
+        return { msg: "Target cleared!", success: true };
     }
     
     /** PUBLIC

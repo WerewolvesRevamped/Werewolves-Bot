@@ -113,6 +113,26 @@ module.exports = function() {
                     }
                 }
             }
+            
+            /** P/E Reformatting **/
+            for(let i = 0; i < abilities[1].length; i++) {
+                if(abilities[1][i].ability.type === "process" && abilities[1][i + 1].ability.type === "evaluate") {
+                    // get p/e
+                    let process = abilities[1][i].ability;
+                    let evaluate = abilities[1][i + 1].ability;
+                    // parse conditions
+                    evaluate.sub_abilities = evaluate.sub_abilities.map(el => {
+                        let ret = el;
+                        ret.condition_text = ret.condition;
+                        ret.condition = parseCondition(ret.condition);
+                        return ret;
+                    });
+                    // reformat p/e
+                    abilities[1][i].ability = { type: "process_evaluate", process: process, evaluate: evaluate }; // replace "process" with a combined P/E ability
+                    abilities[1][i + 1].ability = { type: "blank" }; // delete "evaluate"
+                }
+            }
+            
             /* Remove Blank */
             abilities[1] = abilities[1].filter(el => el.ability.type != "blank"); // remove blank lines
             
@@ -146,6 +166,47 @@ module.exports = function() {
         
         
         return triggers;
+    }
+    
+    /**
+    Parse Condition
+    **/
+    this.parseCondition = function(condition) {
+        let exp, fd, cond;
+        
+        /** Comparisons **/
+        // Equality
+        exp = new RegExp("^" + targetType + " is " + targetType + "$", "g");
+        fd = exp.exec(condition);
+        if(fd) {
+            cond = { type: "comparison", subtype: "equal", first: ttpp(fd[1]), second: ttpp(fd[2]) };
+        }
+        // Less Than
+        exp = new RegExp("^" + targetType + " < " + targetType + "$", "g");
+        fd = exp.exec(condition);
+        if(fd) {
+            cond = { type: "comparison", subtype: "less_than", first: ttpp(fd[1]), second: ttpp(fd[2]) };
+        }
+        // Greater Than
+        exp = new RegExp("^" + targetType + " > " + targetType + "$", "g");
+        fd = exp.exec(condition);
+        if(fd) {
+            cond = { type: "comparison", subtype: "greater_than", first: ttpp(fd[1]), second: ttpp(fd[2]) };
+        }
+        // Not
+        exp = new RegExp("^" + targetType + " is not " + targetType + "$", "g");
+        fd = exp.exec(condition);
+        if(fd) {
+            cond = { type: "comparison", subtype: "not_equal", first: ttpp(fd[1]), second: ttpp(fd[2]) };
+        }
+        
+        if(cond) {
+            return cond;
+        } else {
+            if(!debugMode) throw new Error(`Invalid Condition Type \`\`\`\n${condition}\n\`\`\``);
+            else trigger[1][a] = { type: "error" };
+        }
+        
     }
 
     /** REGEX - Reminder: You need double \'s here **/
@@ -1105,6 +1166,8 @@ module.exports = function() {
     source (may be a group, alignment, attribute, player, poll)
     info (just text)
     list (not annotated)
+    result (a special type for ability results, may take several forms such as role or success)
+    success (a boolean like value for ability results, may be compared to a result)
     **/
     function ttpp(targetType, defaultType = "infer") {
         // pre-existing type annotation
@@ -1129,21 +1192,26 @@ module.exports = function() {
             return "alignment";
         } else if(first == "@") {
             switch(targetType) {
-                case "ActionAbilityType": return "abilityType";
-                case "ActionFeedback": return "info";
-                case "AttackSource": return "source";
-                case "DeathType": return "info";
-                case "KillingType": return "info";
-                case "VisitType": return "abilityType";
-                case "VisitParameter": return "unknown";
-                case "ThisAttr": return "attribute";
-                case "ActionResult": return "info";
+                case "@ActionAbilityType": return "abilityType";
+                case "@ActionFeedback": return "info";
+                case "@AttackSource": return "source";
+                case "@DeathType": return "info";
+                case "@KillingType": return "info";
+                case "@VisitType": return "abilityType";
+                case "@VisitParameter": return "unknown";
+                case "@ThisAttr": return "attribute";
+                case "@ActionResult": return "info";
+                case "@Result": case "@Result1": case "@Result2": case "@Result3": 
+                case "@Result4": case "@Result5": case "@Result6": case "@Result7": return "result";
                 default: return "player";
             }
         } else if(first == "#") {
             return "location";
         } else if(first == "`") {
-            return "role";
+            switch(targetType) {
+                case "`Success`": case "`Failure`": return "success";
+                default: return "role";
+            }
         } else {
             return "unknown"; // this should never occur
         }

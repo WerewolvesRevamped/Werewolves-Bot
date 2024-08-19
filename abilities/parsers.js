@@ -27,6 +27,12 @@ module.exports = function() {
             case "location":
                 // WIP: all groups are locations but not all locations are groups
                 return { value: await parseGroupName(selector, self), type: "role" };
+            case "success":
+                return { value: parseSuccess(selector), type: "success" };
+            break;
+            case "result":
+                return { value: parseResult(selector, additionalTriggerData), type: "result" };
+            break;
             // UNKNOWN
             case "attribute":
             case "alignment":
@@ -65,36 +71,36 @@ module.exports = function() {
             case "@target":
             let target = await getTarget(self);
             target = srcToValue(target);
-            return target;
+            return [ target ];
             
             // trigger dependent selectors
             case "@deathtype":
                 if(additionalTriggerData.death_type) {
-                    return additionalTriggerData.death_type;
+                    return [ additionalTriggerData.death_type ];
                 } else {
                     return invalidSelector(selectorTarget);
                 }
             case "@killingtype":
                 if(additionalTriggerData.killing_type) {
-                    return additionalTriggerData.killing_type;
+                    return [ additionalTriggerData.killing_type ];
                 } else {
                     return invalidSelector(selectorTarget);
                 }
             case "@attacker":
                 if(additionalTriggerData.attacker) {
-                    return additionalTriggerData.attacker;
+                    return [ additionalTriggerData.attacker ];
                 } else {
                     return invalidSelector(selectorTarget);
                 }
             case "@attacksource":
                 if(additionalTriggerData.attack_source) {
-                    return additionalTriggerData.attack_source;
+                    return [ additionalTriggerData.attack_source ];
                 } else {
                     return invalidSelector(selectorTarget);
                 }
             case "@this":
                 if(additionalTriggerData.this) {
-                    return additionalTriggerData.this;
+                    return [ additionalTriggerData.this ];
                 } else {
                     return invalidSelector(selectorTarget);
                 }
@@ -187,6 +193,49 @@ module.exports = function() {
             }
         } else { // location is a player
             return await parsePlayerSelector(selectorTarget, self, additionalTriggerData);
+        }
+    }
+    
+    /**
+    Parse Success
+    bool like type. either success or failure
+    **/
+    const validSuccessValues = ["success","failure"];
+    this.parseSuccess = function(selector) {
+        // get target
+        let selectorTarget = selectorGetTarget(selector);
+        // format
+        selectorTarget = selectorTarget.toLowerCase().replace(/[^a-z]+/g,"");
+        // check
+        if(validSuccessValues.includes(selectorTarget)) {
+            return selectorTarget === "success";
+        } else {
+            abilityLog(`❗ **Error:** Invalid success type \`${selectorTarget}\`. Defaulted to \`failure\`!`);
+            return false;
+        }
+    }
+    
+    /**
+    Parse Result
+    turns a @Result<n> value into the correct result from trigger data
+    **/
+    this.parseResult = function(selector, additionalTriggerData) {
+        // get target
+        let selectorTarget = selectorGetTarget(selector);
+        const emptyResult = { msg: "", success: false };
+        // switch
+        switch(selectorTarget) {
+            case "@result": return additionalTriggerData.result ?? emptyResult;
+            case "@result1": return additionalTriggerData.result1 ?? emptyResult;
+            case "@result2": return additionalTriggerData.result2 ?? emptyResult;
+            case "@result3": return additionalTriggerData.result3 ?? emptyResult;
+            case "@result4": return additionalTriggerData.result4 ?? emptyResult;
+            case "@result5": return additionalTriggerData.result5 ?? emptyResult;
+            case "@result6": return additionalTriggerData.result6 ?? emptyResult;
+            case "@result7": return additionalTriggerData.result7 ?? emptyResult;
+            default: 
+                abilityLog(`❗ **Error:** Invalid result type \`${selectorTarget}\`. Defaulted to \`{msg:"",success:false}\`!`);
+                return emptyResult;
         }
     }
     
