@@ -90,7 +90,8 @@ module.exports = function() {
                 "image": ["img"],
                 "infomanage": ["im"],
                 "groups": ["group"],
-                "attributes": ["attribute","attr"]
+                "attributes": ["attribute","attr"],
+                "locations": ["location", "loc", "locs"]
         };
         for(let cmd in aliases) {
             if(aliases[cmd].indexOf(alias) != -1) return cmd;

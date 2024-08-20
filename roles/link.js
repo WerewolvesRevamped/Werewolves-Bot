@@ -68,6 +68,22 @@ module.exports = function() {
     }
     
     /**
+    Command: $locations query
+    Runs queryLocations to query all locations from github
+    **/
+    this.cmdLocationsQuery = async function(channel) {
+        channel.send(`🔄 Querying locations. Please wait. This may take several minutes.`);
+        try {
+            const output = await queryLocations();
+            output.forEach(el => channel.send(`❗ ${el}`));
+        } catch(err) {
+            channel.send(`⛔ Querying locations failed.`);
+        }
+        channel.send(`✅ Querying locations completed.`);
+        cacheLocations();
+    }
+    
+    /**
     Command: $roles parse
     Parses all roles currently stored in the DB from desc_formalized to parsed
     **/
@@ -134,10 +150,16 @@ module.exports = function() {
         channel.send(`🔄 Querying info. Please wait. This may take several minutes.`);
         output = await queryInfo();
         channel.send(`❗ Querying info completed with \`${output.length}\` errors.`);
+        // query locations
+        channel.send(`🔄 Querying locations. Please wait. This may take several minutes.`);
+        output = await queryLocations();
+        channel.send(`❗ Querying locations completed with \`${output.length}\` errors.`);
         /** Post Update */
         // cache values
         cacheRoleInfo();
         channel.send(`❗ Caching role info.`);
+        cacheLocations();
+        channel.send(`❗ Caching location info.`);
         channel.send(`✅ Update completed.`);
     }
         
@@ -193,6 +215,7 @@ module.exports = function() {
     **/
     function splitRoleDescSections(roleDesc) {
         let sections = roleDesc.match(/__([^_]+)__ *\n([\s\S]+?)(?=__[^_]+__|$)/g);
+        if(!sections) return [];
         sections = sections.map(el => {
             let splitd = el.split("\n"); // split the desc to extract name
             let tname = splitd.shift().replace(/_/g, "").trim().toLowerCase(); // extract name
@@ -398,6 +421,62 @@ module.exports = function() {
         const formalized = roleDescs.filter(el => el[0] == "formalized")[0][1] ?? "";
         // imsert the role into the databse
         sql("INSERT INTO groups (name,display_name,team,desc_basics,desc_members,desc_formalized) VALUES (" + connection.escape(dbName) + "," + connection.escape(roleName) + "," + connection.escape(teamName) + "," + connection.escape(basics) + "," + connection.escape(members) + "," + connection.escape(formalized) + ")");
+        // return nothing
+        return null;
+    }
+    
+    /** 
+    Query Locations
+    queries all locations from github
+    **/
+    async function queryLocations() {
+        return await runQuery(clearLocations, locationpathsPath, queryLocationsCallback, 3);
+    }
+    
+    /**
+    Clear Locations
+    deletes the entire contents of the locations database
+    **/
+     function clearLocations() {
+		sql("DELETE FROM locations");
+	}
+    
+    /** 
+    Query Locations - Callback
+    queries all locations from github
+    **/
+    async function queryLocationsCallback(path, name) {
+        // extract values
+        var locationContents = await queryFile(path, name); // get the location contents
+        const dbName = getDBName(name); // get the db name
+        const roleDescs = splitRoleDescSections(locationContents); // split the location descriptions, into the different types of description
+        const locName = getRoleDescName(locationContents); // grabs the location name inbetween the **'s in the first line
+        let description;
+        let formalized;
+        if(roleDescs.length === 0) {
+            description = "";
+            formalized = locationContents.split("\n");
+            formalized.shift();
+            formalized = formalized.join("\n");
+        } else {
+            description = roleDescs.filter(el => el[0] == "description")[0][1] ?? "";
+            formalized = roleDescs.filter(el => el[0] == "formalized")[0][1] ?? "";
+        }
+        const formalizedParsed = formalized.split("\n").map(el => {
+            let spl = el.split(": ");
+            return { name: spl[0], value: spl[1] };
+        });
+        const sort_index = formalizedParsed.find(el => el.name == "Sort Index").value;
+        let members = formalizedParsed.find(el => el.name == "Members").value;
+        let viewers = formalizedParsed.find(el => el.name == "Viewers").value;
+        members = members.split(", ").join(",");
+        viewers = viewers.split(", ").join(",");
+        if(members === "*All*") members = "Alive,Dead,Ghost,Substitute";
+        if(members === "*None*") members = "";
+        if(viewers === "*All*") viewers = "Alive,Dead,Ghost,Substitute";
+        if(viewers === "*None*") viewers = "";
+        // imsert the role into the databse
+        sql("INSERT INTO locations (name,display_name,description,sort_index,members,viewers) VALUES (" + connection.escape(dbName) + "," + connection.escape(locName) + "," + connection.escape(description.trim()) + "," + connection.escape(sort_index) + "," + connection.escape(members) + "," + connection.escape(viewers) + ")");
         // return nothing
         return null;
     }

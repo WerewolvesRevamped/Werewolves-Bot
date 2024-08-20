@@ -386,6 +386,10 @@ client.on("messageCreate", async message => {
 	case "sets":
 		if(checkGM(message)) cmdSets(message, args, argsX);
 	break;
+	/* locations */ // Command for locations (undocumentated)
+	case "locations": 
+		if(checkGM(message)) cmdLocations(message, args, argsX);
+	break;
 	/* Update */ // Updates all github linked data
 	case "update":
 		if(checkGM(message)) cmdUpdate(message.channel);
