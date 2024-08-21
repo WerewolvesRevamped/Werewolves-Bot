@@ -16,6 +16,7 @@ require("./types/protecting.js")();
 require("./types/logging.js")();
 require("./types/targeting.js")();
 require("./types/process_evaluate.js")();
+require("./types/announcement.js")();
 
 module.exports = function() {
     
@@ -53,28 +54,31 @@ module.exports = function() {
                 return { msg: "", success: false };
             break;
             case "joining":
-                return await abilityJoining(src_ref, src_name, ability, additionalTriggerData)
+                return await abilityJoining(src_ref, src_name, ability, additionalTriggerData);
             break;
             case "investigating":
-                return await abilityInvestigating(src_ref, src_name, ability, additionalTriggerData)
+                return await abilityInvestigating(src_ref, src_name, ability, additionalTriggerData);
             break;
             case "disguising":
-                return await abilityDisguising(src_ref, src_name, ability, additionalTriggerData)
+                return await abilityDisguising(src_ref, src_name, ability, additionalTriggerData);
             break;
             case "killing":
-                return await abilityKilling(src_ref, src_name, ability, additionalTriggerData)
+                return await abilityKilling(src_ref, src_name, ability, additionalTriggerData);
             break;
             case "protecting":
-                return await abilityProtecting(src_ref, src_name, ability, additionalTriggerData)
+                return await abilityProtecting(src_ref, src_name, ability, additionalTriggerData);
             break;
             case "log":
-                return await abilityLogging(src_ref, src_name, ability, additionalTriggerData)
+                return await abilityLogging(src_ref, src_name, ability, additionalTriggerData);
             break;
             case "targeting":
-                return await abilityTargeting(src_ref, src_name, ability, additionalTriggerData)
+                return await abilityTargeting(src_ref, src_name, ability, additionalTriggerData);
             break;
             case "process_evaluate":
-                return await abilityProcessEvaluate(src_ref, src_name, ability, additionalTriggerData)
+                return await abilityProcessEvaluate(src_ref, src_name, ability, additionalTriggerData);
+            break;
+            case "announcement":
+                return await abilityAnnouncement(src_ref, src_name, ability, additionalTriggerData);
             break;
         }
     }

@@ -33,13 +33,15 @@ module.exports = function() {
             case "result":
                 return { value: parseResult(selector, additionalTriggerData), type: "result" };
             break;
+            case "info":
+                return { value: await parseInfo(selector, self, additionalTriggerData), type: "info" };
+            break;
             // UNKNOWN
             case "attribute":
             case "alignment":
             case "abilityType":
             case "abilitySubtype":
             case "source":
-            case "info":
             default:
                 abilityLog(`❗ **Error:** Invalid selector type \`${selectorType}\`!`);
                 return { value: [], type: "unknown" };
@@ -179,20 +181,21 @@ module.exports = function() {
     parses a location
     WIP: Locations can also be a group
     **/
-    const locations = ["#story_time","#town_square","#tavern","#voting_booth"];
     this.parseLocation = async function(selector, self = null, additionalTriggerData = {}) {
         // get target
         let selectorTarget = selectorGetTarget(selector);
         // check what type of location it is
         if(selectorTarget[0] === "#") { // location is a channel 
-            if(locations.includes(selectorTarget)) {
-                return selectorTarget;
+            if(verifyLocation(selectorTarget)) {
+                return { value: selectorTarget, type: "location", default: false };
             } else {
-                abilityLog(`❗ **Error:** Invalid location \`${selectorTarget}\`. Defaulted to \`#town_square\`!`);
-                return "#town_square";              
+                let def = cachedLocations[0]; // default is whatever location is first
+                abilityLog(`❗ **Error:** Invalid location \`${selectorTarget}\`. Defaulted to \`${def}\`!`);
+                return { value: def, type: "location", default: true };              
             }
         } else { // location is a player
-            return await parsePlayerSelector(selectorTarget, self, additionalTriggerData);
+            let parsedPlayer = await parsePlayerSelector(selectorTarget, self, additionalTriggerData);
+            return { value: parsedPlayer, type: "player", default: false };
         }
     }
     
@@ -237,6 +240,36 @@ module.exports = function() {
                 abilityLog(`❗ **Error:** Invalid result type \`${selectorTarget}\`. Defaulted to \`{msg:"",success:false}\`!`);
                 return emptyResult;
         }
+    }
+    
+    /**
+    Parse Info
+    parses an info message which may contain other selectors
+    **/
+    this.parseInfo = async function(selector, self, additionalTriggerData) {
+        // get target
+        let selectorTarget = selector.split("[")[0]; // we cant actually use the util function as it converts to lower case
+        selectorTarget = selectorTarget.replace(/`/g,"");
+        let spl = selectorTarget.split(" ");
+        // convert text segments to selectors if applicable
+        for(let i = 0; i < spl.length; i++) {
+            let infType = inferType(spl[i]);
+            if(infType != "unknown") {
+                let parsed = await parseSelector(`${spl[i]}[${infType}]`, self, additionalTriggerData);
+                let strs = [];
+                // iterate through selector list
+                for(let j = 0; j < parsed.value.length; j++) {
+                    let txt = srcRefToText(`${infType}:${parsed.value[j]}`);
+                    strs.push(txt);
+                }
+                // merge selector list
+                let str = strs.join(", ");
+                // return selector list
+                spl[i] = str;
+            }
+        }
+        // return
+        return spl.join(" ");
     }
     
     /**

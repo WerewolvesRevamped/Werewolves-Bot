@@ -114,5 +114,30 @@ module.exports = function() {
 		return loc ? true : false;
 	}
     
+    /**
+    Parse location name
+    Returns a location name in db format
+    **/
+    function parseLocation(name) {
+        return name.toLowerCase().replace(/[^a-z\$ ]/g,"").trim();
+    }
+    
+    /**
+    Location send
+    used to send a message to a location
+    **/
+    this.locationSend = function(locationName, message, color = EMBED_GRAY, thumbnail = null, title = null) {
+        let parsedLocationName = parseLocation(locationName);
+        sql("SELECT channel_id FROM locations WHERE name = " + connection.escape(parsedLocationName), result => {
+            let loc_sc_id = result[0].channel_id;
+            let loc_sc = stats.guild.channels.cache.get(loc_sc_id);
+            embed = basicEmbed(message, color);
+            if(thumbnail) embed.embeds[0].thumbnail = { url: thumbnail }; // add thumbnail
+            if(title) embed.embeds[0].title = title; // add title
+            loc_sc.send(embed);
+        });
+
+    }
+    
     
 }

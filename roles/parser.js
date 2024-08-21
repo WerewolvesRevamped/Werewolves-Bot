@@ -755,7 +755,7 @@ module.exports = function() {
             exp = new RegExp("^Reveal " + targetType + " to " + locationType + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "announcement", target: ttpp(fd[2], "location"), info: fd[1] };
+                ability = { type: "announcement", target: ttpp(fd[2], "location"), info: ttpp(fd[1]) };
             }
             // reveal
             exp = new RegExp("^(Learn|Know) " + targetType + "$", "g");
@@ -1186,7 +1186,7 @@ module.exports = function() {
     Infer Type
     attempts to infer a target type type 
     **/
-    function inferType(targetType) {
+    this.inferType = function(targetType) {
         let first = targetType[0];
         if(first == "&") {
             return "alignment";
