@@ -77,6 +77,9 @@ module.exports = function() {
             case "process_evaluate":
                 return await abilityProcessEvaluate(src_ref, src_name, ability, additionalTriggerData);
             break;
+            case "abilities":
+                return await abilityAbilities(src_ref, src_name, ability, additionalTriggerData);
+            break;
             case "announcement":
                 return await abilityAnnouncement(src_ref, src_name, ability, additionalTriggerData);
             break;

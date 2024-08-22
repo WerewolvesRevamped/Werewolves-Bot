@@ -139,18 +139,27 @@ module.exports = function() {
                     // get p/e
                     let evaluate = abilities[1][i].ability;
                     let storedCondition = null;
+                    let storedConditionIndex = -1;
                     // parse conditions
-                    evaluate.sub_abilities = evaluate.sub_abilities.map(el => {
-                        if(el.ability.type === "condition") {
-                            storedCondition = el.condition;
-                            return el;
+                    for(let i = 0; i < evaluate.sub_abilities.length; i++) {
+                        if(evaluate.sub_abilities[i].ability.type === "condition") { // store a condiiton and create an abilities block
+                            storedCondition = true;
+                            storedConditionIndex = i;
+                            evaluate.sub_abilities[i].condition_text = evaluate.sub_abilities[i].condition;
+                            evaluate.sub_abilities[i].condition = parseCondition(evaluate.sub_abilities[i].condition);
+                            evaluate.sub_abilities[i].ability = { type: "abilities", sub_abilities: [ ] };
+                        } else if(storedCondition && !evaluate.sub_abilities[i].condition) { // use stored condition, pushes the ability into that conditions block
+                            evaluate.sub_abilities[storedConditionIndex].ability.sub_abilities.push(evaluate.sub_abilities[i].ability);
+                            delete evaluate.sub_abilities[i]; // we cant write to this directly as we want the object to persist in the other array we just copied it too
+                            evaluate.sub_abilities[i] = { ability: { type: "blank" } };
+                        } else { // default, parse condition
+                            storedCondition = false;
+                            evaluate.sub_abilities[i].condition_text = evaluate.sub_abilities[i].condition;
+                            evaluate.sub_abilities[i].condition = parseCondition(evaluate.sub_abilities[i].condition);
                         }
-                        let ret = el;
-                        ret.condition_text = ret.condition ?? storedCondition;
-                        ret.condition = parseCondition(ret.condition_text);
-                        return ret;
-                    });
-                    evaluate.sub_abilities = evaluate.sub_abilities.filter(el => el.ability.type != "condition");
+                    }
+                    // remove blank abilities
+                    evaluate.sub_abilities = evaluate.sub_abilities.filter(el => el.ability.type != "blank");
                     // reformat p/e
                     abilities[1][i].ability = { type: "process_evaluate", process: { type: "process", sub_abilities: [ ] }, evaluate: evaluate }; // replace "evaluate" with a combined P/E ability
                 }
@@ -225,6 +234,31 @@ module.exports = function() {
         if(fd) {
             cond = { type: "comparison", subtype: "not_equal", first: ttpp(fd[1]), second: ttpp(fd[2]) };
         }
+        /** Existence **/
+        exp = new RegExp("^" + targetType + " exists$", "g");
+        fd = exp.exec(condition);
+        if(fd) {
+            cond = { type: "existence", target: ttpp(fd[1]) };
+        }
+        /** Logic **/
+        // not
+        exp = new RegExp("^not \\((.+?)\\)$", "g");
+        fd = exp.exec(condition);
+        if(fd) {
+            cond = { type: "logic", subtype: "not", condition: parseCondition(fd[1]) };
+        }
+        // and
+        exp = new RegExp("^\\((.+?)\\) and \\((.+?)\\)$", "g");
+        fd = exp.exec(condition);
+        if(fd) {
+            cond = { type: "logic", subtype: "and", condition1: parseCondition(fd[1]), condition2: parseCondition(fd[2]) };
+        }
+        // or
+        exp = new RegExp("^\\((.+?)\\) or \\((.+?)\\)$", "g");
+        fd = exp.exec(condition);
+        if(fd) {
+            cond = { type: "logic", subtype: "or", condition1: parseCondition(fd[1]), condition2: parseCondition(fd[2]) };
+        }
         
         if(cond) {
             return cond;
@@ -288,7 +322,6 @@ module.exports = function() {
             
             // check for P/E Condition
             let abilityLineSplitPE = abilityLine.split(/(?<!List|Action|Process|Evaluate): |(?<!List|Action|Process|Evaluate):$/);
-            console.log(abilityLineSplitPE);
             let peCond;
             if(abilityLineSplitPE.length == 2) { // evaluate condition
                 abilityLine = abilityLineSplitPE[1].trim();
