@@ -52,6 +52,33 @@ module.exports = function() {
 	this.isPublic = function(channel) {
 		return !channel.parent ? false : channel.parentId === cachedPublic;
 	}
+    
+    
+    /**
+    Cache Locations
+    caches the current state of the locations database
+    **/
+    this.cachedLocations = [];
+    this.cacheLocations = function() {
+		sql("SELECT name FROM locations", result => {
+				cachedLocations = result.map(el => el.name);
+		}, () => {
+			log("Game > ❗❗❗ Unable to cache locations!");
+		});
+	}
+    
+    /**
+    Cache Polls
+    caches the current state of the polls database
+    **/
+    this.cachedPolls = [];
+    this.cachePolls = function() {
+		sql("SELECT name FROM polls", result => {
+				cachedPolls = result.map(el => el.name);
+		}, () => {
+			log("Game > ❗❗❗ Unable to cache polls!");
+		});
+	}
 	
     
 }

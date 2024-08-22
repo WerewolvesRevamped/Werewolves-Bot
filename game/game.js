@@ -11,6 +11,8 @@ require("./caching.js")();
 require("./cleanup.js")();
 require("./phase.js")();
 require("./locations.js")();
+require("./polls.js")();
+
 module.exports = function() {
 
 	/* Handles start command */

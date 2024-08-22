@@ -51,7 +51,7 @@ module.exports = function() {
                 "host": ["ho"],
                 "demote_unhost": ["v"],
                 "promote_host": ["^"],
-                "poll": ["polls","pl"],
+                "polls": ["poll","pl"],
                 "emojis": ["emoji","e"],
                 "help": ["h"],
                 "impersonate": ["imp"],

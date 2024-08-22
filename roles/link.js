@@ -84,6 +84,22 @@ module.exports = function() {
     }
     
     /**
+    Command: $polls query
+    Runs queryPolls to query all polls from github
+    **/
+    this.cmdPollsQuery = async function(channel) {
+        channel.send(`🔄 Querying polls. Please wait. This may take several minutes.`);
+        try {
+            const output = await queryPolls();
+            output.forEach(el => channel.send(`❗ ${el}`));
+        } catch(err) {
+            channel.send(`⛔ Querying polls failed.`);
+        }
+        channel.send(`✅ Querying polls completed.`);
+        cachePolls();
+    }
+    
+    /**
     Command: $roles parse
     Parses all roles currently stored in the DB from desc_formalized to parsed
     **/
@@ -95,7 +111,7 @@ module.exports = function() {
             channel.send(`✅ Successfully parsed \`${output.success}\` roles. `);
             channel.send(`😔 Failed to parse \`${output.failure}\` roles. `);
         } catch(err) {
-            channel.send(`⛔ Querying roles failed.`);
+            channel.send(`⛔ Parsing roles failed.`);
         }
         channel.send(`✅ Parsing roles completed. `);
     }
@@ -112,9 +128,26 @@ module.exports = function() {
             channel.send(`✅ Successfully parsed \`${output.success}\` groups. `);
             channel.send(`😔 Failed to parse \`${output.failure}\` groups. `);
         } catch(err) {
-            channel.send(`⛔ Querying groups failed.`);
+            channel.send(`⛔ Parsing groups failed.`);
         }
         channel.send(`✅ Parsing groups completed. `);
+    }
+    
+    /**
+    Command: $polls parse
+    Parses all polls currently stored in the DB from desc_formalized to parsed
+    **/
+    this.cmdPollsParse = async function(channel) {
+        channel.send(`🔄 Parsing polls. Please wait. This may take several minutes.`);
+        try {
+            const output = await parsePolls();
+            output.output.forEach(el => channel.send(`❗ ${el}`));
+            channel.send(`✅ Successfully parsed \`${output.success}\` polls. `);
+            channel.send(`😔 Failed to parse \`${output.failure}\` polls. `);
+        } catch(err) {
+            channel.send(`⛔ Parsing polls failed.`);
+        }
+        channel.send(`✅ Parsing polls completed. `);
     }
     
     /**
@@ -145,6 +178,14 @@ module.exports = function() {
         channel.send(`🔄 Parsing groups. Please wait. This may take several minutes.`);
         output = await parseGroups();
         channel.send(`❗ Parsing groups completed with \`${output.output.length}\` errors.`);
+        // query polls
+        channel.send(`🔄 Querying polls. Please wait. This may take several minutes.`);
+        output = await queryPolls();
+        channel.send(`❗ Querying polls completed with \`${output.length}\` errors.`);
+        // parse polls
+        channel.send(`🔄 Parsing polls. Please wait. This may take several minutes.`);
+        output = await parsePolls();
+        channel.send(`❗ Parsing polls completed with \`${output.output.length}\` errors.`);
         /** No Parsing */
         // query info
         channel.send(`🔄 Querying info. Please wait. This may take several minutes.`);
@@ -426,11 +467,63 @@ module.exports = function() {
     }
     
     /** 
+    Query Polls
+    queries all polls from github
+    **/
+    async function queryPolls() {
+        return await runQuery(clearPolls, pollpathsPath, queryPollsCallback, 2);
+    }
+    
+    /**
+    Clear Groups
+    deletes the entire contents of the groups database
+    **/
+     function clearPolls() {
+		sql("DELETE FROM polls");
+	}
+    
+    /** 
+    Query Polls - Callback
+    queries all groups from github
+    **/
+    async function queryPollsCallback(path, name) {
+        // extract values
+        var pollContents = await queryFile(path, name); // get the role contents
+        const dbName = getDBName(name); // get the db name
+        const pollName = getRoleDescName(pollContents); // grabs the role name inbetween the **'s in the first line
+        
+        // splt into lines
+        let pollLines = pollContents.split("\n");
+        pollLines.shift();
+        
+        let options = "", voters = "", show_voters = 1, formalized = [];
+        
+        // find specific key value
+        pollLines.forEach(el => {
+            let spl = el.split(": ");
+            switch(spl[0]) {
+                case "Available Options": options = spl[1]; break;
+                case "Allowed Voters": voters = spl[1]; break;
+                case "Show Voters": show_voters = +(spl[1] === "Yes"); break;
+                default: formalized.push(el); break;
+            }
+        });
+        
+        // merge formalized
+        formalized = formalized.join("\n");
+
+        // imsert the role into the databse
+        sql("INSERT INTO polls (name,display_name,options,voters,show_voters,desc_formalized) VALUES (" + connection.escape(dbName) + "," + connection.escape(pollName) + "," + connection.escape(options) + "," + connection.escape(voters) + "," + show_voters + "," + connection.escape(formalized) + ")");
+        // return nothing
+        return null;
+    }
+    
+    /** 
     Query Locations
     queries all locations from github
     **/
     async function queryLocations() {
-        return await runQuery(clearLocations, locationpathsPath, queryLocationsCallback, 3);
+        return await runQuery(clearLocations, locationpathsPath, queryLocationsCallback, 2);
     }
     
     /**
@@ -544,6 +637,24 @@ module.exports = function() {
     **/
     async function parseGroups() {
         return await runParser("groups", cachedGroups);
+    }
+    
+    /**
+    Parse Polls
+    Parses all polls
+    **/
+    async function parsePolls() {
+        return await runParser("polls", cachedPolls);
+    }
+    
+    /**
+    Command: Parse
+    parses a single game element
+    **/
+    this.cmdParse = async function(channel, args) {
+        let result = await runParser(args[0], [ args[1] ]);
+        result.output.forEach(el => channel.send(`❗ ${el}`));
+        channel.send(`Parsed \`${args[1]}\` as \`${args[0]}\`.`);
     }
     
     /**

@@ -58,6 +58,8 @@ client.on("ready", async () => {
 	setTimeout(function() {
 		getIDs();
 		cacheRoleInfo();
+        cacheLocations();
+        cachePolls();
         getSCCats();
 		getVotes();
 		getCCs();
@@ -342,6 +344,9 @@ client.on("messageCreate", async message => {
     case "execute": // executes an ability (not documented!!)
         if(checkGM(message)) cmdExecute(message, message.content.substr(8 + stats.prefix.length));
     break;
+    case "parse": // parses a game element (not documented!!)
+        if(checkGM(message)) cmdParse(message.channel, args);
+    break;
     case "phase": // executes an ability (not documented!!)
         if(checkGM(message)) cmdPhase(message, args);
     break;
@@ -388,7 +393,11 @@ client.on("messageCreate", async message => {
 	break;
 	/* locations */ // Command for locations (undocumentated)
 	case "locations": 
-		if(checkGM(message)) cmdLocations(message, args, argsX);
+		if(checkGM(message)) cmdLocations(message, args);
+	break;
+	/* polls */ // Command for locations (undocumentated)
+	case "polls": 
+		if(checkGM(message)) cmdPolls(message, args);
 	break;
 	/* Update */ // Updates all github linked data
 	case "update":
@@ -543,10 +552,6 @@ client.on("messageCreate", async message => {
 	/* Emoji */
 	case "emojis":
 		cmdEmojis(message.channel);
-	break;
-	/* Poll */
-	case "poll":
-		if(checkGM(message)) cmdPoll(message, args);
 	break;
 	/* Promote */
 	case "promote":

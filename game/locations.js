@@ -8,7 +8,7 @@ module.exports = function() {
     Command: $locations
     Handle location command
     **/
-	this.cmdLocations = function(message, args, argsX) {
+	this.cmdLocations = function(message, args) {
 		// Check subcommand
 		if(!args[0]) { 
 			message.channel.send("⛔ Syntax error. Not enough parameters!"); 
@@ -87,20 +87,6 @@ module.exports = function() {
 		}, () => {
 			// DB error
 			channel.send("⛔ Database error. Couldn't look for location list!");
-		});
-	}
-    
-    
-    /**
-    Cache Locations
-    caches the current state of the locations database
-    **/
-    this.cachedLocations = [];
-    this.cacheLocations = function() {
-		sql("SELECT name FROM locations", result => {
-				cachedLocations = result.map(el => el.name);
-		}, () => {
-			log("Game > ❗❗❗ Unable to cache locations!");
 		});
 	}
     

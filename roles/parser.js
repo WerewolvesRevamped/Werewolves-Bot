@@ -211,7 +211,7 @@ module.exports = function() {
 
     /** REGEX - Reminder: You need double \'s here **/
     // general
-    const targetType = "(`[^`]*`|@\\S*|#\\S*|%[^%]+%|randomize\\(.+?\\)|shuffle\\(.+?\\)|most_freq_role\\(.+?\\))";
+    const targetType = "(`[^`]*`|@\\S*|&\\S*|#\\S*|%[^%]+%|randomize\\(.+?\\)|shuffle\\(.+?\\)|most_freq_role\\(.+?\\))";
     const attrDuration = "( \\(~[^\)]+\\))?";
     const locationType = "(`[^`]*`|@\\S*|#\\S*)"; // extended version of target type
     const groupType = "(@\\S*|#\\S*)"; // reduced version of location type
@@ -730,25 +730,31 @@ module.exports = function() {
             exp = new RegExp("^Create `" + str + "` Poll in " + locationType + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "poll", subtype: "creation", target: fd[1], poll_location: fd[2] };
+                ability = { type: "poll", subtype: "creation", target: ttpp(fd[1], "poll"), poll_location: ttpp(fd[2], "location") };
+            }
+            // poll creates itself
+            exp = new RegExp("^Create Poll in " + locationType + "$", "g");
+            fd = exp.exec(abilityLine);
+            if(fd) {
+                ability = { type: "poll", subtype: "creation", target: "@self[poll]", poll_location: ttpp(fd[1], "location") };
             }
             // Cancel polls resulting ability
             exp = new RegExp("^Cancel `" + str + "` Poll$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "poll", subtype: "cancellation", target: fd[1] };
+                ability = { type: "poll", subtype: "cancellation", target: ttpp(fd[1], "poll") };
             }
             // Delete a poll
             exp = new RegExp("^Delete `" + str + "` Poll$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "poll", subtype: "deletion", target: fd[1] };
+                ability = { type: "poll", subtype: "deletion", target: ttpp(fd[1], "poll") };
             }
             // Delete a poll
             exp = new RegExp("^Manipulate `" + str + "` Poll \\(" + targetType + " is `" + pollManipManipSubtype + "`\\)$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "poll", subtype: "manipulation", target: ttpp(fd[1]), manip_target: fd[2], manip_type: lc(fd[3]) };
+                ability = { type: "poll", subtype: "manipulation", target: ttpp(fd[1], "poll"), manip_target: fd[2], manip_type: lc(fd[3]) };
             }
             /** ANNOUNCEMENTS **/
             // reveal
@@ -1160,6 +1166,7 @@ module.exports = function() {
     attribute
     alignment
     group
+    poll
     abilityType
     abilitySubtype
     location (locations includes unique locations as well as all players and groups)
