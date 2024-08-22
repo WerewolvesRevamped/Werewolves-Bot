@@ -26,8 +26,17 @@ module.exports = function() {
     Trigger Handler
     handle a trigger triggering (for everyone)
     **/
-    this.triggerHandler = function(triggerName, additionalTriggerData = {}) {
+    this.triggerHandler = async function(triggerName, additionalTriggerData = {}) {
         abilityLog(`🔷 **Trigger:** ${triggerName}`);  
+        await triggerHandlerPlayers(triggerName, additionalTriggerData);
+        await triggerHandlerGroups(triggerName, additionalTriggerData);
+    }
+    
+    /**
+    Trigger Handler - Players
+    handles a trigger triggering for ALL players
+    **/
+    function triggerHandlerPlayers(triggerName, additionalTriggerData) {
         return new Promise(res => {
             // get all players
             sql("SELECT role,id FROM players WHERE type='player' AND alive=1", async r => {
@@ -42,44 +51,96 @@ module.exports = function() {
     }
     
     /**
+    Trigger Handler - Groups
+    handles a trigger triggering for ALL groups
+    **/
+    function triggerHandlerGroups(triggerName, additionalTriggerData) {
+        return new Promise(res => {
+            // get all players
+            sql("SELECT name,channel_id FROM active_groups WHERE disbanded=0", async r => {
+                // get their groups's data
+                for(let pr of r) {
+                    await triggerHandlerGroup(pr, triggerName, additionalTriggerData);
+                }
+                // resolve outer promise
+                res();
+            });
+        });
+    }
+    
+    /**
     Trigger Handler - Player
     handles trigger triggering for a single player
     **/
     async function triggerHandlerPlayer(pr, triggerName, additionalTriggerData = {}) {
         await new Promise(res => {
             sql("SELECT * FROM roles WHERE name=" + connection.escape(pr.role), async result => {
+                if(!result[0]) {
+                    abilityLog(`🔴 **Skipped Player:** <@${toTitleCase(pr.id)}>. Unknown role \`${toTitleCase(pr.role)}\`.`);
+                    res();
+                }
                 // parse the formalized desc into an object
                 let parsed = JSON.parse(result[0].parsed);
-                // grab the triggers
-                let triggers = parsed.triggers;
-                // filter out the relevant triggers
-                triggers = triggers.filter(el => el.trigger == triggerName);
-                // execute all relevant triggers
-                for(const trigger of triggers) {
-                    if(trigger.complex) { // WIP: do additional evaluation for complex triggers
-                        let param = trigger.trigger_parameter;
-                        switch(triggerName) {
-                            case "On Death Complex":
-                            case "On Killed Complex":
-                                let selector = await parsePlayerSelector(param);
-                                if(selector.includes(additionalTriggerData.this)) {
-                                    await executeTrigger(`player:${pr.id}`, `role:${pr.role}`, trigger, triggerName, additionalTriggerData);
-                                } else {
-                                    abilityLog(`🔴 **Skipped Trigger:** <@${pr.id}> (${toTitleCase(triggerName)}). Failed complex condition \`${param}\`.`);
-                                }
-                            break;
-                            default:
-                                abilityLog(`❗ **Skipped Trigger:** <@${pr.id}> (${toTitleCase(triggerName)}). Unknown complex trigger.`);
-                            break;
-                        }
-                    } else { // always execute for normal triggers
-                        await executeTrigger(`player:${pr.id}`, `role:${pr.role}`, trigger, triggerName, additionalTriggerData);
-                    }
-                }
+                await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `player:${pr.id}`, `role:${pr.role}`);
                 // resolve outer promise
                 res();
             });            
         });
+    }
+    
+    /**
+    Trigger Handler - Group
+    handles trigger triggering for a single group
+    **/
+    async function triggerHandlerGroup(pr, triggerName, additionalTriggerData = {}) {
+        await new Promise(res => {
+            sql("SELECT * FROM groups WHERE name=" + connection.escape(pr.name), async result => {
+                if(!result[0]) {
+                    abilityLog(`🔴 **Skipped Group:** <#${pr.channel_id}>. Unknown group \`${toTitleCase(pr.name)}\`.`);
+                    res();
+                }
+                // parse the formalized desc into an object
+                let parsed = JSON.parse(result[0].parsed);
+                await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `group:${pr.channel_id}`, `group:${pr.name}`);
+                // resolve outer promise
+                res();
+            });            
+        });
+    }
+    
+    /**
+    Handles the parsed data of a game component in a trigger
+    **/
+    async function triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, src_ref, src_name) {
+        // grab the triggers
+        let triggers = parsed.triggers;
+        // filter out the relevant triggers
+        triggers = triggers.filter(el => el.trigger == triggerName);
+        // execute all relevant triggers
+        for(const trigger of triggers) {
+            // COMPLEX TRIGGERS
+            if(trigger.complex) {
+                let param = trigger.trigger_parameter;
+                switch(triggerName) {
+                    case "On Death Complex":
+                    case "On Killed Complex":
+                        let selector = await parsePlayerSelector(param);
+                        if(selector.includes(additionalTriggerData.this)) {
+                            await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
+                        } else {
+                            abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\`.`);
+                        }
+                    break;
+                    default:
+                        abilityLog(`❗ **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Unknown complex trigger.`);
+                    break;
+                }
+            }
+            // NORMAL TRIGGERS
+            else { // always execute for normal triggers
+                await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
+            }
+        }
     }
     
     /**

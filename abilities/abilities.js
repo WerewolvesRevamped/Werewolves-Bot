@@ -106,58 +106,62 @@ module.exports = function() {
     used to send feedback for abilities (and probably prompts?)
     **/
     this.abilitySend = function(src_ref, message, color = EMBED_GRAY, ping = false, footer = false, thumbnail = null, title = null) {
-        let player_id = srcToValue(src_ref);
-        let type = srcToType(src_ref);
-        
-        switch(type) {
-            case "player":
-                sql("SELECT channel_id FROM connected_channels WHERE id = " + connection.escape(player_id), result => {
-                    let player_sc_id = result[0].channel_id;
-                    let player_sc = stats.guild.channels.cache.get(player_sc_id);
-                    embed = basicEmbed(message, color);
-                    if(ping) embed.embed.content =  `<@&${stats.participant}>`; // add ping
-                    if(footer) embed.embeds[0].footer = { text: footer }; // add footer
-                    if(thumbnail) embed.embeds[0].thumbnail = { url: thumbnail }; // add thumbnail
-                    if(title) embed.embeds[0].title = title; // add title
-                    player_sc.send(embed);
-                });
-            break;
-            default:
-                abilityLog(`❗ **Error:** Unknown type for sending ability!`);
-            break;
-        }
+        // just use the promise variant but dont wait
+        abilitySendProm(src_ref, message, color, ping, footer, thumbnail, title);
     }
     
     /**
     Ability Feedback + Return new message ID
     **/
-    this.abilitySendProm = function(src_ref, message, color = EMBED_GRAY, ping = false, footer = false, thumbnail = null, title = null) {
-        let player_id = srcToValue(src_ref);
+    this.abilitySendProm = async function(src_ref, message, color = EMBED_GRAY, ping = false, footer = false, thumbnail = null, title = null) {
+        let ref = srcToValue(src_ref);
         let type = srcToType(src_ref);
+        let channel_id = null;
         
-        
+        // get channel id by type
         switch(type) {
             case "player":
-                return new Promise(res => {
-                        sql("SELECT channel_id FROM connected_channels WHERE id = " + connection.escape(player_id), result => {
-                            let player_sc_id = result[0].channel_id;
-                            let player_sc = stats.guild.channels.cache.get(player_sc_id);
-                            embed = basicEmbed(message, color);
-                            if(ping) embed.content =  `<@&${stats.participant}>`; // add ping
-                            if(footer) embed.embeds[0].footer = { text: footer }; // add footer
-                            if(thumbnail) embed.embeds[0].thumbnail = { url: thumbnail }; // add thumbnail
-                            if(title) embed.embeds[0].title = title; // add title
-                            player_sc.send(embed).then(msg => {
-                                res(msg.id);
-                            });
-                        });
-                    });      
+                channel_id = await abilitySendGetPlayerChannel(ref);
+            break;
+            case "group":
+                channel_id = ref; // group ref already is channel id
             break;
             default:
                 abilityLog(`❗ **Error:** Unknown type for sending ability!`);
             break;
         }
         
+        if(!channel_id) {
+            abilityLog(`❗ **Error:** Channel not found!`);
+            return null;
+        }
+        
+        // get channel
+        let sc = stats.guild.channels.cache.get(channel_id);
+        // create embed
+        embed = basicEmbed(message, color);
+        if(ping) embed.content =  `<@&${stats.participant}>`; // add ping
+        if(footer) embed.embeds[0].footer = { text: footer }; // add footer
+        if(thumbnail) embed.embeds[0].thumbnail = { url: thumbnail }; // add thumbnail
+        if(title) embed.embeds[0].title = title; // add title
+        // send embed
+        return new Promise(res => {
+            sc.send(embed).then(msg => {
+                res(msg.id);
+            });
+        });
+        
+    }
+    
+    /**
+    Get Player Channel
+    **/
+    function abilitySendGetPlayerChannel(player_id) {
+        return new Promise(res => {
+            sql("SELECT channel_id FROM connected_channels WHERE id = " + connection.escape(player_id), result => {
+                res(result[0].channel_id);
+            });
+        });      
     }
     
     /**

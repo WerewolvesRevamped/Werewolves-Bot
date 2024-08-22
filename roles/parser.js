@@ -1210,7 +1210,7 @@ module.exports = function() {
         } else if(first == "`") {
             switch(targetType) {
                 case "`Success`": case "`Failure`": return "success";
-                default: return "role";
+                default: return targetType.includes("@") || targetType.length > 30 ? "info" : "role";
             }
         } else {
             return "unknown"; // this should never occur
