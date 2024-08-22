@@ -30,6 +30,7 @@ module.exports = function() {
         abilityLog(`🔷 **Trigger:** ${triggerName}`);  
         await triggerHandlerPlayers(triggerName, additionalTriggerData);
         await triggerHandlerGroups(triggerName, additionalTriggerData);
+        await triggerHandlerPolls(triggerName, additionalTriggerData);
     }
     
     /**
@@ -61,6 +62,25 @@ module.exports = function() {
                 // get their groups's data
                 for(let pr of r) {
                     await triggerHandlerGroup(pr, triggerName, additionalTriggerData);
+                }
+                // resolve outer promise
+                res();
+            });
+        });
+    }
+    
+    /**
+    Trigger Handler - Polls
+    handles a trigger triggering for ALL polls
+    **/
+    function triggerHandlerPolls(triggerName, additionalTriggerData) {
+        return new Promise(res => {
+            // get all players
+            sql("SELECT name,parsed FROM polls", async r => {
+                // no need for an extra layer for polls
+                for(let pr of r) {
+                    let parsed = JSON.parse(pr.parsed);
+                    await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `poll:${pr.name}`, `poll:${pr.name}`);
                 }
                 // resolve outer promise
                 res();

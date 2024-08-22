@@ -82,8 +82,11 @@ module.exports = function() {
             case "player":
                 return getPlayerTarget(srcVal);
             break;
-            case "player":
+            case "group":
                 return getGroupTarget(srcVal);
+            break;
+            case "poll":
+                return getPollTarget(srcVal);
             break;
             default:
                 abilityLog(`❗ **Error:** Unsupported type ${srcType} for targeting!`);  
@@ -105,6 +108,9 @@ module.exports = function() {
             break;
             case "group":
                 return setGroupTarget(srcVal, target);
+            break;
+            case "poll":
+                return setPollTarget(srcVal, target);
             break;
             default:
                 abilityLog(`❗ **Error:** Unsupported type ${srcType} for targeting!`);  
@@ -156,6 +162,30 @@ module.exports = function() {
     function setGroupTarget(channel_id, target) {
         return new Promise(res => {
             sql("UPDATE active_groups SET target=" + connection.escape(target) + " WHERE channel_id=" + connection.escape(channel_id), result => {
+                res();
+            });	
+        });
+    }
+    
+    /** PRIVATE
+    Set Target Poll
+    set the target for a poll
+    **/
+    function getPollTarget(name) {
+        return new Promise(res => {
+            sql("SELECT target FROM polls WHERE name=" + connection.escape(name), result => {
+                res(result[0].target);
+            });	
+        });
+    }
+    
+    /** PRIVATE
+    Set Target Poll
+    set the target for a poll
+    **/
+    function setPollTarget(name, target) {
+        return new Promise(res => {
+            sql("UPDATE polls SET target=" + connection.escape(target) + " WHERE name=" + connection.escape(name), result => {
                 res();
             });	
         });

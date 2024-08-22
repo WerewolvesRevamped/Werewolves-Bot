@@ -43,7 +43,7 @@ module.exports = function() {
             if(condBool) {
                 abilityLog(`▶️ **Entering Branch:** ${condTxt}`);
                 let result = await executeAbility(src_ref, src_name, evaluate[i].ability, [], additionalTriggerData);
-                return true;
+                return result;
             } else {
                 abilityLog(`◀️ **Skipping Branch:** ${condTxt}`);
             }

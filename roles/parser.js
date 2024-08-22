@@ -8,7 +8,7 @@ module.exports = function() {
     Debug Mode
     If set to true does console.log, if set to false does throw
     **/
-    const debugMode = false;
+    const debugMode = true;
     
     /**
     Ability Counter
@@ -116,25 +116,51 @@ module.exports = function() {
             
             /** P/E Reformatting **/
             for(let i = 0; i < abilities[1].length; i++) {
+                // is process and next is evaluate
                 if(abilities[1][i].ability.type === "process" && abilities[1][i + 1].ability.type === "evaluate") {
                     // get p/e
                     let process = abilities[1][i].ability;
                     let evaluate = abilities[1][i + 1].ability;
+                    let storedCondition = null;
                     // parse conditions
                     evaluate.sub_abilities = evaluate.sub_abilities.map(el => {
+                        if(el.ability.type === "condition") storedCondition = el.condition;
                         let ret = el;
-                        ret.condition_text = ret.condition;
-                        ret.condition = parseCondition(ret.condition);
+                        ret.condition_text = ret.condition ?? storedCondition;
+                        ret.condition = parseCondition(ret.condition_text);
                         return ret;
                     });
                     // reformat p/e
                     abilities[1][i].ability = { type: "process_evaluate", process: process, evaluate: evaluate }; // replace "process" with a combined P/E ability
                     abilities[1][i + 1].ability = { type: "blank" }; // delete "evaluate"
                 }
+                // is evaluate and no process
+                else if((i === 0 || abilities[1][i - 1].ability.type != "process") && abilities[1][i].ability.type === "evaluate") {
+                    // get p/e
+                    let evaluate = abilities[1][i].ability;
+                    let storedCondition = null;
+                    // parse conditions
+                    evaluate.sub_abilities = evaluate.sub_abilities.map(el => {
+                        if(el.ability.type === "condition") {
+                            storedCondition = el.condition;
+                            return el;
+                        }
+                        let ret = el;
+                        ret.condition_text = ret.condition ?? storedCondition;
+                        ret.condition = parseCondition(ret.condition_text);
+                        return ret;
+                    });
+                    evaluate.sub_abilities = evaluate.sub_abilities.filter(el => el.ability.type != "condition");
+                    // reformat p/e
+                    abilities[1][i].ability = { type: "process_evaluate", process: { type: "process", sub_abilities: [ ] }, evaluate: evaluate }; // replace "evaluate" with a combined P/E ability
+                }
             }
             
             /* Remove Blank */
             abilities[1] = abilities[1].filter(el => el.ability.type != "blank"); // remove blank lines
+            
+            
+            console.log("DONE");
             
             /** Formatting */
             /* Output */
@@ -204,7 +230,7 @@ module.exports = function() {
             return cond;
         } else {
             if(!debugMode) throw new Error(`Invalid Condition Type \`\`\`\n${condition}\n\`\`\``);
-            else trigger[1][a] = { type: "error" };
+            else return { type: "error" };
         }
         
     }
@@ -261,7 +287,8 @@ module.exports = function() {
             let isInlineEval = false;
             
             // check for P/E Condition
-            let abilityLineSplitPE = abilityLine.split(/(?<!List): |:$/);
+            let abilityLineSplitPE = abilityLine.split(/(?<!List|Action|Process|Evaluate): |(?<!List|Action|Process|Evaluate):$/);
+            console.log(abilityLineSplitPE);
             let peCond;
             if(abilityLineSplitPE.length == 2) { // evaluate condition
                 abilityLine = abilityLineSplitPE[1].trim();
@@ -305,14 +332,14 @@ module.exports = function() {
                 exp = new RegExp("^Attribute: has " + targetType + "$", "g");
                 fd = exp.exec(restrictions[rest]);
                 if(fd) {
-                    parsedRestrictions.push({ type: "attribute", subtype: "has", target: "@Self[player]", attribute: ttpp(fd[1], "attribute") });
+                    parsedRestrictions.push({ type: "attribute", subtype: "has", target: "@self[player]", attribute: ttpp(fd[1], "attribute") });
                     restFound = true;
                 }
                 // self lacks attribute
                 exp = new RegExp("^Attribute: lacks " + targetType + "$", "g");
                 fd = exp.exec(restrictions[rest]);
                 if(fd) {
-                    parsedRestrictions.push({ type: "attribute", subtype: "lacks", target: "@Self[player]", attribute: ttpp(fd[1], "attribute") });
+                    parsedRestrictions.push({ type: "attribute", subtype: "lacks", target: "@self[player]", attribute: ttpp(fd[1], "attribute") });
                     restFound = true;
                 }
                 // self has attribute
@@ -615,13 +642,13 @@ module.exports = function() {
             exp = new RegExp("^Join " + groupType + attrDuration + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "joining", subtype: "add", target: "@Self[player]", group: fd[1], membership_type: "member", duration: dd(fd[2], "persistent") };
+                ability = { type: "joining", subtype: "add", target: "@self[player]", group: fd[1], membership_type: "member", duration: dd(fd[2], "persistent") };
             }
             // joining with specific membership type
             exp = new RegExp("^Join " + groupType + " as `" + joiningSubtype + "`" + attrDuration + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "joining", subtype: "add", target: "@Self[player]", group: fd[1], membership_type: lc(fd[2]), duration: dd(fd[3], "persistent") };
+                ability = { type: "joining", subtype: "add", target: "@self[player]", group: fd[1], membership_type: lc(fd[2]), duration: dd(fd[3], "persistent") };
             }
             // add somebody else 
             exp = new RegExp("^Add " + targetType + " to " + groupType + attrDuration + "$", "g");
@@ -639,7 +666,7 @@ module.exports = function() {
             exp = new RegExp("^Leave " + groupType + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "joining", subtype: "remove", target: "@Self[player]", group: fd[1] };
+                ability = { type: "joining", subtype: "remove", target: "@self[player]", group: fd[1] };
             }
             // remove somebody else
             exp = new RegExp("^Remove " + targetType + " from " + groupType + "$", "g");
@@ -767,7 +794,7 @@ module.exports = function() {
             exp = new RegExp("^(Learn|Know) " + targetType + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "announcement", target: "@Self[player]", info: ttpp(fd[2]) };
+                ability = { type: "announcement", target: "@self[player]", info: ttpp(fd[2]) };
             }
             /** ROLE CHANGE **/
             // role change
@@ -793,7 +820,7 @@ module.exports = function() {
             exp = new RegExp("^Copy " + targetType + attrDuration + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "copying", subtype: "ability", target: ttpp(fd[1]), copy_to: "@Self[player]", duration: dd(fd[2], "permanent") };
+                ability = { type: "copying", subtype: "ability", target: ttpp(fd[1]), copy_to: "@self[player]", duration: dd(fd[2], "permanent") };
             }
             // copy abilities, target to target2
             exp = new RegExp("^Copy " + targetType + " to " + targetType + attrDuration + "$", "g");
@@ -811,13 +838,13 @@ module.exports = function() {
             exp = new RegExp("^Full Copy " + targetType + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "copying", subtype: "full", target: ttpp(fd[1]), copy_to: "@Self[player]", suppressed: false, duration: dd(fd[2], "permanent") };
+                ability = { type: "copying", subtype: "full", target: ttpp(fd[1]), copy_to: "@self[player]", suppressed: false, duration: dd(fd[2], "permanent") };
             }
             // full copy, surpressed
             exp = new RegExp("^Full Copy " + targetType + " \\(Suppressed\\)$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "copying", subtype: "full", target: ttpp(fd[1]), copy_to: "@Self[player]", suppressed: true, duration: dd(fd[2], "permanent") };
+                ability = { type: "copying", subtype: "full", target: ttpp(fd[1]), copy_to: "@self[player]", suppressed: true, duration: dd(fd[2], "permanent") };
             }
             /** CHOICES **/
             
@@ -841,7 +868,7 @@ module.exports = function() {
             exp = new RegExp("^Disband$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "disband", target: "@Self[player]" };
+                ability = { type: "disband", target: "@self[player]" };
             }
             // disband
             exp = new RegExp("^Disband " + targetType + "$", "g");
@@ -854,31 +881,31 @@ module.exports = function() {
             exp = new RegExp("^Increment Counter$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "counting", subtype: "increment", counter_value: 1, target: "@Self[player]" };
+                ability = { type: "counting", subtype: "increment", counter_value: 1, target: "@self[player]" };
             }
             // decrement self by 1
             exp = new RegExp("^Decrement Counter$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "counting", subtype: "decrement", counter_value: 1, target: "@Self[player]" };
+                ability = { type: "counting", subtype: "decrement", counter_value: 1, target: "@self[player]" };
             }
             // increment self by value
             exp = new RegExp("^Increment Counter by " + num + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "counting", subtype: "increment", counter_value: fd[1], target: "@Self[player]" };
+                ability = { type: "counting", subtype: "increment", counter_value: fd[1], target: "@self[player]" };
             }
             // decrement self by value
             exp = new RegExp("^Decrement Counter by " + num + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "counting", subtype: "decrement", counter_value: fd[1], target: "@Self[player]" };
+                ability = { type: "counting", subtype: "decrement", counter_value: fd[1], target: "@self[player]" };
             }
             // set counter to value
             exp = new RegExp("^Set Counter to " + num + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "counting", subtype: "set", counter_value: fd[1], target: "@Self[player]" };
+                ability = { type: "counting", subtype: "set", counter_value: fd[1], target: "@self[player]" };
             }
             // increment self by 1, for target
             exp = new RegExp("^Increment Counter for " + targetType + "$", "g");
@@ -915,7 +942,7 @@ module.exports = function() {
             exp = new RegExp("^Conversation Reset$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "reset", target: "@Self[player]" };
+                ability = { type: "reset", target: "@self[player]" };
             }
             // conversation reset target
             exp = new RegExp("^Conversation Reset " + targetType + "$", "g");
@@ -1008,6 +1035,10 @@ module.exports = function() {
                     trigger[1][a].condition = peCond;
                     trigger[1][a].inline_eval = true;
                 }
+            } else if(!ability && peCond && peCond.length > 0) {
+                //console.log("IDENT", ability);
+                trigger[1][a] = { depth: (+bullets.indexOf(trigger[1][a].trim()[0])) + 1, ability: { type: "condition", id: abilityCounter++ }, parameters: { }, condition: peCond };
+                if(isInlineEval) trigger[1][a].inline_eval = true;
             } else if(abilityLine == "") {
                 trigger[1][a] = { depth: (+bullets.indexOf(trigger[1][a].trim()[0])) + 1, ability: { type: "blank", id: abilityCounter++ }, parameters: { } };
             } else {

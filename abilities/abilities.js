@@ -126,6 +126,9 @@ module.exports = function() {
             case "group":
                 channel_id = ref; // group ref already is channel id
             break;
+            case "poll":
+                channel_id = "1276250651097170022"; // poll log is hardcoded
+            break;
             default:
                 abilityLog(`❗ **Error:** Unknown type for sending ability!`);
             break;
