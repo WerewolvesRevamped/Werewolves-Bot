@@ -87,8 +87,8 @@ module.exports = function() {
             if(hasDef) continue;
             
             // run the on death trigger
-            await trigger(targets[i], "On Death", { attacker: src_ref, death_type: "lynch", attack_source: src_name }); 
-            await trigger(targets[i], "On Lynch", { attacker: src_ref, death_type: "lynch", attack_source: src_name }); 
+            await triggerPlayer(targets[i], "On Death", { attacker: src_ref, death_type: "lynch", attack_source: src_name }); 
+            await triggerPlayer(targets[i], "On Lynch", { attacker: src_ref, death_type: "lynch", attack_source: src_name }); 
             await triggerHandler("On Death Complex", { attacker: src_ref, death_type: "lynch", attack_source: src_name, this: targets[i] }); 
             
             // execute the kill
@@ -156,8 +156,8 @@ module.exports = function() {
     **/
     async function killDeathTriggers(target, src_ref, type, src_name) {
         // normal triggers
-        await trigger(target, "On Death", { attacker: src_ref, death_type: type, attack_source: src_name }); 
-        await trigger(target, "On Killed", { attacker: src_ref, death_type: type, attack_source: src_name }); 
+        await triggerPlayer(target, "On Death", { attacker: src_ref, death_type: type, attack_source: src_name }); 
+        await triggerPlayer(target, "On Killed", { attacker: src_ref, death_type: type, attack_source: src_name }); 
         // complex triggers
         await triggerHandler("On Death Complex", { attacker: src_ref, death_type: type, attack_source: src_name, this: target }); 
         await triggerHandler("On Killed Complex", { attacker: src_ref, death_type: type, attack_source: src_name, this: target }); 
@@ -211,26 +211,26 @@ module.exports = function() {
         if(defense) { // defense successful, log and continue
             abilityLog(`✅ ${srcRefToText(src_ref)} attacked <@${pid}> - failed due to:\`\`\`${JSON.stringify(defense)}\`\`\``);
             // run defense triggers
-            await trigger(pid, "On Defense", { attacker: src_ref, killing_type: type, attack_source: src_name }); 
+            await triggerPlayer(pid, "On Defense", { attacker: src_ref, killing_type: type, attack_source: src_name }); 
             switch(defenseType) {
                 case "absence":
-                    await trigger(pid, "On Absence Defense", { attacker: src_ref, killing_type: type, attack_source: src_name }); 
+                    await triggerPlayer(pid, "On Absence Defense", { attacker: src_ref, killing_type: type, attack_source: src_name }); 
                     await useAttribute(defense.ai_id);
                 break;
                 case "active":
-                    await trigger(pid, "On Active Defense", { attacker: src_ref, killing_type: type, attack_source: src_name }); 
+                    await triggerPlayer(pid, "On Active Defense", { attacker: src_ref, killing_type: type, attack_source: src_name }); 
                     await useAttribute(defense.ai_id);
                 break;
                 case "passive":
-                    await trigger(pid, "On Passive Defense", { attacker: src_ref, killing_type: type, attack_source: src_name }); 
+                    await triggerPlayer(pid, "On Passive Defense", { attacker: src_ref, killing_type: type, attack_source: src_name }); 
                     await useAttribute(defense.ai_id);
                 break;
                 case "partial":
-                    await trigger(pid, "On Partial Defense", { attacker: src_ref, killing_type: type, attack_source: src_name }); 
+                    await triggerPlayer(pid, "On Partial Defense", { attacker: src_ref, killing_type: type, attack_source: src_name }); 
                     await useAttribute(defense.ai_id);
                 break;
                 case "recruitment":
-                    await trigger(pid, "On Recruitment Defense", { attacker: src_ref, killing_type: type, attack_source: src_name }); 
+                    await triggerPlayer(pid, "On Recruitment Defense", { attacker: src_ref, killing_type: type, attack_source: src_name }); 
                     await useAttribute(defense.ai_id);
                 break;
             }
@@ -253,8 +253,7 @@ module.exports = function() {
        await mayorCheck();
        // send a reporter message
        reporterMessage(player_id);
-            
-        // get player
+        
         let player = stats.guild.members.cache.get(player_id);
         // revoke participant role
         removeRoleRecursive(player, false, stats.participant, "participant");

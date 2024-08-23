@@ -66,7 +66,7 @@ module.exports = function() {
         }
         
         // create poll
-        await createPoll(pollType, pollName, pollLocation, allOptions)
+        await createPoll(pollType, pollName, pollLocation, allOptions, src_ref);
         
         // feedback
         return { msg: "Poll created!", success: true };

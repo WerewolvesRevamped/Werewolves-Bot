@@ -191,7 +191,7 @@ module.exports = function() {
     pollLocation: Output of parseLocation
     options: an array of objects of form { id: <id>, emoji: <emoji>, type: "player" } or { name: <name>, emoji: <emoji>, type: "emoji" }
     **/
-    this.createPoll = async function(pollType, pollName, pollLocation, options) {
+    this.createPoll = async function(pollType, pollName, pollLocation, options, src_ref) {
         // get lut emoji if applicable
         let emoji = getLUTEmoji(pollType, pollName);
         
@@ -221,15 +221,15 @@ module.exports = function() {
             pollReact(pollDisMsg, emojis);
         }
         // create in DB
-        await createPollInDB(pollType, pollName, initialMsg.channel.id, initialMsg.id, pollMsgs);
+        await createPollInDB(pollType, pollName, initialMsg.channel.id, initialMsg.id, pollMsgs, src_ref);
     }
     
 	/** PRIVATE
     Creates an active poll entry in DB
     **/
-    function createPollInDB(type, name, channel, initial_message, messages) {
+    function createPollInDB(type, name, channel, initial_message, messages, src_ref) {
         return new Promise(res => {
-            sql("INSERT INTO active_polls (type, name, channel, initial_message, messages) VALUES (" + connection.escape(type) + "," + connection.escape(name) + "," + connection.escape(channel) + "," + connection.escape(initial_message) + ", " + connection.escape(messages) + ")", result => {
+            sql("INSERT INTO active_polls (type, name, channel, initial_message, messages, src_ref) VALUES (" + connection.escape(type) + "," + connection.escape(name) + "," + connection.escape(channel) + "," + connection.escape(initial_message) + "," + connection.escape(messages)+ "," + connection.escape(src_ref) + ")", result => {
                 res();
             })
         });
@@ -282,6 +282,7 @@ module.exports = function() {
         const channelId = pollData.channel;
         const channel = stats.guild.channels.cache.get(channelId);
         const pollType = pollData.type;
+        const pollName = pollData.name;
         
         // go through reactions
         let allReactions = [];
@@ -348,14 +349,17 @@ module.exports = function() {
             // if no valid voters, but votes
             if(validVoters.length === 0) validVoters = "*Unknown*";
             
+            // candidate name
+            let candidateName = candidate.match(/^\d+$/) ? `<@${candidate}>` : candidate;
+            
             // create message
-            let msg =  `(${votes}) ${reac.emoji} <@${candidate}> **-** ${validVoters}` + (invalidVoters.length>0 ? ` (Invalid Votes: ${invalidVoters})` : "");
+            let msg =  `(${votes}) ${reac.emoji} ${candidateName} **-** ${validVoters}` + (invalidVoters.length>0 ? ` (Invalid Votes: ${invalidVoters})` : "");
             outputLines.push(msg);
             
             // check if winner
-            if(votes == maxVotes) {
+            if(votes == maxVotes && candidate != "Abstain") {
                 maxVotesData.push(candidate);
-            } else if(votes > maxVotes) {
+            } else if(votes > maxVotes && candidate != "Abstain") {
                 maxVotesData = [ candidate ];
                 maxVotes = votes;
             }
@@ -366,15 +370,35 @@ module.exports = function() {
             let msgFull = outputLines.join("\n");
             let embed;
             if(maxVotesData.length === 1) {
-                msgFull += `\n\n**Winner:** <@${maxVotesData[0]}> with **${maxVotes}** votes!`;
-                embed = basicEmbed(msgFull, EMBED_GREEN);
-            } else {
-                msgFull += `\n\n**Tie:** ${maxVotesData.map(el => '<@' + el + '>').join(', ')} with **${maxVotes}** votes!`;
+                if(maxVotesData[0].match(/^\d+$/)) { // PLAYER WINNER
+                    msgFull += `\n\n**Winner:** <@${maxVotesData[0]}> with **${maxVotes}** votes!`;
+                    embed = basicEmbed(msgFull, EMBED_GREEN);
+                    // on poll closed trigger
+                    await trigger(pollData.src_ref, "On Poll Closed", { winner: `${maxVotesData[0]}` }); 
+                } else { // NON PLAYER WINNER
+                    msgFull += `\n\n**Result:** **${maxVotesData[0]}** with **${maxVotes}** votes!`;
+                    embed = basicEmbed(msgFull, EMBED_GREEN);
+                }
+            } else if(maxVotesData.length === 0) { // NO WINNER
+                msgFull += `\n\n**No Winner**`;
+                embed = basicEmbed(msgFull, EMBED_RED);
+            } else { // TIE
+                let winners = maxVotesData.map(el => {
+                    if(el.match(/^\d+$/)) {
+                        return `<@${maxVotesData[0]}>`;
+                    } else {
+                        return el;
+                    }
+                }).join(', ');
+                msgFull += `\n\n**Tie:** ${winners} with **${maxVotes}** votes!`;
                 embed = basicEmbed(msgFull, EMBED_YELLOW);
             }
+            // send embed
+            embed.embeds[0].title = toTitleCase(pollName); // title
             channel.send(embed);
-        } else {
+        } else { // NO VOTES
             let embed = basicEmbed("*No Votes*", EMBED_RED);
+            embed.embeds[0].title = toTitleCase(pollName); // title
             channel.send(embed);
         }
         

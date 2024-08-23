@@ -106,6 +106,12 @@ module.exports = function() {
                 } else {
                     return invalidSelector(selectorTarget);
                 }
+            case "@winner":
+                if(additionalTriggerData.winner) {
+                    return [ additionalTriggerData.winner ];
+                } else {
+                    return invalidSelector(selectorTarget);
+                }
             
             // unknown selector
             default:

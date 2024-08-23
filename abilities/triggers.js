@@ -7,15 +7,83 @@ module.exports = function() {
     
      /**
     Trigger
+    triggers a trigger for a specified game element
+    **/
+    this.trigger = async function(src_ref, triggerName, additionalTriggerData = {}) {
+        let type = srcToType(src_ref);
+        let val = srcToValue(src_ref);
+        if(!val) {// default to player type
+            val = type;
+            type = "player";
+        }
+        // run trigger
+        abilityLog(`🔷 **Trigger:** ${triggerName} for ${srcRefToText(src_ref)}`);  
+        switch(type) {
+            case "player": await triggerPlayer(val, triggerName, additionalTriggerData, true); break;
+            case "groups": await triggerGroup(val, triggerName, additionalTriggerData, true); break;
+            case "poll": await triggerPoll(val, triggerName, additionalTriggerData, true); break;
+            default: abilityLog(`❗ **Skipped Trigger:** Unknown type for trigger ${type}.`); break;
+        }
+    }
+    
+     /**
+    Trigger Player
     triggers a trigger for a specified player
     **/
-    this.trigger = function(player_id, triggerName, additionalTriggerData = {}) {
-        abilityLog(`🔶 **Trigger:** ${triggerName} for <@${player_id}>`);  
+    this.triggerPlayer = function(player_id, triggerName, additionalTriggerData, fromTrigger = false) {
+        if(!fromTrigger) abilityLog(`🔷 **Trigger:** ${triggerName} for <@${player_id}>`);  
         return new Promise(res => {
             // get all players
             sql("SELECT role,id FROM players WHERE type='player' AND id=" + connection.escape(player_id), async r => {
                 //trigger handler
+                if(!r[0]) {
+                    abilityLog(`❗ **Skipped Trigger:** Cannot find matching player for ${player_id}.`);
+                    res();
+                }
                 await triggerHandlerPlayer(r[0], triggerName, additionalTriggerData);
+                // resolve outer promise
+                res();
+            });
+        });
+    }
+    
+     /**
+    Trigger Group
+    triggers a trigger for a specified group
+    **/
+    this.triggerGroup = function(channel_id, triggerName, additionalTriggerData, fromTrigger = false) {
+        if(!fromTrigger) abilityLog(`🔷 **Trigger:** ${triggerName} for <#${channel_id}>`);  
+        return new Promise(res => {
+            // get all players
+            sql("SELECT name,channel_id FROM active_groups WHERE disbanded=0 AND channel_id=" + connection.escape(channel_id), async r => {
+                //trigger handler
+                if(!r[0]) {
+                    abilityLog(`❗ **Skipped Trigger:** Cannot find matching group for ${channel_id}.`);
+                    res();
+                }
+                await triggerHandlerGroup(r[0], triggerName, additionalTriggerData);
+                // resolve outer promise
+                res();
+            });
+        });
+    }
+    
+     /**
+    Trigger Poll
+    triggers a trigger for a specified poll
+    **/
+    this.triggerPoll = function(poll_name, triggerName, additionalTriggerData, fromTrigger = false) {
+        if(!fromTrigger) abilityLog(`🔷 **Trigger:** ${triggerName} for \`${toTitleCase(poll_name)}\``);  
+        return new Promise(res => {
+            // get all players
+            sql("SELECT name,parsed FROM polls WHERE name=" + connection.escape(poll_name), async r => {
+                //trigger handler
+                if(!r[0]) {
+                    abilityLog(`❗ **Skipped Trigger:** Cannot find matching poll for ${poll_name}.`);
+                    res();
+                }
+                let parsed = JSON.parse(r[0].parsed);
+                await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `poll:${r[0].name}`, `poll:${r[0].name}`);
                 // resolve outer promise
                 res();
             });

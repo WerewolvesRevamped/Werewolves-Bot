@@ -134,7 +134,7 @@ module.exports = function() {
                 channel_id = ref; // group ref already is channel id
             break;
             case "poll":
-                channel_id = "1276250651097170022"; // poll log is hardcoded
+                channel_id = "1276250651097170022"; // WIP: poll log is hardcoded
             break;
             case "location":
                 channel_id = await abilitySendGetLocationChannel(ref);
