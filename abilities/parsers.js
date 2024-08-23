@@ -163,7 +163,7 @@ module.exports = function() {
     this.parseGroupName = async function(selector, self = null) {
         // get target
         let selectorTarget = selectorGetTarget(selector);
-        if(selector === "@self") {
+        if(selectorTarget === "@self") {
             if(!self) { // if no self is specified, @Self is invalid
                 abilityLog(`❗ **Error:** Used \`@Self\` in invalid context!`);
                 return null;
@@ -186,8 +186,8 @@ module.exports = function() {
         let selectorTarget = selectorGetTarget(selector);
         // check what type of location it is
         if(selectorTarget[0] === "#") { // location is a channel 
-            if(verifyLocation(selectorTarget)) {
-                return { value: selectorTarget, type: "location", default: false };
+            if(verifyLocationName(selectorTarget)) {
+                return { value: parseLocationName(selectorTarget), type: "location", default: false };
             } else {
                 let def = cachedLocations[0]; // default is whatever location is first
                 abilityLog(`❗ **Error:** Invalid location \`${selectorTarget}\`. Defaulted to \`${def}\`!`);
@@ -196,6 +196,30 @@ module.exports = function() {
         } else { // location is a player
             let parsedPlayer = await parsePlayerSelector(selectorTarget, self, additionalTriggerData);
             return { value: parsedPlayer, type: "player", default: false };
+        }
+    }
+    
+    /**
+    Parse Poll
+    parses a poll
+    **/
+    this.parsePoll = async function(selector, self = null, additionalTriggerData = {}) {
+        // get target
+        let selectorTarget = selectorGetTarget(selector);
+        if(selectorTarget === "@self") {
+            if(!self) { // if no self is specified, @Self is invalid
+                abilityLog(`❗ **Error:** Used \`@Self\` in invalid context!`);
+                return null;
+            }
+            self = srcToValue(self); // get poll name
+            return self; 
+        } else {
+            if(verifyPoll(selectorTarget)) {
+                return selectorTarget;
+            } else {
+                abilityLog(`❗ **Error:** Invalid poll \`${selectorTarget}\`.!`);
+                return null;              
+            }
         }
     }
     
@@ -277,7 +301,7 @@ module.exports = function() {
     returns the target of a selector (removing the type)
     **/
     this.selectorGetTarget = function(selector) {
-        return selector.split("[")[0].toLowerCase();
+        return selector.split("[")[0].toLowerCase().trim();
     }
     
     /**
@@ -286,7 +310,7 @@ module.exports = function() {
     **/
     this.selectorGetType = function(selector) {
         let spl = selector.split("[");
-        return spl.length >= 2 ? spl[1].split("]")[0].toLowerCase() : "unknown";
+        return spl.length >= 2 ? spl[1].split("]")[0].toLowerCase().trim() : "unknown";
     }
     
     /**

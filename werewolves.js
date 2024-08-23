@@ -29,17 +29,16 @@ require("./confirm.js")();
 require("./players.js")();
 require("./ccs.js")();
 require("./whispers.js")();
-require("./game/game.js")();
-require("./poll.js")();
 require("./theme.js")();
 
 require("./temp.js")();
 
 
-require("./paths.js")();
 
 // V2 Modules
+require("./paths.js")();
 require("./roles/roles.js")();
+require("./game/game.js")();
 require("./utility/utility.js")();
 require("./abilities/abilities.js")();
 require("./attributes/attributes.js")();
@@ -66,7 +65,6 @@ client.on("ready", async () => {
 		getPRoles();
 		getCCCats();
 		getPublicCat();
-        loadPollValues();
         cacheIconLUT();
         cacheColorsLUT();
 		global.client.guilds.fetch(stats.log_guild).then(guild => {

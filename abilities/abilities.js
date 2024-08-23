@@ -17,6 +17,7 @@ require("./types/logging.js")();
 require("./types/targeting.js")();
 require("./types/process_evaluate.js")();
 require("./types/announcement.js")();
+require("./types/poll.js")();
 
 module.exports = function() {
     
@@ -83,6 +84,9 @@ module.exports = function() {
             case "announcement":
                 return await abilityAnnouncement(src_ref, src_name, ability, additionalTriggerData);
             break;
+            case "poll":
+                return await abilityPoll(src_ref, src_name, ability, additionalTriggerData);
+            break;
         }
     }
 
@@ -132,8 +136,12 @@ module.exports = function() {
             case "poll":
                 channel_id = "1276250651097170022"; // poll log is hardcoded
             break;
+            case "location":
+                channel_id = await abilitySendGetLocationChannel(ref);
+            break;
             default:
                 abilityLog(`❗ **Error:** Unknown type for sending ability!`);
+                return null;
             break;
         }
         
@@ -153,7 +161,7 @@ module.exports = function() {
         // send embed
         return new Promise(res => {
             sc.send(embed).then(msg => {
-                res(msg.id);
+                res(msg);
             });
         });
         
@@ -165,6 +173,17 @@ module.exports = function() {
     function abilitySendGetPlayerChannel(player_id) {
         return new Promise(res => {
             sql("SELECT channel_id FROM connected_channels WHERE id = " + connection.escape(player_id), result => {
+                res(result[0].channel_id);
+            });
+        });      
+    }
+    
+    /**
+    Get Location Channel
+    **/
+    function abilitySendGetLocationChannel(loc_name) {
+        return new Promise(res => {
+            sql("SELECT channel_id FROM locations WHERE name = " + connection.escape(loc_name), result => {
                 res(result[0].channel_id);
             });
         });      

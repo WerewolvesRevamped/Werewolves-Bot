@@ -1446,6 +1446,12 @@ module.exports = function() {
 	/* Get User from Argument */
 	this.getUser = function(channel, inUser) {
 		var user;
+        var guild;
+        if(!channel) {
+            guild = stats.guild;
+        } else {
+            channel.guild;
+        }
 		// Get User by ID 
 		if(/^\d+$/.test(inUser)) {
 			user = client.users.cache.find(user => user.id === inUser);
@@ -1467,7 +1473,7 @@ module.exports = function() {
 		user = client.users.cache.find(user => user.username.toLowerCase() === inUser);
 		if(user) return user.id;
 		// Get User by Nickname
-		user = channel.guild.members.cache.find(member => member.nickname && member.nickname.toLowerCase() === inUser);
+		user = guild.members.cache.find(member => member.nickname && member.nickname.toLowerCase() === inUser);
 		if(user) return user.id;
 		// Get User by Emoji 
 		user = emojiToID(inUser)

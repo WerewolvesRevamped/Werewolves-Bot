@@ -132,6 +132,7 @@ module.exports = function() {
     Handles the parsed data of a game component in a trigger
     **/
     async function triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, src_ref, src_name) {
+        if(!parsed || !parsed.triggers) return;
         // grab the triggers
         let triggers = parsed.triggers;
         // filter out the relevant triggers
@@ -204,7 +205,7 @@ module.exports = function() {
                     let type = toTitleCase(selectorGetType(prompts[0][1]));
                     let promptMsg = getPromptMessage(ability, type);
                     let refImg = await refToImg(src_name);
-                    let mid = await abilitySendProm(src_ref, `${getAbilityEmoji(ability.type)} ${promptMsg}`, EMBED_GRAY, true, promptInfoMsg, refImg, "Ability Prompt");
+                    let mid = (await abilitySendProm(src_ref, `${getAbilityEmoji(ability.type)} ${promptMsg}`, EMBED_GRAY, true, promptInfoMsg, refImg, "Ability Prompt")).id;
                     if(ptype == "immediate") { // immediate prompt
                         abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(ability.type)} [${type}] {Immediate}`);
                         await createPrompt(mid, src_ref, src_name, ability, restrictions, additionalTriggerData, "immediate", type);
@@ -221,7 +222,7 @@ module.exports = function() {
                     let type2 = toTitleCase(selectorGetType(prompts[1][1]));
                     let promptMsg = getPromptMessage(ability, type1, type2);
                     let refImg = await refToImg(src_name);
-                    let mid = await abilitySendProm(src_ref, `${getAbilityEmoji(ability.type)} ${promptMsg}`, EMBED_GRAY, true, promptInfoMsg, refImg, "Ability Prompt");
+                    let mid = (await abilitySendProm(src_ref, `${getAbilityEmoji(ability.type)} ${promptMsg}`, EMBED_GRAY, true, promptInfoMsg, refImg, "Ability Prompt")).id;
                     if(ptype == "immediate") { // immediate prompt
                         abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(ability.type)} [${type1}, ${type2}] {Immediate}`);
                         await createPrompt(mid, src_ref, src_name, ability, restrictions,additionalTriggerData, "immediate", type1, type2);

@@ -8,7 +8,7 @@ module.exports = function() {
     Debug Mode
     If set to true does console.log, if set to false does throw
     **/
-    const debugMode = true;
+    const debugMode = false;
     
     /**
     Ability Counter
@@ -168,9 +168,6 @@ module.exports = function() {
             /* Remove Blank */
             abilities[1] = abilities[1].filter(el => el.ability.type != "blank"); // remove blank lines
             
-            
-            console.log("DONE");
-            
             /** Formatting */
             /* Output */
             let paramAbilities = abilities[1].filter(el => el.ability.type != "error" && !deepEqual(el.parameters, defaultParams)); // check which abilities have params attached
@@ -209,6 +206,12 @@ module.exports = function() {
     this.parseCondition = function(condition) {
         let exp, fd, cond;
         
+        /** Otherwise **/
+        exp = new RegExp("^Otherwise$", "g");
+        fd = exp.exec(condition);
+        if(fd) {
+            cond = { type: "otherwise" };
+        }
         /** Comparisons **/
         // Equality
         exp = new RegExp("^" + targetType + " is " + targetType + "$", "g");
@@ -321,13 +324,16 @@ module.exports = function() {
             let isInlineEval = false;
             
             // check for P/E Condition
-            let abilityLineSplitPE = abilityLine.split(/(?<!List|Action|Process|Evaluate): |(?<!List|Action|Process|Evaluate):$/);
+            let abilityLineSplitPE = abilityLine.split(/(?<!List|Action|Process): |(?<!List|Action|Process):$/);
+            let abilityLineSplitPE2 = abilityLine.split(/(?<=Process): /);
             let peCond;
-            if(abilityLineSplitPE.length == 2) { // evaluate condition
+            if(abilityLineSplitPE2.length == 2) { // process
+                abilityLine = abilityLineSplitPE2[1].trim();
+                peCond = abilityLineSplitPE2[0].trim();
+            } else if(abilityLineSplitPE.length == 2) { // evaluate condition
                 abilityLine = abilityLineSplitPE[1].trim();
                 peCond = abilityLineSplitPE[0].trim();
-            }
-            if(abilityLineSplitPE.length == 3) { // inline evaluate
+            } else if(abilityLineSplitPE.length == 3) { // inline evaluate
                 abilityLine = abilityLineSplitPE[2].trim();
                 peCond = abilityLineSplitPE[1].trim();
                 isInlineEval = true;
@@ -781,10 +787,10 @@ module.exports = function() {
             }
             /** POLL MANIPULATING **/
             // Poll duplication/addtion
-            exp = new RegExp("^Add `" + str + "` Poll$", "g");
+            exp = new RegExp("^Add `" + str + "` Poll" + attrDuration + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "poll", subtype: "addition", target: fd[1] };
+                ability = { type: "poll", subtype: "addition", target: ttpp(fd[1], "poll"), duration: dd(fd[2], "untiluse") };
             }
             // Creates a new poll
             exp = new RegExp("^Create `" + str + "` Poll in " + locationType + "$", "g");
@@ -798,23 +804,29 @@ module.exports = function() {
             if(fd) {
                 ability = { type: "poll", subtype: "creation", target: "@self[poll]", poll_location: ttpp(fd[1], "location") };
             }
+            // poll creates itself named
+            exp = new RegExp("^Create Poll in " + locationType + " as " + targetType + "$", "g");
+            fd = exp.exec(abilityLine);
+            if(fd) {
+                ability = { type: "poll", subtype: "creation", target: "@self[poll]", poll_location: ttpp(fd[1], "location"), poll_name: ttpp(fd[2]) };
+            }
             // Cancel polls resulting ability
-            exp = new RegExp("^Cancel `" + str + "` Poll$", "g");
+            exp = new RegExp("^Cancel `" + str + "` Poll" + attrDuration + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "poll", subtype: "cancellation", target: ttpp(fd[1], "poll") };
+                ability = { type: "poll", subtype: "cancellation", target: ttpp(fd[1], "poll"), duration: dd(fd[2], "untiluse") };
             }
             // Delete a poll
-            exp = new RegExp("^Delete `" + str + "` Poll$", "g");
+            exp = new RegExp("^Delete `" + str + "` Poll" + attrDuration + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "poll", subtype: "deletion", target: ttpp(fd[1], "poll") };
+                ability = { type: "poll", subtype: "deletion", target: ttpp(fd[1], "poll"), duration: dd(fd[2], "untiluse") };
             }
             // Delete a poll
-            exp = new RegExp("^Manipulate `" + str + "` Poll \\(" + targetType + " is `" + pollManipManipSubtype + "`\\)$", "g");
+            exp = new RegExp("^Manipulate `" + str + "` Poll \\(" + targetType + " is `" + pollManipManipSubtype + "`\\)" + attrDuration + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "poll", subtype: "manipulation", target: ttpp(fd[1], "poll"), manip_target: fd[2], manip_type: lc(fd[3]) };
+                ability = { type: "poll", subtype: "manipulation", target: ttpp(fd[1], "poll"), manip_target: fd[2], manip_type: lc(fd[3]), duration: dd(fd[2], "untiluse") };
             }
             /** ANNOUNCEMENTS **/
             // reveal

@@ -33,7 +33,7 @@ module.exports = function() {
 		if(!args[1]) { 
 			channel.send("⛔ Syntax error. Not enough parameters!"); 
 			return; 
-		} else if(!verifyLocation(args[1])) {
+		} else if(!verifyLocationName(args[1])) {
 			channel.send("⛔ Command error. Invalid location `" + args[1] + "`!"); 
 			return; 
 		}
@@ -93,9 +93,9 @@ module.exports = function() {
      /** Verify Location
     Verifies if a location exists
     **/
-    this.verifyLocation = function(input) {
+    this.verifyLocationName = function(input) {
         if(cachedLocations.length == 0) return true; // if cache is currently not loaded just allow it
-		let inputLoc = input.replace(/[^a-z\$ ]/g,"").trim(); // parse location name
+		let inputLoc = parseLocationName(input); // parse location name
 		let loc = cachedLocations.find(el => el === inputLoc); // check if location is in cache
 		return loc ? true : false;
 	}
@@ -104,16 +104,17 @@ module.exports = function() {
     Parse location name
     Returns a location name in db format
     **/
-    function parseLocation(name) {
+    this.parseLocationName = function(name) {
         return name.toLowerCase().replace(/[^a-z\$ ]/g,"").trim();
     }
     
     /**
     Location send
     used to send a message to a location
+    WIP: THIS CAN USE ABILITY SEND
     **/
     this.locationSend = function(locationName, message, color = EMBED_GRAY, thumbnail = null, title = null) {
-        let parsedLocationName = parseLocation(locationName);
+        let parsedLocationName = parseLocationName(locationName);
         sql("SELECT channel_id FROM locations WHERE name = " + connection.escape(parsedLocationName), result => {
             let loc_sc_id = result[0].channel_id;
             let loc_sc = stats.guild.channels.cache.get(loc_sc_id);

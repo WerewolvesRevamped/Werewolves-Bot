@@ -442,6 +442,8 @@ module.exports = function() {
         attributesReset();
         // reset active attributes
         abilitiesReset();
+        // reset active polls
+        pollsReset();
 		// Reset Poll Count
 		sqlSetStat(13, 1, result => {
 			channel.send("✅ Successfully reset poll counter!");
