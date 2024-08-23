@@ -155,6 +155,16 @@ module.exports = function() {
 		return info ? true : false;
 	}
     
+    /**
+    Parse Group
+    Parses a group name
+    **/
+    this.parseGroupName = function(input) {
+		input = input.toLowerCase(); // change group name to lower case
+        input = input.replace(/[^a-z\$ ]/g, ""); // remove any non a-z characters
+		return input;
+	}
+    
     /** Verify Group
     Verifies if a group exists
     **/

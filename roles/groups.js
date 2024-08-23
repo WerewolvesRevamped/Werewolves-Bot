@@ -150,6 +150,17 @@ module.exports = function() {
 		sql("DELETE FROM active_groups");
     }
     
+    /** PUBLIC
+    Get group data
+    **/
+    this.groupGetData = function(groupName) {
+        return new Promise(res => {
+            sql("SELECT * FROM active_groups WHERE name=" + connection.escape(groupName), result => {
+                res(result[0]);
+            });
+        });
+    }
+    
     
     
 }

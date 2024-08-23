@@ -29,7 +29,7 @@ module.exports = function() {
         
         // populate result selectors
         for(let i = 0; i < results.length; i++) {
-            additionalTriggerData["result" + i] = results[i];
+            additionalTriggerData["result" + (i+1)] = results[i];
         }
         additionalTriggerData.result = results[0];
         
@@ -40,18 +40,21 @@ module.exports = function() {
             let condition = evaluate[i].condition;
             let condTxt = evaluate[i].condition_text;
             let condBool = await parseCondition(condition, src_ref, src_name, additionalTriggerData);
-            if(condBool) {
+            if(condBool) { // enter final branch
                 abilityLog(`▶️ **Entering Branch:** ${condTxt}`);
                 let result = await executeAbility(src_ref, src_name, evaluate[i].ability, [], additionalTriggerData);
                 return result;
-            } else {
+            } else if(condition.type === "always") { // additionally enter always branch
+                abilityLog(`▶️ **Always Branch:**`);
+                await executeAbility(src_ref, src_name, evaluate[i].ability, [], additionalTriggerData);
+            } else { // skip branch
                 abilityLog(`◀️ **Skipping Branch:** ${condTxt}`);
             }
         }
         
         abilityLog(`▶️ **Entering Branch:** Failure (Default)`);
         // if no evaluate conditions matched, a failure is implied
-        return { msg: "Process/Evaluate failed!", success: false };
+        return { msg: "", success: false };
     }
     
     /** PUBLIC
@@ -96,6 +99,9 @@ module.exports = function() {
             default:
                 abilityLog(`❗ **Error:** Unknown condition type \`${type}\`!`);
                 return false;
+            // ALWAYS
+            case "always":
+                return false;
             // COMPARISON
             case "comparison":
                 if(!condition.subtype || !condition.first || !condition.second) {
@@ -115,9 +121,9 @@ module.exports = function() {
                         if(first.type === second.type) { // same type, do direct type comparison
                             return first.value === second.value;
                         } else if(first.type === "result" && second.type === "success") {
-                            return first.value.success === second.value;
+                            return first.value[0].success === second.value[0];
                         } else if(first.type === "success" && second.type === "result") {
-                            return first.value === second.value.success;
+                            return first.value[0] === second.value[0].success;
                         }
                         // no comparison can be made
                         return false;

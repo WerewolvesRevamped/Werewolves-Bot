@@ -31,6 +31,7 @@ module.exports = function() {
                 let pollType = await parsePoll(ability.target, src_ref, additionalTriggerData);
                 if(!pollType) return { msg: "Poll manipulation failed! " + abilityError, success: false };
                 let pollLocation = await parseLocation(ability.poll_location, src_ref, additionalTriggerData);
+                console.log(pollLocation);
                 let pollName =  ability.poll_name ? (await parseInfo(ability.poll_name)) : pollType;
                 result = await pollCreate(src_name, src_ref, pollType, pollName, pollLocation);
                 return result;
@@ -69,7 +70,7 @@ module.exports = function() {
         await createPoll(pollType, pollName, pollLocation, allOptions, src_ref);
         
         // feedback
-        return { msg: "Poll created!", success: true };
+        return { msg: "", success: true };
     }
 
     function pollNameToEmoji(name) {

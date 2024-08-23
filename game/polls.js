@@ -327,7 +327,7 @@ module.exports = function() {
         let maxVotes = -1, maxVotesData = [];
         for(let j = 0; j < allReactions.length; j++) {
             const reac = allReactions[j];
-            const voters = reac.users;
+            const voters = reac.users.filter(el => allowedVoters.indexOf(el.id) > -1);
             
             // remove invalid votes through duplication
             const validVoters = voters.filter(el => duplicateVoters.indexOf(el.id) === -1);
@@ -366,6 +366,7 @@ module.exports = function() {
         }
         
         // send poll results
+        doTrigger = false;
         if(outputLines.length > 0) {
             let msgFull = outputLines.join("\n");
             let embed;
@@ -373,8 +374,7 @@ module.exports = function() {
                 if(maxVotesData[0].match(/^\d+$/)) { // PLAYER WINNER
                     msgFull += `\n\n**Winner:** <@${maxVotesData[0]}> with **${maxVotes}** votes!`;
                     embed = basicEmbed(msgFull, EMBED_GREEN);
-                    // on poll closed trigger
-                    await trigger(pollData.src_ref, "On Poll Closed", { winner: `${maxVotesData[0]}` }); 
+                    doTrigger = true;
                 } else { // NON PLAYER WINNER
                     msgFull += `\n\n**Result:** **${maxVotesData[0]}** with **${maxVotes}** votes!`;
                     embed = basicEmbed(msgFull, EMBED_GREEN);
@@ -395,11 +395,16 @@ module.exports = function() {
             }
             // send embed
             embed.embeds[0].title = toTitleCase(pollName); // title
-            channel.send(embed);
+            await channel.send(embed);
         } else { // NO VOTES
             let embed = basicEmbed("*No Votes*", EMBED_RED);
             embed.embeds[0].title = toTitleCase(pollName); // title
-            channel.send(embed);
+            await channel.send(embed);
+        }
+        
+        if(doTrigger) {
+            // on poll closed trigger
+            await trigger(pollData.src_ref, "On Poll Closed", { winner: `${maxVotesData[0]}` }); 
         }
         
         // remove all reactions

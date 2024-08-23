@@ -208,7 +208,7 @@ module.exports = function() {
     Source Reference to Text
     Converts a source reference to text suitable for discord
     **/
-    this.srcRefToText = function(src_ref) {
+    this.srcRefToText = function(src_ref, raw = null) {
         let type = srcToType(src_ref);
         let val = srcToValue(src_ref);
         switch(type) {
@@ -221,6 +221,8 @@ module.exports = function() {
             case "poll":
             case "role":
                 return `\`${toTitleCase(val)}\``;
+            case "result":
+                return raw.msg;
             case "unknown":
             default:
                 return `UNKNOWN \`${src_ref}\``;

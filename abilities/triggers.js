@@ -20,7 +20,7 @@ module.exports = function() {
         abilityLog(`🔷 **Trigger:** ${triggerName} for ${srcRefToText(src_ref)}`);  
         switch(type) {
             case "player": await triggerPlayer(val, triggerName, additionalTriggerData, true); break;
-            case "groups": await triggerGroup(val, triggerName, additionalTriggerData, true); break;
+            case "group": await triggerGroup(val, triggerName, additionalTriggerData, true); break;
             case "poll": await triggerPoll(val, triggerName, additionalTriggerData, true); break;
             default: abilityLog(`❗ **Skipped Trigger:** Unknown type for trigger ${type}.`); break;
         }
@@ -395,6 +395,9 @@ module.exports = function() {
     this.eventStartNight = async function() {
         await clearPrompts();
         
+        // close polls
+        await closePolls();
+        
         // handle queued end actions
         skipActionQueueChecker = true;
         await executeEndQueuedAction();
@@ -431,6 +434,9 @@ module.exports = function() {
     **/
     this.eventStartDay = async function() {
         await clearPrompts();
+        
+        // close polls
+        await closePolls();
         
         // handle queued end actions
         skipActionQueueChecker = true;

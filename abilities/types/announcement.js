@@ -39,10 +39,10 @@ module.exports = function() {
                 locationSend(loc.value, info, EMBED_GRAY, img, "Announcement");
             break;
             case "player":
-                locationSend(`player:${loc.value}`, info, EMBED_GRAY, false, false, img, "Announcement");
+                abilitySend(`player:${loc.value}`, info, EMBED_GRAY, false, false, img, "Announcement");
             break;
             case "group":
-                locationSend(`group:${loc.value}`, info, EMBED_GRAY, false, false, img, "Announcement");
+                abilitySend(`group:${loc.value}`, info, EMBED_GRAY, false, false, img, "Announcement");
             break;
         }
         

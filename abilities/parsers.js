@@ -16,25 +16,36 @@ module.exports = function() {
         switch(selectorType) {
             // PLAYER
             case "player": 
-                return { value: await parsePlayerSelector(selector, self), type: "player" };
+                return { value: await parsePlayerSelector(selector, self, additionalTriggerData), type: "player" };
             // ROLE
             case "role": 
                 return { value: parseRoleSelector(selector), type: "role" };
             // GROUP
             case "group":
-                return { value: await parseGroupName(selector, self), type: "group" };
+                let group = await parseGroup(selector, self);
+                let groups = group ? [ group ] : [ ];
+                return { value: groups, type: "group" };
             // LOCATION
             case "location":
-                // WIP: all groups are locations but not all locations are groups
-                return { value: await parseGroupName(selector, self), type: "role" };
+                let loc = await parseLocation(selector, self, additionalTriggerData);
+                let locs = loc ? [ loc ] : [ ];
+                return { value: locs, type: "role" };
+            // POLL
+            case "poll":
+                let poll = await parsePoll(selector, self, additionalTriggerData);
+                let polls = poll ? [ poll ] : [ ];
+                return { value: polls, type: "poll" };
+            // SUCCESS
             case "success":
-                return { value: parseSuccess(selector), type: "success" };
+                return { value: [ parseSuccess(selector) ], type: "success" };
             break;
+            // RESULT
             case "result":
-                return { value: parseResult(selector, additionalTriggerData), type: "result" };
+                return { value: [ parseResult(selector, additionalTriggerData) ], type: "result" };
             break;
+            // INFO
             case "info":
-                return { value: await parseInfo(selector, self, additionalTriggerData), type: "info" };
+                return { value: [ await parseInfo(selector, self, additionalTriggerData) ], type: "info" };
             break;
             // UNKNOWN
             case "attribute":
@@ -163,10 +174,9 @@ module.exports = function() {
     /**
     Parse Group Name
     parses a group name
-    WIP: DOESNT VALIDATE IF THE GROUP EXISTS
     WIP: DOESNT CONSIDER THE :'ed GROUP NAMES
     **/
-    this.parseGroupName = async function(selector, self = null) {
+    this.parseGroup = async function(selector, self = null) {
         // get target
         let selectorTarget = selectorGetTarget(selector);
         if(selectorTarget === "@self") {
@@ -175,12 +185,19 @@ module.exports = function() {
                 return null;
             }
             self = srcToValue(self);
-            return self; // THIS RETURNS A GROUP ID PROBABLY AND NOT A NAME LIKE BELOW
+            return self;
         }
-        // WIP: weak group parser
-        return selectorTarget.replace("#", "").replace(/\-/g, " ").toLowerCase();
+        // parse group
+        let parsedGroupName = parseGroupName(selectorTarget);
+        if(cachedGroups.indexOf(parsedGroupName) >= 0) {
+            // get channel id
+            let groupData = await groupGetData(parsedGroupName);
+            return groupData.channel_id;
+        } else {
+            abilityLog(`❗ **Error:** Invalid group \`${selectorTarget}\`!`);
+            return null;
+        }
     }
-    
     
     /**
     Parse Location
@@ -194,6 +211,9 @@ module.exports = function() {
         if(selectorTarget[0] === "#") { // location is a channel 
             if(verifyLocationName(selectorTarget)) {
                 return { value: parseLocationName(selectorTarget), type: "location", default: false };
+            } else if(verifyGroup(selectorTarget)) {
+                let group = await parseGroup(selectorTarget);
+                return { value: group, type: "group", default: false };   
             } else {
                 let def = cachedLocations[0]; // default is whatever location is first
                 abilityLog(`❗ **Error:** Invalid location \`${selectorTarget}\`. Defaulted to \`${def}\`!`);
@@ -289,7 +309,7 @@ module.exports = function() {
                 let strs = [];
                 // iterate through selector list
                 for(let j = 0; j < parsed.value.length; j++) {
-                    let txt = srcRefToText(`${infType}:${parsed.value[j]}`);
+                    let txt = srcRefToText(`${infType}:${parsed.value[j]}`, parsed.value[j]);
                     strs.push(txt);
                 }
                 // merge selector list

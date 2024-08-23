@@ -121,7 +121,7 @@ module.exports = function() {
             embed = basicEmbed(message, color);
             if(thumbnail) embed.embeds[0].thumbnail = { url: thumbnail }; // add thumbnail
             if(title) embed.embeds[0].title = title; // add title
-            loc_sc.send(embed);
+            if(loc_sc) loc_sc.send(embed);
         });
 
     }

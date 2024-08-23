@@ -97,6 +97,15 @@ module.exports = function() {
                     abilities[1][a].ability = { type: "evaluate", sub_abilities: [ {ability: dc.ability, condition: dc.condition} ] };
                     continue;
                 }
+                // switch from inline eval to process
+                if(inPE && peType == "process" && abilities[1][a].condition === "Evaluate") { 
+                    peDepth = abilities[1][a].depth;
+                    peIndex = a;
+                    peType = "evaluate";
+                    let dc = deepCopy(abilities[1][a]);
+                    abilities[1][a].ability = { type: "evaluate", sub_abilities: [ ] };
+                    continue;
+                }
                 // handle entries within PE
                 if(inPE) {
                     if(abilities[1][a].depth > peDepth) {
@@ -205,6 +214,12 @@ module.exports = function() {
     **/
     this.parseCondition = function(condition) {
         let exp, fd, cond;
+        
+        /** Always **/
+        // doesnt have a condition
+        if(!condition) {
+            return { type: "always" };
+        }
         
         /** Otherwise **/
         exp = new RegExp("^Otherwise$", "g");
