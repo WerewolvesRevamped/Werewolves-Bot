@@ -1370,7 +1370,7 @@ module.exports = function() {
 								});
 						} else { 
 							// Signup emoji
-							sql("INSERT INTO players (id, emoji, role, type) VALUES (" + connection.escape(member.id) + "," + connection.escape("" + args[0]) + "," + connection.escape(defRole) +  "," + connection.escape(dbType) + ")", result => {
+							sql("INSERT INTO players (id, emoji, role, orig_role, type) VALUES (" + connection.escape(member.id) + "," + connection.escape("" + args[0]) + "," + connection.escape(defRole) + "," + connection.escape(defRole) +  "," + connection.escape(dbType) + ")", result => {
 								message.edit(`✅ ${member.user} ${msg2} ${args[0]}!`);
 								if(signupMode == "signup") updateGameStatusDelayed();
 								message.reactions.removeAll().catch(err => { 
