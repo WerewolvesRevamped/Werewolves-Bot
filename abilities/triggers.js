@@ -220,6 +220,17 @@ module.exports = function() {
                             abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\`.`);
                         }
                     break;
+                    case "On Action Complex":
+                        let abilityType = await parseSelector(param);
+                        let triggerAbilityType = additionalTriggerData.ability_subtype + additionalTriggerData.ability_type;
+                        abilityType = abilityType.value[0].toLowerCase().replace(/[^a-z]+/,"");
+                        triggerAbilityType = triggerAbilityType.replace(/[^a-z]+/,"");
+                        if(abilityType === triggerAbilityType) {
+                             await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
+                        } else {
+                            abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\` with \`${triggerAbilityType}\`.`);
+                        }
+                    break;
                     default:
                         abilityLog(`❗ **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Unknown complex trigger.`);
                     break;
@@ -238,6 +249,7 @@ module.exports = function() {
     **/
     async function executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData = {}) {
         const ptype = getPromptType(triggerName);
+        const promptOverwrite = trigger?.parameters?.prompt_overwrite;
         // iterate through abilities of the trigger
         for(const ability of trigger.abilities) {
             // check trigger restrictions
@@ -271,7 +283,7 @@ module.exports = function() {
                 // single prompt (@Selection)
                 case 1: {
                     let type = toTitleCase(selectorGetType(prompts[0][1]));
-                    let promptMsg = getPromptMessage(ability, type);
+                    let promptMsg = getPromptMessage(ability, promptOverwrite, type);
                     let refImg = await refToImg(src_name);
                     let mid = (await abilitySendProm(src_ref, `${getAbilityEmoji(ability.type)} ${promptMsg}`, EMBED_GRAY, true, promptInfoMsg, refImg, "Ability Prompt")).id;
                     if(ptype == "immediate") { // immediate prompt
@@ -288,7 +300,7 @@ module.exports = function() {
                 case 2: {
                     let type1 = toTitleCase(selectorGetType(prompts[0][1]));
                     let type2 = toTitleCase(selectorGetType(prompts[1][1]));
-                    let promptMsg = getPromptMessage(ability, type1, type2);
+                    let promptMsg = getPromptMessage(ability, promptOverwrite, type1, type2);
                     let refImg = await refToImg(src_name);
                     let mid = (await abilitySendProm(src_ref, `${getAbilityEmoji(ability.type)} ${promptMsg}`, EMBED_GRAY, true, promptInfoMsg, refImg, "Ability Prompt")).id;
                     if(ptype == "immediate") { // immediate prompt
@@ -372,6 +384,7 @@ module.exports = function() {
     **/
     this.getPromptType = function(trigger) {
         switch(trigger) {
+            default:
             case "Immediate Night": case "Immediate Day": case "Immediate":
                 return "immediate";
             case "Start Night": case "Start Day": case "Start Phase":

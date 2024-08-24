@@ -13,7 +13,12 @@ module.exports = function() {
     Get Promp Message
     returns a prompt message
     **/
-    this.getPromptMessage = function(ability, type1 = "", type2 = "") {
+    this.getPromptMessage = function(ability, promptOverwrite, type1 = "", type2 = "") {
+        // apply prompt overwrite if applicable
+        if(promptOverwrite && prompts[promptOverwrite]) {
+            return prompts[promptOverwrite];
+        }
+        // find prompt
         const ty = ability.type ? ability.type.replace(/ /g,"_") : null;
         const su = ability.subtype ? ability.subtype.replace(/ /g,"_") : null;
         const typ1 = type1.toLowerCase();

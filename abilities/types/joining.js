@@ -59,7 +59,7 @@ module.exports = function() {
             let attrs = await queryAttributePlayer(targets[i], "val1", group);
             if(attrs.length > 1) { // already part of the group, skip
                 abilityLog(`❎ <@${targets[i]}> could not join ${toTitleCase(group)} - multiple memberships found.`);  
-                if(targets.length === 1) return { msg: "Joining failed! " + abilityFailure, success: false };
+                if(targets.length === 1) return { msg: "Joining failed! " + abilityFailure, success: false, target: `player:${targets[0]}` };
             } if(attrs.length == 1) { // already part of the group
                 let oldMembership = getMembershipTier(attrs[0].val2)
                 let newMembership = getMembershipTier(type);
@@ -67,20 +67,20 @@ module.exports = function() {
                     await deleteAttributePlayer(targets[i], "val1", group); // delete old membership
                     await createGroupMembershipAttribute(src_name, src_ref, targets[i], dur_type, group, type); // create new membership
                     abilityLog(`✅ <@${targets[i]}> promoted ${toTitleCase(group)} membership to \`${toTitleCase(type)}\` for \`${getDurationName(dur_type)}\`.`);
-                    if(targets.length === 1) return { msg: "Joining succeeded!", success: true };
+                    if(targets.length === 1) return { msg: "Joining succeeded!", success: true, target: `player:${targets[0]}` };
                     // note: upgrading membership may downgrade duration. this is intentional (for simplicity)
                 } else { // old tier is higher or equal, skip
                     abilityLog(`❎ <@${targets[i]}> could not join ${toTitleCase(group)} as \`${toTitleCase(type)}\` - equal or higher membership present.`);  
-                    if(targets.length === 1) return { msg: "Joining failed! " + abilityFailure, success: false };
+                    if(targets.length === 1) return { msg: "Joining failed! " + abilityFailure, success: false, target: `player:${targets[0]}` };
                 }
             } else { // not part of the group,join
                 await createGroupMembershipAttribute(src_name, src_ref, targets[i], dur_type, group, type);
                 await groupsJoin(targets[i], group);
                 abilityLog(`✅ <@${targets[i]}> joined ${toTitleCase(group)} as \`${toTitleCase(type)}\` for \`${getDurationName(dur_type)}\`.`);
-                if(targets.length === 1) return { msg: "Joining succeeded!", success: true };
+                if(targets.length === 1) return { msg: "Joining succeeded!", success: true, target: `player:${targets[0]}` };
             }
         }
-        return { msg: "Joinings executed!", success: null };
+        return { msg: "Joinings executed!", success: null, target: `player:${targets[0]}` };
     }
     
     /**
@@ -95,13 +95,13 @@ module.exports = function() {
                 await deleteAttributePlayer(targets[i], "val1", group); // delete old membership(s)
                 groupsSend(group, `<@${targets[i]}> has left $name.`);
                 abilityLog(`✅ <@${targets[i]}> was removed from ${toTitleCase(group)}.`);
-                if(targets.length === 1) return { msg: "Joining succeeded!", success: true };
+                if(targets.length === 1) return { msg: "Joining succeeded!", success: true, target: `player:${targets[0]}` };
             } else { // no membership, cannot be removed
                 abilityLog(`❎ <@${targets[i]}> could not be removed from ${toTitleCase(group)} - no membership present.`);  
-                if(targets.length === 1) return { msg: "Joining failed! " + abilityFailure, success: false };
+                if(targets.length === 1) return { msg: "Joining failed! " + abilityFailure, success: false, target: `player:${targets[0]}` };
             }
         }
-        return { msg: "Joinings executed!", success: null };
+        return { msg: "Joinings executed!", success: null, target: `player:${targets[0]}` };
     }
     
     /**

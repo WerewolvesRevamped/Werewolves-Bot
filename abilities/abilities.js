@@ -49,45 +49,55 @@ module.exports = function() {
         }
         // execute ability
         abilityLog(`🟢 **Executing Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) \`\`\`${JSON.stringify(ability)}\`\`\``);
+        let feedback;
         switch(ability.type) {
             default:
                 abilityLog(`❗ **Error:** Unknown ability type \`${ability.type}\`!`);
-                return { msg: "", success: false };
+                feedback = { msg: "", success: false };
             break;
             case "joining":
-                return await abilityJoining(src_ref, src_name, ability, additionalTriggerData);
+                feedback = await abilityJoining(src_ref, src_name, ability, additionalTriggerData);
             break;
             case "investigating":
-                return await abilityInvestigating(src_ref, src_name, ability, additionalTriggerData);
+                feedback = await abilityInvestigating(src_ref, src_name, ability, additionalTriggerData);
             break;
             case "disguising":
-                return await abilityDisguising(src_ref, src_name, ability, additionalTriggerData);
+                feedback = await abilityDisguising(src_ref, src_name, ability, additionalTriggerData);
             break;
             case "killing":
-                return await abilityKilling(src_ref, src_name, ability, additionalTriggerData);
+                feedback = await abilityKilling(src_ref, src_name, ability, additionalTriggerData);
             break;
             case "protecting":
-                return await abilityProtecting(src_ref, src_name, ability, additionalTriggerData);
+                feedback = await abilityProtecting(src_ref, src_name, ability, additionalTriggerData);
             break;
             case "log":
-                return await abilityLogging(src_ref, src_name, ability, additionalTriggerData);
+                feedback = await abilityLogging(src_ref, src_name, ability, additionalTriggerData);
             break;
             case "targeting":
-                return await abilityTargeting(src_ref, src_name, ability, additionalTriggerData);
+                feedback = await abilityTargeting(src_ref, src_name, ability, additionalTriggerData);
             break;
             case "process_evaluate":
-                return await abilityProcessEvaluate(src_ref, src_name, ability, additionalTriggerData);
+                feedback = await abilityProcessEvaluate(src_ref, src_name, ability, additionalTriggerData);
             break;
             case "abilities":
-                return await abilityAbilities(src_ref, src_name, ability, additionalTriggerData);
+                feedback = await abilityAbilities(src_ref, src_name, ability, additionalTriggerData);
             break;
             case "announcement":
-                return await abilityAnnouncement(src_ref, src_name, ability, additionalTriggerData);
+                feedback = await abilityAnnouncement(src_ref, src_name, ability, additionalTriggerData);
             break;
             case "poll":
-                return await abilityPoll(src_ref, src_name, ability, additionalTriggerData);
+                feedback = await abilityPoll(src_ref, src_name, ability, additionalTriggerData);
             break;
         }
+        
+        // on action trigger
+        const actionTarget = feedback.target ? feedback.target : null;
+        await trigger(src_ref, "On Action", { action_result: feedback.result, action_target: actionTarget }); 
+        await trigger(src_ref, "On Action Complex", { action_result: feedback.result, action_target: actionTarget, ability_type: ability.type, ability_subtype: "" }); 
+        if(ability.subtype) await trigger(src_ref, "On Action Complex", { action_result: feedback.result, action_target: actionTarget, ability_type: ability.type, ability_subtype: ability.subtype }); 
+        
+        // return feedback
+        return feedback;
     }
 
     /**

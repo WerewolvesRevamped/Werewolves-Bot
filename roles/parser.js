@@ -327,9 +327,9 @@ module.exports = function() {
             /**
             Split Line
             **/
-            let abilityLineSplit = trigger[1][a].split(/ \[| \{| ⟨/); // split off things after the ability part
-            if(abilityLineSplit.length >= 1 && abilityLineSplit[0].match(/\[|\{|⟨/)) {
-                abilityLineSplit = (" " + trigger[1][a]).split(/ \[| \{| ⟨/);
+            let abilityLineSplit = trigger[1][a].split(/ \[| \{| ⟨| \|/); // split off things after the ability part
+            if(abilityLineSplit.length >= 1 && abilityLineSplit[0].match(/\[|\{|⟨|\|/)) {
+                abilityLineSplit = (" " + trigger[1][a]).split(/ \[| \{| ⟨| \|/);
             }
             let ability = null;
             let exp, fd;
@@ -361,6 +361,7 @@ module.exports = function() {
             let restrictions = abilityValues.match(/(?<=\[).+(?=\])/)?.[0]?.split(", ");
             let compulsion = abilityValues.match(/(?<=\{).+(?=\})/)?.[0]?.split(", ");
             let scaling = abilityValues.match(/(?<=\⟨).+(?=\⟩)/)?.[0]?.split(", ");
+            let promptOverwrite = abilityValues.match(/(?<=\|).+(?=\|)/)?.[0];
             let parsedRestrictions = [];
             let parsedScaling = [];
             
@@ -1091,6 +1092,7 @@ module.exports = function() {
                 //console.log("IDENT", ability);
                 trigger[1][a] = { depth: (+bullets.indexOf(trigger[1][a].trim()[0])) + 1, ability: ability, parameters: { restrictions: parsedRestrictions, scaling: parsedScaling, direct: cDirect, repeating: cRepeating, visitless: cVisitless, forced: cForced, forced_sel: cForcedSelection } };
                 if(peCond) trigger[1][a].condition = peCond;
+                if(promptOverwrite) trigger[1][a].parameters.prompt_overwrite = promptOverwrite;
                 if(isInlineEval) {
                     trigger[1][a].condition = peCond;
                     trigger[1][a].inline_eval = true;
@@ -1300,7 +1302,8 @@ module.exports = function() {
                 case "@ThisAttr": return "attribute";
                 case "@ActionResult": return "info";
                 case "@Result": case "@Result1": case "@Result2": case "@Result3": 
-                case "@Result4": case "@Result5": case "@Result6": case "@Result7": return "result";
+                case "@Result4": case "@Result5": case "@Result6": case "@Result7": 
+                case "@ActionResult": return "result";
                 default: return "player";
             }
         } else if(first == "#") {

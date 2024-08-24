@@ -67,7 +67,7 @@ module.exports = function() {
             success = true; // if attack succeeds set to true
         }
         
-        return success ? { msg: "Attack successful!", success: true } : { msg: "Attack failed!", success: false }; // if at least one player dies its a success
+        return success ? { msg: "Attack successful!", success: true, target: `player:${targets[0]}` } : { msg: "Attack failed!", success: false, target: `player:${targets[0]}` }; // if at least one player dies its a success
     }
     
     /** PRIVATE
@@ -97,7 +97,7 @@ module.exports = function() {
             success = true; // if attack succeeds set to true
         }
         
-        return success ? { msg: "Lynch successful!", success: true } : { msg: "Lynch failed!", success: false }; // if at least one player dies its a success
+        return success ? { msg: "Lynch successful!", success: true, target: `player:${targets[0]}` } : { msg: "Lynch failed!", success: false, target: `player:${targets[0]}` }; // if at least one player dies its a success
     }
     
     /** PRIVATE
@@ -125,7 +125,7 @@ module.exports = function() {
             success = true; // if attack succeeds set to true
         }
         
-        return success ? { msg: "Kill successful!", success: true } : { msg: "Kill failed!", success: false }; // if at least one player dies its a success
+        return success ? { msg: "Kill successful!", success: true, target: `player:${targets[0]}` } : { msg: "Kill failed!", success: false, target: `player:${targets[0]}` }; // if at least one player dies its a success
     }
     
     /** PRIVATE
@@ -147,7 +147,7 @@ module.exports = function() {
             abilityLog(`✅ ${srcRefToText(src_ref)} true killed <@${targets[i]}>.`);
             success = true; // True Kill always succeeds
         }
-        return success ? { msg: "True Kill successful!", success: true } : { msg: "True Kill failed!", success: false }; // if at least one player dies its a success
+        return success ? { msg: "True Kill successful!", success: true, target: `player:${targets[0]}` } : { msg: "True Kill failed!", success: false, target: `player:${targets[0]}` }; // if at least one player dies its a success
     }
     
     /** PRIVATE

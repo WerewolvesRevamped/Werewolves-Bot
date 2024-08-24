@@ -38,20 +38,21 @@ module.exports = function() {
             // SUCCESS
             case "success":
                 return { value: [ parseSuccess(selector) ], type: "success" };
-            break;
             // RESULT
             case "result":
                 return { value: [ parseResult(selector, additionalTriggerData) ], type: "result" };
-            break;
             // INFO
             case "info":
                 return { value: [ await parseInfo(selector, self, additionalTriggerData) ], type: "info" };
-            break;
+            // ABILITY TYPE
+            case "abilitytype":
+                return { value: [ parseAbilityType(selector) ], type: "abilityType" };
+            // ABILITY SUBTYPE
+            case "abilitysubtype":
+                return { value: [ parseAbilitySubtype(selector) ], type: "abilitySubype" };
             // UNKNOWN
             case "attribute":
             case "alignment":
-            case "abilityType":
-            case "abilitySubtype":
             case "source":
             default:
                 abilityLog(`❗ **Error:** Invalid selector type \`${selectorType}\`!`);
@@ -120,6 +121,12 @@ module.exports = function() {
             case "@winner":
                 if(additionalTriggerData.winner) {
                     return [ additionalTriggerData.winner ];
+                } else {
+                    return invalidSelector(selectorTarget);
+                }
+            case "@actiontarget":
+                if(additionalTriggerData.action_target) {
+                    return [ additionalTriggerData.action_target ];
                 } else {
                     return invalidSelector(selectorTarget);
                 }
@@ -286,6 +293,7 @@ module.exports = function() {
             case "@result5": return additionalTriggerData.result5 ?? emptyResult;
             case "@result6": return additionalTriggerData.result6 ?? emptyResult;
             case "@result7": return additionalTriggerData.result7 ?? emptyResult;
+            case "@actionresult": return additionalTriggerData.action_result ?? emptyResult;
             default: 
                 abilityLog(`❗ **Error:** Invalid result type \`${selectorTarget}\`. Defaulted to \`{msg:"",success:false}\`!`);
                 return emptyResult;
@@ -320,6 +328,64 @@ module.exports = function() {
         }
         // return
         return spl.join(" ");
+    }
+    
+    /**
+    Parse ability type
+    **/
+    const abilityTypeNames = ["joining","investigating","disguising","killing","protecting","log","targeting","process_evaluate","abilities","announcement","poll"];
+    this.parseAbilityType = function(ability_type) {
+        // get target
+        let selectorTarget = selectorGetTarget(ability_type);
+        if(abilityTypeNames.includes(selectorTarget)) {
+            return selectorTarget;
+        } else {
+            abilityLog(`❗ **Error:** Invalid ability type \`${selectorTarget}\`. Defaulted to \`none\`!`);
+            return "none";
+        }
+    }
+    
+    /**
+    Parse ability subtype
+    **/
+    const abilitySubtypeNames = [
+        ["add","remove"], // joining
+        ["role","class","category"], // investigating
+        ["weakly","strongly"], // disguising
+        ["attack","kill","lynch","true-kill"], // killing
+        ["active-defense","passive-defense","partial-defense","recruitment-defense","absence"], // protecting
+        [], // log
+        ["target","untarget"], // targeting
+        [], // process_evaluate
+        [], // abilities
+        [], // announcement
+        ["creation"], // poll
+        ];
+    this.parseAbilitySubype = function(ability_subtype) {
+        // get target
+        const selectorTarget = selectorGetTarget(ability_subtype);
+        const selectorTargetSplit = selectorTarget.split(" ");
+        // doesnt specify both type and subtype; or too many parts
+        if(selectorTargetSplit.length != 2) {
+            abilityLog(`❗ **Error:** Invalid ability subtype length for \`${selectorTarget}\`. Defaulted to \`none none\`!`);
+            return "none none";
+        }
+        // check if type is valid
+        if(abilityTypeNames.includes(selectorTargetSplit[1])) {
+            // get relevant subtypes
+            const abilityIndex = abilityTypeNames.indexOf(selectorTargetSplit[1]);
+            const validAbilitySubtypeNames = abilitySubtypeNames[abilityIndex];
+            // check if subtype is valid
+            if(validAbilitySubtypeNames.includes(selectorTargetSplit[0])) {
+                return selectorTarget;
+            } else { // invalid subtype
+                abilityLog(`❗ **Error:** Invalid ability subtype \`${selectorTargetSplit[0]}\` in \`${selectorTarget}\`. Defaulted to \`none none\`!`);
+                return "none none";
+            }
+        } else { // type is invalid
+            abilityLog(`❗ **Error:** Invalid ability type \`${selectorTargetSplit[1]}\` in \`${selectorTarget}\`. Defaulted to \`none none\`!`);
+            return "none none";
+        }
     }
     
     /**
@@ -402,6 +468,7 @@ module.exports = function() {
             return "all";
         }
     }
+    
     
     
 }

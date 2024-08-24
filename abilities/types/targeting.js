@@ -55,7 +55,7 @@ module.exports = function() {
         abilityLog(`✅ ${srcRefToText(src_ref)} targeted ${srcRefToText(targetType+':'+target)}.`);
         
         // feedback
-        return { msg: "Target updated!", success: true };
+        return { msg: "Target updated!", success: true, target: `${targetType}:${target}` };
     }
     
     /** PRIVATE

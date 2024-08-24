@@ -67,7 +67,7 @@ module.exports = function() {
             await createDefenseAttribute(src_name, src_ref, targets[i], dur_type, def_type, from_type, from_selector, during_phase);
             abilityLog(`✅ <@${targets[i]}> was protected with \`${toTitleCase(def_type)}\` defense for \`${getDurationName(dur_type)}\`.`);
         }
-        return { msg: "Protecting executed!", success: true };
+        return { msg: "Protecting executed!", success: true, target: `player:${targets[0]}` };
     }
     
     /**
@@ -79,7 +79,7 @@ module.exports = function() {
             await createAbsenceAttribute(src_name, src_ref, targets[i], dur_type, loc, from_type, from_selector, during_phase);
             abilityLog(`✅ <@${targets[i]}> is absent at \`${loc}\` for \`${getDurationName(dur_type)}\`.`);
         }
-        return { msg: "Absence registered!", success: true };
+        return { msg: "Absence registered!", success: true, target: `player:${targets[0]}` };
     }
     
         

@@ -51,7 +51,7 @@ module.exports = function() {
             await createDisguiseAttribute(src_name, src_ref, targets[i], duration, disguise, strength);
             abilityLog(`✅ <@${targets[i]}> was ${strength === 'weak' ? 'weakly' : 'strongly'} disguised as \`${toTitleCase(disguise)}\` for \`${getDurationName(duration)}\`.`);
         }
-        return { msg: "Disguising succeeded!", success: true };
+        return { msg: "Disguising succeeded!", success: true, target: `player:${targets[0]}` };
     }
     
     /**
