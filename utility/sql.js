@@ -51,7 +51,7 @@ module.exports = function() {
     SQL Set Stats
     Sets a stat in the stat database by numeric id
     */
-	this.sqlSetStat = function(id, value, resCallback, errCallback) {
+	this.sqlSetStat = function(id, value, resCallback = ()=>{}, errCallback = ()=>{}) {
 		sql("UPDATE stats SET value = " + connection.escape(value) + " WHERE id = " + connection.escape(id), resCallback, errCallback);
 	}
 
@@ -71,7 +71,7 @@ module.exports = function() {
     0: Default query, resolves the promise with the query's result
     1: Either resolves with result[0].value if result[0] is set or runs the error callback
     */
-	this.sqlQuery = function(query, resCallback = ()=>{}, errCallback = ()=>{}, mode) {
+	this.sqlQuery = function(query, resCallback = ()=>{}, errCallback = ()=>{}, mode = 0) {
 		// Do query
 		connection.query(query, function(err, result, fields) {
 			// Check success

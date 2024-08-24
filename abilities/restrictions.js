@@ -15,6 +15,7 @@ module.exports = function() {
     apply ability restrictions
     **/
     this.handleRestriction = async function(src_ref, ability, restriction, prePrompt, target = null, additionalTriggerData = {}) {
+        console.log(restriction);
         switch(restriction.type) {
             // UNKNOWN
             default: 
@@ -74,7 +75,7 @@ module.exports = function() {
                         }
                         // check if target exists
                         if(!target) {
-                            return true; // restriciton application not applicable without target
+                            return true; // restriction application not applicable without target
                         }
                         // actual evaluation
                         let lt = await getLastTarget(src_ref, ability);

@@ -189,7 +189,7 @@ module.exports = function() {
     Verifies if an info message exists
     **/
     this.verifyInfoMessage = function(input) {
-		return verifyRole(input) || verifyInfo(input) || verifyGroup(input);
+		return verifyRole(input) || verifyInfo(input) || verifyGroup(input) || verifyLocationName(input);
 	}
     
     /**

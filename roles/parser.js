@@ -51,6 +51,7 @@ module.exports = function() {
         const defaultParams = parseAbilities(["Immediate",["Disband"]])[1][0].parameters;
         
         if(debugMode) console.log("PARSE ABILITIES");
+        
         for(let t in triggers.triggers) {
             // abilities
             let abilities = parseAbilities(triggers.triggers[t]); // parse abilities of a trigger
@@ -176,6 +177,16 @@ module.exports = function() {
             
             /* Remove Blank */
             abilities[1] = abilities[1].filter(el => el.ability.type != "blank"); // remove blank lines
+            
+            // extract additional parameters
+            let additionalParameters = abilities[1].filter(el => el.ability.type === "parameters");
+            abilities[1] = abilities[1].filter(el => el.ability.type != "parameters"); // remove parameters lines
+            if(additionalParameters.length === 1) {
+                console.log("ADDPARA", additionalParameters);
+                 abilities[1][0].parameters = additionalParameters[0].parameters;
+            } else if(additionalParameters.length > 1) {
+                if(!debugMode) throw new Error(`Too many additional parameters.`);
+            }
             
             /** Formatting */
             /* Output */
@@ -1126,7 +1137,7 @@ module.exports = function() {
                 trigger[1][a] = { depth: (+bullets.indexOf(trigger[1][a].trim()[0])) + 1, ability: { type: "condition", id: abilityCounter++ }, parameters: { }, condition: peCond };
                 if(isInlineEval) trigger[1][a].inline_eval = true;
             } else if(abilityLine == "") {
-                trigger[1][a] = { depth: (+bullets.indexOf(trigger[1][a].trim()[0])) + 1, ability: { type: "blank", id: abilityCounter++ }, parameters: { } };
+                trigger[1][a] = { depth: (+bullets.indexOf(trigger[1][a].trim()[0])) + 1, ability: { type: "parameters", id: abilityCounter++ }, parameters: { restrictions: parsedRestrictions, scaling: parsedScaling, direct: cDirect, repeating: cRepeating, visitless: cVisitless, forced: cForced, forced_sel: cForcedSelection } };
             } else {
                 //console.log("UNIDENT", abilityLine);
                 if(!debugMode) throw new Error(`Invalid Ability Type \`\`\`\n${trigger[1][a]}\n\`\`\` with ability line \`\`\`\n${abilityLine}\n\`\`\``);

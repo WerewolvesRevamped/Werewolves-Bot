@@ -55,6 +55,10 @@ module.exports = function() {
         } else if(cachedInfoNames.includes(roleName)) {
             // its an info
             infoEmbed = await getInfoEmbed(roleName, channel.guild);
+        }  else if(cachedLocations.includes(roleName)) {
+            // its a location
+            console.log(roleName);
+            infoEmbed = await getLocationEmbed(roleName);
         } else {
             // its nothing? should be impossible since verifyInfoMessage checks its one of the above minimum
             // can happen if running info pre caching
@@ -159,6 +163,36 @@ module.exports = function() {
                
                 // get icon if applicable
                 let lutval = applyLUT(groupName);
+                if(!lutval) lutval = applyLUT(result?.display_name ?? "Unknown");
+                if(lutval) { // set icon and name
+                    //console.log(`${iconRepoBaseUrl}${lutval}`);
+                    embed.thumbnail = { "url": `${iconRepoBaseUrl}${lutval}.png` };
+                    embed.author = { "icon_url": `${iconRepoBaseUrl}${lutval}.png`, "name": applyTheme(result?.display_name ?? "Unknown") };
+                } else { // just set title afterwards
+                    embed.title = applyET(result?.display_name ?? "Unknown");
+                }
+                
+                // resolve promise, return embed
+                res(embed);
+            })
+        });
+    }
+    
+    /**
+    Get Location Embed
+    Returns a location embed for a group message
+    */
+    this.getLocationEmbed = function(locationName) {
+        return new Promise(res => {
+            sql("SELECT * FROM locations WHERE name = " + connection.escape(locationName), async result => {
+                result = result[0]; // there should always only be one role by a certain name
+                var embed = await getBasicEmbed(mainGuild);
+                
+                // description
+                embed.description = result?.description ?? "No info found"
+               
+                // get icon if applicable
+                let lutval = applyLUT(locationName);
                 if(!lutval) lutval = applyLUT(result?.display_name ?? "Unknown");
                 if(lutval) { // set icon and name
                     //console.log(`${iconRepoBaseUrl}${lutval}`);

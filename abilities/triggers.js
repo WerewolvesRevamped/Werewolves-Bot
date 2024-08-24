@@ -78,7 +78,7 @@ module.exports = function() {
             // get all players
             sql("SELECT name,parsed FROM polls WHERE name=" + connection.escape(poll_name), async r => {
                 //trigger handler
-                if(!r[0]) {
+                if(!r[0] || !r[0].parsed) {
                     abilityLog(`❗ **Skipped Trigger:** Cannot find matching poll for ${poll_name}.`);
                     res();
                 }
@@ -147,6 +147,7 @@ module.exports = function() {
             sql("SELECT name,parsed FROM polls", async r => {
                 // no need for an extra layer for polls
                 for(let pr of r) {
+                    if(!pr.parsed) continue;
                     let parsed = JSON.parse(pr.parsed);
                     await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `poll:${pr.name}`, `poll:${pr.name}`);
                 }
@@ -168,6 +169,7 @@ module.exports = function() {
                     res();
                 }
                 // parse the formalized desc into an object
+                if(result[0].parsed) res();
                 let parsed = JSON.parse(result[0].parsed);
                 await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `player:${pr.id}`, `role:${pr.role}`);
                 // resolve outer promise
@@ -188,6 +190,7 @@ module.exports = function() {
                     res();
                 }
                 // parse the formalized desc into an object
+                if(result[0].parsed) res();
                 let parsed = JSON.parse(result[0].parsed);
                 await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `group:${pr.channel_id}`, `group:${pr.name}`);
                 // resolve outer promise

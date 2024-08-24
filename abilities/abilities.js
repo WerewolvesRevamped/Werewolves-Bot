@@ -207,7 +207,7 @@ module.exports = function() {
     Abilities Reset
     **/
     this.abilitiesReset = function() {
-		sql("DELETE FROM action_quantities");
+		sql("DELETE FROM action_data");
 		sql("DELETE FROM action_queue");
 		sql("DELETE FROM prompts");
     }

@@ -36,21 +36,7 @@ module.exports = function() {
             }
 		}
 		channel.send("✳ Game is called `" + stats.game + "`");
-        
-		// Create Public Channels
-		channel.guild.channels.create({ name: "💬 " + toTitleCase(stats.game) + " Public Channels", type: ChannelType.GuildCategory,  permissionOverwrites: getPublicCatPerms(channel.guild) })
-		.then(cc => {
-			sqlSetStat(15, cc.id, result => {
-				// Create public channels
-				createStartPublic(channel, cc);
-			}, () => {
-				channel.send("⛔ Database error. Could not save public category!");
-			});
-		}).catch(err => { 
-			// Missing permissions
-			logO(err); 
-			sendError(channel, err, "Could not create public channels");
-		});
+        createLocations();
 		// Set Gamephase
 		cmdGamephaseSet(channel, ["set", gp.INGAME]);
 		// Cache emojis
@@ -62,11 +48,17 @@ module.exports = function() {
 		// Assign roles
 		startOnePlayer(channel, channel.guild.roles.cache.get(stats.signed_up).members.toJSON(), 0);
 		createSCs(channel, debug);
-        
+        // reset to d0
+        setPhase("d0");
+        setSubphase(SUBPHASE.MAIN);
         // emit a starting event
         setTimeout(function() {
             eventStarting();
         }, 1000 * 60);
+        // emit a starting event
+        setTimeout(function() {
+            eventStartDay();
+        }, 1000 * 60 * 2);
         
 	}
     
@@ -248,62 +240,6 @@ module.exports = function() {
         });
 	}
 	
-	/* Public Permissions */
-	this.getPublicCatPerms = function(guild) {
-		return [ getPerms(guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.ghost, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.participant, ["write", "read"], []) ];
-	}
-	
-	/* Starts the creation of extra scs */
-	this.createStartPublic = function(channel, cc) {
-		sql("SELECT name,members,setup FROM sc WHERE type = 'public' ORDER BY cond ASC", result => {
-			createOnePublic(channel, cc, result, 0);
-		}, () => {
-			channel.send("⛔ Database error. Unable to get a list extra SCs."); 
-		});
-	}
-	
-	this.createOnePublic = function(channel, category, channels, index) {
-		// Checks
-		if(index >= channels.length) {
-			channel.send("✅ Finished creating Public Channels!");
-            getPublicCat();
-			return;
-		}
-		let cPerms;
-		switch(channels[index].members) {
-			case "mayor": 
-				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.mayor, ["read", "write"], []), getPerms(stats.mayor2, ["read", "write"], []), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.ghost, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.sub, ["read"], ["write"]), getPerms(stats.participant, ["read"], ["write"]) ]; 
-			break;
-			case "info": 
-				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.ghost, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.sub, ["read"], ["write"]), getPerms(stats.participant, ["read"], ["write"]) ]; 
-			break;
-			case "alive": 
-				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.ghost, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.sub, ["read"], ["write"]), getPerms(stats.participant, ["read","write"], []) ]; 
-			break;
-			case "dead": 
-				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read","write"], []), getPerms(stats.ghost, [], ["read"]), getPerms(stats.spectator, ["read","write"], []), getPerms(stats.participant, [], ["read"]), getPerms(stats.sub, [], ["read"]) ]; 
-			break;
-			case "ghost": 
-				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.ghost, ["read","write"], []), getPerms(stats.spectator, ["read","write"], []), getPerms(stats.participant, [], ["read"]), getPerms(stats.sub, [], ["read"]) ]; 
-			break;
-			case "sub": 
-				cPerms = [ getPerms(channel.guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.ghost, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.participant, [], ["read"]), getPerms(stats.sub, ["read","write"], []) ]; 
-			break;
-		}
-		channel.guild.channels.create({ name: channels[index].name, type: ChannelType.GuildText,  permissionOverwrites: cPerms, parent: category })
-		.then(sc => { 
-			if(channels[index].setup.length > 1) channels[index].setup.replace(/%n/g, index).split(",").forEach(el => sc.send(stats.prefix + el));
-			sc.setParent(category,{ lockPermissions: false }).then(m => {
-				createOnePublic(channel, category, channels, ++index);
-			}).catch(err => { 
-				logO(err); 
-				sendError(channel, err, "Could not set category"); 
-			}); 
-		}).catch(err => { 
-			logO(err); 
-			sendError(channel, err, "Could not create channel"); 
-		});
-	}
 	
     this.cmdForceDemote = function(channel, all = true) {
         // demotable

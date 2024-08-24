@@ -126,5 +126,72 @@ module.exports = function() {
 
     }
     
+    /** Create public channels **/
+    this.createLocations = async function() {
+		// Create Public Channels
+		const publicCat = await mainGuild.channels.create({ name: "💬 " + toTitleCase(stats.game) + " Public Channels", type: ChannelType.GuildCategory,  permissionOverwrites: getLocationPermissions() });
+        
+        // save public channel
+        sqlSetStat(15, publicCat.id);
+        
+        // get all locations
+		const locations = await sqlProm("SELECT * FROM locations ORDER BY sort_index ASC");
+            
+        // go through all locations
+        for(let i = 0; i < locations.length; i++) {
+            // get permissions
+            const members = locations[i].members.toLowerCase().split(",");
+            const viewers = locations[i].viewers.toLowerCase().split(",");
+            let permissions = [ getPerms(mainGuild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []) ];
+            // add member permissions
+            members.forEach(mem => {
+                let perm = getLocationPermissionsType(mem, ["write","read"], []);
+                if(perm) permissions.push(perm);
+            });
+            // add viewer permissions
+            viewers.forEach(view => {
+                let perm = getLocationPermissionsType(view, ["read"], ["write"]);
+                if(perm) permissions.push(perm);
+            });
+            
+            // create channel
+            const displayName = locations[i].display_name;
+            let newLocChannel = await mainGuild.channels.create({ name: displayName, type: ChannelType.GuildText, permissionOverwrites: permissions, parent: publicCat });
+            newLocChannel.setParent(publicCat, { lockPermissions: false });
+            
+            // send message
+            if(locations[i].description) {
+                let embed = await getLocationEmbed(locations[i].name);
+                sendEmbed(newLocChannel, embed, true);
+            }
+            
+            // save channel
+            const name = locations[i].name;
+            await sqlProm("UPDATE locations SET channel_id=" + connection.escape(newLocChannel.id) + " WHERE name=" + connection.escape(name));
+        }      
+
+    }
+    
+    function getLocationPermissionsType(type, allow, deny) {
+        switch(type) {
+            case "alive":
+                return stats.participant ? getPerms(stats.participant, allow, deny) : null; 
+            case "dead":
+                return stats.dead_participant ? getPerms(stats.dead_participant, allow, deny) : null; 
+            case "ghost":
+                return stats.ghost ? getPerms(stats.ghost, allow, deny) : null; 
+            case "substitute":
+                return stats.substitute ? getPerms(stats.substitute, allow, deny) : null; 
+            default:
+                return null;
+        }
+    }
+    
+	/* Public Permissions */
+	function getLocationPermissions() {
+		return [ getPerms(mainGuild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.ghost, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.participant, ["write", "read"], []) ];
+	}
+	
+    
     
 }

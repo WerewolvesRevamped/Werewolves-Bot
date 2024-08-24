@@ -57,6 +57,8 @@ module.exports = function() {
                 // Determine channel name
                 let channelName = rolesNameArray.join("-").substr(0, 100);
                 channelName = applyTheme(channelName);
+                
+                if(channelName.length > 100 || channelName.length <= 0) channelName = "invalid";
 
                 // Create SC channel
                 channel.guild.channels.create({ name: channelName, type: ChannelType.GuildText,  permissionOverwrites: scPerms, parent: category })
