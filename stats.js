@@ -15,7 +15,6 @@ module.exports = function() {
 		// Get Log Channel & Guild
 		sqlGetStat(11,  result => { 
 			stats.log_guild = result;
-			stats.guild = client.guilds.cache.get(result);
 			if(doLog) log("Stats > Cached log guild id as `" + result + "`!")
 		}, () => {
             stats.log_guild = false;

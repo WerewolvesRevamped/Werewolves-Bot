@@ -442,7 +442,7 @@ module.exports = function() {
             sql("SELECT channel_id FROM connected_channels WHERE id = " + connection.escape(src_ref), result => {
                 for(let i = 0; i < result.length; i++) {
                     let player_sc_id = result[i].channel_id;
-                    let player_sc = stats.guild.channels.cache.get(player_sc_id);
+                    let player_sc = mainGuild.channels.cache.get(player_sc_id);
                     let player_sc_msg = player_sc.messages.cache.get(message_id);
                     let orig_text = player_sc_msg.embeds[0].description.split(".")[0];
                     embed = basicEmbed(`${orig_text}. Ability executed.`, EMBED_GREEN);

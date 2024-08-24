@@ -1448,7 +1448,7 @@ module.exports = function() {
 		var user;
         var guild;
         if(!channel) {
-            guild = stats.guild;
+            guild = mainGuild;
         } else {
             channel.guild;
         }

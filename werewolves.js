@@ -161,6 +161,7 @@ var automationBusy = false;
 
 /* New Message */
 client.on("messageCreate", async message => {
+    if(!message) return;
     try {
         await message.fetch();
     } catch (err) {

@@ -24,7 +24,7 @@ module.exports = function() {
         let result;
         // check parameters
         if(!ability.target || !ability.group) {
-            abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
+            abilityLog(`❗ **Error:** Missing arguments for type \`${ability.type}\`!`);
             return { msg: "Joining failed! " + abilityError, success: false };
         }
         // parse parameters
@@ -92,8 +92,8 @@ module.exports = function() {
             // check if target is already part of the group
             let attrs = await queryAttributePlayer(targets[i], "val1", group);
             if(attrs.length > 0) { // in group, can be removed
-                await deleteAttributePlayer(targets[i], "val1", group); // delete old membership(s)
-                groupsSend(group, `<@${targets[i]}> has left $name.`);
+                await deleteAttributePlayer(targets[i], "attr_type", "group_membership", "val1", group); // delete old membership(s)
+                await groupsLeave(targets[i], group);
                 abilityLog(`✅ <@${targets[i]}> was removed from ${toTitleCase(group)}.`);
                 if(targets.length === 1) return { msg: "Joining succeeded!", success: true, target: `player:${targets[0]}` };
             } else { // no membership, cannot be removed
@@ -117,12 +117,44 @@ module.exports = function() {
                     let groupChannel = await mainGuild.channels.fetch(result[0].channel_id);
                     
                     groupChannel.permissionOverwrites.create(target, { ViewChannel: true}).then(sc => {
-                        groupChannel.send(`<@${target}> has joined <#${groupChannel.id}>.`);
+                        let embed = basicEmbed(`<@${target}> has joined <#${groupChannel.id}>.`, EMBED_GREEN);
+                        groupChannel.send(embed);
+                        res();
+                    }).catch(async err => { 
+                        logO(err); 
+                        let embed = basicEmbed(`Failed to add <@${target}> to <#${groupChannel.id}>.`, EMBED_RED);
+                        groupChannel.send(embed);
+                        res();
+                    });	
+                } else {
+                    // group doesnt exist, create it
+                    await groupsCreate(group, target); 
+                    res();
+                }
+            });
+        });
+    }
+    
+    /**
+    Groups: Leave
+    leave a group
+    takes a target id and a group name
+    **/
+    this.groupsLeave = async function(target, group) {
+        return new Promise(res => {
+            sql("SELECT * FROM active_groups WHERE name=" + connection.escape(group), async result => {
+                if(result && result[0]) {
+                    // group exists, add target to group
+                    let groupChannel = await mainGuild.channels.fetch(result[0].channel_id);
+                    groupChannel.permissionOverwrites.cache.get(target).delete().then(sc => {
+                        let embed = basicEmbed(`<@${target}> has left <#${groupChannel.id}>.`, EMBED_RED);
+                        groupChannel.send(embed);
                         res();
                     }).catch(async err => { 
                         // Failure, Create a new SC Cat first
                         logO(err); 
-                        groupChannel.send(`Failed to add <@${target}> to <#${groupChannel.id}>.`);
+                        let embed = basicEmbed(`Failed to remove <@${target}> from <#${groupChannel.id}>.`, EMBED_RED);
+                        groupChannel.send(embed);
                         res();
                     });	
                 } else {
@@ -173,10 +205,10 @@ module.exports = function() {
             let category = await mainGuild.channels.fetch(cachedSCs[cachedSCs.length - 1]);
             
             // Create SC channel
-            mainGuild.channels.create({ name: group, type: ChannelType.GuildText,  permissionOverwrites: scPerms, parent: category })
+            mainGuild.channels.create({ name: channelName, type: ChannelType.GuildText,  permissionOverwrites: scPerms, parent: category })
             .then(async sc => {
                 // Create a default connection with the groups name
-                cmdConnectionAdd(sc, ["", group], true);
+                connectionAdd(sc.id, group);
                 // Send info message for each role
                 let infoEmbed = await getGroupEmbed(group, ["basics","details"], mainGuild);
                 sendEmbed(sc, infoEmbed, true);
@@ -187,14 +219,16 @@ module.exports = function() {
                 }).catch(async err => { 
                     // Failure, Create a new SC Cat first
                     logO(err); 
-                    let newCategory = await createNewSCCat(channel, sc);
+                    await createNewSCCat(channel, sc);
                 });	
                 
                 // announce new group
                 if(firstMember) {
-                    sc.send(`<@${firstMember}> has created <#${sc.id}>.`);
+                    let embed = basicEmbed(`<@${firstMember}> has created <#${sc.id}>.`, EMBED_GREEN);
+                    sc.send(embed);
                 } else {
-                    sc.send(`<#${sc.id}> has been created.`);
+                    let embed = basicEmbed(`<#${sc.id}> has been created.`, EMBED_GREEN);
+                    sc.send(embed);
                 }
                 
                 // save group in DB

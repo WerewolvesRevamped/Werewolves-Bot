@@ -127,6 +127,11 @@ module.exports = function() {
                         }
                         // no comparison can be made
                         return false;
+                    // COMPARISON - NOT EQUAL
+                    case "not_equal":
+                        condition.subtype = "equal";
+                        let condBool = await parseCondition(condition, src_ref, src_name, additionalTriggerData);
+                        return condBool;
                 }
             // LOGIC
             case "logic":
@@ -175,7 +180,8 @@ module.exports = function() {
                     return false;
                 }
                 let targets = await parseSelector(condition.target, src_ref, additionalTriggerData);
-                return (targets.length > 0);
+                console.log("EXISTENCE", condition.target, targets);
+                return (targets.value.length > 0);
         }
     }
     

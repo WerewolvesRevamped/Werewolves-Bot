@@ -18,6 +18,7 @@ require("./types/targeting.js")();
 require("./types/process_evaluate.js")();
 require("./types/announcement.js")();
 require("./types/poll.js")();
+require("./types/granting.js")();
 
 module.exports = function() {
     
@@ -88,6 +89,9 @@ module.exports = function() {
             case "poll":
                 feedback = await abilityPoll(src_ref, src_name, ability, additionalTriggerData);
             break;
+            case "granting":
+                feedback = await abilityGranting(src_ref, src_name, ability, additionalTriggerData);
+            break;
         }
         
         // on action trigger
@@ -105,7 +109,7 @@ module.exports = function() {
     logs a message in the ability log. WIP: dont hardcode
     **/
     this.abilityLog = function(msg) {
-        stats.guild.channels.cache.get("1269376980906672228").send(msg);
+        mainGuild.channels.cache.get("1269376980906672228").send(msg);
     }
     
     /**
@@ -161,7 +165,7 @@ module.exports = function() {
         }
         
         // get channel
-        let sc = stats.guild.channels.cache.get(channel_id);
+        let sc = mainGuild.channels.cache.get(channel_id);
         // create embed
         embed = basicEmbed(message, color);
         if(ping) embed.content =  `<@&${stats.participant}>`; // add ping

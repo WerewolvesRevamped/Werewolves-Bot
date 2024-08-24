@@ -226,19 +226,5 @@ module.exports = function() {
         connectionSend(conn, text, disguise);
     }
     
-    /**
-    Connection Send
-    sends a message through a connection
-    **/
-    this.connectionSend = function(conName, msg, disguise = false) {
-        // get connected channels from DB
-        sql("SELECT channel_id FROM connected_channels WHERE id = " + connection.escape(conName), result => {
-            // iterate through all connected channels
-            for(let i = 0; i < result.length; i++) {
-                if(disguise) sendMessageDisguise(result[i].channel_id, msg, disguise); // has disguise
-                else sendMessage(result[i].channel_id, msg); // no disguise
-            }
-        });
-    }
 	
 }

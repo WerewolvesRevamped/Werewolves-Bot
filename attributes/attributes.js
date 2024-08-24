@@ -103,12 +103,8 @@ module.exports = function() {
     Create Attribute
     creates an attribute in the database
     **/
-    this.createAttribute = async function(src_name, src_ref, target_player, dur, attr_type, val1 = "", val2 = "", val3 = "", val4 = "") {
-         return new Promise(res => {
-            sql("INSERT INTO active_attributes (owner, src_name, src_ref, attr_type, duration, val1, val2, val3, val4, applied_phase) VALUES (" + connection.escape(target_player) + "," + connection.escape(src_name) +  "," + connection.escape(src_ref) + "," + connection.escape(attr_type) + "," + connection.escape(dur) +  "," + connection.escape(val1) +  "," + connection.escape(val2) +  "," + connection.escape(val3) +  "," + connection.escape(val4) + "," + connection.escape(getPhaseAsNumber()) + ")", result => {
-                res();
-            });
-         });
+    this.createAttribute = function(src_name, src_ref, target_player, dur, attr_type, val1 = "", val2 = "", val3 = "", val4 = "") {
+         return sqlProm("INSERT INTO active_attributes (owner, src_name, src_ref, attr_type, duration, val1, val2, val3, val4, applied_phase) VALUES (" + connection.escape(target_player) + "," + connection.escape(src_name) +  "," + connection.escape(src_ref) + "," + connection.escape(attr_type) + "," + connection.escape(dur) +  "," + connection.escape(val1) +  "," + connection.escape(val2) +  "," + connection.escape(val3) +  "," + connection.escape(val4) + "," + connection.escape(getPhaseAsNumber()) + ")");
     }
     
     /**
@@ -160,6 +156,14 @@ module.exports = function() {
     }
     
     /**
+    Create Role Attribute
+    creates a role attribute with specific role
+    **/
+    this.createRoleAttribute = async function(src_name, src_ref, target_player, dur, role =  "", channelId = "") {
+        await createAttribute(src_name, src_ref, target_player, dur, "role", role, channelId);
+    }
+    
+    /**
     Checks if a attribute column name is valid**/
     function isValidAttributeColumnName(name) {
         return ["owner","src_name","src_ref","attr_type","duration","val1","val2","val3","val4"].includes(name);
@@ -169,7 +173,7 @@ module.exports = function() {
         if(isValidAttributeColumnName(name)) {
             return true;
         } else {
-            abilityLog(`❗ **Error:** Unexpected attribute query column \`${name}\`!`);  
+            abilityLog(`❗ **Error:** Unexpected attribute column \`${name}\`!`);  
             return false;
         }
     }
@@ -183,27 +187,19 @@ module.exports = function() {
         else return await singleColumnQueryGeneric(column, val);
     }
     
-    async function singleColumnQueryGeneric(column, val) {
+    function singleColumnQueryGeneric(column, val) {
         // make sure column is valid
         if(!validateAttributeColumnName(column)) return [];
         // query attribute
-        return new Promise(res => {
-             sql("SELECT * FROM active_attributes WHERE " + column + "=" + connection.escape(val) + " ORDER BY ai_id ASC", result => {
-                 res(result);
-             });
-        }); 
+        return sqlProm("SELECT * FROM active_attributes WHERE " + column + "=" + connection.escape(val) + " ORDER BY ai_id ASC");
     }
     
-    async function twoColumnQueryGeneric(column, val, column2, val2) {
+    function twoColumnQueryGeneric(column, val, column2, val2) {
         // make sure column is valid
         if(!validateAttributeColumnName(column)) return [];
         if(!validateAttributeColumnName(column2)) return [];
         // query attribute
-        return new Promise(res => {
-             sql("SELECT * FROM active_attributes WHERE " + column + "=" + connection.escape(val) + " AND " + column2 + "=" + connection.escape(val2) + " ORDER BY ai_id ASC", result => {
-                 res(result);
-             });
-        }); 
+        return sqlProm("SELECT * FROM active_attributes WHERE " + column + "=" + connection.escape(val) + " AND " + column2 + "=" + connection.escape(val2) + " ORDER BY ai_id ASC");
     }
     
     
@@ -216,44 +212,42 @@ module.exports = function() {
         else return await singleColumnQuery(player, column, val);
     }
     
-    async function singleColumnQuery(player, column, val) {
+    function singleColumnQuery(player, column, val) {
         // make sure column is valid
         if(!validateAttributeColumnName(column)) return [];
         // query attribute
-        return new Promise(res => {
-             sql("SELECT * FROM active_attributes WHERE owner=" + connection.escape(player) + " AND " + column + "=" + connection.escape(val) + " ORDER BY ai_id ASC", result => {
-                 res(result);
-             });
-        }); 
+        return sqlProm("SELECT * FROM active_attributes WHERE owner=" + connection.escape(player) + " AND " + column + "=" + connection.escape(val) + " ORDER BY ai_id ASC");
     }
     
-    async function twoColumnQuery(player, column, val, column2, val2) {
+    function twoColumnQuery(player, column, val, column2, val2) {
         // make sure column is valid
         if(!validateAttributeColumnName(column)) return [];
         if(!validateAttributeColumnName(column2)) return [];
         // query attribute
-        return new Promise(res => {
-             sql("SELECT * FROM active_attributes WHERE owner=" + connection.escape(player) + " AND " + column + "=" + connection.escape(val) + " AND " + column2 + "=" + connection.escape(val2) + " ORDER BY ai_id ASC", result => {
-                 res(result);
-             });
-        }); 
+        return sqlProm("SELECT * FROM active_attributes WHERE owner=" + connection.escape(player) + " AND " + column + "=" + connection.escape(val) + " AND " + column2 + "=" + connection.escape(val2) + " ORDER BY ai_id ASC");
     }
     /**
     Attribute Deletion for Player
     delets an attribute for a specific player
     **/
-    this.deleteAttributePlayer = async function(player, column, val) {
+    this.deleteAttributePlayer = async function(player, column, val, column2 = null, val2 = null) {
+        if(column2) return await twoColumnDeletion(player, column, val, column2, val2);
+        else return await singleColumnDeletion(player, column, val);
+    }
+    
+    function singleColumnDeletion(player, column, val) {
         // make sure column is valid
-        if(!(["owner","src_name","src_ref","attr_type","duration","val1","val2","val3","val4"].includes(column))) {
-            abilityLog(`❗ **Error:** Unexpected attribute deletion column \`${column}\`!`);  
-            return [];
-        }
-        // query attribute
-        return new Promise(res => {
-             sql("DELETE FROM active_attributes WHERE owner=" + connection.escape(player) + " AND " + column + "=" + connection.escape(val), result => {
-                 res(result);
-             });
-        }); 
+        if(!validateAttributeColumnName(column)) return [];
+        // delete attribute
+        return sqlProm("DELETE FROM active_attributes WHERE owner=" + connection.escape(player) + " AND " + column + "=" + connection.escape(val));
+    }
+    
+    function twoColumnDeletion(player, column, val, column2, val2) {
+        // make sure column is valid
+        if(!validateAttributeColumnName(column)) return [];
+        if(!validateAttributeColumnName(column2)) return [];
+        // delete attribute
+        return sqlProm("DELETE FROM active_attributes WHERE owner=" + connection.escape(player) + " AND " + column + "=" + connection.escape(val) + " AND " + column2 + "=" + connection.escape(val2));
     }
     
     /**
@@ -304,7 +298,7 @@ module.exports = function() {
     Get Attribute
     gets an attribute by ai id
     **/
-    async function getAttribute(id) {
+    function getAttribute(id) {
         // get attribute
         return new Promise(res => {
              sql("SELECT * FROM active_attributes WHERE ai_id=" + connection.escape(id), result => {
@@ -317,26 +311,18 @@ module.exports = function() {
     Delete Attribute
     deletes an attribute by ai id
     **/
-    async function deleteAttribute(id) {
+    function deleteAttribute(id) {
         // delete attribute
-        return new Promise(res => {
-             sql("DELETE FROM active_attributes WHERE ai_id=" + connection.escape(id), result => {
-                 res();
-             });
-        }); 
+        return sqlPromEsc("DELETE FROM active_attributes WHERE ai_id=", id);
     }
     
     /** PRIVATE
     Increment Attribute
     increments an attribute's used value by ai id
     **/
-    async function incrementAttribute(id) {
+    function incrementAttribute(id) {
         // update attribute
-        return new Promise(res => {
-             sql("UPDATE active_attributes SET used=used+1 WHERE ai_id=" + connection.escape(id), result => {
-                 res();
-             });
-        }); 
+        return sqlPromEsc("UPDATE active_attributes SET used=used+1 WHERE ai_id=", id);
     }
     
 }

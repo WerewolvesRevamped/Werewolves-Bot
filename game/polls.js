@@ -107,7 +107,7 @@ module.exports = function() {
 				channel.send("✳️ Sending a list of currently existing active poll instances:");
 				// Send message
 				chunkArray(result.map(poll => {
-                    return `\`${poll.ai_id}\`: **${toTitleCase(poll.name)}** [${toTitleCase(poll.type)}] ( https://discord.com/channels/${stats.guild.id}/${poll.channel}/${poll.initial_message} )`;
+                    return `\`${poll.ai_id}\`: **${toTitleCase(poll.name)}** [${toTitleCase(poll.type)}] ( https://discord.com/channels/${mainGuild.id}/${poll.channel}/${poll.initial_message} )`;
                 }), 10).map(el => el.join("\n")).forEach(el => channel.send(el));
 			} else { 
 				// No polls exist
@@ -280,7 +280,7 @@ module.exports = function() {
         // get messages
         const messages = pollData.messages.split(",");
         const channelId = pollData.channel;
-        const channel = stats.guild.channels.cache.get(channelId);
+        const channel = mainGuild.channels.cache.get(channelId);
         const pollType = pollData.type;
         const pollName = pollData.name;
         

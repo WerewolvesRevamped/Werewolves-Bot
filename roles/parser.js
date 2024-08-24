@@ -277,6 +277,24 @@ module.exports = function() {
         if(fd) {
             cond = { type: "logic", subtype: "or", condition1: parseCondition(fd[1]), condition2: parseCondition(fd[2]) };
         }
+        /** Attribute **/
+        exp = new RegExp("^" + targetType + " has " + attributeName + "$", "g");
+        fd = exp.exec(condition);
+        if(fd) {
+            cond = { type: "attribute", target: ttpp(fd[1]), attribute: ttpp(fd[2], "attribute") };
+        }
+        /** Membership **/
+        exp = new RegExp("^" + targetType + " is in " + groupType + "$", "g");
+        fd = exp.exec(condition);
+        if(fd) {
+            cond = { type: "membership", target: ttpp(fd[1]), group: ttpp(fd[2]) };
+        }
+        /** Selector **/
+        exp = new RegExp("^" + targetType + " is part of " + groupType + "$", "g");
+        fd = exp.exec(condition);
+        if(fd) {
+            cond = { type: "selector", target: ttpp(fd[1]), selector: ttpp(fd[2]) };
+        }
         
         if(cond) {
             return cond;

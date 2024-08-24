@@ -213,7 +213,7 @@ module.exports = function() {
     Sends a message to a specified channel id
     **/
     this.sendMessage = function(channel_id, msg) {
-        let con_sc = stats.guild.channels.cache.get(con_id); // get channel
+        let con_sc = mainGuild.channels.cache.get(con_id); // get channel
         con_sc.send(msg); // send message
     }
     
@@ -229,7 +229,7 @@ module.exports = function() {
         if(roleIcon) webhookAvatar = roleIcon;
         
         // get channel
-        let con_sc = stats.guild.channels.cache.get(channel_id);
+        let con_sc = mainGuild.channels.cache.get(channel_id);
         
         // get webhooks of channel
         let webhooks = await con_sc.fetchWebhooks();

@@ -19,7 +19,7 @@ module.exports = function() {
                 return { value: await parsePlayerSelector(selector, self, additionalTriggerData), type: "player" };
             // ROLE
             case "role": 
-                return { value: parseRoleSelector(selector), type: "role" };
+                return { value: await parseRoleSelector(selector, self, additionalTriggerData), type: "role" };
             // GROUP
             case "group":
                 let group = await parseGroup(selector, self);
@@ -73,20 +73,37 @@ module.exports = function() {
         switch(selectorTarget) {
             // base selectors
             case "@self":
-            if(!self) { // if no self is specified, @Self is invalid
-                abilityLog(`❗ **Error:** Used \`@Self\` in invalid context!`);
-                return [ ];
-            }
-            self = srcToValue(self);
-            return [ self ];
-            // all players
+                if(!self) { // if no self is specified, @Self is invalid
+                    abilityLog(`❗ **Error:** Used \`@Self\` in invalid context!`);
+                    return [ ];
+                }
+                self = srcToValue(self);
+                return [ self ];
+            // all (living) players
             case "@all":
-            return await getAllLivingIDs();
-            // all players
+                return await getAllLivingIDs();
+            // others; @all without @self
+            case "@others":
+                let all = await getAllLivingIDs();
+                self = srcToValue(self);
+                return all.filter(el => el != self);
+            // all dead players
+            case "@dead":
+                return await getAllDeadIDs();
+            // all players, including dead ones
+            case "@deadalive":
+                let dead = await getAllDeadIDs();
+                let alive = await getAllLivingIDs();
+                return [...dead, ...alive];
+            // target
             case "@target":
-            let target = await getTarget(self);
-            target = srcToValue(target);
-            return [ target ];
+                if(!self) { // if no self is specified, @Self is invalid
+                    abilityLog(`❗ **Error:** Used \`@Target\` in invalid context!`);
+                    return [ ];
+                }
+                let target = await getTarget(self);
+                target = srcToValue(target);
+                return [ target ];
             
             // trigger dependent selectors
             case "@deathtype":
@@ -156,7 +173,18 @@ module.exports = function() {
     **/
     this.getAllLivingIDs = function() {
         return new Promise(res => {
-            sql("SELECT id FROM players WHERE alive=1", result => {
+            sql("SELECT id FROM players WHERE type='player' AND alive=1", result => {
+                res(result.map(el => el.id));
+            })
+        });
+    }
+    
+    /**
+    Get all dead player ids
+    **/
+    this.getAllDeadIDs = function() {
+        return new Promise(res => {
+            sql("SELECT id FROM players WHERE type='player' AND alive=0", result => {
                 res(result.map(el => el.id));
             })
         });
@@ -235,6 +263,12 @@ module.exports = function() {
                     if(!compInverted) allPlayers = allPlayers.filter(el => groupMembers.includes(el.id));
                     else allPlayers = allPlayers.filter(el => !groupMembers.includes(el.id));
                 break;
+                case "attrrole":
+                    let attrRoleOwners = await queryAttribute("attr_type", "role", "val1", compVal);
+                    attrRoleOwners = attrRoleOwners.map(el => el.owner);
+                    if(!compInverted) allPlayers = allPlayers.filter(el => attrRoleOwners.includes(el.id));
+                    else allPlayers = allPlayers.filter(el => !attrRoleOwners.includes(el.id));
+                break;
                 case "aliveonly":
                     if(compVal === "false") aliveOnly = false;
                 break;
@@ -260,7 +294,7 @@ module.exports = function() {
     **/
     function getAllPlayers() {
         return new Promise(res => {
-            sql("SELECT players.id,players.role,players.orig_role,players.alive,role.class,role.category,role.team,orig_role.class AS orig_class,orig_role.category AS orig_cat,orig_role.team AS orig_align FROM players INNER JOIN roles AS role ON players.role=role.name INNER JOIN roles AS orig_role ON players.orig_role=orig_role.name", result => {
+            sql("SELECT players.id,players.role,players.orig_role,players.alive,role.class,role.category,role.team,orig_role.class AS orig_class,orig_role.category AS orig_cat,orig_role.team AS orig_align FROM players INNER JOIN roles AS role ON players.role=role.name INNER JOIN roles AS orig_role ON players.orig_role=orig_role.name WHERE players.type='player'", result => {
                 res(result);
             })
         });
@@ -281,11 +315,20 @@ module.exports = function() {
     Parse Role Selector
     parses a role type selector
     **/
-    this.parseRoleSelector = function(selector) {
+    this.parseRoleSelector = async function(selector, self = null, additionalTriggerData = {}) {
         // get target
         let selectorTarget = selectorGetTarget(selector);
         /** WIP: Needs to be able to parse much more! **/
         switch(selectorTarget) {
+            // target
+            case "@target":
+                if(!self) { // if no self is specified, @Self is invalid
+                    abilityLog(`❗ **Error:** Used \`@Target\` in invalid context!`);
+                    return [ ];
+                }
+                let target = await getTarget(self);
+                target = srcToValue(target);
+                return [ target ];
             default:
                 let parsedRole = parseRole(selectorTarget);
                 if(verifyRole(parsedRole)) {
@@ -452,7 +495,7 @@ module.exports = function() {
     /**
     Parse ability type
     **/
-    const abilityTypeNames = ["joining","investigating","disguising","killing","protecting","log","targeting","process_evaluate","abilities","announcement","poll"];
+    const abilityTypeNames = ["joining","investigating","disguising","killing","protecting","log","targeting","process_evaluate","abilities","announcement","poll","granting"];
     this.parseAbilityType = function(ability_type) {
         // get target
         let selectorTarget = selectorGetTarget(ability_type);
@@ -479,6 +522,7 @@ module.exports = function() {
         [], // abilities
         [], // announcement
         ["creation"], // poll
+        ["add"], // granting
         ];
     this.parseAbilitySubype = function(ability_subtype) {
         // get target

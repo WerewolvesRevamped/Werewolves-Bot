@@ -76,25 +76,25 @@ module.exports = function() {
                 // amount of players is above treshhold
                 if(result.length > stats.mayor_threshold) {
                     // get players with wrong mayor role
-                    wrongMayorMembers = stats.guild.roles.cache.get(mayor1).members.toJSON();
+                    wrongMayorMembers = mainGuild.roles.cache.get(mayor1).members.toJSON();
                     // switch their roles
                     let results = [];
                     wrongMayorMembers.forEach(el => {
                         switchRoles(el, channel, mayor1, mayor2, "mayor 1", "mayor 2");
-                        let msg = `**${el} has changed from ${stats.guild.roles.cache.get(mayor1)} to ${stats.guild.roles.cache.get(mayor2)}!**`;
+                        let msg = `**${el} has changed from ${mainGuild.roles.cache.get(mayor1)} to ${mainGuild.roles.cache.get(mayor2)}!**`;
                         connectionSend("mayor", msg, "Mayor");
-                        results.push(`✅ Switched ${el} to ${stats.guild.roles.cache.get(mayor2)}`);
+                        results.push(`✅ Switched ${el} to ${mainGuild.roles.cache.get(mayor2)}`);
                     });
                     if(results.length > 0) res(results); // return results
                     else res([]); // apparently no changes occured
                 } else { // amount of players is below or equal to treshold
                     // get players with wrong mayor role
-                    wrongMayorMembers = stats.guild.roles.cache.get(mayor2).members.toJSON();
+                    wrongMayorMembers = mainGuild.roles.cache.get(mayor2).members.toJSON();
                     // switch their roles
                     let results = [];
                     wrongMayorMembers.forEach(el => {
                         switchRoles(el, channel, mayor2, mayor1, "mayor 2", "mayor 1");
-                        let msg = `**${el} has changed from ${stats.guild.roles.cache.get(mayor2)} to ${stats.guild.roles.cache.get(mayor1)}!**`;
+                        let msg = `**${el} has changed from ${mainGuild.roles.cache.get(mayor2)} to ${mainGuild.roles.cache.get(mayor1)}!**`;
                         connectionSend("mayor", msg, "Mayor");
                         results.push(`✅ Switched ${el} to ${mayor1}`);
                     });

@@ -254,7 +254,7 @@ module.exports = function() {
        // send a reporter message
        reporterMessage(player_id);
         
-        let player = stats.guild.members.cache.get(player_id);
+        let player = mainGuild.members.cache.get(player_id);
         // revoke participant role
         removeRoleRecursive(player, false, stats.participant, "participant");
         // grant dead role depending on mode

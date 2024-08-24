@@ -117,7 +117,7 @@ module.exports = function() {
         let parsedLocationName = parseLocationName(locationName);
         sql("SELECT channel_id FROM locations WHERE name = " + connection.escape(parsedLocationName), result => {
             let loc_sc_id = result[0].channel_id;
-            let loc_sc = stats.guild.channels.cache.get(loc_sc_id);
+            let loc_sc = mainGuild.channels.cache.get(loc_sc_id);
             embed = basicEmbed(message, color);
             if(thumbnail) embed.embeds[0].thumbnail = { url: thumbnail }; // add thumbnail
             if(title) embed.embeds[0].title = title; // add title
