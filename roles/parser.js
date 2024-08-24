@@ -307,7 +307,7 @@ module.exports = function() {
 
     /** REGEX - Reminder: You need double \'s here **/
     // general
-    const targetType = "(`[^`]*`|@\\S*|&\\S*|#\\S*|%[^%]+%|randomize\\(.+?\\)|shuffle\\(.+?\\)|most_freq_role\\(.+?\\))";
+    const targetType = "(`[^`]*`|@\\S*|&\\S*|#\\S*|%[^%]+%|randomize\\(.+?\\)|shuffle\\(.+?\\)|most_freq_role\\(.+?\\)|\\d+)";
     const attrDuration = "( \\(~[^\)]+\\))?";
     const locationType = "(`[^`]*`|@\\S*|#\\S*)"; // extended version of target type
     const groupType = "(@\\S*|#\\S*)"; // reduced version of location type
@@ -572,7 +572,13 @@ module.exports = function() {
             exp = new RegExp("^Investigate " + targetType + " Count" + investAffected + "$", "g");
             fd = exp.exec(abilityLine);
             if(fd) {
-                ability = { type: "investigating", subtype: "count", target: ttpp(fd[1]), ...parseInvestAffected(fd[2]) };
+                ability = { type: "investigating", subtype: "count", target: ttpp(fd[1], "role"), ...parseInvestAffected(fd[2]) };
+            }
+            // Player Count invest
+            exp = new RegExp("^Investigate " + targetType + " Player Count$", "g");
+            fd = exp.exec(abilityLine);
+            if(fd) {
+                ability = { type: "investigating", subtype: "player_count", target: ttpp(fd[1]) };
             }
             /** TARGET **/
             // target, default type
@@ -1286,6 +1292,7 @@ module.exports = function() {
     list (not annotated)
     result (a special type for ability results, may take several forms such as role or success)
     success (a boolean like value for ability results, may be compared to a result)
+    number
     **/
     function ttpp(targetType, defaultType = "infer") {
         // pre-existing type annotation
@@ -1332,6 +1339,9 @@ module.exports = function() {
                 default: return targetType.includes("@") || targetType.length > 30 ? "info" : "role";
             }
         } else {
+            if(/^\d+$/.test(targetType)) {
+                return "number";
+            }
             return "unknown"; // this should never occur
         }
     }

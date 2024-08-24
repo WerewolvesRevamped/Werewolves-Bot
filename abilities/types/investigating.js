@@ -35,13 +35,17 @@ module.exports = function() {
                 result = await investigatingCategory(src_name, src_ref, target, ability.affected_by_wd ?? false, ability.affected_by_sd ?? false);
                 return result;
             break;
+            case "player_count":
+                result = await investigatingPlayerCount(src_name, src_ref, target, ability.target);
+                return result;
+            break;
         }
     }
     
     /**
     Single target check - checks investigation is only targetting exactly one target
     **/
-    function singleTargetCheck(targets) {
+    function singleTargetCheck(targets, src_ref) {
         // can only investigate exactly one player
         if(targets.length > 1) {
             abilityLog(`❗ **Error:** ${srcRefToText(src_ref)} tried to investigate more than one player at a time!`);  
@@ -65,7 +69,7 @@ module.exports = function() {
         let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);
         // feedback
         abilityLog(`✅ ${srcRefToText(src_ref)} investigated <@${targets[0]}>'s role as \`${toTitleCase(rdata.role.role)}\`${rdata.type?' ('+rdata.type+')':''}.`);
-        return { msg: `Investigated <@${targets[0]}>'s role: \`${toTitleCase(rdata.role.role)}\``, success: true, target: `player:${targets[0]}` };
+        return { msg: `Investigated <@${targets[0]}>'s role: \`${toTitleCase(rdata.role.role)}\``, success: true, target: `player:${targets[0]}`, result: toTitleCase(rdata.role.role) };
     }
     
     /**
@@ -80,7 +84,7 @@ module.exports = function() {
         let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);
         // feedback
         abilityLog(`✅ ${srcRefToText(src_ref)} investigated <@${targets[0]}>'s class as \`${toTitleCase(rdata.role.class)}\`${rdata.type?' ('+rdata.type+')':''}.`);
-        return { msg: `Investigated <@${targets[0]}>'s class: \`${toTitleCase(rdata.role.class)}\``, success: true, target: `player:${targets[0]}` };
+        return { msg: `Investigated <@${targets[0]}>'s class: \`${toTitleCase(rdata.role.class)}\``, success: true, target: `player:${targets[0]}`, result: toTitleCase(rdata.role.class) };
     }
     
     /**
@@ -95,7 +99,18 @@ module.exports = function() {
         let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);
         // feedback
         abilityLog(`✅ ${srcRefToText(src_ref)} investigated <@${targets[0]}>'s category as \`${toTitleCase(rdata.role.category)}\`${rdata.type?' ('+rdata.type+')':''}.`);
-        return { msg: `Investigated <@${targets[0]}>'s category: \`${toTitleCase(rdata.role.category)}\``, success: true, target: `player:${targets[0]}` };
+        return { msg: `Investigated <@${targets[0]}>'s category: \`${toTitleCase(rdata.role.category)}\``, success: true, target: `player:${targets[0]}`, result: toTitleCase(rdata.role.category) };
+    }
+    
+    /**
+    Ability: Investigating - Player Count
+    **/
+    this.investigatingPlayerCount = async function(src_name, src_ref, targets, selector) {
+        let count = targets.length;
+        let selectorTarget = selector.split("[")[0];
+        // feedback
+        abilityLog(`✅ ${srcRefToText(src_ref)} investigated \`${selectorTarget}\`'s count as \`${count}\`.`);
+        return { msg: `Investigated \`${selectorTarget}\`'s count: \`${count}\``, success: true, result: count };
     }
     
     /**

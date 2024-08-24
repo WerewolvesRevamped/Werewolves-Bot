@@ -131,7 +131,7 @@ module.exports = function() {
                     case "not_equal":
                         condition.subtype = "equal";
                         let condBool = await parseCondition(condition, src_ref, src_name, additionalTriggerData);
-                        return condBool;
+                        return !condBool;
                 }
             // LOGIC
             case "logic":

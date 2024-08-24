@@ -156,7 +156,7 @@ module.exports = function() {
                     return [ id ];
                 } else if (ADVANCED_SELECTOR.test(selectorTarget)) {
                     let contents = selectorTarget.match(ADVANCED_SELECTOR);
-                    return await parseAdvancedPlayerSelector(contents[1]);
+                    return await parseAdvancedPlayerSelector(contents[1], self, additionalTriggerData);
                 } else {
                     return invalidSelector(selectorTarget);
                 }
@@ -193,7 +193,7 @@ module.exports = function() {
     /** PRIVATE
     Parses an advanced player selector
     **/
-    this.parseAdvancedPlayerSelector = async function(selector) {
+    this.parseAdvancedPlayerSelector = async function(selector, self, additionalTriggerData) {
         // split selector into its components
         const selSplit = selector.toLowerCase().split(",").map(el => el.split(":"));
         // get all players
@@ -216,62 +216,85 @@ module.exports = function() {
                 default:
                     abilityLog(`❗ **Error:** Unknown advanced selector component \`${compName}\`!`);
                 break;
+                // Role
                 case "role":
                     if(!compInverted) allPlayers = allPlayers.filter(el => el.role === compVal);
                     else allPlayers = allPlayers.filter(el => el.role != compVal);
                 break;
+                // Category
                 case "cat":
                     if(!compInverted) allPlayers = allPlayers.filter(el => el.category === compVal);
                     else allPlayers = allPlayers.filter(el => el.category != compVal);
                 break;
+                // Class
                 case "class":
                     if(!compInverted) allPlayers = allPlayers.filter(el => el.class === compVal);
                     else allPlayers = allPlayers.filter(el => el.class != compVal);
                 break;
+                // Alignment
+                // WIP: ACTUAL ALIGNMENT MAY DIFFER FROM CURRENT ROLE ALIGNMENT
                 case "align":
                     if(!compInverted) allPlayers = allPlayers.filter(el => el.team === compVal);
                     else allPlayers = allPlayers.filter(el => el.team != compVal);
                 break;
+                // Full Category
                 case "fullcat":
                     compValSplit = compVal.split("-");
                     if(!compInverted) allPlayers = allPlayers.filter(el => el.class === compValSplit[0] && el.category === compValSplit[1]);
                     else allPlayers = allPlayers.filter(el => el.class != compValSplit[0] || el.category != compValSplit[1]);
                 break;
+                // Original Role
                 case "orig_role":
                     if(!compInverted) allPlayers = allPlayers.filter(el => el.orig_role === compVal);
                     else allPlayers = allPlayers.filter(el => el.orig_role != compVal);
                 break;
+                // Original Role Category
                 case "orig_cat":
                     if(!compInverted) allPlayers = allPlayers.filter(el => el.orig_cat === compVal);
                     else allPlayers = allPlayers.filter(el => el.orig_cat != compVal);
                 break;
+                // Original Role Class
                 case "orig_class":
                     if(!compInverted) allPlayers = allPlayers.filter(el => el.orig_class === compVal);
                     else allPlayers = allPlayers.filter(el => el.orig_class != compVal);
                 break;
+                // Original Alignment
                 case "orig_align":
                     if(!compInverted) allPlayers = allPlayers.filter(el => el.orig_align === compVal);
                     else allPlayers = allPlayers.filter(el => el.orig_align != compVal);
                 break;
+                // Original Full Category
                 case "orig_fullcat":
                     compValSplit = compVal.split("-");
                     if(!compInverted) allPlayers = allPlayers.filter(el => el.orig_class === compValSplit[0] && el.orig_cat === compValSplit[1]);
                     else allPlayers = allPlayers.filter(el => el.orig_class != compValSplit[0] || el.orig_cat != compValSplit[1]);
                 break;
+                // Group - Query by group membership
                 case "group":
                     let groupMembers = await getAllGroupMembers(compVal);
                     if(!compInverted) allPlayers = allPlayers.filter(el => groupMembers.includes(el.id));
                     else allPlayers = allPlayers.filter(el => !groupMembers.includes(el.id));
                 break;
+                // AttrRole - Find players that have a certain role attribute
                 case "attrrole":
                     let attrRoleOwners = await queryAttribute("attr_type", "role", "val1", compVal);
                     attrRoleOwners = attrRoleOwners.map(el => el.owner);
                     if(!compInverted) allPlayers = allPlayers.filter(el => attrRoleOwners.includes(el.id));
                     else allPlayers = allPlayers.filter(el => !attrRoleOwners.includes(el.id));
                 break;
+                // AttrDisguise - Find players that have a disguise created by a certain player
+                case "attrdisguise":
+                    let target = await parsePlayerSelector(`@${compVal}`, self, additionalTriggerData);
+                    let attrDisOwners = await queryAttribute("attr_type", "disguise", "src_ref", `player:${target[0]}`);
+                    attrDisOwners = attrDisOwners.map(el => el.owner);
+                    if(!compInverted) allPlayers = allPlayers.filter(el => attrDisOwners.includes(el.id));
+                    else allPlayers = allPlayers.filter(el => !attrDisOwners.includes(el.id));
+                break;
+                // AliveOnly - Allows enabling of selecting dead players
                 case "aliveonly":
                     if(compVal === "false") aliveOnly = false;
                 break;
+                // SelectAll - Allows enabling of limiting the selector to 1 random player
                 case "selectall":
                     if(compVal === "false") selectAll = false;
                 break;
@@ -512,7 +535,7 @@ module.exports = function() {
     **/
     const abilitySubtypeNames = [
         ["add","remove"], // joining
-        ["role","class","category"], // investigating
+        ["role","class","category","player_count"], // investigating
         ["weakly","strongly"], // disguising
         ["attack","kill","lynch","true-kill"], // killing
         ["active-defense","passive-defense","partial-defense","recruitment-defense","absence"], // protecting
@@ -522,7 +545,7 @@ module.exports = function() {
         [], // abilities
         [], // announcement
         ["creation"], // poll
-        ["add"], // granting
+        ["add","remove"], // granting
         ];
     this.parseAbilitySubype = function(ability_subtype) {
         // get target
