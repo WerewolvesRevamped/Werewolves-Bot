@@ -287,69 +287,116 @@ module.exports = function() {
         let src_name = prompt.src_name;
         let src_ref = prompt.src_ref;
         
-        // check which type of prompt
-        if(prompt.type2 == "none") { // single reply needed
-            let reply = message.content.trim();
-            let parsedReply = parsePromptReply(reply, prompt.type1, message);
-            // reply received
-            if(parsedReply !== false) {
-                // apply prompt reply onto ability
-                let promptAppliedAbility = applyPromptValue(ability, 0, parsedReply[1]);
-                // check restrictions again
-                for(let i = 0; i < restrictions.length; i++) {
-                    let passed = await handleRestriction(src_ref, promptAppliedAbility, restrictions[i], RESTR_POST, parsedReply[1], additionalTriggerData);
-                    if(!passed) {
-                        let msg = getPromptMessage(restrictions[i]);
-                        let embed = basicEmbed(`You cannot execute this ability due to a restriction: ${msg}`, EMBED_RED);
-                        message.reply(embed);
-                        return;
+        // get type and action count
+        const type1 = prompt.type1.split("-")[0];
+        const type2 = prompt.type2.split("-")[0];
+        const actionCount = prompt.type1.split("-")[1] ?? 1;
+        
+        // get replies
+        const replies = message.content.trim().split("\n");
+        
+        // check if replies matches action count
+        if(replies.length != actionCount) {
+            let embed = basicEmbed(`You cannot execute this ability. You submitted \`${replies.length}\` choice(s), but expected \`${actionCount}\` choice(s). Please reply again to the original prompt with a valid submission.`, EMBED_RED);
+            message.reply(embed);
+            return;      
+        }
+        
+        // iterate through replies - for restrictions
+        for(const thisReply of replies) {
+            // check which type of prompt
+            if(type2 == "none") { // single reply needed
+                let reply = thisReply.trim();
+                let parsedReply = parsePromptReply(reply, type1, message);
+                // reply received
+                if(parsedReply !== false) {
+                    // apply prompt reply onto ability
+                    let promptAppliedAbility = applyPromptValue(ability, 0, parsedReply[1]);
+                    // check restrictions again
+                    for(let i = 0; i < restrictions.length; i++) {
+                        let passed = await handleRestriction(src_ref, promptAppliedAbility, restrictions[i], RESTR_POST, parsedReply[1], additionalTriggerData);
+                        if(!passed) {
+                            let msg = getPromptMessage(restrictions[i]);
+                            let embed = basicEmbed(`You cannot execute this ability due to a restriction: ${msg}`, EMBED_RED);
+                            message.reply(embed);
+                            return;
+                        }
                     }
                 }
-                // delete prompt 
-                await deletePrompt(message.reference.messageId);
-                // reply to prompt
-                let repl_msg = await sendPromptReplyConfirmMessage(message, prompt.prompt_type, `You submitted: \`${parsedReply[0]}\`.`);
-                // queue action
-                let exeTime = prompt.prompt_type == "immediate" ? getTime() + 60 : endActionTime;
-                await createAction(repl_msg, src_ref, src_name, promptAppliedAbility, ability, prompt.prompt_type, prompt.type1, prompt.type2, exeTime, restrictions, additionalTriggerData, parsedReply[1]);
-                // log prompt reply
-                abilityLog(`✅ **Prompt Reply:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) submitted \`${parsedReply[0]}\`.`);
-            }
-        } else { // two replies needed
-            let reply = message.content.split(";");
-            if(reply.length != 2) {
-                message.reply(basicEmbed("❌ You must specify exactly two arguments, separated by `;`.", EMBED_RED));
-            }
-            let reply1 = reply[0].trim();
-            let reply2 = reply[1].trim();
-            let parsedReply1 = parsePromptReply(reply1, prompt.type1, message);
-            let parsedReply2 = parsePromptReply(reply2, prompt.type2, message);
-            // reply received
-            if(parsedReply1 !== false && parsedReply2 !== false) {
-                // apply prompt reply onto ability
-                let promptAppliedAbility = applyPromptValue(ability, 0, parsedReply1[1]);
-                promptAppliedAbility = applyPromptValue(ability, 1, parsedReply2[1]);
-                // check restrictions again
-                for(let i = 0; i < restrictions.length; i++) {
-                    let passed = await handleRestriction(src_ref, promptAppliedAbility, restrictions[i], RESTR_POST, parsedReply1[1], additionalTriggerData);
-                    if(!passed) {
-                        let msg = getPromptMessage(restrictions[i]);
-                        let embed = basicEmbed(`You cannot execute this ability due to a restriction: ${msg}`, EMBED_RED);
-                        message.reply(embed);
-                        return;
+            } else { // two replies needed
+                let reply = thisReply.split(";");
+                if(reply.length != 2) {
+                    message.reply(basicEmbed("❌ You must specify exactly two arguments, separated by `;`.", EMBED_RED));
+                    return;
+                }
+                let reply1 = reply[0].trim();
+                let reply2 = reply[1].trim();
+                let parsedReply1 = parsePromptReply(reply1, type1, message);
+                let parsedReply2 = parsePromptReply(reply2, type2, message);
+                // reply received
+                if(parsedReply1 !== false && parsedReply2 !== false) {
+                    // apply prompt reply onto ability
+                    let promptAppliedAbility = applyPromptValue(ability, 0, parsedReply1[1]);
+                    promptAppliedAbility = applyPromptValue(ability, 1, parsedReply2[1]);
+                    // check restrictions again
+                    for(let i = 0; i < restrictions.length; i++) {
+                        let passed = await handleRestriction(src_ref, promptAppliedAbility, restrictions[i], RESTR_POST, parsedReply1[1], additionalTriggerData);
+                        if(!passed) {
+                            let msg = getPromptMessage(restrictions[i]);
+                            let embed = basicEmbed(`You cannot execute this ability due to a restriction: ${msg}`, EMBED_RED);
+                            message.reply(embed);
+                            return;
+                        }
                     }
                 }
-                // delete prompt 
-                await deletePrompt(message.reference.messageId);
-                // reply to prompt
-                let repl_msg = await sendPromptReplyConfirmMessage(message, prompt.prompt_type, `You submitted: \`${parsedReply1[0]}\` and \`${parsedReply2[0]}\`.`);
-                // queue action
-                let exeTime = prompt.prompt_type == "immediate" ? getTime() + 60 : endActionTime;
-                await createAction(repl_msg, src_ref, src_name, promptAppliedAbility, ability, prompt.prompt_type, prompt.type1, prompt.type2, exeTime, restrictions, additionalTriggerData, parsedReply1[1]);
-                // log prompt reply
-                abilityLog(`✅ **Prompt Reply:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) submitted \`${parsedReply1[0]}\` and \`${parsedReply2[0]}\`.`);
             }
         }
+        
+        // iterate through replies - for execution
+        for(const thisReply of replies) {
+            // check which type of prompt
+            if(type2 == "none") { // single reply needed
+                let reply = thisReply.trim();
+                let parsedReply = parsePromptReply(reply, type1, message);
+                // reply received
+                if(parsedReply !== false) {
+                    // apply prompt reply onto ability
+                    let promptAppliedAbility = applyPromptValue(ability, 0, parsedReply[1]);
+                    // delete prompt 
+                    await deletePrompt(message.reference.messageId);
+                    // reply to prompt
+                    let repl_msg = await sendPromptReplyConfirmMessage(message, prompt.prompt_type, `You submitted: \`${parsedReply[0]}\`.`);
+                    // queue action
+                    let exeTime = prompt.prompt_type == "immediate" ? getTime() + 60 : endActionTime;
+                    await createAction(repl_msg, src_ref, src_name, promptAppliedAbility, ability, prompt.prompt_type, type1, type2, exeTime, restrictions, additionalTriggerData, parsedReply[1]);
+                    // log prompt reply
+                    abilityLog(`✅ **Prompt Reply:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) submitted \`${parsedReply[0]}\`.`);
+                }
+            } else { // two replies needed
+                let reply = thisReply.split(";");
+                let reply1 = reply[0].trim();
+                let reply2 = reply[1].trim();
+                let parsedReply1 = parsePromptReply(reply1, type1, message);
+                let parsedReply2 = parsePromptReply(reply2, type2, message);
+                // reply received
+                if(parsedReply1 !== false && parsedReply2 !== false) {
+                    // apply prompt reply onto ability
+                    let promptAppliedAbility = applyPromptValue(ability, 0, parsedReply1[1]);
+                    promptAppliedAbility = applyPromptValue(ability, 1, parsedReply2[1]);
+                    // delete prompt 
+                    await deletePrompt(message.reference.messageId);
+                    // reply to prompt
+                    let repl_msg = await sendPromptReplyConfirmMessage(message, prompt.prompt_type, `You submitted: \`${parsedReply1[0]}\` and \`${parsedReply2[0]}\`.`);
+                    // queue action
+                    let exeTime = prompt.prompt_type == "immediate" ? getTime() + 60 : endActionTime;
+                    await createAction(repl_msg, src_ref, src_name, promptAppliedAbility, ability, prompt.prompt_type, type1, type2, exeTime, restrictions, additionalTriggerData, parsedReply1[1]);
+                    // log prompt reply
+                    abilityLog(`✅ **Prompt Reply:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) submitted \`${parsedReply1[0]}\` and \`${parsedReply2[0]}\`.`);
+                }
+            }
+        }
+        
+        
     }
     
     /**

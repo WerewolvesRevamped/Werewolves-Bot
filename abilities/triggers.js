@@ -253,6 +253,21 @@ module.exports = function() {
     async function executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData = {}) {
         const ptype = getPromptType(triggerName);
         const promptOverwrite = trigger?.parameters?.prompt_overwrite;
+        
+        // handle action scaling
+        const actionScaling = trigger?.parameters?.scaling ?? [];
+        let actionCount = 1;
+        let actionCountSuffix = "";
+        for(const scaling of actionScaling) {
+            let scalValue = await handleScaling(scaling);
+            if(scalValue !== null) actionCount = scalValue;
+        }
+        let scalingMessage = "";
+        if(actionCount > 1) {
+            scalingMessage = `\n\nYou may use your ability \`${actionCount}\` times. Please provide your choices for each use separated by newlines.`;
+            actionCountSuffix = `-${actionCount}`;
+        }
+        
         // iterate through abilities of the trigger
         for(const ability of trigger.abilities) {
             // check trigger restrictions
@@ -288,13 +303,13 @@ module.exports = function() {
                     let type = toTitleCase(selectorGetType(prompts[0][1]));
                     let promptMsg = getPromptMessage(ability, promptOverwrite, type);
                     let refImg = await refToImg(src_name);
-                    let mid = (await abilitySendProm(src_ref, `${getAbilityEmoji(ability.type)} ${promptMsg}`, EMBED_GRAY, true, promptInfoMsg, refImg, "Ability Prompt")).id;
+                    let mid = (await abilitySendProm(src_ref, `${getAbilityEmoji(ability.type)} ${promptMsg} ${scalingMessage}`, EMBED_GRAY, true, promptInfoMsg, refImg, "Ability Prompt")).id;
                     if(ptype == "immediate") { // immediate prompt
                         abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(ability.type)} [${type}] {Immediate}`);
-                        await createPrompt(mid, src_ref, src_name, ability, restrictions, additionalTriggerData, "immediate", type);
+                        await createPrompt(mid, src_ref, src_name, ability, restrictions, additionalTriggerData, "immediate", type + actionCountSuffix);
                     } else if(ptype == "end") { // end phase prompt
                         abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(ability.type)} [${type}] {End}`);
-                        await createPrompt(mid, src_ref, src_name, ability, restrictions, additionalTriggerData, "end", type);
+                        await createPrompt(mid, src_ref, src_name, ability, restrictions, additionalTriggerData, "end", type + actionCountSuffix);
                     } else {
                         abilityLog(`❗ **Error:** Invalid prompt type!`);
                     }
@@ -305,13 +320,13 @@ module.exports = function() {
                     let type2 = toTitleCase(selectorGetType(prompts[1][1]));
                     let promptMsg = getPromptMessage(ability, promptOverwrite, type1, type2);
                     let refImg = await refToImg(src_name);
-                    let mid = (await abilitySendProm(src_ref, `${getAbilityEmoji(ability.type)} ${promptMsg}`, EMBED_GRAY, true, promptInfoMsg, refImg, "Ability Prompt")).id;
+                    let mid = (await abilitySendProm(src_ref, `${getAbilityEmoji(ability.type)} ${promptMsg} ${scalingMessage}`, EMBED_GRAY, true, promptInfoMsg, refImg, "Ability Prompt")).id;
                     if(ptype == "immediate") { // immediate prompt
                         abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(ability.type)} [${type1}, ${type2}] {Immediate}`);
-                        await createPrompt(mid, src_ref, src_name, ability, restrictions,additionalTriggerData, "immediate", type1, type2);
+                        await createPrompt(mid, src_ref, src_name, ability, restrictions,additionalTriggerData, "immediate", type1 + actionCountSuffix, type2 + actionCountSuffix);
                     } else if(ptype == "end") { // end phase prompt
                         abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(ability.type)} [${type1}, ${type2}] {End}`);
-                        await createPrompt(mid, src_ref, src_name, ability, restrictions, additionalTriggerData, "end", type1, type2);
+                        await createPrompt(mid, src_ref, src_name, ability, restrictions, additionalTriggerData, "end", type1 + actionCountSuffix, type2 + actionCountSuffix);
                     } else {
                         abilityLog(`❗ **Error:** Invalid prompt type!`);
                     }

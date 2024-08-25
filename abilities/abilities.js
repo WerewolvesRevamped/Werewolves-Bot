@@ -6,6 +6,7 @@ require("./triggers.js")();
 require("./parsers.js")();
 require("./prompts.js")();
 require("./restrictions.js")();
+require("./scaling.js")();
 
 /** Ability Types **/
 require("./types/joining.js")();
