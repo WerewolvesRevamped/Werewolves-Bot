@@ -55,7 +55,7 @@ module.exports = function() {
         setTimeout(function() {
             eventStarting();
         }, 1000 * 60);
-        // emit a starting event
+        // emit a day start event for d0
         setTimeout(function() {
             eventStartDay();
         }, 1000 * 60 * 2);

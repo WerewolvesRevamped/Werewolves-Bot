@@ -270,7 +270,7 @@ module.exports = function() {
             }
             // merge prompt info
             let promptInfoMsg = "";
-            if(promptInfo.length > 0) promptInfoMsg = promptInfo.join("; ");
+            if(promptInfo.length > 0) promptInfoMsg = promptInfo.join("; ") + ".";
             // check if prompts are necessary
             let prompts = getPrompts(ability);
             switch(prompts.length) {

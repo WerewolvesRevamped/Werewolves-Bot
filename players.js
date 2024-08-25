@@ -1450,7 +1450,7 @@ module.exports = function() {
         if(!channel) {
             guild = mainGuild;
         } else {
-            channel.guild;
+            guild = channel.guild;
         }
 		// Get User by ID 
 		if(/^\d+$/.test(inUser)) {

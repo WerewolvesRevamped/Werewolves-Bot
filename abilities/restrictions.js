@@ -15,7 +15,6 @@ module.exports = function() {
     apply ability restrictions
     **/
     this.handleRestriction = async function(src_ref, ability, restriction, prePrompt, target = null, additionalTriggerData = {}) {
-        console.log(restriction);
         switch(restriction.type) {
             // UNKNOWN
             default: 
@@ -79,8 +78,8 @@ module.exports = function() {
                         }
                         // actual evaluation
                         let lt = await getLastTarget(src_ref, ability);
-                        let lastTarget = lt ? await parsePlayerSelector(lt, src_ref, null, additionalTriggerData) : null;
-                        let targets = await parsePlayerSelector(target, src_ref, null, additionalTriggerData);
+                        let lastTarget = lt ? await parsePlayerSelector(lt, src_ref, additionalTriggerData) : null;
+                        let targets = await parsePlayerSelector(target, src_ref, additionalTriggerData);
                         // check if last target is included in the target selector
                         if(!lastTarget || !targets.includes(lastTarget[0])) {
                             return true;
@@ -127,7 +126,17 @@ module.exports = function() {
                 let max_allowed = restriction.quantity;
                 if(quantity < max_allowed) return `${max_allowed - quantity}/${max_allowed} uses left`;
                 else return "";
-            break;
+            // SUCCESSION
+            case "succession":
+                if(restriction.subtype === "target") {
+                    // get last target
+                    let lt = await getLastTarget(src_ref, ability);
+                    let lastTarget = lt ? await parsePlayerSelector(lt, src_ref) : null;
+                    let lastTargetMember = mainGuild.members.cache.get(lastTarget[0]);
+                    return lastTarget ? `You may not target ${lastTargetMember.displayName} again` : "";
+                } else {
+                    return "";
+                }
         }
     }
     
