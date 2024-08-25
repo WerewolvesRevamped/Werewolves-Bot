@@ -263,10 +263,7 @@ module.exports = function() {
             if(scalValue !== null) actionCount = scalValue;
         }
         let scalingMessage = "";
-        if(actionCount > 1) {
-            scalingMessage = `\n\nYou may use your ability \`${actionCount}\` times. Please provide your choices for each use separated by newlines.`;
-            actionCountSuffix = `-${actionCount}`;
-        }
+        if(actionCount > 1) scalingMessage = `\n\nYou may use your ability \`${actionCount}\` times. Please provide your choices for each use separated by newlines.`;
         
         // iterate through abilities of the trigger
         for(const ability of trigger.abilities) {
@@ -306,10 +303,10 @@ module.exports = function() {
                     let mid = (await abilitySendProm(src_ref, `${getAbilityEmoji(ability.type)} ${promptMsg} ${scalingMessage}`, EMBED_GRAY, true, promptInfoMsg, refImg, "Ability Prompt")).id;
                     if(ptype == "immediate") { // immediate prompt
                         abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(ability.type)} [${type}] {Immediate}`);
-                        await createPrompt(mid, src_ref, src_name, ability, restrictions, additionalTriggerData, "immediate", type + actionCountSuffix);
+                        await createPrompt(mid, src_ref, src_name, ability, restrictions, additionalTriggerData, "immediate", actionCount, type);
                     } else if(ptype == "end") { // end phase prompt
                         abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(ability.type)} [${type}] {End}`);
-                        await createPrompt(mid, src_ref, src_name, ability, restrictions, additionalTriggerData, "end", type + actionCountSuffix);
+                        await createPrompt(mid, src_ref, src_name, ability, restrictions, additionalTriggerData, "end", actionCount, type);
                     } else {
                         abilityLog(`❗ **Error:** Invalid prompt type!`);
                     }
@@ -323,10 +320,10 @@ module.exports = function() {
                     let mid = (await abilitySendProm(src_ref, `${getAbilityEmoji(ability.type)} ${promptMsg} ${scalingMessage}`, EMBED_GRAY, true, promptInfoMsg, refImg, "Ability Prompt")).id;
                     if(ptype == "immediate") { // immediate prompt
                         abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(ability.type)} [${type1}, ${type2}] {Immediate}`);
-                        await createPrompt(mid, src_ref, src_name, ability, restrictions,additionalTriggerData, "immediate", type1 + actionCountSuffix, type2 + actionCountSuffix);
+                        await createPrompt(mid, src_ref, src_name, ability, restrictions,additionalTriggerData, "immediate", actionCount, type1, type2);
                     } else if(ptype == "end") { // end phase prompt
                         abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(ability.type)} [${type1}, ${type2}] {End}`);
-                        await createPrompt(mid, src_ref, src_name, ability, restrictions, additionalTriggerData, "end", type1 + actionCountSuffix, type2 + actionCountSuffix);
+                        await createPrompt(mid, src_ref, src_name, ability, restrictions, additionalTriggerData, "end", actionCount, type1, type2);
                     } else {
                         abilityLog(`❗ **Error:** Invalid prompt type!`);
                     }

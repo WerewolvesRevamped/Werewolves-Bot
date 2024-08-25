@@ -7,7 +7,7 @@
     "targeting.target.role": "Which role would you like to target?",
     "protecting.absence.1": "Who do you want to sleep with?",
     
-    "succession.target": "You may not select the same target several times in a row. You may resubmit another target as a reply to the original prompt.",
+    "succession.target": "You may not select the same target two times in a row. You may resubmit another target as a reply to the original prompt.",
     
     "targeting.emergency.player": "Once per game, you may change your target a second time in a phase. Reply to this prompt to do so and ignore the prompt if you do not want to use your emergency use yet."
 }
