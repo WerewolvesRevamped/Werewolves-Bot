@@ -19,7 +19,11 @@ module.exports = function() {
             // MULTIPLIER
             case "multiplier":
                 // WIP: doesnt consider odd/even parameters
-                return scaling.quantity;
+                if((scaling.even && (getPhaseNum % 2 === 0)) || (scaling.odd && (getPhaseNum % 2 === 1))) {
+                    return scaling.quantity;
+                } else {
+                    return null;
+                }
             break;
             
         }

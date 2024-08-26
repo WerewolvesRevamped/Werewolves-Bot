@@ -310,7 +310,7 @@ module.exports = function() {
         // store prompt reply messages
         let promptReplyMessages = [];
         
-        // iterate through replies - for restrictions
+        // iterate through replies - for restrictions and prompt reply validation
         for(let i = 0; i < replies.length; i++) {
             let clonedAbility = JSON.parse(JSON.stringify(ability));
             // check which type of prompt
