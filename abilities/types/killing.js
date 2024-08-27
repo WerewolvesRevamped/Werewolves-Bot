@@ -47,15 +47,16 @@ module.exports = function() {
     **/
     async function killingAttack(src_name, src_ref, targets) {
         let success = false;
+        let origMaxIndex = targets.length - 1;
         
         // iterate through all attack targets
         for(let i = 0; i < targets.length; i++) {
             // for every target, add all other player that are absent at their location to targets
-            let absentPlayers = getAbsences(targets[i], "attack", src_ref);
+            let absentPlayers = await getAbsences(targets[i], "attack", src_ref);
             if(absentPlayers[0]) targets.push(...absentPlayers);
             
             // check if player has a defense
-            let hasDef = await hasDefense(targets[i], "attack", src_ref, src_name);
+            let hasDef = await hasDefense(targets[i], "attack", src_ref, src_name, i > origMaxIndex);
             if(hasDef) continue;
             
             // run the on death trigger
@@ -75,15 +76,16 @@ module.exports = function() {
     **/
     async function killingLynch(src_name, src_ref, targets) {
         let success = false;
+        let origMaxIndex = targets.length - 1;
         
         // iterate through all attack targets
         for(let i = 0; i < targets.length; i++) {
             // for every target, add all other player that are absent at their location to targets
-            let absentPlayers = getAbsences(targets[i], "lynch", src_ref);
+            let absentPlayers = await getAbsences(targets[i], "lynch", src_ref);
             if(absentPlayers[0]) targets.push(...absentPlayers);
             
             // check if player has a defense
-            let hasDef = await hasDefense(targets[i], "lynch", src_ref, src_name);
+            let hasDef = await hasDefense(targets[i], "lynch", src_ref, src_name, i > origMaxIndex);
             if(hasDef) continue;
             
             // run the on death trigger
@@ -105,15 +107,16 @@ module.exports = function() {
     **/
     async function killingKill(src_name, src_ref, targets) {
         let success = false;
+        let origMaxIndex = targets.length - 1;
         
         // iterate through all attack targets
         for(let i = 0; i < targets.length; i++) {
             // for every target, add all other player that are absent at their location to targets
-            let absentPlayers = getAbsences(targets[i], "kill", src_ref);
+            let absentPlayers = await getAbsences(targets[i], "kill", src_ref);
             if(absentPlayers[0]) targets.push(...absentPlayers);
             
             // check if player has a defense
-            let hasDef = await hasDefense(targets[i], "kill", src_ref, src_name);
+            let hasDef = await hasDefense(targets[i], "kill", src_ref, src_name, i > origMaxIndex);
             if(hasDef) continue;
             
             // run the on death trigger
@@ -136,7 +139,7 @@ module.exports = function() {
         let success = false;
         for(let i = 0; i < targets.length; i++) {
             // for every target, add all other player that are absent at their location to targets
-            let absentPlayers = getAbsences(targets[i], "true kill", src_ref);
+            let absentPlayers = await getAbsences(targets[i], "true kill", src_ref);
             if(absentPlayers[0]) targets.push(...absentPlayers);
             
             // run the on death trigger
@@ -183,10 +186,10 @@ module.exports = function() {
     Find defense
     find the topmost applicable defense
     **/
-    async function hasDefense(pid, type, src_ref, src_name) {
+    async function hasDefense(pid, type, src_ref, src_name, ignoreAbsence) {
         // evaluate all applicable defenses in order
         let defense, defenseType;
-        if(!defense) { // ABSENCE
+        if(!defense && !ignoreAbsence) { // ABSENCE
             defense = await getTopAbsence(pid, type, src_ref);
             defenseType = "absence";
         }
