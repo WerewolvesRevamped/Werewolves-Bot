@@ -146,13 +146,8 @@ module.exports = function() {
     Polls: Reset
     resets all active polls
     **/
-    this.pollsReset = async function() {
-        return new Promise(res => {
-            // Reset active Group Database
-            sql("DELETE FROM active_polls", result => {
-                res();
-            });
-        });
+    this.pollsReset = function() {
+        return sqlProm("DELETE FROM active_polls");
     }
     
      /** Verify Poll
@@ -198,6 +193,11 @@ module.exports = function() {
         // initial message
         let initialMsg = await abilitySendProm(`${pollLocation.type}:${pollLocation.value}`, `Poll: **${toTitleCase(pollName)}** ${emoji} `);
         
+        // pin poll initial message (if SC poll)
+        if(isSC(initialMsg.channel)) {
+            pinMessage(initialMsg);
+        }
+        
         // split list
         let optionLists = [];
         let pollMsgs = [];
@@ -228,11 +228,7 @@ module.exports = function() {
     Creates an active poll entry in DB
     **/
     function createPollInDB(type, name, channel, initial_message, messages, src_ref) {
-        return new Promise(res => {
-            sql("INSERT INTO active_polls (type, name, channel, initial_message, messages, src_ref) VALUES (" + connection.escape(type) + "," + connection.escape(name) + "," + connection.escape(channel) + "," + connection.escape(initial_message) + "," + connection.escape(messages)+ "," + connection.escape(src_ref) + ")", result => {
-                res();
-            })
-        });
+        return sqlProm("INSERT INTO active_polls (type, name, channel, initial_message, messages, src_ref) VALUES (" + connection.escape(type) + "," + connection.escape(name) + "," + connection.escape(channel) + "," + connection.escape(initial_message) + "," + connection.escape(messages)+ "," + connection.escape(src_ref) + ")");
     }
     
     
@@ -242,18 +238,9 @@ module.exports = function() {
 	async function pollReact(message, list) {
         // Iterate through emojis
         for(let i = 0; i < list.length; i++) {
-            await pollReactOnce(message, list[i]);
+            await message.react(list[i]);
         }
 	}
-    
-    function pollReactOnce(message, emoji) {
-        // React to message
-        return new Promise(res => {
-            message.react(emoji).then(r => {
-                res();
-            });
-        });
-    }
     
     /** PUBLIC
     Closes a poll

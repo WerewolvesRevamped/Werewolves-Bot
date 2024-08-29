@@ -218,6 +218,17 @@ module.exports = function() {
     }
     
     /**
+    Pins a message and deletes the pinning message
+    **/
+    this.pinMessage = function(message) {
+        message.pin().then(mp => {
+            mp.channel.messages.fetch().then(messages => {
+                mp.channel.bulkDelete(messages.filter(el => el.type === MessageType.ChannelPinnedMessage)); // delete pinning message
+            });	
+        });
+    }
+    
+    /**
     Sends a message to a specified channel id with a disguise by using a webhook
     **/
     this.sendMessageDisguise = async function(channel_id, msg, disguise) {
