@@ -6,8 +6,12 @@
 module.exports = function() {
     const prompts = require("./prompts.json");
     
-    this.delayedActionTime = 2147483646;
-    this.endActionTime = 2147483647;
+    this.delayedActionTime = 2147483645;
+    this.endActionTime = 2147483646;
+    this.neverActionTime = 2147483647;
+    
+    // Prompt Message Splitter
+    this.PROMPT_SPLIT = "․";
     
     /**
     Get Promp Message
@@ -34,8 +38,11 @@ module.exports = function() {
         let promptMsg = `Give ${type1}`;
         if(type2.length > 0) promptMsg += `and ${type2}`;
         promptMsg += ` (\`${ty}${su?'.'+su:''}.${type2===''?'1':'2'}\`)`;
+        if(type1.length === 0) promptMsg = `No Give (\`${tysu}\`)`
         // search for prompt in JSON
-        if(type2 === "" && ty && su && prompts[tysu1l]) return prompts[tysu1l];
+        if(type1 === "" && ty && su && prompts[tysu]) return prompts[tysu];
+        else if(type1 === "" && ty && prompts[ty]) return prompts[ty];
+        else if(type2 === "" && ty && su && prompts[tysu1l]) return prompts[tysu1l];
         else if(type2 === "" && ty && su && prompts[tysu1]) return prompts[tysu1];
         else if(type2 === "" && ty && su && prompts[tysu]) return prompts[tysu];
         else if(type2 !== "" && ty && su && prompts[tysu2l]) return prompts[tysu2l];
@@ -85,12 +92,8 @@ module.exports = function() {
     Clear Prompts
     clears all prompts from the table
     **/
-    this.clearPrompts = async function() {
-        return new Promise(res => {
-            sql("DELETE FROM prompts", () => {
-                res();
-            });
-        });
+    this.clearPrompts = function() {
+        return sqlProm("DELETE FROM prompts");
     }
     
     /**
@@ -117,12 +120,8 @@ module.exports = function() {
     /**
     Deletes a Prompt by prompt message id
     **/
-    async function deletePrompt(id) {
-        return new Promise(res => {
-            sql("DELETE FROM prompts WHERE message_id=" + connection.escape(id), result => {
-                res();
-            });
-        });
+    function deletePrompt(id) {
+        return sqlPromEsc("DELETE FROM prompts WHERE message_id=", id);
     }
     
     /**
@@ -140,56 +139,43 @@ module.exports = function() {
     /**
     Deletes a Queued Action by message id
     **/
-    this.deleteQueuedAction = async function(id) {
-        return new Promise(res => {
-            sql("DELETE FROM action_queue WHERE message_id=" + connection.escape(id), result => {
-                res();
-            });
-        });
+    this.deleteQueuedAction = function(id) {
+        return sqlPromEsc("DELETE FROM action_queue WHERE message_id=", id);
     }
     
     /**
     Sets the execution time of a queued action to the past, immediately executing it on the next check
     **/
-    this.instantQueuedAction = async function(id) {
-        return new Promise(res => {
-            sql("UPDATE action_queue SET execute_time=" + connection.escape(getTime() - 1) + " WHERE message_id=" + connection.escape(id), result => {
-                res();
-            });
-        });
+    this.instantQueuedAction = function(id) {
+        return sqlPromEsc("UPDATE action_queue SET execute_time=" + connection.escape(getTime() - 1) + " WHERE message_id=", id);
     }
     
     /**
     Sets the execution time of a queued action to max int, delaying it until max delayed actions are manually executed
     **/
-    this.delayQueuedAction = async function(id) {
-        return new Promise(res => {
-            sql("UPDATE action_queue SET execute_time=" + delayedActionTime + " WHERE message_id=" + connection.escape(id), result => {
-                res();
-            });
-        });
+    this.delayQueuedAction = function(id) {
+        return sqlPromEsc("UPDATE action_queue SET execute_time=" + delayedActionTime + " WHERE message_id=", id);
     }
     
     /**
     Sets the execution time of all delayed queued action to the past, executing them all on the next check
     **/
-    this.executeDelayedQueuedAction = async function() {
-        return new Promise(res => {
-            sql("UPDATE action_queue SET execute_time=" + connection.escape(getTime() - 1) + " WHERE execute_time=" + delayedActionTime, result => {
-                res();
-            });
-        });
+    this.executeDelayedQueuedAction = function() {
+        return sqlProm("UPDATE action_queue SET execute_time=" + connection.escape(getTime() - 1) + " WHERE execute_time=" + delayedActionTime);
     }
     
     /**
     Sets the execution time of all end queued action to the past, executing them all on the next check
     **/
-    this.executeEndQueuedAction = async function() {
-        return new Promise(res => {
-            sql("UPDATE action_queue SET execute_time=" + connection.escape(getTime() - 1) + " WHERE execute_time=" + endActionTime, result => {
-                res();
-            });
-        });
+    this.executeEndQueuedAction = function() {
+        return sqlProm("UPDATE action_queue SET execute_time=" + connection.escape(getTime() - 1) + " WHERE execute_time=" + endActionTime);
+    }
+    
+    /**
+    Clear all queued action that are set to be never run
+    **/
+    this.clearNeverQueuedAction = function() {
+        return sqlProm("DELETE FROM action_queue WHERE execute_time=" + neverActionTime);
     }
     
     /**
@@ -217,7 +203,7 @@ module.exports = function() {
     Create Queued Action
     creates an action in the action queue which will be executed at a specified time
     **/
-    async function createAction(mid, src_ref, src_name, ability, orig_ability, prompt_type, type1, type2, time, restrictions, additionalTriggerData, target) {
+    this.createAction = async function (mid, src_ref, src_name, ability, orig_ability, prompt_type, type1, type2, time, restrictions, additionalTriggerData, target) {
         await new Promise(res => {
             sql("INSERT INTO action_queue (message_id,src_ref,src_name,ability,orig_ability,type1,type2,execute_time, prompt_type, restrictions, target, additional_trigger_data) VALUES (" + connection.escape(mid) + "," + connection.escape(src_ref) + "," + connection.escape(src_name) + "," + connection.escape(JSON.stringify(ability)) + "," + connection.escape(JSON.stringify(orig_ability)) + "," + connection.escape(type1) + "," + connection.escape(type2) + "," + connection.escape(time) + "," + connection.escape(prompt_type) + "," + connection.escape(JSON.stringify(restrictions)) + "," + connection.escape(target) + "," + connection.escape(JSON.stringify(additionalTriggerData)) + ")", result => {
                 res();
@@ -263,7 +249,7 @@ module.exports = function() {
             // execute the ability
             let feedback = await executeAbility(curAction.src_ref, curAction.src_name, ability, restrictions, additionalTriggerData);
             // send feedback
-            if(feedback.msg) abilitySend(curAction.src_ref, feedback.msg, EMBED_GREEN);
+            if(feedback && feedback.msg) abilitySend(curAction.src_ref, feedback.msg, EMBED_GREEN);
             // confirm automatic execution
             confirmAutoExecution(curAction.src_ref, curAction.message_id);
         }
@@ -385,7 +371,7 @@ module.exports = function() {
         await deletePrompt(message.reference.messageId);
         
         // reply to prompt
-        let repl_msg = await sendPromptReplyConfirmMessage(message, promptType, "You submitted: " + promptReplyMessages.join(", ") + "․"); // ․ is a special char!!
+        let repl_msg = await sendPromptReplyConfirmMessage(message, promptType, "You submitted: " + promptReplyMessages.join(", ") + PROMPT_SPLIT); 
         // queue action
         const exeTime = promptType == "immediate" ? getTime() + 60 : endActionTime;
         
@@ -417,6 +403,35 @@ module.exports = function() {
         if(prompt_type == "end") msg.components[0].components = [ cancelButton ];
         // send reply
         let repl_msg = await message.reply(msg);
+        return repl_msg.id;
+    }
+    
+    /**
+    Sends special yes/no prompt
+    **/
+    this.sendSelectionlessPrompt = async function (src_ref, prompt_type, txt, color = EMBED_GRAY, ping = false, footer = false, thumbnail = null, title = null) {
+        // reply message with buttons
+        let options = "confirm or delay";
+        if(!subphaseIsMain()) options = "confirm";
+        let msg;
+        if(prompt_type === "immediate") msg = basicEmbed(`${txt} You may ${options} the ability, otherwise it will not be executed.`, color);
+        else msg = basicEmbed(`${txt} You may confirm the ability to execute it at the end of the phase, otherwise it will not be executed.`, color);
+        // create buttons
+        let confirmButton = { type: 2, label: "Confirm", style: 3, custom_id: "confirm" };
+        let confirmEndButton = { type: 2, label: "Confirm", style: 3, custom_id: "confirm-end" };
+        let delayButton = { type: 2, label: "Delay", style: 2, custom_id: "delay-selectionless" };
+        msg.components = [ { type: 1, components: [ confirmButton ] } ];
+        if(subphaseIsMain() && prompt_type === "immediate") msg.components[0].components.push(delayButton);
+        else if(prompt_type === "end") msg.components = [ { type: 1, components: [ confirmEndButton ] } ];
+        // additional embed options
+        if(ping) msg.content =  `<@&${stats.participant}>`; // add ping
+        if(footer) msg.embeds[0].footer = { text: footer }; // add footer
+        if(thumbnail) msg.embeds[0].thumbnail = { url: thumbnail }; // add thumbnail
+        if(title) msg.embeds[0].title = title; // add title
+        // send prompt
+        let channel_id = await getSrcRefChannel(src_ref);
+        let channel = mainGuild.channels.cache.get(channel_id);
+        let repl_msg = await channel.send(msg);
         return repl_msg.id;
     }
     

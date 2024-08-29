@@ -287,24 +287,37 @@ module.exports = function() {
             let prompts = getPrompts(ability);
             switch(prompts.length) {
                 // if no prompts are necessary -> directly execute ability
-                case 0:
-                    if(ptype == "end") {
-                        abilityLog(`❗ **Error:** Cannot use \`${triggerName}\` trigger without prompt!`);
-                    } else {
+                case 0: {
+                    if(ptype[1] === true) { // forced prompt
+                        // additional second restriction check
+                        for(let i = 0; i < restrictions.length; i++) {
+                            let passed = await handleRestriction(src_ref, ability, restrictions[i], RESTR_POST, null, additionalTriggerData);
+                            if(!passed) {
+                                abilityLog(`🔴 **Skipped Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}). Failed restriction \`${restrictions[i].type}\`.`);
+                                return;
+                            }
+                        }
+                        // send prompt
+                        let promptMsg = getPromptMessage(ability, promptOverwrite);
+                        let refImg = await refToImg(src_name);
+                        let mid = await sendSelectionlessPrompt(src_ref, ptype[0], `${getAbilityEmoji(ability.type)} ${promptMsg}${PROMPT_SPLIT}`, EMBED_GRAY, true, promptInfoMsg, refImg, "Ability Prompt");
+                        // schedule actions
+                        await createAction(mid, src_ref, src_name, ability, ability, ptype[0], "none", "none", neverActionTime, restrictions, additionalTriggerData, "notarget");
+                    } else { // no prompt
                         let feedback = await executeAbility(src_ref, src_name, ability, restrictions, additionalTriggerData);
-                        if(feedback.msg) abilitySend(src_ref, feedback.msg);
+                        if(feedback && feedback.msg) abilitySend(src_ref, feedback.msg);
                     }
-                break;
+                } break;
                 // single prompt (@Selection)
                 case 1: {
                     let type = toTitleCase(selectorGetType(prompts[0][1]));
                     let promptMsg = getPromptMessage(ability, promptOverwrite, type);
                     let refImg = await refToImg(src_name);
                     let mid = (await abilitySendProm(src_ref, `${getAbilityEmoji(ability.type)} ${promptMsg} ${scalingMessage}`, EMBED_GRAY, true, promptInfoMsg, refImg, "Ability Prompt")).id;
-                    if(ptype == "immediate") { // immediate prompt
+                    if(ptype[0] === "immediate") { // immediate prompt
                         abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(ability.type)} [${type}] {Immediate}`);
                         await createPrompt(mid, src_ref, src_name, ability, restrictions, additionalTriggerData, "immediate", actionCount, type);
-                    } else if(ptype == "end") { // end phase prompt
+                    } else if(ptype[0] === "end") { // end phase prompt
                         abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(ability.type)} [${type}] {End}`);
                         await createPrompt(mid, src_ref, src_name, ability, restrictions, additionalTriggerData, "end", actionCount, type);
                     } else {
@@ -318,10 +331,10 @@ module.exports = function() {
                     let promptMsg = getPromptMessage(ability, promptOverwrite, type1, type2);
                     let refImg = await refToImg(src_name);
                     let mid = (await abilitySendProm(src_ref, `${getAbilityEmoji(ability.type)} ${promptMsg} ${scalingMessage}`, EMBED_GRAY, true, promptInfoMsg, refImg, "Ability Prompt")).id;
-                    if(ptype == "immediate") { // immediate prompt
+                    if(ptype[0] === "immediate") { // immediate prompt
                         abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(ability.type)} [${type1}, ${type2}] {Immediate}`);
                         await createPrompt(mid, src_ref, src_name, ability, restrictions,additionalTriggerData, "immediate", actionCount, type1, type2);
-                    } else if(ptype == "end") { // end phase prompt
+                    } else if(ptype[0] === "end") { // end phase prompt
                         abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(ability.type)} [${type1}, ${type2}] {End}`);
                         await createPrompt(mid, src_ref, src_name, ability, restrictions, additionalTriggerData, "end", actionCount, type1, type2);
                     } else {
@@ -395,16 +408,17 @@ module.exports = function() {
     
     /**
     Get prompt type
-    returns whether to use an immediate or an end phase prompt
+    returns whether to use an immediate or an end phase prompt, as well as wether the prompt is forced
     **/
     this.getPromptType = function(trigger) {
         switch(trigger) {
             default:
+                return [ "immediate", false ];
             case "Immediate Night": case "Immediate Day": case "Immediate":
-                return "immediate";
+                return [ "immediate", true ];
             case "Start Night": case "Start Day": case "Start Phase":
             case "End Night": case "End Day": case "End Phase":
-                return "end";
+                return [ "end", true ];
         }
     }
     
@@ -426,11 +440,16 @@ module.exports = function() {
         // close polls
         await closePolls();
         
-        // handle queued end actions
+        // handle queued end actions; also redo immediate queued actions even if normally none should be present
         skipActionQueueChecker = true;
-        await executeEndQueuedAction();
-        skipActionQueueChecker = false;
+        await executeDelayedQueuedAction();
         await actionQueueChecker();
+        await executeEndQueuedAction();
+        await actionQueueChecker();
+        skipActionQueueChecker = false;
+        
+        // clear actions
+        await clearNeverQueuedAction();
         
         // passive end actions
         await triggerHandler("Passive End Day");
@@ -466,11 +485,16 @@ module.exports = function() {
         // close polls
         await closePolls();
         
-        // handle queued end actions
+        // handle queued end actions; also redo immediate queued actions even if normally none should be present
         skipActionQueueChecker = true;
-        await executeEndQueuedAction();
-        skipActionQueueChecker = false;
+        await executeDelayedQueuedAction();
         await actionQueueChecker();
+        await executeEndQueuedAction();
+        await actionQueueChecker();
+        skipActionQueueChecker = false;
+        
+        // clear actions
+        await clearNeverQueuedAction();
         
         // passive end actions
         await triggerHandler("Passive End Night");

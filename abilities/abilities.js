@@ -31,78 +31,83 @@ module.exports = function() {
     executes an ability
     **/
     this.executeAbility = async function(src_ref, src_name, ability, restrictions = [], additionalTriggerData = {}) {
-        // find src role type
-        if(!isSrc(src_ref)) src_ref = `unknown:${src_ref}`;
-        if(!isSrc(src_name)) src_name = `unknown:${src_name}`;
-        // check restrictions again
-        for(let i = 0; i < restrictions.length; i++) {
-            let passed = await handleRestriction(src_ref, ability, restrictions[i], RESTR_POST, null, additionalTriggerData);
-            if(!passed) {
-                abilityLog(`🔴 **Skipped Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}). Failed restriction \`${restrictions[i].type}\`.`);
-                return;
+        try {
+            // find src role type
+            if(!isSrc(src_ref)) src_ref = `unknown:${src_ref}`;
+            if(!isSrc(src_name)) src_name = `unknown:${src_name}`;
+            // check restrictions again
+            for(let i = 0; i < restrictions.length; i++) {
+                let passed = await handleRestriction(src_ref, ability, restrictions[i], RESTR_POST, null, additionalTriggerData);
+                if(!passed) {
+                    abilityLog(`🔴 **Skipped Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}). Failed restriction \`${restrictions[i].type}\`.`);
+                    return;
+                }
             }
+            // get/increase quantity
+            let quantity = 0;
+            if(ability.id) {
+                quantity = await getActionQuantity(src_ref, ability);
+                if(quantity === -1) await initActionData(src_ref, ability);
+                await increaseActionQuantity(src_ref, ability);
+            }
+            // execute ability
+            abilityLog(`🟢 **Executing Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) \`\`\`${JSON.stringify(ability)}\`\`\``);
+            let feedback;
+            switch(ability.type) {
+                default:
+                    abilityLog(`❗ **Error:** Unknown ability type \`${ability.type}\`!`);
+                    feedback = { msg: "", success: false };
+                break;
+                case "joining":
+                    feedback = await abilityJoining(src_ref, src_name, ability, additionalTriggerData);
+                break;
+                case "investigating":
+                    feedback = await abilityInvestigating(src_ref, src_name, ability, additionalTriggerData);
+                break;
+                case "disguising":
+                    feedback = await abilityDisguising(src_ref, src_name, ability, additionalTriggerData);
+                break;
+                case "killing":
+                    feedback = await abilityKilling(src_ref, src_name, ability, additionalTriggerData);
+                break;
+                case "protecting":
+                    feedback = await abilityProtecting(src_ref, src_name, ability, additionalTriggerData);
+                break;
+                case "log":
+                    feedback = await abilityLogging(src_ref, src_name, ability, additionalTriggerData);
+                break;
+                case "targeting":
+                    feedback = await abilityTargeting(src_ref, src_name, ability, additionalTriggerData);
+                break;
+                case "process_evaluate":
+                    feedback = await abilityProcessEvaluate(src_ref, src_name, ability, additionalTriggerData);
+                break;
+                case "abilities":
+                    feedback = await abilityAbilities(src_ref, src_name, ability, additionalTriggerData);
+                break;
+                case "announcement":
+                    feedback = await abilityAnnouncement(src_ref, src_name, ability, additionalTriggerData);
+                break;
+                case "poll":
+                    feedback = await abilityPoll(src_ref, src_name, ability, additionalTriggerData);
+                break;
+                case "granting":
+                    feedback = await abilityGranting(src_ref, src_name, ability, additionalTriggerData);
+                break;
+            }
+            
+            // on action trigger
+            const actionTarget = feedback.target ? feedback.target : null;
+            await trigger(src_ref, "On Action", { action_result: feedback.result, action_target: actionTarget }); 
+            await trigger(src_ref, "On Action Complex", { action_result: feedback.result, action_target: actionTarget, ability_type: ability.type, ability_subtype: "" }); 
+            if(ability.subtype) await trigger(src_ref, "On Action Complex", { action_result: feedback.result, action_target: actionTarget, ability_type: ability.type, ability_subtype: ability.subtype }); 
+            
+            // return feedback
+            return feedback;
+        } catch(err) {
+            console.log(`Error in ability ${ability.type} for ${src_name} (${src_ref})`);
+            console.log(err);
         }
-        // get/increase quantity
-        let quantity = 0;
-        if(ability.id) {
-            quantity = await getActionQuantity(src_ref, ability);
-            if(quantity === -1) await initActionData(src_ref, ability);
-            await increaseActionQuantity(src_ref, ability);
-        }
-        // execute ability
-        abilityLog(`🟢 **Executing Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) \`\`\`${JSON.stringify(ability)}\`\`\``);
-        let feedback;
-        switch(ability.type) {
-            default:
-                abilityLog(`❗ **Error:** Unknown ability type \`${ability.type}\`!`);
-                feedback = { msg: "", success: false };
-            break;
-            case "joining":
-                feedback = await abilityJoining(src_ref, src_name, ability, additionalTriggerData);
-            break;
-            case "investigating":
-                feedback = await abilityInvestigating(src_ref, src_name, ability, additionalTriggerData);
-            break;
-            case "disguising":
-                feedback = await abilityDisguising(src_ref, src_name, ability, additionalTriggerData);
-            break;
-            case "killing":
-                feedback = await abilityKilling(src_ref, src_name, ability, additionalTriggerData);
-            break;
-            case "protecting":
-                feedback = await abilityProtecting(src_ref, src_name, ability, additionalTriggerData);
-            break;
-            case "log":
-                feedback = await abilityLogging(src_ref, src_name, ability, additionalTriggerData);
-            break;
-            case "targeting":
-                feedback = await abilityTargeting(src_ref, src_name, ability, additionalTriggerData);
-            break;
-            case "process_evaluate":
-                feedback = await abilityProcessEvaluate(src_ref, src_name, ability, additionalTriggerData);
-            break;
-            case "abilities":
-                feedback = await abilityAbilities(src_ref, src_name, ability, additionalTriggerData);
-            break;
-            case "announcement":
-                feedback = await abilityAnnouncement(src_ref, src_name, ability, additionalTriggerData);
-            break;
-            case "poll":
-                feedback = await abilityPoll(src_ref, src_name, ability, additionalTriggerData);
-            break;
-            case "granting":
-                feedback = await abilityGranting(src_ref, src_name, ability, additionalTriggerData);
-            break;
-        }
-        
-        // on action trigger
-        const actionTarget = feedback.target ? feedback.target : null;
-        await trigger(src_ref, "On Action", { action_result: feedback.result, action_target: actionTarget }); 
-        await trigger(src_ref, "On Action Complex", { action_result: feedback.result, action_target: actionTarget, ability_type: ability.type, ability_subtype: "" }); 
-        if(ability.subtype) await trigger(src_ref, "On Action Complex", { action_result: feedback.result, action_target: actionTarget, ability_type: ability.type, ability_subtype: ability.subtype }); 
-        
-        // return feedback
-        return feedback;
     }
 
     /**
@@ -136,34 +141,8 @@ module.exports = function() {
     Ability Feedback + Return new message ID
     **/
     this.abilitySendProm = async function(src_ref, message, color = EMBED_GRAY, ping = false, footer = false, thumbnail = null, title = null) {
-        let ref = srcToValue(src_ref);
-        let type = srcToType(src_ref);
-        let channel_id = null;
-        
-        // get channel id by type
-        switch(type) {
-            case "player":
-                channel_id = await abilitySendGetPlayerChannel(ref);
-            break;
-            case "group":
-                channel_id = ref; // group ref already is channel id
-            break;
-            case "poll":
-                channel_id = "1276250651097170022"; // WIP: poll log is hardcoded
-            break;
-            case "location":
-                channel_id = await abilitySendGetLocationChannel(ref);
-            break;
-            default:
-                abilityLog(`❗ **Error:** Unknown type for sending ability!`);
-                return null;
-            break;
-        }
-        
-        if(!channel_id) {
-            abilityLog(`❗ **Error:** Channel not found!`);
-            return null;
-        }
+        let channel_id = await getSrcRefChannel(src_ref);
+        if(!channel_id) return;
         
         // get channel
         let sc = mainGuild.channels.cache.get(channel_id);
@@ -180,6 +159,40 @@ module.exports = function() {
             });
         });
         
+    }
+    
+    /**
+    Get src_ref channel
+    **/
+    this.getSrcRefChannel = async function(src_ref) {
+        let ref = srcToValue(src_ref);
+        let type = srcToType(src_ref);
+        let channel_id = null;
+        
+        // get channel id by type
+        switch(type) {
+            case "player":
+                return await abilitySendGetPlayerChannel(ref);
+            break;
+            case "group":
+                return ref; // group ref already is channel id
+            break;
+            case "poll":
+                return "1276250651097170022"; // WIP: poll log is hardcoded
+            break;
+            case "location":
+                return await abilitySendGetLocationChannel(ref);
+            break;
+            default:
+                abilityLog(`❗ **Error:** Unknown type for get src_ref channel!`);
+                return null;
+            break;
+        }
+        
+        if(!channel_id) {
+            abilityLog(`❗ **Error:** Channel not found!`);
+            return null;
+        }
     }
     
     /**

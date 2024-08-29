@@ -123,7 +123,12 @@ module.exports = function() {
             // get channel
             let grantingChannel = await mainGuild.channels.fetch(channelId);
             // update channel permissions
-            grantingChannel.permissionOverwrites.cache.get(target).delete().then(sc => {
+            let overwrites = grantingChannel.permissionOverwrites.cache.get(target);
+            if(!overwrites) {
+                res(); // Nothing to remove!
+                return;
+            }
+            overwrites.delete().then(sc => {
                 let embed = basicEmbed(`<@${target}> was removed from <#${grantingChannel.id}>.`, EMBED_RED);
                 grantingChannel.send(embed);
                 res();

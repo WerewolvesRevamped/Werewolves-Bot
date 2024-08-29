@@ -758,14 +758,20 @@ client.on("guildMemberAdd", async member => {
 /* New Slash Command */
 client.on('interactionCreate', async interaction => {
     if(interaction.isButton()) {
-        let orig_text = interaction.message.embeds[0].description.split("․")[0]; // ․ is a special char!!
+        let orig_text = interaction.message.embeds[0].description.split(PROMPT_SPLIT)[0];
         let embed;
+        let actionAll = await getAction(interaction.message.id);
+        let invalidReply = basicEmbed(`${orig_text}. Invalid action. You cannot interact with this prompt anymore.`, EMBED_RED);
+        invalidReply.components = [];
         switch(interaction.customId) {
             default:
                 console.log("Unknown Interaction", interaction.customId);
             break;
             case "confirm": // instantly execute ability
             case "delay-confirm": // instantly execute ability, after delay
+            case "delay-selectionless-confirm": // instantly execute ability, after delay selectionless
+                if(!actionAll) return interaction.update(invalidReply);
+                // execute immediately
                 await instantQueuedAction(interaction.message.id);
                 embed = basicEmbed(`${orig_text}. Execution confirmed.`, EMBED_GREEN);
                 embed.components = [];
@@ -773,8 +779,8 @@ client.on('interactionCreate', async interaction => {
             break;
             case "cancel": // cancel ability
             case "delay-cancel": // cancel ability, after delay
+                if(!actionAll) return interaction.update(invalidReply);
                 // turn this message from an action queue message into a prompt
-                let actionAll = await getAction(interaction.message.id);
                 let action = actionAll[0];
                 // recreate prompt
                 await createPrompt(interaction.message.id, action.src_ref, action.src_name, JSON.parse(action.orig_ability), JSON.parse(action.restrictions), JSON.parse(action.additional_trigger_data), action.prompt_type, actionAll.length, action.type1, action.type2);
@@ -785,12 +791,39 @@ client.on('interactionCreate', async interaction => {
                 embed.components = [];
                 interaction.update(embed); 
             break;
+            case "delay-selectionless-cancel": // cancel ability, after delay selectionless
+                if(!actionAll) return interaction.update(invalidReply);
+                // turn this message from an action queue message into a prompt
+                let actionSelectionless = actionAll[0];
+                // recreate prompt
+                let mid = await sendSelectionlessPrompt(actionSelectionless.src_ref, actionSelectionless.prompt_type, `${orig_text}${PROMPT_SPLIT}`, EMBED_GRAY, true, null, null, "Ability Prompt"); // special ․
+                // schedule actions
+                await createAction(mid, actionSelectionless.src_ref, actionSelectionless.src_name, JSON.parse(actionSelectionless.orig_ability), JSON.parse(actionSelectionless.orig_ability), actionSelectionless.prompt_type, "none", "none", neverActionTime, JSON.parse(actionSelectionless.restrictions), JSON.parse(actionSelectionless.additional_trigger_data), actionSelectionless.target);
+                // delete from action queue
+                await deleteQueuedAction(interaction.message.id);
+                // update message
+                embed = basicEmbed(`${orig_text}. Execution cancelled. You will receive a new prompt in case you change your mind.`, EMBED_RED);
+                embed.components = [];
+                interaction.update(embed); 
+            break;
             case "delay": // delay ability
+                if(!actionAll) return interaction.update(invalidReply);
+                // set delay
                 await delayQueuedAction(interaction.message.id);
                 embed = basicEmbed(`${orig_text}. Execution delayed. You may execute the ability immediately or cancel the execution (allowing you to change your selection). If you choose no action the ability will be executed automatically towards the end of the phase.`, EMBED_GRAY);
                 let confirmButton = { type: 2, label: "Execute Immediately", style: 3, custom_id: "delay-confirm" };
                 let cancelButton = { type: 2, label: "Cancel", style: 4, custom_id: "delay-cancel" };
                 embed.components = [ { type: 1, components: [ confirmButton, cancelButton ] } ];
+                interaction.update(embed);
+            break;
+            case "delay-selectionless": // delay ability
+                if(!actionAll) return interaction.update(invalidReply);
+                // set delay
+                await delayQueuedAction(interaction.message.id);
+                embed = basicEmbed(`${orig_text}${PROMPT_SPLIT} Execution delayed. You may execute the ability immediately or cancel the execution. If you choose no action the ability will be executed automatically towards the end of the phase.`, EMBED_GRAY);
+                let confirmButtonSelectionless = { type: 2, label: "Execute Immediately", style: 3, custom_id: "delay-selectionless-confirm" };
+                let cancelButtonSelectionless = { type: 2, label: "Cancel", style: 4, custom_id: "delay-selectionless-cancel" };
+                embed.components = [ { type: 1, components: [ confirmButtonSelectionless, cancelButtonSelectionless ] } ];
                 interaction.update(embed);
             break;
         }
