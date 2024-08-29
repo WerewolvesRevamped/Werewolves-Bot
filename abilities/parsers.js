@@ -547,7 +547,7 @@ module.exports = function() {
         ["creation"], // poll
         ["add","remove"], // granting
         ];
-    this.parseAbilitySubype = function(ability_subtype) {
+    this.parseAbilitySubtype = function(ability_subtype) {
         // get target
         const selectorTarget = selectorGetTarget(ability_subtype);
         const selectorTargetSplit = selectorTarget.split(" ");

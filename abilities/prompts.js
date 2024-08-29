@@ -11,7 +11,7 @@ module.exports = function() {
     this.neverActionTime = 2147483647;
     
     // Prompt Message Splitter
-    this.PROMPT_SPLIT = "․";
+    this.PROMPT_SPLIT = "․"; // this is a special marker character, not a normal .
     
     /**
     Get Promp Message

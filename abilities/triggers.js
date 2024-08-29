@@ -225,6 +225,7 @@ module.exports = function() {
                     break;
                     case "On Action Complex":
                         let abilityType = await parseSelector(param);
+                        console.log(abilityType);
                         let triggerAbilityType = additionalTriggerData.ability_subtype + additionalTriggerData.ability_type;
                         abilityType = abilityType.value[0].toLowerCase().replace(/[^a-z]+/,"");
                         triggerAbilityType = triggerAbilityType.replace(/[^a-z]+/,"");

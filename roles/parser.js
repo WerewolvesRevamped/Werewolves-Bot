@@ -182,7 +182,6 @@ module.exports = function() {
             let additionalParameters = abilities[1].filter(el => el.ability.type === "parameters");
             abilities[1] = abilities[1].filter(el => el.ability.type != "parameters"); // remove parameters lines
             if(additionalParameters.length === 1) {
-                console.log("ADDPARA", additionalParameters);
                  abilities[1][0].parameters = additionalParameters[0].parameters;
             } else if(additionalParameters.length > 1) {
                 if(!debugMode) throw new Error(`Too many additional parameters.`);
@@ -1248,7 +1247,7 @@ module.exports = function() {
                     exp = new RegExp("^On (Visited|Action) \\[" + abilitySubtype + "\\]$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
-                        complexTrigger = "On " + fd[1] + ";" + ttpp(fd[2], "abilitySubype");
+                        complexTrigger = "On " + fd[1] + ";" + ttpp(fd[2], "abilitySubtype");
                     }
                     /** On Target Visited [Ability]**/
                     exp = new RegExp("^On " + targetType + " Visited \\[" + abilityType + "\\]$", "g");
@@ -1259,7 +1258,7 @@ module.exports = function() {
                     exp = new RegExp("^On " + targetType + " Visited \\[" + abilitySubtype + "\\]$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
-                        complexTrigger = "On Visited;" + ttpp(fd[1]) + ";" + ttpp(fd[2], "abilitySubype");
+                        complexTrigger = "On Visited;" + ttpp(fd[1]) + ";" + ttpp(fd[2], "abilitySubtype");
                     }
                     /** Otherwise **/
                     if(!complexTrigger) { // could not find a complex trigger match

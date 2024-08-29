@@ -796,7 +796,7 @@ client.on('interactionCreate', async interaction => {
                 // turn this message from an action queue message into a prompt
                 let actionSelectionless = actionAll[0];
                 // recreate prompt
-                let mid = await sendSelectionlessPrompt(actionSelectionless.src_ref, actionSelectionless.prompt_type, `${orig_text}${PROMPT_SPLIT}`, EMBED_GRAY, true, null, null, "Ability Prompt"); // special ․
+                let mid = await sendSelectionlessPrompt(actionSelectionless.src_ref, actionSelectionless.prompt_type, `${orig_text}${PROMPT_SPLIT}`, EMBED_GRAY, false, null, null, "Ability Prompt"); // special ․
                 // schedule actions
                 await createAction(mid, actionSelectionless.src_ref, actionSelectionless.src_name, JSON.parse(actionSelectionless.orig_ability), JSON.parse(actionSelectionless.orig_ability), actionSelectionless.prompt_type, "none", "none", neverActionTime, JSON.parse(actionSelectionless.restrictions), JSON.parse(actionSelectionless.additional_trigger_data), actionSelectionless.target);
                 // delete from action queue
