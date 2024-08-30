@@ -72,9 +72,16 @@ module.exports = function() {
     **/
     this.grantingRemove = async function(src_name, src_ref, targets, role) {
         // get existing channel
-        let existingChannel = await connectionGet(`${role}:${src_ref}`);
+        let existingChannel, roleName;
+        if(/\d+/.test(role)) { // channel was directly passed via selector (@ThisAttr)
+            existingChannel = [ { channel_id: role } ];
+            roleName = `<#${role}>`;
+        } else { // channel has to be retrieved 
+            existingChannel = await connectionGet(`${role}:${src_ref}`);
+            roleName = toTitleCase(role);
+        }
         if(existingChannel.length == 0) {
-            abilityLog(`❎ <@${targets[0]}> could not be removed from ${toTitleCase(role)} - doesn't exist.`);  
+            abilityLog(`❎ <@${targets[0]}> could not be removed from ${roleName} - doesn't exist.`);  
             return { msg: "Grantings failed!", success: false, target: `player:${targets[0]}` };
         }
         let channelId = existingChannel[0].channel_id;
@@ -82,7 +89,7 @@ module.exports = function() {
         for(let i = 0; i < targets.length; i++) {
             await grantingLeave(targets[i], channelId);
             await deleteAttributePlayer(targets[i], "attr_type", "role", "val2", channelId); // delete old membership(s)
-            abilityLog(`✅ <@${targets[i]}> was removed from ${toTitleCase(role)} at <#${channelId}>.`);
+            abilityLog(`✅ <@${targets[i]}> was removed from ${roleName} at <#${channelId}>.`);
             if(targets.length === 1) return { msg: "Granting succeeded!", success: true, target: `player:${targets[0]}` };
         }
         return { msg: "Grantings succeeded!", success: true, target: `player:${targets[0]}` };

@@ -325,4 +325,11 @@ module.exports = function() {
         return sqlPromEsc("UPDATE active_attributes SET used=used+1 WHERE ai_id=", id);
     }
     
+    /** PUBLIC
+    Get role attribute's player id
+    **/
+    this.roleAttributeGetPlayer = function(channel_id) {
+        return sqlPromEsc("SELECT players.id FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.attr_type='role' AND active_attributes.val2=", channel_id);
+    }
+    
 }

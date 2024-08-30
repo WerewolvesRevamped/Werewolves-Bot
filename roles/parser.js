@@ -41,6 +41,10 @@ module.exports = function() {
     **/
     this.parseRoleText = function(inputLines) {
         if(debugMode) console.log("-=- S T A R T -=-");
+        
+        if(inputLines[0] === "TBD") {
+            throw new Error(`Unfinished role.`);
+        }
 
         // split the role into its triggers
         if(debugMode) console.log("PARSE TRIGGERS");
@@ -513,13 +517,21 @@ module.exports = function() {
                 exp = new RegExp("^(\\$total|\\$living)/(\\d+)$", "g");
                 fd = exp.exec(scaling[scal]);
                 if(fd) {
-                    parsedScaling.push({ type: "math_multiplier", quantity: "calc(" + fd[1] + "/" + fd[2] + ")" });
+                    parsedScaling.push({ type: "math_multiplier", quantity: fd[1] + "/" + fd[2] });
                     scalFound = true;
                 }
-                exp = new RegExp("^(\\$total|\\$living)(\\<|\\>|≤|≥|\\=)(\\d+) ⇒ (\\d+)$", "g");
+                exp = new RegExp("^(\\$total|\\$living)(\\<|\\>|≤|≥|\\=)(\\d+) ⇒ x?(\\d+)$", "g");
                 fd = exp.exec(scaling[scal]);
                 if(fd) {
-                    parsedScaling.push({ type: "dynamic", compare: fd[1], compare_type: fd[2], compare_to: +fd[3], quantity: +fd[4] });
+                    let ct, compTo = +fd[3];
+                    switch(fd[2]) {
+                        case "<": ct = "less_than"; break;
+                        case ">": ct = "greater_than"; break;
+                        case "=": ct = "equal_to"; break;
+                        case "≤": ct = "less_than"; compTo++; break;
+                        case "≥": ct = "greater_than"; compTo--; break;
+                    }
+                    parsedScaling.push({ type: "dynamic", compare: fd[1], compare_type: ct, compare_to: compTo, quantity: +fd[4] });
                     scalFound = true;
                 }
                 /** Math Multiplier **/

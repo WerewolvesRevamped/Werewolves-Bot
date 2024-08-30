@@ -77,8 +77,18 @@ module.exports = function() {
                     abilityLog(`❗ **Error:** Used \`@Self\` in invalid context!`);
                     return [ ];
                 }
-                self = srcToValue(self);
-                return [ self ];
+                let val = srcToValue(self);
+                let type = srcToType(self);
+                switch(type) {
+                    default:
+                        abilityLog(`❗ **Error:** Used \`@Self\` with invalid self type \`${type}\`!`);
+                        return [ ];
+                    case "player":
+                        return [ val ];
+                    case "player_attr": // retrieve player id through channel id
+                        val = await roleAttributeGetPlayer(val);
+                        return [ val[0].id ];
+                }
             // all (living) players
             case "@all":
                 return await getAllLivingIDs();
@@ -352,6 +362,14 @@ module.exports = function() {
                 let target = await getTarget(self);
                 target = srcToValue(target);
                 return [ target ];
+            // ThisAttr
+            case "@thisattr":
+                if(!self) { // if no self is specified, @Self is invalid
+                    abilityLog(`❗ **Error:** Used \`@ThisAttr\` in invalid context!`);
+                    return [ ];
+                }
+                self = srcToValue(self);
+                return [ self ];
             default:
                 let parsedRole = parseRole(selectorTarget);
                 if(verifyRole(parsedRole)) {
@@ -572,6 +590,44 @@ module.exports = function() {
             abilityLog(`❗ **Error:** Invalid ability type \`${selectorTargetSplit[1]}\` in \`${selectorTarget}\`. Defaulted to \`none none\`!`);
             return "none none";
         }
+    }
+    
+    /**
+    Parse Number
+    parses a number
+    **/
+    this.parseNumber = async function(selector) {
+        // get target
+        let selectorTarget = selectorGetTarget(selector);
+        // is number?
+        if(!isNaN(selectorTarget)) { // direct number
+            return +selectorTarget;
+        } else { // not a number
+            selectorTarget = await applyVariables(selectorTarget);
+            if(!isNaN(selectorTarget)) { // direct variable
+                return +selectorTarget;
+            } else { // division
+                let splitSel = selectorTarget.split("/");
+                if(splitSel.length == 2 && !isNaN(splitSel[0]) && !isNaN(splitSel[1])) {
+                    return (+splitSel[0]) / (+splitSel[1]);
+                } else {
+                    abilityLog(`❗ **Error:** Invalid number \`${selectorTarget}\`!`);
+                    return 0;         
+                }
+            }
+        }
+    }
+    
+    /**
+    Applies Variables
+    **/
+    this.applyVariables = async function(txt) {
+            let players = await getAllPlayers();
+            let totalCount = players.length;
+            let aliveCount = players.filter(el => el.alive === "1");
+            txt = txt.replace(/\$total/, totalCount);
+            txt = txt.replace(/\$alive/, aliveCount);
+            return txt;
     }
     
     /**

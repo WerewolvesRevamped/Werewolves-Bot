@@ -792,11 +792,12 @@ client.on('interactionCreate', async interaction => {
                 interaction.update(embed); 
             break;
             case "delay-selectionless-cancel": // cancel ability, after delay selectionless
+            case "confirm-end-cancel": // cancel ability, after delay selectionless
                 if(!actionAll) return interaction.update(invalidReply);
                 // turn this message from an action queue message into a prompt
                 let actionSelectionless = actionAll[0];
                 // recreate prompt
-                let mid = await sendSelectionlessPrompt(actionSelectionless.src_ref, actionSelectionless.prompt_type, `${orig_text}${PROMPT_SPLIT}`, EMBED_GRAY, false, null, null, "Ability Prompt"); // special ․
+                let mid = await sendSelectionlessPrompt(actionSelectionless.src_ref, actionSelectionless.prompt_type, `${orig_text}${PROMPT_SPLIT}`, EMBED_GRAY, false, null, null, "Ability Prompt");
                 // schedule actions
                 await createAction(mid, actionSelectionless.src_ref, actionSelectionless.src_name, JSON.parse(actionSelectionless.orig_ability), JSON.parse(actionSelectionless.orig_ability), actionSelectionless.prompt_type, "none", "none", neverActionTime, JSON.parse(actionSelectionless.restrictions), JSON.parse(actionSelectionless.additional_trigger_data), actionSelectionless.target);
                 // delete from action queue
@@ -810,7 +811,7 @@ client.on('interactionCreate', async interaction => {
                 if(!actionAll) return interaction.update(invalidReply);
                 // set delay
                 await delayQueuedAction(interaction.message.id);
-                embed = basicEmbed(`${orig_text}. Execution delayed. You may execute the ability immediately or cancel the execution (allowing you to change your selection). If you choose no action the ability will be executed automatically towards the end of the phase.`, EMBED_GRAY);
+                embed = basicEmbed(`${orig_text}. Execution delayed. You may execute the ability immediately or cancel the execution (allowing you to change your selection). If you choose no action the ability will be executed automatically towards the end of the phase.`, EMBED_YELLOW);
                 let confirmButton = { type: 2, label: "Execute Immediately", style: 3, custom_id: "delay-confirm" };
                 let cancelButton = { type: 2, label: "Cancel", style: 4, custom_id: "delay-cancel" };
                 embed.components = [ { type: 1, components: [ confirmButton, cancelButton ] } ];
@@ -820,10 +821,19 @@ client.on('interactionCreate', async interaction => {
                 if(!actionAll) return interaction.update(invalidReply);
                 // set delay
                 await delayQueuedAction(interaction.message.id);
-                embed = basicEmbed(`${orig_text}${PROMPT_SPLIT} Execution delayed. You may execute the ability immediately or cancel the execution. If you choose no action the ability will be executed automatically towards the end of the phase.`, EMBED_GRAY);
+                embed = basicEmbed(`${orig_text}${PROMPT_SPLIT} Execution delayed. You may execute the ability immediately or cancel the execution. If you choose no action the ability will be executed automatically towards the end of the phase.`, EMBED_YELLOW);
                 let confirmButtonSelectionless = { type: 2, label: "Execute Immediately", style: 3, custom_id: "delay-selectionless-confirm" };
                 let cancelButtonSelectionless = { type: 2, label: "Cancel", style: 4, custom_id: "delay-selectionless-cancel" };
                 embed.components = [ { type: 1, components: [ confirmButtonSelectionless, cancelButtonSelectionless ] } ];
+                interaction.update(embed);
+            break;
+            case "confirm-end": // confirm end ability
+                if(!actionAll) return interaction.update(invalidReply);
+                // set delay
+                await endConfirmQueuedAction(interaction.message.id);
+                embed = basicEmbed(`${orig_text}${PROMPT_SPLIT} Execution confirmed. If you change your mind, you can still cancel the execution until the end of the phase.`, EMBED_GREEN);
+                let cancelEndButton = { type: 2, label: "Cancel", style: 4, custom_id: "confirm-end-cancel" };
+                embed.components = [ { type: 1, components: [ cancelEndButton ] } ];
                 interaction.update(embed);
             break;
         }

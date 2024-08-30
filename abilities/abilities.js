@@ -174,6 +174,9 @@ module.exports = function() {
             case "player":
                 return await abilitySendGetPlayerChannel(ref);
             break;
+            case "player_attr":
+                return ref;
+            break;
             case "group":
                 return ref; // group ref already is channel id
             break;
@@ -216,6 +219,7 @@ module.exports = function() {
             });
         });      
     }
+   
     
     /**
     Abilities Reset
@@ -228,8 +232,11 @@ module.exports = function() {
     
     /**
     SOURCES
-    possible source reference types: player (player id), group (channel id), alignment, attribute, poll
-    possible source name types: role, group, alignment, attribute, poll
+    possible source types:
+    player (member id) / role (name)
+    player_attr (channel id) / role (name)
+    group (channel id) / group (name)
+    poll (name) / poll (name)
     **/
     
     /** PUBLIC
@@ -243,6 +250,7 @@ module.exports = function() {
             case "player":
                 return `<@${val}>`;
             case "group":
+            case "player_attr":
                 return `<#${val}>`;
             case "alignment":
             case "attribute":

@@ -399,6 +399,9 @@ module.exports = function() {
             let msg = await channel.messages.fetch(messages[i]);
             await msg.reactions.removeAll();
         }
+        // unpin
+        let initialMsg = await channel.messages.fetch(pollData.initial_message);
+        await initialMsg.unpin();
     }
     
     /** PRIVATE

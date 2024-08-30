@@ -24,6 +24,24 @@ module.exports = function() {
                     return null;
                 }
             break;
+            // DYNAMIC
+            case "dynamic":
+                let comp = scaling.compare;
+                let compTo = scaling.compare_to;
+                let quant = scaling.quantity;
+                switch(scaling.compare_type) {
+                    case "equal_to":
+                        if(comp == compTo) return quant;
+                    break;
+                    case "less_than":
+                        if(comp < compTo) return quant;
+                    break;
+                    case "greater_than":
+                        if(comp > compTo) return quant;
+                    break;
+                }
+                return null;
+            break;
             
         }
     }

@@ -19,10 +19,26 @@ module.exports = function() {
         // run trigger
         abilityLog(`🔷 **Trigger:** ${triggerName} for ${srcRefToText(src_ref)}`);  
         switch(type) {
-            case "player": await triggerPlayer(val, triggerName, additionalTriggerData, true); break;
-            case "group": await triggerGroup(val, triggerName, additionalTriggerData, true); break;
-            case "poll": await triggerPoll(val, triggerName, additionalTriggerData, true); break;
-            default: abilityLog(`❗ **Skipped Trigger:** Unknown type for trigger ${type}.`); break;
+            case "player":
+                await triggerPlayer(val, triggerName, additionalTriggerData, true);
+            break;
+            case "player_attr":
+                let pid = await roleAttributeGetPlayer(val);
+                if(!pid[0]) {
+                    abilityLog(`❗ **Skipped Trigger:** Could not find who <#${val}> belongs to.`);
+                    return;
+                }
+                await triggerPlayer(pid[0].id, triggerName, additionalTriggerData, true);
+            break;
+            case "group":
+                await triggerGroup(val, triggerName, additionalTriggerData, true);
+            break;
+            case "poll":
+                await triggerPoll(val, triggerName, additionalTriggerData, true);
+            break;
+            default:
+                abilityLog(`❗ **Skipped Trigger:** Unknown type for trigger ${type}.`);
+            break;
         }
     }
     
@@ -30,17 +46,31 @@ module.exports = function() {
     Trigger Player
     triggers a trigger for a specified player
     **/
-    this.triggerPlayer = function(player_id, triggerName, additionalTriggerData, fromTrigger = false) {
+    this.triggerPlayer = async function(player_id, triggerName, additionalTriggerData, fromTrigger = false) {
         if(!fromTrigger) abilityLog(`🔷 **Trigger:** ${triggerName} for <@${player_id}>`);  
-        return new Promise(res => {
+        // primary roles
+        await new Promise(res => {
             // get all players
             sql("SELECT role,id FROM players WHERE type='player' AND id=" + connection.escape(player_id), async r => {
                 //trigger handler
                 if(!r[0]) {
                     abilityLog(`❗ **Skipped Trigger:** Cannot find matching player for ${player_id}.`);
                     res();
+                    return;
                 }
                 await triggerHandlerPlayer(r[0], triggerName, additionalTriggerData);
+                // resolve outer promise
+                res();
+            });
+        });
+        // role type attributes (additional roles)
+        await new Promise(res => {
+            // get all players
+            sql("SELECT players.id,active_attributes.val1 AS role,active_attributes.val2 AS channel_id FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.attr_type='role' AND id=" + connection.escape(player_id), async r => {
+                // iterate through additional roles
+                for(let i = 0; i < r.length; i++) {
+                    await triggerHandlerPlayerRoleAttribute(r[i], triggerName, additionalTriggerData);
+                }
                 // resolve outer promise
                 res();
             });
@@ -60,6 +90,7 @@ module.exports = function() {
                 if(!r[0]) {
                     abilityLog(`❗ **Skipped Trigger:** Cannot find matching group for ${channel_id}.`);
                     res();
+                    return;
                 }
                 await triggerHandlerGroup(r[0], triggerName, additionalTriggerData);
                 // resolve outer promise
@@ -81,6 +112,7 @@ module.exports = function() {
                 if(!r[0] || !r[0].parsed) {
                     abilityLog(`❗ **Skipped Trigger:** Cannot find matching poll for ${poll_name}.`);
                     res();
+                    return;
                 }
                 let parsed = JSON.parse(r[0].parsed);
                 await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `poll:${r[0].name}`, `poll:${r[0].name}`);
@@ -97,6 +129,7 @@ module.exports = function() {
     this.triggerHandler = async function(triggerName, additionalTriggerData = {}) {
         abilityLog(`🔷 **Trigger:** ${triggerName}`);  
         await triggerHandlerPlayers(triggerName, additionalTriggerData);
+        await triggerHandlerPlayersRoleAttributes(triggerName, additionalTriggerData);
         await triggerHandlerGroups(triggerName, additionalTriggerData);
         await triggerHandlerPolls(triggerName, additionalTriggerData);
     }
@@ -112,6 +145,24 @@ module.exports = function() {
                 // get their role's data
                 for(let pr of r) {
                     await triggerHandlerPlayer(pr, triggerName, additionalTriggerData);
+                }
+                // resolve outer promise
+                res();
+            });
+        });
+    }
+    
+    /**
+    Trigger Handler - Players (Role Attributes)
+    handles a trigger triggering for ALL players' role attributes
+    **/
+    function triggerHandlerPlayersRoleAttributes(triggerName, additionalTriggerData) {
+        return new Promise(res => {
+            // get all players
+            sql("SELECT players.id,active_attributes.val1 AS role,active_attributes.val2 AS channel_id FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.attr_type='role'", async r => {
+                // get their role's data
+                for(let pr of r) {
+                    await triggerHandlerPlayerRoleAttribute(pr, triggerName, additionalTriggerData);
                 }
                 // resolve outer promise
                 res();
@@ -179,6 +230,27 @@ module.exports = function() {
     }
     
     /**
+    Trigger Handler - Player Role Attribute
+    handles trigger triggering for a single player's role attribute
+    **/
+    async function triggerHandlerPlayerRoleAttribute(pr, triggerName, additionalTriggerData = {}) {
+        await new Promise(res => {
+            sql("SELECT * FROM roles WHERE name=" + connection.escape(pr.role), async result => {
+                if(!result[0]) {
+                    abilityLog(`🔴 **Skipped Player:** <@${toTitleCase(pr.id)}> (<#${pr.channel_id}>). Unknown role \`${toTitleCase(pr.role)}\`.`);
+                    res();
+                }
+                // parse the formalized desc into an object
+                if(result[0].parsed) res();
+                let parsed = JSON.parse(result[0].parsed);
+                await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `player_attr:${pr.channel_id}`, `role:${pr.role}`);
+                // resolve outer promise
+                res();
+            });            
+        });
+    }
+    
+    /**
     Trigger Handler - Group
     handles trigger triggering for a single group
     **/
@@ -225,7 +297,6 @@ module.exports = function() {
                     break;
                     case "On Action Complex":
                         let abilityType = await parseSelector(param);
-                        console.log(abilityType);
                         let triggerAbilityType = additionalTriggerData.ability_subtype + additionalTriggerData.ability_type;
                         abilityType = abilityType.value[0].toLowerCase().replace(/[^a-z]+/,"");
                         triggerAbilityType = triggerAbilityType.replace(/[^a-z]+/,"");

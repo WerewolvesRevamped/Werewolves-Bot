@@ -158,6 +158,13 @@ module.exports = function() {
     }
     
     /**
+    Sets the execution time of a queued action to max int, delaying it until end confirmed actions are manually executed
+    **/
+    this.endConfirmQueuedAction = function(id) {
+        return sqlPromEsc("UPDATE action_queue SET execute_time=" + endActionTime + " WHERE message_id=", id);
+    }
+    
+    /**
     Sets the execution time of all delayed queued action to the past, executing them all on the next check
     **/
     this.executeDelayedQueuedAction = function() {
