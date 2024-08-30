@@ -1,3 +1,4 @@
+
 /**
 temp module
 **/
@@ -91,7 +92,8 @@ module.exports = function() {
                 "infomanage": ["im"],
                 "groups": ["group"],
                 "attributes": ["attribute","attr"],
-                "locations": ["location", "loc", "locs"]
+                "locations": ["location", "loc", "locs"],
+                "details": ["il","id"]
         };
         for(let cmd in aliases) {
             if(aliases[cmd].indexOf(alias) != -1) return cmd;

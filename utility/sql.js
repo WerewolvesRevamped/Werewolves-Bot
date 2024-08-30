@@ -102,12 +102,24 @@ module.exports = function() {
         });
     }
     
+    this.sqlPromOne = function(query) {
+        return new Promise(res => {
+              sql(query, result => {
+                  res(result[0] ?? null);
+              });
+        });
+    }
+    
     /**
     SQL Promise (Escaped)
     Does a sql query as a promise and appends an escaped value which was parsed unescaped as a second parameter
     **/
     this.sqlPromEsc = function(query, val) {
         return sqlProm(query + connection.escape(val));
+    }
+    
+    this.sqlPromOneEsc = function(query, val) {
+        return sqlPromOne(query + connection.escape(val));
     }
 	
 }

@@ -402,8 +402,13 @@ client.on("messageCreate", async message => {
 	case "update":
 		if(checkGM(message)) cmdUpdate(message.channel);
 	break;
-	/* Role Info */ // Returns the info for a role set by the roles command
+	/* Role Info */ // Returns the info for a role set by the roles command (simplified)
 	case "info":
+		cmdInfo(message.channel, args, false, false, true);
+	break;
+	/* Role Info */ // Returns the info for a role set by the roles command (basics/details)
+    // NOT DOCUMENTED
+	case "details":
 		cmdInfo(message.channel, args);
 	break;
 	/* Role Info */ // Returns the info for a role set by the roles command

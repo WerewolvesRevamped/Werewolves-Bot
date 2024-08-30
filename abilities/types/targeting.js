@@ -75,12 +75,16 @@ module.exports = function() {
     Get Target
     get the target for anything
     **/
-    this.getTarget = function(src_ref) {
+    this.getTarget = async function(src_ref) {
         let srcType = srcToType(src_ref);
         let srcVal = srcToValue(src_ref);
         switch(srcType) {
             case "player":
                 return getPlayerTarget(srcVal);
+            break;
+            case "player_attr":
+                let attr = await roleAttributeGetPlayer(srcVal);
+                return getAttributeTarget(attr.ai_id);
             break;
             case "group":
                 return getGroupTarget(srcVal);
@@ -99,12 +103,16 @@ module.exports = function() {
     Set Target
     set the target for anything
     **/
-    function setTarget(src_ref, target) {
+    async function setTarget(src_ref, target) {
         let srcType = srcToType(src_ref);
         let srcVal = srcToValue(src_ref);
         switch(srcType) {
             case "player":
                 return setPlayerTarget(srcVal, target);
+            break;
+            case "player_attr":
+                let attr = await roleAttributeGetPlayer(srcVal);
+                return setAttributeTarget(attr.ai_id, target);
             break;
             case "group":
                 return setGroupTarget(srcVal, target);
@@ -136,11 +144,7 @@ module.exports = function() {
     set the target for a player
     **/
     function setPlayerTarget(player_id, target) {
-        return new Promise(res => {
-            sql("UPDATE players SET target=" + connection.escape(target) + " WHERE id=" + connection.escape(player_id), result => {
-                res();
-            });	
-        });
+        return sqlPromEsc("UPDATE players SET target=" + connection.escape(target) + " WHERE id=", player_id);
     }
     
     /** PRIVATE
@@ -160,11 +164,7 @@ module.exports = function() {
     set the target for a group
     **/
     function setGroupTarget(channel_id, target) {
-        return new Promise(res => {
-            sql("UPDATE active_groups SET target=" + connection.escape(target) + " WHERE channel_id=" + connection.escape(channel_id), result => {
-                res();
-            });	
-        });
+        return sqlPromEsc("UPDATE active_groups SET target=" + connection.escape(target) + " WHERE channel_id=", channel_id);
     }
     
     /** PRIVATE
@@ -184,11 +184,27 @@ module.exports = function() {
     set the target for a poll
     **/
     function setPollTarget(name, target) {
+        return sqlPromEsc("UPDATE polls SET target=" + connection.escape(target) + " WHERE name=", name);
+    }
+    
+    /** PRIVATE
+    Set Target Attribute
+    set the target for an attribute
+    **/
+    function getAttributeTarget(ai_id) {
         return new Promise(res => {
-            sql("UPDATE polls SET target=" + connection.escape(target) + " WHERE name=" + connection.escape(name), result => {
-                res();
+            sql("SELECT active_attributes FROM polls WHERE ai_id=" + connection.escape(ai_id), result => {
+                res(result[0].target);
             });	
         });
+    }
+    
+    /** PRIVATE
+    Set Target Attribute
+    set the target for an attribute
+    **/
+    function setAttributeTarget(ai_id, target) {
+        return sqlPromEsc("UPDATE active_attributes SET target=" + connection.escape(target) + " WHERE ai_id=", ai_id);
     }
     
 }

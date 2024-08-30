@@ -86,8 +86,8 @@ module.exports = function() {
                     case "player":
                         return [ val ];
                     case "player_attr": // retrieve player id through channel id
-                        val = await roleAttributeGetPlayer(val);
-                        return [ val[0].id ];
+                        attr = await roleAttributeGetPlayer(val);
+                        return [ attr.id ];
                 }
             // all (living) players
             case "@all":
@@ -364,7 +364,7 @@ module.exports = function() {
                 return [ target ];
             // ThisAttr
             case "@thisattr":
-                if(!self) { // if no self is specified, @Self is invalid
+                if(!self) { // if no self is specified, @ThisAttr is invalid
                     abilityLog(`❗ **Error:** Used \`@ThisAttr\` in invalid context!`);
                     return [ ];
                 }
@@ -562,7 +562,7 @@ module.exports = function() {
         [], // process_evaluate
         [], // abilities
         [], // announcement
-        ["creation"], // poll
+        ["creation","addition","deletion"], // poll
         ["add","remove"], // granting
         ];
     this.parseAbilitySubtype = function(ability_subtype) {

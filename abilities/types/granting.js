@@ -49,7 +49,6 @@ module.exports = function() {
     this.grantingAdd = async function(src_name, src_ref, targets, role) {
         // get existing channel if applicable
         let existingChannel = await connectionGet(`${role}:${src_ref}`);
-        console.log(existingChannel);
         // iterate through targets
         for(let i = 0; i < targets.length; i++) {
             let channelId;

@@ -218,7 +218,7 @@ module.exports = function() {
             pollMsgs.push(pollDisMsg.id);
             // do the reactions
             let emojis = optionLists[i].map(el => el.emoji);
-            pollReact(pollDisMsg, emojis);
+            await pollReact(pollDisMsg, emojis);
         }
         // create in DB
         await createPollInDB(pollType, pollName, initialMsg.channel.id, initialMsg.id, pollMsgs, src_ref);

@@ -164,6 +164,14 @@ module.exports = function() {
     }
     
     /**
+    Create Poll Count Attribute
+    creates a poll count attribute
+    **/
+    this.createPollCountAttribute = async function(src_name, src_ref, target_player, dur, poll =  "lynch", poll_count = 1) {
+        await createAttribute(src_name, src_ref, target_player, dur, "poll_count", poll, poll_count);
+    }
+    
+    /**
     Checks if a attribute column name is valid**/
     function isValidAttributeColumnName(name) {
         return ["owner","src_name","src_ref","attr_type","duration","val1","val2","val3","val4"].includes(name);
@@ -329,7 +337,7 @@ module.exports = function() {
     Get role attribute's player id
     **/
     this.roleAttributeGetPlayer = function(channel_id) {
-        return sqlPromEsc("SELECT players.id FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.attr_type='role' AND active_attributes.val2=", channel_id);
+        return sqlPromOneEsc("SELECT active_attributes.ai_id,players.id FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.attr_type='role' AND active_attributes.val2=", channel_id);
     }
     
 }

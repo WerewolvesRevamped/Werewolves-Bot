@@ -23,12 +23,12 @@ module.exports = function() {
                 await triggerPlayer(val, triggerName, additionalTriggerData, true);
             break;
             case "player_attr":
-                let pid = await roleAttributeGetPlayer(val);
-                if(!pid[0]) {
+                let attr = await roleAttributeGetPlayer(val);
+                if(!attr) { // after a remove granting we wont be able to find the owner anymore
                     abilityLog(`❗ **Skipped Trigger:** Could not find who <#${val}> belongs to.`);
                     return;
                 }
-                await triggerPlayer(pid[0].id, triggerName, additionalTriggerData, true);
+                await triggerPlayer(attr.id, triggerName, additionalTriggerData, true);
             break;
             case "group":
                 await triggerGroup(val, triggerName, additionalTriggerData, true);
@@ -66,10 +66,11 @@ module.exports = function() {
         // role type attributes (additional roles)
         await new Promise(res => {
             // get all players
-            sql("SELECT players.id,active_attributes.val1 AS role,active_attributes.val2 AS channel_id FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.attr_type='role' AND id=" + connection.escape(player_id), async r => {
+            sql("SELECT players.id,active_attributes.ai_id,active_attributes.val1 AS role,active_attributes.val2 AS channel_id FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.attr_type='role' AND id=" + connection.escape(player_id), async r => {
                 // iterate through additional roles
                 for(let i = 0; i < r.length; i++) {
                     await triggerHandlerPlayerRoleAttribute(r[i], triggerName, additionalTriggerData);
+                    await useAttribute(r[i].ai_id);
                 }
                 // resolve outer promise
                 res();
@@ -159,10 +160,11 @@ module.exports = function() {
     function triggerHandlerPlayersRoleAttributes(triggerName, additionalTriggerData) {
         return new Promise(res => {
             // get all players
-            sql("SELECT players.id,active_attributes.val1 AS role,active_attributes.val2 AS channel_id FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.attr_type='role'", async r => {
+            sql("SELECT players.id,active_attributes.ai_id,active_attributes.val1 AS role,active_attributes.val2 AS channel_id FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.attr_type='role'", async r => {
                 // get their role's data
                 for(let pr of r) {
                     await triggerHandlerPlayerRoleAttribute(pr, triggerName, additionalTriggerData);
+                    await useAttribute(pr.ai_id); 
                 }
                 // resolve outer promise
                 res();
@@ -324,7 +326,8 @@ module.exports = function() {
     **/
     async function executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData = {}) {
         const ptype = getPromptType(triggerName);
-        const promptOverwrite = trigger?.parameters?.prompt_overwrite;
+        const promptOverwrite = trigger?.parameters?.prompt_overwrite ?? "";
+        const promptPing = !(promptOverwrite.match(/^silent:.*$/)); // check if prompt should ping
         
         // handle action scaling
         const actionScaling = trigger?.parameters?.scaling ?? [];
@@ -336,6 +339,11 @@ module.exports = function() {
         }
         let scalingMessage = "";
         if(actionCount > 1) scalingMessage = `\n\nYou may use your ability \`${actionCount}\` times. Please provide your choices for each use separated by newlines.`;
+        
+        // if action count is zero, then no action at all
+        if(actionCount === 0) {
+            return;
+        }
         
         // iterate through abilities of the trigger
         for(const ability of trigger.abilities) {
@@ -372,12 +380,18 @@ module.exports = function() {
                         // send prompt
                         let promptMsg = getPromptMessage(ability, promptOverwrite);
                         let refImg = await refToImg(src_name);
-                        let mid = await sendSelectionlessPrompt(src_ref, ptype[0], `${getAbilityEmoji(ability.type)} ${promptMsg}${PROMPT_SPLIT}`, EMBED_GRAY, true, promptInfoMsg, refImg, "Ability Prompt");
-                        // schedule actions
-                        await createAction(mid, src_ref, src_name, ability, ability, ptype[0], "none", "none", neverActionTime, restrictions, additionalTriggerData, "notarget");
+                        for(let i = 0; i < actionCount; i++) { // iterate for scaling
+                            if(promptMsg[promptMsg.length - 1] === ".") promptMsg = promptMsg.substr(0, promptMsg.length - 1); // if last character is normal . remove it 
+                            let mid = await sendSelectionlessPrompt(src_ref, ptype[0], `${getAbilityEmoji(ability.type)} ${promptMsg}${PROMPT_SPLIT}`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt");
+                            abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(ability.type)} {Selectionless}`);
+                            // schedule actions
+                            await createAction(mid, src_ref, src_name, ability, ability, ptype[0], "none", "none", neverActionTime, restrictions, additionalTriggerData, "notarget");
+                        }
                     } else { // no prompt
-                        let feedback = await executeAbility(src_ref, src_name, ability, restrictions, additionalTriggerData);
-                        if(feedback && feedback.msg) abilitySend(src_ref, feedback.msg);
+                        for(let i = 0; i < actionCount; i++) { 
+                            let feedback = await executeAbility(src_ref, src_name, ability, restrictions, additionalTriggerData);
+                            if(feedback && feedback.msg) abilitySend(src_ref, feedback.msg);
+                        }
                     }
                 } break;
                 // single prompt (@Selection)
@@ -385,7 +399,7 @@ module.exports = function() {
                     let type = toTitleCase(selectorGetType(prompts[0][1]));
                     let promptMsg = getPromptMessage(ability, promptOverwrite, type);
                     let refImg = await refToImg(src_name);
-                    let mid = (await abilitySendProm(src_ref, `${getAbilityEmoji(ability.type)} ${promptMsg} ${scalingMessage}`, EMBED_GRAY, true, promptInfoMsg, refImg, "Ability Prompt")).id;
+                    let mid = (await abilitySendProm(src_ref, `${getAbilityEmoji(ability.type)} ${promptMsg} ${scalingMessage}`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt")).id;
                     if(ptype[0] === "immediate") { // immediate prompt
                         abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(ability.type)} [${type}] {Immediate}`);
                         await createPrompt(mid, src_ref, src_name, ability, restrictions, additionalTriggerData, "immediate", actionCount, type);
@@ -402,7 +416,7 @@ module.exports = function() {
                     let type2 = toTitleCase(selectorGetType(prompts[1][1]));
                     let promptMsg = getPromptMessage(ability, promptOverwrite, type1, type2);
                     let refImg = await refToImg(src_name);
-                    let mid = (await abilitySendProm(src_ref, `${getAbilityEmoji(ability.type)} ${promptMsg} ${scalingMessage}`, EMBED_GRAY, true, promptInfoMsg, refImg, "Ability Prompt")).id;
+                    let mid = (await abilitySendProm(src_ref, `${getAbilityEmoji(ability.type)} ${promptMsg} ${scalingMessage}`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt")).id;
                     if(ptype[0] === "immediate") { // immediate prompt
                         abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(ability.type)} [${type1}, ${type2}] {Immediate}`);
                         await createPrompt(mid, src_ref, src_name, ability, restrictions,additionalTriggerData, "immediate", actionCount, type1, type2);

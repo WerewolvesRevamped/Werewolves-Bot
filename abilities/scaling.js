@@ -40,7 +40,7 @@ module.exports = function() {
                         if(comp > compTo) return quant;
                     break;
                 }
-                return null;
+                return 0;
             break;
             
         }

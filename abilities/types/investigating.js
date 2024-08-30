@@ -120,22 +120,29 @@ module.exports = function() {
         // get role data
         let rdata = await getRoleDataFromPlayer(player);
         let type = "";
+        let wdis, sdis;
         // get weak disguise data (if applicable)
         if(affected_by_wd) {
-            let disguise = await getTopWeakDisguise(player);
-            if(disguise) {
-                rdata = await getRoleDataFromRole(disguise);
+            wdis = await getTopWeakDisguise(player);
+            if(wdis.val1) {
+                rdata = await getRoleDataFromRole(wdis.val1);
                 type = "WD";
             }
         }
         // get strong disguise data (if applicable)
         if(affected_by_sd) {
-            let disguise = await getTopStrongDisguise(player);
-            if(disguise) {
-                rdata = await getRoleDataFromRole(disguise);
+            sdis = await getTopStrongDisguise(player);
+            if(sdis.val1) {
+                rdata = await getRoleDataFromRole(sdis.val1);
                 type = "SD";
             }
         }
+        // log an attribute use
+        switch(type) {
+            case "WD": await useAttribute(wdis.ai_id); break;
+            case "SD": await useAttribute(sdis.ai_id); break;    
+        }
+        // return output
         return {role: rdata, type: type};
     }
     

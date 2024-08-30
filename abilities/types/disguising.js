@@ -61,7 +61,7 @@ module.exports = function() {
         let allDisguises = await queryAttributePlayer(player_id, "attr_type", "disguise", "val2", type); // get all disguises of specified type
         if(allDisguises.length <= 0) return ""; // no disguises
         let topDisguise = allDisguises[allDisguises.length - 1]; // get most recent disguise
-        return topDisguise.val1;
+        return topDisguise;
     }
     
     /**

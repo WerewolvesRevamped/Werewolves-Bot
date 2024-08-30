@@ -253,7 +253,13 @@ module.exports = function() {
                         case "card": sectionText = result.desc_card; break;
                     }
                     // only add the section if it exists
-                    if(sectionText) embed.fields.push(...handleFields(applyETN(sectionText, guild), toTitleCase(applyTheme(visibleSections[sec])), !isFormalized));
+                    if(sectionText) {
+                        if(visibleSections.length == 1) {
+                            embed.description = applyETN(sectionText, guild);
+                        } else {
+                            embed.fields.push(...handleFields(applyETN(sectionText, guild), toTitleCase(applyTheme(visibleSections[sec])), !isFormalized));
+                        }
+                    }
                 }
                 
                 // resolve promise with the embed, returning the embed

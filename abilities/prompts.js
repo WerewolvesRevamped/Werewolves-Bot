@@ -19,8 +19,11 @@ module.exports = function() {
     **/
     this.getPromptMessage = function(ability, promptOverwrite, type1 = "", type2 = "") {
         // apply prompt overwrite if applicable
+        let poSplit = promptOverwrite.split(":");
         if(promptOverwrite && prompts[promptOverwrite]) {
             return prompts[promptOverwrite];
+        } else if(poSplit[1] && prompts[poSplit[1]]) {
+            return prompts[poSplit[1]];
         }
         // find prompt
         const ty = ability.type ? ability.type.replace(/ /g,"_") : null;
@@ -421,8 +424,8 @@ module.exports = function() {
         let options = "confirm or delay";
         if(!subphaseIsMain()) options = "confirm";
         let msg;
-        if(prompt_type === "immediate") msg = basicEmbed(`${txt} You may ${options} the ability, otherwise it will not be executed.`, color);
-        else msg = basicEmbed(`${txt} You may confirm the ability to execute it at the end of the phase, otherwise it will not be executed.`, color);
+        if(prompt_type === "immediate") msg = basicEmbed(`${txt} You may ${options} the ability, otherwise it will __not__ be executed.`, color);
+        else msg = basicEmbed(`${txt} You may confirm the ability to execute it at the end of the phase, otherwise it will __not__ be executed.`, color);
         // create buttons
         let confirmButton = { type: 2, label: "Confirm", style: 3, custom_id: "confirm" };
         let confirmEndButton = { type: 2, label: "Confirm", style: 3, custom_id: "confirm-end" };
