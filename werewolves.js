@@ -625,20 +625,15 @@ client.on("messageCreate", async message => {
 	case "substitute":
 		cmdSubstitute(message.channel, message.member, args);
 	break;
-	/* Sudo */
-	case "sudo":
-		if(checkSafe(message)) {
-            await sleep(2000)
-			message.channel.send(stats.prefix + message.content.substr(6));
-		}
-	break;
 	/* Confirm */
 	case "confirm":
 		confirmActionExecute(args.join(" "), message, false);
 	break;
 	/* Modrole */ 
 	case "modrole": 
+    /** DISABLED
 		if(message.author.id == client.user.id || checkAdmin(message)) cmdModrole(message, args);
+        **/
 	break;
     /* Elect */
     case "elect":
