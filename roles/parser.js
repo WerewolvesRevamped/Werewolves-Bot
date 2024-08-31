@@ -52,89 +52,31 @@ module.exports = function() {
         if(debugMode) console.log(JSON.stringify(triggers));
         
         // get a default param for comparision
-        const defaultParams = parseAbilities(["Immediate",["Disband"]])[1][0].parameters;
+        const defaultParams = parseAbility("Disband").parameters;
         
         if(debugMode) console.log("PARSE ABILITIES");
         
-        for(let t in triggers.triggers) {
+        for(const t in triggers.triggers) {
+            const thisTrigger = triggers.triggers[t];
+            
+            // get trigger name
+            const thisTriggerName = thisTrigger[0];
+            
+            // parse abilities
+            let thisTriggerAbilities = parseAbilities(thisTrigger[1]);
+
+            
             // abilities
-            let abilities = parseAbilities(triggers.triggers[t]); // parse abilities of a trigger
-            if(debugMode) console.log("ABILITIES", JSON.stringify(abilities));
-            /** Preprocessing **/
-            /* Reformat P/E */
-            let inPE = false;
-            let peDepth = -1;
-            let peIndex = null;
-            let peType = null;
-            for(const a in abilities[1]) {
-                // standard multine line P or E start
-                if(abilities[1][a].ability.type == "process" || abilities[1][a].ability.type == "evaluate") {
-                    inPE = true;
-                    peDepth = abilities[1][a].depth;
-                    peIndex = a;
-                    abilities[1][a].ability.sub_abilities = [];
-                    peType = abilities[1][a].ability.type;
-                    continue;
-                }
-                // P or E inline start
-                if(!inPE && abilities[1][a].condition) {
-                    inPE = true;
-                    peDepth = abilities[1][a].depth - 1;
-                    peIndex = a;
-                    let dc = deepCopy(abilities[1][a]);
-                    if(dc.condition == "Process") { // Inline Process
-                        abilities[1][a].ability = { type: "process", sub_abilities: [ {ability: dc.ability} ] };
-                        peType = "process";
-                        peDepth++;
-                    } else { // Inline Evaluate
-                        abilities[1][a].ability = { type: "evaluate", sub_abilities: [ {ability: dc.ability, condition: dc.condition} ] };
-                        peType = "evaluate";
-                    }
-                    if(dc.ability.type == "action") abilities[1][a].ability.parameters = dc.parameters;
-                    continue;
-                }
-                // switch from eval to inline process
-                if(inPE && peType == "process" && abilities[1][a].inline_eval) { 
-                    peDepth = abilities[1][a].depth - 1;
-                    peIndex = a;
-                    peType = "evaluate";
-                    let dc = deepCopy(abilities[1][a]);
-                    abilities[1][a].ability = { type: "evaluate", sub_abilities: [ {ability: dc.ability, condition: dc.condition} ] };
-                    continue;
-                }
-                // switch from inline eval to process
-                if(inPE && peType == "process" && abilities[1][a].condition === "Evaluate") { 
-                    peDepth = abilities[1][a].depth;
-                    peIndex = a;
-                    peType = "evaluate";
-                    let dc = deepCopy(abilities[1][a]);
-                    abilities[1][a].ability = { type: "evaluate", sub_abilities: [ ] };
-                    continue;
-                }
-                // handle entries within PE
-                if(inPE) {
-                    if(abilities[1][a].depth > peDepth) {
-                        let dc = deepCopy(abilities[1][a]);
-                        if(peType == "evaluate") {
-                            if(dc.ability.type != "error") abilities[1][peIndex].ability.sub_abilities.push({ability: dc.ability, condition: dc.condition});
-                            else abilities[1][peIndex].ability.sub_abilities.push({ability: dc.ability, condition: JSON.stringify(dc)});
-                        } else if(peType == "process") {
-                            abilities[1][peIndex].ability.sub_abilities.push({ability: dc.ability });
-                        }
-                        abilities[1][a].ability.type = "blank";
-                    } else {
-                        inPE = false;
-                    }
-                }
-            }
+            if(debugMode) console.log("ABILITIES", JSON.stringify(thisTriggerAbilities));
+
             
             /** P/E Reformatting **/
-            for(let i = 0; i < abilities[1].length; i++) {
+            for(let i = 0; i < thisTriggerAbilities.length; i++) {
                 // is process and next is evaluate
-                if(abilities[1][i].ability.type === "process" && abilities[1][i + 1].ability.type === "evaluate") {
+                if(thisTriggerAbilities[i].ability.type === "process" && thisTriggerAbilities[i + 1].ability.type === "evaluate") {
                     // get p/e
-                    let process = abilities[1][i].ability;
-                    let evaluate = abilities[1][i + 1].ability;
+                    let process = thisTriggerAbilities[i].ability;
+                    let evaluate = thisTriggerAbilities[i + 1].ability;
                     let storedCondition = null;
                     // parse conditions
                     evaluate.sub_abilities = evaluate.sub_abilities.map(el => {
@@ -145,13 +87,13 @@ module.exports = function() {
                         return ret;
                     });
                     // reformat p/e
-                    abilities[1][i].ability = { type: "process_evaluate", process: process, evaluate: evaluate }; // replace "process" with a combined P/E ability
-                    abilities[1][i + 1].ability = { type: "blank" }; // delete "evaluate"
+                    thisTriggerAbilities[i].ability = { type: "process_evaluate", process: process, evaluate: evaluate }; // replace "process" with a combined P/E ability
+                    thisTriggerAbilities[i + 1].ability = { type: "blank" }; // delete "evaluate"
                 }
                 // is evaluate and no process
-                else if((i === 0 || abilities[1][i - 1].ability.type != "process") && abilities[1][i].ability.type === "evaluate") {
+                else if((i === 0 || thisTriggerAbilities[i - 1].ability.type != "process") && thisTriggerAbilities[i].ability.type === "evaluate") {
                     // get p/e
-                    let evaluate = abilities[1][i].ability;
+                    let evaluate = thisTriggerAbilities[i].ability;
                     let storedCondition = null;
                     let storedConditionIndex = -1;
                     // parse conditions
@@ -175,35 +117,35 @@ module.exports = function() {
                     // remove blank abilities
                     evaluate.sub_abilities = evaluate.sub_abilities.filter(el => el.ability.type != "blank");
                     // reformat p/e
-                    abilities[1][i].ability = { type: "process_evaluate", process: { type: "process", sub_abilities: [ ] }, evaluate: evaluate }; // replace "evaluate" with a combined P/E ability
+                    thisTriggerAbilities[i].ability = { type: "process_evaluate", process: { type: "process", sub_abilities: [ ] }, evaluate: evaluate }; // replace "evaluate" with a combined P/E ability
                 }
             }
             
             /* Remove Blank */
-            abilities[1] = abilities[1].filter(el => el.ability.type != "blank"); // remove blank lines
+            thisTriggerAbilities = thisTriggerAbilities.filter(el => el.ability.type != "blank"); // remove blank lines
             
             // extract additional parameters
-            let additionalParameters = abilities[1].filter(el => el.ability.type === "parameters");
-            abilities[1] = abilities[1].filter(el => el.ability.type != "parameters"); // remove parameters lines
+            let additionalParameters = thisTriggerAbilities.filter(el => el.ability.type === "parameters");
+            thisTriggerAbilities = thisTriggerAbilities.filter(el => el.ability.type != "parameters"); // remove parameters lines
             if(additionalParameters.length === 1) {
-                 abilities[1][0].parameters = additionalParameters[0].parameters;
+                 thisTriggerAbilities[0].parameters = additionalParameters[0].parameters;
             } else if(additionalParameters.length > 1) {
                 if(!debugMode) throw new Error(`Too many additional parameters.`);
             }
             
             /** Formatting */
             /* Output */
-            let paramAbilities = abilities[1].filter(el => el.ability.type != "error" && !deepEqual(el.parameters, defaultParams)); // check which abilities have params attached
+            let paramAbilities = thisTriggerAbilities.filter(el => el.ability.type != "error" && el.parameters && !deepEqual(el.parameters, defaultParams)); // check which abilities have params attached
             // no params
             if(paramAbilities.length == 0) {
-                triggers.triggers[t] = { trigger: abilities[0], abilities: delParam(abilities[1]) };
+                triggers.triggers[t] = { trigger: thisTriggerName, abilities: delParam(thisTriggerAbilities) };
             }
             // params attached to first line
-            else if(paramAbilities.length == 1 && !deepEqual(abilities[1][0], defaultParams)) {
-                triggers.triggers[t] = { trigger: abilities[0], abilities: delParam(abilities[1]), parameters: abilities[1][0].parameters };
+            else if(paramAbilities.length == 1 && !deepEqual(thisTriggerAbilities[0], defaultParams)) {
+                triggers.triggers[t] = { trigger: thisTriggerName, abilities: delParam(thisTriggerAbilities), parameters: thisTriggerAbilities[0].parameters };
             } else { // parameters are used in an invalid way
-                if(!debugMode) throw new Error(`Invalid Parameters \`\`\`\n${abilities[0]}\n\`\`\` and \`\`\`\n${abilities[1]}\n\`\`\``);
-                else triggers.triggers[t] = { trigger: "error_invalid_parameters", abilities: [], error_data: { trigger: abilities[0], abilities: abilities[1] } };
+                if(!debugMode) throw new Error(`Invalid Parameters \`\`\`\n${thisTriggerName}\n\`\`\` and \`\`\`\n${thisTriggerAbilities}\n\`\`\``);
+                else triggers.triggers[t] = { trigger: "error_invalid_parameters", abilities: [], error_data: { trigger: thisTriggerName, abilities: thisTriggerAbilities } };
             }
             
             // removes the ability type 'action' as that gets moved into parameters
@@ -221,6 +163,131 @@ module.exports = function() {
         
         
         return triggers;
+    }
+    
+    /**
+    Parse Abilities
+    **/
+    this.parseAbilities = function(abilities, startIndex = 0, parsingDepth = 0, parsingType = "none") {
+        // get a default param for comparision
+        const defaultParams = parseAbility("Disband").parameters;
+        if(debugMode) console.log(`PARSING ABILITIES from ${startIndex} at ${parsingDepth}`);
+        // init
+        let abilitiesParsed = [];
+        let parameters = {};
+        // iterate
+        for(let i = startIndex; i < abilities.length; i++) {
+            const thisAbilityFull = abilities[i];
+            if(!thisAbilityFull) continue; // triggers without abilities
+            // get depth
+            const bullet = thisAbilityFull.trim()[0]; // extract bullet character
+            const depth = (+bullets.indexOf(bullet)) + 1; // get bullet index
+            // split into different components
+            const abilityLineSplit = thisAbilityFull.replace(bulletsRegex,"").trim().split(/ \[| \{| ⟨| \|/);
+            let thisAbility = abilityLineSplit[0].trim();
+            let abilityValues, thisAbilitySplit;
+            if(/\[|\{|⟨|\|/.test(thisAbility[0])) { // empty ability, just values
+                abilityValues = thisAbility;
+                thisAbilitySplit = [];
+                thisAbility = "";
+            } else { // ability exists, so do values (maybe)
+                thisAbilitySplit = thisAbility.split(/(?<!List): |(?<!List):$/);
+                abilityValues = thisAbilityFull.split(thisAbility)[1]?.trim();
+            }
+            // debug output
+            if(debugMode) console.log("   DEPTH", depth, "INDEX", i);
+            if(debugMode) console.log("   ABILITY", thisAbilitySplit.join(";"));
+            if(debugMode) console.log("   ABILITY VALUES", abilityValues);
+            // check if first ability is a depth=1
+            if(parsingDepth === 0 && depth === 1 && (abilitiesParsed.length === 0 || (abilitiesParsed.length === 1 && abilitiesParsed[0].ability.type === "parameters"))) {
+                parsingDepth = 1;
+            }
+            // check how many components
+            if(depth === parsingDepth) {
+                // normal ability
+                if(thisAbilitySplit.length === 1) {
+                    const ability = parseAbility(thisAbilitySplit[0] + " " + abilityValues); // parse ability
+                    abilitiesParsed.push(ability);
+                }
+                // ability that is split into two components
+                else if(thisAbilitySplit.length === 2) {
+                    const ability = parseAbility(thisAbilitySplit[1] + " " + abilityValues); // parse ability
+                    // Process/Evaluate Next Line
+                    if(ability.ability.type === "parameters" && thisAbilitySplit[0] === "Process" || thisAbilitySplit[0] === "Evaluate") {
+                        // requires parsing of sub abilities
+                        ability.type = thisAbilitySplit[0].toLowerCase(); // update type - it starts out as parameters
+                        ability.ability.sub_abilities = parseAbilities(abilities, i + 1, depth + 1, ability.type);
+                        i += ability.sub_abilities.length;
+                        abilitiesParsed.push(ability);    
+                    }
+                    // Process/Evaluate's Action
+                    else if(ability.ability.type === "parameters" && thisAbilitySplit[0] === "Action") {
+                        // should parse to "parameters" ability type and can thus be directly added
+                        abilitiesParsed.push(ability);    
+                    }
+                    // Process/Evaluate In-Line
+                    else if(ability.ability.type != "parameters" && thisAbilitySplit[0] === "Process" || thisAbilitySplit[0] === "Evaluate") {
+                        // only has a single sub ability we already have parsed
+                        let type = thisAbilitySplit[0].toLowerCase();
+                        abilitiesParsed.push({ ability: { type: type, sub_abilities: [ ability.ability ] } });    
+                    }
+                    // Evaluate sub-conditions
+                    else if(parsingType == "evaluate" && isCondition(thisAbilitySplit[0])) {
+                        ability.condition = thisAbilitySplit[0];
+                        abilitiesParsed.push(ability);
+                    }
+                    // Unknown case
+                    else {
+                        if(debugMode) console.log("   UNKNOWN 2 CASE", ability);    
+                        else throw new Error(`Invalid two segment ability line:\n\`\`\`${thisAbilitySplit.join(";")} \`\`\`with context ${startIndex}, ${parsingDepth}, ${parsingType}.`);
+                    }
+                }
+                // ability that is split into two components
+                else if(thisAbilitySplit.length === 3) {
+                    const ability = parseAbility(thisAbilitySplit[2] + " " + abilityValues); // parse ability
+                    // Evaluate In-Line
+                    if(ability.ability.type != "parameters" && thisAbilitySplit[0] === "Evaluate" && isCondition(thisAbilitySplit[1])) {
+                        abilitiesParsed.push({ ability: { type: "evaluate", sub_abilities: [ { ability: ability.ability, condition: thisAbilitySplit[1] } ] } }); 
+                    }
+                    // Unknown case
+                    else {
+                        if(debugMode) console.log("   UNKNOWN 3 CASE");    
+                        else throw new Error(`Invalid three segment ability line:\n\`\`\`${thisAbilitySplit.join(";")} \`\`\`with context ${startIndex}, ${parsingDepth}, ${parsingType}.`);
+                    }
+                }
+                // parameters only
+                else if(thisAbilitySplit.length === 0) {
+                    const params = parseAbility(abilityValues); // parse parameters
+                    abilitiesParsed.push(params);
+                }
+                // ability that is split into an unknown amount of components
+                else {
+                    if(debugMode) console.log("   UNKNOWN LENGTH");    
+                        else throw new Error(`Invalid ability line component amount:\n\`\`\`${thisAbilitySplit.join(";")} \`\`\`with context ${startIndex}, ${parsingDepth}, ${parsingType}.`);
+                }
+            } else if(depth > parsingDepth) { // this should be handled above
+                if(debugMode) console.log("   UNKNOWN DEPTH CASE");
+                else throw new Error(`Invalid ability line depth:\n\`\`\`${thisAbilitySplit.join(";")} \`\`\`with context ${startIndex}, ${parsingDepth}, ${parsingType}.`);
+            } else if(depth < parsingDepth) { // sub-parsing complete, return
+                if(debugMode) console.log(`SUB-PARSING DONE`);
+                return abilitiesParsed;
+            }
+        }
+        // return
+        if(debugMode) console.log(`PARSING DONE`);
+        return abilitiesParsed;
+    }
+    
+    /**
+    Check if is condition
+    **/
+    this.isCondition = function(maybeCondition) {
+        try {
+            let cond = parseCondition(maybeCondition);
+            if(cond.type && cond.type != "error") return true;
+        } catch(err) {
+            return false;
+        }
     }
     
     /**
@@ -353,802 +420,774 @@ module.exports = function() {
     Parse Abilities
     Parses the abilities (and parameters) for a trigger
     **/
-    this.parseAbilities = function(trigger) {
-        // iterate through all the abilities
-        for(let a in trigger[1]) {
-            /**
-            Split Line
-            **/
-            let abilityLineSplit = trigger[1][a].split(/ \[| \{| ⟨| \|/); // split off things after the ability part
-            if(abilityLineSplit.length >= 1 && abilityLineSplit[0].match(/\[|\{|⟨|\|/)) {
-                abilityLineSplit = (" " + trigger[1][a]).split(/ \[| \{| ⟨| \|/);
-            }
-            let ability = null;
-            let exp, fd;
-            
-            let abilityLine = abilityLineSplit.shift().replace(bulletsRegex,"").trim();
-            let abilityValues = abilityLine.length > 0 ? trigger[1][a].split(abilityLine)[1] : trigger[1][a];
-            let isInlineEval = false;
-            
-            // check for P/E Condition
-            let abilityLineSplitPE = abilityLine.split(/(?<!List|Action|Process): |(?<!List|Action|Process):$/);
-            let abilityLineSplitPE2 = abilityLine.split(/(?<=Process): /);
-            let peCond;
-            if(abilityLineSplitPE2.length == 2) { // process
-                abilityLine = abilityLineSplitPE2[1].trim();
-                peCond = abilityLineSplitPE2[0].trim();
-            } else if(abilityLineSplitPE.length == 2) { // evaluate condition
-                abilityLine = abilityLineSplitPE[1].trim();
-                peCond = abilityLineSplitPE[0].trim();
-            } else if(abilityLineSplitPE.length == 3) { // inline evaluate
-                abilityLine = abilityLineSplitPE[2].trim();
-                peCond = abilityLineSplitPE[1].trim();
-                isInlineEval = true;
-            }
-            //console.log("VALUES: ", abilityValues);
-            
-            /**
-            Evaluate additional values
-            **/
-            let restrictions = abilityValues.match(/(?<=\[).+(?=\])/)?.[0]?.split(", ");
-            let compulsion = abilityValues.match(/(?<=\{).+(?=\})/)?.[0]?.split(", ");
-            let scaling = abilityValues.match(/(?<=\⟨).+(?=\⟩)/)?.[0]?.split(", ");
-            let promptOverwrite = abilityValues.match(/(?<=\|).+(?=\|)/)?.[0];
-            let parsedRestrictions = [];
-            let parsedScaling = [];
-            
-            for(let rest in restrictions) {
-                let restFound = false;
-                /** Temporal **/
-                // temporal, during
-                exp = new RegExp("^Temporal: (Day|Night) (\\d+)$", "g");
-                fd = exp.exec(restrictions[rest]);
-                if(fd) {
-                    parsedRestrictions.push({ type: "temporal", subtype: "during", phase: phaseParse(fd[1], fd[2]) });
-                    restFound = true;
-                }
-                // temporal, after
-                exp = new RegExp("^Temporal: (Day|Night) (\\d+)\\+$", "g");
-                fd = exp.exec(restrictions[rest]);
-                if(fd) {
-                    parsedRestrictions.push({ type: "temporal", subtype: "after", phase: phaseParse(fd[1], fd[2]) });
-                    restFound = true;
-                }
-                /** Attribute **/
-                // self has attribute
-                exp = new RegExp("^Attribute: has " + targetType + "$", "g");
-                fd = exp.exec(restrictions[rest]);
-                if(fd) {
-                    parsedRestrictions.push({ type: "attribute", subtype: "has", target: "@self[player]", attribute: ttpp(fd[1], "attribute") });
-                    restFound = true;
-                }
-                // self lacks attribute
-                exp = new RegExp("^Attribute: lacks " + targetType + "$", "g");
-                fd = exp.exec(restrictions[rest]);
-                if(fd) {
-                    parsedRestrictions.push({ type: "attribute", subtype: "lacks", target: "@self[player]", attribute: ttpp(fd[1], "attribute") });
-                    restFound = true;
-                }
-                // self has attribute
-                exp = new RegExp("^Attribute: " + targetType + " has " + targetType + "$", "g");
-                fd = exp.exec(restrictions[rest]);
-                if(fd) {
-                    parsedRestrictions.push({ type: "attribute", subtype: "has", target: ttpp(fd[1]), attribute: ttpp(fd[2], "attribute") });
-                    restFound = true;
-                }
-                // self lacks attribute
-                exp = new RegExp("^Attribute: " + targetType + " lacks " + targetType + "$", "g");
-                fd = exp.exec(restrictions[rest]);
-                if(fd) {
-                    parsedRestrictions.push({ type: "attribute", subtype: "lacks", target: ttpp(fd[1]), attribute: ttpp(fd[2], "attribute") });
-                    restFound = true;
-                }
-                /** Succession **/
-                // no succession
-                exp = new RegExp("^Succession: No Succession$", "g");
-                fd = exp.exec(restrictions[rest]);
-                if(fd) {
-                    parsedRestrictions.push({ type: "succession", subtype: "default" });
-                    restFound = true;
-                }
-                // no target succession
-                exp = new RegExp("^Succession: No Target Succession$", "g");
-                fd = exp.exec(restrictions[rest]);
-                if(fd) {
-                    parsedRestrictions.push({ type: "succession", subtype: "target" });
-                    restFound = true;
-                }
-                /** Quantity **/
-                // quantity
-                exp = new RegExp("^Quantity: (\\d+)$", "g");
-                fd = exp.exec(restrictions[rest]);
-                if(fd) {
-                    parsedRestrictions.push({ type: "quantity", quantity: +fd[1] });
-                    restFound = true;
-                }
-                /** Condition **/
-                // condition
-                exp = new RegExp("^Condition: (.+)$", "g");
-                fd = exp.exec(restrictions[rest]);
-                if(fd) {
-                    parsedRestrictions.push({ type: "condition", condition: fd[1] });
-                    restFound = true;
-                }
-                /** DEFAULT **/
-                if(!restFound) {
-                    if(!debugMode) throw new Error(`Invalid Restriction Type \`\`\`\n${restrictions[rest]}\n\`\`\``);
-                    else parsedRestrictions.push({ type: "error", error_restriction: restrictions[rest] });
-                }
-            }
-            
-            for(let scal in scaling) {
-                let scalFound = false;
-                /** Multiplier **/
-                // always
-                exp = new RegExp("^x(\\d+)$", "g");
-                fd = exp.exec(scaling[scal]);
-                if(fd) {
-                    parsedScaling.push({ type: "multiplier", quantity: +fd[1], odd: true, even: true });
-                    scalFound = true;
-                }
-                // odd phase 
-                exp = new RegExp("^Odd: x(\\d+)$", "g");
-                fd = exp.exec(scaling[scal]);
-                if(fd) {
-                    parsedScaling.push({ type: "multiplier", quantity: +fd[1], odd: true, even: false });
-                    scalFound = true;
-                }
-                // even phase 
-                exp = new RegExp("^Even: x(\\d+)$", "g");
-                fd = exp.exec(scaling[scal]);
-                if(fd) {
-                    parsedScaling.push({ type: "multiplier", quantity: +fd[1], odd: false, even: true });
-                    scalFound = true;
-                }
-                /** Split Scaling **/
-                // always
-                exp = new RegExp("^\\*(\\d+)$", "g");
-                fd = exp.exec(scaling[scal]);
-                if(fd) {
-                    parsedScaling.push({ type: "split", quantity: +fd[1] });
-                    scalFound = true;
-                }
-                /** Dynamic Scaling **/
-                exp = new RegExp("^(\\$total|\\$living)/(\\d+)$", "g");
-                fd = exp.exec(scaling[scal]);
-                if(fd) {
-                    parsedScaling.push({ type: "division", quantity: fd[1] + "/" + fd[2] });
-                    scalFound = true;
-                }
-                exp = new RegExp("^(\\$total|\\$living)(\\<|\\>|≤|≥|\\=)(\\d+) ⇒ x?(\\d+)$", "g");
-                fd = exp.exec(scaling[scal]);
-                if(fd) {
-                    let ct, compTo = +fd[3];
-                    switch(fd[2]) {
-                        case "<": ct = "less_than"; break;
-                        case ">": ct = "greater_than"; break;
-                        case "=": ct = "equal_to"; break;
-                        case "≤": ct = "less_than"; compTo++; break;
-                        case "≥": ct = "greater_than"; compTo--; break;
-                    }
-                    parsedScaling.push({ type: "dynamic", compare: fd[1], compare_type: ct, compare_to: compTo, quantity: +fd[4] });
-                    scalFound = true;
-                }
-                /** DEFAULT **/
-                if(!scalFound) {
-                    if(!debugMode) throw new Error(`Invalid Scaling Type \`\`\`\n${scaling[scal]}\n\`\`\``);
-                    else parsedScaling.push({ type: "error", error_scaling: scaling[scal] });
-                }
-            }
-            
-            let cDirect = false;
-            let cRepeating = false;
-            let cVisitless = false;
-            let cForced = false;
-            let cForcedSelection = null;
-            for(let comp in compulsion) {
-                if(compulsion[comp] == "Direct") cDirect = true;
-                else if(compulsion[comp] == "Repeating") cRepeating = true;
-                else if(compulsion[comp] == "Visitless") cVisitless = true;
-                else if(compulsion[comp] == "Forced") cForced = true;
-                else if(compulsion[comp].substr(0, 6) == "Forced") {
-                    cForced = true;
-                    cForcedSelection = compulsion[comp].substr(7);
-                }
-                else {
-                    if(!debugMode) throw new Error(`Invalid Compulsion Type \`\`\`\n${compulsion[comp]}\n\`\`\``);
-                }
-            }
-            
-            /**
-            Evaluate Ability Types
-            **/
-            
-            /** KILLING **/
-            exp = new RegExp("^(Kill|Attack|Lynch|True Kill) " + targetType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "killing", subtype: lc(fd[1]), target: ttpp(fd[2]) };
-            }
-            /** INVESTIGATION **/
-            // Role/align/cat/class Invest
-            exp = new RegExp("^(Role|Alignment|Category|Class) Investigate " + targetType + investAffected + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "investigating", subtype: lc(fd[1]), target: ttpp(fd[2]), ...parseInvestAffected(fd[3]) };
-            }
-            // Attribute invest
-            exp = new RegExp("^Attribute Investigate " + targetType + " for " + targetType + investAffected + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "investigating", subtype: "attribute", target: ttpp(fd[1]), attribute: ttpp(fd[2], "attribute"), ...parseInvestAffected(fd[3]) };
-            }
-            // Role Count invest
-            exp = new RegExp("^Investigate " + targetType + " Count" + investAffected + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "investigating", subtype: "count", target: ttpp(fd[1], "role"), ...parseInvestAffected(fd[2]) };
-            }
-            // Player Count invest
-            exp = new RegExp("^Investigate " + targetType + " Player Count$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "investigating", subtype: "player_count", target: ttpp(fd[1]) };
-            }
-            /** TARGET **/
-            // target, default type
-            exp = new RegExp("^Target " + targetType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "targeting", subtype: "target", target: ttpp(fd[1]) };
-            }
-            // target, specified type
-            exp = new RegExp("^Target " + targetType + " \\(" + targetingType + "\\)$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "targeting", subtype: "target", target: ttpp(fd[1], fd[2].toLowerCase()) };
-            }
-            // untarget
-            exp = new RegExp("^Untarget$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "targeting", subtype: "untarget" };
-            }
-            /** DISGUISING **/
-            exp = new RegExp("^(Weakly|Strongly) Disguise " + targetType + " as " + targetType + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "disguising", subtype: lc(fd[1]), target: ttpp(fd[2]), disguise: ttpp(fd[3], "role"), duration: dd(fd[4], "permanent") };
-            }
-            /** PROTECTING **/
-            // From By Through During
-            exp = new RegExp("^Protect " + targetType + " from `" + defenseAttackSubtypes + "` by " + targetType + " through " + defenseSubtypes + " during " + defensePhases + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "protecting", subtype: lc(fd[4]), target: ttpp(fd[1]), defense_from_type: rblc(fd[2]), defense_from_target: ttpp(fd[3]), defense_during: fd[fd.length-2], duration: dd(fd[fd.length-1], "permanent") };
-                if(ability.subtype.substr(0,7)  == "absence") {
-                    ability.subtype = "absence";
-                    ability.absence_at = ttpp(fd[5]);
-                }
-            }
-            // From By Through
-            exp = new RegExp("^Protect " + targetType + " from `" + defenseAttackSubtypes + "` by " + targetType + " through " + defenseSubtypes + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "protecting", subtype: lc(fd[4]), target: ttpp(fd[1]), defense_from_type: rblc(fd[2]), defense_from_target: ttpp(fd[3]), defense_during: "all", duration: dd(fd[fd.length-1], "permanent") };
-                if(ability.subtype.substr(0,7)  == "absence") {
-                    ability.subtype = "absence";
-                    ability.absence_at = ttpp(fd[5]);
-                }
-            }
-            // From Through During
-            exp = new RegExp("^Protect " + targetType + " from `" + defenseAttackSubtypes + "` through " + defenseSubtypes + " during " + defensePhases + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "protecting", subtype: lc(fd[3]), target: ttpp(fd[1]), defense_from_type: rblc(fd[2]), defense_from_target: "@All[player]", defense_during: fd[fd.length-2], duration: dd(fd[fd.length-1], "permanent") };
-                if(ability.subtype.substr(0,7)  == "absence") {
-                    ability.subtype = "absence";
-                    ability.absence_at = ttpp(fd[4]);
-                }
-            }
-            // From Through
-            exp = new RegExp("^Protect " + targetType + " from `" + defenseAttackSubtypes + "` through " + defenseSubtypes + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "protecting", subtype: lc(fd[3]), target: ttpp(fd[1]), defense_from_type: rblc(fd[2]), defense_from_target: "@All[player]", defense_during: "all", duration: dd(fd[fd.length-1], "permanent") };
-                if(ability.subtype.substr(0,7)  == "absence") {
-                    ability.subtype = "absence";
-                    ability.absence_at = ttpp(fd[4]);
-                }
-            }
-            /** APPLYING **/
-            // standard applying - add attribute
-            exp = new RegExp("^Apply " + attributeName + " to " + targetType + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "applying", subtype: "add", target: ttpp(fd[2]), attribute: fd[1], duration: dd(fd[3], "permanent") };
-            }
-            // standard applying with parameter
-            exp = new RegExp("^Apply " + attributeName + " to " + targetType + attrDuration + " " + attrData + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "applying", subtype: "add", target: ttpp(fd[2]), attribute: fd[1], duration: dd(fd[3], "permanent"), attr_index: 1, attr_value: fd[fd.length-1] };
-            }
-            // Remove Attribute
-            exp = new RegExp("^Remove " + attributeName + " from " + targetType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "applying", subtype: "remove", target: ttpp(fd[2]), attribute: fd[1] };
-            }
-            // Change Attribute Value
-            exp = new RegExp("^Change " + attributeName + " value `" + attrIndex + "` to `" + attrValue + "` for " + targetType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "applying", subtype: "change", target: ttpp(fd[4]), attribute: fd[1], attr_index: +fd[2], attr_value: fd[3]  };
-            }
-            /** REDIRECTING **/
-            // redirect from all
-            exp = new RegExp("^Redirect `" + redirectSubtype + "` to " + targetType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "redirecting", subtype: fd[1], target: ttpp(fd[2]), source: "@All[player]" };
-            }
-            // redirect from certain players
-            exp = new RegExp("^Redirect `" + redirectSubtype + "` from " + targetType + " to " + targetType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "redirecting", subtype: fd[1], target: ttpp(fd[3]), source: ttpp(fd[2]) };
-            }
-            /** VOTE MANIPULATION **/
-            // manipulation by absolute value
-            exp = new RegExp("^Manipulate " + targetType + "'s `" + manipSubtype + "` to `" + num + "`" + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "manipulating", subtype: "absolute", target: ttpp(fd[1]), manip_type: fd[2], manip_value: +fd[3], duration: dd(fd[4], "permanent") };
-            }
-            // manipulation by relative value
-            exp = new RegExp("^Manipulate " + targetType + "'s `" + manipSubtype + "` by `" + num + "`" + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "manipulating", subtype: "relative", target: ttpp(fd[1]), manip_type: fd[2], manip_value: +fd[3], duration: dd(fd[4], "permanent") };
-            }
-            // manipulation by absolute value - selector variant
-            exp = new RegExp("^Manipulate " + targetType + "'s `" + manipSubtype + "` to " + targetType + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "manipulating", subtype: "absolute", target: ttpp(fd[1]), manip_type: fd[2], manip_value: fd[3], duration: dd(fd[4], "permanent") };
-            }
-            // manipulation by relative value - selector variant
-            exp = new RegExp("^Manipulate " + targetType + "'s `" + manipSubtype + "` by " + targetType + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "manipulating", subtype: "relative", target: ttpp(fd[1]), manip_type: fd[2], manip_value: fd[3], duration: dd(fd[4], "permanent") };
-            }
-            /** WHISPERING **/
-            // manipulation by absolute value
-            exp = new RegExp("^Whisper to " + locationType + " as " + targetType + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "whispering", target: ttpp(fd[1], "role"), disguise: fd[2], duration: dd(fd[3], "permanent") };
-            }
-            /** JOINING **/
-            // default joining
-            exp = new RegExp("^Join " + groupType + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "joining", subtype: "add", target: "@self[player]", group: fd[1], membership_type: "member", duration: dd(fd[2], "persistent") };
-            }
-            // joining with specific membership type
-            exp = new RegExp("^Join " + groupType + " as `" + joiningSubtype + "`" + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "joining", subtype: "add", target: "@self[player]", group: fd[1], membership_type: lc(fd[2]), duration: dd(fd[3], "persistent") };
-            }
-            // add somebody else 
-            exp = new RegExp("^Add " + targetType + " to " + groupType + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "joining", subtype: "add", target: ttpp(fd[1]), group: fd[2], membership_type: "member", duration: dd(fd[3], "persistent") };
-            }
-            // add somebody else as a specific membership type
-            exp = new RegExp("^Add " + targetType + " to " + groupType + " as `" + joiningSubtype + "`" + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "joining", subtype: "add", target: ttpp(fd[1]), group: fd[2], membership_type: lc(fd[3]), duration: dd(fd[4], "persistent") };
-            }
-            // default leaving
-            exp = new RegExp("^Leave " + groupType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "joining", subtype: "remove", target: "@self[player]", group: fd[1] };
-            }
-            // remove somebody else
-            exp = new RegExp("^Remove " + targetType + " from " + groupType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "joining", subtype: "remove", target: ttpp(fd[1]), group: fd[2] };
-            }
-            /** GRANTING **/
-            // default granting
-            exp = new RegExp("^Grant " + targetType + " to " + targetType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "granting", subtype: "add", target: ttpp(fd[2]), role: ttpp(fd[1], "role") };
-            }
-            // revoking
-            exp = new RegExp("^Revoke " + targetType + " from " + targetType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "granting", subtype: "remove", target: ttpp(fd[2]), role: ttpp(fd[1], "role") };
-            }
-            // transfer
-            exp = new RegExp("^Transfer " + targetType + " from " + targetType + " to " + targetType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "granting", subtype: "transfer", target: ttpp(fd[2]), role: ttpp(fd[1], "role"), transfer_to: ttpp(fd[3]) };
-            }
-            /** LOYALTY **/
-            // loyalty
-            exp = new RegExp("^Loyalty to " + locationType + " \\(" + loyaltySubtype + "\\)$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "loyalty", subtype: fd[2], target: fd[1] };
-            }
-            /** OBSTRUCTING **/
-            // obstruct all
-            exp = new RegExp("^Obstruct " + targetType + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "obstructing", target: ttpp(fd[1]), duration: dd(fd[2], "permanent") };
-            }
-            // obstruct specific ability type
-            exp = new RegExp("^Obstruct " + abilityType + " for " + targetType + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "obstructing", target: ttpp(fd[2]), duration: dd(fd[3], "permanent"), obstructed_ability: lc(fd[1]), obstructed_subtype: "", custom_feedback: "" };
-            }
-            // obstruct specific ability subtype
-            exp = new RegExp("^Obstruct " + abilitySubtype + " for " + targetType + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                fd = fd.filter(el => el); // filter out empty capture groups
-                ability = { type: "obstructing", target: ttpp(fd[3]), duration: dd(fd[4], "permanent"), obstructed_ability: lc(fd[1].replace(fd[2], "").trim()), obstructed_subtype: lc(fd[2]), custom_feedback: "" };
-            }
-            // obstruct specific ability type; custom feedback
-            exp = new RegExp("^Obstruct " + abilityType + " for " + targetType + " ⇒ `" + str + "`" + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "obstructing", target: ttpp(fd[2]), duration: dd(fd[4], "permanent"), obstructed_ability: lc(fd[1]), obstructed_subtype: "", custom_feedback: [{chance: 1, feedback: fd[3]}] };
-            }
-            // obstruct specific ability subtype; custom feedback
-            exp = new RegExp("^Obstruct " + abilitySubtype + " for " + targetType + " ⇒ `" + str + "`" + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                fd = fd.filter(el => el); // filter out empty capture groups
-                ability = { type: "obstructing", target: ttpp(fd[3]), duration: dd(fd[5], "permanent"), obstructed_ability: lc(fd[1].replace(fd[2], "").trim()), obstructed_subtype: lc(fd[2]), custom_feedback: [{chance: 1, feedback: fd[4]}] };
-            }
-            // obstruct specific ability type; double custom feedback
-            exp = new RegExp("^Obstruct " + abilityType + " for " + targetType + " ⇒ \\(" + decNum + ":`" + str + "`," + decNum + ":`" + str + "`\\)" + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "obstructing", target: ttpp(fd[2]), duration: dd(fd[7], "permanent"), obstructed_ability: lc(fd[1]), obstructed_subtype: "", custom_feedback: [{chance: +fd[3], feedback: fd[4]},{chance: +fd[5], feedback: fd[6] }] };
-            }
-            // obstruct specific ability subtype; double custom feedback
-            exp = new RegExp("^Obstruct " + abilitySubtype + " for " + targetType + " ⇒ \\(" + decNum + ":`" + str + "`," + decNum + ":`" + str + "`\\)" + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                fd = fd.filter(el => el); // filter out empty capture groups
-                ability = { type: "obstructing", target: ttpp(fd[3]), duration: dd(fd[8], "permanent"), obstructed_ability: lc(fd[1].replace(fd[2], "").trim()), obstructed_subtype: lc(fd[2]), custom_feedback: [{chance: +fd[4], feedback: fd[5]},{chance: +fd[6], feedback: fd[7] }] };
-            }
-            /** POLL MANIPULATING **/
-            // Poll duplication/addtion
-            exp = new RegExp("^Add `" + str + "` Poll" + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "poll", subtype: "addition", target: ttpp(fd[1], "poll"), duration: dd(fd[2], "untiluse") };
-            }
-            // Creates a new poll
-            exp = new RegExp("^Create `" + str + "` Poll in " + locationType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "poll", subtype: "creation", target: ttpp(fd[1], "poll"), poll_location: ttpp(fd[2], "location") };
-            }
-            // poll creates itself
-            exp = new RegExp("^Create Poll in " + locationType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "poll", subtype: "creation", target: "@self[poll]", poll_location: ttpp(fd[1], "location") };
-            }
-            // poll creates itself named
-            exp = new RegExp("^Create Poll in " + locationType + " as " + targetType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "poll", subtype: "creation", target: "@self[poll]", poll_location: ttpp(fd[1], "location"), poll_name: ttpp(fd[2]) };
-            }
-            // Cancel polls resulting ability
-            exp = new RegExp("^Cancel `" + str + "` Poll" + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "poll", subtype: "cancellation", target: ttpp(fd[1], "poll"), duration: dd(fd[2], "untiluse") };
-            }
-            // Delete a poll
-            exp = new RegExp("^Delete `" + str + "` Poll" + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "poll", subtype: "deletion", target: ttpp(fd[1], "poll"), duration: dd(fd[2], "untiluse") };
-            }
-            // Delete a poll
-            exp = new RegExp("^Manipulate `" + str + "` Poll \\(" + targetType + " is `" + pollManipManipSubtype + "`\\)" + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "poll", subtype: "manipulation", target: ttpp(fd[1], "poll"), manip_target: fd[2], manip_type: lc(fd[3]), duration: dd(fd[2], "untiluse") };
-            }
-            /** ANNOUNCEMENTS **/
-            // reveal
-            exp = new RegExp("^Reveal " + targetType + " to " + locationType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "announcement", target: ttpp(fd[2], "location"), info: ttpp(fd[1]) };
-            }
-            // reveal
-            exp = new RegExp("^(Learn|Know) " + targetType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "announcement", target: "@self[player]", info: ttpp(fd[2]) };
-            }
-            /** ROLE CHANGE **/
-            // role change
-            exp = new RegExp("^Role Change " + targetType + " to " + targetType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "changing", subtype: "role", target: ttpp(fd[1]), change_to: ttpp(fd[2], "role") };
-            }
-            // alignment change
-            exp = new RegExp("^Alignment Change " + targetType + " to " + targetType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "changing", subtype: "alignment", target: ttpp(fd[1]), change_to: ttpp(fd[2], "alignment") };
-            }
-            // group change
-            exp = new RegExp("^Group Change " + targetType + " to " + targetType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "changing", subtype: "group", target: ttpp(fd[1]), change_to: ttpp(fd[2], "group") };
-            }
-            /** COPYING **/
-            // copy abilities, target to self
-            exp = new RegExp("^Copy " + targetType + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "copying", subtype: "ability", target: ttpp(fd[1]), copy_to: "@self[player]", duration: dd(fd[2], "permanent") };
-            }
-            // copy abilities, target to target2
-            exp = new RegExp("^Copy " + targetType + " to " + targetType + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "copying", subtype: "ability", target: ttpp(fd[1]), copy_to: ttpp(fd[2]), duration: dd(fd[3], "permanent") };
-            }
-            // copy abilities, target to target
-            exp = new RegExp("^Duplicate " + targetType + "'s abilities" + attrDuration + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "copying", subtype: "ability", target: ttpp(fd[1]), copy_to: ttpp(fd[1]), duration: dd(fd[2], "permanent") };
-            }
-            // full copy
-            exp = new RegExp("^Full Copy " + targetType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "copying", subtype: "full", target: ttpp(fd[1]), copy_to: "@self[player]", suppressed: false, duration: dd(fd[2], "permanent") };
-            }
-            // full copy, surpressed
-            exp = new RegExp("^Full Copy " + targetType + " \\(Suppressed\\)$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "copying", subtype: "full", target: ttpp(fd[1]), copy_to: "@self[player]", suppressed: true, duration: dd(fd[2], "permanent") };
-            }
-            /** CHOICES **/
-            
-            /** WIP - NEEDS DOING **/
-            
-            /** ASCEND DESCEND **/
-            // ascend
-            exp = new RegExp("^Ascend$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "ascend" };
-            }
-            // descend
-            exp = new RegExp("^Descend$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "descend" };
-            }
-            /** DISBAND **/
-            // disband self
-            exp = new RegExp("^Disband$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "disband", target: "@self[player]" };
-            }
-            // disband
-            exp = new RegExp("^Disband " + targetType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "disband", target: ttpp(fd[1], "group") };
-            }
-            /** COUNTING **/
-            // increment self by 1
-            exp = new RegExp("^Increment Counter$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "counting", subtype: "increment", counter_value: 1, target: "@self[player]" };
-            }
-            // decrement self by 1
-            exp = new RegExp("^Decrement Counter$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "counting", subtype: "decrement", counter_value: 1, target: "@self[player]" };
-            }
-            // increment self by value
-            exp = new RegExp("^Increment Counter by " + num + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "counting", subtype: "increment", counter_value: fd[1], target: "@self[player]" };
-            }
-            // decrement self by value
-            exp = new RegExp("^Decrement Counter by " + num + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "counting", subtype: "decrement", counter_value: fd[1], target: "@self[player]" };
-            }
-            // set counter to value
-            exp = new RegExp("^Set Counter to " + num + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "counting", subtype: "set", counter_value: fd[1], target: "@self[player]" };
-            }
-            // increment self by 1, for target
-            exp = new RegExp("^Increment Counter for " + targetType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "counting", subtype: "increment", counter_value: 1, target: ttpp(fd[1]) };
-            }
-            // decrement self by 1, for target
-            exp = new RegExp("^Decrement Counter for " + targetType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "counting", subtype: "decrement", counter_value: 1, target: ttpp(fd[1]) };
-            }
-            // increment self by value, for target
-            exp = new RegExp("^Increment Counter by " + num + " for " + targetType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "counting", subtype: "increment", counter_value: fd[1], target: ttpp(fd[2]) };
-            }
-            // decrement self by value, for target
-            exp = new RegExp("^Decrement Counter by " + num + " for " + targetType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "counting", subtype: "decrement", counter_value: fd[1], target: ttpp(fd[2]) };
-            }
-            // set counter to value, for target
-            exp = new RegExp("^Set Counter to " + num + " for " + targetType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "counting", subtype: "set", counter_value: fd[1], target: ttpp(fd[2]) };
-            }
-            /** CONVERSATION RESET **/
-            // conversation reset self
-            exp = new RegExp("^Conversation Reset$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "reset", target: "@self[player]" };
-            }
-            // conversation reset target
-            exp = new RegExp("^Conversation Reset " + targetType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "reset", target: ttpp(fd[1]) };
-            }
-            /** CANCEL **/
-            // cancel
-            exp = new RegExp("^Cancel$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "cancel", cancel_with: "Failure" };
-            }
-            // cancel with specific result
-            exp = new RegExp("^Cancel with (Failure|Success|" + rawStr + ")$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "cancel", cancel_with: fd[1] };
-            }
-            /** SWITCHING **/
-            // switching
-            exp = new RegExp("^Switch with " + targetType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "switching", target: ttpp(fd[1]) };
-            }
-            /** PROCESS/EVALUATE **/
-            // process
-            exp = new RegExp("^Process:$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "process" };
-            }
-            // evaluate
-            exp = new RegExp("^Evaluate:$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "evaluate" };
-            }
-            /** FEEDBACK */
-            // just feedback
-            exp = new RegExp("^" + targetType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "feedback", feedback: ttpp(fd[1]) };
-            }
-            /** ACTION VALUES */
-            // just values
-            exp = new RegExp("^Action:$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "action" };
-            }
-            /** FAILURE / SUCCESS */
-            // just values
-            exp = new RegExp("^Failure$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "failure" };
-            }
-            // just values
-            exp = new RegExp("^Success$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "success" };
-            }
-            /** LOGGING (DEBUG) **/
-            // log named
-            exp = new RegExp("^Log " + targetType + " as " + targetType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "log", selector: ttpp(fd[1]), info: fd[2] };
-            }
-            // log unnamed
-            exp = new RegExp("^Log " + targetType + "$", "g");
-            fd = exp.exec(abilityLine);
-            if(fd) {
-                ability = { type: "log", selector: ttpp(fd[1]), info: "" };
-            }
-
-            
-            /** Ability Types End */
-            if(ability) {
-                ability.id = abilityCounter++; // assign ability id
-                //console.log("IDENT", ability);
-                trigger[1][a] = { depth: (+bullets.indexOf(trigger[1][a].trim()[0])) + 1, ability: ability, parameters: { restrictions: parsedRestrictions, scaling: parsedScaling, direct: cDirect, repeating: cRepeating, visitless: cVisitless, forced: cForced, forced_sel: cForcedSelection } };
-                if(peCond) trigger[1][a].condition = peCond;
-                if(promptOverwrite) trigger[1][a].parameters.prompt_overwrite = promptOverwrite;
-                if(isInlineEval) {
-                    trigger[1][a].condition = peCond;
-                    trigger[1][a].inline_eval = true;
-                }
-            } else if(!ability && peCond && peCond.length > 0) {
-                //console.log("IDENT", ability);
-                trigger[1][a] = { depth: (+bullets.indexOf(trigger[1][a].trim()[0])) + 1, ability: { type: "condition", id: abilityCounter++ }, parameters: { }, condition: peCond };
-                if(isInlineEval) trigger[1][a].inline_eval = true;
-            } else if(abilityLine == "") {
-                trigger[1][a] = { depth: (+bullets.indexOf(trigger[1][a].trim()[0])) + 1, ability: { type: "parameters", id: abilityCounter++ }, parameters: { restrictions: parsedRestrictions, scaling: parsedScaling, direct: cDirect, repeating: cRepeating, visitless: cVisitless, forced: cForced, forced_sel: cForcedSelection } };
-            } else {
-                //console.log("UNIDENT", abilityLine);
-                if(!debugMode) throw new Error(`Invalid Ability Type \`\`\`\n${trigger[1][a]}\n\`\`\` with ability line \`\`\`\n${abilityLine}\n\`\`\``);
-                else trigger[1][a] = { depth: (+bullets.indexOf(trigger[1][a].trim()[0])) + 1, ability: { type: "error" }, parameters : { failed_ability: trigger[1][a], failed_ability_line: "^" + abilityLine + "$" } };
+    this.parseAbility = function(abilityLineFull) {
+        /**
+        Split Line
+        **/
+        let abilityLineSplit = abilityLineFull.split(/ \[| \{| ⟨| \|/); // split off things after the ability part
+        if(abilityLineSplit.length >= 1 && abilityLineSplit[0].match(/\[|\{|⟨|\|/)) {
+            abilityLineSplit = (" " + abilityLineFull).split(/ \[| \{| ⟨| \|/);
+        }
+        let ability = null;
+        let exp, fd;
+        
+        let abilityLine = abilityLineSplit.shift().replace(bulletsRegex,"").trim();
+        let abilityValues = abilityLine.length > 0 ? abilityLineFull.split(abilityLine)[1] : abilityLineFull;
+        
+        //console.log("VALUES: ", abilityValues);
+        
+        /**
+        Evaluate additional values
+        **/
+        let restrictions = abilityValues.match(/(?<=\[).+(?=\])/)?.[0]?.split(", ");
+        let compulsion = abilityValues.match(/(?<=\{).+(?=\})/)?.[0]?.split(", ");
+        let scaling = abilityValues.match(/(?<=\⟨).+(?=\⟩)/)?.[0]?.split(", ");
+        let promptOverwrite = abilityValues.match(/(?<=\|).+(?=\|)/)?.[0];
+        let parsedRestrictions = [];
+        let parsedScaling = [];
+        
+        for(let rest in restrictions) {
+            let restFound = false;
+            /** Temporal **/
+            // temporal, during
+            exp = new RegExp("^Temporal: (Day|Night) (\\d+)$", "g");
+            fd = exp.exec(restrictions[rest]);
+            if(fd) {
+                parsedRestrictions.push({ type: "temporal", subtype: "during", phase: phaseParse(fd[1], fd[2]) });
+                restFound = true;
+            }
+            // temporal, after
+            exp = new RegExp("^Temporal: (Day|Night) (\\d+)\\+$", "g");
+            fd = exp.exec(restrictions[rest]);
+            if(fd) {
+                parsedRestrictions.push({ type: "temporal", subtype: "after", phase: phaseParse(fd[1], fd[2]) });
+                restFound = true;
+            }
+            /** Attribute **/
+            // self has attribute
+            exp = new RegExp("^Attribute: has " + targetType + "$", "g");
+            fd = exp.exec(restrictions[rest]);
+            if(fd) {
+                parsedRestrictions.push({ type: "attribute", subtype: "has", target: "@self[player]", attribute: ttpp(fd[1], "attribute") });
+                restFound = true;
+            }
+            // self lacks attribute
+            exp = new RegExp("^Attribute: lacks " + targetType + "$", "g");
+            fd = exp.exec(restrictions[rest]);
+            if(fd) {
+                parsedRestrictions.push({ type: "attribute", subtype: "lacks", target: "@self[player]", attribute: ttpp(fd[1], "attribute") });
+                restFound = true;
+            }
+            // self has attribute
+            exp = new RegExp("^Attribute: " + targetType + " has " + targetType + "$", "g");
+            fd = exp.exec(restrictions[rest]);
+            if(fd) {
+                parsedRestrictions.push({ type: "attribute", subtype: "has", target: ttpp(fd[1]), attribute: ttpp(fd[2], "attribute") });
+                restFound = true;
+            }
+            // self lacks attribute
+            exp = new RegExp("^Attribute: " + targetType + " lacks " + targetType + "$", "g");
+            fd = exp.exec(restrictions[rest]);
+            if(fd) {
+                parsedRestrictions.push({ type: "attribute", subtype: "lacks", target: ttpp(fd[1]), attribute: ttpp(fd[2], "attribute") });
+                restFound = true;
+            }
+            /** Succession **/
+            // no succession
+            exp = new RegExp("^Succession: No Succession$", "g");
+            fd = exp.exec(restrictions[rest]);
+            if(fd) {
+                parsedRestrictions.push({ type: "succession", subtype: "default" });
+                restFound = true;
+            }
+            // no target succession
+            exp = new RegExp("^Succession: No Target Succession$", "g");
+            fd = exp.exec(restrictions[rest]);
+            if(fd) {
+                parsedRestrictions.push({ type: "succession", subtype: "target" });
+                restFound = true;
+            }
+            /** Quantity **/
+            // quantity
+            exp = new RegExp("^Quantity: (\\d+)$", "g");
+            fd = exp.exec(restrictions[rest]);
+            if(fd) {
+                parsedRestrictions.push({ type: "quantity", quantity: +fd[1] });
+                restFound = true;
+            }
+            /** Condition **/
+            // condition
+            exp = new RegExp("^Condition: (.+)$", "g");
+            fd = exp.exec(restrictions[rest]);
+            if(fd) {
+                parsedRestrictions.push({ type: "condition", condition: fd[1] });
+                restFound = true;
+            }
+            /** DEFAULT **/
+            if(!restFound) {
+                if(!debugMode) throw new Error(`Invalid Restriction Type \`\`\`\n${restrictions[rest]}\n\`\`\``);
+                else parsedRestrictions.push({ type: "error", error_restriction: restrictions[rest] });
             }
         }
-        return trigger;
+        
+        for(let scal in scaling) {
+            let scalFound = false;
+            /** Multiplier **/
+            // always
+            exp = new RegExp("^x(\\d+)$", "g");
+            fd = exp.exec(scaling[scal]);
+            if(fd) {
+                parsedScaling.push({ type: "multiplier", quantity: +fd[1], odd: true, even: true });
+                scalFound = true;
+            }
+            // odd phase 
+            exp = new RegExp("^Odd: x(\\d+)$", "g");
+            fd = exp.exec(scaling[scal]);
+            if(fd) {
+                parsedScaling.push({ type: "multiplier", quantity: +fd[1], odd: true, even: false });
+                scalFound = true;
+            }
+            // even phase 
+            exp = new RegExp("^Even: x(\\d+)$", "g");
+            fd = exp.exec(scaling[scal]);
+            if(fd) {
+                parsedScaling.push({ type: "multiplier", quantity: +fd[1], odd: false, even: true });
+                scalFound = true;
+            }
+            /** Split Scaling **/
+            // always
+            exp = new RegExp("^\\*(\\d+)$", "g");
+            fd = exp.exec(scaling[scal]);
+            if(fd) {
+                parsedScaling.push({ type: "split", quantity: +fd[1] });
+                scalFound = true;
+            }
+            /** Dynamic Scaling **/
+            exp = new RegExp("^(\\$total|\\$living)/(\\d+)$", "g");
+            fd = exp.exec(scaling[scal]);
+            if(fd) {
+                parsedScaling.push({ type: "division", quantity: fd[1] + "/" + fd[2] });
+                scalFound = true;
+            }
+            exp = new RegExp("^(\\$total|\\$living)(\\<|\\>|≤|≥|\\=)(\\d+) ⇒ x?(\\d+)$", "g");
+            fd = exp.exec(scaling[scal]);
+            if(fd) {
+                let ct, compTo = +fd[3];
+                switch(fd[2]) {
+                    case "<": ct = "less_than"; break;
+                    case ">": ct = "greater_than"; break;
+                    case "=": ct = "equal_to"; break;
+                    case "≤": ct = "less_than"; compTo++; break;
+                    case "≥": ct = "greater_than"; compTo--; break;
+                }
+                parsedScaling.push({ type: "dynamic", compare: fd[1], compare_type: ct, compare_to: compTo, quantity: +fd[4] });
+                scalFound = true;
+            }
+            /** DEFAULT **/
+            if(!scalFound) {
+                if(!debugMode) throw new Error(`Invalid Scaling Type \`\`\`\n${scaling[scal]}\n\`\`\``);
+                else parsedScaling.push({ type: "error", error_scaling: scaling[scal] });
+            }
+        }
+        
+        let cDirect = false;
+        let cRepeating = false;
+        let cVisitless = false;
+        let cForced = false;
+        let cForcedSelection = null;
+        for(let comp in compulsion) {
+            if(compulsion[comp] == "Direct") cDirect = true;
+            else if(compulsion[comp] == "Repeating") cRepeating = true;
+            else if(compulsion[comp] == "Visitless") cVisitless = true;
+            else if(compulsion[comp] == "Forced") cForced = true;
+            else if(compulsion[comp].substr(0, 6) == "Forced") {
+                cForced = true;
+                cForcedSelection = compulsion[comp].substr(7);
+            }
+            else {
+                if(!debugMode) throw new Error(`Invalid Compulsion Type \`\`\`\n${compulsion[comp]}\n\`\`\``);
+            }
+        }
+        
+        /**
+        Evaluate Ability Types
+        **/
+        
+        /** KILLING **/
+        exp = new RegExp("^(Kill|Attack|Lynch|True Kill) " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "killing", subtype: lc(fd[1]), target: ttpp(fd[2]) };
+        }
+        /** INVESTIGATION **/
+        // Role/align/cat/class Invest
+        exp = new RegExp("^(Role|Alignment|Category|Class) Investigate " + targetType + investAffected + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "investigating", subtype: lc(fd[1]), target: ttpp(fd[2]), ...parseInvestAffected(fd[3]) };
+        }
+        // Attribute invest
+        exp = new RegExp("^Attribute Investigate " + targetType + " for " + targetType + investAffected + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "investigating", subtype: "attribute", target: ttpp(fd[1]), attribute: ttpp(fd[2], "attribute"), ...parseInvestAffected(fd[3]) };
+        }
+        // Role Count invest
+        exp = new RegExp("^Investigate " + targetType + " Count" + investAffected + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "investigating", subtype: "count", target: ttpp(fd[1], "role"), ...parseInvestAffected(fd[2]) };
+        }
+        // Player Count invest
+        exp = new RegExp("^Investigate " + targetType + " Player Count$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "investigating", subtype: "player_count", target: ttpp(fd[1]) };
+        }
+        /** TARGET **/
+        // target, default type
+        exp = new RegExp("^Target " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "targeting", subtype: "target", target: ttpp(fd[1]) };
+        }
+        // target, specified type
+        exp = new RegExp("^Target " + targetType + " \\(" + targetingType + "\\)$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "targeting", subtype: "target", target: ttpp(fd[1], fd[2].toLowerCase()) };
+        }
+        // untarget
+        exp = new RegExp("^Untarget$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "targeting", subtype: "untarget" };
+        }
+        /** DISGUISING **/
+        exp = new RegExp("^(Weakly|Strongly) Disguise " + targetType + " as " + targetType + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "disguising", subtype: lc(fd[1]), target: ttpp(fd[2]), disguise: ttpp(fd[3], "role"), duration: dd(fd[4], "permanent") };
+        }
+        /** PROTECTING **/
+        // From By Through During
+        exp = new RegExp("^Protect " + targetType + " from `" + defenseAttackSubtypes + "` by " + targetType + " through " + defenseSubtypes + " during " + defensePhases + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "protecting", subtype: lc(fd[4]), target: ttpp(fd[1]), defense_from_type: rblc(fd[2]), defense_from_target: ttpp(fd[3]), defense_during: fd[fd.length-2], duration: dd(fd[fd.length-1], "permanent") };
+            if(ability.subtype.substr(0,7)  == "absence") {
+                ability.subtype = "absence";
+                ability.absence_at = ttpp(fd[5]);
+            }
+        }
+        // From By Through
+        exp = new RegExp("^Protect " + targetType + " from `" + defenseAttackSubtypes + "` by " + targetType + " through " + defenseSubtypes + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "protecting", subtype: lc(fd[4]), target: ttpp(fd[1]), defense_from_type: rblc(fd[2]), defense_from_target: ttpp(fd[3]), defense_during: "all", duration: dd(fd[fd.length-1], "permanent") };
+            if(ability.subtype.substr(0,7)  == "absence") {
+                ability.subtype = "absence";
+                ability.absence_at = ttpp(fd[5]);
+            }
+        }
+        // From Through During
+        exp = new RegExp("^Protect " + targetType + " from `" + defenseAttackSubtypes + "` through " + defenseSubtypes + " during " + defensePhases + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "protecting", subtype: lc(fd[3]), target: ttpp(fd[1]), defense_from_type: rblc(fd[2]), defense_from_target: "@All[player]", defense_during: fd[fd.length-2], duration: dd(fd[fd.length-1], "permanent") };
+            if(ability.subtype.substr(0,7)  == "absence") {
+                ability.subtype = "absence";
+                ability.absence_at = ttpp(fd[4]);
+            }
+        }
+        // From Through
+        exp = new RegExp("^Protect " + targetType + " from `" + defenseAttackSubtypes + "` through " + defenseSubtypes + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "protecting", subtype: lc(fd[3]), target: ttpp(fd[1]), defense_from_type: rblc(fd[2]), defense_from_target: "@All[player]", defense_during: "all", duration: dd(fd[fd.length-1], "permanent") };
+            if(ability.subtype.substr(0,7)  == "absence") {
+                ability.subtype = "absence";
+                ability.absence_at = ttpp(fd[4]);
+            }
+        }
+        /** APPLYING **/
+        // standard applying - add attribute
+        exp = new RegExp("^Apply " + attributeName + " to " + targetType + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "applying", subtype: "add", target: ttpp(fd[2]), attribute: fd[1], duration: dd(fd[3], "permanent") };
+        }
+        // standard applying with parameter
+        exp = new RegExp("^Apply " + attributeName + " to " + targetType + attrDuration + " " + attrData + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "applying", subtype: "add", target: ttpp(fd[2]), attribute: fd[1], duration: dd(fd[3], "permanent"), attr_index: 1, attr_value: fd[fd.length-1] };
+        }
+        // Remove Attribute
+        exp = new RegExp("^Remove " + attributeName + " from " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "applying", subtype: "remove", target: ttpp(fd[2]), attribute: fd[1] };
+        }
+        // Change Attribute Value
+        exp = new RegExp("^Change " + attributeName + " value `" + attrIndex + "` to `" + attrValue + "` for " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "applying", subtype: "change", target: ttpp(fd[4]), attribute: fd[1], attr_index: +fd[2], attr_value: fd[3]  };
+        }
+        /** REDIRECTING **/
+        // redirect from all
+        exp = new RegExp("^Redirect `" + redirectSubtype + "` to " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "redirecting", subtype: fd[1], target: ttpp(fd[2]), source: "@All[player]" };
+        }
+        // redirect from certain players
+        exp = new RegExp("^Redirect `" + redirectSubtype + "` from " + targetType + " to " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "redirecting", subtype: fd[1], target: ttpp(fd[3]), source: ttpp(fd[2]) };
+        }
+        /** VOTE MANIPULATION **/
+        // manipulation by absolute value
+        exp = new RegExp("^Manipulate " + targetType + "'s `" + manipSubtype + "` to `" + num + "`" + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "manipulating", subtype: "absolute", target: ttpp(fd[1]), manip_type: fd[2], manip_value: +fd[3], duration: dd(fd[4], "permanent") };
+        }
+        // manipulation by relative value
+        exp = new RegExp("^Manipulate " + targetType + "'s `" + manipSubtype + "` by `" + num + "`" + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "manipulating", subtype: "relative", target: ttpp(fd[1]), manip_type: fd[2], manip_value: +fd[3], duration: dd(fd[4], "permanent") };
+        }
+        // manipulation by absolute value - selector variant
+        exp = new RegExp("^Manipulate " + targetType + "'s `" + manipSubtype + "` to " + targetType + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "manipulating", subtype: "absolute", target: ttpp(fd[1]), manip_type: fd[2], manip_value: fd[3], duration: dd(fd[4], "permanent") };
+        }
+        // manipulation by relative value - selector variant
+        exp = new RegExp("^Manipulate " + targetType + "'s `" + manipSubtype + "` by " + targetType + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "manipulating", subtype: "relative", target: ttpp(fd[1]), manip_type: fd[2], manip_value: fd[3], duration: dd(fd[4], "permanent") };
+        }
+        /** WHISPERING **/
+        // manipulation by absolute value
+        exp = new RegExp("^Whisper to " + locationType + " as " + targetType + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "whispering", target: ttpp(fd[1], "role"), disguise: fd[2], duration: dd(fd[3], "permanent") };
+        }
+        /** JOINING **/
+        // default joining
+        exp = new RegExp("^Join " + groupType + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "joining", subtype: "add", target: "@self[player]", group: fd[1], membership_type: "member", duration: dd(fd[2], "persistent") };
+        }
+        // joining with specific membership type
+        exp = new RegExp("^Join " + groupType + " as `" + joiningSubtype + "`" + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "joining", subtype: "add", target: "@self[player]", group: fd[1], membership_type: lc(fd[2]), duration: dd(fd[3], "persistent") };
+        }
+        // add somebody else 
+        exp = new RegExp("^Add " + targetType + " to " + groupType + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "joining", subtype: "add", target: ttpp(fd[1]), group: fd[2], membership_type: "member", duration: dd(fd[3], "persistent") };
+        }
+        // add somebody else as a specific membership type
+        exp = new RegExp("^Add " + targetType + " to " + groupType + " as `" + joiningSubtype + "`" + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "joining", subtype: "add", target: ttpp(fd[1]), group: fd[2], membership_type: lc(fd[3]), duration: dd(fd[4], "persistent") };
+        }
+        // default leaving
+        exp = new RegExp("^Leave " + groupType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "joining", subtype: "remove", target: "@self[player]", group: fd[1] };
+        }
+        // remove somebody else
+        exp = new RegExp("^Remove " + targetType + " from " + groupType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "joining", subtype: "remove", target: ttpp(fd[1]), group: fd[2] };
+        }
+        /** GRANTING **/
+        // default granting
+        exp = new RegExp("^Grant " + targetType + " to " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "granting", subtype: "add", target: ttpp(fd[2]), role: ttpp(fd[1], "role") };
+        }
+        // revoking
+        exp = new RegExp("^Revoke " + targetType + " from " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "granting", subtype: "remove", target: ttpp(fd[2]), role: ttpp(fd[1], "role") };
+        }
+        // transfer
+        exp = new RegExp("^Transfer " + targetType + " from " + targetType + " to " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "granting", subtype: "transfer", target: ttpp(fd[2]), role: ttpp(fd[1], "role"), transfer_to: ttpp(fd[3]) };
+        }
+        /** LOYALTY **/
+        // loyalty
+        exp = new RegExp("^Loyalty to " + locationType + " \\(" + loyaltySubtype + "\\)$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "loyalty", subtype: fd[2], target: fd[1] };
+        }
+        /** OBSTRUCTING **/
+        // obstruct all
+        exp = new RegExp("^Obstruct " + targetType + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "obstructing", target: ttpp(fd[1]), duration: dd(fd[2], "permanent") };
+        }
+        // obstruct specific ability type
+        exp = new RegExp("^Obstruct " + abilityType + " for " + targetType + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "obstructing", target: ttpp(fd[2]), duration: dd(fd[3], "permanent"), obstructed_ability: lc(fd[1]), obstructed_subtype: "", custom_feedback: "" };
+        }
+        // obstruct specific ability subtype
+        exp = new RegExp("^Obstruct " + abilitySubtype + " for " + targetType + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            fd = fd.filter(el => el); // filter out empty capture groups
+            ability = { type: "obstructing", target: ttpp(fd[3]), duration: dd(fd[4], "permanent"), obstructed_ability: lc(fd[1].replace(fd[2], "").trim()), obstructed_subtype: lc(fd[2]), custom_feedback: "" };
+        }
+        // obstruct specific ability type; custom feedback
+        exp = new RegExp("^Obstruct " + abilityType + " for " + targetType + " ⇒ `" + str + "`" + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "obstructing", target: ttpp(fd[2]), duration: dd(fd[4], "permanent"), obstructed_ability: lc(fd[1]), obstructed_subtype: "", custom_feedback: [{chance: 1, feedback: fd[3]}] };
+        }
+        // obstruct specific ability subtype; custom feedback
+        exp = new RegExp("^Obstruct " + abilitySubtype + " for " + targetType + " ⇒ `" + str + "`" + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            fd = fd.filter(el => el); // filter out empty capture groups
+            ability = { type: "obstructing", target: ttpp(fd[3]), duration: dd(fd[5], "permanent"), obstructed_ability: lc(fd[1].replace(fd[2], "").trim()), obstructed_subtype: lc(fd[2]), custom_feedback: [{chance: 1, feedback: fd[4]}] };
+        }
+        // obstruct specific ability type; double custom feedback
+        exp = new RegExp("^Obstruct " + abilityType + " for " + targetType + " ⇒ \\(" + decNum + ":`" + str + "`," + decNum + ":`" + str + "`\\)" + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "obstructing", target: ttpp(fd[2]), duration: dd(fd[7], "permanent"), obstructed_ability: lc(fd[1]), obstructed_subtype: "", custom_feedback: [{chance: +fd[3], feedback: fd[4]},{chance: +fd[5], feedback: fd[6] }] };
+        }
+        // obstruct specific ability subtype; double custom feedback
+        exp = new RegExp("^Obstruct " + abilitySubtype + " for " + targetType + " ⇒ \\(" + decNum + ":`" + str + "`," + decNum + ":`" + str + "`\\)" + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            fd = fd.filter(el => el); // filter out empty capture groups
+            ability = { type: "obstructing", target: ttpp(fd[3]), duration: dd(fd[8], "permanent"), obstructed_ability: lc(fd[1].replace(fd[2], "").trim()), obstructed_subtype: lc(fd[2]), custom_feedback: [{chance: +fd[4], feedback: fd[5]},{chance: +fd[6], feedback: fd[7] }] };
+        }
+        /** POLL MANIPULATING **/
+        // Poll duplication/addtion
+        exp = new RegExp("^Add `" + str + "` Poll" + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "poll", subtype: "addition", target: ttpp(fd[1], "poll"), duration: dd(fd[2], "untiluse") };
+        }
+        // Creates a new poll
+        exp = new RegExp("^Create `" + str + "` Poll in " + locationType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "poll", subtype: "creation", target: ttpp(fd[1], "poll"), poll_location: ttpp(fd[2], "location") };
+        }
+        // poll creates itself
+        exp = new RegExp("^Create Poll in " + locationType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "poll", subtype: "creation", target: "@self[poll]", poll_location: ttpp(fd[1], "location") };
+        }
+        // poll creates itself named
+        exp = new RegExp("^Create Poll in " + locationType + " as " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "poll", subtype: "creation", target: "@self[poll]", poll_location: ttpp(fd[1], "location"), poll_name: ttpp(fd[2]) };
+        }
+        // Cancel polls resulting ability
+        exp = new RegExp("^Cancel `" + str + "` Poll" + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "poll", subtype: "cancellation", target: ttpp(fd[1], "poll"), duration: dd(fd[2], "untiluse") };
+        }
+        // Delete a poll
+        exp = new RegExp("^Delete `" + str + "` Poll" + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "poll", subtype: "deletion", target: ttpp(fd[1], "poll"), duration: dd(fd[2], "untiluse") };
+        }
+        // Delete a poll
+        exp = new RegExp("^Manipulate `" + str + "` Poll \\(" + targetType + " is `" + pollManipManipSubtype + "`\\)" + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "poll", subtype: "manipulation", target: ttpp(fd[1], "poll"), manip_target: fd[2], manip_type: lc(fd[3]), duration: dd(fd[2], "untiluse") };
+        }
+        /** ANNOUNCEMENTS **/
+        // reveal
+        exp = new RegExp("^Reveal " + targetType + " to " + locationType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "announcement", target: ttpp(fd[2], "location"), info: ttpp(fd[1]) };
+        }
+        // reveal
+        exp = new RegExp("^(Learn|Know) " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "announcement", target: "@self[player]", info: ttpp(fd[2]) };
+        }
+        /** ROLE CHANGE **/
+        // role change
+        exp = new RegExp("^Role Change " + targetType + " to " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "changing", subtype: "role", target: ttpp(fd[1]), change_to: ttpp(fd[2], "role") };
+        }
+        // alignment change
+        exp = new RegExp("^Alignment Change " + targetType + " to " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "changing", subtype: "alignment", target: ttpp(fd[1]), change_to: ttpp(fd[2], "alignment") };
+        }
+        // group change
+        exp = new RegExp("^Group Change " + targetType + " to " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "changing", subtype: "group", target: ttpp(fd[1]), change_to: ttpp(fd[2], "group") };
+        }
+        /** COPYING **/
+        // copy abilities, target to self
+        exp = new RegExp("^Copy " + targetType + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "copying", subtype: "ability", target: ttpp(fd[1]), copy_to: "@self[player]", duration: dd(fd[2], "permanent") };
+        }
+        // copy abilities, target to target2
+        exp = new RegExp("^Copy " + targetType + " to " + targetType + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "copying", subtype: "ability", target: ttpp(fd[1]), copy_to: ttpp(fd[2]), duration: dd(fd[3], "permanent") };
+        }
+        // copy abilities, target to target
+        exp = new RegExp("^Duplicate " + targetType + "'s abilities" + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "copying", subtype: "ability", target: ttpp(fd[1]), copy_to: ttpp(fd[1]), duration: dd(fd[2], "permanent") };
+        }
+        // full copy
+        exp = new RegExp("^Full Copy " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "copying", subtype: "full", target: ttpp(fd[1]), copy_to: "@self[player]", suppressed: false, duration: dd(fd[2], "permanent") };
+        }
+        // full copy, surpressed
+        exp = new RegExp("^Full Copy " + targetType + " \\(Suppressed\\)$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "copying", subtype: "full", target: ttpp(fd[1]), copy_to: "@self[player]", suppressed: true, duration: dd(fd[2], "permanent") };
+        }
+        /** CHOICES **/
+        
+        /** WIP - NEEDS DOING **/
+        
+        /** ASCEND DESCEND **/
+        // ascend
+        exp = new RegExp("^Ascend$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "ascend" };
+        }
+        // descend
+        exp = new RegExp("^Descend$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "descend" };
+        }
+        /** DISBAND **/
+        // disband self
+        exp = new RegExp("^Disband$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "disband", target: "@self[player]" };
+        }
+        // disband
+        exp = new RegExp("^Disband " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "disband", target: ttpp(fd[1], "group") };
+        }
+        /** COUNTING **/
+        // increment self by 1
+        exp = new RegExp("^Increment Counter$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "counting", subtype: "increment", counter_value: 1, target: "@self[player]" };
+        }
+        // decrement self by 1
+        exp = new RegExp("^Decrement Counter$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "counting", subtype: "decrement", counter_value: 1, target: "@self[player]" };
+        }
+        // increment self by value
+        exp = new RegExp("^Increment Counter by " + num + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "counting", subtype: "increment", counter_value: fd[1], target: "@self[player]" };
+        }
+        // decrement self by value
+        exp = new RegExp("^Decrement Counter by " + num + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "counting", subtype: "decrement", counter_value: fd[1], target: "@self[player]" };
+        }
+        // set counter to value
+        exp = new RegExp("^Set Counter to " + num + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "counting", subtype: "set", counter_value: fd[1], target: "@self[player]" };
+        }
+        // increment self by 1, for target
+        exp = new RegExp("^Increment Counter for " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "counting", subtype: "increment", counter_value: 1, target: ttpp(fd[1]) };
+        }
+        // decrement self by 1, for target
+        exp = new RegExp("^Decrement Counter for " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "counting", subtype: "decrement", counter_value: 1, target: ttpp(fd[1]) };
+        }
+        // increment self by value, for target
+        exp = new RegExp("^Increment Counter by " + num + " for " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "counting", subtype: "increment", counter_value: fd[1], target: ttpp(fd[2]) };
+        }
+        // decrement self by value, for target
+        exp = new RegExp("^Decrement Counter by " + num + " for " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "counting", subtype: "decrement", counter_value: fd[1], target: ttpp(fd[2]) };
+        }
+        // set counter to value, for target
+        exp = new RegExp("^Set Counter to " + num + " for " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "counting", subtype: "set", counter_value: fd[1], target: ttpp(fd[2]) };
+        }
+        /** CONVERSATION RESET **/
+        // conversation reset self
+        exp = new RegExp("^Conversation Reset$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "reset", target: "@self[player]" };
+        }
+        // conversation reset target
+        exp = new RegExp("^Conversation Reset " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "reset", target: ttpp(fd[1]) };
+        }
+        /** CANCEL **/
+        // cancel
+        exp = new RegExp("^Cancel$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "cancel", cancel_with: "Failure" };
+        }
+        // cancel with specific result
+        exp = new RegExp("^Cancel with (Failure|Success|" + rawStr + ")$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "cancel", cancel_with: fd[1] };
+        }
+        /** SWITCHING **/
+        // switching
+        exp = new RegExp("^Switch with " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "switching", target: ttpp(fd[1]) };
+        }
+        /** PROCESS/EVALUATE **/
+        // process
+        exp = new RegExp("^Process:$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "process" };
+        }
+        // evaluate
+        exp = new RegExp("^Evaluate:$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "evaluate" };
+        }
+        /** FEEDBACK */
+        // just feedback
+        exp = new RegExp("^" + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "feedback", feedback: ttpp(fd[1]) };
+        }
+        /** ACTION VALUES */
+        // just values
+        exp = new RegExp("^Action:$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "action" };
+        }
+        /** FAILURE / SUCCESS */
+        // just values
+        exp = new RegExp("^Failure$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "failure" };
+        }
+        // just values
+        exp = new RegExp("^Success$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "success" };
+        }
+        /** LOGGING (DEBUG) **/
+        // log named
+        exp = new RegExp("^Log " + targetType + " as " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "log", selector: ttpp(fd[1]), info: fd[2] };
+        }
+        // log unnamed
+        exp = new RegExp("^Log " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "log", selector: ttpp(fd[1]), info: "" };
+        }
+
+        
+        /** Ability Types End */
+        if(ability) {
+            ability.id = abilityCounter++; // assign ability id
+            //console.log("IDENT", ability);
+            abilityLineFull = { ability: ability, parameters: { restrictions: parsedRestrictions, scaling: parsedScaling, direct: cDirect, repeating: cRepeating, visitless: cVisitless, forced: cForced, forced_sel: cForcedSelection } };
+            if(promptOverwrite) abilityLineFull.parameters.prompt_overwrite = promptOverwrite;
+        } else if(abilityLine == "") {
+            abilityLineFull = { ability: { type: "parameters", id: abilityCounter++ }, parameters: { restrictions: parsedRestrictions, scaling: parsedScaling, direct: cDirect, repeating: cRepeating, visitless: cVisitless, forced: cForced, forced_sel: cForcedSelection } };
+        } else {
+            //console.log("UNIDENT", abilityLine);
+            if(!debugMode) throw new Error(`Invalid Ability Type \`\`\`\n${abilityLineFull}\n\`\`\` with ability line \`\`\`\n${abilityLine}\n\`\`\``);
+            else abilityLineFull = { ability: { type: "error" }, parameters : { failed_ability: abilityLineFull, failed_ability_line: "^" + abilityLine + "$" } };
+        }
+        return abilityLineFull;
     }
 
     // parse the WD/SD affected element for invest abilities
