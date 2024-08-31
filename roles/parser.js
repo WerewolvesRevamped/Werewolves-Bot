@@ -215,9 +215,9 @@ module.exports = function() {
                     // Process/Evaluate Next Line
                     if(ability.ability.type === "parameters" && thisAbilitySplit[0] === "Process" || thisAbilitySplit[0] === "Evaluate") {
                         // requires parsing of sub abilities
-                        ability.type = thisAbilitySplit[0].toLowerCase(); // update type - it starts out as parameters
-                        ability.ability.sub_abilities = parseAbilities(abilities, i + 1, depth + 1, ability.type);
-                        i += ability.sub_abilities.length;
+                        ability.ability.type = thisAbilitySplit[0].toLowerCase(); // update type - it starts out as parameters
+                        ability.ability.sub_abilities = parseAbilities(abilities, i + 1, depth + 1, ability.ability.type);
+                        i += ability.ability.sub_abilities.length;
                         abilitiesParsed.push(ability);    
                     }
                     // Process/Evaluate's Action
@@ -238,7 +238,7 @@ module.exports = function() {
                     }
                     // Unknown case
                     else {
-                        if(debugMode) console.log("   UNKNOWN 2 CASE", ability);    
+                        if(debugMode) console.log("   UNKNOWN 2 CASE", JSON.stringify(ability));    
                         else throw new Error(`Invalid two segment ability line:\n\`\`\`${thisAbilitySplit.join(";")} \`\`\`with context ${startIndex}, ${parsingDepth}, ${parsingType}.`);
                     }
                 }
@@ -251,7 +251,7 @@ module.exports = function() {
                     }
                     // Unknown case
                     else {
-                        if(debugMode) console.log("   UNKNOWN 3 CASE");    
+                        if(debugMode) console.log("   UNKNOWN 3 CASE", JSON.stringify(ability));    
                         else throw new Error(`Invalid three segment ability line:\n\`\`\`${thisAbilitySplit.join(";")} \`\`\`with context ${startIndex}, ${parsingDepth}, ${parsingType}.`);
                     }
                 }
