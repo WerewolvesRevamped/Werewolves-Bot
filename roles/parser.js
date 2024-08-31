@@ -517,7 +517,7 @@ module.exports = function() {
                 exp = new RegExp("^(\\$total|\\$living)/(\\d+)$", "g");
                 fd = exp.exec(scaling[scal]);
                 if(fd) {
-                    parsedScaling.push({ type: "math_multiplier", quantity: fd[1] + "/" + fd[2] });
+                    parsedScaling.push({ type: "division", quantity: fd[1] + "/" + fd[2] });
                     scalFound = true;
                 }
                 exp = new RegExp("^(\\$total|\\$living)(\\<|\\>|≤|≥|\\=)(\\d+) ⇒ x?(\\d+)$", "g");
@@ -532,13 +532,6 @@ module.exports = function() {
                         case "≥": ct = "greater_than"; compTo--; break;
                     }
                     parsedScaling.push({ type: "dynamic", compare: fd[1], compare_type: ct, compare_to: compTo, quantity: +fd[4] });
-                    scalFound = true;
-                }
-                /** Math Multiplier **/
-                exp = new RegExp("^(.+)$", "g");
-                fd = exp.exec(scaling[scal]);
-                if(fd && !scalFound) {
-                    parsedScaling.push({ type: "math_multiplier", quantity: fd[1] });
                     scalFound = true;
                 }
                 /** DEFAULT **/

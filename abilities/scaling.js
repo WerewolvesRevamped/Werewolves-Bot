@@ -42,6 +42,12 @@ module.exports = function() {
                 }
                 return 0;
             break;
+            // DIVISION
+            case "division":
+                let div = scaling.quantity;
+                let divNum = await parseNumber(div);
+                return divNum;
+            break;
             
         }
     }
