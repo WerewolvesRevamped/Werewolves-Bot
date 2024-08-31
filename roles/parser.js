@@ -34,6 +34,13 @@ module.exports = function() {
     this.delParam = function(tr) {
         return tr.map(el => el.ability);
     }
+    
+    this.delParamInplace = function(tr) {
+        return tr.map(el => {
+            delete el.parameters;
+            return el;
+        });
+    }
 
     /**
     Parse Role
@@ -128,7 +135,8 @@ module.exports = function() {
             let additionalParameters = thisTriggerAbilities.filter(el => el.ability.type === "parameters");
             thisTriggerAbilities = thisTriggerAbilities.filter(el => el.ability.type != "parameters"); // remove parameters lines
             if(additionalParameters.length === 1) {
-                 thisTriggerAbilities[0].parameters = additionalParameters[0].parameters;
+                if(thisTriggerAbilities[0]) thisTriggerAbilities[0].parameters = additionalParameters[0].parameters;
+                else throw new Error(`Cant find first ability in \`\`\`${JSON.stringify(thisTriggerAbilities)}\`\`\``);
             } else if(additionalParameters.length > 1) {
                 if(!debugMode) throw new Error(`Too many additional parameters.`);
             }
@@ -171,7 +179,7 @@ module.exports = function() {
     this.parseAbilities = function(abilities, startIndex = 0, parsingDepth = 0, parsingType = "none") {
         // get a default param for comparision
         const defaultParams = parseAbility("Disband").parameters;
-        if(debugMode) console.log(`PARSING ABILITIES from ${startIndex} at ${parsingDepth}`);
+        if(debugMode) console.log(`PARSING ABILITIES from ${startIndex} at ${parsingDepth} as ${parsingType}`);
         // init
         let abilitiesParsed = [];
         let parameters = {};
@@ -205,36 +213,54 @@ module.exports = function() {
             // check how many components
             if(depth === parsingDepth) {
                 // normal ability
+                /** SINGLE SEGMENT **/
                 if(thisAbilitySplit.length === 1) {
                     const ability = parseAbility(thisAbilitySplit[0] + " " + abilityValues); // parse ability
-                    abilitiesParsed.push(ability);
+                    // Normal Ability / Process Ability
+                    if(parsingType === "none" || parsingType === "process" || parsingType === "evaluate_condition") {
+                        abilitiesParsed.push(ability);
+                    }
+                    // Unknown case
+                    else {
+                        if(debugMode) console.log("   UNKNOWN 1 CASE", JSON.stringify(ability));    
+                        else throw new Error(`Invalid one segment ability line:\n\`\`\`${thisAbilitySplit.join(";")} \`\`\`with context ${startIndex}, ${parsingDepth}, ${parsingType}.`);
+                    }
                 }
+                /** TWO SEGMENT **/
                 // ability that is split into two components
                 else if(thisAbilitySplit.length === 2) {
                     const ability = parseAbility(thisAbilitySplit[1] + " " + abilityValues); // parse ability
                     // Process/Evaluate Next Line
-                    if(ability.ability.type === "parameters" && thisAbilitySplit[0] === "Process" || thisAbilitySplit[0] === "Evaluate") {
+                    if(parsingType === "none" && (thisAbilitySplit[0] === "Process" || thisAbilitySplit[0] === "Evaluate") && thisAbilitySplit[1].length === 0) {
                         // requires parsing of sub abilities
                         ability.ability.type = thisAbilitySplit[0].toLowerCase(); // update type - it starts out as parameters
-                        ability.ability.sub_abilities = parseAbilities(abilities, i + 1, depth + 1, ability.ability.type);
+                        let subAbilities = parseAbilities(abilities, i + 1, depth + 1, ability.ability.type);
+                        ability.ability.sub_abilities = delParamInplace(subAbilities);
                         i += ability.ability.sub_abilities.length;
                         abilitiesParsed.push(ability);    
                     }
                     // Process/Evaluate's Action
-                    else if(ability.ability.type === "parameters" && thisAbilitySplit[0] === "Action") {
+                    else if(parsingType === "none" && ability.ability.type === "parameters" && thisAbilitySplit[0] === "Action") {
                         // should parse to "parameters" ability type and can thus be directly added
                         abilitiesParsed.push(ability);    
                     }
                     // Process/Evaluate In-Line
-                    else if(ability.ability.type != "parameters" && thisAbilitySplit[0] === "Process" || thisAbilitySplit[0] === "Evaluate") {
+                    else if(parsingType === "none" && (thisAbilitySplit[0] === "Process" || thisAbilitySplit[0] === "Evaluate") && thisAbilitySplit[1].length > 0) {
                         // only has a single sub ability we already have parsed
                         let type = thisAbilitySplit[0].toLowerCase();
                         abilitiesParsed.push({ ability: { type: type, sub_abilities: [ ability.ability ] } });    
                     }
                     // Evaluate sub-conditions
-                    else if(parsingType == "evaluate" && isCondition(thisAbilitySplit[0])) {
+                    else if(parsingType == "evaluate" && isCondition(thisAbilitySplit[0]) && thisAbilitySplit[1].length > 0) {
                         ability.condition = thisAbilitySplit[0];
                         abilitiesParsed.push(ability);
+                    }
+                    // Evaluate Multi-line Condition
+                    else if(parsingType == "evaluate" && isCondition(thisAbilitySplit[0]) && thisAbilitySplit[1].length === 0) {
+                        let subAbilities = parseAbilities(abilities, i + 1, depth + 1, "evaluate_condition");
+                        subAbilities = delParam(subAbilities);
+                        i += subAbilities.length;
+                        abilitiesParsed.push({ ability: { type: "abilities", sub_abilities: subAbilities }, condition: thisAbilitySplit[0] });
                     }
                     // Unknown case
                     else {
@@ -242,7 +268,8 @@ module.exports = function() {
                         else throw new Error(`Invalid two segment ability line:\n\`\`\`${thisAbilitySplit.join(";")} \`\`\`with context ${startIndex}, ${parsingDepth}, ${parsingType}.`);
                     }
                 }
-                // ability that is split into two components
+                /** THREE SEGMENT **/
+                // ability that is split into three components
                 else if(thisAbilitySplit.length === 3) {
                     const ability = parseAbility(thisAbilitySplit[2] + " " + abilityValues); // parse ability
                     // Evaluate In-Line
