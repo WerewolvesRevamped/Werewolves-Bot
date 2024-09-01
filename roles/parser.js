@@ -321,8 +321,8 @@ module.exports = function() {
                         else throw new Error(`Invalid ability line component amount:\n\`\`\`${thisAbilitySplit.join(";")} \`\`\`with context ${startIndex}, ${parsingDepth}, ${parsingType}.`);
                 }
             } else if(depth > parsingDepth) { // Entering a lesser depth without a reason?
-                // check if condition, then it must be an implied process
                 /** TWO SEGMENT - DEPTH INCREASED **/
+                // check if condition, then it must be an implied process
                 if(thisAbilitySplit.length === 2) {
                     const ability = parseAbility(thisAbilitySplit[1] + " " + abilityValues); // parse ability
                     const hasAbility = thisAbilitySplit[1].length > 0;
@@ -337,6 +337,24 @@ module.exports = function() {
                         subAbilities = delParamInplace(subAbilities);
                         i += subAbilities.length - 1; // 1 less because current one is in there as well
                         abilitiesParsed.push({ ability: { type: "evaluate", sub_abilities: subAbilities } });
+                    }
+                    // implied process with multiline evaluate conditions
+                    if(!hasAbility && hasCondition) {
+                        // rewrite the previous element to a process
+                        abilitiesParsed[i - 1] = { ability: { type: "process", sub_abilities: [ { ability: abilitiesParsed[i - 1].ability } ] }, parameters: abilitiesParsed[i - 1].parameters };
+                        // merge abilities of this condition
+                        let subAbilitiesCondition = parseAbilities(abilities, i + 1, depth + 1, "evaluate_condition");
+                        subAbilitiesCondition = delParamInplace(subAbilitiesCondition);
+                        const abilitiesAbility = { ability: { type: "abilities", sub_abilities: subAbilitiesCondition }, condition: thisAbilitySplit[0] };
+                        i += subAbilitiesCondition.length;
+                        // find further conditions
+                        let subAbilitiesRest = parseAbilities(abilities, i + 1, depth, "evaluate");
+                        subAbilitiesRest = delParamInplace(subAbilitiesRest);
+                        i += subAbilitiesRest.length;
+                        // create evaluate object
+                        let eval = { ability: { type: "evaluate", sub_abilities: [ abilitiesAbility, ...subAbilitiesRest ] } };
+                        if(ability.parameters) eval.parameters = ability.parameters;
+                        abilitiesParsed.push(eval);
                     }
                     // Unknown case
                     else {
