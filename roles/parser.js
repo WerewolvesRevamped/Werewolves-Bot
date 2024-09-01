@@ -218,7 +218,7 @@ module.exports = function() {
                     const ability = parseAbility(thisAbilitySplit[0] + " " + abilityValues); // parse ability
                     const hasAbility = thisAbilitySplit[0].length > 0;
                     // Normal Ability / Process Ability
-                    if((parsingType === "none" || parsingType === "process" || parsingType === "evaluate_condition")) {
+                    if(parsingType === "none" || parsingType === "process" || parsingType === "evaluate_condition") {
                         abilitiesParsed.push(ability);
                     }
                     // Unknown case
@@ -320,9 +320,33 @@ module.exports = function() {
                     if(debugMode) console.log("   UNKNOWN LENGTH");    
                         else throw new Error(`Invalid ability line component amount:\n\`\`\`${thisAbilitySplit.join(";")} \`\`\`with context ${startIndex}, ${parsingDepth}, ${parsingType}.`);
                 }
-            } else if(depth > parsingDepth) { // this should be handled above
-                if(debugMode) console.log("   UNKNOWN DEPTH CASE");
-                else throw new Error(`Invalid ability line depth:\n\`\`\`${thisAbilitySplit.join(";")} \`\`\`with context ${startIndex}, ${parsingDepth}, ${parsingType}.`);
+            } else if(depth > parsingDepth) { // Entering a lesser depth without a reason?
+                // check if condition, then it must be an implied process
+                /** TWO SEGMENT - DEPTH INCREASED **/
+                if(thisAbilitySplit.length === 2) {
+                    const ability = parseAbility(thisAbilitySplit[1] + " " + abilityValues); // parse ability
+                    const hasAbility = thisAbilitySplit[1].length > 0;
+                    const hasCondition = isCondition(thisAbilitySplit[0]);
+                    // implied process with inline evaluate conditions
+                    if(hasAbility && hasCondition) {
+                        // rewrite the previous element to a process
+                        abilitiesParsed[i - 1] = { ability: { type: "process", sub_abilities: [ { ability: abilitiesParsed[i - 1].ability } ] }, parameters: abilitiesParsed[i - 1].parameters };
+                        // add condition to current element
+                        const abilityWithCond = { ability: ability.ability, condition: thisAbilitySplit[0] }; // add condition to ability
+                        let subAbilities = [abilityWithCond, ...parseAbilities(abilities, i + 1, depth, "evaluate")]; // combine current ability and future subabilities
+                        subAbilities = delParamInplace(subAbilities);
+                        i += subAbilities.length - 1; // 1 less because current one is in there as well
+                        abilitiesParsed.push({ ability: { type: "evaluate", sub_abilities: subAbilities } });
+                    }
+                    // Unknown case
+                    else {
+                        if(debugMode) console.log("   UNKNOWN 2 DEPTH CASE", JSON.stringify(ability));    
+                        else throw new Error(`Invalid two segment ability line:\n\`\`\`${thisAbilitySplit.join(";")} \`\`\`with context ${startIndex}, ${parsingDepth}, ${parsingType}.`);
+                    }
+                } else {
+                    if(debugMode) console.log("   UNKNOWN DEPTH CASE");
+                    else throw new Error(`Invalid ability line depth:\n\`\`\`${thisAbilitySplit.join(";")} \`\`\`with context ${startIndex}, ${parsingDepth}, ${parsingType}.`);
+                }
             } else if(depth < parsingDepth) { // sub-parsing complete, return
                 if(debugMode) console.log(`SUB-PARSING DONE`);
                 return abilitiesParsed;
