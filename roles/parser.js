@@ -218,7 +218,7 @@ module.exports = function() {
                     const ability = parseAbility(thisAbilitySplit[0] + " " + abilityValues); // parse ability
                     const hasAbility = thisAbilitySplit[0].length > 0;
                     // Normal Ability / Process Ability
-                    if(parsingType === "none" || parsingType === "process" || parsingType === "evaluate_condition") {
+                    if((parsingType === "none" || parsingType === "process" || parsingType === "evaluate_condition")) {
                         abilitiesParsed.push(ability);
                     }
                     // Unknown case
@@ -232,6 +232,7 @@ module.exports = function() {
                 else if(thisAbilitySplit.length === 2) {
                     const ability = parseAbility(thisAbilitySplit[1] + " " + abilityValues); // parse ability
                     const hasAbility = thisAbilitySplit[1].length > 0;
+                    const hasCondition = isCondition(thisAbilitySplit[0]);
                     // Process/Evaluate Next Line
                     if(parsingType === "none" && (thisAbilitySplit[0] === "Process" || thisAbilitySplit[0] === "Evaluate") && !hasAbility) {
                         // requires parsing of sub abilities
@@ -253,19 +254,35 @@ module.exports = function() {
                         abilitiesParsed.push({ ability: { type: type, sub_abilities: [ ability.ability ] } });    
                     }
                     // Evaluate sub-conditions
-                    else if(parsingType === "evaluate" && isCondition(thisAbilitySplit[0]) && hasAbility) {
+                    else if(parsingType === "evaluate" && hasCondition && hasAbility) {
                         ability.condition = thisAbilitySplit[0];
                         abilitiesParsed.push(ability);
                     }
                     // Evaluate Multi-line Condition
-                    else if(parsingType === "evaluate" && isCondition(thisAbilitySplit[0]) && !hasAbility) {
+                    else if(parsingType === "evaluate" && hasCondition && !hasAbility) {
                         let subAbilities = parseAbilities(abilities, i + 1, depth + 1, "evaluate_condition");
                         subAbilities = delParam(subAbilities);
                         i += subAbilities.length;
                         abilitiesParsed.push({ ability: { type: "abilities", sub_abilities: subAbilities }, condition: thisAbilitySplit[0] });
                     }
+                    // Implied Eval Multiline Condition
+                    else if(parsingType === "none" && hasCondition && !hasAbility) {
+                        // merge abilities of this condition
+                        let subAbilitiesCondition = parseAbilities(abilities, i + 1, depth + 1, "evaluate_condition");
+                        subAbilitiesCondition = delParamInplace(subAbilitiesCondition);
+                        const abilitiesAbility = { ability: { type: "abilities", sub_abilities: subAbilitiesCondition }, condition: thisAbilitySplit[0] };
+                        i += subAbilitiesCondition.length;
+                        // find further conditions
+                        let subAbilitiesRest = parseAbilities(abilities, i + 1, depth, "evaluate");
+                        subAbilitiesRest = delParamInplace(subAbilitiesRest);
+                        i += subAbilitiesRest.length;
+                        // create evaluate object
+                        let eval = { ability: { type: "evaluate", sub_abilities: [ abilitiesAbility, ...subAbilitiesRest ] } };
+                        if(ability.parameters) eval.parameters = ability.parameters;
+                        abilitiesParsed.push(eval);
+                    }
                     // Implied Evaluate condition
-                    else if(parsingType === "none" && isCondition(thisAbilitySplit[0]) && hasAbility) {
+                    else if(parsingType === "none" && hasCondition && hasAbility) {
                         const abilityWithCond = { ability: ability.ability, condition: thisAbilitySplit[0] }; // add condition to ability
                         let subAbilities = [abilityWithCond, ...parseAbilities(abilities, i + 1, depth, "evaluate")]; // combine current ability and future subabilities
                         subAbilities = delParamInplace(subAbilities);
