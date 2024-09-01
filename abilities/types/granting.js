@@ -17,13 +17,6 @@ module.exports = function() {
         }
         // parse parameters
         let target = await parsePlayerSelector(ability.target, src_ref, additionalTriggerData);
-        let role = await parseRoleSelector(ability.role, src_ref, additionalTriggerData);
-        // can only grant exactly one role
-        if(role.length != 1) {
-            abilityLog(`❗ **Error:** Tried to grant ${role.length} roles!`);
-            return { msg: "Granting failed! " + abilityError, success: false };
-        }
-        role = role[0];
         // select subtype
         switch(ability.subtype) {
             default:
@@ -31,11 +24,24 @@ module.exports = function() {
                 return { msg: "Granting failed! " + abilityError, success: false };
             break;
             case "add":
+                // can only grant exactly one role
+                let role = await parseRoleSelector(ability.role, src_ref, additionalTriggerData);
+                if(role.length != 1) {
+                    abilityLog(`❗ **Error:** Tried to grant ${role.length} roles!`);
+                    return { msg: "Granting failed! " + abilityError, success: false };
+                }
+                role = role[0];
                 result = await grantingAdd(src_name, src_ref, target, role);
                 return result;
             break;
             case "remove":
-                result = await grantingRemove(src_name, src_ref, target, role);
+                let activeExtraRole = await parseActiveExtraRoleSelector(ability.role, src_ref, additionalTriggerData);
+                if(activeExtraRole.length != 1) {
+                    abilityLog(`❗ **Error:** Tried to grant ${activeExtraRole.length} roles!`);
+                    return { msg: "Granting failed! " + abilityError, success: false };
+                }
+                activeExtraRole = activeExtraRole[0];
+                result = await grantingRemove(src_name, src_ref, target, activeExtraRole);
                 return result;
             break;
         }
@@ -69,21 +75,9 @@ module.exports = function() {
     Ability: Granting - Remove
     removes a role to a player
     **/
-    this.grantingRemove = async function(src_name, src_ref, targets, role) {
-        // get existing channel
-        let existingChannel, roleName;
-        if(/\d+/.test(role)) { // channel was directly passed via selector (@ThisAttr)
-            existingChannel = [ { channel_id: role } ];
-            roleName = `<#${role}>`;
-        } else { // channel has to be retrieved 
-            existingChannel = await connectionGet(`${role}:${src_ref}`);
-            roleName = toTitleCase(role);
-        }
-        if(existingChannel.length == 0) {
-            abilityLog(`❎ <@${targets[0]}> could not be removed from ${roleName} - doesn't exist.`);  
-            return { msg: "Grantings failed!", success: false, target: `player:${targets[0]}` };
-        }
-        let channelId = existingChannel[0].channel_id;
+    this.grantingRemove = async function(src_name, src_ref, targets, activeExtraRole) {
+        let channelId = activeExtraRole;
+        let roleName = `<#${channelId}>`;
         // iterate through targets
         for(let i = 0; i < targets.length; i++) {
             await grantingLeave(targets[i], channelId);

@@ -8,7 +8,7 @@ module.exports = function() {
     Debug Mode
     If set to true does console.log, if set to false does throw
     **/
-    const debugMode = false;
+    const debugMode = true;
     
     /**
     Ability Counter
@@ -251,7 +251,7 @@ module.exports = function() {
                         ability.ability.type = thisAbilitySplit[0].toLowerCase(); // update type - it starts out as parameters
                         let subAbilities = parseAbilities(abilities, i + 1, depth + 1, ability.ability.type);
                         ability.ability.sub_abilities = delParamInplace(subAbilities);
-                        i += ability.ability.sub_abilities.length;
+                        i += subAbilities.length;
                         abilitiesParsed.push(ability);    
                     }
                     // Process/Evaluate's Action
@@ -287,7 +287,7 @@ module.exports = function() {
                         // find further conditions
                         let subAbilitiesRest = parseAbilities(abilities, i + 1, depth, "evaluate");
                         subAbilitiesRest = delParamInplace(subAbilitiesRest);
-                        i += subAbilitiesRest.length;
+                        i += subAbilitiesRest.map(el => el.ability.sub_abilities.length).reduce((a,b) => a+b);
                         // create evaluate object
                         let eval = { ability: { type: "evaluate", sub_abilities: [ abilitiesAbility, ...subAbilitiesRest ] } };
                         if(ability.parameters) eval.parameters = ability.parameters;
@@ -961,13 +961,13 @@ module.exports = function() {
         exp = new RegExp("^Revoke " + targetType + " from " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "granting", subtype: "remove", target: ttpp(fd[2]), role: ttpp(fd[1], "role") };
+            ability = { type: "granting", subtype: "remove", target: ttpp(fd[2]), role: ttpp(fd[1], "activeExtaRole") };
         }
         // transfer
         exp = new RegExp("^Transfer " + targetType + " from " + targetType + " to " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "granting", subtype: "transfer", target: ttpp(fd[2]), role: ttpp(fd[1], "role"), transfer_to: ttpp(fd[3]) };
+            ability = { type: "granting", subtype: "transfer", target: ttpp(fd[2]), role: ttpp(fd[1], "activeExtaRole"), transfer_to: ttpp(fd[3]) };
         }
         /** LOYALTY **/
         // loyalty
@@ -1486,6 +1486,7 @@ module.exports = function() {
     result (a special type for ability results, may take several forms such as role or success)
     success (a boolean like value for ability results, may be compared to a result)
     number
+    activeExtaRole (an active extra role)
     **/
     function ttpp(targetType, defaultType = "infer") {
         // pre-existing type annotation

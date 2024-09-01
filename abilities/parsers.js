@@ -20,6 +20,9 @@ module.exports = function() {
             // ROLE
             case "role": 
                 return { value: await parseRoleSelector(selector, self, additionalTriggerData), type: "role" };
+            // ACTIVE EXTRA ROLE
+            case "activeextrarole":
+                return { value: await parseActiveExtraRoleSelector(selector, self, additionalTriggerData), type: "activeExtraRole" };
             // GROUP
             case "group":
                 let group = await parseGroup(selector, self);
@@ -368,6 +371,26 @@ module.exports = function() {
                 let target = await getTarget(self);
                 target = srcToValue(target);
                 return [ target ];
+            default:
+                let parsedRole = parseRole(selectorTarget);
+                if(verifyRole(parsedRole)) {
+                    return [ parsedRole ];
+                } else {
+                    abilityLog(`❗ **Error:** Invalid role selector target \`${selectorTarget}\`!`);
+                    return [ ];
+                }
+        }
+    }
+    
+    /**
+    Parse Active Extra Role Selector
+    parses an extra role type selector
+    and returns a channel id
+    **/
+    this.parseActiveExtraRoleSelector = async function(selector, self = null, additionalTriggerData = {}) {
+        // get target
+        let selectorTarget = selectorGetTarget(selector);
+        switch(selectorTarget) {
             // ThisAttr
             case "@thisattr":
                 if(!self) { // if no self is specified, @ThisAttr is invalid
@@ -379,9 +402,10 @@ module.exports = function() {
             default:
                 let parsedRole = parseRole(selectorTarget);
                 if(verifyRole(parsedRole)) {
-                    return [ parsedRole ];
+                    let connections = await connectionGet(`${parsedRole}:${src_ref}`);
+                    return connections.map(el => el.channel_id);
                 } else {
-                    abilityLog(`❗ **Error:** Invalid role selector target \`${selectorTarget}\`!`);
+                    abilityLog(`❗ **Error:** Invalid extra role selector target \`${selectorTarget}\`!`);
                     return [ ];
                 }
         }
@@ -526,7 +550,6 @@ module.exports = function() {
                 let strs = [];
                 // iterate through selector list
                 for(let j = 0; j < parsed.value.length; j++) {
-                    console.log(`${infType}:${parsed.value[j]}`);
                     let txt = srcRefToText(`${infType}:${parsed.value[j]}`, parsed.value[j]);
                     strs.push(txt);
                 }

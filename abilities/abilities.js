@@ -58,7 +58,7 @@ module.exports = function() {
             }
             
             // execute ability
-            abilityLog(`🟢 **Executing Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) \`\`\`${JSON.stringify(ability)}\`\`\``);
+            abilityLog(`🟢 **Executing Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) \`\`\`${JSON.stringify(ability).substr(0,1800)}\`\`\``);
             let feedback;
             switch(ability.type) {
                 default:
