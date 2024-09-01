@@ -207,7 +207,7 @@ module.exports = function() {
             if(debugMode) console.log("   ABILITY", thisAbilitySplit.join(";"));
             if(debugMode) console.log("   ABILITY VALUES", abilityValues);
             // check if first ability is a depth=1
-            if(parsingDepth === 0 && depth === 1 && (abilitiesParsed.length === 0 || (abilitiesParsed.length === 1 && abilitiesParsed[0].ability.type === "parameters"))) {
+            if(parsingDepth === 0 && depth === 1 && (abilitiesParsed.length === 0 || (abilitiesParsed.length === 1 && abilitiesParsed[0] && abilitiesParsed[0].ability.type === "parameters"))) {
                 parsingDepth = 1;
             }
             // check how many components
@@ -231,6 +231,14 @@ module.exports = function() {
                 // ability that is split into two components
                 else if(thisAbilitySplit.length === 2) {
                     const ability = parseAbility(thisAbilitySplit[1] + " " + abilityValues); // parse ability
+                    // check if first element is an ability after all
+                    let abilityFirst;
+                    try {
+                        abilityFirst = parseAbility(thisAbilitySplit[0] + " " + abilityValues); 
+                    } catch(err) {
+                        abilityFirst = null; 
+                    }
+                    // 
                     const hasAbility = thisAbilitySplit[1].length > 0;
                     const hasCondition = isCondition(thisAbilitySplit[0]);
                     // Process/Evaluate Next Line
@@ -289,6 +297,24 @@ module.exports = function() {
                         i += subAbilities.length - 1; // 1 less because current one is in there as well
                         abilitiesParsed.push({ ability: { type: "evaluate", sub_abilities: subAbilities } });
                     }
+                    // For Each (Multiline)
+                    else if(parsingType === "none" && abilityFirst && abilityFirst.ability.type === "for_each" && !hasAbility) {
+                        // get abilities contained in the for each
+                        let subAbilities = parseAbilities(abilities, i + 1, depth + 1, "none");
+                        subAbilities = delParamInplace(subAbilities);
+                        i += subAbilities.length;
+                        // create for each object
+                        let forEach = { ability: { type: "for_each", sub_abilities: subAbilities, target: abilityFirst.ability.target } };
+                        if(abilityFirst.parameters) forEach.parameters = abilityFirst.parameters;
+                        abilitiesParsed.push(forEach);
+                    }
+                    // For Each (Inline)
+                    else if(parsingType === "none" && abilityFirst && abilityFirst.ability.type === "for_each" && hasAbility) {
+                        // create for each object
+                        let forEach = { ability: { type: "for_each", sub_abilities: [ { ability: ability.ability } ], target: abilityFirst.ability.target } };
+                        if(abilityFirst.parameters) forEach.parameters = abilityFirst.parameters;
+                        abilitiesParsed.push(forEach);
+                    }
                     // Unknown case
                     else {
                         if(debugMode) console.log("   UNKNOWN 2 CASE", JSON.stringify(ability));    
@@ -328,7 +354,7 @@ module.exports = function() {
                     const hasAbility = thisAbilitySplit[1].length > 0;
                     const hasCondition = isCondition(thisAbilitySplit[0]);
                     // implied process with inline evaluate conditions
-                    if(hasAbility && hasCondition) {
+                    if(hasAbility && hasCondition && ability && abilitiesParsed[i - 1]) {
                         // rewrite the previous element to a process
                         abilitiesParsed[i - 1] = { ability: { type: "process", sub_abilities: [ { ability: abilitiesParsed[i - 1].ability } ] }, parameters: abilitiesParsed[i - 1].parameters };
                         // add condition to current element
@@ -339,7 +365,7 @@ module.exports = function() {
                         abilitiesParsed.push({ ability: { type: "evaluate", sub_abilities: subAbilities } });
                     }
                     // implied process with multiline evaluate conditions
-                    if(!hasAbility && hasCondition) {
+                    if(!hasAbility && hasCondition && ability && abilitiesParsed[i - 1]) {
                         // rewrite the previous element to a process
                         abilitiesParsed[i - 1] = { ability: { type: "process", sub_abilities: [ { ability: abilitiesParsed[i - 1].ability } ] }, parameters: abilitiesParsed[i - 1].parameters };
                         // merge abilities of this condition
@@ -1268,6 +1294,12 @@ module.exports = function() {
         fd = exp.exec(abilityLine);
         if(fd) {
             ability = { type: "log", selector: ttpp(fd[1]), info: "" };
+        }
+        /** FOR EACH **/
+        exp = new RegExp("^For Each " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "for_each", target: ttpp(fd[1]) };
         }
 
         
