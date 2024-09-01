@@ -94,7 +94,7 @@ module.exports = function() {
                         return ret;
                     });
                     // reformat p/e
-                    thisTriggerAbilities[i].ability = { type: "process_evaluate", process: process, evaluate: evaluate }; // replace "process" with a combined P/E ability
+                    thisTriggerAbilities[i].ability = { type: "process_evaluate", process: process, evaluate: evaluate, id: abilityCounter++ }; // replace "process" with a combined P/E ability
                     thisTriggerAbilities[i + 1].ability = { type: "blank" }; // delete "evaluate"
                 }
                 // is evaluate and no process
@@ -110,7 +110,7 @@ module.exports = function() {
                             storedConditionIndex = i;
                             evaluate.sub_abilities[i].condition_text = evaluate.sub_abilities[i].condition;
                             evaluate.sub_abilities[i].condition = parseCondition(evaluate.sub_abilities[i].condition);
-                            evaluate.sub_abilities[i].ability = { type: "abilities", sub_abilities: [ ] };
+                            evaluate.sub_abilities[i].ability = { type: "abilities", sub_abilities: [ ], id: abilityCounter++ };
                         } else if(storedCondition && !evaluate.sub_abilities[i].condition) { // use stored condition, pushes the ability into that conditions block
                             evaluate.sub_abilities[storedConditionIndex].ability.sub_abilities.push(evaluate.sub_abilities[i].ability);
                             delete evaluate.sub_abilities[i]; // we cant write to this directly as we want the object to persist in the other array we just copied it too
@@ -124,7 +124,7 @@ module.exports = function() {
                     // remove blank abilities
                     evaluate.sub_abilities = evaluate.sub_abilities.filter(el => el.ability.type != "blank");
                     // reformat p/e
-                    thisTriggerAbilities[i].ability = { type: "process_evaluate", process: { type: "process", sub_abilities: [ ] }, evaluate: evaluate }; // replace "evaluate" with a combined P/E ability
+                    thisTriggerAbilities[i].ability = { type: "process_evaluate", process: { type: "process", sub_abilities: [ ] }, evaluate: evaluate, id: abilityCounter++ }; // replace "evaluate" with a combined P/E ability
                 }
             }
             
@@ -221,6 +221,10 @@ module.exports = function() {
                     if(parsingType === "none" || parsingType === "process" || parsingType === "evaluate_condition") {
                         abilitiesParsed.push(ability);
                     }
+                    // Within Evaluate without condition
+                    else if(parsingType === "evaluate") {
+                        abilitiesParsed.push({ ability: ability.ability, condition: "Always" });
+                    }
                     // Unknown case
                     else {
                         if(debugMode) console.log("   UNKNOWN 1 CASE", JSON.stringify(ability));    
@@ -259,7 +263,7 @@ module.exports = function() {
                     else if(parsingType === "none" && (thisAbilitySplit[0] === "Process" || thisAbilitySplit[0] === "Evaluate") && hasAbility) {
                         // only has a single sub ability we already have parsed
                         let type = thisAbilitySplit[0].toLowerCase();
-                        abilitiesParsed.push({ ability: { type: type, sub_abilities: [ ability.ability ] } });    
+                        abilitiesParsed.push({ ability: { type: type, sub_abilities: [ { ability: ability.ability } ] } });    
                     }
                     // Evaluate sub-conditions
                     else if(parsingType === "evaluate" && hasCondition && hasAbility) {
@@ -271,14 +275,14 @@ module.exports = function() {
                         let subAbilities = parseAbilities(abilities, i + 1, depth + 1, "evaluate_condition");
                         subAbilities = delParam(subAbilities);
                         i += subAbilities.length;
-                        abilitiesParsed.push({ ability: { type: "abilities", sub_abilities: subAbilities }, condition: thisAbilitySplit[0] });
+                        abilitiesParsed.push({ ability: { type: "abilities", sub_abilities: subAbilities, id: abilityCounter++ }, condition: thisAbilitySplit[0] });
                     }
                     // Implied Eval Multiline Condition
                     else if(parsingType === "none" && hasCondition && !hasAbility) {
                         // merge abilities of this condition
                         let subAbilitiesCondition = parseAbilities(abilities, i + 1, depth + 1, "evaluate_condition");
                         subAbilitiesCondition = delParamInplace(subAbilitiesCondition);
-                        const abilitiesAbility = { ability: { type: "abilities", sub_abilities: subAbilitiesCondition }, condition: thisAbilitySplit[0] };
+                        const abilitiesAbility = { ability: { type: "abilities", sub_abilities: subAbilitiesCondition, id: abilityCounter++ }, condition: thisAbilitySplit[0] };
                         i += subAbilitiesCondition.length;
                         // find further conditions
                         let subAbilitiesRest = parseAbilities(abilities, i + 1, depth, "evaluate");
@@ -304,14 +308,14 @@ module.exports = function() {
                         subAbilities = delParamInplace(subAbilities);
                         i += subAbilities.length;
                         // create for each object
-                        let forEach = { ability: { type: "for_each", sub_abilities: subAbilities, target: abilityFirst.ability.target } };
+                        let forEach = { ability: { type: "for_each", sub_abilities: subAbilities, target: abilityFirst.ability.target, id: abilityCounter++ } };
                         if(abilityFirst.parameters) forEach.parameters = abilityFirst.parameters;
                         abilitiesParsed.push(forEach);
                     }
                     // For Each (Inline)
                     else if(parsingType === "none" && abilityFirst && abilityFirst.ability.type === "for_each" && hasAbility) {
                         // create for each object
-                        let forEach = { ability: { type: "for_each", sub_abilities: [ { ability: ability.ability } ], target: abilityFirst.ability.target } };
+                        let forEach = { ability: { type: "for_each", sub_abilities: [ { ability: ability.ability } ], target: abilityFirst.ability.target, id: abilityCounter++ } };
                         if(abilityFirst.parameters) forEach.parameters = abilityFirst.parameters;
                         abilitiesParsed.push(forEach);
                     }
@@ -422,7 +426,7 @@ module.exports = function() {
         /** Always **/
         // doesnt have a condition
         if(!condition) {
-            return { type: "always" };
+            throw new Error(`No Condition`);
         }
         
         /** Otherwise **/
@@ -430,6 +434,12 @@ module.exports = function() {
         fd = exp.exec(condition);
         if(fd) {
             cond = { type: "otherwise" };
+        }
+        /** Always **/
+        exp = new RegExp("^Always$", "g");
+        fd = exp.exec(condition);
+        if(fd) {
+            cond = { type: "always" };
         }
         /** Comparisons **/
         // Equality

@@ -30,6 +30,9 @@ module.exports = function() {
                 }
                 await triggerPlayer(attr.id, triggerName, additionalTriggerData, true);
             break;
+            case "player_group":
+                // cant run triggers as player_group
+            break;
             case "group":
                 await triggerGroup(val, triggerName, additionalTriggerData, true);
             break;

@@ -158,6 +158,12 @@ module.exports = function() {
                 } else {
                     return invalidSelector(selectorTarget);
                 }
+            case "@executor":
+                if(additionalTriggerData.executor) {
+                    return [ additionalTriggerData.executor ];
+                } else {
+                    return invalidSelector(selectorTarget);
+                }
             
             // unknown selector
             default:
@@ -520,6 +526,7 @@ module.exports = function() {
                 let strs = [];
                 // iterate through selector list
                 for(let j = 0; j < parsed.value.length; j++) {
+                    console.log(`${infType}:${parsed.value[j]}`);
                     let txt = srcRefToText(`${infType}:${parsed.value[j]}`, parsed.value[j]);
                     strs.push(txt);
                 }

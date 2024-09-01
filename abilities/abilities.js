@@ -32,6 +32,11 @@ module.exports = function() {
     **/
     this.executeAbility = async function(src_ref, src_name, ability, restrictions = [], additionalTriggerData = {}) {
         try {
+            // if an executor is passed we use that instead of src_ref
+            if(additionalTriggerData.executor) {
+                src_ref = `player_group:${additionalTriggerData.executor}`;
+            }
+            
             // find src role type
             if(!isSrc(src_ref)) src_ref = `unknown:${src_ref}`;
             if(!isSrc(src_name)) src_name = `unknown:${src_name}`;
@@ -43,6 +48,7 @@ module.exports = function() {
                     return;
                 }
             }
+            
             // get/increase quantity
             let quantity = 0;
             if(ability.id) {
@@ -50,6 +56,7 @@ module.exports = function() {
                 if(quantity === -1) await initActionData(src_ref, ability);
                 await increaseActionQuantity(src_ref, ability);
             }
+            
             // execute ability
             abilityLog(`🟢 **Executing Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) \`\`\`${JSON.stringify(ability)}\`\`\``);
             let feedback;
@@ -104,8 +111,10 @@ module.exports = function() {
             
             // return feedback
             return feedback;
-        } catch(err) {
-            console.log(`Error in ability ${ability.type} for ${src_name} (${src_ref})`);
+        } 
+        // Handle Errors
+        catch(err) {
+            console.log(`Error in ability ${ability?.type} for ${src_name} (${src_ref})`);
             console.log(err);
         }
     }
@@ -142,7 +151,6 @@ module.exports = function() {
     **/
     this.abilitySendProm = async function(src_ref, message, color = EMBED_GRAY, ping = false, footer = false, thumbnail = null, title = null) {
         let channel_id = await getSrcRefChannel(src_ref);
-        console.log(channel_id, src_ref);
         if(!channel_id) return;
         
         // get channel
@@ -237,6 +245,7 @@ module.exports = function() {
     player (member id) / role (name)
     player_attr (channel id) / role (name)
     group (channel id) / group (name)
+    player_group (member id) / group (name)
     poll (name) / poll (name)
     **/
     
@@ -250,6 +259,8 @@ module.exports = function() {
         switch(type) {
             case "player":
                 return `<@${val}>`;
+            case "player_group":
+                return `<@${val}> (Group Executor)`;
             case "group":
             case "player_attr":
                 return `<#${val}>`;

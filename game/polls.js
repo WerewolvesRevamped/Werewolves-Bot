@@ -335,7 +335,7 @@ module.exports = function() {
         
         // generate output
         let outputLines = [];
-        let maxVotes = -1, maxVotesData = [];
+        let maxVotes = -1, maxVotesData = [], maxVotesValidVoters = [];
         for(let j = 0; j < allReactions.length; j++) {
             const reac = allReactions[j];
             const voters = reac.users.filter(el => allowedVoters.indexOf(el.id) > -1);
@@ -372,8 +372,10 @@ module.exports = function() {
             // check if winner
             if(votes == maxVotes && candidate != "Abstain") {
                 maxVotesData.push(candidate);
+                maxVotesValidVoters = [];
             } else if(votes > maxVotes && candidate != "Abstain") {
                 maxVotesData = [ candidate ];
+                maxVotesValidVoters = validVoters.map(el => el.id);
                 maxVotes = votes;
             }
         }
@@ -428,7 +430,19 @@ module.exports = function() {
         
         // on poll closed trigger
         if(doTrigger) {
-            await trigger(pollData.src_ref, "On Poll Closed", { winner: maxVotesData[0] }); 
+            let srcType = srcToType(pollData.src_ref);
+            switch(srcType) {
+                // default direct trigger execution
+                default:
+                    await trigger(pollData.src_ref, "On Poll Closed", { winner: maxVotesData[0] }); 
+                break;
+                // for group polls a random executor is chosen
+                case "group":
+                    let executor = shuffleArray(maxVotesValidVoters)[0];
+                    await trigger(pollData.src_ref, "On Poll Closed", { winner: maxVotesData[0], executor: executor }); 
+                break;
+                
+            }
         }
         
         // remove all reactions
