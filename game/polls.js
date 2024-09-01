@@ -181,6 +181,30 @@ module.exports = function() {
     }
     
     /** PUBLIC
+    Option List to Data
+    **/
+    this.optionListData = async function(options) {
+        let allOptions = [];
+        for(let i = 0; i < options.length; i++) {
+            // player selector
+            if(options[i][0] === "@") {
+                let players = await parsePlayerSelector(options[i]);
+                players = players.map(el => {
+                    let id = el;
+                    let emoji = idToEmoji(el);
+                    return { id: id, emoji: emoji, type: "player" };
+                });
+                allOptions.push(...players);
+            }
+            // not player
+            else {
+                allOptions.push({ name: options[i], emoji: pollNameToEmoji(options[i]), type: "emoji" });
+            }
+        }
+        return allOptions;
+    }
+    
+    /** PUBLIC
     Create Poll
     pollName: Name of the poll
     pollLocation: Output of parseLocation
@@ -340,7 +364,9 @@ module.exports = function() {
             let candidateName = candidate.match(/^\d+$/) ? `<@${candidate}>` : candidate;
             
             // create message
-            let msg =  `(${votes}) ${reac.emoji} ${candidateName} **-** ${validVoters}` + (invalidVoters.length>0 ? ` (Invalid Votes: ${invalidVoters})` : "");
+            let msg;
+            if(showVoters) msg = `(${votes}) ${reac.emoji} ${candidateName} **-** ${validVoters}` + (invalidVoters.length>0 ? ` (Invalid Votes: ${invalidVoters})` : "");
+            else msg = `(${votes}) ${reac.emoji} ${candidateName}`;
             outputLines.push(msg);
             
             // check if winner
@@ -359,6 +385,17 @@ module.exports = function() {
             let embed;
             if(maxVotesData.length === 1) {
                 if(maxVotesData[0].match(/^\d+$/)) { // PLAYER WINNER
+                    msgFull += `\n\n**Winner:** <@${maxVotesData[0]}> with **${maxVotes}** votes!`;
+                    embed = basicEmbed(msgFull, EMBED_GREEN);
+                    doTrigger = true;
+                } else if(maxVotesData[0] === "Random") { // SPECIAL RANDOM WINNER
+                    // select random player
+                    const options = pollTypeData.options.split(", ");
+                    let allOptions = await optionListData(options);
+                    allOptions = allOptions.filter(el => el.type === "player");
+                    allOptions = shuffleArray(allOptions);
+                    maxVotesData[0] = allOptions[0].id;
+                    // player win
                     msgFull += `\n\n**Winner:** <@${maxVotesData[0]}> with **${maxVotes}** votes!`;
                     embed = basicEmbed(msgFull, EMBED_GREEN);
                     doTrigger = true;
@@ -389,9 +426,9 @@ module.exports = function() {
             await channel.send(embed);
         }
         
+        // on poll closed trigger
         if(doTrigger) {
-            // on poll closed trigger
-            await trigger(pollData.src_ref, "On Poll Closed", { winner: `${maxVotesData[0]}` }); 
+            await trigger(pollData.src_ref, "On Poll Closed", { winner: maxVotesData[0] }); 
         }
         
         // remove all reactions
@@ -399,6 +436,7 @@ module.exports = function() {
             let msg = await channel.messages.fetch(messages[i]);
             await msg.reactions.removeAll();
         }
+        
         // unpin
         let initialMsg = await channel.messages.fetch(pollData.initial_message);
         await initialMsg.unpin();
@@ -409,6 +447,35 @@ module.exports = function() {
     **/
     async function pollValue(player_id) {
         return 1; // WIP
+    }
+    
+    
+    /**
+    Converts a poll name to an emoji
+    **/
+    function pollNameToEmoji(name) {
+        name = name.toLowerCase();
+        switch(name) {
+            case "abstain": return "⛔";
+            case "cancel": return "❌";
+            case "random": return "❓";
+            case "yes": return client.emojis.cache.get(stats.yes_emoji);
+            case "no": return client.emojis.cache.get(stats.no_emoji);
+        }
+    }
+
+    /**
+    Converts a poll emoji to a poll name
+    **/
+    function pollEmojiToName(name) {
+        name = name.toLowerCase();
+        switch(name) {
+            case "⛔": return "Abstain";
+            case "❌": return "Cancel";
+            case "❓": return "Random";
+            case client.emojis.cache.get(stats.yes_emoji): return "Yes";
+            case client.emojis.cache.get(stats.no_emoji): return "No";
+        }
     }
     
 }

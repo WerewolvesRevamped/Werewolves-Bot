@@ -142,6 +142,7 @@ module.exports = function() {
     **/
     this.abilitySendProm = async function(src_ref, message, color = EMBED_GRAY, ping = false, footer = false, thumbnail = null, title = null) {
         let channel_id = await getSrcRefChannel(src_ref);
+        console.log(channel_id, src_ref);
         if(!channel_id) return;
         
         // get channel

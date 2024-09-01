@@ -67,24 +67,7 @@ module.exports = function() {
         const options = pollData.options.split(", ");
         const name = pollData.display_name;
         
-        // WIP: NOT CONSIDERING NON PLAYER POLLS
-        let allOptions = [];
-        for(let i = 0; i < options.length; i++) {
-            // player selector
-            if(options[i][0] === "@") {
-                let players = await parsePlayerSelector(options[i], src_ref);
-                players = players.map(el => {
-                    let id = el;
-                    let emoji = idToEmoji(el);
-                    return { id: id, emoji: emoji, type: "player" };
-                });
-                allOptions.push(...players);
-            }
-            // not player
-            else {
-                allOptions.push({ name: options[i], emoji: pollNameToEmoji(options[i]), type: "emoji" });
-            }
-        }
+        const allOptions = await optionListData(options);
         
         // calculate poll count
         let pollCount = 1;
@@ -108,28 +91,6 @@ module.exports = function() {
         
         // feedback - poll creation always creates obvious feedback and needs no text feedback
         return { msg: "", success: true };
-    }
-
-    function pollNameToEmoji(name) {
-        name = name.toLowerCase();
-        switch(name) {
-            case "abstain": return "⛔";
-            case "cancel": return "❌";
-            case "random": return "❓";
-            case "yes": return client.emojis.cache.get(stats.yes_emoji);
-            case "no": return client.emojis.cache.get(stats.no_emoji);
-        }
-    }
-
-    this.pollEmojiToName = function(name) {
-        name = name.toLowerCase();
-        switch(name) {
-            case "⛔": return "Abstain";
-            case "❌": return "Cancel";
-            case "❓": return "Random";
-            case client.emojis.cache.get(stats.yes_emoji): return "Yes";
-            case client.emojis.cache.get(stats.no_emoji): return "No";
-        }
     }
     
     
