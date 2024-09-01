@@ -8,7 +8,7 @@ module.exports = function() {
     Debug Mode
     If set to true does console.log, if set to false does throw
     **/
-    const debugMode = true;
+    const debugMode = false;
     
     /**
     Ability Counter
@@ -70,7 +70,7 @@ module.exports = function() {
             const thisTriggerName = thisTrigger[0];
             
             // parse abilities
-            let thisTriggerAbilities = parseAbilities(thisTrigger[1]);
+            let thisTriggerAbilities = parseAbilities(thisTrigger[1]).abilities;
 
             
             // abilities
@@ -250,8 +250,8 @@ module.exports = function() {
                         // requires parsing of sub abilities
                         ability.ability.type = thisAbilitySplit[0].toLowerCase(); // update type - it starts out as parameters
                         let subAbilities = parseAbilities(abilities, i + 1, depth + 1, ability.ability.type);
-                        ability.ability.sub_abilities = delParamInplace(subAbilities);
-                        i += subAbilities.length;
+                        i = subAbilities.index;
+                        ability.ability.sub_abilities = delParamInplace(subAbilities.abilities);
                         abilitiesParsed.push(ability);    
                     }
                     // Process/Evaluate's Action
@@ -273,21 +273,21 @@ module.exports = function() {
                     // Evaluate Multi-line Condition
                     else if(parsingType === "evaluate" && hasCondition && !hasAbility) {
                         let subAbilities = parseAbilities(abilities, i + 1, depth + 1, "evaluate_condition");
-                        subAbilities = delParam(subAbilities);
-                        i += subAbilities.length;
+                        i = subAbilities.index;
+                        subAbilities = delParam(subAbilities.abilities);
                         abilitiesParsed.push({ ability: { type: "abilities", sub_abilities: subAbilities, id: abilityCounter++ }, condition: thisAbilitySplit[0] });
                     }
                     // Implied Eval Multiline Condition
                     else if(parsingType === "none" && hasCondition && !hasAbility) {
                         // merge abilities of this condition
                         let subAbilitiesCondition = parseAbilities(abilities, i + 1, depth + 1, "evaluate_condition");
-                        subAbilitiesCondition = delParamInplace(subAbilitiesCondition);
+                        i = subAbilitiesCondition.index;
+                        subAbilitiesCondition = delParamInplace(subAbilitiesCondition.abilities);
                         const abilitiesAbility = { ability: { type: "abilities", sub_abilities: subAbilitiesCondition, id: abilityCounter++ }, condition: thisAbilitySplit[0] };
-                        i += subAbilitiesCondition.length;
                         // find further conditions
                         let subAbilitiesRest = parseAbilities(abilities, i + 1, depth, "evaluate");
-                        subAbilitiesRest = delParamInplace(subAbilitiesRest);
-                        i += subAbilitiesRest.map(el => el.ability.sub_abilities.length).reduce((a,b) => a+b);
+                        i = subAbilitiesRest.index;
+                        subAbilitiesRest = delParamInplace(subAbilitiesRest.abilities);
                         // create evaluate object
                         let eval = { ability: { type: "evaluate", sub_abilities: [ abilitiesAbility, ...subAbilitiesRest ] } };
                         if(ability.parameters) eval.parameters = ability.parameters;
@@ -296,17 +296,17 @@ module.exports = function() {
                     // Implied Evaluate condition
                     else if(parsingType === "none" && hasCondition && hasAbility) {
                         const abilityWithCond = { ability: ability.ability, condition: thisAbilitySplit[0] }; // add condition to ability
-                        let subAbilities = [abilityWithCond, ...parseAbilities(abilities, i + 1, depth, "evaluate")]; // combine current ability and future subabilities
-                        subAbilities = delParamInplace(subAbilities);
-                        i += subAbilities.length - 1; // 1 less because current one is in there as well
-                        abilitiesParsed.push({ ability: { type: "evaluate", sub_abilities: subAbilities } });
+                        let subAbilities = parseAbilities(abilities, i + 1, depth, "evaluate");
+                        i = subAbilities.index;
+                        subAbilities = delParamInplace(subAbilities.abilities);
+                        abilitiesParsed.push({ ability: { type: "evaluate", sub_abilities: [abilityWithCond, ...subAbilities] } });
                     }
                     // For Each (Multiline)
                     else if(parsingType === "none" && abilityFirst && abilityFirst.ability.type === "for_each" && !hasAbility) {
                         // get abilities contained in the for each
                         let subAbilities = parseAbilities(abilities, i + 1, depth + 1, "none");
-                        subAbilities = delParamInplace(subAbilities);
-                        i += subAbilities.length;
+                        i = subAbilities.index;
+                        subAbilities = delParamInplace(subAbilities.abilities);
                         // create for each object
                         let forEach = { ability: { type: "for_each", sub_abilities: subAbilities, target: abilityFirst.ability.target, id: abilityCounter++ } };
                         if(abilityFirst.parameters) forEach.parameters = abilityFirst.parameters;
@@ -363,10 +363,10 @@ module.exports = function() {
                         abilitiesParsed[i - 1] = { ability: { type: "process", sub_abilities: [ { ability: abilitiesParsed[i - 1].ability } ] }, parameters: abilitiesParsed[i - 1].parameters };
                         // add condition to current element
                         const abilityWithCond = { ability: ability.ability, condition: thisAbilitySplit[0] }; // add condition to ability
-                        let subAbilities = [abilityWithCond, ...parseAbilities(abilities, i + 1, depth, "evaluate")]; // combine current ability and future subabilities
-                        subAbilities = delParamInplace(subAbilities);
-                        i += subAbilities.length - 1; // 1 less because current one is in there as well
-                        abilitiesParsed.push({ ability: { type: "evaluate", sub_abilities: subAbilities } });
+                        let subAbilities = parseAbilities(abilities, i + 1, depth, "evaluate"); 
+                        i = subAbilities.index; 
+                        subAbilities = delParamInplace(subAbilities.abilities);
+                        abilitiesParsed.push({ ability: { type: "evaluate", sub_abilities: [ abilityWithCond, ...subAbilities ] } });
                     }
                     // implied process with multiline evaluate conditions
                     if(!hasAbility && hasCondition && ability && abilitiesParsed[i - 1]) {
@@ -374,13 +374,13 @@ module.exports = function() {
                         abilitiesParsed[i - 1] = { ability: { type: "process", sub_abilities: [ { ability: abilitiesParsed[i - 1].ability } ] }, parameters: abilitiesParsed[i - 1].parameters };
                         // merge abilities of this condition
                         let subAbilitiesCondition = parseAbilities(abilities, i + 1, depth + 1, "evaluate_condition");
-                        subAbilitiesCondition = delParamInplace(subAbilitiesCondition);
+                        i = subAbilitiesCondition.index;
+                        subAbilitiesCondition = delParamInplace(subAbilitiesCondition.abilities);
                         const abilitiesAbility = { ability: { type: "abilities", sub_abilities: subAbilitiesCondition }, condition: thisAbilitySplit[0] };
-                        i += subAbilitiesCondition.length;
                         // find further conditions
                         let subAbilitiesRest = parseAbilities(abilities, i + 1, depth, "evaluate");
-                        subAbilitiesRest = delParamInplace(subAbilitiesRest);
-                        i += subAbilitiesRest.length;
+                        i = subAbilitiesRest.index;
+                        subAbilitiesRest = delParamInplace(subAbilitiesRest.abilities);
                         // create evaluate object
                         let eval = { ability: { type: "evaluate", sub_abilities: [ abilitiesAbility, ...subAbilitiesRest ] } };
                         if(ability.parameters) eval.parameters = ability.parameters;
@@ -397,12 +397,12 @@ module.exports = function() {
                 }
             } else if(depth < parsingDepth) { // sub-parsing complete, return
                 if(debugMode) console.log(`SUB-PARSING DONE`);
-                return abilitiesParsed;
+                return { abilities: abilitiesParsed, index: i - 1 };
             }
         }
         // return
         if(debugMode) console.log(`PARSING DONE`);
-        return abilitiesParsed;
+        return { abilities: abilitiesParsed, index: abilities.length - 1 };
     }
     
     /**
@@ -1129,9 +1129,24 @@ module.exports = function() {
             ability = { type: "copying", subtype: "full", target: ttpp(fd[1]), copy_to: "@self[player]", suppressed: true, duration: dd(fd[2], "permanent") };
         }
         /** CHOICES **/
-        
-        /** WIP - NEEDS DOING **/
-        
+        // choice choosing
+        exp = new RegExp("^" + targetType + " Choice Choose " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "choices", subtype: "choosing", choice: ttpp(fd[1], "choice"), option: ttpp(fd[2], "option") };
+        }
+        // choice creation
+        exp = new RegExp("^" + targetType + " Choice Creation$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "choices", subtype: "choosing", choice: ttpp(fd[1], "choice"), target: "@self[player]" };
+        }
+        // choice creation
+        exp = new RegExp("^" + targetType + " Choice Creation for " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "choices", subtype: "choosing", choice: ttpp(fd[1], "choice"), target: ttpp(fd[2]) };
+        }
         /** ASCEND DESCEND **/
         // ascend
         exp = new RegExp("^Ascend$", "g");
@@ -1487,6 +1502,8 @@ module.exports = function() {
     success (a boolean like value for ability results, may be compared to a result)
     number
     activeExtaRole (an active extra role)
+    choice (name of a choice)
+    option (name of an option in a choice)
     **/
     function ttpp(targetType, defaultType = "infer") {
         // pre-existing type annotation
@@ -1523,6 +1540,7 @@ module.exports = function() {
                 case "@Result": case "@Result1": case "@Result2": case "@Result3": 
                 case "@Result4": case "@Result5": case "@Result6": case "@Result7": 
                 case "@ActionResult": return "result";
+                case "@Chosen": return "option";
                 default: return "player";
             }
         } else if(first == "#") {
