@@ -26,7 +26,7 @@ module.exports = function() {
             break;
             // DYNAMIC
             case "dynamic":
-                let comp = scaling.compare;
+                let comp = await parseNumber(scaling.compare);
                 let compTo = scaling.compare_to;
                 let quant = scaling.quantity;
                 switch(scaling.compare_type) {

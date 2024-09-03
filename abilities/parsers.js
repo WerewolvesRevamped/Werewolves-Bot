@@ -629,6 +629,7 @@ module.exports = function() {
     this.parseNumber = async function(selector) {
         // get target
         let selectorTarget = selectorGetTarget(selector);
+        selectorTarget = selectorTarget.replace(/`/g,"");
         // is number?
         if(!isNaN(selectorTarget)) { // direct number
             return +selectorTarget;
@@ -656,7 +657,7 @@ module.exports = function() {
             let totalCount = players.length;
             let aliveCount = players.filter(el => el.alive === "1");
             txt = txt.replace(/\$total/, totalCount);
-            txt = txt.replace(/\$alive/, aliveCount);
+            txt = txt.replace(/\$living/, aliveCount);
             txt = txt.replace(/\$phase/, getPhaseAsNumber());
             return txt;
     }

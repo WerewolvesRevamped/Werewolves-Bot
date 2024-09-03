@@ -72,6 +72,12 @@ module.exports = function() {
             sql("SELECT players.id,active_attributes.ai_id,active_attributes.val1 AS role,active_attributes.val2 AS channel_id FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.attr_type='role' AND id=" + connection.escape(player_id), async r => {
                 // iterate through additional roles
                 for(let i = 0; i < r.length; i++) {
+                //trigger handler
+                    if(!r[i] || !r[i].role) {
+                        abilityLog(`❗ **Skipped Trigger:** Cannot find valid role for ${player_id} #${i}.`);
+                        res();
+                        return;
+                    }
                     await triggerHandlerPlayerRoleAttribute(r[i], triggerName, additionalTriggerData);
                     await useAttribute(r[i].ai_id);
                 }
@@ -166,6 +172,11 @@ module.exports = function() {
             sql("SELECT players.id,active_attributes.ai_id,active_attributes.val1 AS role,active_attributes.val2 AS channel_id FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.attr_type='role'", async r => {
                 // get their role's data
                 for(let pr of r) {
+                    if(!pr || !pr.role) {
+                        abilityLog(`❗ **Skipped Trigger:** Cannot find valid role for ${pr.id} #${i}.`);
+                        res();
+                        return;
+                    }
                     await triggerHandlerPlayerRoleAttribute(pr, triggerName, additionalTriggerData);
                     await useAttribute(pr.ai_id); 
                 }
@@ -218,14 +229,19 @@ module.exports = function() {
     handles trigger triggering for a single player
     **/
     async function triggerHandlerPlayer(pr, triggerName, additionalTriggerData = {}) {
-        await new Promise(res => {
+        return await new Promise(res => {
             sql("SELECT * FROM roles WHERE name=" + connection.escape(pr.role), async result => {
                 if(!result[0]) {
                     abilityLog(`🔴 **Skipped Player:** <@${toTitleCase(pr.id)}>. Unknown role \`${toTitleCase(pr.role)}\`.`);
                     res();
+                    return;
                 }
                 // parse the formalized desc into an object
-                if(result[0].parsed) res();
+                if(!result[0].parsed) {
+                    abilityLog(`🔴 **Skipped Player:** <@${toTitleCase(pr.id)}>. Invalid role \`${toTitleCase(pr.role)}\`.`);
+                    res();
+                    return;
+                }
                 let parsed = JSON.parse(result[0].parsed);
                 await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `player:${pr.id}`, `role:${pr.role}`);
                 // resolve outer promise
@@ -239,14 +255,19 @@ module.exports = function() {
     handles trigger triggering for a single player's role attribute
     **/
     async function triggerHandlerPlayerRoleAttribute(pr, triggerName, additionalTriggerData = {}) {
-        await new Promise(res => {
+        return await new Promise(res => {
             sql("SELECT * FROM roles WHERE name=" + connection.escape(pr.role), async result => {
                 if(!result[0]) {
                     abilityLog(`🔴 **Skipped Player:** <@${toTitleCase(pr.id)}> (<#${pr.channel_id}>). Unknown role \`${toTitleCase(pr.role)}\`.`);
                     res();
+                    return;
                 }
                 // parse the formalized desc into an object
-                if(result[0].parsed) res();
+                if(!result[0].parsed) {
+                    abilityLog(`🔴 **Skipped Player:** <@${toTitleCase(pr.id)}> (<#${pr.channel_id}>). Invalid role \`${toTitleCase(pr.role)}\`.`);
+                    res();
+                    return;
+                }
                 let parsed = JSON.parse(result[0].parsed);
                 await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `player_attr:${pr.channel_id}`, `role:${pr.role}`);
                 // resolve outer promise
@@ -260,14 +281,19 @@ module.exports = function() {
     handles trigger triggering for a single group
     **/
     async function triggerHandlerGroup(pr, triggerName, additionalTriggerData = {}) {
-        await new Promise(res => {
+        return await new Promise(res => {
             sql("SELECT * FROM groups WHERE name=" + connection.escape(pr.name), async result => {
                 if(!result[0]) {
                     abilityLog(`🔴 **Skipped Group:** <#${pr.channel_id}>. Unknown group \`${toTitleCase(pr.name)}\`.`);
                     res();
+                    return;
                 }
                 // parse the formalized desc into an object
-                if(result[0].parsed) res();
+                if(!result[0].parsed) {
+                    abilityLog(`🔴 **Skipped Group:** <#${pr.channel_id}>. Invalid group \`${toTitleCase(pr.name)}\`.`);
+                    res();
+                    return;
+                }
                 let parsed = JSON.parse(result[0].parsed);
                 await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `group:${pr.channel_id}`, `group:${pr.name}`);
                 // resolve outer promise
@@ -281,10 +307,12 @@ module.exports = function() {
     **/
     async function triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, src_ref, src_name) {
         if(!parsed || !parsed.triggers) return;
+        const triggerNameFormatted = triggerName.trim().toLowerCase().replace(/[^a-z]/g,"");
+        
         // grab the triggers
         let triggers = parsed.triggers;
         // filter out the relevant triggers
-        triggers = triggers.filter(el => el.trigger == triggerName);
+        triggers = triggers.filter(el => el.trigger.trim().toLowerCase().replace(/[^a-z]/g,"") == triggerNameFormatted);
         // execute all relevant triggers
         for(const trigger of triggers) {
             // COMPLEX TRIGGERS
@@ -345,6 +373,7 @@ module.exports = function() {
         
         // if action count is zero, then no action at all
         if(actionCount === 0) {
+            abilityLog(`🔴 **Skipped Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}). Action count is \`0\`.`);
             return;
         }
         
