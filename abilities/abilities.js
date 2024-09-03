@@ -20,6 +20,7 @@ require("./types/process_evaluate.js")();
 require("./types/announcement.js")();
 require("./types/poll.js")();
 require("./types/granting.js")();
+require("./types/manipulating.js")();
 
 module.exports = function() {
     
@@ -100,6 +101,9 @@ module.exports = function() {
                 break;
                 case "granting":
                     feedback = await abilityGranting(src_ref, src_name, ability, additionalTriggerData);
+                break;
+                case "manipulating":
+                    feedback = await abilityManipulating(src_ref, src_name, ability, additionalTriggerData);
                 break;
             }
             

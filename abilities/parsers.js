@@ -657,6 +657,7 @@ module.exports = function() {
             let aliveCount = players.filter(el => el.alive === "1");
             txt = txt.replace(/\$total/, totalCount);
             txt = txt.replace(/\$alive/, aliveCount);
+            txt = txt.replace(/\$phase/, getPhaseAsNumber());
             return txt;
     }
     
@@ -738,6 +739,23 @@ module.exports = function() {
         } else {
             abilityLog(`❗ **Error:** Invalid phase type \`${phase_type}\`. Defaulted to \`all\`!`);
             return "all";
+        }
+    }
+    
+    /**
+    Parse Manip Type
+    parses a manipulation type
+    defaults to "public" (public voting power);
+    **/
+    const manipTypes = ["public voting power","special public voting power","private voting power","public starting votes"];
+    const manipTypesShort = ["public","special","private","starting"];
+    this.parseManipType = function(manip_type) {
+        manip_type = manip_type.toLowerCase();
+        if(manipTypes.includes(manip_type)) {
+            return manipTypesShort[manipTypes.indexOf(manip_type)];
+        } else {
+            abilityLog(`❗ **Error:** Invalid manipulation type \`${manip_type}\`. Defaulted to \`public\`!`);
+            return "public";
         }
     }
     

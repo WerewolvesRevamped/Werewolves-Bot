@@ -294,6 +294,8 @@ module.exports = function() {
         const channel = mainGuild.channels.cache.get(channelId);
         const pollType = pollData.type;
         const pollName = pollData.name;
+        const pollIsPublic = isPublic(channel);
+        const pollPublicType = pollIsPublic ? "public" : "private";
         
         // go through reactions
         let allReactions = [];
@@ -347,7 +349,7 @@ module.exports = function() {
             // evaluate vote count
             let votes = 0;
             for(let i = 0; i < validVoters.length; i++) {
-                votes += await pollValue(validVoters[i]);
+                votes += await pollValue(validVoters[i].id, pollPublicType);
             }
             
             // if no votes, continue
@@ -365,7 +367,7 @@ module.exports = function() {
             
             // create message
             let msg;
-            if(showVoters) msg = `(${votes}) ${reac.emoji} ${candidateName} **-** ${validVoters}` + (invalidVoters.length>0 ? ` (Invalid Votes: ${invalidVoters})` : "");
+            if(showVoters) msg = `(${votes}) ${reac.emoji} ${candidateName} **-** ${validVoters.join(', ')}` + (invalidVoters.length>0 ? ` (Invalid Votes: ${invalidVoters.join(', ')})` : "");
             else msg = `(${votes}) ${reac.emoji} ${candidateName}`;
             outputLines.push(msg);
             
@@ -459,8 +461,43 @@ module.exports = function() {
     /** PRIVATE
     Evaluate vote value
     **/
-    async function pollValue(player_id) {
-        return 1; // WIP
+    async function pollValue(player_id, type) {
+        if(type === "private") { // PRIVATE POLLS
+            const voteManipulations = await getManipulations(player_id, "private");
+            let voteValue = 1;
+            // add private votes
+            for(let i = 0; i < voteManipulations.length; i++) {
+                switch(voteManipulations[i].val1) {
+                    case "absolute": voteValue = + voteManipulations[i].val3; break;
+                    case "relative": voteValue += + voteManipulations[i].val3; break;
+                }
+            }
+            // return vote total
+            return voteValue;
+        } else if(type === "public") { // PUBLIC POLLS
+            const voteManipulations = await getManipulations(player_id, "public");
+            const specialVoteManipulations = await getManipulations(player_id, "special");
+            let voteValue = 1, specialVoteValue = 0;
+            // add public votes
+            for(let i = 0; i < voteManipulations.length; i++) {
+                switch(voteManipulations[i].val1) {
+                    case "absolute": voteValue = + voteManipulations[i].val3; break;
+                    case "relative": voteValue += + voteManipulations[i].val3; break;
+                }
+            }
+            // add special votes
+            for(let i = 0; i < specialVoteManipulations.length; i++) {
+                switch(specialVoteManipulations[i].val1) {
+                    case "absolute": specialVoteValue = + specialVoteManipulations[i].val3; break;
+                    case "relative": specialVoteValue += + specialVoteManipulations[i].val3; break;
+                }
+            }
+            // return vote total
+            let totalVotes = voteValue + ((voteValue>=0 ? 1 : -1) * specialVoteValue);
+            return totalVotes;
+        } else { // UNKNOWN / OTHER POLLS
+            return 1;
+        }
     }
     
     

@@ -54,7 +54,7 @@ module.exports = function() {
 				channel.send("✳️ Sending a list of currently existing active attributes instances:\nAI ID: AttrType - Owner (Duration) [Values] {Source}");
 				// Send message
 				chunkArray(result.map(attribute => {
-                    return `\`${attribute.ai_id}\`: **${toTitleCase(attribute.attr_type)}** - <@${attribute.owner}> (~${toTitleCase(attribute.duration)}) [${attribute.val1};${attribute.val2};${attribute.val3};${attribute.val4}] {${srcNameToText(src_name)}}:${srcRefToText(src_ref)}}`;
+                    return `\`${attribute.ai_id}\`: **${toTitleCase(attribute.attr_type)}** - <@${attribute.owner}> (~${toTitleCase(attribute.duration)}) [${attribute.val1};${attribute.val2};${attribute.val3};${attribute.val4}] {${srcNameToText(attribute.src_name)}:${srcRefToText(attribute.src_ref)}}`;
                 }), 20).map(el => el.join("\n")).forEach(el => channel.send(el));
 			} else { 
 				// No attributes exist
@@ -135,8 +135,8 @@ module.exports = function() {
     Create Manipulation Attribute
     creates a manipulation attribute with a specific manipulation subtype and a value for the manipulation
     **/
-    this.createManipulationAttribute = async function(src_name, src_ref, target_player, dur, subtype = "public voting power", val = 1) {
-        await createAttribute(src_name, src_ref, target_player, dur, "manipulation", subtype, val);
+    this.createManipulationAttribute = async function(src_name, src_ref, target_player, dur, type = "absolute", subtype = "public", val = 1) {
+        await createAttribute(src_name, src_ref, target_player, dur, "manipulation", type, subtype, val);
     }
     
     /**

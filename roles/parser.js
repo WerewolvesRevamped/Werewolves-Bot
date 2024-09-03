@@ -282,7 +282,7 @@ module.exports = function() {
                         // merge abilities of this condition
                         let subAbilitiesCondition = parseAbilities(abilities, i + 1, depth + 1, "evaluate_condition");
                         i = subAbilitiesCondition.index;
-                        subAbilitiesCondition = delParamInplace(subAbilitiesCondition.abilities);
+                        subAbilitiesCondition = delParam(subAbilitiesCondition.abilities);
                         const abilitiesAbility = { ability: { type: "abilities", sub_abilities: subAbilitiesCondition, id: abilityCounter++ }, condition: thisAbilitySplit[0] };
                         // find further conditions
                         let subAbilitiesRest = parseAbilities(abilities, i + 1, depth, "evaluate");
