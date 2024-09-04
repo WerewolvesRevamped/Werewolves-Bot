@@ -41,7 +41,6 @@ module.exports = function() {
 		cmdGamephaseSet(channel, ["set", gp.INGAME]);
 		// Cache emojis
 		getEmojis();	
-		getVotes();
 		getCCs();
 		cacheRoleInfo();
         getPRoles();
@@ -365,14 +364,6 @@ module.exports = function() {
                 channel.send("⛔ Database error. Could not reset player list!");
             });
         }
-		// Reset polls
-		// Reset Poll Database
-		sql("DELETE FROM polls", result => {
-			channel.send("✅ Successfully reset poll list!");
-			getEmojis();
-		},() => {
-			channel.send("⛔ Database error. Could not reset poll list!");
-		});
         // reset active groups
         groupsReset();
         // reset active attributes

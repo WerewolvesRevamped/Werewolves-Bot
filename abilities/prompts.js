@@ -19,11 +19,13 @@ module.exports = function() {
     **/
     this.getPromptMessage = function(ability, promptOverwrite, type1 = "", type2 = "") {
         // apply prompt overwrite if applicable
-        let poSplit = promptOverwrite.split(":");
-        if(promptOverwrite && prompts[promptOverwrite]) {
-            return prompts[promptOverwrite];
-        } else if(poSplit[1] && prompts[poSplit[1]]) {
-            return prompts[poSplit[1]];
+        if(promptOverwrite) {
+            let poSplit = promptOverwrite.split(":");
+            if(promptOverwrite && prompts[promptOverwrite]) {
+                return prompts[promptOverwrite];
+            } else if(poSplit[1] && prompts[poSplit[1]]) {
+                return prompts[poSplit[1]];
+            }
         }
         // find prompt
         const ty = ability.type ? ability.type.replace(/ /g,"_") : null;
@@ -322,6 +324,7 @@ module.exports = function() {
                     // save prompt applied ability reply
                     promptAppliedAbilities.push(promptAppliedAbility);
                     // check restrictions again
+                    additionalTriggerData.selection = parsedReply[1];
                     for(let i = 0; i < restrictions.length; i++) {
                         let passed = await handleRestriction(src_ref, promptAppliedAbility, restrictions[i], RESTR_POST, parsedReply[1], additionalTriggerData);
                         if(!passed) {
@@ -358,6 +361,8 @@ module.exports = function() {
                     // save prompt applied ability reply
                     promptAppliedAbilities.push(promptAppliedAbility);
                     // check restrictions again
+                    additionalTriggerData.selection = parsedReply1[1];
+                    additionalTriggerData.secondaryselection = parsedReply2[1];
                     for(let i = 0; i < restrictions.length; i++) {
                         let passed = await handleRestriction(src_ref, promptAppliedAbility, restrictions[i], RESTR_POST, parsedReply1[1], additionalTriggerData);
                         if(!passed) {

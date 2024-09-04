@@ -39,7 +39,7 @@ module.exports = function() {
         for(let i = 0; i < evaluate.length; i++) {
             let condition = evaluate[i].condition;
             let condTxt = evaluate[i].condition_text;
-            let condBool = await parseCondition(condition, src_ref, src_name, additionalTriggerData);
+            let condBool = await resolveCondition(condition, src_ref, src_name, additionalTriggerData);
             if(condBool) { // enter final branch
                 abilityLog(`▶️ **Entering Branch:** ${condTxt}`);
                 let result = await executeAbility(src_ref, src_name, evaluate[i].ability, [], additionalTriggerData);
@@ -82,11 +82,11 @@ module.exports = function() {
         return { msg: lastResult.msg, success: lastResult.success };
     }
     
-    /** PRIVATE
+    /** PUBLIC
     parse condition
     we pass all data as it may be necessary for selectors
     **/
-    async function parseCondition(condition, src_ref, src_name, additionalTriggerData) {
+    this.resolveCondition = async function (condition, src_ref, src_name, additionalTriggerData) {
         // check parameters
         if(!condition.type) {
             abilityLog(`❗ **Error:** Missing type for condition!`);
@@ -118,6 +118,8 @@ module.exports = function() {
                         return false;
                     // COMPARISON - EQUAL
                     case "equal":
+                        console.log("FIRST", first);
+                        console.log("SECOND", second);
                         if(first.type === second.type) { // same type, do direct type comparison
                             return first.value === second.value;
                         } else if(first.type === "result" && second.type === "success") {
@@ -129,8 +131,9 @@ module.exports = function() {
                         return false;
                     // COMPARISON - NOT EQUAL
                     case "not_equal":
-                        condition.subtype = "equal";
-                        let condBool = await parseCondition(condition, src_ref, src_name, additionalTriggerData);
+                        let conditionCopy = JSON.parse(JSON.stringify(condition));
+                        conditionCopy.subtype = "equal";
+                        let condBool = await resolveCondition(conditionCopy, src_ref, src_name, additionalTriggerData);
                         return !condBool;
                 }
             // LOGIC
@@ -152,7 +155,7 @@ module.exports = function() {
                             abilityLog(`❗ **Error:** Missing arguments for subtype \`${condition.subtype}\`!`);
                             return false;
                         }
-                        condBool1 = await parseCondition(condition.condition, src_ref, src_name, additionalTriggerData);
+                        condBool1 = await resolveCondition(condition.condition, src_ref, src_name, additionalTriggerData);
                         return !condBool1;
                     // LOGIC - AND
                     case "and":
@@ -160,8 +163,8 @@ module.exports = function() {
                             abilityLog(`❗ **Error:** Missing arguments for subtype \`${condition.subtype}\`!`);
                             return false;
                         }
-                        condBool1 = await parseCondition(condition.condition1, src_ref, src_name, additionalTriggerData);
-                        condBool2 = await parseCondition(condition.condition2, src_ref, src_name, additionalTriggerData);
+                        condBool1 = await resolveCondition(condition.condition1, src_ref, src_name, additionalTriggerData);
+                        condBool2 = await resolveCondition(condition.condition2, src_ref, src_name, additionalTriggerData);
                         return condBool1 && condBool2;
                     // LOGIC - OR
                     case "or":
@@ -169,8 +172,8 @@ module.exports = function() {
                             abilityLog(`❗ **Error:** Missing arguments for subtype \`${condition.subtype}\`!`);
                             return false;
                         }
-                        condBool1 = await parseCondition(condition.condition1, src_ref, src_name, additionalTriggerData);
-                        condBool2 = await parseCondition(condition.condition2, src_ref, src_name, additionalTriggerData);
+                        condBool1 = await resolveCondition(condition.condition1, src_ref, src_name, additionalTriggerData);
+                        condBool2 = await resolveCondition(condition.condition2, src_ref, src_name, additionalTriggerData);
                         return condBool1 || condBool2;
                 }
             // EXISTENCE

@@ -9,9 +9,6 @@
 module.exports = function() {
 	/* Variables */
 	this.emojiIDs = null;
-	this.publicValues = null;
-	this.privateValues = null;
-	this.publicVotes = null;
 	this.ccs = null;
 	this.pRoles = null;
 	
@@ -203,7 +200,7 @@ module.exports = function() {
 				switch(args[1]) {
 					default:
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players [get|get_clean|set|resurrect|signup|list|list_alive|substitute|switch|messages|messages2|log|log2|log3|log4|votes|roles]\n```";
-            help += "```\nFunctionality\n\nGroup of commands to handle players. " + stats.prefix + "help players <sub-command> for detailed help.\n\nList of Player Properties:\nalive: Whether the player is alive`\ntype: What type of player. Can be 'player', 'substitute' and 'substituted'.\nemoji: The emoji the player uses\nrole: The role of the player\npublic_value: The value of the players vote on public polls (Typically 1)\nprivate_value: The value of the players vote on private polls (Typically 1)\npublic_votes: The base value of votes the player has against them on public votes (Typically 0)\nid: The discord id of the player\nccs: the amount of created ccs\npublic_msgs: Amount of messages sent in public channels\nprivate_msgs: Amount of messages sent in private channels\type: The type of player. 0 for default, 1 for substitute.```";
+            help += "```\nFunctionality\n\nGroup of commands to handle players. " + stats.prefix + "help players <sub-command> for detailed help.\n\nList of Player Properties:\nalive: Whether the player is alive`\ntype: What type of player. Can be 'player', 'substitute' and 'substituted'.\nemoji: The emoji the player uses\nrole: The role of the player\nid: The discord id of the player\nccs: the amount of created ccs\npublic_msgs: Amount of messages sent in public channels\nprivate_msgs: Amount of messages sent in private channels\type: The type of player. 0 for default, 1 for substitute.```";
 					  help += "```diff\nAliases\n\n- p\n- player\n```";
 					break;
 					case "get":
@@ -586,34 +583,6 @@ module.exports = function() {
 		});
 	
 	}
-	
-	/* Lists all vote changes */
-	this.cmdPlayersVotes = function(channel) {
-		// Get a list of players
-		sql("SELECT id,emoji,role,alive,public_value,private_value,public_votes,ccs FROM players WHERE type='player'", result => {
-			let playerListArray = result.filter(el => el.alive && (el.public_value != 1 || el.private_value != 1 || el.public_votes != 0)).map(el => `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"} ${el.public_value},${el.private_value},${el.public_votes}`);
-			let playerList = [], counter = 0;
-			for(let i = 0; i < playerListArray.length; i++) {
-				if(!playerList[Math.floor(counter/10)]) playerList[Math.floor(counter/10)] = [];
-				playerList[Math.floor(counter/10)].push(playerListArray[i]);
-				counter++;
-			}
-			channel.send("**Manipulated Players** | Total: " + playerListArray.length +  "\nPublic Value, Private Value, Public Votes");
-			for(let i = 0; i < playerList.length; i++) {
-				// Print message
-				channel.send("✳ Listing players " + i  + "/" + (playerList.length) + "...").then(m => {
-					m.edit(playerList[i].join("\n"));
-				}).catch(err => {
-					logO(err); 
-					sendError(channel, err, "Could not list manipulated players");
-				});
-			}
-		}, () => {
-			// DB error
-			channel.send("⛔ Database error. Could not list manipulated players!");
-		});
-	
-	}
     
 	/* Returns a comman separated role list */
 	this.cmdPlayersRoleList = function(channel) {
@@ -635,7 +604,7 @@ module.exports = function() {
 	/* Lists all signedup players in log format */
 	this.cmdPlayersLog = function(channel) {
 		// Get a list of players
-		sql("SELECT id,emoji,role,alive,public_value,private_value,public_votes,ccs FROM players WHERE type='player'", result => {
+		sql("SELECT id,emoji,role,alive,ccs FROM players WHERE type='player'", result => {
 			let playerListArray = result.map(el => {
                 let player = channel.guild.members.cache.get(el.id);
                 let nickname = player.nickname ? " (as `" + player.nickname + "`)" : "";
@@ -677,7 +646,7 @@ module.exports = function() {
 	/* Lists all signedup players in final results format */
 	this.cmdPlayersLog3 = function(channel) {
 		// Get a list of players
-		sql("SELECT id,emoji,role,alive,public_value,private_value,public_votes,ccs FROM players WHERE type='player'", result => {
+		sql("SELECT id,emoji,role,alive,ccs FROM players WHERE type='player'", result => {
 			let playerList1 = result.filter(el => el.alive == 1).map(el => {
                 let player = channel.guild.members.cache.get(el.id);
                 return `• ${player ? player : "<@" + el.id + ">"} (${el.role.split(",").map(role => toTitleCase(role)).join(", ")})`;
@@ -701,7 +670,7 @@ module.exports = function() {
 	/* Lists all signedup players in final results format */
 	this.cmdPlayersLog4 = function(channel) {
 		// Get a list of players
-		sql("SELECT id,emoji,role,alive,public_value,private_value,public_votes,ccs FROM players WHERE type='player'", result => {
+		sql("SELECT id,emoji,role,alive,ccs FROM players WHERE type='player'", result => {
 			let playerList1 = result.filter(el => el.alive == 1).map(el => {
                 let player = channel.guild.members.cache.get(el.id);
                 return `• ${getRoleEmoji(el.role.split(",")[0])} ${player ? player : "<@" + el.id + ">"} (${el.role.split(",").map(role => toTitleCase(role)).join(", ")})`;
@@ -726,7 +695,7 @@ module.exports = function() {
 	/* Lists all signedup players in a different log format */
 	this.cmdPlayersLog2 = function(channel) {
 		// Get a list of players
-		sql("SELECT id,emoji,role,alive,public_value,private_value,public_votes,ccs FROM players WHERE alive=1 AND type='player'", result => {
+		sql("SELECT id,emoji,role,alive,ccs FROM players WHERE alive=1 AND type='player'", result => {
 			let playerList = result.map(el => {
 				let thisRoles = el.role.split(",").map(role => toTitleCase(role));
 				let thisPlayer = channel.guild.members.cache.get(el.id);
@@ -1031,7 +1000,6 @@ module.exports = function() {
 		setTimeout(function() {
             getIDs();
 			cacheRoleInfo();
-			getVotes();
 			getCCs();
 			getPRoles();
 			getCCCats();
@@ -1056,7 +1024,6 @@ module.exports = function() {
 		}, 3000);
 		setTimeout(function() { // reload data
 			cacheRoleInfo();
-			getVotes();
 			getCCs();
 			getPRoles();
 			getCCCats();
@@ -1172,7 +1139,7 @@ module.exports = function() {
 	}
 	
 	this.isPlayersArgs = function(arg) {
-		let allowedArgs = ["emoji", "role", "orig_role", "alive", "public_value", "private_value", "public_votes", "id", "ccs", "public_msgs", "private_msgs", "type"];
+		let allowedArgs = ["emoji", "role", "orig_role", "alive", "id", "ccs", "public_msgs", "private_msgs", "type"];
 		return allowedArgs.indexOf(arg) >= 0;
 	}
 	
@@ -1227,7 +1194,6 @@ module.exports = function() {
 			let playerName = channel.guild.members.cache.get(user)?.displayName ?? "USER LEFT";
 			channel.send("✅ `" + playerName + "`'s " + args[1] + " value now is `" + args[3] + "`!");
 			updateGameStatus();
-			getVotes();
 			getCCs();
 			getPRoles();
             mayorCheck();
@@ -1612,24 +1578,6 @@ module.exports = function() {
 		});
 	}
 	
-	/* Cache Public Votes */
-	this.getVotes = function() {
-		sql("SELECT id,public_value FROM players", result => {
-				publicValues = result;
-		}, () => {
-			log("Players > ❗❗❗ Unable to cache public values!");
-		});
-		sql("SELECT id,private_value FROM players", result => {
-				privateValues = result;
-		}, () => {
-			log("Players > ❗❗❗ Unable to cache private values!");
-		});
-		sql("SELECT id,public_votes FROM players", result => {
-				publicVotes = result;
-		}, () => {
-			log("Players > ❗❗❗ Unable to cache public votes!");
-		});
-	}
 	
 	this.getCCs = function() {
 		sql("SELECT id,ccs FROM players", result => {

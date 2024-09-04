@@ -653,7 +653,7 @@ module.exports = function() {
             exp = new RegExp("^Condition: (.+)$", "g");
             fd = exp.exec(restrictions[rest]);
             if(fd) {
-                parsedRestrictions.push({ type: "condition", condition: fd[1] });
+                parsedRestrictions.push({ type: "condition", condition: parseCondition(fd[1]) });
                 restFound = true;
             }
             /** DEFAULT **/
@@ -1076,7 +1076,7 @@ module.exports = function() {
         exp = new RegExp("^(Learn|Know) " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "announcement", target: "@self[player]", info: ttpp(fd[2]) };
+            ability = { type: "announcement", target: "@self[location]", info: ttpp(fd[2]) };
         }
         /** ROLE CHANGE **/
         // role change
@@ -1490,6 +1490,7 @@ module.exports = function() {
     role
     attribute
     alignment
+    category
     group
     poll
     abilityType
@@ -1524,7 +1525,25 @@ module.exports = function() {
     **/
     this.inferType = function(targetType) {
         let first = targetType[0];
-        if(first == "&") {
+        if(/->/.test(targetType)) {
+            let properties = targetType.split(/->/);
+            switch(properties[properties.length - 1]) {
+                case "Role": return "role";
+                case "Category": return "category";
+                case "OriginalRole": return "role";
+                case "Alignment": return "alignment";
+                case "Counter": return "unknown";
+                case "PublicVotingPower": return "number";
+                case "PrivateVotingPower": return "number";
+                case "OwnerRole": return "role";
+                case "OwnerPlayer": return "player";
+                case "Value1": return "unknown";
+                case "Value2": return "unknown";
+                case "Value3": return "unknown";
+                case "Value4": return "unknown";
+                case "Members": return "player";
+            }
+        } else if(first == "&") {
             return "alignment";
         } else if(first == "@") {
             switch(targetType) {

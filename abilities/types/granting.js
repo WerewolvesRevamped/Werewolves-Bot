@@ -66,6 +66,12 @@ module.exports = function() {
             }
             await createRoleAttribute(src_name, src_ref, targets[i], "persistent", role, channelId);
             abilityLog(`✅ <@${targets[i]}> was granted ${toTitleCase(role)} at <#${channelId}>.`);
+            // run Starting trigger if new role
+            if(existingChannel.length === 0) { 
+                let latestRoleAttr = await queryAttribute("attr_type", "role");
+                await triggerPlayerRoleAttributeByAttr(latestRoleAttr[latestRoleAttr.length - 1].ai_id, "Starting");
+            }
+            // return result
             if(targets.length === 1) return { msg: "Granting succeeded!", success: true, target: `player:${targets[0]}` };
         }
         return { msg: "Grantings succeeded!", success: true, target: `player:${targets[0]}` };

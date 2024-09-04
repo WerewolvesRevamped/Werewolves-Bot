@@ -60,7 +60,6 @@ client.on("ready", async () => {
         cacheLocations();
         cachePolls();
         getSCCats();
-		getVotes();
 		getCCs();
 		getPRoles();
 		getCCCats();
@@ -85,7 +84,6 @@ async function forceReload(channel) {
     try { getIDs(); channel.send("✅ Loaded ids."); } catch (err) { logO(err); channel.send("⛔ Failed to load ids."); } await sleep(1000);
     try { cacheRoleInfo(); channel.send("✅ Cached role info."); } catch (err) { logO(err); channel.send("⛔ Failed to cache role info."); } await sleep(1000);
     try { getSCCats(); channel.send("✅ Cached sc cats."); } catch (err) { logO(err); channel.send("⛔ Failed to sc cats."); } await sleep(1000);
-    try { getVotes(); channel.send("✅ Cached votes."); } catch (err) { logO(err); channel.send("⛔ Failed to cache votes."); } await sleep(1000);
     try { getCCs(); channel.send("✅ Cached cc cats."); } catch (err) { logO(err); channel.send("⛔ Failed to cache cc cats."); } await sleep(1000);
     try { getPublicCat(); channel.send("✅ Cached public cat."); } catch (err) { logO(err); channel.send("⛔ Failed to cache public cat."); } await sleep(1000);
     try { loadPollValues(); channel.send("✅ Cached poll values."); } catch (err) { logO(err); channel.send("⛔ Failed to cache poll values."); } await sleep(1000);
@@ -313,8 +311,8 @@ client.on("messageCreate", async message => {
             member.voice.setChannel("1075235455123083264");
         }
     break;
-    case "image": // probably not documented?
-        cmdGetImg(message.channel, args.join(" "));
+    case "image": // probably not documented? // WIP: seems to be missing
+        //cmdGetImg(message.channel, args.join(" "));
     break;
     case "card": // probably not documented?
         cmdGetCard(message.channel, args.join(" "));
@@ -761,7 +759,7 @@ client.on('interactionCreate', async interaction => {
         let orig_text = interaction.message.embeds[0].description.split(PROMPT_SPLIT)[0];
         let embed;
         let actionAll = await getAction(interaction.message.id);
-        let invalidReply = basicEmbed(`${orig_text}. Invalid action. You cannot interact with this prompt anymore.`, EMBED_RED);
+        let invalidReply = basicEmbed(`${orig_text}${PROMPT_SPLIT} Invalid action. You cannot interact with this prompt anymore.`, EMBED_RED);
         invalidReply.components = [];
         switch(interaction.customId) {
             default:
@@ -773,7 +771,7 @@ client.on('interactionCreate', async interaction => {
                 if(!actionAll) return interaction.update(invalidReply);
                 // execute immediately
                 await instantQueuedAction(interaction.message.id);
-                embed = basicEmbed(`${orig_text}. Execution confirmed.`, EMBED_GREEN);
+                embed = basicEmbed(`${orig_text}${PROMPT_SPLIT} Execution confirmed.`, EMBED_GREEN);
                 embed.components = [];
                 interaction.update(embed);
             break;
@@ -787,7 +785,7 @@ client.on('interactionCreate', async interaction => {
                 // delete from action queue
                 await deleteQueuedAction(interaction.message.id);
                 // update message
-                embed = basicEmbed(`${orig_text}. Execution cancelled. Reply to this message to submit a new choice.`, EMBED_RED);
+                embed = basicEmbed(`${orig_text}${PROMPT_SPLIT} Execution cancelled. Reply to this message to submit a new choice.`, EMBED_RED);
                 embed.components = [];
                 interaction.update(embed); 
             break;
@@ -803,7 +801,7 @@ client.on('interactionCreate', async interaction => {
                 // delete from action queue
                 await deleteQueuedAction(interaction.message.id);
                 // update message
-                embed = basicEmbed(`${orig_text}. Execution cancelled. You will receive a new prompt in case you change your mind.`, EMBED_RED);
+                embed = basicEmbed(`${orig_text}${PROMPT_SPLIT} Execution cancelled. You will receive a new prompt in case you change your mind.`, EMBED_RED);
                 embed.components = [];
                 interaction.update(embed); 
             break;
@@ -811,7 +809,7 @@ client.on('interactionCreate', async interaction => {
                 if(!actionAll) return interaction.update(invalidReply);
                 // set delay
                 await delayQueuedAction(interaction.message.id);
-                embed = basicEmbed(`${orig_text}. Execution delayed. You may execute the ability immediately or cancel the execution (allowing you to change your selection). If you choose no action the ability will be executed automatically towards the end of the phase.`, EMBED_YELLOW);
+                embed = basicEmbed(`${orig_text}${PROMPT_SPLIT} Execution delayed. You may execute the ability immediately or cancel the execution (allowing you to change your selection). If you choose no action the ability will be executed automatically towards the end of the phase.`, EMBED_YELLOW);
                 let confirmButton = { type: 2, label: "Execute Immediately", style: 3, custom_id: "delay-confirm" };
                 let cancelButton = { type: 2, label: "Cancel", style: 4, custom_id: "delay-cancel" };
                 embed.components = [ { type: 1, components: [ confirmButton, cancelButton ] } ];

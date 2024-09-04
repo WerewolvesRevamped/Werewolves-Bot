@@ -205,7 +205,7 @@ module.exports = function() {
     Get Subphase
     returns the current subphase as a string
     **/
-    const SUBPHASE = {
+    this.SUBPHASE = {
         MAIN: 0,
         LATE: 1,
         LOCKED: 2

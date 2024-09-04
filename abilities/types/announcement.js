@@ -41,6 +41,9 @@ module.exports = function() {
             case "player":
                 abilitySend(`player:${loc.value}`, info, EMBED_GRAY, false, false, img, "Announcement");
             break;
+            case "player_attr":
+                abilitySend(`player_attr:${loc.value}`, info, EMBED_GRAY, false, false, img, "Announcement");
+            break;
             case "group":
                 abilitySend(`group:${loc.value}`, info, EMBED_GRAY, false, false, img, "Announcement");
             break;

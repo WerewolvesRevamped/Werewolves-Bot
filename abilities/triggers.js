@@ -87,6 +87,32 @@ module.exports = function() {
         });
     }
     
+    /**
+    Trigger Player - Role Attribute
+    **/
+    this.triggerPlayerRoleAttributeByAttr = function(ai_id, triggerName, additionalTriggerData, fromTrigger = false) {
+        return new Promise(res => {
+            // get all players
+            sql("SELECT players.id,active_attributes.ai_id,active_attributes.val1 AS role,active_attributes.val2 AS channel_id FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.attr_type='role' AND active_attributes.ai_id=" + connection.escape(ai_id), async r => {
+                if(!fromTrigger) abilityLog(`🔷 **Trigger:** ${triggerName} for <@${r[0].id}> (Role Attribute)`);  
+                // iterate through additional roles
+                for(let i = 0; i < r.length; i++) {
+                //trigger handler
+                    if(!r[i] || !r[i].role) {
+                        abilityLog(`❗ **Skipped Trigger:** Cannot find valid role for ${player_id} #${i}.`);
+                        res();
+                        return;
+                    }
+                    await triggerHandlerPlayerRoleAttribute(r[i], triggerName, additionalTriggerData);
+                    await useAttribute(r[i].ai_id);
+                }
+                // resolve outer promise
+                res();
+            });
+        });
+    }
+
+    
      /**
     Trigger Group
     triggers a trigger for a specified group

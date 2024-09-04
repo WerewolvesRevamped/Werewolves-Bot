@@ -103,8 +103,7 @@ module.exports = function() {
                 if(prePrompt) {
                     return true;
                 } else {
-                    abilityLog(`❗ **Error:** Unknown restriction type \`${restriction.type}\`!`);
-                    return false;
+                    return resolveCondition(restriction.condition, src_ref, null, additionalTriggerData);
                 }
             break;
         }
@@ -132,8 +131,9 @@ module.exports = function() {
                     // get last target
                     let lt = await getLastTarget(src_ref, ability);
                     let lastTarget = lt ? await parsePlayerSelector(lt, src_ref) : null;
+                    if(!lastTarget || !lastTarget[0]) return "";
                     let lastTargetMember = mainGuild.members.cache.get(lastTarget[0]);
-                    return lastTarget ? `You may not target ${lastTargetMember.displayName} again` : "";
+                    return lastTarget ? `You may not target ${lastTargetMember?.displayName ?? '*unknown*'} again` : "";
                 } else {
                     return "";
                 }
