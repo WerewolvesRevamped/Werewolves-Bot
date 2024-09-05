@@ -369,7 +369,7 @@ module.exports = function() {
                         abilitiesParsed.push({ ability: { type: "evaluate", sub_abilities: [ abilityWithCond, ...subAbilities ] } });
                     }
                     // implied process with multiline evaluate conditions
-                    if(!hasAbility && hasCondition && ability && abilitiesParsed[i - 1]) {
+                    else if(!hasAbility && hasCondition && ability && abilitiesParsed[i - 1]) {
                         // rewrite the previous element to a process
                         abilitiesParsed[i - 1] = { ability: { type: "process", sub_abilities: [ { ability: abilitiesParsed[i - 1].ability } ] }, parameters: abilitiesParsed[i - 1].parameters };
                         // merge abilities of this condition
@@ -1491,6 +1491,7 @@ module.exports = function() {
     attribute
     alignment
     category
+    class
     group
     poll
     abilityType

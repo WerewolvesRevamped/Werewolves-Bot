@@ -550,7 +550,7 @@ module.exports = function() {
 		// Set Role
 		if(!invalidRoles.length) {
 			// All roles are valid -> Set it
-			sql("UPDATE players SET role = " + connection.escape(validRoles.join(",")) + " WHERE id = " + connection.escape(el[1]), result => {
+			sql("UPDATE players SET role = " + connection.escape(validRoles.join(",")) + ",orig_role = " + connection.escape(validRoles.join(",")) + " WHERE id = " + connection.escape(el[1]), result => {
 				m.edit(m.content + "\n	✅ Set role to `" + validRoles.join("` + `") + "`!").then(m => {
 				});
 			}, () => {

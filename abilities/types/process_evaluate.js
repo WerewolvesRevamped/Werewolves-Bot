@@ -102,6 +102,9 @@ module.exports = function() {
             // ALWAYS
             case "always":
                 return false;
+            // OTHERWISE
+            case "otherwise":
+                return true;
             // COMPARISON
             case "comparison":
                 if(!condition.subtype || !condition.first || !condition.second) {
@@ -111,6 +114,9 @@ module.exports = function() {
                 const first = await parseSelector(condition.first, src_ref, additionalTriggerData);
                 const second = await parseSelector(condition.second, src_ref, additionalTriggerData);
                 
+                //console.log("FIRST", first.type, first.value[0]);
+                //console.log("SECOND", second.type, second.value[0]);
+                
                 // switch by subtype
                 switch(condition.subtype) {
                     default:
@@ -118,20 +124,22 @@ module.exports = function() {
                         return false;
                     // COMPARISON - EQUAL
                     case "equal":
-                        console.log("FIRST", first);
-                        console.log("SECOND", second);
                         if(first.type === second.type) { // same type, do direct type comparison
                             return first.value === second.value;
                         } else if(first.type === "result" && second.type === "success") {
                             return first.value[0].success === second.value[0];
                         } else if(first.type === "success" && second.type === "result") {
                             return first.value[0] === second.value[0].success;
+                        } else if(first.type === "number" && second.type === "result") {
+                            return first.value[0] === (await parseNumber(second.value[0].result));
+                        }else if(first.type === "result" && second.type === "number") {
+                            return (await parseNumber(first.value[0].result)) === second.value[0];
                         }
                         // no comparison can be made
                         return false;
                     // COMPARISON - NOT EQUAL
                     case "not_equal":
-                        let conditionCopy = JSON.parse(JSON.stringify(condition));
+                        let conditionCopy = JSON.parse(JSON.stringify(condition)); // deep clone
                         conditionCopy.subtype = "equal";
                         let condBool = await resolveCondition(conditionCopy, src_ref, src_name, additionalTriggerData);
                         return !condBool;

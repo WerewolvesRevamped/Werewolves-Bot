@@ -53,6 +53,9 @@ module.exports = function() {
             // ABILITY SUBTYPE
             case "abilitysubtype":
                 return { value: [ parseAbilitySubtype(selector) ], type: "abilitySubype" };
+            // NUMBER
+            case "number":
+                return { value: [ await parseNumber(selector) ], type: "number" };
             // UNKNOWN
             default:
                 abilityLog(`❗ **Error:** Invalid selector type \`${selectorType}\`!`);
@@ -230,7 +233,7 @@ module.exports = function() {
         });
     }
     
-    /** PRIVAZE
+    /** PRIVATE
     Parses a property access
     **/
     async function parsePropertyAccess(result, property, type) {

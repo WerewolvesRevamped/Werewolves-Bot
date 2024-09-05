@@ -105,6 +105,10 @@ module.exports = function() {
                 case "manipulating":
                     feedback = await abilityManipulating(src_ref, src_name, ability, additionalTriggerData);
                 break;
+                case "feedback":
+                    let info = await parseInfo(ability.feedback);
+                    feedback = { msg: info, success: true };
+                break;
             }
             
             // on action trigger
