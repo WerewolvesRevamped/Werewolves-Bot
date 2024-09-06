@@ -172,6 +172,14 @@ module.exports = function() {
     }
     
     /**
+    Create Poll Result Attribute
+    creates a poll result attribute
+    **/
+    this.createPollResultAttribute = async function(src_name, src_ref, target_player, dur, poll =  "lynch", subtype = "cancel", target = "", subtype2 = "") {
+        await createAttribute(src_name, src_ref, target_player, dur, "poll_result", poll, subtype, target, subtype2);
+    }
+    
+    /**
     Checks if a attribute column name is valid**/
     function isValidAttributeColumnName(name) {
         return ["owner","src_name","src_ref","attr_type","duration","val1","val2","val3","val4"].includes(name);

@@ -382,12 +382,18 @@ module.exports = function() {
             }
         }
         
+        // attempt poll cancellation
+        let pollCancelled = await attemptPollCancellation(pollType);
+        
         // send poll results
         doTrigger = false;
-        if(outputLines.length > 0) {
+        if(outputLines.length > 0 || pollCancelled) {
             let msgFull = outputLines.join("\n");
             let embed;
-            if(maxVotesData.length === 1) {
+            if(pollCancelled) { // CANCELLED - NO WINNER
+                msgFull += `\n\n**Cancelled:** The poll was cancelled!`;
+                embed = basicEmbed(msgFull, EMBED_RED);
+            } else if(maxVotesData.length === 1) {
                 if(maxVotesData[0].match(/^\d+$/)) { // PLAYER WINNER
                     msgFull += `\n\n**Winner:** <@${maxVotesData[0]}> with **${maxVotes}** votes!`;
                     embed = basicEmbed(msgFull, EMBED_GREEN);
