@@ -55,10 +55,14 @@ module.exports = function() {
         } else if(cachedInfoNames.includes(roleName)) {
             // its an info
             infoEmbed = await getInfoEmbed(roleName, channel.guild);
-        }  else if(cachedLocations.includes(roleName)) {
+        } else if(cachedLocations.includes(roleName)) {
             // its a location
             console.log(roleName);
             infoEmbed = await getLocationEmbed(roleName);
+        } else if(cachedAttributes.includes(roleName)) {
+            // its a location
+            console.log(roleName);
+            infoEmbed = await getAttributeEmbed(roleName, sections);
         } else {
             // its nothing? should be impossible since verifyInfoMessage checks its one of the above minimum
             // can happen if running info pre caching
@@ -163,6 +167,42 @@ module.exports = function() {
                
                 // get icon if applicable
                 let lutval = applyLUT(groupName);
+                if(!lutval) lutval = applyLUT(result?.display_name ?? "Unknown");
+                if(lutval) { // set icon and name
+                    //console.log(`${iconRepoBaseUrl}${lutval}`);
+                    embed.thumbnail = { "url": `${iconRepoBaseUrl}${lutval}.png` };
+                    embed.author = { "icon_url": `${iconRepoBaseUrl}${lutval}.png`, "name": applyTheme(result?.display_name ?? "Unknown") };
+                } else { // just set title afterwards
+                    embed.title = applyET(result?.display_name ?? "Unknown");
+                }
+                
+                // resolve promise, return embed
+                res(embed);
+            })
+        });
+    }
+    
+    /**
+    Get Attribute Embed
+    Returns an attribute embed for an attribute message
+    */
+    this.getAttributeEmbed = function(attrName, sections) {
+        return new Promise(res => {
+            sql("SELECT * FROM attributes WHERE name = " + connection.escape(attrName), async result => {
+                result = result[0]; // there should always only be one attribute by a certain name
+                var embed = await getBasicEmbed(mainGuild);
+                
+                var desc = [];
+                if(sections.includes("basics") || sections.includes("simplified") || sections.includes("details")) desc.push(["Basics", result?.desc_basics ?? "No info found"]);
+                if(sections.includes("formalized")) desc.push(["Formalized", formatFormalized(result?.desc_formalized ?? "No info found")]);
+
+                // split a single section into several fields if necessary
+                for(let d in desc) {
+                    embed.fields.push(...handleFields(applyETN(desc[d][1], mainGuild), applyTheme(desc[d][0])));
+                }
+               
+                // get icon if applicable
+                let lutval = applyLUT(attrName);
                 if(!lutval) lutval = applyLUT(result?.display_name ?? "Unknown");
                 if(lutval) { // set icon and name
                     //console.log(`${iconRepoBaseUrl}${lutval}`);

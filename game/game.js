@@ -392,7 +392,6 @@ module.exports = function() {
 		// Cleanup channels
 		cmdCCCleanup(channel);
 		scCleanup(channel);
-		cmdKillqClear(channel);
 		sqlGetStat(15, result => {
 			cleanupCat(channel, result, "public");
 		}, () => {

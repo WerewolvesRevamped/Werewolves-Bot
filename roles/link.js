@@ -100,6 +100,22 @@ module.exports = function() {
     }
     
     /**
+    Command: $attributes query
+    Runs queryAttributes to query all attributes from github
+    **/
+    this.cmdAttributesQuery = async function(channel) {
+        channel.send(`🔄 Querying attributes. Please wait. This may take several minutes.`);
+        try {
+            const output = await queryAttributes();
+            output.forEach(el => channel.send(`❗ ${el}`));
+        } catch(err) {
+            channel.send(`⛔ Querying attributes failed.`);
+        }
+        channel.send(`✅ Querying attributes completed.`);
+        cacheAttributes();
+    }
+    
+    /**
     Command: $roles parse
     Parses all roles currently stored in the DB from desc_formalized to parsed
     **/
@@ -151,6 +167,23 @@ module.exports = function() {
     }
     
     /**
+    Command: $attributes parse
+    Parses all attributes currently stored in the DB from desc_formalized to parsed
+    **/
+    this.cmdAttributesParse = async function(channel) {
+        channel.send(`🔄 Parsing attributes. Please wait. This may take several minutes.`);
+        try {
+            const output = await parseAttributes();
+            output.output.forEach(el => channel.send(`❗ ${el}`));
+            channel.send(`✅ Successfully parsed \`${output.success}\` attributes. `);
+            channel.send(`😔 Failed to parse \`${output.failure}\` attributes. `);
+        } catch(err) {
+            channel.send(`⛔ Parsing attributes failed.`);
+        }
+        channel.send(`✅ Parsing attributes completed. `);
+    }
+    
+    /**
     Command: $update
     Updates all github linked data
     **/
@@ -186,6 +219,14 @@ module.exports = function() {
         channel.send(`🔄 Parsing polls. Please wait. This may take several minutes.`);
         output = await parsePolls();
         channel.send(`❗ Parsing polls completed with \`${output.output.length}\` errors.`);
+        // query attributes
+        channel.send(`🔄 Querying attributes. Please wait. This may take several minutes.`);
+        output = await queryAttributes();
+        channel.send(`❗ Querying attributes completed with \`${output.length}\` errors.`);
+        // parse attributes
+        channel.send(`🔄 Parsing attributes. Please wait. This may take several minutes.`);
+        output = await parseAttributes();
+        channel.send(`❗ Parsing attributes completed with \`${output.output.length}\` errors.`);
         /** No Parsing */
         // query info
         channel.send(`🔄 Querying info. Please wait. This may take several minutes.`);
@@ -246,6 +287,7 @@ module.exports = function() {
         }
         // Cache Role Info again
         cacheRoleInfo();
+        // WIP: ^ this is async and does not necessarily finish in time
         // output errors
         return outputs;     
     }
@@ -451,17 +493,51 @@ module.exports = function() {
     **/
     async function queryGroupsCallback(path, name) {
         // extract values
-        var groupContents = await queryFile(path, name); // get the role contents
+        var groupContents = await queryFile(path, name); // get the group contents
         const dbName = getDBName(name); // get the db name
-        const roleDescs = splitRoleDescSections(groupContents); // split the role descriptions, into the different types of role description
-        const roleName = getRoleDescName(groupContents); // grabs the role name inbetween the **'s in the first line
+        const roleDescs = splitRoleDescSections(groupContents); // split the group descriptions, into the different types of group description
+        const roleName = getRoleDescName(groupContents); // grabs the group name inbetween the **'s in the first line
         const fullCategory = getFullCategory(groupContents); // get the parts of first line besides name
         const teamName = fullCategory[0].replace("Team Group", "").trim().toLowerCase(); // extract team name
         const basics = roleDescs.filter(el => el[0] == "basics")[0][1] ?? "";
         const members = roleDescs.filter(el => el[0] == "members")[0][1] ?? "";
         const formalized = roleDescs.filter(el => el[0] == "formalized")[0][1] ?? "";
-        // imsert the role into the databse
+        // imsert the group into the databse
         sql("INSERT INTO groups (name,display_name,team,desc_basics,desc_members,desc_formalized) VALUES (" + connection.escape(dbName) + "," + connection.escape(roleName) + "," + connection.escape(teamName) + "," + connection.escape(basics) + "," + connection.escape(members) + "," + connection.escape(formalized) + ")");
+        // return nothing
+        return null;
+    }
+    
+    /** 
+    Query Attributes
+    queries all attributes from github
+    **/
+    async function queryAttributes() {
+        return await runQuery(clearAttributes, attributepathsPath, queryAttributesCallback, 5);
+    }
+    
+    /**
+    Clear Attributes
+    deletes the entire contents of the attributes database
+    **/
+     function clearAttributes() {
+		sql("DELETE FROM attributes");
+	}
+    
+    /** 
+    Query Attributes - Callback
+    queries all attributes from github
+    **/
+    async function queryAttributesCallback(path, name) {
+        // extract values
+        var attributeContents = await queryFile(path, name); // get the attribute contents
+        const dbName = getDBName(name); // get the db name
+        const roleDescs = splitRoleDescSections(attributeContents); // split the attribute descriptions, into the different types of attribute description
+        const roleName = getRoleDescName(attributeContents); // grabs the attribute name inbetween the **'s in the first line
+        const basics = roleDescs.filter(el => el[0] == "basics")[0][1] ?? "";
+        const formalized = roleDescs.filter(el => el[0] == "formalized")[0][1] ?? "";
+        // imsert the attribute into the databse
+        sql("INSERT INTO attributes (name,display_name,desc_basics,desc_formalized) VALUES (" + connection.escape(dbName) + "," + connection.escape(roleName) + "," + connection.escape(basics) + "," + connection.escape(formalized) + ")");
         // return nothing
         return null;
     }
@@ -645,6 +721,14 @@ module.exports = function() {
     **/
     async function parsePolls() {
         return await runParser("polls", cachedPolls);
+    }
+    
+    /**
+    Parse Attributes
+    Parses all attributes
+    **/
+    async function parseAttributes() {
+        return await runParser("attributes", cachedAttributes);
     }
     
     /**

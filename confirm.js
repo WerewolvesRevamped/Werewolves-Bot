@@ -34,7 +34,6 @@ module.exports = function() {
 			case "start_debug": cmdStart(message.channel, true); break;
 			case "reset": cmdReset(message.channel); break;
 			case "end": cmdEnd(message.channel); break;
-			case "killq killall": cmdKillqKillall(message.channel); break;
 			case "players list": cmdPlayersList(message.channel); break;
 			case "players list_alive": cmdPlayersListAlive(message.channel); break;
 			case "players log": cmdPlayersLog(message.channel); break;
@@ -61,7 +60,7 @@ module.exports = function() {
 			case "confirm":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "confirm <Command>\n```";
 				help += "```\nFunctionality\n\nSkips the confirming stage of a command that requires confirming.\n```";
-				help += "```fix\nUsage\n\n> " + stats.prefix + "confirm killq killall```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "confirm reset```";
 			break;
 		}
 		return help;

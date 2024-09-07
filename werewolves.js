@@ -278,7 +278,6 @@ client.on("messageCreate", async message => {
 	const commandX = argsX.shift();
 	
 	if(message.content.search("@everyone") >= 0) {
-		message.channel.send("killq add " + message.author);
         return;
 	}
 

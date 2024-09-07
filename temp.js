@@ -60,7 +60,6 @@ module.exports = function() {
                 "cc": ["c","ccs"],
                 "roll": ["rand","random","randomize"],
                 "players": ["p","player"],
-                "killq": ["kq","kill","killqueue"],
                 "sheet": ["sh","game"],
                 "delete": ["d"],
                 "bulkdelete": ["bd"],

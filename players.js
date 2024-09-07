@@ -80,7 +80,6 @@ module.exports = function() {
 				if(isGameMaster(member)) help += stats.prefix + "players [list|list_alive|msgs|log|log2|log3|log4|votes|msgs2|roles] - Information about players\n";
 				if(isGameMaster(member)) help += stats.prefix + "players [get|get_clean|set|resurrect|signup|signup_sub] - Manages players\n";
 				if(isGameMaster(member)) help += stats.prefix + "players [substitute|switch] - Manages player changes\n";
-				if(isGameMaster(member)) help += stats.prefix + "killq [add|remove|killall|list|clear] - Manages kill queue\n";
 				if(isGameMaster(member)) help += stats.prefix + "kqak - Instant kill a player\n";
 				if(isAdmin(member)) help += stats.prefix + "modrole [add|remove] - Adds/removes roles from users\n";
 				help += stats.prefix + "list - Lists signed up players\n";
@@ -114,11 +113,6 @@ module.exports = function() {
 				help += "```\nFunctionality\n\nAdds or removes a role from a user\n```";
 				help += "```fix\nUsage\n\n> " + stats.prefix + "modrole add 242983689921888256 584770967058776067\n< ✅ Added Bot Developer to @McTsts (Ts)!\n```";
 				help += "```diff\nAliases\n\n- mr\n```";
-            break;
-			case "kqak":
-				help += "```yaml\nSyntax\n\n" + stats.prefix + "kqak <user>\n```";
-				help += "```\nFunctionality\n\nAdds a user to the killq and runs killq killall\n```";
-				help += "```fix\nUsage\n\n> " + stats.prefix + "kqak Ts\n```";
             break;
 			case "list_signedup":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "list\n```";
@@ -308,41 +302,6 @@ module.exports = function() {
 					break;	
 				}
 			break;
-			case "killq":
-				if(!isGameMaster(member)) break;
-				switch(args[1]) {
-					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "killq [add|remove|killall|list|clear]\n```";
-						help += "```\nFunctionality\n\nGroup of commands to handle killing. " + stats.prefix + "help killq <sub-command> for detailed help.```";
-						help += "```diff\nAliases\n\n- killq\n- killqueue\n- kq\n```";
-					break;
-					case "add":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "killq add <Player List>\n```";
-						help += "```\nFunctionality\n\nAdds all players from the <Player List> into the kill queue.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "killq add mctsts\n< ✳ Adding 1 player (McTsts) to the kill queue!\n< ✅ Added McTsts to the kill queue!\n```";
-					break;
-					case "remove":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "killq remove <Player List>\n```";
-						help += "```\nFunctionality\n\nRemoves all players from the <Player List> from the kill queue.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "killq remove mctsts\n< ✳ Removing 1 player (McTsts) from the kill queue!\n< ✅ Removed McTsts from the kill queue!\n```";
-					break;
-					case "killall":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "killq killall\n```";
-						help += "```\nFunctionality\n\nKills all players that are currently in the kill queue.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "killq killall\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "killq killall!\n< Kill Queue | Total: 1\n  🛠 - McTsts (McTsts)\n< ✳ Killing 1 player!\n< ✅ Killed McTsts!\n```";
-					break;
-					case "list":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "killq list\n```";
-						help += "```\nFunctionality\n\nLists all players that are currently in the kill queue.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "killq list\n< Kill Queue | Total: 1\n  🛠 - McTsts (McTsts)\n```";
-					break;
-					case "clear":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "killq clear\n```";
-						help += "```\nFunctionality\n\nRemoves all players from the kill queue.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "killq clear\n< ✅ Successfully cleared kill queue!\n```";
-					break;
-				}
-			break;
 		}
 		return help;
 	}
@@ -352,168 +311,7 @@ module.exports = function() {
 		channel.send("```\n" + emojiIDs.map(el =>  el.emoji + " " + el.id).join("\n") + "\n``` ```\n" + emojiIDs.map(el =>  el.emoji).join(" ") + "\n```");
 	}
 	
-	/* Handles killq command */
-	this.cmdKillq = function(message, args) {
-		// Check subcommand
-		if(!args[0]) { 
-			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `killq [list|add|remove|clear|killall]`!"); 
-			return; 
-		}
-		// Find subcommand
-		switch(args[0]) {
-			case "list": cmdKillqList(message.channel); break;
-			case "add": cmdKillqAdd(message.channel, args); break;
-			case "remove": cmdKillqRemove(message.channel, args); break;
-			case "clear": cmdKillqClear(message.channel); break;
-			case "killall": cmdKillqList(message.channel); cmdConfirm(message, "killq killall"); break;
-			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
-		}
-	}
 	
-	/* Lists current killq */
-	this.cmdKillqList = function(channel) {
-		// Get killq
-		sql("SELECT killq.id, players.role FROM killq INNER JOIN players ON killq.id = players.id", result => {
-			// Print killq
-			let playerList = result.map(el => {
-                let member = channel.guild.members.cache.get(el.id);
-                let rName = toTitleCase(el.role.split(",")[0]);
-                let rEmoji = getRoleEmoji(rName);
-                return idToEmoji(el.id) + " - " + member.displayName + "/" + member.user.username + " - " + (rEmoji ? `<:${rEmoji.name}:${rEmoji.id}> ` : "") + rName;
-            }).join("\n");
-			channel.send("**Kill Queue** | Total: " +  result.length + "\n" + playerList);
-		}, () => {
-			// Db error
-			channel.send("⛔ Database error. Could not list kill queue!");
-		});
-	}
-	
-	/* Add an user to the killq */
-	this.cmdKillqAdd = function(channel, args) {
-		// Check parameter
-		if(!args[1]) { 
-			channel.send("⛔ Syntax error. Not enough parameters! Requires at least 1 player!"); 
-			return; 
-		}
-		// Get users 
-		players = parseUserList(channel, args, 1);
-		if(players)  {
-			let playerList = players.map(el => "`" + channel.guild.members.cache.get(el).displayName + "`").join(", ");
-			// Add to killq
-			channel.send("✳ Adding " + players.length + " player" + (players.length != 1 ? "s" : "") + " (" + playerList  + ") to the kill queue!");
-			players.forEach(el => {
-				sql("INSERT INTO killq (id) VALUES (" + connection.escape(el) + ")", result => {
-					channel.send("✅ Added `" +  channel.guild.members.cache.get(el).displayName + "` to the kill queue!");
-				}, () => {
-					// DB Error
-					channel.send("⛔ Database error. Could not add " +  channel.guild.members.cache.get(el) + " to the kill queue!");
-				});	
-			});
-		} else {
-			// No valid players
-			channel.send("⛔ Syntax error. No valid players!");
-		}
-	}
-	
-	/* Removes an user from the killq */
-	this.cmdKillqRemove = function(channel, args) {
-		// Check parameters
-		if(!args[1]) { 
-			channel.send("⛔ Syntax error. Not enough parameters! Requires at least 1 player!");
-			return; 
-		}
-		// Get users
-		players = parseUserList(channel, args, 1);
-		if(players) { 
-			// Remove from killq
-			let playerList = players.map(el =>"`" + channel.guild.members.cache.get(el).displayName + "`").join(", ");
-			channel.send("✳ Removing " + players.length + " player" + (players.length != 1 ? "s" : "") + " (" + playerList + ") from the kill queue!");
-			players.forEach(el => {
-				sql("DELETE FROM killq WHERE id = " + connection.escape(el), result => {
-					channel.send("✅ Removed `" +  channel.guild.members.cache.get(el).displayName + "` from the kill queue!");
-				}, () => {
-					// DB error
-					channel.send("⛔ Database error. Could not remove " +  channel.guild.members.cache.get(el) + " from the kill queue!");
-				});	
-			});
-		}  else {
-			// No valid players
-			channel.send("⛔ Syntax error. No valid players!");
-		}
-	}
-	
-	/* Kills all players in the killq */
-	this.cmdKillqKillall = function(channel) {
-		sql("SELECT id FROM killq", result => {
-			result = removeDuplicates(result.map(el => el.id));
-			channel.send("✳ Killing `" + result.length + "` player" + (result.length != 1 ? "s" : "") + "!");
-			result.forEach(async el => {
-				// Update DB
-				sql("DELETE FROM killq WHERE id = " + connection.escape(el), result => {
-				}, () => {
-					channel.send("⛔ Database error. Could not remove `" +  channel.guild.members.cache.get(el).displayName + "` from the kill queue!");
-				});	
-				sql("UPDATE players SET alive = 0 WHERE id = " + connection.escape(el), result => {
-					channel.send("✅ Killed `" +  channel.guild.members.cache.get(el).displayName + "`!");
-					updateGameStatus();
-                    setTimeout(async function () {
-                        let results = await mayorCheck();
-                        results.forEach(el => {
-                            channel.send(el); 
-                        });
-                    }, 5000);
-				}, () => {
-					channel.send("⛔ Database error. Could not kill `" +  channel.guild.members.cache.get(el).displayName + "`!");
-				});	
-                 channel.guild.members.cache.get(el).voice.disconnect();
-                
-                var reportMsg;
-                // Get info
-                sql("SELECT role FROM players WHERE id = " + connection.escape(el), result => {
-                    let rolesFiltered = result[0].role.split(",").filter(role => verifyRole(role));
-                    let roleList = rolesFiltered.map(role => toTitleCase(role)).join("` + `");
-                    let emojiList = rolesFiltered.map(role => {
-                        let rEmoji = getRoleEmoji(role);
-                        return rEmoji ? `<:${rEmoji.name}:${rEmoji.id}>` : false;
-                    }).filter(el => el).join(" ");
-                    reportMsg = "<@" + el + "> was a `" + roleList + "` " + emojiList;
-                    
-                    // Send reporter message
-                    cmdConnectionSend(channel, ["", "reporter2", true, reportMsg]);
-                    cmdConnectionSend(channel, ["", "reporter", "Reporter", reportMsg]);
-                }, () => {
-                    // Database error
-                    reportMsg = "⛔ Database error. Could not get player information!";
-                    
-                    // Send reporter message
-                    cmdConnectionSend(channel, ["", "reporter2", true, reportMsg]);
-                    cmdConnectionSend(channel, ["", "reporter", "Reporter", reportMsg]);
-                });
-                
-                await sleep(500);
-                let player = channel.guild.members.cache.get(el);
-                removeRoleRecursive(player, channel, stats.participant, "participant");
-                if(!stats.haunting) addRoleRecursive(player, channel, stats.dead_participant, "dead participant");
-                else addRoleRecursive(player, channel, stats.ghost, "ghost");
-                removeRoleRecursive(player, channel, stats.mayor, "mayor");
-                removeRoleRecursive(player, channel, stats.mayor2, "mayor 2");
-                removeRoleRecursive(player, channel, stats.reporter, "reporter");
-                removeRoleRecursive(player, channel, stats.guardian, "guardian");
-
-			});
-		}, () => {
-			channel.send("⛔ Database error. Could not kill the players in the kill queue");
-		});
-	}
-	
-	/* Clear killq */
-	this.cmdKillqClear = function(channel) {
-		sql("DELETE FROM killq", result => {
-			channel.send("✅ Successfully cleared kill queue!");
-		}, () => {
-			channel.send("⛔ Database error. Could not clear kill queue!");
-		});
-	}
 	
 	/* Lists all signedup players */
 	this.cmdPlayersList = function(channel) {
@@ -982,10 +780,7 @@ module.exports = function() {
         let subRole = pRoles.find(el => el.id === originalPlayer).role;
 		cmdPlayersSet(message.channel, ["set", "role", originalPlayer, "substituted"]);
 		cmdPlayersSet(message.channel, ["set", "type", originalPlayer, "substituted"]);
-		cmdKillqAdd(message.channel, ["add", originalPlayer]);
-		setTimeout(function () {
-			confirmActionExecute("killq killall", message, false);
-		}, 5000);
+        // WIP: SHOULD BE KILLING THE OLD PLAYER
 		setTimeout(function () {
 			cmdPlayersSet(message.channel, ["set", "type", newPlayer, "player"]); 
 			cmdPlayersSet(message.channel, ["set", "role", newPlayer, subRole]); 

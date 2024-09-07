@@ -84,16 +84,6 @@ module.exports = function() {
         return true;
     }
     
-    
-    /**
-    Get all vote manipulations
-    **/
-    this.getManipulations = async function(player_id, subtype) {
-        let allManipulations = await queryAttributePlayer(player_id, "attr_type", "manipulation", "val2", subtype); // get all manipulation of specified type
-        if(allManipulations.length <= 0) return []; // no manipulations
-        return allManipulations;
-    }
-    
     /** PRIVATE
     Ability: Poll - Creation
     **/

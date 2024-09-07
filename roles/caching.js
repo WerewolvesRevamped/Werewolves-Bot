@@ -10,6 +10,7 @@ module.exports = function() {
     **/
     this.cachedRoles = [];
     this.cachedGroups = [];
+    this.cachedAttributes = [];
     this.cachedSets = [];
     this.cachedAliases = [];
     this.cachedInfoNames = [];
@@ -38,6 +39,18 @@ module.exports = function() {
 				cachedGroups = result.map(el => el.name);
 		}, () => {
 			log("Roles > ❗❗❗ Unable to cache groups!");
+		});
+	}
+    
+    /**
+    Cache Attributes
+    caches the current state of the attributes database
+    **/
+    this.cacheAttributes = function() {
+		sql("SELECT name FROM attributes", result => {
+				cachedAttributes = result.map(el => el.name);
+		}, () => {
+			log("Roles > ❗❗❗ Unable to cache attributes!");
 		});
 	}
     
@@ -85,6 +98,7 @@ module.exports = function() {
 		cacheAliases();
 		cacheRoles();
         cacheGroups();
+        cacheAttributes();
         cacheInfoNames();
         cacheSets();
 	}

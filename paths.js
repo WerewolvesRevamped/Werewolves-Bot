@@ -6,14 +6,14 @@ module.exports = function() {
     /**
     Github Paths
     **/
-    this.githubRaw = "https://raw.githubusercontent.com/";
+    const githubRaw = "https://raw.githubusercontent.com/";
     this.githubAPI = "https://api.github.com/";
     /**
     Repo Paths
     **/
-    this.wwrOrg = "WerewolvesRevamped";
-    this.iconRepo = `${wwrOrg}/Werewolves-Icons`;
-    this.iconRepoBranch = "main"
+    const wwrOrg = "WerewolvesRevamped";
+    const iconRepo = `${wwrOrg}/Werewolves-Icons`;
+    const iconRepoBranch = "main"
     this.iconRepoBaseUrl = `${githubRaw}${iconRepo}/${iconRepoBranch}/`;
     this.roleRepo = `${wwrOrg}/Werewolves-Roles`;
     this.roleRepoBranch = "main";
@@ -27,9 +27,10 @@ module.exports = function() {
     this.setspathsPath = `${roleRepoBaseUrl}_paths/sets`;
     this.locationpathsPath = `${roleRepoBaseUrl}_paths/locations`;
     this.pollpathsPath = `${roleRepoBaseUrl}_paths/polls`;
+    this.attributepathsPath = `${roleRepoBaseUrl}_paths/attributes`;
     /**
     Website Paths
     **/
-    this.website = "https://werewolves.me/";
+    const website = "https://werewolves.me/";
     this.cardBaseUrl = `${website}cards/card.php?name=`;
 }

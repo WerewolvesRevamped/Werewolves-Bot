@@ -79,7 +79,7 @@ module.exports = function() {
 			case "sudo":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "sudo <Command>\n```";
 				help += "```\nFunctionality\n\nAllows webhooks to run commands with GM permissions in GMSAFE channels.\n```";
-				help += "```fix\nUsage\n\n> " + stats.prefix + "sudo confirm killq killall```";
+				help += "```fix\nUsage\n\n> " + stats.prefix + "sudo confirm reset```";
 			break;
 			case "ping":
 				help += "```yaml\nSyntax\n\n" + stats.prefix + "ping\n```";

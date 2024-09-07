@@ -175,6 +175,16 @@ module.exports = function() {
 		return group ? true : false;
 	}
     
+    /** Verify Attribute
+    Verifies if an attribute exists
+    **/
+    this.verifyAttribute = function(input) {
+        if(cachedAttributes.length == 0) return true; // if cache is currently not loaded just allow it
+		let inputAttr = input.replace(/[^a-z\$ ]/g,"").trim(); // parse attribute name
+		let attr = cachedAttributes.find(el => el === inputAttr); // check if attribute is in cache
+		return attr ? true : false;
+	}
+    
     /** Verify Set
     Verifies if a set exists
     **/
@@ -189,7 +199,7 @@ module.exports = function() {
     Verifies if an info message exists
     **/
     this.verifyInfoMessage = function(input) {
-		return verifyRole(input) || verifyInfo(input) || verifyGroup(input) || verifyLocationName(input);
+		return verifyRole(input) || verifyInfo(input) || verifyGroup(input) || verifyLocationName(input) || verifyAttribute(input);
 	}
     
     /**
