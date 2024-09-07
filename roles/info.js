@@ -25,14 +25,21 @@ module.exports = function() {
         roleName = parseRole(roleName);
 		if(!verifyInfoMessage(roleName)) { // not a valid role
 			// get all roles and aliases, to get an array of all possible role names
-			let allRoleNames = [...cachedRoles, ...cachedGroups, ...cachedAliases.map(el => el.alias), ...cachedInfoNames];
+			let allRoleNames = [...cachedRoles, ...cachedGroups, ...cachedAttributes, ...cachedLocations, ...cachedAliases.map(el => el.alias), ...cachedInfoNames];
 			let bestMatch = findBestMatch(roleName.toLowerCase(), allRoleNames.map(el => el.toLowerCase())); // find closest match
 			// check if match is close enough
 			if(bestMatch.value <= ~~(roleName.length/2)) { // auto alias if so, but send warning 
                 console.log(roleName, bestMatch.name);
 				roleName = parseRole(bestMatch.name);
-                if(roleName.toLowerCase() === bestMatch.name.toLowerCase()) channel.send(`❗ Could not find role \`${origRoleName}\`. Did you mean \`${roleName}\`?`);
-                else channel.send(`❗ Could not find role \`${origRoleName}\`. Did you mean \`${roleName}\` (aka \`${(bestMatch.name.length>2 ? toTitleCase(bestMatch.name) : bestMatch.name.toUpperCase())}\`)?`);
+                if(roleName.toLowerCase() === bestMatch.name.toLowerCase()) {
+                    if(origRoleName.toLowerCase().replace(/[^a-z]/g,"") === bestMatch.name.toLowerCase().replace(/[^a-z]/g,"")) {
+                        // do nothing when they match besides some non letter characters
+                    } else {
+                        channel.send(`❗ Could not find role \`${origRoleName}\`. Did you mean \`${roleName}\`?`);
+                    }
+                } else {
+                    channel.send(`❗ Could not find role \`${origRoleName}\`. Did you mean \`${roleName}\` (aka \`${(bestMatch.name.length>2 ? toTitleCase(bestMatch.name) : bestMatch.name.toUpperCase())}\`)?`);
+                }
 			} else { // early fail if otherwise
 				channel.send(`❗ Could not find role \`${origRoleName}\`.`);
                 return;

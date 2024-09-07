@@ -66,6 +66,7 @@ client.on("ready", async () => {
 		getPublicCat();
         cacheIconLUT();
         cacheColorsLUT();
+        cacheActiveCustomAttributes();
 		global.client.guilds.fetch(stats.log_guild).then(guild => {
 			guild.members.fetch().then((members) => {
                 //members.forEach(el => console.log(el.user.id));

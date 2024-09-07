@@ -91,8 +91,11 @@ module.exports = function() {
                     case "player":
                         return [ val ];
                     case "player_attr": // retrieve player id through channel id
-                        attr = await roleAttributeGetPlayer(val);
+                        let attr = await roleAttributeGetPlayer(val);
                         return [ attr.id ];
+                    case "attribute": // retrieve player id through cached attributes
+                        let owner = getCustomAttributeOwner(val);
+                        return [ srcToValue(owner) ];
                 }
             // all (living) players
             case "@all":
@@ -552,6 +555,9 @@ module.exports = function() {
                         return { value: val, type: "player", default: false };
                     case "player_attr":
                         return { value: val, type: "player_attr", default: false };
+                    case "attribute":
+                        let source = getCustomAttributeSource(val);
+                        return { value: srcToValue(source), type: srcToType(source), default: false };
                 }
             } else {
                 let parsedPlayer = await parsePlayerSelector(selectorTarget, self, additionalTriggerData);

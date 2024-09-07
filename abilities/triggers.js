@@ -39,6 +39,9 @@ module.exports = function() {
             case "poll":
                 await triggerPoll(val, triggerName, additionalTriggerData, true);
             break;
+            case "attribute":
+                await triggerAttribute(val, triggerName, additionalTriggerData, true);
+            break;
             default:
                 abilityLog(`❗ **Skipped Trigger:** Unknown type for trigger ${type}.`);
             break;
@@ -158,6 +161,32 @@ module.exports = function() {
         });
     }
     
+     /**
+    Trigger Attribute
+    triggers a trigger for a specified attribute
+    **/
+    this.triggerAttribute = function(attr_id, triggerName, additionalTriggerData, fromTrigger = false) {
+        if(!fromTrigger) abilityLog(`🔷 **Trigger:** ${triggerName} for \`${srcRefToText('attribute:' + attr_id)}\``);  
+        return new Promise(res => {
+            // get all players
+            sql("SELECT active_attributes.ai_id,attributes.name,attributes.parsed FROM attributes INNER JOIN active_attributes ON attributes.name = active_attributes.val1 WHERE active_attributes.ai_id=" + connection.escape(attr_id), async r => {
+                //trigger handler
+                if(!r[0] || !r[0].parsed) {
+                    abilityLog(`❗ **Skipped Trigger:** Cannot find matching attribute for ${attr_id}.`);
+                    res();
+                    return;
+                }
+                let parsed = JSON.parse(r[0].parsed);
+                let updatedAdditionalTriggerData = JSON.parse(JSON.stringify(additionalTriggerData)); // deep clone
+                updatedAdditionalTriggerData.attr_owner = getCustomAttributeOwner(r[0].ai_id);
+                updatedAdditionalTriggerData.attr_source = getCustomAttributeSource(r[0].ai_id);
+                await triggerHandlerParsedHandler(triggerName, updatedAdditionalTriggerData, parsed, `attribute:${r[0].ai_id}`, `attribute:${r[0].name}`);
+                // resolve outer promise
+                res();
+            });
+        });
+    }
+    
     /**
     Trigger Handler
     handle a trigger triggering (for everyone)
@@ -168,6 +197,7 @@ module.exports = function() {
         await triggerHandlerPlayersRoleAttributes(triggerName, additionalTriggerData);
         await triggerHandlerGroups(triggerName, additionalTriggerData);
         await triggerHandlerPolls(triggerName, additionalTriggerData);
+        await triggerHandlerAttributes(triggerName, additionalTriggerData);
     }
     
     /**
@@ -243,6 +273,29 @@ module.exports = function() {
                     if(!pr.parsed) continue;
                     let parsed = JSON.parse(pr.parsed);
                     await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `poll:${pr.name}`, `poll:${pr.name}`);
+                }
+                // resolve outer promise
+                res();
+            });
+        });
+    }
+    
+    /**
+    Trigger Handler - Attributes
+    handles a trigger triggering for ALL attributes
+    **/
+    function triggerHandlerAttributes(triggerName, additionalTriggerData) {
+        return new Promise(res => {
+            // get all players
+            sql("SELECT active_attributes.ai_id,attributes.name,attributes.parsed FROM attributes INNER JOIN active_attributes ON attributes.name = active_attributes.val1 WHERE active_attributes.attr_type='custom'", async r => {
+                // no need for an extra layer for attributes due to JOIN which I forgot about previously!
+                for(let pr of r) {
+                    if(!pr.parsed) continue;
+                    let parsed = JSON.parse(pr.parsed);
+                    let updatedAdditionalTriggerData = JSON.parse(JSON.stringify(additionalTriggerData)); // deep clone
+                    updatedAdditionalTriggerData.attr_owner = getCustomAttributeOwner(r[0].ai_id);
+                    updatedAdditionalTriggerData.attr_source = getCustomAttributeSource(r[0].ai_id);
+                    await triggerHandlerParsedHandler(triggerName, updatedAdditionalTriggerData, parsed, `attribute:${pr.ai_id}`, `attribute:${pr.name}`);
                 }
                 // resolve outer promise
                 res();

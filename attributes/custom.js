@@ -70,7 +70,29 @@ module.exports = function() {
 		});
 	}
 
-
+    /** Custom Attribute Cache
+    Format: [ai_id,src_ref,owner_ref]
+    **/
+    this.cachedActiveCustomAttributes = [];
+    this.cacheActiveCustomAttributes = async function() {
+        let result = await sqlProm("SELECT ai_id,src_ref,owner,owner_type FROM active_attributes WHERE attr_type='custom'");
+        cachedActiveCustomAttributes = result.map(el => [el.ai_id,el.src_ref,`${el.owner_type}:${el.owner}`]);
+    }
+    
+    this.getCustomAttributeOwner = function(ai_id) {
+        let found = cachedActiveCustomAttributes.find(el => el[0] === +ai_id);
+        if(found) return found[2];
+        else return `unknown:unknown`;
+    }
+    
+    this.getCustomAttributeSource = function(ai_id) {
+        let found = cachedActiveCustomAttributes.find(el => el[0] === +ai_id);
+        if(found) return found[1];
+        else return `unknown:unknown`;
+    }
+    
+    
+   
     
     
 }

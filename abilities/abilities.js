@@ -190,28 +190,19 @@ module.exports = function() {
         switch(type) {
             case "player":
                 return await abilitySendGetPlayerChannel(ref);
-            break;
             case "player_attr":
                 return ref;
-            break;
             case "group":
                 return ref; // group ref already is channel id
-            break;
             case "poll":
                 return "1276250651097170022"; // WIP: poll log is hardcoded
-            break;
+            case "attribute":
+                return "1276250651097170022"; // WIP: poll log is hardcoded
             case "location":
                 return await abilitySendGetLocationChannel(ref);
-            break;
             default:
                 abilityLog(`❗ **Error:** Unknown type for get src_ref channel!`);
                 return null;
-            break;
-        }
-        
-        if(!channel_id) {
-            abilityLog(`❗ **Error:** Channel not found!`);
-            return null;
         }
     }
     
@@ -255,6 +246,7 @@ module.exports = function() {
     group (channel id) / group (name)
     player_group (member id) / group (name)
     poll (name) / poll (name)
+    attribute (ai id) / attribute (name)
     **/
     
     /** PUBLIC
@@ -273,10 +265,16 @@ module.exports = function() {
             case "player_attr":
                 return `<#${val}>`;
             case "alignment":
-            case "attribute":
             case "poll":
             case "role":
                 return `\`${toTitleCase(val)}\``;
+            case "attribute":
+                const owner = getCustomAttributeOwner(val);
+                const source = getCustomAttributeSource(val);
+                const ownerText = srcRefToText(owner);
+                const sourceText = srcRefToText(source);
+                return `Attr-${val} on ${ownerText} from ${sourceText}`;
+            break;
             case "result":
                 return raw.msg;
             case "unknown":
