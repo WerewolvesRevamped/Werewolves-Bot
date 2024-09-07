@@ -1533,7 +1533,7 @@ module.exports = function() {
                 case "Category": return "category";
                 case "OriginalRole": return "role";
                 case "Alignment": return "alignment";
-                case "Counter": return "unknown";
+                case "Counter": return "number";
                 case "PublicVotingPower": return "number";
                 case "PrivateVotingPower": return "number";
                 case "OwnerRole": return "role";
@@ -1541,7 +1541,6 @@ module.exports = function() {
                 case "Value1": return "unknown";
                 case "Value2": return "unknown";
                 case "Value3": return "unknown";
-                case "Value4": return "unknown";
                 case "Members": return "player";
             }
         } else if(first == "&") {

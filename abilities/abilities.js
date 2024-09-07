@@ -109,6 +109,12 @@ module.exports = function() {
                     let info = await parseInfo(ability.feedback);
                     feedback = { msg: info, success: true };
                 break;
+                case "success":
+                    feedback = { msg: "Ability succeeded!", success: true };
+                break;
+                case "failure":
+                    feedback = { msg: "Ability failed!", success: false };
+                break;
             }
             
             // on action trigger
