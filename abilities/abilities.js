@@ -21,6 +21,7 @@ require("./types/announcement.js")();
 require("./types/poll.js")();
 require("./types/granting.js")();
 require("./types/manipulating.js")();
+require("./types/applying.js")();
 
 module.exports = function() {
     
@@ -104,6 +105,9 @@ module.exports = function() {
                 break;
                 case "manipulating":
                     feedback = await abilityManipulating(src_ref, src_name, ability, additionalTriggerData);
+                break;
+                case "applying":
+                    feedback = await abilityApplying(src_ref, src_name, ability, additionalTriggerData);
                 break;
                 case "feedback":
                     let info = await parseInfo(ability.feedback);

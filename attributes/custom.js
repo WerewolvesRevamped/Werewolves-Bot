@@ -91,6 +91,14 @@ module.exports = function() {
         else return `unknown:unknown`;
     }
     
+    /** PUBLIC
+    Create Custom Attribute
+    creates a custom attribute
+    **/
+    this.createCustomAttribute = async function(src_name, src_ref, target, targetType, dur, attrType, val1 = "", val2 = "", val3 = "") {
+        await createAttribute(src_name, src_ref, target, targetType, dur, "custom", attrType, val1, val2, val3);
+        await cacheActiveCustomAttributes();
+    }
     
    
     

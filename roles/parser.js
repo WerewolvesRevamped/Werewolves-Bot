@@ -539,8 +539,10 @@ module.exports = function() {
     const defenseAttackSubtypes = "(Attacks|Kills|Lynches|Attacks & Lynches|All)";
     const defenseSubtypes = "(Absence at " + locationType + "|Active Defense|Passive Defense|Partial Defense|Recruitment Defense)";
     const defensePhases = "(Day|Night)";
-    const attrValue = "(.+?)";
-    const attrData = "\\(" + attrValue + "\\)";
+    const attrValue = "([^,]+?)";
+    const attrData1 = "\\(" + attrValue + "\\)";
+    const attrData2 = "\\(" + attrValue + "," + attrValue + "\\)";
+    const attrData3 = "\\(" + attrValue + "," + attrValue + "," + attrValue + "\\)";
     const attrIndex = num;
     const redirectSubtype = "(all|non-killing abilities)";
     const manipSubtype = "(public voting power|special public voting power|private voting power|public starting votes|lynch starting votes|election starting votes)";
@@ -850,11 +852,23 @@ module.exports = function() {
         if(fd) {
             ability = { type: "applying", subtype: "add", target: ttpp(fd[2]), attribute: fd[1], duration: dd(fd[3], "permanent") };
         }
-        // standard applying with parameter
-        exp = new RegExp("^Apply " + attributeName + " to " + targetType + attrDuration + " " + attrData + "$", "g");
+        // standard applying with parameter (1)
+        exp = new RegExp("^Apply " + attributeName + " to " + targetType + attrDuration + " " + attrData1 + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "applying", subtype: "add", target: ttpp(fd[2]), attribute: fd[1], duration: dd(fd[3], "permanent"), attr_index: 1, attr_value: fd[fd.length-1] };
+            ability = { type: "applying", subtype: "add", target: ttpp(fd[2]), attribute: fd[1], duration: dd(fd[3], "permanent"), val1: fd[fd.length-1] };
+        }
+        // standard applying with parameter (2)
+        exp = new RegExp("^Apply " + attributeName + " to " + targetType + attrDuration + " " + attrData2 + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "applying", subtype: "add", target: ttpp(fd[2]), attribute: fd[1], duration: dd(fd[3], "permanent"), val1: fd[fd.length-2], val2: fd[fd.length-1] };
+        }
+        // standard applying with parameter (3)
+        exp = new RegExp("^Apply " + attributeName + " to " + targetType + attrDuration + " " + attrData3 + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "applying", subtype: "add", target: ttpp(fd[2]), attribute: fd[1], duration: dd(fd[3], "permanent"), val1: fd[fd.length-3], val2: fd[fd.length-2], val3: fd[fd.length-1] };
         }
         // Remove Attribute
         exp = new RegExp("^Remove " + attributeName + " from " + targetType + "$", "g");

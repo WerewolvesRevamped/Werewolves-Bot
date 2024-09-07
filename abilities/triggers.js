@@ -52,7 +52,7 @@ module.exports = function() {
     Trigger Player
     triggers a trigger for a specified player
     **/
-    this.triggerPlayer = async function(player_id, triggerName, additionalTriggerData, fromTrigger = false) {
+    this.triggerPlayer = async function(player_id, triggerName, additionalTriggerData = {}, fromTrigger = false) {
         if(!fromTrigger) abilityLog(`🔷 **Trigger:** ${triggerName} for <@${player_id}>`);  
         // primary roles
         await new Promise(res => {
@@ -93,7 +93,7 @@ module.exports = function() {
     /**
     Trigger Player - Role Attribute
     **/
-    this.triggerPlayerRoleAttributeByAttr = function(ai_id, triggerName, additionalTriggerData, fromTrigger = false) {
+    this.triggerPlayerRoleAttributeByAttr = function(ai_id, triggerName, additionalTriggerData = {}, fromTrigger = false) {
         return new Promise(res => {
             // get all players
             sql("SELECT players.id,active_attributes.ai_id,active_attributes.val1 AS role,active_attributes.val2 AS channel_id FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.attr_type='role' AND active_attributes.ai_id=" + connection.escape(ai_id), async r => {
@@ -120,7 +120,7 @@ module.exports = function() {
     Trigger Group
     triggers a trigger for a specified group
     **/
-    this.triggerGroup = function(channel_id, triggerName, additionalTriggerData, fromTrigger = false) {
+    this.triggerGroup = function(channel_id, triggerName, additionalTriggerData = {}, fromTrigger = false) {
         if(!fromTrigger) abilityLog(`🔷 **Trigger:** ${triggerName} for <#${channel_id}>`);  
         return new Promise(res => {
             // get all players
@@ -142,7 +142,7 @@ module.exports = function() {
     Trigger Poll
     triggers a trigger for a specified poll
     **/
-    this.triggerPoll = function(poll_name, triggerName, additionalTriggerData, fromTrigger = false) {
+    this.triggerPoll = function(poll_name, triggerName, additionalTriggerData = {}, fromTrigger = false) {
         if(!fromTrigger) abilityLog(`🔷 **Trigger:** ${triggerName} for \`${toTitleCase(poll_name)}\``);  
         return new Promise(res => {
             // get all players
@@ -165,8 +165,8 @@ module.exports = function() {
     Trigger Attribute
     triggers a trigger for a specified attribute
     **/
-    this.triggerAttribute = function(attr_id, triggerName, additionalTriggerData, fromTrigger = false) {
-        if(!fromTrigger) abilityLog(`🔷 **Trigger:** ${triggerName} for \`${srcRefToText('attribute:' + attr_id)}\``);  
+    this.triggerAttribute = function(attr_id, triggerName, additionalTriggerData = {}, fromTrigger = false) {
+        if(!fromTrigger) abilityLog(`🔷 **Trigger:** ${triggerName} for ${srcRefToText('attribute:' + attr_id)}`);  
         return new Promise(res => {
             // get all players
             sql("SELECT active_attributes.ai_id,attributes.name,attributes.parsed FROM attributes INNER JOIN active_attributes ON attributes.name = active_attributes.val1 WHERE active_attributes.ai_id=" + connection.escape(attr_id), async r => {
@@ -204,7 +204,7 @@ module.exports = function() {
     Trigger Handler - Players
     handles a trigger triggering for ALL players
     **/
-    function triggerHandlerPlayers(triggerName, additionalTriggerData) {
+    function triggerHandlerPlayers(triggerName, additionalTriggerData = {}) {
         return new Promise(res => {
             // get all players
             sql("SELECT role,id FROM players WHERE type='player' AND alive=1", async r => {
@@ -222,7 +222,7 @@ module.exports = function() {
     Trigger Handler - Players (Role Attributes)
     handles a trigger triggering for ALL players' role attributes
     **/
-    function triggerHandlerPlayersRoleAttributes(triggerName, additionalTriggerData) {
+    function triggerHandlerPlayersRoleAttributes(triggerName, additionalTriggerData = {}) {
         return new Promise(res => {
             // get all players
             sql("SELECT players.id,active_attributes.ai_id,active_attributes.val1 AS role,active_attributes.val2 AS channel_id FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.attr_type='role'", async r => {
@@ -246,7 +246,7 @@ module.exports = function() {
     Trigger Handler - Groups
     handles a trigger triggering for ALL groups
     **/
-    function triggerHandlerGroups(triggerName, additionalTriggerData) {
+    function triggerHandlerGroups(triggerName, additionalTriggerData = {}) {
         return new Promise(res => {
             // get all players
             sql("SELECT name,channel_id FROM active_groups WHERE disbanded=0", async r => {
@@ -264,7 +264,7 @@ module.exports = function() {
     Trigger Handler - Polls
     handles a trigger triggering for ALL polls
     **/
-    function triggerHandlerPolls(triggerName, additionalTriggerData) {
+    function triggerHandlerPolls(triggerName, additionalTriggerData = {}) {
         return new Promise(res => {
             // get all players
             sql("SELECT name,parsed FROM polls", async r => {
@@ -284,7 +284,7 @@ module.exports = function() {
     Trigger Handler - Attributes
     handles a trigger triggering for ALL attributes
     **/
-    function triggerHandlerAttributes(triggerName, additionalTriggerData) {
+    function triggerHandlerAttributes(triggerName, additionalTriggerData = {}) {
         return new Promise(res => {
             // get all players
             sql("SELECT active_attributes.ai_id,attributes.name,attributes.parsed FROM attributes INNER JOIN active_attributes ON attributes.name = active_attributes.val1 WHERE active_attributes.attr_type='custom'", async r => {

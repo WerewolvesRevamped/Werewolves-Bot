@@ -56,6 +56,9 @@ module.exports = function() {
             // NUMBER
             case "number":
                 return { value: [ await parseNumber(selector) ], type: "number" };
+            // ATTRIBUTE
+            case "attribute":
+                return { value: parseAttributeSelector(selector), type: "attribute" };
             // UNKNOWN
             default:
                 abilityLog(`❗ **Error:** Invalid selector type \`${selectorType}\`!`);
@@ -457,6 +460,24 @@ module.exports = function() {
                     return parsePropertyAccess(result, contents[2], infType);
                 } else {
                     abilityLog(`❗ **Error:** Invalid role selector target \`${selectorTarget}\`!`);
+                    return [ ];
+                }
+        }
+    }
+    
+    /**
+    Parse Role Selector
+    parses a attribute type selector
+    **/
+    this.parseAttributeSelector = function(selector, self = null, additionalTriggerData = {}) {
+        // get target
+        let selectorTarget = selectorGetTarget(selector);
+        switch(selectorTarget) {
+            default:
+                if(verifyAttribute(selectorTarget)) {
+                    return [ selectorTarget ];
+                } else {
+                    abilityLog(`❗ **Error:** Invalid attribute selector target \`${selectorTarget}\`!`);
                     return [ ];
                 }
         }
