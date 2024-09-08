@@ -35,6 +35,10 @@ module.exports = function() {
                 result = await investigatingCategory(src_name, src_ref, target, ability.affected_by_wd ?? false, ability.affected_by_sd ?? false);
                 return result;
             break;
+            case "alignment":
+                result = await investigatingAlignment(src_name, src_ref, target, ability.affected_by_wd ?? false, ability.affected_by_sd ?? false);
+                return result;
+            break;
             case "player_count":
                 result = await investigatingPlayerCount(src_name, src_ref, target, ability.target);
                 return result;
@@ -103,6 +107,27 @@ module.exports = function() {
     }
     
     /**
+    Ability: Investigating - Alignment
+    **/
+    this.investigatingAlignment = async function(src_name, src_ref, targets, affected_by_wd, affected_by_sd) {
+        // single target check
+        if(targets.length != 1) {
+            return singleTargetCheck(targets, src_ref);
+        }
+        // get data
+        let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);
+        if(rdata.type === "") {
+            // feedback - no disguise
+            abilityLog(`✅ ${srcRefToText(src_ref)} investigated <@${targets[0]}>'s alignment as \`${toTitleCase(rdata.role.alignment)}\`${rdata.type?' ('+rdata.type+')':''}.`);
+            return { msg: `Investigated <@${targets[0]}>'s alignment: \`${toTitleCase(rdata.role.alignment)}\``, success: true, target: `player:${targets[0]}`, result: `${toTitleCase(rdata.role.alignment)}[alignment]` };
+        } else {
+            // feedback - disguise
+            abilityLog(`✅ ${srcRefToText(src_ref)} investigated <@${targets[0]}>'s alignment as \`${toTitleCase(rdata.role.team)}\`${rdata.type?' ('+rdata.type+')':''}.`);
+            return { msg: `Investigated <@${targets[0]}>'s alignment: \`${toTitleCase(rdata.role.team)}\``, success: true, target: `player:${targets[0]}`, result: `${toTitleCase(rdata.role.team)}[alignment]` };
+        }
+    }
+    
+    /**
     Ability: Investigating - Player Count
     **/
     this.investigatingPlayerCount = async function(src_name, src_ref, targets, selector) {
@@ -151,7 +176,7 @@ module.exports = function() {
     **/
     this.getRoleDataFromPlayer = async function(player) {
         return new Promise(res => {
-            sql("SELECT players.role,roles.class,roles.category,roles.team FROM players INNER JOIN roles ON roles.name=players.role WHERE players.id=" + connection.escape(player), async result => {
+            sql("SELECT players.role,players.alignment,roles.class,roles.category,roles.team FROM players INNER JOIN roles ON roles.name=players.role WHERE players.id=" + connection.escape(player), async result => {
                 res(result[0]);
             });
         });
