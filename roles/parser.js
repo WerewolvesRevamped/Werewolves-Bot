@@ -195,7 +195,7 @@ module.exports = function() {
             let thisAbility = abilityLineSplit[0].trim();
             let abilityValues, thisAbilitySplit;
             if(/\[|\{|⟨|\|/.test(thisAbility[0])) { // empty ability, just values
-                abilityValues = thisAbility;
+                abilityValues = thisAbilityFull.replace(bulletsRegex,"").trim();
                 thisAbilitySplit = [];
                 thisAbility = "";
             } else { // ability exists, so do values (maybe)
@@ -569,7 +569,7 @@ module.exports = function() {
         let abilityLine = abilityLineSplit.shift().replace(bulletsRegex,"").trim();
         let abilityValues = abilityLine.length > 0 ? abilityLineFull.split(abilityLine)[1] : abilityLineFull;
         
-        //console.log("VALUES: ", abilityValues);
+        //console.log("VALUES PARSE: ", abilityValues);
         
         /**
         Evaluate additional values
@@ -1350,6 +1350,7 @@ module.exports = function() {
             if(promptOverwrite) abilityLineFull.parameters.prompt_overwrite = promptOverwrite;
         } else if(abilityLine == "") {
             abilityLineFull = { ability: { type: "parameters", id: abilityCounter++ }, parameters: { restrictions: parsedRestrictions, scaling: parsedScaling, direct: cDirect, repeating: cRepeating, visitless: cVisitless, forced: cForced, forced_sel: cForcedSelection } };
+            if(promptOverwrite) abilityLineFull.parameters.prompt_overwrite = promptOverwrite;
         } else {
             //console.log("UNIDENT", abilityLine);
             if(!debugMode) throw new Error(`Invalid Ability Type \`\`\`\n${abilityLineFull}\n\`\`\` with ability line \`\`\`\n${abilityLine}\n\`\`\``);

@@ -44,6 +44,7 @@ require("./abilities/abilities.js")();
 require("./attributes/attributes.js")();
 
 
+var botLoaded = false;
 
 /* Setup */
 client.on("ready", async () => {
@@ -75,7 +76,12 @@ client.on("ready", async () => {
 		});
 		log("Bot > Caching completed, Bot is ready!")
 	}, 3000);
+    
     //logDMs();
+    
+    setTimeout(function() {
+        botLoaded = true;
+	}, 4000);
     
 });
 
@@ -166,6 +172,11 @@ client.on("messageCreate", async message => {
     } catch (err) {
         console.log("UNKNOWN MESSAGE");
         //console.log(err);
+        return;
+    }
+    
+    if(!botLoaded && !message.author.bot) {
+        message.channel.send("🕐 Bot is loading. Please wait.");
         return;
     }
     

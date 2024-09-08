@@ -179,7 +179,6 @@ module.exports = function() {
             case "@selection":
                 if(additionalTriggerData.selection) {
                     let id = additionalTriggerData.selection.match(ID_SELECTOR_EXTENDED);
-                    console.log("sec", additionalTriggerData.selection, id);
                     return id ? [ id[1] ] : [ ];
                 } else {
                     return invalidSelector(selectorTarget);
@@ -187,7 +186,6 @@ module.exports = function() {
             case "@secondaryselection":
                 if(additionalTriggerData.secondaryselection) {
                     let id = additionalTriggerData.secondaryselection.match(ID_SELECTOR_EXTENDED)[1];
-                    console.log("sec", additionalTriggerData.secondaryselection, id);
                     return id ? [ id[1] ] : [ ];
                 } else {
                     return invalidSelector(selectorTarget);

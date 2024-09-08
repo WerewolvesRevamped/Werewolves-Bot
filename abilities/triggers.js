@@ -636,7 +636,11 @@ module.exports = function() {
     triggers at the start of the game
     **/
     this.eventStarting = async function() {
+        // starting
         await triggerHandler("Starting");
+        
+        // passive
+        await triggerHandler("Passive");
     }
     
     /**
@@ -682,6 +686,9 @@ module.exports = function() {
         await triggerHandler("End Phase");
         await triggerHandler("Start Day");
         await triggerHandler("Start Phase");
+        
+        // passive
+        await triggerHandler("Passive");
     }
     
     /**
@@ -727,6 +734,9 @@ module.exports = function() {
         await triggerHandler("End Phase");
         await triggerHandler("Start Night");
         await triggerHandler("Start Phase");
+        
+        // passive
+        await triggerHandler("Passive");
     }
     
 }

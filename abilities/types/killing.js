@@ -92,6 +92,7 @@ module.exports = function() {
             await triggerPlayer(targets[i], "On Death", { attacker: src_ref, death_type: "lynch", attack_source: src_name }); 
             await triggerPlayer(targets[i], "On Lynch", { attacker: src_ref, death_type: "lynch", attack_source: src_name }); 
             await triggerHandler("On Death Complex", { attacker: src_ref, death_type: "lynch", attack_source: src_name, this: targets[i] }); 
+            await triggerHandler("Passive");
             
             // execute the kill
             await killPlayer(targets[i]);
@@ -164,6 +165,8 @@ module.exports = function() {
         // complex triggers
         await triggerHandler("On Death Complex", { attacker: src_ref, death_type: type, attack_source: src_name, this: target }); 
         await triggerHandler("On Killed Complex", { attacker: src_ref, death_type: type, attack_source: src_name, this: target }); 
+        // passive
+        await triggerHandler("Passive");
     }
     
     /** PRIVATE
