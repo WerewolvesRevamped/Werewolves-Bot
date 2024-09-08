@@ -69,7 +69,7 @@ module.exports = function() {
         // get color
         let color = getTeamColor(rTeam);
         
-        return { url: url, color: color };
+        return { url: url, color: color, class: rClass, category: rCategory, team: rTeam };
     }
     
     /**

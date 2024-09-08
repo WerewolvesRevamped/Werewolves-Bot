@@ -232,7 +232,7 @@ module.exports = function() {
     
     /**
     Get Team Embed
-    Returns a team embed for an team message
+    Returns a team embed for a team message
     */
     this.getTeamEmbed = function(teamName, sections) {
         return new Promise(res => {

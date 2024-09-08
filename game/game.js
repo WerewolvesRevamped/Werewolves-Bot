@@ -536,30 +536,24 @@ module.exports = function() {
 		});
 	}
 	
-	/* Imports one players' roles via a pasted sheet */
-	this.cmdSheetImportRole = function(m, el) {
-		// Find the roles and which are valid/invalid
-		let roleList = el.splice(3).map(role => parseRole(role));
-		if(roleList[0] != "custom") {
-			var validRoles = roleList.filter(role => verifyRole(role));
-			var invalidRoles = roleList.filter(role => !verifyRole(role));
-		} else {
-			var validRoles = roleList;
-			var invalidRoles = [];
-		}
+	/* Imports one players' role via a pasted sheet */
+	this.cmdSheetImportRole = async function(m, el) {
+        // check valid role
+        let parsedRole = parseRole(el[3]);
 		// Set Role
-		if(!invalidRoles.length) {
+		if(verifyRole(parsedRole)) {
 			// All roles are valid -> Set it
-			sql("UPDATE players SET role = " + connection.escape(validRoles.join(",")) + ",orig_role = " + connection.escape(validRoles.join(",")) + " WHERE id = " + connection.escape(el[1]), result => {
-				m.edit(m.content + "\n	✅ Set role to `" + validRoles.join("` + `") + "`!").then(m => {
+            let roleData = await getRoleDataFromName(parsedRole);
+			sql("UPDATE players SET role = " + connection.escape(parsedRole) + ",orig_role = " + connection.escape(parsedRole) + ",alignment=" + connection.escape(roleData.team) + " WHERE id = " + connection.escape(el[1]), result => {
+				m.edit(m.content + "\n	✅ Set role to `" + parsedRole + "`!").then(m => {
 				});
 			}, () => {
 				m.edit(m.content + "\n	⛔ Database error. Could not set role!").then(m => {
 				});
 			});
 		} else {
-			// One or more invalid roles
-			m.edit(m.content + "\n	⛔ Command error. Role `" + invalidRoles.join("` + `") + "` does not exist!").then(m => {
+			// Invalid roles
+			m.edit(m.content + "\n	⛔ Command error. Role `" + parsedRole + "` does not exist!").then(m => {
 			});
 		}
 	}

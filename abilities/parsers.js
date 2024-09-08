@@ -272,6 +272,9 @@ module.exports = function() {
                 case "originalrole":
                     output.push(playerData.orig_role);
                 break;
+                case "alignment":
+                    output.push(playerData.alignment);
+                break;
                 default:  
                     abilityLog(`❗ **Error:** Invalid player property access \`${property}\`!`);
                 break;
@@ -324,10 +327,9 @@ module.exports = function() {
                     else allPlayers = allPlayers.filter(el => el.class != compVal);
                 break;
                 // Alignment
-                // WIP: ACTUAL ALIGNMENT MAY DIFFER FROM CURRENT ROLE ALIGNMENT
                 case "align":
-                    if(!compInverted) allPlayers = allPlayers.filter(el => el.team === compVal);
-                    else allPlayers = allPlayers.filter(el => el.team != compVal);
+                    if(!compInverted) allPlayers = allPlayers.filter(el => el.alignment === compVal);
+                    else allPlayers = allPlayers.filter(el => el.alignment != compVal);
                 break;
                 // Full Category
                 case "fullcat":
@@ -415,7 +417,7 @@ module.exports = function() {
     Get all single player 
     **/
     function getPlayer(id) {
-        return sqlPromOneEsc("SELECT players.id,players.role,players.orig_role,players.alive,role.class,role.category,role.team,orig_role.class AS orig_class,orig_role.category AS orig_cat,orig_role.team AS orig_align FROM players INNER JOIN roles AS role ON players.role=role.name INNER JOIN roles AS orig_role ON players.orig_role=orig_role.name WHERE players.type='player' AND players.id=", id);
+        return sqlPromOneEsc("SELECT players.id,players.role,players.orig_role,players.alive,players.alignment,role.class,role.category,role.team,orig_role.class AS orig_class,orig_role.category AS orig_cat,orig_role.team AS orig_align FROM players INNER JOIN roles AS role ON players.role=role.name INNER JOIN roles AS orig_role ON players.orig_role=orig_role.name WHERE players.type='player' AND players.id=", id);
     }
     
     /**
