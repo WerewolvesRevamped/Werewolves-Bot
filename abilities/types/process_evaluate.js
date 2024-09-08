@@ -137,6 +137,28 @@ module.exports = function() {
                         }
                         // no comparison can be made
                         return false;
+                    // COMPARISON - LESS THAN
+                    case "less_than":
+                        if(first.type === second.type && first.type === "number") { // same type, do direct type comparison
+                            return first.value < second.value;
+                        } else if(first.type === "number" && second.type === "result") {
+                            return first.value[0] < (await parseNumber(second.value[0].result));
+                        }else if(first.type === "result" && second.type === "number") {
+                            return (await parseNumber(first.value[0].result)) < second.value[0];
+                        }
+                        // no comparison can be made
+                        return false;
+                    // COMPARISON - GREATER THAN
+                    case "greater_than":
+                        if(first.type === second.type && first.type === "number") { // same type, do direct type comparison
+                            return first.value < second.value;
+                        } else if(first.type === "number" && second.type === "result") {
+                            return first.value[0] < (await parseNumber(second.value[0].result));
+                        }else if(first.type === "result" && second.type === "number") {
+                            return (await parseNumber(first.value[0].result)) < second.value[0];
+                        }
+                        // no comparison can be made
+                        return false;
                     // COMPARISON - NOT EQUAL
                     case "not_equal":
                         let conditionCopy = JSON.parse(JSON.stringify(condition)); // deep clone
