@@ -58,7 +58,7 @@ module.exports = function() {
                     break;
                     // SUCCESSION - DEFAULT
                     case "default":
-                        let lastPhase = await getLastPase(src_ref, ability);
+                        let lastPhase = await getLastPhase(src_ref, ability);
                         // check if current phase is at least 2 higher than the phase the ability was last used in
                         if(getPhaseAsNumber() >= lastPhase+2) {
                             return true;
@@ -114,7 +114,6 @@ module.exports = function() {
                 } else {
                     let targets = await parseSelector(restriction.target, src_ref, additionalTriggerData);
                     let attribute = parseAttributeSelector(restriction.attribute, src_ref, additionalTriggerData);
-                    console.log("ATTRIBUTE", JSON.stringify(targets), attribute);
                     // switch by subtype
                     switch(restriction.subtype) {
                         default:
@@ -231,7 +230,7 @@ module.exports = function() {
     /**
     Get last used phase
     **/
-    this.getLastPase = function(src_ref, ability) {
+    this.getLastPhase = function(src_ref, ability) {
         return new Promise(res => {
             sql("SELECT * FROM action_data WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=" + connection.escape(ability.id), result => {
                 if(!result[0]) res(-2);

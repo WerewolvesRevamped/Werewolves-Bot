@@ -194,10 +194,10 @@ module.exports = function() {
     this.triggerHandler = async function(triggerName, additionalTriggerData = {}) {
         abilityLog(`🔷 **Trigger:** ${triggerName}`);  
         await triggerHandlerPlayers(triggerName, additionalTriggerData);
-        await triggerHandlerPlayersRoleAttributes(triggerName, additionalTriggerData);
-        await triggerHandlerGroups(triggerName, additionalTriggerData);
-        await triggerHandlerPolls(triggerName, additionalTriggerData);
-        await triggerHandlerAttributes(triggerName, additionalTriggerData);
+        //await triggerHandlerPlayersRoleAttributes(triggerName, additionalTriggerData);
+        //await triggerHandlerGroups(triggerName, additionalTriggerData);
+        //await triggerHandlerPolls(triggerName, additionalTriggerData);
+        //await triggerHandlerAttributes(triggerName, additionalTriggerData);
     }
     
     /**
@@ -456,93 +456,105 @@ module.exports = function() {
             return;
         }
         
-        // iterate through abilities of the trigger
-        for(const ability of trigger.abilities) {
-            // check trigger restrictions
-            let promptInfo = [];
-            let restrictions = trigger?.parameters?.restrictions ?? [];
-            for(let i = 0; i < restrictions.length; i++) {
-                let passed = await handleRestriction(src_ref, ability, restrictions[i], RESTR_PRE, null, additionalTriggerData);
-                if(!passed) {
-                    abilityLog(`🔴 **Skipped Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}). Failed restriction \`${restrictions[i].type}\`.`);
-                    return;
-                }
-                // get additional restriction info
-                let info = await getRestrictionInfo(src_ref, ability, restrictions[i]);
-                if(info) promptInfo.push(info);
+        // check trigger restrictions
+        let promptInfo = [];
+        let restrictions = trigger?.parameters?.restrictions ?? [];
+        for(let i = 0; i < restrictions.length; i++) {
+            let passed = await handleRestriction(src_ref, trigger.abilities[0], restrictions[i], RESTR_PRE, null, additionalTriggerData);
+            if(!passed) {
+                abilityLog(`🔴 **Skipped Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}). Failed restriction \`${restrictions[i].type}\`.`);
+                return;
             }
-            // merge prompt info
-            let promptInfoMsg = "";
-            if(promptInfo.length > 0) promptInfoMsg = promptInfo.join("; ") + ".";
-            // check if prompts are necessary
-            let prompts = getPrompts(ability);
-            switch(prompts.length) {
-                // if no prompts are necessary -> directly execute ability
-                case 0: {
-                    if(ptype[1] === true) { // forced prompt
-                        // additional second restriction check
-                        for(let i = 0; i < restrictions.length; i++) {
-                            let passed = await handleRestriction(src_ref, ability, restrictions[i], RESTR_POST, null, additionalTriggerData);
-                            if(!passed) {
-                                abilityLog(`🔴 **Skipped Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}). Failed restriction \`${restrictions[i].type}\`.`);
-                                return;
-                            }
+            // get additional restriction info
+            let info = await getRestrictionInfo(src_ref, trigger.abilities[0], restrictions[i]);
+            if(info) promptInfo.push(info);
+        }
+        // merge prompt info
+        let promptInfoMsg = "";
+        if(promptInfo.length > 0) promptInfoMsg = promptInfo.join("; ") + ".";
+        
+        // check if prompts are necessary
+        let allPrompts = [];
+        for(const ability of trigger.abilities) {
+            let pro = getPrompts(ability);
+            allPrompts.push(...pro);
+        }
+        // find first instances of prompts; removes duplicates
+        let prompts = [];
+        let primary = allPrompts.find(el => el[2] === "primary");
+        let secondary = allPrompts.find(el => el[2] === "secondary");
+        if(primary) prompts.push(primary);
+        if(secondary) prompts.push(secondary);
+        
+        switch(prompts.length) {
+            // if no prompts are necessary -> directly execute ability
+            case 0: 
+                // iterate through all abilities and execute them
+                if(ptype[1] === true) { // forced prompt
+                    // additional second restriction check
+                    for(let i = 0; i < restrictions.length; i++) {
+                        let passed = await handleRestriction(src_ref, trigger.abilities[0], restrictions[i], RESTR_POST, null, additionalTriggerData);
+                        if(!passed) {
+                            abilityLog(`🔴 **Skipped Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}). Failed restriction \`${restrictions[i].type}\`.`);
+                            return;
                         }
-                        // send prompt
-                        let promptMsg = getPromptMessage(ability, promptOverwrite);
-                        let refImg = await refToImg(src_name);
-                        for(let i = 0; i < actionCount; i++) { // iterate for scaling
-                            if(promptMsg[promptMsg.length - 1] === ".") promptMsg = promptMsg.substr(0, promptMsg.length - 1); // if last character is normal . remove it 
-                            let mid = await sendSelectionlessPrompt(src_ref, ptype[0], `${getAbilityEmoji(ability.type)} ${promptMsg}${PROMPT_SPLIT}`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt");
-                            abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(ability.type)} {Selectionless}`);
-                            // schedule actions
-                            await createAction(mid, src_ref, src_name, ability, ability, ptype[0], "none", "none", neverActionTime, restrictions, additionalTriggerData, "notarget");
-                        }
-                    } else { // no prompt
-                        for(let i = 0; i < actionCount; i++) { 
+                    }
+                    // send prompt
+                    let promptMsg = getPromptMessage(trigger.abilities[0], promptOverwrite);
+                    let refImg = await refToImg(src_name);
+                    for(let i = 0; i < actionCount; i++) { // iterate for scaling
+                        if(promptMsg[promptMsg.length - 1] === ".") promptMsg = promptMsg.substr(0, promptMsg.length - 1); // if last character is normal . remove it 
+                        let mid = await sendSelectionlessPrompt(src_ref, ptype[0], `${getAbilityEmoji(trigger.abilities[0].type)} ${promptMsg}${PROMPT_SPLIT}`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt");
+                        abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(trigger.abilities[0].type)} {Selectionless}`);
+                        // schedule actions
+                        await createAction(mid, src_ref, src_name, trigger.abilities, trigger.abilities, ptype[0], "none", "none", neverActionTime, restrictions, additionalTriggerData, "notarget");
+                    }
+                } else { // no prompt
+                    for(let i = 0; i < actionCount; i++) { 
+                        for(const ability of trigger.abilities) {
                             let feedback = await executeAbility(src_ref, src_name, ability, restrictions, additionalTriggerData);
                             if(feedback && feedback.msg) abilitySend(src_ref, feedback.msg);
                         }
                     }
-                } break;
-                // single prompt (@Selection)
-                case 1: {
-                    let type = toTitleCase(selectorGetType(prompts[0][1]));
-                    let promptMsg = getPromptMessage(ability, promptOverwrite, type);
-                    let refImg = await refToImg(src_name);
-                    let mid = (await abilitySendProm(src_ref, `${getAbilityEmoji(ability.type)} ${promptMsg} ${scalingMessage}`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt")).id;
-                    if(ptype[0] === "immediate") { // immediate prompt
-                        abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(ability.type)} [${type}] {Immediate}`);
-                        await createPrompt(mid, src_ref, src_name, ability, restrictions, additionalTriggerData, "immediate", actionCount, type);
-                    } else if(ptype[0] === "end") { // end phase prompt
-                        abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(ability.type)} [${type}] {End}`);
-                        await createPrompt(mid, src_ref, src_name, ability, restrictions, additionalTriggerData, "end", actionCount, type);
-                    } else {
-                        abilityLog(`❗ **Error:** Invalid prompt type!`);
-                    }
-                } break;
-                // double prompt (@Selection and @SecondarySelection)
-                case 2: {
-                    let type1 = toTitleCase(selectorGetType(prompts[0][1]));
-                    let type2 = toTitleCase(selectorGetType(prompts[1][1]));
-                    let promptMsg = getPromptMessage(ability, promptOverwrite, type1, type2);
-                    let refImg = await refToImg(src_name);
-                    let mid = (await abilitySendProm(src_ref, `${getAbilityEmoji(ability.type)} ${promptMsg} ${scalingMessage}`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt")).id;
-                    if(ptype[0] === "immediate") { // immediate prompt
-                        abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(ability.type)} [${type1}, ${type2}] {Immediate}`);
-                        await createPrompt(mid, src_ref, src_name, ability, restrictions,additionalTriggerData, "immediate", actionCount, type1, type2);
-                    } else if(ptype[0] === "end") { // end phase prompt
-                        abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(ability.type)} [${type1}, ${type2}] {End}`);
-                        await createPrompt(mid, src_ref, src_name, ability, restrictions, additionalTriggerData, "end", actionCount, type1, type2);
-                    } else {
-                        abilityLog(`❗ **Error:** Invalid prompt type!`);
-                    }
-                } break;
-                // more than 2 prompts -> error
-                default:
-                    abilityLog(`❗ **Error:** Invalid amount of prompts (${prompts.length}) in ability!`);
-                break;
-            }
+                }
+            break;
+            // single prompt (@Selection)
+            case 1: {
+                let type = toTitleCase(selectorGetType(prompts[0][1]));
+                let promptMsg = getPromptMessage(trigger.abilities[0], promptOverwrite, type);
+                let refImg = await refToImg(src_name);
+                let mid = (await abilitySendProm(src_ref, `${getAbilityEmoji(trigger.abilities[0].type)} ${promptMsg} ${scalingMessage}`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt")).id;
+                if(ptype[0] === "immediate") { // immediate prompt
+                    abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(trigger.abilities[0].type)} [${type}] {Immediate}`);
+                    await createPrompt(mid, src_ref, src_name, trigger.abilities, restrictions, additionalTriggerData, "immediate", actionCount, type);
+                } else if(ptype[0] === "end") { // end phase prompt
+                    abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(trigger.abilities[0].type)} [${type}] {End}`);
+                    await createPrompt(mid, src_ref, src_name, trigger.abilities, restrictions, additionalTriggerData, "end", actionCount, type);
+                } else {
+                    abilityLog(`❗ **Error:** Invalid prompt type!`);
+                }
+            } break;
+            // double prompt (@Selection and @SecondarySelection)
+            case 2: {
+                let type1 = toTitleCase(selectorGetType(prompts[0][1]));
+                let type2 = toTitleCase(selectorGetType(prompts[1][1]));
+                let promptMsg = getPromptMessage(trigger.abilities[0], promptOverwrite, type1, type2);
+                let refImg = await refToImg(src_name);
+                let mid = (await abilitySendProm(src_ref, `${getAbilityEmoji(trigger.abilities[0].type)} ${promptMsg} ${scalingMessage}`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt")).id;
+                if(ptype[0] === "immediate") { // immediate prompt
+                    abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(trigger.abilities[0].type)} [${type1}, ${type2}] {Immediate}`);
+                    await createPrompt(mid, src_ref, src_name, trigger.abilities, restrictions,additionalTriggerData, "immediate", actionCount, type1, type2);
+                } else if(ptype[0] === "end") { // end phase prompt
+                    abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(trigger.abilities[0].type)} [${type1}, ${type2}] {End}`);
+                    await createPrompt(mid, src_ref, src_name, trigger.abilities, restrictions, additionalTriggerData, "end", actionCount, type1, type2);
+                } else {
+                    abilityLog(`❗ **Error:** Invalid prompt type!`);
+                }
+            } break;
+            // more than 2 prompts -> error
+            default:
+                abilityLog(`❗ **Error:** Invalid amount of prompts (${prompts.length}) in ability!`);
+            break;
         }
     }
     

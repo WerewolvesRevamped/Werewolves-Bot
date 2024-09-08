@@ -65,9 +65,9 @@ module.exports = function() {
     Create Prompt
     creates a new prompt in the prompt table
     **/
-    this.createPrompt = async function(mid, src_ref, src_name, ability, restrictions, additionalTriggerData, prompt_type, amount, type1, type2 = "none") {
+    this.createPrompt = async function(mid, src_ref, src_name, abilities, restrictions, additionalTriggerData, prompt_type, amount, type1, type2 = "none") {
         await new Promise(res => {
-            sql("INSERT INTO prompts (message_id,src_ref,src_name,ability,type1,type2,prompt_type,restrictions,additional_trigger_data,amount) VALUES (" + connection.escape(mid) + "," + connection.escape(src_ref) + "," + connection.escape(src_name) + "," + connection.escape(JSON.stringify(ability)) + "," + connection.escape(type1.toLowerCase()) + "," + connection.escape(type2.toLowerCase()) + "," + connection.escape(prompt_type) + "," + connection.escape(JSON.stringify(restrictions)) + "," + connection.escape(JSON.stringify(additionalTriggerData)) + "," + amount + ")", result => {
+            sql("INSERT INTO prompts (message_id,src_ref,src_name,abilities,type1,type2,prompt_type,restrictions,additional_trigger_data,amount) VALUES (" + connection.escape(mid) + "," + connection.escape(src_ref) + "," + connection.escape(src_name) + "," + connection.escape(JSON.stringify(abilities)) + "," + connection.escape(type1.toLowerCase()) + "," + connection.escape(type2.toLowerCase()) + "," + connection.escape(prompt_type) + "," + connection.escape(JSON.stringify(restrictions)) + "," + connection.escape(JSON.stringify(additionalTriggerData)) + "," + amount + ")", result => {
                 res();
             });            
         });
@@ -86,8 +86,10 @@ module.exports = function() {
             if(typeof val !== "string") return;
             // to lower case
             val = val.toLowerCase();
-            if(val.indexOf("@selection") >= 0 || val.indexOf("@secondaryselection") >= 0) {
-                foundSelections.push([key,val]);
+            if(val.indexOf("@selection") >= 0) {
+                foundSelections.push([key,val,"primary"]);
+            } else if(val.indexOf("@secondaryselection") >= 0) {
+                foundSelections.push([key,val,"secondary"]);
             }
         });
         return foundSelections;
@@ -215,9 +217,9 @@ module.exports = function() {
     Create Queued Action
     creates an action in the action queue which will be executed at a specified time
     **/
-    this.createAction = async function (mid, src_ref, src_name, ability, orig_ability, prompt_type, type1, type2, time, restrictions, additionalTriggerData, target) {
+    this.createAction = async function (mid, src_ref, src_name, abilities, orig_ability, prompt_type, type1, type2, time, restrictions, additionalTriggerData, target) {
         await new Promise(res => {
-            sql("INSERT INTO action_queue (message_id,src_ref,src_name,ability,orig_ability,type1,type2,execute_time, prompt_type, restrictions, target, additional_trigger_data) VALUES (" + connection.escape(mid) + "," + connection.escape(src_ref) + "," + connection.escape(src_name) + "," + connection.escape(JSON.stringify(ability)) + "," + connection.escape(JSON.stringify(orig_ability)) + "," + connection.escape(type1) + "," + connection.escape(type2) + "," + connection.escape(time) + "," + connection.escape(prompt_type) + "," + connection.escape(JSON.stringify(restrictions)) + "," + connection.escape(target) + "," + connection.escape(JSON.stringify(additionalTriggerData)) + ")", result => {
+            sql("INSERT INTO action_queue (message_id,src_ref,src_name,abilities,orig_ability,type1,type2,execute_time, prompt_type, restrictions, target, additional_trigger_data) VALUES (" + connection.escape(mid) + "," + connection.escape(src_ref) + "," + connection.escape(src_name) + "," + connection.escape(JSON.stringify(abilities)) + "," + connection.escape(JSON.stringify(orig_ability)) + "," + connection.escape(type1) + "," + connection.escape(type2) + "," + connection.escape(time) + "," + connection.escape(prompt_type) + "," + connection.escape(JSON.stringify(restrictions)) + "," + connection.escape(target) + "," + connection.escape(JSON.stringify(additionalTriggerData)) + ")", result => {
                 res();
             });            
         });
@@ -249,19 +251,25 @@ module.exports = function() {
             // delete the queued action entry
             await deleteQueuedAction(curAction.message_id);
             // parse ability
-            let ability = JSON.parse(curAction.ability);
+            let abilities = JSON.parse(curAction.abilities);
             // parse restrictions
             let restrictions = JSON.parse(curAction.restrictions);
             // parse additional trigger data
             let additionalTriggerData = JSON.parse(curAction.additional_trigger_data);
             // save last target
-            quantity = await getActionQuantity(curAction.src_ref, ability);
-            if(quantity === -1) await initActionData(curAction.src_ref, ability);
-            setLastTarget(curAction.src_ref, ability, curAction.target);
+            quantity = await getActionQuantity(curAction.src_ref, abilities[0]);
+            if(quantity === -1) await initActionData(curAction.src_ref, abilities[0]);
+            setLastTarget(curAction.src_ref, abilities[0], curAction.target);
             // execute the ability
-            let feedback = await executeAbility(curAction.src_ref, curAction.src_name, ability, restrictions, additionalTriggerData);
+            let feedback = [];
+            for(let ability of abilities) {
+                let fed = await executeAbility(curAction.src_ref, curAction.src_name, ability, restrictions, additionalTriggerData);
+                if(fed && fed.msg) feedback.push(fed);
+            }
             // send feedback
-            if(feedback && feedback.msg) abilitySend(curAction.src_ref, feedback.msg, EMBED_GREEN);
+            feedback.forEach(el => {
+                abilitySend(curAction.src_ref, el.msg, EMBED_GREEN);
+            });
             // confirm automatic execution
             confirmAutoExecution(curAction.src_ref, curAction.message_id);
         }
@@ -279,7 +287,7 @@ module.exports = function() {
         // load prompt from DB
         let prompt = await getPrompt(message.reference.messageId);
         // get values from prompt
-        let ability = JSON.parse(prompt.ability);
+        let abilities = JSON.parse(prompt.abilities);
         let restrictions = JSON.parse(prompt.restrictions);
         let additionalTriggerData = JSON.parse(prompt.additional_trigger_data);
         let src_name = prompt.src_name;
@@ -310,7 +318,7 @@ module.exports = function() {
         
         // iterate through replies - for restrictions and prompt reply validation
         for(let i = 0; i < replies.length; i++) {
-            let clonedAbility = JSON.parse(JSON.stringify(ability));
+            let clonedAbilities = JSON.parse(JSON.stringify(abilities));
             // check which type of prompt
             if(type2 == "none") { // single reply needed
                 let reply = replies[i].trim();
@@ -320,13 +328,16 @@ module.exports = function() {
                     // save parsed reply
                     parsedReplies.push(parsedReply);
                     // apply prompt reply onto ability
-                    let promptAppliedAbility = applyPromptValue(clonedAbility, 0, parsedReply[1]);
+                    for(let j = 0; j < clonedAbilities.length; j++) {
+                        clonedAbilities[j] = applyPromptValue(clonedAbilities[j], 0, parsedReply[1]);
+                    }
+                    let promptAppliedAbility = clonedAbilities;
                     // save prompt applied ability reply
                     promptAppliedAbilities.push(promptAppliedAbility);
                     // check restrictions again
                     additionalTriggerData.selection = parsedReply[1];
                     for(let i = 0; i < restrictions.length; i++) {
-                        let passed = await handleRestriction(src_ref, promptAppliedAbility, restrictions[i], RESTR_POST, parsedReply[1], additionalTriggerData);
+                        let passed = await handleRestriction(src_ref, promptAppliedAbility[0], restrictions[i], RESTR_POST, parsedReply[1], additionalTriggerData);
                         if(!passed) {
                             let msg = getPromptMessage(restrictions[i]);
                             let embed = basicEmbed(`You cannot execute this ability due to a restriction: ${msg}`, EMBED_RED);
@@ -356,15 +367,18 @@ module.exports = function() {
                     // save parsed reply
                     parsedReplies.push(parsedReply1);
                     // apply prompt reply onto ability
-                    let promptAppliedAbility = applyPromptValue(clonedAbility, 0, parsedReply1[1]);
-                    promptAppliedAbility = applyPromptValue(promptAppliedAbility, 1, parsedReply2[1]);
+                    for(let j = 0; j < clonedAbilities.length; j++) {
+                        clonedAbilities[j] = applyPromptValue(clonedAbilities[j], 0, parsedReply1[1]);
+                        clonedAbilities[j] = applyPromptValue(clonedAbilities[j], 1, parsedReply2[1]);
+                    }
+                    promptAppliedAbility = clonedAbilities
                     // save prompt applied ability reply
                     promptAppliedAbilities.push(promptAppliedAbility);
                     // check restrictions again
                     additionalTriggerData.selection = parsedReply1[1];
                     additionalTriggerData.secondaryselection = parsedReply2[1];
                     for(let i = 0; i < restrictions.length; i++) {
-                        let passed = await handleRestriction(src_ref, promptAppliedAbility, restrictions[i], RESTR_POST, parsedReply1[1], additionalTriggerData);
+                        let passed = await handleRestriction(src_ref, promptAppliedAbility[0], restrictions[i], RESTR_POST, parsedReply1[1], additionalTriggerData);
                         if(!passed) {
                             let msg = getPromptMessage(restrictions[i]);
                             let embed = basicEmbed(`You cannot execute this ability due to a restriction: ${msg}`, EMBED_RED);
@@ -393,7 +407,7 @@ module.exports = function() {
         // iterate through replies - for execution
         for(let i = 0; i < replies.length; i++) {
             // schedule actions
-            await createAction(repl_msg, src_ref, src_name, promptAppliedAbilities[i], ability, promptType, type1, type2, exeTime, restrictions, additionalTriggerData, parsedReplies[i][1]);
+            await createAction(repl_msg, src_ref, src_name, promptAppliedAbilities[i], abilities, promptType, type1, type2, exeTime, restrictions, additionalTriggerData, parsedReplies[i][1]);
         }
         
         
