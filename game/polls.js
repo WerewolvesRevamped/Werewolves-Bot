@@ -124,7 +124,7 @@ module.exports = function() {
     Deletes an active poll instances
     **/
 	/* Lists all polls names */
-	this.cmdGroupsDelete = function(channel, args) {
+	this.cmdPollsDelete = function(channel, args) {
 		if(!args[1]) {  
 			channel.send("⛔ Syntax error. Incorrect amount of parameters!"); 
 			return; 

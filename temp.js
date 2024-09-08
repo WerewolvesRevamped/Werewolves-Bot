@@ -92,6 +92,7 @@ module.exports = function() {
                 "groups": ["group"],
                 "attributes": ["attribute","attr"],
                 "locations": ["location", "loc", "locs"],
+                "teams": ["team","tm"],
                 "details": ["il","id"]
         };
         for(let cmd in aliases) {

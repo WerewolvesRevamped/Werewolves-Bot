@@ -28,6 +28,7 @@ module.exports = function() {
     this.locationpathsPath = `${roleRepoBaseUrl}_paths/locations`;
     this.pollpathsPath = `${roleRepoBaseUrl}_paths/polls`;
     this.attributepathsPath = `${roleRepoBaseUrl}_paths/attributes`;
+    this.teamspathsPath = `${roleRepoBaseUrl}_paths/teams`;
     /**
     Website Paths
     **/

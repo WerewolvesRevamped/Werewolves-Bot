@@ -116,6 +116,22 @@ module.exports = function() {
     }
     
     /**
+    Command: $teams query
+    Runs queryTeams to query all teams from github
+    **/
+    this.cmdTeamsQuery = async function(channel) {
+        channel.send(`🔄 Querying teams. Please wait. This may take several minutes.`);
+        try {
+            const output = await queryTeams();
+            output.forEach(el => channel.send(`❗ ${el}`));
+        } catch(err) {
+            channel.send(`⛔ Querying teams failed.`);
+        }
+        channel.send(`✅ Querying teams completed.`);
+        cacheTeams();
+    }
+    
+    /**
     Command: $roles parse
     Parses all roles currently stored in the DB from desc_formalized to parsed
     **/
@@ -184,6 +200,23 @@ module.exports = function() {
     }
     
     /**
+    Command: $teams parse
+    Parses all teams currently stored in the DB from desc_formalized to parsed
+    **/
+    this.cmdTeamsParse = async function(channel) {
+        channel.send(`🔄 Parsing teams. Please wait. This may take several minutes.`);
+        try {
+            const output = await parseTeams();
+            output.output.forEach(el => channel.send(`❗ ${el}`));
+            channel.send(`✅ Successfully parsed \`${output.success}\` teams. `);
+            channel.send(`😔 Failed to parse \`${output.failure}\` teams. `);
+        } catch(err) {
+            channel.send(`⛔ Parsing teams failed.`);
+        }
+        channel.send(`✅ Parsing teams completed. `);
+    }
+    
+    /**
     Command: $update
     Updates all github linked data
     **/
@@ -213,7 +246,7 @@ module.exports = function() {
         channel.send(`❗ Parsing groups completed with \`${output.output.length}\` errors.`);
         // query polls
         channel.send(`🔄 Querying polls. Please wait. This may take several minutes.`);
-        output = await queryPolls();
+        output = await queryPolls(); 
         channel.send(`❗ Querying polls completed with \`${output.length}\` errors.`);
         // parse polls
         channel.send(`🔄 Parsing polls. Please wait. This may take several minutes.`);
@@ -227,6 +260,14 @@ module.exports = function() {
         channel.send(`🔄 Parsing attributes. Please wait. This may take several minutes.`);
         output = await parseAttributes();
         channel.send(`❗ Parsing attributes completed with \`${output.output.length}\` errors.`);
+        // query teams
+        channel.send(`🔄 Querying teams. Please wait. This may take several minutes.`);
+        output = await queryTeams();
+        channel.send(`❗ Querying teams completed with \`${output.length}\` errors.`);
+        // parse teams
+        channel.send(`🔄 Parsing teams. Please wait. This may take several minutes.`);
+        output = await parseTeams();
+        channel.send(`❗ Parsing teams completed with \`${output.output.length}\` errors.`);
         /** No Parsing */
         // query info
         channel.send(`🔄 Querying info. Please wait. This may take several minutes.`);
@@ -242,6 +283,10 @@ module.exports = function() {
         channel.send(`❗ Caching role info.`);
         cacheLocations();
         channel.send(`❗ Caching location info.`);
+        cachePolls();
+        channel.send(`❗ Caching poll info.`);
+        cacheTeams();
+        channel.send(`❗ Caching teams info.`);
         channel.send(`✅ Update completed.`);
     }
         
@@ -252,7 +297,7 @@ module.exports = function() {
     const emptyDesc = "No description available.";
     async function runQuery(clearFunc, path, callbackFunc, maxAllowedErrors = 1) {
         // clear the relevant table
-        clearFunc();
+        await clearFunc();
         // get all files
         const tree = await getTree();
         // get the relevant paths file
@@ -288,6 +333,7 @@ module.exports = function() {
         // Cache Role Info again
         cacheRoleInfo();
         // WIP: ^ this is async and does not necessarily finish in time
+        // WIP2: ^ this also doesnt cache polls, teams or locations which are part of game module not role module
         // output errors
         return outputs;     
     }
@@ -345,7 +391,7 @@ module.exports = function() {
     deletes the entire contents of the roles database
     **/
      function clearRoles() {
-		sql("DELETE FROM roles");
+		return sqlProm("DELETE FROM roles");
 	}
     
     /**
@@ -399,7 +445,7 @@ module.exports = function() {
     deletes the entire contents of the roles database
     **/
      function clearSets() {
-		sql("DELETE FROM sets");
+		return sqlProm("DELETE FROM sets");
 	}
     
     /**
@@ -434,7 +480,7 @@ module.exports = function() {
     deletes the entire contents of the info database
     **/
      function clearInfo() {
-		sql("DELETE FROM info");
+		return sqlProm("DELETE FROM info");
 	}
     
     /** 
@@ -484,7 +530,7 @@ module.exports = function() {
     deletes the entire contents of the groups database
     **/
      function clearGroups() {
-		sql("DELETE FROM groups");
+		return sqlProm("DELETE FROM groups");
 	}
     
     /** 
@@ -521,7 +567,7 @@ module.exports = function() {
     deletes the entire contents of the attributes database
     **/
      function clearAttributes() {
-		sql("DELETE FROM attributes");
+		return sqlProm("DELETE FROM attributes");
 	}
     
     /** 
@@ -543,6 +589,57 @@ module.exports = function() {
     }
     
     /** 
+    Query Teams
+    queries all teams from github
+    **/
+    async function queryTeams() {
+        return await runQuery(clearTeams, teamspathsPath, queryTeamsCallback, 5);
+    }
+    
+    /**
+    Clear Teams
+    deletes the entire contents of the teams database
+    **/
+     function clearTeams() {
+		return sqlProm("DELETE FROM teams");
+	}
+    
+    /** 
+    Query Teams - Callback
+    queries all attributes from github
+    **/
+    async function queryTeamsCallback(path, name) {
+        // extract values
+        var teamContents = await queryFile(path, name); // get the team contents
+        const dbName = getDBName(name); // get the db name
+        const teamDescs = splitRoleDescSections(teamContents); // split the team descriptions, into the different types of team description
+        const teamName = getRoleDescName(teamContents); // grabs the team name inbetween the **'s in the first line
+        const formalized = teamDescs.filter(el => el[0] == "formalized")[0][1] ?? "";
+        const basics = teamDescs.filter(el => el[0] == "basics")[0][1] ?? "";
+        
+        // split into lines
+        let formalizedLines = formalized.split("\n");
+        let win_condition = "", formalizedFiltered = [];
+        
+        // find specific key value
+        formalizedLines.forEach(el => {
+            let spl = el.split(": ");
+            switch(spl[0]) {
+                case "Win Condition": win_condition = spl[1]; break;
+                default: formalizedFiltered.push(el); break;
+            }
+        });
+        
+        // merge formalized
+        formalizedFiltered = formalizedFiltered.join("\n");
+        
+        // imsert the team into the databse
+        sql("INSERT INTO teams (name,display_name,win_condition,desc_basics,desc_formalized) VALUES (" + connection.escape(dbName) + "," + connection.escape(teamName) + "," + connection.escape(win_condition) + "," + connection.escape(basics) + "," + connection.escape(formalizedFiltered) + ")");
+        // return nothing
+        return null;
+    }
+    
+    /** 
     Query Polls
     queries all polls from github
     **/
@@ -551,11 +648,11 @@ module.exports = function() {
     }
     
     /**
-    Clear Groups
+    Clear Polls
     deletes the entire contents of the groups database
     **/
      function clearPolls() {
-		sql("DELETE FROM polls");
+		return sqlProm("DELETE FROM polls");
 	}
     
     /** 
@@ -568,7 +665,7 @@ module.exports = function() {
         const dbName = getDBName(name); // get the db name
         const pollName = getRoleDescName(pollContents); // grabs the role name inbetween the **'s in the first line
         
-        // splt into lines
+        // split into lines
         let pollLines = pollContents.split("\n");
         pollLines.shift();
         
@@ -607,7 +704,7 @@ module.exports = function() {
     deletes the entire contents of the locations database
     **/
      function clearLocations() {
-		sql("DELETE FROM locations");
+		return sqlProm("DELETE FROM locations");
 	}
     
     /** 
@@ -729,6 +826,14 @@ module.exports = function() {
     **/
     async function parseAttributes() {
         return await runParser("attributes", cachedAttributes);
+    }
+    
+    /**
+    Parse Teams
+    Parses all teams
+    **/
+    async function parseTeams() {
+        return await runParser("teams", cachedTeams);
     }
     
     /**

@@ -60,6 +60,7 @@ client.on("ready", async () => {
 		cacheRoleInfo();
         cacheLocations();
         cachePolls();
+        cacheTeams();
         getSCCats();
 		getCCs();
 		getPRoles();
@@ -406,6 +407,10 @@ client.on("messageCreate", async message => {
 	/* polls */ // Command for locations (undocumentated)
 	case "polls": 
 		if(checkGM(message)) cmdPolls(message, args);
+	break;
+	/* teams */ // Command for locations (undocumentated)
+	case "teams": 
+		if(checkGM(message)) cmdTeams(message, args);
 	break;
 	/* Update */ // Updates all github linked data
 	case "update":

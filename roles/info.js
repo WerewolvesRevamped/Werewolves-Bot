@@ -25,7 +25,7 @@ module.exports = function() {
         roleName = parseRole(roleName);
 		if(!verifyInfoMessage(roleName)) { // not a valid role
 			// get all roles and aliases, to get an array of all possible role names
-			let allRoleNames = [...cachedRoles, ...cachedGroups, ...cachedAttributes, ...cachedLocations, ...cachedAliases.map(el => el.alias), ...cachedInfoNames];
+			let allRoleNames = [...cachedRoles, ...cachedGroups, ...cachedAttributes, ...cachedLocations, ...cachedTeams, ...cachedTeamNames, ...cachedAliases.map(el => el.alias), ...cachedInfoNames];
 			let bestMatch = findBestMatch(roleName.toLowerCase(), allRoleNames.map(el => el.toLowerCase())); // find closest match
 			// check if match is close enough
 			if(bestMatch.value <= ~~(roleName.length/2)) { // auto alias if so, but send warning 
@@ -64,12 +64,17 @@ module.exports = function() {
             infoEmbed = await getInfoEmbed(roleName, channel.guild);
         } else if(cachedLocations.includes(roleName)) {
             // its a location
-            console.log(roleName);
             infoEmbed = await getLocationEmbed(roleName);
         } else if(cachedAttributes.includes(roleName)) {
             // its a location
-            console.log(roleName);
             infoEmbed = await getAttributeEmbed(roleName, sections);
+        } else if(cachedTeams.includes(roleName)) {
+            // its a team
+            infoEmbed = await getTeamEmbed(roleName, sections);
+        } else if(cachedTeamNames.includes(roleName)) {
+            // its a team display name -> convert to name
+            let ind = cachedTeamNames.indexOf(roleName);
+            infoEmbed = await getTeamEmbed(cachedTeams[ind], sections);
         } else {
             // its nothing? should be impossible since verifyInfoMessage checks its one of the above minimum
             // can happen if running info pre caching
@@ -210,6 +215,47 @@ module.exports = function() {
                
                 // get icon if applicable
                 let lutval = applyLUT(attrName);
+                if(!lutval) lutval = applyLUT(result?.display_name ?? "Unknown");
+                if(lutval) { // set icon and name
+                    //console.log(`${iconRepoBaseUrl}${lutval}`);
+                    embed.thumbnail = { "url": `${iconRepoBaseUrl}${lutval}.png` };
+                    embed.author = { "icon_url": `${iconRepoBaseUrl}${lutval}.png`, "name": applyTheme(result?.display_name ?? "Unknown") };
+                } else { // just set title afterwards
+                    embed.title = applyET(result?.display_name ?? "Unknown");
+                }
+                
+                // resolve promise, return embed
+                res(embed);
+            })
+        });
+    }
+    
+    /**
+    Get Team Embed
+    Returns a team embed for an team message
+    */
+    this.getTeamEmbed = function(teamName, sections) {
+        return new Promise(res => {
+            sql("SELECT * FROM teams WHERE teams.name=" + connection.escape(teamName), async result => {
+                result = result[0]; // there should always only be one attribute by a certain name
+                var embed = await getBasicEmbed(mainGuild);
+                
+                // create members list
+                var members = await applyQuery(`@Query;Team=${result.name},Type=default;$.Emoji $.Name@\n\n@Query;Team=${result.name},Type=limited;$.Emoji *$.Name*@\n\n@Query;Team=${result.name},Type=transformation;$.Emoji $.Name (T)@`);
+                members = members.replace("\n\n\n","\n"); // remove extra newline for when a section is empty
+                
+                var desc = [];
+                if(sections.includes("basics") || sections.includes("simplified") || sections.includes("details")) desc.push(["Basics", result?.desc_basics ?? "No info found"]);
+                if(sections.includes("details")) desc.push(["Members", members ?? "No info found"]);
+                if(sections.includes("formalized")) desc.push(["Formalized", formatFormalized(result?.desc_formalized ?? "No info found")]);
+
+                // split a single section into several fields if necessary
+                for(let d in desc) {
+                    embed.fields.push(...handleFields(applyETN(desc[d][1], mainGuild), applyTheme(desc[d][0])));
+                }
+               
+                // get icon if applicable
+                let lutval = applyLUT(teamName);
                 if(!lutval) lutval = applyLUT(result?.display_name ?? "Unknown");
                 if(lutval) { // set icon and name
                     //console.log(`${iconRepoBaseUrl}${lutval}`);

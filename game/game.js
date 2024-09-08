@@ -12,6 +12,7 @@ require("./cleanup.js")();
 require("./phase.js")();
 require("./locations.js")();
 require("./polls.js")();
+require("./teams.js")();
 require("./connections.js")();
 
 module.exports = function() {

@@ -79,6 +79,21 @@ module.exports = function() {
 			log("Game > ❗❗❗ Unable to cache polls!");
 		});
 	}
+    
+    /**
+    Cache Teams
+    caches the current state of the teams database
+    **/
+    this.cachedTeams = [];
+    this.cachedTeamNames = [];
+    this.cacheTeams = function() {
+		sql("SELECT name,display_name FROM teams", result => {
+				cachedTeams = result.map(el => el.name);
+				cachedTeamNames = result.map(el => parseTeam(el.display_name));
+		}, () => {
+			log("Game > ❗❗❗ Unable to cache teams!");
+		});
+	}
 	
     
 }
