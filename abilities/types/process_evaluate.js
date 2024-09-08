@@ -96,17 +96,20 @@ module.exports = function() {
         const type = condition.type;
         switch(type) {
             // DEFAULT
-            default:
+            default: {
                 abilityLog(`❗ **Error:** Unknown condition type \`${type}\`!`);
                 return false;
+            }
             // ALWAYS
-            case "always":
+            case "always": {
                 return false;
+            }
             // OTHERWISE
-            case "otherwise":
+            case "otherwise": {
                 return true;
+            }
             // COMPARISON
-            case "comparison":
+            case "comparison": {
                 if(!condition.subtype || !condition.first || !condition.second) {
                     abilityLog(`❗ **Error:** Missing arguments for type \`${type}\`!`);
                     return false;
@@ -154,7 +157,7 @@ module.exports = function() {
                             return first.value < second.value;
                         } else if(first.type === "number" && second.type === "result") {
                             return first.value[0] < (await parseNumber(second.value[0].result));
-                        }else if(first.type === "result" && second.type === "number") {
+                        } else if(first.type === "result" && second.type === "number") {
                             return (await parseNumber(first.value[0].result)) < second.value[0];
                         }
                         // no comparison can be made
@@ -166,8 +169,9 @@ module.exports = function() {
                         let condBool = await resolveCondition(conditionCopy, src_ref, src_name, additionalTriggerData);
                         return !condBool;
                 }
+            }
             // LOGIC
-            case "logic":
+            case "logic": {
                 if(!condition.subtype) {
                     abilityLog(`❗ **Error:** Missing arguments for type \`${type}\`!`);
                     return false;
@@ -206,8 +210,9 @@ module.exports = function() {
                         condBool2 = await resolveCondition(condition.condition2, src_ref, src_name, additionalTriggerData);
                         return condBool1 || condBool2;
                 }
+            }
             // EXISTENCE
-            case "existence":
+            case "existence": {
                 if(!condition.target) {
                     abilityLog(`❗ **Error:** Missing arguments for type \`${type}\`!`);
                     return false;
@@ -215,6 +220,21 @@ module.exports = function() {
                 let targets = await parseSelector(condition.target, src_ref, additionalTriggerData);
                 console.log("EXISTENCE", condition.target, targets);
                 return (targets.value.length > 0);
+            }
+            // ATTRIBUTE
+            case "attribute": {
+                if(!condition.target || !condition.attribute) {
+                    abilityLog(`❗ **Error:** Missing arguments for type \`${type}\`!`);
+                    return false;
+                }
+                let targets = await parseSelector(condition.target, src_ref, additionalTriggerData);
+                let attribute = parseAttribute(condition.attribute, src_ref, additionalTriggerData);
+                for(let i = 0; i < targets.value.length; i++) {
+                    let bool = hasCustomAttribute(`${targets.type}:${targets.value[i]}`, attribute);
+                    if(!bool) return false;
+                }
+                return true;
+            }
         }
     }
     
