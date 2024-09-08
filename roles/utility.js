@@ -161,7 +161,7 @@ module.exports = function() {
     **/
     this.parseGroupName = function(input) {
 		input = input.toLowerCase(); // change group name to lower case
-        input = input.replace(/[^a-z\$ ]/g, ""); // remove any non a-z characters
+        input = input.replace(/[^a-z]/g, "").trim(); // remove any non a-z characters
 		return input;
 	}
     
@@ -170,9 +170,19 @@ module.exports = function() {
     **/
     this.verifyGroup = function(input) {
         if(cachedGroups.length == 0) return true; // if cache is currently not loaded just allow it
-		let inputGroup = input.replace(/[^a-z\$ ]/g,"").trim(); // parse group name
+		let inputGroup = input.replace(/[^a-z]/g,"").trim(); // parse group name
 		let group = cachedGroups.find(el => el === inputGroup); // check if group is in cache
 		return group ? true : false;
+	}
+    
+    /**
+    Parse Attribute Name
+    Parses an attribute name
+    **/
+    this.parseAttributeName = function(input) {
+		input = input.toLowerCase(); // change attribute name to lower case
+        input = input.replace(/[^a-z]/g, "").trim(); // remove any non a-z characters
+		return input;
 	}
     
     /** Verify Attribute
@@ -180,7 +190,7 @@ module.exports = function() {
     **/
     this.verifyAttribute = function(input) {
         if(cachedAttributes.length == 0) return true; // if cache is currently not loaded just allow it
-		let inputAttr = input.replace(/[^a-z\$ ]/g,"").trim(); // parse attribute name
+		let inputAttr = input.replace(/[^a-z]/g,"").trim(); // parse attribute name
 		let attr = cachedAttributes.find(el => el === inputAttr); // check if attribute is in cache
 		return attr ? true : false;
 	}

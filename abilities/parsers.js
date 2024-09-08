@@ -474,8 +474,9 @@ module.exports = function() {
         let selectorTarget = selectorGetTarget(selector);
         switch(selectorTarget) {
             default:
-                if(verifyAttribute(selectorTarget)) {
-                    return [ selectorTarget ];
+                let parsed = parseAttributeName(selectorTarget);
+                if(verifyAttribute(parsed)) {
+                    return [ parsed ];
                 } else {
                     abilityLog(`❗ **Error:** Invalid attribute selector target \`${selectorTarget}\`!`);
                     return [ ];

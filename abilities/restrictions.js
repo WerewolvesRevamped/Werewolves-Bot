@@ -106,6 +106,36 @@ module.exports = function() {
                     return resolveCondition(restriction.condition, src_ref, null, additionalTriggerData);
                 }
             break;
+            // ATTRIBUTE
+            case "attribute":
+                // cannot be evaluated pre-prompt: always true
+                if(prePrompt) {
+                    return true;
+                } else {
+                    let targets = await parseSelector(restriction.target, src_ref, additionalTriggerData);
+                    let attribute = parseAttributeSelector(restriction.attribute, src_ref, additionalTriggerData);
+                    console.log("ATTRIBUTE", JSON.stringify(targets), attribute);
+                    // switch by subtype
+                    switch(restriction.subtype) {
+                        default:
+                            abilityLog(`❗ **Error:** Unknown restriction subtype \`${restriction.subtype}\`!`);
+                            return false;
+                        // ATTRIBUTE - HAS
+                        case "has":
+                            for(let i = 0; i < targets.value.length; i++) {
+                                let res = hasCustomAttribute(`${targets.type}:${targets.value[i]}`, attribute[0]);
+                                if(!res) return false;
+                            }
+                            return true;
+                        // ATTRIBUTE - LACKS
+                        case "lacks":
+                            for(let i = 0; i < targets.value.length; i++) {
+                                let res = hasCustomAttribute(`${targets.type}:${targets.value[i]}`, attribute[0]);
+                                if(res) return false;
+                            }
+                            return true;
+                    }
+                }
         }
     }
     
