@@ -235,6 +235,21 @@ module.exports = function() {
                 }
                 return true;
             }
+            // SELECTOR
+            case "selector": {
+                if(!condition.target || !condition.selector) {
+                    abilityLog(`❗ **Error:** Missing arguments for type \`${type}\`!`);
+                    return false;
+                }
+                let targets = await parseSelector(condition.target, src_ref, additionalTriggerData);
+                let selector = await parseSelector(condition.selector, src_ref, additionalTriggerData);
+                if(targets.type != selector.type) return false;
+                for(let i = 0; i < targets.value.length; i++) {
+                    let bool = selector.value.includes(targets.value[i]);
+                    if(!bool) return false;
+                }
+                return true;
+            }
         }
     }
     
