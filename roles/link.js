@@ -782,8 +782,15 @@ module.exports = function() {
                 
                 // parse the role using the role parser
                 parsed = parseRoleText(formalizedDesc.split("\n"));
+                // remove role attributes
+                let roleAttributes = "";
+                if(parsed.role_attribute && parsed.role_attribute.length > 0) {
+                    roleAttributes = parsed.role_attribute.map(el => parseAttributeName(el)).join(",");
+                }
+                delete parsed.role_attribute;
                 successCounter++;
                 sql("UPDATE " + dbName + " SET parsed = " + connection.escape(JSON.stringify(parsed)) + " WHERE name = " + connection.escape(el));
+                if(roleAttributes.length > 0) sql("UPDATE " + dbName + " SET attributes = " + connection.escape(roleAttributes) + " WHERE name = " + connection.escape(el));
             } catch (err) {
                 output.push(`**${toTitleCase(el)}:** ${err}`);
                 failureCounter++;
