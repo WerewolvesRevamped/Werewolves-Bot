@@ -23,9 +23,22 @@ module.exports = function() {
         let spl = info.split(" ");
         let img = null;
         for(let i = 0; i < spl.length; i++) {
-            let parsedRole = parseRole(spl[i]);
-            if(verifyRole(parsedRole)) {
-                let refImg = await refToImg(`role:${parsedRole}`);
+            // two word roles 
+            if(i+1 < spl.length) {
+                let parsedRole1 = parseRole(spl[i] + " " + spl[i+1]);
+                if(verifyRole(parsedRole1)) {
+                    let refImg = await refToImg(`role:${parsedRole1}`);
+                    if(refImg) {
+                        img = refImg;
+                        break;
+                    }
+                }
+            }
+            
+            // one word roles
+            let parsedRole2 = parseRole(spl[i]);
+            if(verifyRole(parsedRole2)) {
+                let refImg = await refToImg(`role:${parsedRole2}`);
                 if(refImg) {
                     img = refImg;
                     break;
@@ -49,7 +62,7 @@ module.exports = function() {
             break;
         }
         
-        return { msg: "Announcement succeeded!", success: false };
+        return { msg: "", success: false };
 
     }
     

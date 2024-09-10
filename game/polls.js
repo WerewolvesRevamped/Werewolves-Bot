@@ -419,7 +419,7 @@ module.exports = function() {
             } else { // TIE
                 let winners = maxVotesData.map(el => {
                     if(el.match(/^\d+$/)) {
-                        return `<@${maxVotesData[0]}>`;
+                        return `<@${el}>`;
                     } else {
                         return el;
                     }
