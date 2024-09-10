@@ -28,6 +28,9 @@ module.exports = function() {
                 let group = await parseGroup(selector, self);
                 let groups = group ? [ group ] : [ ];
                 return { value: groups, type: "group" };
+            // ALIGNMENT
+            case "alignment":
+                return { value: await parseAlignment(selector), type: "alignment" };
             // LOCATION
             case "location":
                 let loc = await parseLocation(selector, self, additionalTriggerData);
@@ -519,6 +522,26 @@ module.exports = function() {
         }
     }
     
+    
+    /**
+    Parse Alignment
+    parses an alignment name
+    **/
+    this.parseAlignment = async function(selector) {
+        // get target
+        let selectorTarget = selectorGetTarget(selector);
+        switch(selectorTarget) {
+            default:
+                let parsed = parseTeam(selectorTarget);
+                if(verifyTeam(parsed)) {
+                    return [ parsed ];
+                } else {
+                    abilityLog(`❗ **Error:** Invalid team selector target \`${selectorTarget}\`!`);
+                    return [ ];
+                }
+        }
+    }
+    
     /**
     Parse Active Extra Role Selector
     parses an extra role type selector
@@ -575,6 +598,7 @@ module.exports = function() {
             return null;
         }
     }
+    
     
     /**
     Parse Location
