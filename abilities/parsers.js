@@ -59,6 +59,9 @@ module.exports = function() {
             // ATTRIBUTE
             case "attribute":
                 return { value: parseAttributeSelector(selector), type: "attribute" };
+            // ACTIVE ATTRIBUTE
+            case "activeattribute":
+                return { value: await parseActiveAttributeSelector(selector, self, additionalTriggerData, self), type: "activeAttribute" };
             // UNKNOWN
             default:
                 abilityLog(`❗ **Error:** Invalid selector type \`${selectorType}\`!`);
@@ -466,7 +469,7 @@ module.exports = function() {
     }
     
     /**
-    Parse Role Selector
+    Parse Attribue Selector
     parses a attribute type selector
     **/
     this.parseAttributeSelector = function(selector, self = null, additionalTriggerData = {}) {
@@ -477,6 +480,38 @@ module.exports = function() {
                 let parsed = parseAttributeName(selectorTarget);
                 if(verifyAttribute(parsed)) {
                     return [ parsed ];
+                } else {
+                    abilityLog(`❗ **Error:** Invalid attribute selector target \`${selectorTarget}\`!`);
+                    return [ ];
+                }
+        }
+    }
+    
+    /**
+    Parse Active Attribute Selector
+    parses a attribute type selector for active attributes
+    **/
+    this.parseActiveAttributeSelector = function(selector, self = null, additionalTriggerData = {}, onElement = null) {
+        // get all attributes on the target element
+        if(!onElement) return [ ];
+        let attributes = getCustomAttributes(onElement);
+        let attrNames = attributes.map(el => el[3]);
+        // get target
+        let selectorTarget = selectorGetTarget(selector);
+        switch(selectorTarget) {
+            // ThisAttr
+            case "@thisattr":
+                if(!self) { // if no self is specified, @ThisAttr is invalid
+                    abilityLog(`❗ **Error:** Used \`@ThisAttr\` in invalid context!`);
+                    return [ ];
+                }
+                self = srcToValue(self);
+                let attrName = getCustomAttributeName(self);
+                return [ { ai_id: self, name: attrName } ];
+            default:
+                let parsed = parseAttributeName(selectorTarget);
+                if(verifyAttribute(parsed) && attrNames.includes(parsed)) {
+                    return attributes.filter(el => el[3] === parsed).map(el => { return { ai_id: el[0], name: el[3] } });
                 } else {
                     abilityLog(`❗ **Error:** Invalid attribute selector target \`${selectorTarget}\`!`);
                     return [ ];

@@ -91,11 +91,24 @@ module.exports = function() {
         else return `unknown:unknown`;
     }
     
+    this.getCustomAttributeName = function(ai_id) {
+        let found = cachedActiveCustomAttributes.find(el => el[0] === +ai_id);
+        if(found) return found[3];
+        else return `unknown`;
+    }
+    
     // checks if a specific owner has a certain custom attribute
     this.hasCustomAttribute = function(owner, name) {
         let found = cachedActiveCustomAttributes.find(el => el[2] === owner && el[3] === name);
         if(found) return true;
         else return false;
+    }
+    
+    // checks if a specific owner has a certain custom attribute
+    this.getCustomAttributes = function(owner, name) {
+        let found = cachedActiveCustomAttributes.filter(el => el[2] === owner);
+        if(found.length > 0) return found;
+        else return [];
     }
     
     /** PUBLIC

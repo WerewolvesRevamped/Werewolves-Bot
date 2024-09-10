@@ -281,9 +281,10 @@ module.exports = function() {
             case "attribute":
                 const owner = getCustomAttributeOwner(val);
                 const source = getCustomAttributeSource(val);
+                const name = getCustomAttributeName(val);
                 const ownerText = srcRefToText(owner);
                 const sourceText = srcRefToText(source);
-                return `Attr-${val} on ${ownerText} from ${sourceText}`;
+                return `${name} (Attr-${val}) on ${ownerText} from ${sourceText}`;
             break;
             case "result":
                 return raw.msg;

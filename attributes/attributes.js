@@ -259,11 +259,11 @@ module.exports = function() {
         }); 
     }
     
-    /** PRIVATE
+    /** PUBLIC
     Delete Attribute
     deletes an attribute by ai id
     **/
-    function deleteAttribute(id) {
+    this.deleteAttribute = function(id) {
         // delete attribute
         return sqlPromEsc("DELETE FROM active_attributes WHERE ai_id=", id);
     }

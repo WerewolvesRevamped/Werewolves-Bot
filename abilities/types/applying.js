@@ -41,6 +41,10 @@ module.exports = function() {
                 result = await applyingAdd(src_name, src_ref, target, attr, duration, ability.val1 ?? "", ability.val2 ?? "", ability.val3 ?? "");
                 return result;
             break;
+            case "remove":
+                result = await applyingRemove(src_name, src_ref, target, ability.attribute);
+                return result;
+            break;
         }
     }
     
@@ -53,7 +57,7 @@ module.exports = function() {
         // iterate through targets
         for(let i = 0; i < targets.value.length; i++) {
             await createCustomAttribute(src_name, src_ref, targets.value[i], targets.type, duration, attr, val1, val2, val3);
-            abilityLog(`✅ ${srcRefToText(targets.type + ':' + targets.value[i])} was granted ${toTitleCase(attr)} for \`${getDurationName(duration)}\`.`);
+            abilityLog(`✅ ${srcRefToText(targets.type + ':' + targets.value[i])} had ${attr} applied for \`${getDurationName(duration)}\`.`);
             // run Starting trigger
             let latestCustomAttr = await queryAttribute("attr_type", "custom");
             await triggerAttribute(latestCustomAttr[latestCustomAttr.length - 1].ai_id, "Starting");
@@ -62,6 +66,37 @@ module.exports = function() {
         }
         return { msg: "Applyings succeeded!", success: true, target: `${targets.type}:${targets.value[0]}` };
     }
+    
+    /**
+    Ability: Applying - Remove
+    removes an attribute from a player
+    **/
+    this.applyingRemove = async function(src_name, src_ref, targets, attribute) {
+        let failures = 0;
+        let successes = 0;
+        // iterate through targets
+        for(let i = 0; i < targets.value.length; i++) {
+            let attr = parseActiveAttributeSelector(attribute, src_ref, {}, `${targets.type}:${targets.value[i]}`);
+            // can only apply a single attribute
+            if(attr.length === 0) {
+                abilityLog(`❗ **Error:** Tried to unapply no attributes!`);
+                failures++;
+                continue;
+            }
+            for(let j = 0; j < attr.length; j++) {
+                await deleteAttribute(attr[j].ai_id); // delete the attribute
+                abilityLog(`✅ ${srcRefToText(targets.type + ':' + targets.value[i])} had ${attr[j].name} (Attr-${attr[j].ai_id}) unapplied${j>0?' x'+(j+1):''}.`);
+            }
+            // return result
+            if(targets.value.length === 1) return { msg: "Unapplying succeeded!", success: true, target: `${targets.type}:${targets.value[0]}` };
+            successes++;
+        }
+        // feedback
+        if(successes === 0) return { msg: "Unapplying failed! " + abilityError, success: false };
+        else if(failures === 0) return { msg: "Unapplyings succeeded!", success: true, target: `${targets.type}:${targets.value[0]}` };
+        else return { msg: `${successes} unapplyings succeeded, ${failures} unapplyings failed!`, success: true, target: `${targets.type}:${targets.value[0]}` };
+    }
+
     
     
 }

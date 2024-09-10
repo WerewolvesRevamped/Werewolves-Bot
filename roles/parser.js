@@ -850,37 +850,37 @@ module.exports = function() {
         exp = new RegExp("^Apply " + attributeName + " to " + targetType + attrDuration + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "applying", subtype: "add", target: ttpp(fd[2]), attribute: fd[1], duration: dd(fd[3], "permanent") };
+            ability = { type: "applying", subtype: "add", target: ttpp(fd[2]), attribute: ttpp(fd[1],"attribute"), duration: dd(fd[3], "permanent") };
         }
         // standard applying with parameter (1)
         exp = new RegExp("^Apply " + attributeName + " to " + targetType + attrDuration + " " + attrData1 + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "applying", subtype: "add", target: ttpp(fd[2]), attribute: fd[1], duration: dd(fd[3], "permanent"), val1: fd[fd.length-1] };
+            ability = { type: "applying", subtype: "add", target: ttpp(fd[2]), attribute: ttpp(fd[1],"attribute"), duration: dd(fd[3], "permanent"), val1: fd[fd.length-1] };
         }
         // standard applying with parameter (2)
         exp = new RegExp("^Apply " + attributeName + " to " + targetType + attrDuration + " " + attrData2 + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "applying", subtype: "add", target: ttpp(fd[2]), attribute: fd[1], duration: dd(fd[3], "permanent"), val1: fd[fd.length-2], val2: fd[fd.length-1] };
+            ability = { type: "applying", subtype: "add", target: ttpp(fd[2]), attribute: ttpp(fd[1],"attribute"), duration: dd(fd[3], "permanent"), val1: fd[fd.length-2], val2: fd[fd.length-1] };
         }
         // standard applying with parameter (3)
         exp = new RegExp("^Apply " + attributeName + " to " + targetType + attrDuration + " " + attrData3 + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "applying", subtype: "add", target: ttpp(fd[2]), attribute: fd[1], duration: dd(fd[3], "permanent"), val1: fd[fd.length-3], val2: fd[fd.length-2], val3: fd[fd.length-1] };
+            ability = { type: "applying", subtype: "add", target: ttpp(fd[2]), attribute: ttpp(fd[1],"attribute"), duration: dd(fd[3], "permanent"), val1: fd[fd.length-3], val2: fd[fd.length-2], val3: fd[fd.length-1] };
         }
         // Remove Attribute
         exp = new RegExp("^Remove " + attributeName + " from " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "applying", subtype: "remove", target: ttpp(fd[2]), attribute: fd[1] };
+            ability = { type: "applying", subtype: "remove", target: ttpp(fd[2]), attribute: ttpp(fd[1],"activeAttribute") };
         }
         // Change Attribute Value
         exp = new RegExp("^Change " + attributeName + " value `" + attrIndex + "` to `" + attrValue + "` for " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "applying", subtype: "change", target: ttpp(fd[4]), attribute: fd[1], attr_index: +fd[2], attr_value: fd[3]  };
+            ability = { type: "applying", subtype: "change", target: ttpp(fd[4]), attribute: ttpp(fd[1],"activeAttribute"), attr_index: +fd[2], attr_value: fd[3]  };
         }
         /** REDIRECTING **/
         // redirect from all
@@ -962,7 +962,9 @@ module.exports = function() {
         exp = new RegExp("^Remove " + targetType + " from " + groupType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "joining", subtype: "remove", target: ttpp(fd[1]), group: fd[2] };
+            if(fd[1] != "@ThisAttr" && fd[1][0] != "`") { // otherwise this overwrites unapplyings
+                ability = { type: "joining", subtype: "remove", target: ttpp(fd[1]), group: fd[2] };
+            }
         }
         /** GRANTING **/
         // default granting
@@ -1519,6 +1521,7 @@ module.exports = function() {
     success (a boolean like value for ability results, may be compared to a result)
     number
     activeExtaRole (an active extra role)
+    activeAttribute (an active attribute)
     choice (name of a choice)
     option (name of an option in a choice)
     **/
