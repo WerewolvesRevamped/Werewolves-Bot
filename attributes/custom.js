@@ -120,6 +120,45 @@ module.exports = function() {
         await cacheActiveCustomAttributes();
     }
     
+    /** PRIVATE
+    Set Custom Attribute Value #1
+    set an attribute's val2 value by ai id to a specific value
+    **/
+    function setCustomAttributeValue1(id, val) {
+        // update attribute
+        return sqlPromEsc("UPDATE active_attributes SET val2=" + connection.escape(val) + " WHERE ai_id=", id);
+    }
+    
+    /** PRIVATE
+    Set Custom Attribute Value #2
+    set an attribute's val3 value by ai id to a specific value
+    **/
+    function setCustomAttributeValue2(id, val) {
+        // update attribute
+        return sqlPromEsc("UPDATE active_attributes SET val3=" + connection.escape(val) + " WHERE ai_id=", id);
+    }
+    
+    /** PRIVATE
+    Set Custom Attribute Value #3
+    set an attribute's val4 value by ai id to a specific value
+    **/
+    function setCustomAttributeValue3(id, val) {
+        // update attribute
+        return sqlPromEsc("UPDATE active_attributes SET val4=" + connection.escape(val) + " WHERE ai_id=", id);
+    }
+    
+    /** PUBLIC
+    Set Custom Attribute Value
+    set an attribute's value by ai id to a specific value
+    **/
+    this.setCustomAttributeValue = function(id, index, val) {
+        switch(index) {
+            case 1: return setCustomAttributeValue1(id, val);
+            case 2: return setCustomAttributeValue2(id, val);
+            case 3: return setCustomAttributeValue3(id, val);
+        }
+    }
+    
    
     
     

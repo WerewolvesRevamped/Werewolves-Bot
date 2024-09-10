@@ -45,6 +45,21 @@ module.exports = function() {
                 result = await applyingRemove(src_name, src_ref, target, ability.attribute);
                 return result;
             break;
+            case "change":
+                // check parameters
+                if(!ability.attr_index || !ability.attr_value) {
+                    abilityLog(`❗ **Error:** Missing arguments for type \`${ability.type}\`!`);
+                    return { msg: "Applying failed! " + abilityError, success: false };
+                }
+                // check index
+                let index = +ability.attr_index;
+                if(index < 1 || index > 3) {
+                    abilityLog(`❗ **Error:** Invalid index for change applying!`);
+                    return { msg: "Applying failed! " + abilityError, success: false };
+                }
+                result = await applyingChange(src_name, src_ref, target, ability.attribute, index, ability.attr_value);
+                return result;
+            break;
         }
     }
     
@@ -95,6 +110,36 @@ module.exports = function() {
         if(successes === 0) return { msg: "Unapplying failed! " + abilityError, success: false };
         else if(failures === 0) return { msg: "Unapplyings succeeded!", success: true, target: `${targets.type}:${targets.value[0]}` };
         else return { msg: `${successes} unapplyings succeeded, ${failures} unapplyings failed!`, success: true, target: `${targets.type}:${targets.value[0]}` };
+    }
+    
+    /**
+    Ability: Applying - Change
+    changes an attribute for a player
+    **/
+    this.applyingChange = async function(src_name, src_ref, targets, attribute, index, val) {
+        let failures = 0;
+        let successes = 0;
+        // iterate through targets
+        for(let i = 0; i < targets.value.length; i++) {
+            let attr = parseActiveAttributeSelector(attribute, src_ref, {}, `${targets.type}:${targets.value[i]}`);
+            // can only apply a single attribute
+            if(attr.length === 0) {
+                abilityLog(`❗ **Error:** Tried to change no attributes!`);
+                failures++;
+                continue;
+            }
+            for(let j = 0; j < attr.length; j++) {
+                await setCustomAttributeValue(attr[j].ai_id, index, val); // update attribute
+                abilityLog(`✅ ${srcRefToText(targets.type + ':' + targets.value[i])} had ${attr[j].name} (Attr-${attr[j].ai_id})'s value \`${index}\` updated to \`${val}\`.`);
+            }
+            // return result
+            if(targets.value.length === 1) return { msg: "Attribute changing succeeded!", success: true, target: `${targets.type}:${targets.value[0]}` };
+            successes++;
+        }
+        // feedback
+        if(successes === 0) return { msg: "Attribute changings failed! " + abilityError, success: false };
+        else if(failures === 0) return { msg: "Attribute changings succeeded!", success: true, target: `${targets.type}:${targets.value[0]}` };
+        else return { msg: `${successes} attribute changings succeeded, ${failures} attribute changings failed!`, success: true, target: `${targets.type}:${targets.value[0]}` };
     }
 
     

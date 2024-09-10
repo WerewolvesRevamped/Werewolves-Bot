@@ -725,7 +725,7 @@ module.exports = function() {
     /**
     Parse ability type
     **/
-    const abilityTypeNames = ["joining","investigating","disguising","killing","protecting","log","targeting","process_evaluate","abilities","announcement","poll","granting"];
+    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","","manipulating","","joining","granting","","","poll","announcement","","","","","","","","","","feedback","success","failure","log","","process_evaluate","abilities"];
     this.parseAbilityType = function(ability_type) {
         // get target
         let selectorTarget = selectorGetTarget(ability_type);
@@ -741,18 +741,36 @@ module.exports = function() {
     Parse ability subtype
     **/
     const abilitySubtypeNames = [
-        ["add","remove"], // joining
-        ["role","class","category","player_count"], // investigating
-        ["weakly","strongly"], // disguising
         ["attack","kill","lynch","true-kill"], // killing
-        ["active-defense","passive-defense","partial-defense","recruitment-defense","absence"], // protecting
-        [], // log
+        ["role","alignment","class","category","player_count"], // investigating
         ["target","untarget"], // targeting
+        ["weakly","strongly"], // disguising
+        ["active-defense","passive-defense","partial-defense","recruitment-defense","absence"], // protecting
+        ["add","remove","change"], // applying
+        null, // redirecting
+        [], // vote manipulation
+        null, // whispering
+        ["add","remove"], // joining
+        ["add","remove"], // granting
+        null, // loyalty
+        null, // obstruction
+        ["creation","addition","deletion","cancellation"], // poll
+        [], // announcement
+        null, // changing
+        null, // copying
+        null, // choices
+        null, // ascend descend
+        null, // disband
+        null, // counting
+        null, // conversation reset
+        null, // cancel
+        null, // switching
+        [], // feedback
+        [], // success
+        [], // failure
+        [], // log
         [], // process_evaluate
         [], // abilities
-        [], // announcement
-        ["creation","addition","deletion"], // poll
-        ["add","remove"], // granting
         ];
     this.parseAbilitySubtype = function(ability_subtype) {
         // get target
