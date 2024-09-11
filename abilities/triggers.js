@@ -55,7 +55,13 @@ module.exports = function() {
     this.triggerPlayer = async function(player_id, triggerName, additionalTriggerData = {}, fromTrigger = false) {
         if(!fromTrigger) abilityLog(`🔷 **Trigger:** ${triggerName} for <@${player_id}>`);  
         // primary roles
-        await new Promise(res => {
+        await triggerPlayerRole(player_id, triggerName, additionalTriggerData, fromTrigger);
+        // role type attributes (additional roles)
+        await triggerPlayerAttr(player_id, triggerName, additionalTriggerData, fromTrigger);
+    }
+    
+    this.triggerPlayerRole = async function(player_id, triggerName, additionalTriggerData = {}, fromTrigger = false) {
+        return new Promise(res => {
             // get all players
             sql("SELECT role,id FROM players WHERE type='player' AND id=" + connection.escape(player_id), async r => {
                 //trigger handler
@@ -69,8 +75,10 @@ module.exports = function() {
                 res();
             });
         });
-        // role type attributes (additional roles)
-        await new Promise(res => {
+    }
+    
+    this.triggerPlayerAttr = async function(player_id, triggerName, additionalTriggerData = {}, fromTrigger = false) {
+        return new Promise(res => {
             // get all players
             sql("SELECT players.id,active_attributes.ai_id,active_attributes.val1 AS role,active_attributes.val2 AS channel_id FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.attr_type='role' AND id=" + connection.escape(player_id), async r => {
                 // iterate through additional roles

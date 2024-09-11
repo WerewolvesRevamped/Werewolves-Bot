@@ -22,6 +22,7 @@ require("./types/poll.js")();
 require("./types/granting.js")();
 require("./types/manipulating.js")();
 require("./types/applying.js")();
+require("./types/changing.js")();
 
 module.exports = function() {
     
@@ -109,6 +110,9 @@ module.exports = function() {
                 case "applying":
                     feedback = await abilityApplying(src_ref, src_name, ability, additionalTriggerData);
                 break;
+                case "changing":
+                    feedback = await abilityChanging(src_ref, src_name, ability, additionalTriggerData);
+                break;
                 case "feedback":
                     let info = await parseInfo(ability.feedback);
                     feedback = { msg: info, success: true };
@@ -184,8 +188,7 @@ module.exports = function() {
             sc.send(embed).then(msg => {
                 res(msg);
             });
-        });
-        
+        });  
     }
     
     /**

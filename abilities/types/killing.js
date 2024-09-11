@@ -276,6 +276,7 @@ module.exports = function() {
     /** PUBLIC
     Set Living Status
     set the alive value for a player
+    // WIP: Maybe this should be in player module
     **/
     this.setLivingStatus = function(player_id, status) {
         return new Promise(res => {

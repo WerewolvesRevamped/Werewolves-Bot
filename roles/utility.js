@@ -393,6 +393,7 @@ module.exports = function() {
     this.EMBED_YELLOW = 16312092; // update / not error/success
     this.EMBED_GREEN = 8311585; // success
     this.EMBED_GRAY = 10197915; // info / start
+    this.EMBED_PURPLE = 8072875; // (role) change
     this.basicEmbed = function(msg, color) {
         let dmsg = { 
             embeds: [
