@@ -504,10 +504,10 @@ module.exports = function() {
                     let refImg = await refToImg(src_name);
                     for(let i = 0; i < actionCount; i++) { // iterate for scaling
                         if(promptMsg[promptMsg.length - 1] === ".") promptMsg = promptMsg.substr(0, promptMsg.length - 1); // if last character is normal . remove it 
-                        let mid = await sendSelectionlessPrompt(src_ref, ptype[0], `${getAbilityEmoji(trigger.abilities[0].type)} ${promptMsg}${PROMPT_SPLIT}`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt");
+                        let message = await sendSelectionlessPrompt(src_ref, ptype[0], `${getAbilityEmoji(trigger.abilities[0].type)} ${promptMsg}${PROMPT_SPLIT}`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt");
                         abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(trigger.abilities[0].type)} {Selectionless}`);
                         // schedule actions
-                        await createAction(mid, src_ref, src_name, trigger.abilities, trigger.abilities, ptype[0], "none", "none", neverActionTime, restrictions, additionalTriggerData, "notarget");
+                        await createAction(message.id, message.channel.id, src_ref, src_name, trigger.abilities, trigger.abilities, ptype[0], "none", "none", neverActionTime, restrictions, additionalTriggerData, "notarget");
                     }
                 } else { // no prompt
                     for(let i = 0; i < actionCount; i++) { 
@@ -523,13 +523,13 @@ module.exports = function() {
                 let type = toTitleCase(selectorGetType(prompts[0][1]));
                 let promptMsg = getPromptMessage(trigger.abilities[0], promptOverwrite, type);
                 let refImg = await refToImg(src_name);
-                let mid = (await abilitySendProm(src_ref, `${getAbilityEmoji(trigger.abilities[0].type)} ${promptMsg} ${scalingMessage}`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt")).id;
+                let message = await abilitySendProm(src_ref, `${getAbilityEmoji(trigger.abilities[0].type)} ${promptMsg} ${scalingMessage}`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt");
                 if(ptype[0] === "immediate") { // immediate prompt
                     abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(trigger.abilities[0].type)} [${type}] {Immediate}`);
-                    await createPrompt(mid, src_ref, src_name, trigger.abilities, restrictions, additionalTriggerData, "immediate", actionCount, type);
+                    await createPrompt(message.id, message.channel.id, src_ref, src_name, trigger.abilities, restrictions, additionalTriggerData, "immediate", actionCount, type);
                 } else if(ptype[0] === "end") { // end phase prompt
                     abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(trigger.abilities[0].type)} [${type}] {End}`);
-                    await createPrompt(mid, src_ref, src_name, trigger.abilities, restrictions, additionalTriggerData, "end", actionCount, type);
+                    await createPrompt(message.id, message.channel.id, src_ref, src_name, trigger.abilities, restrictions, additionalTriggerData, "end", actionCount, type);
                 } else {
                     abilityLog(`❗ **Error:** Invalid prompt type!`);
                 }
@@ -540,13 +540,13 @@ module.exports = function() {
                 let type2 = toTitleCase(selectorGetType(prompts[1][1]));
                 let promptMsg = getPromptMessage(trigger.abilities[0], promptOverwrite, type1, type2);
                 let refImg = await refToImg(src_name);
-                let mid = (await abilitySendProm(src_ref, `${getAbilityEmoji(trigger.abilities[0].type)} ${promptMsg} ${scalingMessage}`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt")).id;
+                let message = await abilitySendProm(src_ref, `${getAbilityEmoji(trigger.abilities[0].type)} ${promptMsg} ${scalingMessage}`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt");
                 if(ptype[0] === "immediate") { // immediate prompt
                     abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(trigger.abilities[0].type)} [${type1}, ${type2}] {Immediate}`);
-                    await createPrompt(mid, src_ref, src_name, trigger.abilities, restrictions,additionalTriggerData, "immediate", actionCount, type1, type2);
+                    await createPrompt(message.id, message.channel.id, src_ref, src_name, trigger.abilities, restrictions,additionalTriggerData, "immediate", actionCount, type1, type2);
                 } else if(ptype[0] === "end") { // end phase prompt
                     abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(trigger.abilities[0].type)} [${type1}, ${type2}] {End}`);
-                    await createPrompt(mid, src_ref, src_name, trigger.abilities, restrictions, additionalTriggerData, "end", actionCount, type1, type2);
+                    await createPrompt(message.id, message.channel.id, src_ref, src_name, trigger.abilities, restrictions, additionalTriggerData, "end", actionCount, type1, type2);
                 } else {
                     abilityLog(`❗ **Error:** Invalid prompt type!`);
                 }

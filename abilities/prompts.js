@@ -65,9 +65,9 @@ module.exports = function() {
     Create Prompt
     creates a new prompt in the prompt table
     **/
-    this.createPrompt = async function(mid, src_ref, src_name, abilities, restrictions, additionalTriggerData, prompt_type, amount, type1, type2 = "none") {
+    this.createPrompt = async function(mid, cid, src_ref, src_name, abilities, restrictions, additionalTriggerData, prompt_type, amount, type1, type2 = "none") {
         await new Promise(res => {
-            sql("INSERT INTO prompts (message_id,src_ref,src_name,abilities,type1,type2,prompt_type,restrictions,additional_trigger_data,amount) VALUES (" + connection.escape(mid) + "," + connection.escape(src_ref) + "," + connection.escape(src_name) + "," + connection.escape(JSON.stringify(abilities)) + "," + connection.escape(type1.toLowerCase()) + "," + connection.escape(type2.toLowerCase()) + "," + connection.escape(prompt_type) + "," + connection.escape(JSON.stringify(restrictions)) + "," + connection.escape(JSON.stringify(additionalTriggerData)) + "," + amount + ")", result => {
+            sql("INSERT INTO prompts (message_id,channel_id,src_ref,src_name,abilities,type1,type2,prompt_type,restrictions,additional_trigger_data,amount) VALUES (" + connection.escape(mid) + "," + connection.escape(cid) + "," + connection.escape(src_ref) + "," + connection.escape(src_name) + "," + connection.escape(JSON.stringify(abilities)) + "," + connection.escape(type1.toLowerCase()) + "," + connection.escape(type2.toLowerCase()) + "," + connection.escape(prompt_type) + "," + connection.escape(JSON.stringify(restrictions)) + "," + connection.escape(JSON.stringify(additionalTriggerData)) + "," + amount + ")", result => {
                 res();
             });            
         });
@@ -188,7 +188,24 @@ module.exports = function() {
     /**
     Clear all queued action that are set to be never run
     **/
-    this.clearNeverQueuedAction = function() {
+    this.clearNeverQueuedAction = async function() {
+        // retrieve all queued actions that need to be cleared
+        let actionsToClear = await sqlPromEsc("SELECT * FROM action_queue WHERE execute_time=", neverActionTime);
+        
+        // update prompts
+        for(let i = 0; i < actionsToClear.length; i++) {
+            let curAction = actionsToClear[i];
+            // get prompt
+            let promptChannel = await mainGuild.channels.fetch(curAction.channel_id);
+            let promptMessage = await promptChannel.messages.fetch(curAction.message_id);
+            let orig_text = promptMessage.embeds[0].description.split(PROMPT_SPLIT)[0];
+            // update message
+            embed = basicEmbed(`${orig_text}${PROMPT_SPLIT} Ability was __not__ executed.`, EMBED_RED);
+            embed.components = [];
+            promptMessage.edit(embed); 
+        }
+        
+        // delete queued actions
         return sqlProm("DELETE FROM action_queue WHERE execute_time=" + neverActionTime);
     }
     
@@ -217,9 +234,9 @@ module.exports = function() {
     Create Queued Action
     creates an action in the action queue which will be executed at a specified time
     **/
-    this.createAction = async function (mid, src_ref, src_name, abilities, orig_ability, prompt_type, type1, type2, time, restrictions, additionalTriggerData, target) {
+    this.createAction = async function (mid, cid, src_ref, src_name, abilities, orig_ability, prompt_type, type1, type2, time, restrictions, additionalTriggerData, target) {
         await new Promise(res => {
-            sql("INSERT INTO action_queue (message_id,src_ref,src_name,abilities,orig_ability,type1,type2,execute_time, prompt_type, restrictions, target, additional_trigger_data) VALUES (" + connection.escape(mid) + "," + connection.escape(src_ref) + "," + connection.escape(src_name) + "," + connection.escape(JSON.stringify(abilities)) + "," + connection.escape(JSON.stringify(orig_ability)) + "," + connection.escape(type1) + "," + connection.escape(type2) + "," + connection.escape(time) + "," + connection.escape(prompt_type) + "," + connection.escape(JSON.stringify(restrictions)) + "," + connection.escape(target) + "," + connection.escape(JSON.stringify(additionalTriggerData)) + ")", result => {
+            sql("INSERT INTO action_queue (message_id,channel_id,src_ref,src_name,abilities,orig_ability,type1,type2,execute_time, prompt_type, restrictions, target, additional_trigger_data) VALUES (" + connection.escape(mid) + "," + connection.escape(cid) + "," + connection.escape(src_ref) + "," + connection.escape(src_name) + "," + connection.escape(JSON.stringify(abilities)) + "," + connection.escape(JSON.stringify(orig_ability)) + "," + connection.escape(type1) + "," + connection.escape(type2) + "," + connection.escape(time) + "," + connection.escape(prompt_type) + "," + connection.escape(JSON.stringify(restrictions)) + "," + connection.escape(target) + "," + connection.escape(JSON.stringify(additionalTriggerData)) + ")", result => {
                 res();
             });            
         });
@@ -239,11 +256,7 @@ module.exports = function() {
     
     this.actionQueueChecker = async function () {
         // retrieve all queued actions that need to be executed
-        let actionsToExecute = await new Promise(res => {
-            sql("SELECT * FROM action_queue WHERE execute_time<=" + connection.escape(getTime()), result => {
-                res(result);
-            });            
-        });
+        let actionsToExecute = await sqlPromEsc("SELECT * FROM action_queue WHERE execute_time<=", getTime());
         // iterate through them and execute them
         for(let i = 0; i < actionsToExecute.length; i++) {
             // current action
@@ -272,6 +285,15 @@ module.exports = function() {
             });
             // confirm automatic execution
             confirmAutoExecution(curAction.src_ref, curAction.message_id);
+            // clear prompt
+            // get prompt
+            let promptChannel = await mainGuild.channels.fetch(curAction.channel_id);
+            let promptMessage = await promptChannel.messages.fetch(curAction.message_id);
+            let orig_text = promptMessage.embeds[0].description.split(PROMPT_SPLIT)[0];
+            // update message
+            embed = basicEmbed(`${orig_text}${PROMPT_SPLIT} Ability executed.`, EMBED_GREEN);
+            embed.components = [];
+            promptMessage.edit(embed); 
         }
     }
     
@@ -407,7 +429,7 @@ module.exports = function() {
         // iterate through replies - for execution
         for(let i = 0; i < replies.length; i++) {
             // schedule actions
-            await createAction(repl_msg, src_ref, src_name, promptAppliedAbilities[i], abilities, promptType, type1, type2, exeTime, restrictions, additionalTriggerData, parsedReplies[i][1]);
+            await createAction(repl_msg.id, repl_msg.channel.id, src_ref, src_name, promptAppliedAbilities[i], abilities, promptType, type1, type2, exeTime, restrictions, additionalTriggerData, parsedReplies[i][1]);
         }
         
         
@@ -432,7 +454,7 @@ module.exports = function() {
         if(prompt_type == "end") msg.components[0].components = [ cancelButton ];
         // send reply
         let repl_msg = await message.reply(msg);
-        return repl_msg.id;
+        return repl_msg;
     }
     
     /**
@@ -461,7 +483,7 @@ module.exports = function() {
         let channel_id = await getSrcRefChannel(src_ref);
         let channel = mainGuild.channels.cache.get(channel_id);
         let repl_msg = await channel.send(msg);
-        return repl_msg.id;
+        return repl_msg;
     }
     
     /**
