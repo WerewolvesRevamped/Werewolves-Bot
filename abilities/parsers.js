@@ -30,7 +30,7 @@ module.exports = function() {
                 return { value: groups, type: "group" };
             // ALIGNMENT
             case "alignment":
-                return { value: await parseAlignment(selector), type: "alignment" };
+                return { value: await parseAlignment(selector, self, additionalTriggerData), type: "alignment" };
             // LOCATION
             case "location":
                 let loc = await parseLocation(selector, self, additionalTriggerData);
@@ -527,7 +527,7 @@ module.exports = function() {
     Parse Alignment
     parses an alignment name
     **/
-    this.parseAlignment = async function(selector) {
+    this.parseAlignment = async function(selector, self = null, additionalTriggerData = {}) {
         // get target
         let selectorTarget = selectorGetTarget(selector);
         switch(selectorTarget) {
@@ -535,6 +535,11 @@ module.exports = function() {
                 let parsed = parseTeam(selectorTarget);
                 if(verifyTeam(parsed)) {
                     return [ parsed ];
+                } else if (PROPERTY_ACCESS.test(selectorTarget)) { // property access
+                    let contents = selectorTarget.match(PROPERTY_ACCESS); // get the selector
+                    let infType = inferType(`@${contents[1]}`);
+                    let result = await parseSelector(`@${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
+                    return parsePropertyAccess(result, contents[2], infType);
                 } else {
                     abilityLog(`❗ **Error:** Invalid team selector target \`${selectorTarget}\`!`);
                     return [ ];

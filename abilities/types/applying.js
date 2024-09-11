@@ -91,6 +91,13 @@ module.exports = function() {
         let successes = 0;
         // iterate through targets
         for(let i = 0; i < targets.value.length; i++) {
+            // does not have attribute, so no removal needed
+            if(!hasCustomAttribute(`${targets.type}:${targets.value[i]}`, attribute)) {
+                abilityLog(`✅ ${srcRefToText(targets.type + ':' + targets.value[i])} does not have ${attribute}, unapplying skipped.`);
+                successes++;
+                continue;
+            }
+            // get attribute
             let attr = parseActiveAttributeSelector(attribute, src_ref, {}, `${targets.type}:${targets.value[i]}`);
             // can only apply a single attribute
             if(attr.length === 0) {
