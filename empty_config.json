@@ -3,6 +3,7 @@
     "github_token": "GHP TOKEN",
     "guild": "GUILD ID",
     "channel": "CHANNEL ID",
+    "log": "CHANNEL ID",
 	"db": {
 		"host": "localhost",
 		"user": "USER",

@@ -146,7 +146,7 @@ module.exports = function() {
     logs a message in the ability log. WIP: dont hardcode
     **/
     this.abilityLog = function(msg) {
-        mainGuild.channels.cache.get("1269376980906672228").send(msg);
+        mainGuild.channels.cache.get(config.log).send(msg);
     }
     
     /**
@@ -208,9 +208,9 @@ module.exports = function() {
             case "group":
                 return ref; // group ref already is channel id
             case "poll":
-                return backupChannelId; // WIP: poll log is hardcoded
+                return "1276250651097170022"; // WIP: poll log is hardcoded
             case "attribute":
-                return backupChannelId; // WIP: poll log is hardcoded
+                return "1276250651097170022"; // WIP: poll log is hardcoded
             case "location":
                 return await abilitySendGetLocationChannel(ref);
             default:
@@ -225,11 +225,6 @@ module.exports = function() {
     function abilitySendGetPlayerChannel(player_id) {
         return new Promise(res => {
             sql("SELECT channel_id FROM connected_channels WHERE id = " + connection.escape(player_id), result => {
-                if(!result[0]) {
-                    abilityLog(`❗ **Invalid Channel:** Cannot find player ${player_id} (<@${player_id}>).`);
-                    res(backupChannelId);
-                    return;
-                }
                 res(result[0].channel_id);
             });
         });      
@@ -241,11 +236,6 @@ module.exports = function() {
     function abilitySendGetLocationChannel(loc_name) {
         return new Promise(res => {
             sql("SELECT channel_id FROM locations WHERE name = " + connection.escape(loc_name), result => {
-                if(!result[0]) {
-                    abilityLog(`❗ **Invalid Channel:** Cannot find location ${loc_name}.`);
-                    res(backupChannelId);
-                    return;
-                }
                 res(result[0].channel_id);
             });
         });      

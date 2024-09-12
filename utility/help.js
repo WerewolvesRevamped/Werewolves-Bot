@@ -31,7 +31,6 @@ module.exports = function() {
 		msgB += helpGame(member, args);
 		msgB += helpWhispers(member, args);
 		msgB += helpPlayers(member, args);
-		msgB += helpPoll(member, args);
 		msgB += helpTheme(member, args);
 		msgB += helpConfirm(member, args);
 		// Print
