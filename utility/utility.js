@@ -23,6 +23,7 @@ module.exports = function() {
     this.setMainGuild = async function() {
         mainGuild = await global.client.guilds.fetch(config.guild);
         backupChannelId = config.channel;
+        backupChannel = await mainGuild.channels.fetch(config.channel);
     }
     
 	/**

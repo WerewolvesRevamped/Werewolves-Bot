@@ -120,7 +120,7 @@ module.exports = function() {
                 res(); // resolve the promise
             }).catch(err => {
                 logO(err); 
-                sendError(channel, err, "Could not send role message to " + disName);
+                sendError(backupChannel, err, "Could not send role message to " + disName);
                 res(); // resolve the promise
             });
             
