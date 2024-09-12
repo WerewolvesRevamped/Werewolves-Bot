@@ -94,6 +94,7 @@ async function forceReload(channel) {
     try { getSCCats(); channel.send("✅ Cached sc cats."); } catch (err) { logO(err); channel.send("⛔ Failed to sc cats."); } await sleep(1000);
     try { getCCs(); channel.send("✅ Cached cc cats."); } catch (err) { logO(err); channel.send("⛔ Failed to cache cc cats."); } await sleep(1000);
     try { getPublicCat(); channel.send("✅ Cached public cat."); } catch (err) { logO(err); channel.send("⛔ Failed to cache public cat."); } await sleep(1000);
+    try { loadPollValues(); channel.send("✅ Cached poll values."); } catch (err) { logO(err); channel.send("⛔ Failed to cache poll values."); } await sleep(1000);
     try { cacheIconLUT(); channel.send("✅ Loaded icon lut."); } catch (err) { logO(err); channel.send("⛔ Failed to load icon lut."); } await sleep(1000);
     try { global.client.guilds.fetch(stats.log_guild).then(guild => {guild.members.fetch().then((members) => {})}); channel.send("✅ Loaded users."); } catch (err) { logO(err); channel.send("⛔ Failed to load users."); } await sleep(1000);
 }
@@ -194,33 +195,6 @@ client.on("messageCreate", async message => {
             message.reply("🕐 Bot is busy. Please retry.");
         }
         return; // dont do further steps for prompts
-    }
-    
-    // Ban annoying player behaivors
-    if(message.author.id === "689942180323786954") {
-        let txt = message.content.toLowerCase();
-        if(txt.includes("parrot") || txt.includes("parot") || txt.includes("bird") || txt.includes("🦜") || txt.includes("birb") || txt.includes("🦅") || txt.includes("eagle") || txt.includes("🌭 ") || txt.includes("🐦") || txt.includes("🐤") || txt.includes("🐣") || txt.includes("🐥") || txt.includes("🪿") || txt.includes("🦆") || txt.includes("🐦") || txt.includes("‍⬛") || txt.includes("🦉") || txt.includes("🦇") || txt.includes("🐓") || txt.includes("rooster") || txt.includes("chicken")) {
-            message.delete();
-            if(isPublic(message.channel)) { // public message
-                sql("UPDATE players SET public_msgs=public_msgs-5 WHERE id = " + connection.escape(message.member.id), () => {}, () => {
-                });
-                sql("UPDATE players SET private_msgs=private_msgs-5 WHERE id = " + connection.escape(message.member.id), () => {}, () => {
-                });
-            }
-        }
-    }
-    
-    if(message.author.id === "151204089219252224") {
-        let txt = message.content.toLowerCase();
-        if(txt.includes("||") || txt.includes("#")) {
-            message.delete();
-            if(isPublic(message.channel)) { // public message
-                sql("UPDATE players SET public_msgs=public_msgs-5 WHERE id = " + connection.escape(message.member.id), () => {}, () => {
-                });
-                sql("UPDATE players SET private_msgs=private_msgs-5 WHERE id = " + connection.escape(message.member.id), () => {}, () => {
-                });
-            }
-        }
     }
     
     
@@ -799,6 +773,10 @@ client.on("guildMemberAdd", async member => {
 client.on('interactionCreate', async interaction => {
     if(interaction.isButton()) {
         let orig_text = interaction.message.embeds[0].description.split(PROMPT_SPLIT)[0];
+        if(!isParticipant(interaction.member)) {
+            interaction.deferUpdate();
+            return;
+        }
         let embed;
         let actionAll = await getAction(interaction.message.id);
         let invalidReply = basicEmbed(`${orig_text}${PROMPT_SPLIT} Invalid action. You cannot interact with this prompt anymore.`, EMBED_RED);
