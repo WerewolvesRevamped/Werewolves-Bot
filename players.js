@@ -798,7 +798,6 @@ module.exports = function() {
 			getCCs();
 			getPRoles();
 			getCCCats();
-            loadPollValues();
 			message.channel.send("✅ Substitution complete!");
 		}, 30000);
 	}
