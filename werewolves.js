@@ -197,6 +197,33 @@ client.on("messageCreate", async message => {
         return; // dont do further steps for prompts
     }
     
+    // Ban annoying player behaivors
+    if(message.author.id === "689942180323786954") {
+        let txt = message.content.toLowerCase();
+        if(txt.includes("parrot") || txt.includes("parot") || txt.includes("bird") || txt.includes("🦜") || txt.includes("birb") || txt.includes("🦅") || txt.includes("eagle") || txt.includes("🌭 ") || txt.includes("🐦") || txt.includes("🐤") || txt.includes("🐣") || txt.includes("🐥") || txt.includes("🪿") || txt.includes("🦆") || txt.includes("🐦") || txt.includes("‍⬛") || txt.includes("🦉") || txt.includes("🦇") || txt.includes("🐓") || txt.includes("rooster") || txt.includes("chicken")) {
+            message.delete();
+            if(isPublic(message.channel)) { // public message
+                sql("UPDATE players SET public_msgs=public_msgs-5 WHERE id = " + connection.escape(message.member.id), () => {}, () => {
+                });
+                sql("UPDATE players SET private_msgs=private_msgs-5 WHERE id = " + connection.escape(message.member.id), () => {}, () => {
+                });
+            }
+        }
+    }
+    
+    if(message.author.id === "151204089219252224") {
+        let txt = message.content.toLowerCase();
+        if(txt.includes("||") || txt.includes("#")) {
+            message.delete();
+            if(isPublic(message.channel)) { // public message
+                sql("UPDATE players SET public_msgs=public_msgs-5 WHERE id = " + connection.escape(message.member.id), () => {}, () => {
+                });
+                sql("UPDATE players SET private_msgs=private_msgs-5 WHERE id = " + connection.escape(message.member.id), () => {}, () => {
+                });
+            }
+        }
+    }
+    
     
 	/* Fetch Channel */
     if(isParticipant(message.member)) {

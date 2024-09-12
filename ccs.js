@@ -21,6 +21,12 @@ module.exports = function() {
 			message.channel.send("⛔ Command error. Can only use CCs while a game is running."); 
 			return; 
 		}
+
+        if(args[0] === "spam" && message.author.id === "151204089219252224") {
+			message.channel.send("⛔ Permission error. You cannot create spam ccs."); 
+            return;
+        }
+        
 		// Check Subcommand
 		switch(args[0]) {
 			case "create": cmdCCCreate(message.channel, message.member, args, 0, () => {}); break;
