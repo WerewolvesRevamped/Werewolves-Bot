@@ -14,6 +14,7 @@ require("./help.js")();
 module.exports = function() {
     
     this.mainGuild = null;
+    this.backupChannelId = null;
     
     /**
     Set Main Guild
@@ -21,6 +22,7 @@ module.exports = function() {
     **/
     this.setMainGuild = async function() {
         mainGuild = await global.client.guilds.fetch(config.guild);
+        backupChannelId = config.channel;
     }
     
 	/**
