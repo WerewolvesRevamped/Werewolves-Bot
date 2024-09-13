@@ -27,6 +27,11 @@ module.exports = function() {
             return;
         }
         
+        if(args[0] === "create" && message.author.id === "544125116640919557") {
+			message.channel.send("⛔ Permission error. You cannot create ccs."); 
+            return;
+        }
+        
 		// Check Subcommand
 		switch(args[0]) {
 			case "create": cmdCCCreate(message.channel, message.member, args, 0, () => {}); break;
