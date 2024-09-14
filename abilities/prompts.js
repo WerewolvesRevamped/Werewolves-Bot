@@ -247,11 +247,19 @@ module.exports = function() {
     checks the action queue every 10 seconds to see if an action should be executed
     **/
     this.skipActionQueueChecker = false;
+    this.pauseActionQueueChecker = false;
+    this.storytimeCheckScheduled = false;
     this.createActionQueueChecker = function() {
         setInterval(() => {
             if(skipActionQueueChecker) return;
+            if(pauseActionQueueChecker) return;
+            if(storytimeCheckScheduled) postStorytimeImmediate();
             actionQueueChecker();
         }, 10 * 1000)
+    }
+    
+    this.doStorytimeCheck = function() {
+        storytimeCheckScheduled = true;
     }
     
     this.actionQueueChecker = async function () {

@@ -726,7 +726,7 @@ module.exports = function() {
     **/
     this.parseInfo = async function(selector, self, additionalTriggerData) {
         // get target
-        let selectorTarget = selector.split("[")[0]; // we cant actually use the util function as it converts to lower case
+        let selectorTarget = selector.split("`[")[0]; // we cant actually use the util function as it converts to lower case
         selectorTarget = selectorTarget.replace(/`/g,"");
         let spl = selectorTarget.split(" ");
         // convert text segments to selectors if applicable
@@ -734,7 +734,7 @@ module.exports = function() {
             let infType = inferType(spl[i]);
             if(infType != "unknown") {
                 let parsed = await parseSelector(`${spl[i]}[${infType}]`, self, additionalTriggerData);
-                console.log(infType, spl[i], parsed.type, parsed.value);
+                //console.log(infType, spl[i], parsed.type, parsed.value);
                 let strs = [];
                 // iterate through selector list
                 for(let j = 0; j < parsed.value.length; j++) {

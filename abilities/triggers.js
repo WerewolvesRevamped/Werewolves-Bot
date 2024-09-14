@@ -644,11 +644,21 @@ module.exports = function() {
     triggers at the start of the game
     **/
     this.eventStarting = async function() {
+        // pause queue checker during event
+        pauseActionQueueChecker = true;
+        
         // starting
         await triggerHandler("Starting");
         
         // passive
         await triggerHandler("Passive");
+        
+        // starting storytime
+        await bufferStorytime("The game has started!");
+        await postStorytime();
+        
+        // pause queue checker during event
+        pauseActionQueueChecker = false;
     }
     
     /**
@@ -656,6 +666,9 @@ module.exports = function() {
     triggers at the start of the night
     **/
     this.eventStartNight = async function() {
+        // pause queue checker during event
+        pauseActionQueueChecker = true;
+        
         await clearPrompts();
         
         // close polls
@@ -700,6 +713,9 @@ module.exports = function() {
         
         // passive
         await triggerHandler("Passive");
+        
+        // pause queue checker during event
+        pauseActionQueueChecker = false;
     }
     
     /**
@@ -707,6 +723,9 @@ module.exports = function() {
     triggers at the start of the day
     **/
     this.eventStartDay = async function() {
+        // pause queue checker during event
+        pauseActionQueueChecker = true;
+        
         await clearPrompts();
         
         // close polls
@@ -751,6 +770,9 @@ module.exports = function() {
         
         // passive
         await triggerHandler("Passive");
+        
+        // pause queue checker during event
+        pauseActionQueueChecker = false;
     }
     
 }

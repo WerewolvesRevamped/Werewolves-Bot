@@ -36,6 +36,7 @@ module.exports = function() {
             break;
             case "buffer":
                 result = await announcementBuffer(src_ref, info, ability, additionalTriggerData);
+                doStorytimeCheck();
                 return result;
             break;
         }

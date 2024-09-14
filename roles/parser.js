@@ -1549,6 +1549,10 @@ module.exports = function() {
     attempts to infer a target type type 
     **/
     this.inferType = function(targetType) {
+        if(targetType.indexOf("[") > 0 && targetType.indexOf("]") > 0) {
+            return targetType.split("[")[1].split("]")[0];
+        }
+        
         let first = targetType[0];
         if(/->/.test(targetType)) {
             let properties = targetType.split(/->/);
