@@ -23,6 +23,7 @@ require("./types/granting.js")();
 require("./types/manipulating.js")();
 require("./types/applying.js")();
 require("./types/changing.js")();
+require("./types/ascend_descend.js")();
 
 module.exports = function() {
     
@@ -112,6 +113,12 @@ module.exports = function() {
                 break;
                 case "changing":
                     feedback = await abilityChanging(src_ref, src_name, ability, additionalTriggerData);
+                break;
+                case "ascend":
+                    feedback = await abilityAscend(src_ref, src_name, ability, additionalTriggerData);
+                break;
+                case "descend":
+                    feedback = await abilityDescend(src_ref, src_name, ability, additionalTriggerData);
                 break;
                 case "feedback":
                     let info = await parseInfo(ability.feedback);

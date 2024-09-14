@@ -202,6 +202,14 @@ module.exports = function() {
     }
     
     /**
+    Phase Text
+    **/
+    this.getPhaseAsText = function(phase) {
+        if(!phase) phase = getPhase(); // if no phase is specified default to current phase
+        return (isNight(phase) ? "Night" : "Day") + " " + getPhaseNum(phase);
+    }
+    
+    /**
     Get Subphase
     returns the current subphase as a string
     **/

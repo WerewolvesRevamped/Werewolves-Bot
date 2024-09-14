@@ -252,7 +252,7 @@ module.exports = function() {
     Kill Player
     kills a player (does not consider or defenses or anything, just kills)
     **/
-	this.killPlayer = async function(player_id) {
+	this.killPlayer = async function(player_id, silent = false) {
        // set to dead
        await setLivingStatus(player_id, 0);
         // check mayor treshhold (and change roles if applicable)
@@ -271,6 +271,9 @@ module.exports = function() {
         removeRoleRecursive(player, false, stats.mayor2, "mayor 2");
         removeRoleRecursive(player, false, stats.reporter, "reporter");
         removeRoleRecursive(player, false, stats.guardian, "guardian");
+        
+        // add to storytime
+        if(!silent) await bufferStorytime(`<@${player_id}> has died!`);
 	}
     
     /** PUBLIC

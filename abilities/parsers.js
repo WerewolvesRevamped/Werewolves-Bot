@@ -754,7 +754,7 @@ module.exports = function() {
     /**
     Parse ability type
     **/
-    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","","manipulating","","joining","granting","","","poll","announcement","","","","","","","","","","feedback","success","failure","log","","process_evaluate","abilities"];
+    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","","manipulating","","joining","granting","","","poll","announcement","changing","","","ascend","descend","","","","","","feedback","success","failure","log","","process_evaluate","abilities"];
     this.parseAbilityType = function(ability_type) {
         // get target
         let selectorTarget = selectorGetTarget(ability_type);
@@ -785,10 +785,11 @@ module.exports = function() {
         null, // obstruction
         ["creation","addition","deletion","cancellation"], // poll
         [], // announcement
-        null, // changing
+        ["role","alignment"], // changing
         null, // copying
         null, // choices
-        null, // ascend descend
+        [], // ascend
+        [], // descend
         null, // disband
         null, // counting
         null, // conversation reset

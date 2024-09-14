@@ -14,6 +14,7 @@ require("./locations.js")();
 require("./polls.js")();
 require("./teams.js")();
 require("./connections.js")();
+require("./storytime.js")();
 
 module.exports = function() {
 
@@ -373,6 +374,8 @@ module.exports = function() {
         abilitiesReset();
         // reset active polls
         pollsReset();
+        // resets storytime
+        resetStorytime();
 		// Reset Poll Count
 		sqlSetStat(13, 1, result => {
 			channel.send("✅ Successfully reset poll counter!");

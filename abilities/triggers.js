@@ -679,6 +679,9 @@ module.exports = function() {
         // end of phase
         await attributeCleanup();
         
+        // storytime
+        await postStorytime();
+        
         // passive start actions
         await triggerHandler("Passive Start Night");
         await triggerHandler("Start Night");
@@ -726,6 +729,9 @@ module.exports = function() {
         
         // end of phase
         await attributeCleanup();
+        
+        // storytime
+        await postStorytime();
         
         // passive start actions
         await triggerHandler("Passive Start Day");
