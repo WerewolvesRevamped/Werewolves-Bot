@@ -358,6 +358,8 @@ module.exports = function() {
                 let rData = await getRoleDataFromName(val);
                 return rData ? rData.url : null;
             default:
+                let lutval = applyLUT(val);
+                if(lutval) return `${iconRepoBaseUrl}${lutval}.png`;
                 return null;
         }
     }
