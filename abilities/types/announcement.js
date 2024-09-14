@@ -11,14 +11,54 @@ module.exports = function() {
     this.abilityAnnouncement = async function(src_ref, src_name, ability, additionalTriggerData) {
         let result;
         // check parameters
-        if(!ability.target || !ability.info) {
+        if(!ability.info) {
             abilityLog(`❗ **Error:** Missing arguments for type \`${ability.type}\`!`);
             return { msg: "Announcement failed! " + abilityError, success: false };
         }
-        // parse parameters
-        let loc = await parseLocation(ability.target, src_ref, additionalTriggerData);
         let info = await parseInfo(ability.info, src_ref, additionalTriggerData);
+        // select subtype
+        switch(ability.subtype) {
+            default:
+                abilityLog(`❗ **Error:** Unknown ability subtype \`${ability.subtype}\`!`);
+                return { msg: "Announcement failed! " + abilityError, success: false };
+            break;
+            case "immediate":
+                // check parameters
+                if(!ability.target) {
+                    abilityLog(`❗ **Error:** Missing arguments for subtype \`immediate\`!`);
+                    return { msg: "Announcement failed! " + abilityError, success: false };
+                }
+                // parse parameters
+                let loc = await parseLocation(ability.target, src_ref, additionalTriggerData);
+                // execute
+                result = await announcementImmediate(src_ref, info, loc, additionalTriggerData);
+                return result;
+            break;
+            case "buffer":
+                result = await announcementBuffer(src_ref, info, ability, additionalTriggerData);
+                return result;
+            break;
+        }
+    }
+                
         
+        
+    /** PRIVATE
+    Ability: Announcement - Immediate
+    **/
+     async function announcementBuffer(src_ref, info, additionalTriggerData) {
+        // buffer
+        await bufferStorytime(info);
+        // return
+        return { msg: "", success: false };
+     }
+     
+     
+    /** PRIVATE
+    Ability: Announcement - Immediate
+    **/
+     async function announcementImmediate(src_ref, info, loc, additionalTriggerData) {
+        let result;
         // get role image if applicable
         let spl = info.split(" ");
         let img = null;

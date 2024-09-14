@@ -1086,13 +1086,19 @@ module.exports = function() {
         exp = new RegExp("^Reveal " + targetType + " to " + locationType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "announcement", target: ttpp(fd[2], "location"), info: ttpp(fd[1]) };
+            ability = { type: "announcement", subtype: "immediate", target: ttpp(fd[2], "location"), info: ttpp(fd[1]) };
         }
         // reveal
         exp = new RegExp("^(Learn|Know) " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "announcement", target: "@self[location]", info: ttpp(fd[2]) };
+            ability = { type: "announcement", subtype: "immediate", target: "@self[location]", info: ttpp(fd[2]) };
+        }
+        // storytime buffer
+        exp = new RegExp("^Announce " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "announcement", subtype: "buffer", info: ttpp(fd[1]) };
         }
         /** ROLE CHANGE **/
         // role change
