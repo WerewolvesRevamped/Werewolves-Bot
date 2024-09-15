@@ -251,9 +251,11 @@ module.exports = function() {
     this.storytimeCheckScheduled = false;
     this.createActionQueueChecker = function() {
         setInterval(() => {
-            if(skipActionQueueChecker) return;
-            if(pauseActionQueueChecker) return;
-            if(storytimeCheckScheduled) postStorytimeImmediate();
+            if(skipActionQueueChecker || pauseActionQueueChecker) return;
+            if(storytimeCheckScheduled) {
+                postStorytimeImmediate();
+                storytimeCheckScheduled = false
+            }
             actionQueueChecker();
         }, 10 * 1000)
     }
