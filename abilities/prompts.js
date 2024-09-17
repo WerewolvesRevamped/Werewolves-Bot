@@ -249,14 +249,19 @@ module.exports = function() {
     this.skipActionQueueChecker = false;
     this.pauseActionQueueChecker = false;
     this.storytimeCheckScheduled = false;
-    this.createActionQueueChecker = function() {
-        setInterval(() => {
+    this.killqScheduled = false;
+    this.createActionQueueChecker =  function() {
+        setInterval(async () => {
             if(skipActionQueueChecker || pauseActionQueueChecker) return;
             if(storytimeCheckScheduled) {
-                postStorytimeImmediate();
+                await postStorytimeImmediate();
                 storytimeCheckScheduled = false
             }
-            actionQueueChecker();
+            if(killqScheduled) {
+                await killqKillall();
+                killqScheduled = false;
+            }
+            await actionQueueChecker();
         }, 10 * 1000)
     }
     

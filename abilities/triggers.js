@@ -691,6 +691,7 @@ module.exports = function() {
         
         // end of phase
         await attributeCleanup();
+        await killqKillall();
         
         // storytime
         await postStorytime();
@@ -700,6 +701,9 @@ module.exports = function() {
         await triggerHandler("Start Night");
         await triggerHandler("Passive Start Phase");
         await triggerHandler("Start Phase");
+        
+        // handle killq
+        await killqKillall();
         
         // immediate actions
         await triggerHandler("Immediate Night");
@@ -713,6 +717,9 @@ module.exports = function() {
         
         // passive
         await triggerHandler("Passive");
+        
+        // handle killq
+        await killqKillall();
         
         // pause queue checker during event
         pauseActionQueueChecker = false;
@@ -748,6 +755,7 @@ module.exports = function() {
         
         // end of phase
         await attributeCleanup();
+        await killqKillall();
         
         // storytime
         await postStorytime();
@@ -757,6 +765,9 @@ module.exports = function() {
         await triggerHandler("Start Day");
         await triggerHandler("Passive Start Phase");
         await triggerHandler("Start Phase");
+        
+        // handle killq
+        await killqKillall();
         
         // immediate actions
         await triggerHandler("Immediate Day");
@@ -770,6 +781,9 @@ module.exports = function() {
         
         // passive
         await triggerHandler("Passive");
+        
+        // handle killq
+        await killqKillall();
         
         // pause queue checker during event
         pauseActionQueueChecker = false;

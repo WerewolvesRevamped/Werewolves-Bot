@@ -15,6 +15,7 @@ require("./polls.js")();
 require("./teams.js")();
 require("./connections.js")();
 require("./storytime.js")();
+require("./death.js")();
 
 module.exports = function() {
 

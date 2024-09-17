@@ -93,7 +93,8 @@ module.exports = function() {
                 "attributes": ["attribute","attr"],
                 "locations": ["location", "loc", "locs"],
                 "teams": ["team","tm"],
-                "details": ["il","id"]
+                "details": ["il","id"],
+                "killq": ["kq"]
         };
         for(let cmd in aliases) {
             if(aliases[cmd].indexOf(alias) != -1) return cmd;
