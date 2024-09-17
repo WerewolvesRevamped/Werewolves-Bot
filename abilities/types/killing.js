@@ -252,6 +252,7 @@ module.exports = function() {
     **/
     async function queueKill(pid) {
         await killqAdd(pid);
+        doStorytimeCheck();
         killqScheduled = true;
     }
 
