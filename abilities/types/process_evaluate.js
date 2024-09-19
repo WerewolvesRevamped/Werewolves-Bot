@@ -250,6 +250,21 @@ module.exports = function() {
                 }
                 return true;
             }
+            // MEMBERSHIP
+            case "membership": {
+                if(!condition.target || !condition.group) {
+                    abilityLog(`❗ **Error:** Missing arguments for type \`${type}\`!`);
+                    return false;
+                }
+                let targets = await parsePlayerSelector(condition.target, src_ref, additionalTriggerData);
+                let group = await parseGroupName(condition.group);
+                if(cachedGroups.indexOf(group) === -1) return false;
+                for(let i = 0; i < targets.length; i++) {
+                    let attrs = await queryAttributePlayer(targets[i], "val1", group);
+                    if(attrs.length <= 0) return false;
+                }
+                return true;
+            }
         }
     }
     
