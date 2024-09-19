@@ -311,7 +311,7 @@ module.exports = function() {
                 compVal = compVal.substr(1);
                 compInverted = true;
             }
-            console.log("AS", compName, compVal, compInverted);
+            //console.log("AS", compName, compVal, compInverted);
             let compValSplit;
             switch(compName) {
                 default:

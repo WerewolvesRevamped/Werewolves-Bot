@@ -218,7 +218,7 @@ module.exports = function() {
                     return false;
                 }
                 let targets = await parseSelector(condition.target, src_ref, additionalTriggerData);
-                console.log("EXISTENCE", condition.target, targets);
+                //console.log("EXISTENCE", condition.target, targets);
                 return (targets.value.length > 0);
             }
             // ATTRIBUTE
