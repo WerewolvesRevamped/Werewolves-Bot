@@ -446,6 +446,7 @@ module.exports = function() {
         const ptype = getPromptType(triggerName);
         const promptOverwrite = trigger?.parameters?.prompt_overwrite ?? "";
         const promptPing = !(promptOverwrite.match(/^silent:.*$/)); // check if prompt should ping
+        const forced = (trigger?.parameters?.forced ?? false) ? 1 : 0; // check if action is forced
         
         // handle action scaling
         const actionScaling = trigger?.parameters?.scaling ?? [];
@@ -479,6 +480,7 @@ module.exports = function() {
         }
         // merge prompt info
         let promptInfoMsg = "";
+        if(forced) promptInfo.push("This is a forced action. If you do not submit a selection, it will be randomly chosen for you");
         if(promptInfo.length > 0) promptInfoMsg = promptInfo.join("; ") + ".";
         
         // check if prompts are necessary
@@ -499,6 +501,11 @@ module.exports = function() {
             case 0: 
                 // iterate through all abilities and execute them
                 if(ptype[1] === true) { // forced prompt
+                    if(forced) {
+                        abilityLog(`❗ **Skipped Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}). This ability is both explicitly forced, as well as a selectionless prompting ability. This is unsupported.`);
+                        return;
+                    }
+                
                     // additional second restriction check
                     for(let i = 0; i < restrictions.length; i++) {
                         let passed = await handleRestriction(src_ref, trigger.abilities[0], restrictions[i], RESTR_POST, null, additionalTriggerData);
@@ -515,7 +522,7 @@ module.exports = function() {
                         let message = await sendSelectionlessPrompt(src_ref, ptype[0], `${getAbilityEmoji(trigger.abilities[0].type)} ${promptMsg}${PROMPT_SPLIT}`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt");
                         abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(trigger.abilities[0].type)} {Selectionless}`);
                         // schedule actions
-                        await createAction(message.id, message.channel.id, src_ref, src_name, trigger.abilities, trigger.abilities, ptype[0], "none", "none", neverActionTime, restrictions, additionalTriggerData, "notarget");
+                        await createAction(message.id, message.channel.id, src_ref, src_name, trigger.abilities, trigger.abilities, ptype[0], "none", "none", neverActionTime, restrictions, additionalTriggerData, "notarget", forced);
                     }
                 } else { // no prompt
                     for(let i = 0; i < actionCount; i++) { 
@@ -534,10 +541,10 @@ module.exports = function() {
                 let message = await abilitySendProm(src_ref, `${getAbilityEmoji(trigger.abilities[0].type)} ${promptMsg} ${scalingMessage}\nPlease submit your choice as a reply to this message.`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt");
                 if(ptype[0] === "immediate") { // immediate prompt
                     abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(trigger.abilities[0].type)} [${type}] {Immediate}`);
-                    await createPrompt(message.id, message.channel.id, src_ref, src_name, trigger.abilities, restrictions, additionalTriggerData, "immediate", actionCount, type);
+                    await createPrompt(message.id, message.channel.id, src_ref, src_name, trigger.abilities, restrictions, additionalTriggerData, "immediate", actionCount, forced, type);
                 } else if(ptype[0] === "end") { // end phase prompt
                     abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(trigger.abilities[0].type)} [${type}] {End}`);
-                    await createPrompt(message.id, message.channel.id, src_ref, src_name, trigger.abilities, restrictions, additionalTriggerData, "end", actionCount, type);
+                    await createPrompt(message.id, message.channel.id, src_ref, src_name, trigger.abilities, restrictions, additionalTriggerData, "end", actionCount, forced, type);
                 } else {
                     abilityLog(`❗ **Error:** Invalid prompt type!`);
                 }
@@ -551,10 +558,10 @@ module.exports = function() {
                 let message = await abilitySendProm(src_ref, `${getAbilityEmoji(trigger.abilities[0].type)} ${promptMsg} ${scalingMessage}\nPlease submit your choice as a reply to this message.`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt");
                 if(ptype[0] === "immediate") { // immediate prompt
                     abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(trigger.abilities[0].type)} [${type1}, ${type2}] {Immediate}`);
-                    await createPrompt(message.id, message.channel.id, src_ref, src_name, trigger.abilities, restrictions,additionalTriggerData, "immediate", actionCount, type1, type2);
+                    await createPrompt(message.id, message.channel.id, src_ref, src_name, trigger.abilities, restrictions,additionalTriggerData, "immediate", actionCount, type1, forced, type2);
                 } else if(ptype[0] === "end") { // end phase prompt
                     abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(trigger.abilities[0].type)} [${type1}, ${type2}] {End}`);
-                    await createPrompt(message.id, message.channel.id, src_ref, src_name, trigger.abilities, restrictions, additionalTriggerData, "end", actionCount, type1, type2);
+                    await createPrompt(message.id, message.channel.id, src_ref, src_name, trigger.abilities, restrictions, additionalTriggerData, "end", actionCount, type1, forced, type2);
                 } else {
                     abilityLog(`❗ **Error:** Invalid prompt type!`);
                 }
@@ -669,6 +676,7 @@ module.exports = function() {
         // pause queue checker during event
         pauseActionQueueChecker = true;
         
+        await executeForcedPrompts();
         await clearPrompts();
         
         // close polls
@@ -733,6 +741,7 @@ module.exports = function() {
         // pause queue checker during event
         pauseActionQueueChecker = true;
         
+        await executeForcedPrompts();
         await clearPrompts();
         
         // close polls

@@ -65,9 +65,9 @@ module.exports = function() {
     Create Prompt
     creates a new prompt in the prompt table
     **/
-    this.createPrompt = async function(mid, cid, src_ref, src_name, abilities, restrictions, additionalTriggerData, prompt_type, amount, type1, type2 = "none") {
+    this.createPrompt = async function(mid, cid, src_ref, src_name, abilities, restrictions, additionalTriggerData, prompt_type, amount, forced, type1, type2 = "none") {
         await new Promise(res => {
-            sql("INSERT INTO prompts (message_id,channel_id,src_ref,src_name,abilities,type1,type2,prompt_type,restrictions,additional_trigger_data,amount) VALUES (" + connection.escape(mid) + "," + connection.escape(cid) + "," + connection.escape(src_ref) + "," + connection.escape(src_name) + "," + connection.escape(JSON.stringify(abilities)) + "," + connection.escape(type1.toLowerCase()) + "," + connection.escape(type2.toLowerCase()) + "," + connection.escape(prompt_type) + "," + connection.escape(JSON.stringify(restrictions)) + "," + connection.escape(JSON.stringify(additionalTriggerData)) + "," + amount + ")", result => {
+            sql("INSERT INTO prompts (message_id,channel_id,src_ref,src_name,abilities,type1,type2,prompt_type,restrictions,additional_trigger_data,amount,forced) VALUES (" + connection.escape(mid) + "," + connection.escape(cid) + "," + connection.escape(src_ref) + "," + connection.escape(src_name) + "," + connection.escape(JSON.stringify(abilities)) + "," + connection.escape(type1.toLowerCase()) + "," + connection.escape(type2.toLowerCase()) + "," + connection.escape(prompt_type) + "," + connection.escape(JSON.stringify(restrictions)) + "," + connection.escape(JSON.stringify(additionalTriggerData)) + "," + amount + "," + connection.escape(forced) + ")", result => {
                 res();
             });            
         });
@@ -108,6 +108,63 @@ module.exports = function() {
         }
         
         return sqlProm("DELETE FROM prompts");
+    }
+    
+    /**
+    Execute Forced Prompts
+    executes all prompts with forced=1 from the table
+    **/
+    this.executeForcedPrompts = async function() {
+        // get all forced prompts
+        let promptsToExecute = await sqlProm("SELECT * FROM prompts WHERE forced=1");
+        
+        // iterate through prompts and convert to actions
+        for(let i = 0; i < promptsToExecute.length; i++) {
+            // get prompt of current iteration
+            let prompt = promptsToExecute[i];
+            // get values from prompt
+            let abilities = JSON.parse(prompt.abilities);
+            
+            // get type and action count
+            const type1 = prompt.type1;
+            const type2 = prompt.type2;
+            const actionCount = prompt.amount;
+            const promptType = prompt.prompt_type;
+            
+            // get prompt message
+            let promptChannel = await mainGuild.channels.fetch(prompt.channel_id);
+            let promptMessage = await promptChannel.messages.fetch(prompt.message_id);
+            
+            // reply to prompt
+            let selection1 = await randomPromptReply(type1);
+            let selection2 = await randomPromptReply(type2);
+            let repl_msg;
+            if(type2 === "none") repl_msg = await sendPromptReplyConfirmMessage(promptMessage, promptType, `You did not submit a target, but the action is forced. A random target is selected: ${selection1[0]}` + PROMPT_SPLIT); 
+            else repl_msg = await sendPromptReplyConfirmMessage(promptMessage, promptType, `You did not submit a target, but the action is forced. A random target is selected: ${selection1[0]} and ${selection2[0]}` + PROMPT_SPLIT); 
+            
+            // queue action to past to instantly execute
+            const exeTime = getTime() - 1;
+            
+            // apply values
+            let clonedAbilities = JSON.parse(JSON.stringify(abilities));
+            for(let j = 0; j < clonedAbilities.length; j++) {
+                clonedAbilities[j] = applyPromptValue(clonedAbilities[j], 0, selection1[1]);
+                if(type2 != "none") clonedAbilities[j] = applyPromptValue(clonedAbilities[j], 1, selection2[1]);
+            }
+            
+            // create several actions if necessary
+            for(let j = 0; j < actionCount; j++) {
+                await createAction(repl_msg.id, repl_msg.channel.id, prompt.src_ref, prompt.src_name, clonedAbilities, abilities, promptType, type1, type2, exeTime, JSON.parse(prompt.restrictions), JSON.parse(prompt.additional_trigger_data), selection1[1], prompt.forced);
+            }
+        }
+        
+        // execute actions immediately
+        if(promptsToExecute.length > 0) {
+            skipActionQueueChecker = true;
+            await actionQueueChecker();
+            skipActionQueueChecker = false;
+        }
+               
     }
     
     /**
@@ -241,9 +298,9 @@ module.exports = function() {
     Create Queued Action
     creates an action in the action queue which will be executed at a specified time
     **/
-    this.createAction = async function (mid, cid, src_ref, src_name, abilities, orig_ability, prompt_type, type1, type2, time, restrictions, additionalTriggerData, target) {
+    this.createAction = async function (mid, cid, src_ref, src_name, abilities, orig_ability, prompt_type, type1, type2, time, restrictions, additionalTriggerData, target, forced) {
         await new Promise(res => {
-            sql("INSERT INTO action_queue (message_id,channel_id,src_ref,src_name,abilities,orig_ability,type1,type2,execute_time, prompt_type, restrictions, target, additional_trigger_data) VALUES (" + connection.escape(mid) + "," + connection.escape(cid) + "," + connection.escape(src_ref) + "," + connection.escape(src_name) + "," + connection.escape(JSON.stringify(abilities)) + "," + connection.escape(JSON.stringify(orig_ability)) + "," + connection.escape(type1) + "," + connection.escape(type2) + "," + connection.escape(time) + "," + connection.escape(prompt_type) + "," + connection.escape(JSON.stringify(restrictions)) + "," + connection.escape(target) + "," + connection.escape(JSON.stringify(additionalTriggerData)) + ")", result => {
+            sql("INSERT INTO action_queue (message_id,channel_id,src_ref,src_name,abilities,orig_ability,type1,type2,execute_time, prompt_type, restrictions, target, additional_trigger_data, forced) VALUES (" + connection.escape(mid) + "," + connection.escape(cid) + "," + connection.escape(src_ref) + "," + connection.escape(src_name) + "," + connection.escape(JSON.stringify(abilities)) + "," + connection.escape(JSON.stringify(orig_ability)) + "," + connection.escape(type1) + "," + connection.escape(type2) + "," + connection.escape(time) + "," + connection.escape(prompt_type) + "," + connection.escape(JSON.stringify(restrictions)) + "," + connection.escape(target) + "," + connection.escape(JSON.stringify(additionalTriggerData)) + "," + connection.escape(forced) + ")", result => {
                 res();
             });            
         });
@@ -336,6 +393,7 @@ module.exports = function() {
         let additionalTriggerData = JSON.parse(prompt.additional_trigger_data);
         let src_name = prompt.src_name;
         let src_ref = prompt.src_ref;
+        const forced = prompt.forced;
         
         // get type and action count
         const type1 = prompt.type1;
@@ -451,7 +509,7 @@ module.exports = function() {
         // iterate through replies - for execution
         for(let i = 0; i < replies.length; i++) {
             // schedule actions
-            await createAction(repl_msg.id, repl_msg.channel.id, src_ref, src_name, promptAppliedAbilities[i], abilities, promptType, type1, type2, exeTime, restrictions, additionalTriggerData, parsedReplies[i][1]);
+            await createAction(repl_msg.id, repl_msg.channel.id, src_ref, src_name, promptAppliedAbilities[i], abilities, promptType, type1, type2, exeTime, restrictions, additionalTriggerData, parsedReplies[i][1], forced);
         }
         
         
@@ -512,24 +570,45 @@ module.exports = function() {
     Parses an argument of a prompt reply
     Returns an array of type [displayValue, actualValue]
     **/
-    function parsePromptReply(text, type, message) {
+    function parsePromptReply(text, type, message = null) {
         switch(type) {
             case "player":
-                let player = parsePlayerReply(text, message.channel);
+                let player = parsePlayerReply(text);
                 if(player === false) {
-                    message.reply(basicEmbed("❌ You must specify a valid player.", EMBED_RED));
+                    if(message) message.reply(basicEmbed("❌ You must specify a valid player.", EMBED_RED));
                     return false;
                 }
                 return player;
             case "role":
                 let role = parseRoleReply(text);
                 if(role === false) {
-                    message.reply(basicEmbed("❌ You must specify a valid role.", EMBED_RED));
+                    if(message) message.reply(basicEmbed("❌ You must specify a valid role.", EMBED_RED));
                     return false;
                 }
                 return role;
             default:
-                message.reply(basicEmbed("❌ Invalid prompt.", EMBED_RED));
+                if(message) message.reply(basicEmbed("❌ Invalid prompt.", EMBED_RED));
+                return false;
+        }
+    }
+    
+    /**
+   Returns a random prompt reply 
+    Returns an array of type [displayValue, actualValue]
+    **/
+    async function randomPromptReply(type) {
+        switch(type) {
+            case "player":
+                let ids = await getAllLivingIDs();
+                let randomId = ids[Math.floor(Math.random() * ids.length)];
+                let player = parsePlayerReply(randomId);
+                return player;
+            case "role":
+                let roles = await sqlProm("SELECT name FROM roles");
+                let randomRole = roles[Math.floor(Math.random() * roles.length)];
+                let role = parseRoleReply(randomRole.name);
+                return role;
+            default:
                 return false;
         }
     }
@@ -537,17 +616,17 @@ module.exports = function() {
     /**
     Parses an argument of type player in a prompt reply
     **/
-    function parsePlayerReply(playerName, channel) {
+    function parsePlayerReply(playerName) {
         // similiar as implementation in fixUserList()
-		let allPlayerNames = playerIDs.map(el => [channel.guild.members.cache.get(el)?.user.username,channel.guild.members.cache.get(el)?.nickname]).flat().filter(el => el).map(el => el.toLowerCase());
+		let allPlayerNames = playerIDs.map(el => [mainGuild.members.cache.get(el)?.user.username,mainGuild.members.cache.get(el)?.nickname]).flat().filter(el => el).map(el => el.toLowerCase());
         // check provided player name against all player names
 		let parsed = parseList([playerName.toLowerCase()], allPlayerNames);
         if(parsed.invalid.length > 0) { // no player found -> false
             return false;
         } else { // player found -> normalize to player.displayName
             let player = parsed.found[0];
-            let parsedPlayer = parseUser(channel, player); // parse player name/id/emoji to discord id
-            let playerName = channel.guild.members.cache.get(parsedPlayer)?.displayName ?? false; // get name through id
+            let parsedPlayer = parseUser(backupChannel, player); // parse player name/id/emoji to discord id
+            let playerName = mainGuild.members.cache.get(parsedPlayer)?.displayName ?? false; // get name through id
             if(playerName === false) { // this applies in case the player has left the server
                 message.reply(basicEmbed("❌ Player valid but cannot be found.", EMBED_RED));
                 return false;

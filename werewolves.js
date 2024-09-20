@@ -183,7 +183,8 @@ client.on("messageCreate", async message => {
     
     // Check if message is a prompt reply
     if(
-        message.mentions && message.mentions.repliedUser && message.mentions.repliedUser == client.user.id // check if replied to bot
+        !message.author.bot // not from bot
+        && message.mentions && message.mentions.repliedUser && message.mentions.repliedUser == client.user.id // check if replied to bot
         && message.reference && message.reference.messageId && (await isPrompt(message.reference.messageId)) // check if replied to message is a prompt
     ) {
         if(!automationBusy) { // make sure only one action runs at a time
@@ -829,7 +830,7 @@ client.on('interactionCreate', async interaction => {
                 // turn this message from an action queue message into a prompt
                 let action = actionAll[0];
                 // recreate prompt
-                await createPrompt(interaction.message.id, interaction.message.channel.id, action.src_ref, action.src_name, JSON.parse(action.orig_ability), JSON.parse(action.restrictions), JSON.parse(action.additional_trigger_data), action.prompt_type, actionAll.length, action.type1, action.type2);
+                await createPrompt(interaction.message.id, interaction.message.channel.id, action.src_ref, action.src_name, JSON.parse(action.orig_ability), JSON.parse(action.restrictions), JSON.parse(action.additional_trigger_data), action.prompt_type, actionAll.length, action.forced, action.type1, action.type2);
                 // delete from action queue
                 await deleteQueuedAction(interaction.message.id);
                 // update message
@@ -845,7 +846,7 @@ client.on('interactionCreate', async interaction => {
                 // recreate prompt
                 let message = await sendSelectionlessPrompt(actionSelectionless.src_ref, actionSelectionless.prompt_type, `${orig_text}${PROMPT_SPLIT}`, EMBED_GRAY, false, null, null, "Ability Prompt");
                 // schedule actions
-                await createAction(message.id, message.channel.id, actionSelectionless.src_ref, actionSelectionless.src_name, JSON.parse(actionSelectionless.orig_ability), JSON.parse(actionSelectionless.orig_ability), actionSelectionless.prompt_type, "none", "none", neverActionTime, JSON.parse(actionSelectionless.restrictions), JSON.parse(actionSelectionless.additional_trigger_data), actionSelectionless.target);
+                await createAction(message.id, message.channel.id, actionSelectionless.src_ref, actionSelectionless.src_name, JSON.parse(actionSelectionless.orig_ability), JSON.parse(actionSelectionless.orig_ability), actionSelectionless.prompt_type, "none", "none", neverActionTime, JSON.parse(actionSelectionless.restrictions), JSON.parse(actionSelectionless.additional_trigger_data), actionSelectionless.target, actionSelectionless.forced);
                 // delete from action queue
                 await deleteQueuedAction(interaction.message.id);
                 // update message
