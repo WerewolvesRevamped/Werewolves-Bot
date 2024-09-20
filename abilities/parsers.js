@@ -311,7 +311,7 @@ module.exports = function() {
                 compVal = compVal.substr(1);
                 compInverted = true;
             }
-            console.log("AS", compName, compVal, compInverted);
+            //console.log("AS", compName, compVal, compInverted);
             let compValSplit;
             switch(compName) {
                 default:
@@ -726,7 +726,7 @@ module.exports = function() {
     **/
     this.parseInfo = async function(selector, self, additionalTriggerData) {
         // get target
-        let selectorTarget = selector.split("[")[0]; // we cant actually use the util function as it converts to lower case
+        let selectorTarget = selector.split("`[")[0]; // we cant actually use the util function as it converts to lower case
         selectorTarget = selectorTarget.replace(/`/g,"");
         let spl = selectorTarget.split(" ");
         // convert text segments to selectors if applicable
@@ -734,7 +734,7 @@ module.exports = function() {
             let infType = inferType(spl[i]);
             if(infType != "unknown") {
                 let parsed = await parseSelector(`${spl[i]}[${infType}]`, self, additionalTriggerData);
-                console.log(infType, spl[i], parsed.type, parsed.value);
+                //console.log(infType, spl[i], parsed.type, parsed.value);
                 let strs = [];
                 // iterate through selector list
                 for(let j = 0; j < parsed.value.length; j++) {
@@ -754,7 +754,7 @@ module.exports = function() {
     /**
     Parse ability type
     **/
-    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","","manipulating","","joining","granting","","","poll","announcement","","","","","","","","","","feedback","success","failure","log","","process_evaluate","abilities"];
+    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","","manipulating","","joining","granting","","","poll","announcement","changing","","","ascend","descend","","","","","","feedback","success","failure","log","","process_evaluate","abilities"];
     this.parseAbilityType = function(ability_type) {
         // get target
         let selectorTarget = selectorGetTarget(ability_type);
@@ -785,10 +785,11 @@ module.exports = function() {
         null, // obstruction
         ["creation","addition","deletion","cancellation"], // poll
         [], // announcement
-        null, // changing
+        ["role","alignment"], // changing
         null, // copying
         null, // choices
-        null, // ascend descend
+        [], // ascend
+        [], // descend
         null, // disband
         null, // counting
         null, // conversation reset

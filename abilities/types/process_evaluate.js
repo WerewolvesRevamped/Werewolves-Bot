@@ -218,7 +218,7 @@ module.exports = function() {
                     return false;
                 }
                 let targets = await parseSelector(condition.target, src_ref, additionalTriggerData);
-                console.log("EXISTENCE", condition.target, targets);
+                //console.log("EXISTENCE", condition.target, targets);
                 return (targets.value.length > 0);
             }
             // ATTRIBUTE
@@ -247,6 +247,21 @@ module.exports = function() {
                 for(let i = 0; i < targets.value.length; i++) {
                     let bool = selector.value.includes(targets.value[i]);
                     if(!bool) return false;
+                }
+                return true;
+            }
+            // MEMBERSHIP
+            case "membership": {
+                if(!condition.target || !condition.group) {
+                    abilityLog(`❗ **Error:** Missing arguments for type \`${type}\`!`);
+                    return false;
+                }
+                let targets = await parsePlayerSelector(condition.target, src_ref, additionalTriggerData);
+                let group = await parseGroupName(condition.group);
+                if(cachedGroups.indexOf(group) === -1) return false;
+                for(let i = 0; i < targets.length; i++) {
+                    let attrs = await queryAttributePlayer(targets[i], "val1", group);
+                    if(attrs.length <= 0) return false;
                 }
                 return true;
             }

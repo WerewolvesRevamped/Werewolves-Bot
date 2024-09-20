@@ -63,7 +63,7 @@ module.exports = function() {
             await killDeathTriggers(targets[i], src_ref, "attack", src_name)
             
             // execute the kill
-            await killPlayer(targets[i]);
+            await queueKill(targets[i]);
             abilityLog(`✅ ${srcRefToText(src_ref)} attacked <@${targets[i]}> - successful.`);
             success = true; // if attack succeeds set to true
         }
@@ -95,7 +95,7 @@ module.exports = function() {
             await triggerHandler("Passive");
             
             // execute the kill
-            await killPlayer(targets[i]);
+            await queueKill(targets[i]);
             abilityLog(`✅ ${srcRefToText(src_ref)} lynched <@${targets[i]}> - successful.`);
             success = true; // if attack succeeds set to true
         }
@@ -124,7 +124,7 @@ module.exports = function() {
             await killDeathTriggers(targets[i], src_ref, "kill", src_name)
             
             // execute the kill
-            await killPlayer(targets[i]);
+            await queueKill(targets[i]);
             abilityLog(`✅ ${srcRefToText(src_ref)} killed <@${targets[i]}> - successful.`);
             success = true; // if attack succeeds set to true
         }
@@ -147,7 +147,7 @@ module.exports = function() {
             await killDeathTriggers(targets[i], src_ref, "true kill", src_name)
             
             // execute the kill
-            await killPlayer(targets[i]);
+            await queueKill(targets[i]);
             abilityLog(`✅ ${srcRefToText(src_ref)} true killed <@${targets[i]}>.`);
             success = true; // True Kill always succeeds
         }
@@ -247,45 +247,13 @@ module.exports = function() {
         return false;
     }
     
-    
-    /** PUBLIC
-    Kill Player
-    kills a player (does not consider or defenses or anything, just kills)
+    /** PRIVATE
+    Queues a kill
     **/
-	this.killPlayer = async function(player_id) {
-       // set to dead
-       await setLivingStatus(player_id, 0);
-        // check mayor treshhold (and change roles if applicable)
-       await mayorCheck();
-       // send a reporter message
-       reporterMessage(player_id);
-        
-        let player = mainGuild.members.cache.get(player_id);
-        // revoke participant role
-        removeRoleRecursive(player, false, stats.participant, "participant");
-        // grant dead role depending on mode
-        if(!stats.haunting) addRoleRecursive(player, false, stats.dead_participant, "dead participant");
-        else addRoleRecursive(player, false, stats.ghost, "ghost");
-        // revoke elected role WIP: elected module?
-        removeRoleRecursive(player, false, stats.mayor, "mayor");
-        removeRoleRecursive(player, false, stats.mayor2, "mayor 2");
-        removeRoleRecursive(player, false, stats.reporter, "reporter");
-        removeRoleRecursive(player, false, stats.guardian, "guardian");
-	}
-    
-    /** PUBLIC
-    Set Living Status
-    set the alive value for a player
-    // WIP: Maybe this should be in player module
-    **/
-    this.setLivingStatus = function(player_id, status) {
-        return new Promise(res => {
-            sql("UPDATE players SET alive=" + connection.escape(status) + " WHERE id=" + connection.escape(player_id), result => {
-                updateGameStatus(); // update game status (async)
-                res();
-            });	
-        });
+    async function queueKill(pid) {
+        await killqAdd(pid);
+        doStorytimeCheck();
+        killqScheduled = true;
     }
-
 
 }

@@ -153,5 +153,17 @@ module.exports = function() {
     this.getTime = function() {
         return Math.floor(Date.now()/1000);
     }
+    
+    /**
+    Auto Punctate
+    adds a "." if the last character is not punctation
+    **/
+    this.autoPunctate = function(txt) {
+        if(/[\.,!\?\)\(\]\[\}\{\-]/.test(txt[txt.length - 1])) {
+            return txt;
+        } else {
+            return txt + ".";
+        }
+    }
 
 }

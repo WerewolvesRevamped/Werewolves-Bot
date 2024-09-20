@@ -644,11 +644,21 @@ module.exports = function() {
     triggers at the start of the game
     **/
     this.eventStarting = async function() {
+        // pause queue checker during event
+        pauseActionQueueChecker = true;
+        
         // starting
         await triggerHandler("Starting");
         
         // passive
         await triggerHandler("Passive");
+        
+        // starting storytime
+        await bufferStorytime("The game has started!");
+        await postStorytime();
+        
+        // pause queue checker during event
+        pauseActionQueueChecker = false;
     }
     
     /**
@@ -656,6 +666,9 @@ module.exports = function() {
     triggers at the start of the night
     **/
     this.eventStartNight = async function() {
+        // pause queue checker during event
+        pauseActionQueueChecker = true;
+        
         await clearPrompts();
         
         // close polls
@@ -678,12 +691,19 @@ module.exports = function() {
         
         // end of phase
         await attributeCleanup();
+        await killqKillall();
+        
+        // storytime
+        await postStorytime();
         
         // passive start actions
         await triggerHandler("Passive Start Night");
         await triggerHandler("Start Night");
         await triggerHandler("Passive Start Phase");
         await triggerHandler("Start Phase");
+        
+        // handle killq
+        await killqKillall();
         
         // immediate actions
         await triggerHandler("Immediate Night");
@@ -697,6 +717,12 @@ module.exports = function() {
         
         // passive
         await triggerHandler("Passive");
+        
+        // handle killq
+        await killqKillall();
+        
+        // pause queue checker during event
+        pauseActionQueueChecker = false;
     }
     
     /**
@@ -704,6 +730,9 @@ module.exports = function() {
     triggers at the start of the day
     **/
     this.eventStartDay = async function() {
+        // pause queue checker during event
+        pauseActionQueueChecker = true;
+        
         await clearPrompts();
         
         // close polls
@@ -726,12 +755,19 @@ module.exports = function() {
         
         // end of phase
         await attributeCleanup();
+        await killqKillall();
+        
+        // storytime
+        await postStorytime();
         
         // passive start actions
         await triggerHandler("Passive Start Day");
         await triggerHandler("Start Day");
         await triggerHandler("Passive Start Phase");
         await triggerHandler("Start Phase");
+        
+        // handle killq
+        await killqKillall();
         
         // immediate actions
         await triggerHandler("Immediate Day");
@@ -745,6 +781,12 @@ module.exports = function() {
         
         // passive
         await triggerHandler("Passive");
+        
+        // handle killq
+        await killqKillall();
+        
+        // pause queue checker during event
+        pauseActionQueueChecker = false;
     }
     
 }

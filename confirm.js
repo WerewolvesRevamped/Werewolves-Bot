@@ -34,6 +34,7 @@ module.exports = function() {
 			case "start_debug": cmdStart(message.channel, true); break;
 			case "reset": cmdReset(message.channel); break;
 			case "end": cmdEnd(message.channel); break;
+			case "killq killall": cmdKillqKillall(message.channel); break;
 			case "players list": cmdPlayersList(message.channel); break;
 			case "players list_alive": cmdPlayersListAlive(message.channel); break;
 			case "players log": cmdPlayersLog(message.channel); break;

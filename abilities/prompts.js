@@ -99,7 +99,14 @@ module.exports = function() {
     Clear Prompts
     clears all prompts from the table
     **/
-    this.clearPrompts = function() {
+    this.clearPrompts = async function() {
+        let promptsToClear = await sqlProm("SELECT * FROM prompts");
+        
+        // clears last target on unused prompts
+        for(let i = 0; i < promptsToClear.length; i++) {
+            await clearLastTarget(promptsToClear[i].src_ref, JSON.parse(promptsToClear[i].abilities)[0]);
+        }
+        
         return sqlProm("DELETE FROM prompts");
     }
     
@@ -247,11 +254,26 @@ module.exports = function() {
     checks the action queue every 10 seconds to see if an action should be executed
     **/
     this.skipActionQueueChecker = false;
-    this.createActionQueueChecker = function() {
-        setInterval(() => {
-            if(skipActionQueueChecker) return;
-            actionQueueChecker();
+    this.pauseActionQueueChecker = false;
+    this.storytimeCheckScheduled = false;
+    this.killqScheduled = false;
+    this.createActionQueueChecker =  function() {
+        setInterval(async () => {
+            if(skipActionQueueChecker || pauseActionQueueChecker) return;
+            if(killqScheduled) {
+                await killqKillall();
+                killqScheduled = false;
+            }
+            if(storytimeCheckScheduled) {
+                await postStorytimeImmediate();
+                storytimeCheckScheduled = false
+            }
+            await actionQueueChecker();
         }, 10 * 1000)
+    }
+    
+    this.doStorytimeCheck = function() {
+        storytimeCheckScheduled = true;
     }
     
     this.actionQueueChecker = async function () {
@@ -272,7 +294,7 @@ module.exports = function() {
             // save last target
             quantity = await getActionQuantity(curAction.src_ref, abilities[0]);
             if(quantity === -1) await initActionData(curAction.src_ref, abilities[0]);
-            setLastTarget(curAction.src_ref, abilities[0], curAction.target);
+            await setLastTarget(curAction.src_ref, abilities[0], curAction.target);
             // execute the ability
             let feedback = [];
             for(let ability of abilities) {

@@ -24,7 +24,7 @@ module.exports = function() {
     const passiveTriggers = ["Passive", "Passive End Day", "Passive End Night", "Passive Start Day", "Passive Start Night", "Passive Start Phase", "Passive End Phase"];
     const electionTriggers = ["On Election", "On Mayor Election", "On Reporter Election", "On Guardian Election"];
     const defenseTriggers = ["On Defense", "On Passive Defense", "On Partial Defense", "On Recruitment Defense", "On Active Defense", "On Absence Defense"];
-    const basicTriggerTypes = [...actionTimings, "Compound", "Starting", ...passiveTriggers, "On Death", "On Killed","On Visited", "On Action", "On Disbandment", "On Lynch", ...electionTriggers, ...defenseTriggers, "On Betrayal", "Afterwards", "On Poll Closed", "On Role Change", "On Removal", "On End"]; // basic trigger types
+    const basicTriggerTypes = [...actionTimings, "Starting", ...passiveTriggers, "On Death", "On Killed","On Visited", "On Action", "On Disbandment", "On Lynch", ...electionTriggers, ...defenseTriggers, "On Betrayal", "On Poll Closed", "On Poll Win", "On Role Change", "On Removal", "On End"]; // basic trigger types
     const bullets = ["•","‣","◦","·","⁃","⹀"];
 
     /**
@@ -1086,13 +1086,19 @@ module.exports = function() {
         exp = new RegExp("^Reveal " + targetType + " to " + locationType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "announcement", target: ttpp(fd[2], "location"), info: ttpp(fd[1]) };
+            ability = { type: "announcement", subtype: "immediate", target: ttpp(fd[2], "location"), info: ttpp(fd[1]) };
         }
         // reveal
         exp = new RegExp("^(Learn|Know) " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "announcement", target: "@self[location]", info: ttpp(fd[2]) };
+            ability = { type: "announcement", subtype: "immediate", target: "@self[location]", info: ttpp(fd[2]) };
+        }
+        // storytime buffer
+        exp = new RegExp("^Announce " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "announcement", subtype: "buffer", info: ttpp(fd[1]) };
         }
         /** ROLE CHANGE **/
         // role change
@@ -1152,16 +1158,18 @@ module.exports = function() {
             ability = { type: "choices", subtype: "choosing", choice: ttpp(fd[1], "choice"), option: ttpp(fd[2], "option") };
         }
         // choice creation
-        exp = new RegExp("^" + targetType + " Choice Creation$", "g");
+        exp = new RegExp("^" + targetType + " Choice Creation \\(([^\\)]+)\\)$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "choices", subtype: "choosing", choice: ttpp(fd[1], "choice"), target: "@self[player]" };
+            let options = fd[2].split(",").map(el => ttpp(el.trim(), "option"));
+            ability = { type: "choices", subtype: "creation", choice: ttpp(fd[1], "choice"), target: "@self[player]", options: options };
         }
         // choice creation
-        exp = new RegExp("^" + targetType + " Choice Creation for " + targetType + "$", "g");
+        exp = new RegExp("^" + targetType + " Choice Creation for " + targetType + " \\(([^\\)]+)\\)$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "choices", subtype: "choosing", choice: ttpp(fd[1], "choice"), target: ttpp(fd[2]) };
+            let options = fd[3].split(",").map(el => ttpp(el, "option"));
+            ability = { type: "choices", subtype: "creation", choice: ttpp(fd[1], "choice"), target: ttpp(fd[2]), options: options };
         }
         /** ASCEND DESCEND **/
         // ascend
@@ -1475,6 +1483,13 @@ module.exports = function() {
                     if(fd) {
                         complexTrigger = "On Visited;" + ttpp(fd[1]) + ";" + ttpp(fd[2], "abilitySubtype");
                     }
+                    /** Choice Chosen **/
+                    var exp, fd, complexTrigger;
+                    exp = new RegExp("^Choice `" + str +  "` Chosen$", "g");
+                    fd = exp.exec(curTriggerName);
+                    if(fd) {
+                        complexTrigger = "Choice Chosen;" + ttpp(fd[1], "option");
+                    }
                     /** Otherwise **/
                     if(!complexTrigger) { // could not find a complex trigger match
                         if(!debugMode) throw new Error(`Invalid Trigger Type \`\`\`\n${curTriggerName}\n\`\`\` in \`\`\`\n${curInputLine}\n\`\`\``);
@@ -1543,6 +1558,10 @@ module.exports = function() {
     attempts to infer a target type type 
     **/
     this.inferType = function(targetType) {
+        if(targetType.indexOf("[") > 0 && targetType.indexOf("]") > 0) {
+            return targetType.split("[")[1].split("]")[0];
+        }
+        
         let first = targetType[0];
         if(/->/.test(targetType)) {
             let properties = targetType.split(/->/);
