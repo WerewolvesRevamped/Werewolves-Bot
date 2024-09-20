@@ -405,7 +405,7 @@ module.exports = function() {
 		sql("SELECT id,emoji,role,alive,ccs FROM players WHERE type='player'", result => {
 			let playerListArray = result.map(el => {
                 let player = channel.guild.members.cache.get(el.id);
-                let nickname = player.nickname ? " (as `" + player.nickname + "`)" : "";
+                let nickname = player && player.nickname ? " (as `" + player.nickname + "`)" : "";
                 return `• ${el.emoji} ${player ? player : "<@" + el.id + ">"}${nickname} is \`${el.role.split(",").map(role => toTitleCase(role)).join(" + ")}\``;
             });
             
