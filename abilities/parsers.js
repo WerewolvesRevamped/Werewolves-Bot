@@ -13,6 +13,11 @@ module.exports = function() {
     this.parseSelector = async function(selector, self, additionalTriggerData = {}) {
         let selectorTarget = selectorGetTarget(selector);
         let selectorType = selectorGetType(selector);
+        // if type is unknown, but it is a @Self selector, get type from self
+        if(selectorType === "unknown" && selectorTarget === "@self" && self) {
+            selectorType = srcToType(self);
+        }
+        // switch through types
         switch(selectorType) {
             // PLAYER
             case "player": 

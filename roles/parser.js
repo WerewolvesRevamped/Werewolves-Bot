@@ -737,7 +737,7 @@ module.exports = function() {
             else if(compulsion[comp] == "Forced") cForced = true;
             else if(compulsion[comp].substr(0, 6) == "Forced") {
                 cForced = true;
-                cForcedSelection = compulsion[comp].substr(7);
+                cForcedSelection = ttpp(compulsion[comp].substr(7));
             }
             else {
                 if(!debugMode) throw new Error(`Invalid Compulsion Type \`\`\`\n${compulsion[comp]}\n\`\`\``);

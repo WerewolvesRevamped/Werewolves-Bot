@@ -124,6 +124,9 @@ module.exports = function() {
             let prompt = promptsToExecute[i];
             // get values from prompt
             let abilities = JSON.parse(prompt.abilities);
+            const additionalTriggerData = JSON.parse(prompt.additional_trigger_data);
+            const forcedSel = additionalTriggerData.parameters?.forced_sel ?? null;
+            const src_ref = prompt.src_ref;
             
             // get type and action count
             const type1 = prompt.type1;
@@ -135,12 +138,20 @@ module.exports = function() {
             let promptChannel = await mainGuild.channels.fetch(prompt.channel_id);
             let promptMessage = await promptChannel.messages.fetch(prompt.message_id);
             
-            // reply to prompt
-            let selection1 = await randomPromptReply(type1);
-            let selection2 = await randomPromptReply(type2);
-            let repl_msg;
-            if(type2 === "none") repl_msg = await sendPromptReplyConfirmMessage(promptMessage, promptType, `You did not submit a target, but the action is forced. A random target is selected: ${selection1[0]}` + PROMPT_SPLIT); 
-            else repl_msg = await sendPromptReplyConfirmMessage(promptMessage, promptType, `You did not submit a target, but the action is forced. A random target is selected: ${selection1[0]} and ${selection2[0]}` + PROMPT_SPLIT); 
+            // prentend reply to prompt
+            let repl_msg, selection1, selection2;
+            // if specific forced selection is set
+            if(forcedSel) {
+                let parsed = await parseSelector(forcedSel, src_ref, additionalTriggerData);
+                selection1 = parsePromptReply(parsed.value[0], type1);
+                selection2 = null;
+                repl_msg = await sendPromptReplyConfirmMessage(promptMessage, promptType, `You did not submit a target, but the action is forced. The following target was selected: ${selection1[0]}` + PROMPT_SPLIT, true); 
+            } else { // random selection
+                selection1 = await randomPromptReply(type1);
+                selection2 = await randomPromptReply(type2);
+                if(type2 === "none") repl_msg = await sendPromptReplyConfirmMessage(promptMessage, promptType, `You did not submit a target, but the action is forced. A random target is selected: ${selection1[0]}` + PROMPT_SPLIT, true); 
+                else repl_msg = await sendPromptReplyConfirmMessage(promptMessage, promptType, `You did not submit a target, but the action is forced. A random target is selected: ${selection1[0]} and ${selection2[0]}` + PROMPT_SPLIT, true); 
+            }
             
             // queue action to past to instantly execute
             const exeTime = getTime() - 1;
@@ -154,7 +165,7 @@ module.exports = function() {
             
             // create several actions if necessary
             for(let j = 0; j < actionCount; j++) {
-                await createAction(repl_msg.id, repl_msg.channel.id, prompt.src_ref, prompt.src_name, clonedAbilities, abilities, promptType, type1, type2, exeTime, JSON.parse(prompt.restrictions), JSON.parse(prompt.additional_trigger_data), selection1[1], prompt.forced);
+                await createAction(repl_msg.id, repl_msg.channel.id, src_ref, prompt.src_name, clonedAbilities, abilities, promptType, type1, type2, exeTime, JSON.parse(prompt.restrictions), additionalTriggerData, selection1[1], prompt.forced);
             }
         }
         
@@ -518,7 +529,7 @@ module.exports = function() {
     /**
     Sends a reply message to a prompt reply with reactions
     **/
-    async function sendPromptReplyConfirmMessage(message, prompt_type, txt) {
+    async function sendPromptReplyConfirmMessage(message, prompt_type, txt, hideButtons = false) {
         // reply message with buttons
         let options = "confirm, cancel or delay";
         if(!subphaseIsMain()) options = "confirm or cancel";
@@ -532,6 +543,7 @@ module.exports = function() {
         msg.components = [ { type: 1, components: [ confirmButton, cancelButton ] } ];
         if(subphaseIsMain()) msg.components[0].components.push(delayButton);
         if(prompt_type == "end") msg.components[0].components = [ cancelButton ];
+        if(hideButtons) msg.components = [ ];
         // send reply
         let repl_msg = await message.reply(msg);
         return repl_msg;

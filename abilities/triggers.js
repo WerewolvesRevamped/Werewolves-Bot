@@ -442,11 +442,16 @@ module.exports = function() {
     Execute Trigger
     executes the abilities of a trigger if applicable
     **/
-    async function executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData = {}) {
+    async function executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerDataOriginal = {}) {
         const ptype = getPromptType(triggerName);
         const promptOverwrite = trigger?.parameters?.prompt_overwrite ?? "";
         const promptPing = !(promptOverwrite.match(/^silent:.*$/)); // check if prompt should ping
         const forced = (trigger?.parameters?.forced ?? false) ? 1 : 0; // check if action is forced
+        const forcedSel = trigger?.parameters?.forced_sel ?? null;
+        
+        // extend additional trigger data
+        let additionalTriggerData = JSON.parse(JSON.stringify(additionalTriggerDataOriginal));
+        additionalTriggerData.parameters = trigger?.parameters ?? {};
         
         // handle action scaling
         const actionScaling = trigger?.parameters?.scaling ?? [];
@@ -480,7 +485,17 @@ module.exports = function() {
         }
         // merge prompt info
         let promptInfoMsg = "";
-        if(forced) promptInfo.push("This is a forced action. If you do not submit a selection, it will be randomly chosen for you");
+        if(forced) {
+            if(!forcedSel) {
+                promptInfo.push("This is a forced action. If you do not submit a selection, it will be randomly chosen for you");
+            } else {
+                let parsed = await parseSelector(forcedSel, src_ref, additionalTriggerData);
+                let parsedText = parsed.value[0];
+                console.log(parsed, parsedText);
+                if(parsed.type === "player") parsedText = mainGuild.members.cache.get(parsed.value[0]).displayName;
+                promptInfo.push(`This is a forced action. If you do not submit a selection, ${parsedText} will be chosen`);
+            }
+        }
         if(promptInfo.length > 0) promptInfoMsg = promptInfo.join("; ") + ".";
         
         // check if prompts are necessary
