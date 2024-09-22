@@ -90,6 +90,8 @@ module.exports = function() {
                 foundSelections.push([key,val,"primary"]);
             } else if(val.indexOf("@secondaryselection") >= 0) {
                 foundSelections.push([key,val,"secondary"]);
+            } else if(val.indexOf("@chosen") >= 0) {
+                foundSelections.push([key,val,"choice"]);
             }
         });
         return foundSelections;
@@ -598,6 +600,8 @@ module.exports = function() {
                     return false;
                 }
                 return role;
+            case "choice":
+                return false;
             default:
                 if(message) message.reply(basicEmbed("❌ Invalid prompt.", EMBED_RED));
                 return false;

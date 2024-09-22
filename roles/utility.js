@@ -394,6 +394,7 @@ module.exports = function() {
     this.EMBED_GREEN = 8311585; // success
     this.EMBED_GRAY = 10197915; // info / start
     this.EMBED_PURPLE = 8072875; // (role) change
+    this.EMBED_BLUE = 4096721; // choices
     this.basicEmbed = function(msg, color) {
         let dmsg = { 
             embeds: [

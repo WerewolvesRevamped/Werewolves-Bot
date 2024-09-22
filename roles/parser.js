@@ -1162,13 +1162,15 @@ module.exports = function() {
         fd = exp.exec(abilityLine);
         if(fd) {
             let options = fd[2].split(",").map(el => ttpp(el.trim(), "option"));
+            if(options.length > 5 && !debugMode) throw new Error(`Too Many Options \`\`\`\n${abilityLine}\n\`\`\``);
             ability = { type: "choices", subtype: "creation", choice: ttpp(fd[1], "choice"), target: "@self[player]", options: options };
         }
         // choice creation
         exp = new RegExp("^" + targetType + " Choice Creation for " + targetType + " \\(([^\\)]+)\\)$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            let options = fd[3].split(",").map(el => ttpp(el, "option"));
+            let options = fd[3].split(",").map(el => ttpp(el.trim(), "option"));
+            if(options.length > 5 && !debugMode) throw new Error(`Too Many Options \`\`\`\n${abilityLine}\n\`\`\``);
             ability = { type: "choices", subtype: "creation", choice: ttpp(fd[1], "choice"), target: ttpp(fd[2]), options: options };
         }
         /** ASCEND DESCEND **/
@@ -1488,7 +1490,7 @@ module.exports = function() {
                     exp = new RegExp("^Choice `" + str +  "` Chosen$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
-                        complexTrigger = "Choice Chosen;" + ttpp(fd[1], "option");
+                        complexTrigger = "Choice Chosen;" + ttpp(fd[1].trim().toLowerCase().replace(/[^a-z]/g,""), "option");
                     }
                     /** Otherwise **/
                     if(!complexTrigger) { // could not find a complex trigger match

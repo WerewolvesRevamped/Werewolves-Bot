@@ -802,7 +802,7 @@ client.on("guildMemberAdd", async member => {
 client.on('interactionCreate', async interaction => {
     if(interaction.isButton()) {
         let orig_text = interaction.message.embeds[0].description.split(PROMPT_SPLIT)[0];
-        if(!isParticipant(interaction.member)) {
+        if(!isParticipant(interaction.member) && !isGameMaster(interaction.member)) {
             interaction.deferUpdate();
             return;
         }
@@ -810,7 +810,12 @@ client.on('interactionCreate', async interaction => {
         let actionAll = await getAction(interaction.message.id);
         let invalidReply = basicEmbed(`${orig_text}${PROMPT_SPLIT} Invalid action. You cannot interact with this prompt anymore.`, EMBED_RED);
         invalidReply.components = [];
-        switch(interaction.customId) {
+        
+        // switch through interactions
+        const interactionSplit = interaction.customId.split(":");
+        const interactionName = interactionSplit[0];
+        const interactionArg = interactionSplit.length > 1 ? interactionSplit[1] : "";
+        switch(interactionName) {
             default:
                 console.log("Unknown Interaction", interaction.customId);
             break;
@@ -882,6 +887,29 @@ client.on('interactionCreate', async interaction => {
                 let cancelEndButton = { type: 2, label: "Cancel", style: 4, custom_id: "confirm-end-cancel" };
                 embed.components = [ { type: 1, components: [ cancelEndButton ] } ];
                 interaction.update(embed);
+            break;
+            case "choice": // choice reply
+                // get arguments
+                const interactionArgSplit = interactionArg.split("-");
+                if(interactionArgSplit.length != 2) {
+                    interaction.deferUpdate();
+                    return;
+                }
+                const choiceName = interactionArgSplit[0];
+                const optionName = interactionArgSplit[1];
+                const chooser = interaction.member.id;
+                // get choice data
+                let choiceData = await choicesGetByOwner(choiceName, chooser);
+                let choiceCreatorId = srcToValue(choiceData.src_ref)
+                // deletes choice
+                await choicesDeleteByOwner(choiceName, chooser);
+                // update message
+                embed = basicEmbed(`${orig_text}${PROMPT_SPLIT} Choice chosen.`, EMBED_GREEN);
+                embed.components = [ ];
+                interaction.update(embed);
+                // run trigger
+                abilityLog(`✅ **Choice Chose:** <@${chooser}> chose \`${optionName}\` for \`${choiceName}\`.`);
+                await triggerPlayer(choiceCreatorId, "Choice Chosen Complex", { chooser: `player:${chooser}`, chosen: parseOption(optionName) }); 
             break;
         }
     }

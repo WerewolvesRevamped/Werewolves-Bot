@@ -202,10 +202,10 @@ module.exports = function() {
     this.triggerHandler = async function(triggerName, additionalTriggerData = {}) {
         abilityLog(`🔷 **Trigger:** ${triggerName}`);  
         await triggerHandlerPlayers(triggerName, additionalTriggerData);
-        await triggerHandlerPlayersRoleAttributes(triggerName, additionalTriggerData);
-        await triggerHandlerGroups(triggerName, additionalTriggerData);
-        await triggerHandlerPolls(triggerName, additionalTriggerData);
-        await triggerHandlerAttributes(triggerName, additionalTriggerData);
+        //await triggerHandlerPlayersRoleAttributes(triggerName, additionalTriggerData);
+        //await triggerHandlerGroups(triggerName, additionalTriggerData);
+        //await triggerHandlerPolls(triggerName, additionalTriggerData);
+        //await triggerHandlerAttributes(triggerName, additionalTriggerData);
     }
     
     /**
@@ -426,6 +426,14 @@ module.exports = function() {
                             abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\` with \`${triggerAbilityType}\`.`);
                         }
                     break;
+                    case "Choice Chosen Complex":
+                        let option = parseOption(param);
+                        if(option === additionalTriggerData.chosen) {
+                            await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
+                        } else {
+                            abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\`.`);
+                        }
+                    break;
                     default:
                         abilityLog(`❗ **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Unknown complex trigger.`);
                     break;
@@ -491,7 +499,6 @@ module.exports = function() {
             } else {
                 let parsed = await parseSelector(forcedSel, src_ref, additionalTriggerData);
                 let parsedText = parsed.value[0];
-                console.log(parsed, parsedText);
                 if(parsed.type === "player") parsedText = mainGuild.members.cache.get(parsed.value[0]).displayName;
                 promptInfo.push(`This is a forced action. If you do not submit a selection, ${parsedText} will be chosen`);
             }
@@ -508,8 +515,14 @@ module.exports = function() {
         let prompts = [];
         let primary = allPrompts.find(el => el[2] === "primary");
         let secondary = allPrompts.find(el => el[2] === "secondary");
+        let choice = allPrompts.find(el => el[2] === "choice");
         if(primary) prompts.push(primary);
         if(secondary) prompts.push(secondary);
+        
+        if(choice) {
+            await choicesChoosingPrompt(src_name, src_ref, trigger.abilities[0], promptOverwrite, ptype[0], restrictions, additionalTriggerData, actionCount, forced);
+            return;
+        }
         
         switch(prompts.length) {
             // if no prompts are necessary -> directly execute ability
@@ -590,8 +603,9 @@ module.exports = function() {
     
     /**
     Get Ability Emoji
+    WIP: move this?
     **/
-    function getAbilityEmoji(type) {
+    this.getAbilityEmoji = function(type) {
         let emojiName;
         switch(type) {
             case "killing": emojiName = "CategoryKilling"; break;

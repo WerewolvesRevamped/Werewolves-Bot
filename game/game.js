@@ -377,6 +377,10 @@ module.exports = function() {
         pollsReset();
         // resets storytime
         resetStorytime();
+        // resets choices
+        choicesReset();
+        // reset kill queue
+        killqClear();
 		// Reset Poll Count
 		sqlSetStat(13, 1, result => {
 			channel.send("✅ Successfully reset poll counter!");

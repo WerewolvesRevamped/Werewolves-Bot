@@ -759,7 +759,7 @@ module.exports = function() {
     /**
     Parse ability type
     **/
-    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","","manipulating","","joining","granting","","","poll","announcement","changing","","","ascend","descend","","","","","","feedback","success","failure","log","","process_evaluate","abilities"];
+    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","","manipulating","","joining","granting","","","poll","announcement","changing","","choices","ascend","descend","","","","","","feedback","success","failure","log","","process_evaluate","abilities"];
     this.parseAbilityType = function(ability_type) {
         // get target
         let selectorTarget = selectorGetTarget(ability_type);
@@ -792,7 +792,7 @@ module.exports = function() {
         [], // announcement
         ["role","alignment"], // changing
         null, // copying
-        null, // choices
+        ["creation","choosing"], // choices
         [], // ascend
         [], // descend
         null, // disband
@@ -872,6 +872,35 @@ module.exports = function() {
             txt = txt.replace(/\$living/, aliveCount);
             txt = txt.replace(/\$phase/, getPhaseAsNumber());
             return txt;
+    }
+    
+    
+    
+    /**
+    Parse Choice
+    parses a choice
+    **/
+    this.parseChoice = function(choice) {
+        let target = selectorGetTarget(choice);
+        return target.trim().toLowerCase().replace(/[^a-z]/g,"");
+    }
+    
+    /**
+    Parse Option
+    parses an option
+    **/
+    this.parseOption = function(option) {
+        let target = selectorGetTarget(option);
+        return target.trim().toLowerCase().replace(/[^a-z]/g,"");
+    }
+    
+    /**
+    Parse Option
+    parses an option for display
+    **/
+    this.parseOptionDisplay = function(option) {
+        let target = option.split("[")[0];
+        return target.trim();
     }
     
     /**
