@@ -435,6 +435,12 @@ module.exports = function() {
         if(fd) {
             cond = { type: "otherwise" };
         }
+        /** Feedback (Otherwise) **/
+        exp = new RegExp("^Feedback$", "g");
+        fd = exp.exec(condition);
+        if(fd) {
+            cond = { type: "otherwise" };
+        }
         /** Always **/
         exp = new RegExp("^Always$", "g");
         fd = exp.exec(condition);

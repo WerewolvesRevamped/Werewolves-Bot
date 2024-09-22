@@ -73,7 +73,7 @@ module.exports = function() {
         let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);
         // feedback
         abilityLog(`✅ ${srcRefToText(src_ref)} investigated <@${targets[0]}>'s role as \`${toTitleCase(rdata.role.role)}\`${rdata.type?' ('+rdata.type+')':''}.`);
-        return { msg: `Investigated <@${targets[0]}>'s role: \`${toTitleCase(rdata.role.role)}\``, success: true, target: `player:${targets[0]}`, result: `${toTitleCase(rdata.role.role)}[role]` };
+        return { msg: `Investigated <@${targets[0]}>'s role: \`${toTitleCase(rdata.role.role)}\``, success: true, target: `player:${targets[0]}`, result: `${toTitleCase(rdata.role.role)}[role]`, role: rdata.role.role };
     }
     
     /**
@@ -88,7 +88,7 @@ module.exports = function() {
         let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);
         // feedback
         abilityLog(`✅ ${srcRefToText(src_ref)} investigated <@${targets[0]}>'s class as \`${toTitleCase(rdata.role.class)}\`${rdata.type?' ('+rdata.type+')':''}.`);
-        return { msg: `Investigated <@${targets[0]}>'s class: \`${toTitleCase(rdata.role.class)}\``, success: true, target: `player:${targets[0]}`, result: `${toTitleCase(rdata.role.class)}[class]` };
+        return { msg: `Investigated <@${targets[0]}>'s class: \`${toTitleCase(rdata.role.class)}\``, success: true, target: `player:${targets[0]}`, result: `${toTitleCase(rdata.role.class)}[class]`, class: rdata.role.class };
     }
     
     /**
@@ -103,7 +103,7 @@ module.exports = function() {
         let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);
         // feedback
         abilityLog(`✅ ${srcRefToText(src_ref)} investigated <@${targets[0]}>'s category as \`${toTitleCase(rdata.role.category)}\`${rdata.type?' ('+rdata.type+')':''}.`);
-        return { msg: `Investigated <@${targets[0]}>'s category: \`${toTitleCase(rdata.role.category)}\``, success: true, target: `player:${targets[0]}`, result: `${toTitleCase(rdata.role.category)}[category]` };
+        return { msg: `Investigated <@${targets[0]}>'s category: \`${toTitleCase(rdata.role.category)}\``, success: true, target: `player:${targets[0]}`, result: `${toTitleCase(rdata.role.category)}[category]`, category: rdata.role.category };
     }
     
     /**
@@ -119,11 +119,11 @@ module.exports = function() {
         if(rdata.type === "") {
             // feedback - no disguise
             abilityLog(`✅ ${srcRefToText(src_ref)} investigated <@${targets[0]}>'s alignment as \`${toTitleCase(rdata.role.alignment)}\`${rdata.type?' ('+rdata.type+')':''}.`);
-            return { msg: `Investigated <@${targets[0]}>'s alignment: \`${toTitleCase(rdata.role.alignment)}\``, success: true, target: `player:${targets[0]}`, result: `${toTitleCase(rdata.role.alignment)}[alignment]` };
+            return { msg: `Investigated <@${targets[0]}>'s alignment: \`${toTitleCase(rdata.role.alignment)}\``, success: true, target: `player:${targets[0]}`, result: `${toTitleCase(rdata.role.alignment)}[alignment]`, alignment: rdata.role.alignment };
         } else {
             // feedback - disguise
             abilityLog(`✅ ${srcRefToText(src_ref)} investigated <@${targets[0]}>'s alignment as \`${toTitleCase(rdata.role.team)}\`${rdata.type?' ('+rdata.type+')':''}.`);
-            return { msg: `Investigated <@${targets[0]}>'s alignment: \`${toTitleCase(rdata.role.team)}\``, success: true, target: `player:${targets[0]}`, result: `${toTitleCase(rdata.role.team)}[alignment]` };
+            return { msg: `Investigated <@${targets[0]}>'s alignment: \`${toTitleCase(rdata.role.team)}\``, success: true, target: `player:${targets[0]}`, result: `${toTitleCase(rdata.role.team)}[alignment]`, alignment: rdata.role.team };
         }
     }
     

@@ -460,6 +460,24 @@ module.exports = function() {
                 let target = await getTarget(self);
                 target = srcToValue(target);
                 return [ target ];
+            case "@result":
+            case "@result1":
+            case "@result2":
+            case "@result3":
+            case "@result4":
+            case "@result5":
+            case "@result6":
+            case "@result7":
+            case "@actionresult":
+                let result = parseResult(selectorTarget, additionalTriggerData);
+                if(result.role) {
+                    let parsedRole = parseRole(result.role);
+                    if(verifyRole(parsedRole)) {
+                        return [ parsedRole ];
+                    }
+                }
+                abilityLog(`❗ **Error:** Failed to cast result to role!`);
+                return [ ];
             default:
                 let parsedRole = parseRole(selectorTarget);
                 if(verifyRole(parsedRole)) {
@@ -536,6 +554,24 @@ module.exports = function() {
         // get target
         let selectorTarget = selectorGetTarget(selector);
         switch(selectorTarget) {
+            case "@result":
+            case "@result1":
+            case "@result2":
+            case "@result3":
+            case "@result4":
+            case "@result5":
+            case "@result6":
+            case "@result7":
+            case "@actionresult":
+                let result = parseResult(selectorTarget, additionalTriggerData);
+                if(result.alignment) {
+                    let parsedTeam = parseTeam(result.alignment);
+                    if(verifyTeam(parsedTeam)) {
+                        return [ parsedTeam ];
+                    }
+                }
+                abilityLog(`❗ **Error:** Failed to cast result to alignment!`);
+                return [ ];
             default:
                 let parsed = parseTeam(selectorTarget);
                 if(verifyTeam(parsed)) {
@@ -704,7 +740,7 @@ module.exports = function() {
     Parse Result
     turns a @Result<n> value into the correct result from trigger data
     **/
-    this.parseResult = function(selector, additionalTriggerData) {
+    this.parseResult = function(selector, additionalTriggerData = {}) {
         // get target
         let selectorTarget = selectorGetTarget(selector);
         const emptyResult = { msg: "", success: false };

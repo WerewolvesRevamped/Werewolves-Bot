@@ -89,11 +89,14 @@ module.exports = function() {
     this.applyingRemove = async function(src_name, src_ref, targets, attribute) {
         let failures = 0;
         let successes = 0;
+        let attrName = parseAttributeSelector(attribute, src_ref);
+
         // iterate through targets
         for(let i = 0; i < targets.value.length; i++) {
             // does not have attribute, so no removal needed
-            if(!hasCustomAttribute(`${targets.type}:${targets.value[i]}`, attribute)) {
-                abilityLog(`✅ ${srcRefToText(targets.type + ':' + targets.value[i])} does not have ${attribute}, unapplying skipped.`);
+            if(!hasCustomAttribute(`${targets.type}:${targets.value[i]}`, attrName[0])) {
+                abilityLog(`✅ ${srcRefToText(targets.type + ':' + targets.value[i])} does not have ${attrName[0]}, unapplying skipped.`);
+                if(targets.value.length === 1) return { msg: "Unapplying succeeded!", success: true, target: `${targets.type}:${targets.value[0]}` };
                 successes++;
                 continue;
             }

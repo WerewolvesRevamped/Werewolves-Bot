@@ -125,7 +125,7 @@ module.exports = function() {
                     feedback = await abilityDescend(src_ref, src_name, ability, additionalTriggerData);
                 break;
                 case "feedback":
-                    let info = await parseInfo(ability.feedback);
+                    let info = await parseInfo(ability.feedback, src_ref, additionalTriggerData);
                     feedback = { msg: info, success: true };
                 break;
                 case "success":

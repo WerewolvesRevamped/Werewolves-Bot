@@ -99,6 +99,7 @@ module.exports = function() {
     
     // checks if a specific owner has a certain custom attribute
     this.hasCustomAttribute = function(owner, name) {
+        console.log(owner, name);
         let found = cachedActiveCustomAttributes.find(el => el[2] === owner && el[3] === name);
         if(found) return true;
         else return false;

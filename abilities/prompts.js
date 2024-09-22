@@ -80,12 +80,11 @@ module.exports = function() {
      this.getPrompts = function(ability) {
         // iterate through all object values
         let foundSelections = [];
-        Object.keys(ability).forEach(key => {
-            let val = ability[key];
+        objRecIterate(ability, (key, property) => {
             // check if its a string type value
-            if(typeof val !== "string") return;
+            if(typeof property !== "string") return;
             // to lower case
-            val = val.toLowerCase();
+            let val = property.toLowerCase();
             if(val.indexOf("@selection") >= 0) {
                 foundSelections.push([key,val,"primary"]);
             } else if(val.indexOf("@secondaryselection") >= 0) {
@@ -292,12 +291,11 @@ module.exports = function() {
     **/
     function applyPromptValue(ability, promptIndex, promptValue) {
         // iterate through all object values
-        Object.keys(ability).forEach(key => {
-            let val = ability[key];
+        objRecIterate(ability, (key, property) => {
             // check if its a string type value
-            if(typeof val !== "string") return;
+            if(typeof property !== "string") return;
             // to lower case
-            val = val.toLowerCase();
+            let val = property.toLowerCase();
             if(val.indexOf("@selection") >= 0 && promptIndex == 0) {
                 ability[key] = promptValue;
             } else if(val.indexOf("@secondaryselection") >= 0 && promptIndex == 1) {
@@ -600,8 +598,6 @@ module.exports = function() {
                     return false;
                 }
                 return role;
-            case "choice":
-                return false;
             default:
                 if(message) message.reply(basicEmbed("❌ Invalid prompt.", EMBED_RED));
                 return false;

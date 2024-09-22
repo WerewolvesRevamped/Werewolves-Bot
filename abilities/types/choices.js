@@ -85,16 +85,6 @@ module.exports = function() {
         const promptMsg = getPromptMessage(ability, promptOverwrite);
         const refImg = await refToImg(src_name);
         const message = await sendChoiceMessage(sc, `${getAbilityEmoji(ability.type)} ${promptMsg}${PROMPT_SPLIT}\nPlease select one of the choices by clicking the respective button. You may be prompted for additional selections after the choice.`, choiceName, choice.options, refImg, "Ability Prompt - Choice");
-        
-        if(promptType === "immediate") { // immediate prompt
-            abilityLog(`🟩 **Prompting Choice:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(ability.type)} {Immediate}`);
-            await createPrompt(message.id, message.channel.id, src_ref, src_name, [ ability ], restrictions, additionalTriggerData, "immediate", actionCount, forced, "choice");
-        } else if(ptype[0] === "end") { // end phase prompt
-            abilityLog(`🟩 **Prompting Choice:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(ability.type)} {End}`);
-            await createPrompt(message.id, message.channel.id, src_ref, src_name, [ ability ], restrictions, additionalTriggerData, "end", actionCount, forced, "choice");
-        } else {
-            abilityLog(`❗ **Error:** Invalid prompt type!`);
-        }
     }
     
     /**

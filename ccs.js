@@ -681,7 +681,9 @@ module.exports = function() {
 						if(players.length > 0 && mode === 0) players.forEach(el => ccPerms.push(getPerms(el, ["read"], [])));
 						if(players.length > 0 && mode === 1) players.forEach(el => ccPerms.push(getPerms(el, ["read", "history"], [])));
                         let cc = channel.guild.channels.cache.get(result);
-						channel.guild.channels.create({ name: (spam?"🤖-":"") + (isGhost(member)?"👻-":"") + args[1] + "", type: ChannelType.GuildText,  permissionOverwrites: ccPerms, parent: cc.id })
+                        let cobj = { name: (spam?"🤖-":"") + args[1] + "", type: ChannelType.GuildText,  permissionOverwrites: ccPerms, parent: cc.id };
+                        if(result % 50 === 49) delete cobj.parent;
+                        channel.guild.channels.create(cobj)
 						.then(ct => {
 							let cc = channel.guild.channels.cache.get(result);
 							if(cc) {

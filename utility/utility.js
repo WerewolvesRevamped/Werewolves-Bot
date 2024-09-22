@@ -165,5 +165,31 @@ module.exports = function() {
             return txt + ".";
         }
     }
+    
+    /**
+    Replace Object Recursively
+    **/
+    this.objRecReplace = function(obj, func) {
+        // go through keys
+        for(var key in obj) {
+            if (typeof obj[key] === "object" && obj[key] !== null) { // continue recursion
+                objRecReplace(obj[key], func)
+            } else if (obj.hasOwnProperty(key)) { // replace key
+                obj[key] = func(key, obj[key])
+            }
+        }
+        return obj; // optional, uses reference anyway
+    }
+    
+    /** 
+    Iterate Object Recursively
+    **/
+    this.objRecIterate = function(obj, func) {
+        obj = objRecReplace(obj, function (key, property) {
+            func(key, property);
+            return property;
+        });
+        return obj; // optional, uses reference anyway
+    }
 
 }
