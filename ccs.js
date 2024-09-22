@@ -387,6 +387,8 @@ module.exports = function() {
 			return;
 		}
 		args[1] = args[1].replace(/🔒/,"lock");
+		args[1] = args[1].replace(/🤖/,"bot");
+		args[1] = args[1].replace(/👻/,"ghost");
 		let ccOwner = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Member).filter(el => el.allow == 66560).map(el => el.id);
 		if(mode || isGameMaster(member, true) || ccOwner.includes(member.id)) {
 			channel.edit({ name: args[1] })
@@ -590,6 +592,8 @@ module.exports = function() {
 			return;
 		}
 		args[1] = args[1].replace(/🔒/,"lock");
+		args[1] = args[1].replace(/🤖/,"bot");
+		args[1] = args[1].replace(/👻/,"ghost");
 		players = parseUserList(channel, args, 2, member);
         if(!players || spam) players = [];
 		if(!spam && !isGameMaster(member, true) && !isHelper(member)) {
