@@ -291,16 +291,18 @@ module.exports = function() {
     **/
     function applyPromptValue(ability, promptIndex, promptValue) {
         // iterate through all object values
-        objRecIterate(ability, (key, property) => {
+        objRecReplace(ability, (key, property) => {
             // check if its a string type value
             if(typeof property !== "string") return;
             // to lower case
             let val = property.toLowerCase();
             if(val.indexOf("@selection") >= 0 && promptIndex == 0) {
-                ability[key] = promptValue;
+                return promptValue;
             } else if(val.indexOf("@secondaryselection") >= 0 && promptIndex == 1) {
-                ability[key] = promptValue;
+                return promptValue;
             }
+            // default
+            return property;
         });
         return ability;
     }

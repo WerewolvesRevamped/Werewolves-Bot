@@ -174,6 +174,7 @@ module.exports = function() {
     Initialize action quantity to 1
     **/
     this.initActionData = function(src_ref, ability) {
+        if(!ability || !ability.id) return;
         return new Promise(res => {
             sql("INSERT INTO action_data (src_ref,ability_id,quantity,last_phase) VALUES (" + connection.escape(src_ref) + "," + connection.escape(ability.id) + ",0," + getPhaseAsNumber() + ")", result => {
                  res();
@@ -185,6 +186,7 @@ module.exports = function() {
     Increase action quantity
     **/
     this.increaseActionQuantity = function(src_ref, ability) {
+        if(!ability || !ability.id) return;
         return new Promise(res => {
             sql("UPDATE action_data SET quantity=quantity+1,last_phase=" + getPhaseAsNumber() + " WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=" + connection.escape(ability.id), result => {
                  res();
@@ -196,6 +198,7 @@ module.exports = function() {
     Get action quantity
     **/
     this.getActionQuantity = function(src_ref, ability) {
+        if(!ability || !ability.id) return -1;
         return new Promise(res => {
             sql("SELECT * FROM action_data WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=" + connection.escape(ability.id), result => {
                 if(!result[0]) res(-1);
@@ -219,6 +222,7 @@ module.exports = function() {
     Clears the last target
     **/
     this.clearLastTarget = function(src_ref, ability) {
+        if(!ability || !ability.id) return;
         console.log(src_ref, ability.id);
         console.log(ability);
         return sqlProm("UPDATE action_data SET last_target=NULL WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=" + connection.escape(ability.id));
