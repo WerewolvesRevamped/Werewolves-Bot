@@ -142,6 +142,11 @@ module.exports = function() {
             await trigger(src_ref, "On Action Complex", { action_result: feedback.result, action_target: actionTarget, ability_type: ability.type, ability_subtype: "" }); 
             if(ability.subtype) await trigger(src_ref, "On Action Complex", { action_result: feedback.result, action_target: actionTarget, ability_type: ability.type, ability_subtype: ability.subtype }); 
             
+            // check choice completion (if applicable)
+            if(additionalTriggerData.choice_data) {
+                await choiceCheckCompletion(additionalTriggerData.choice_data.owner, additionalTriggerData.choice_data.name);
+            }
+            
             // return feedback
             return feedback;
         } 

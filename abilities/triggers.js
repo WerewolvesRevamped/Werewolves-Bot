@@ -520,7 +520,7 @@ module.exports = function() {
         if(secondary) prompts.push(secondary);
         
         if(choice) {
-            await choicesChoosingPrompt(src_name, src_ref, trigger.abilities[0], promptOverwrite, ptype[0], restrictions, additionalTriggerData, actionCount, forced);
+            await choicesChoosingPrompt(src_name, src_ref, trigger.abilities[0], promptOverwrite);
             return;
         }
         
@@ -728,6 +728,7 @@ module.exports = function() {
         
         // end of phase
         await attributeCleanup();
+        await choicesReset();
         await killqKillall();
         
         // storytime
@@ -793,6 +794,7 @@ module.exports = function() {
         
         // end of phase
         await attributeCleanup();
+        await choicesReset();
         await killqKillall();
         
         // storytime

@@ -59,7 +59,7 @@ module.exports = function() {
     /**
     Choice choosing prompt creation
     **/
-    this.choicesChoosingPrompt = async function(src_name, src_ref, ability, promptOverwrite, promptType, restrictions, additionalTriggerData, actionCount, forced) {
+    this.choicesChoosingPrompt = async function(src_name, src_ref, ability, promptOverwrite) {
         // get channel
         const channel_id = await getSrcRefChannel(src_ref);
         if(!channel_id) return;
@@ -85,6 +85,13 @@ module.exports = function() {
         const promptMsg = getPromptMessage(ability, promptOverwrite);
         const refImg = await refToImg(src_name);
         const message = await sendChoiceMessage(sc, `${getAbilityEmoji(ability.type)} ${promptMsg}${PROMPT_SPLIT}\nPlease select one of the choices by clicking the respective button. You may be prompted for additional selections after the choice.`, choiceName, choice.options, refImg, "Ability Prompt - Choice");
+        
+        // save choice message
+        let p1 = choicesUpdateByOwner(choiceName, pid, "ability", JSON.stringify(ability));
+        let p2 = choicesUpdateByOwner(choiceName, pid, "prompt", promptOverwrite);
+        let p3 = choicesUpdateByOwner(choiceName, pid, "choice_msg", message.id);
+        let p4 = choicesUpdateByOwner(choiceName, pid, "choice_channel", message.channel.id);
+        await Promise.all([p1, p2, p3, p4]);
     }
     
     /**
@@ -111,6 +118,79 @@ module.exports = function() {
         return choice_msg;
     }
     
+    /**
+    Clears prompts and action belonging to a choice
+    **/
+    this.choiceUnchoose = async function(orig_text, chooser, choiceName) {
+        // clear all connected prompts
+        let messagesToClear = [];
+        let allPrompts = await sqlProm("SELECT * FROM prompts");
+        for(let i = 0; i < allPrompts.length; i++) {
+            let promptATD = JSON.parse(allPrompts[i].additional_trigger_data);
+            if(promptATD.choice_data && promptATD.choice_data.owner === chooser && promptATD.choice_data.name === choiceName) {
+                messagesToClear.push([allPrompts[i].channel_id, allPrompts[i].message_id]);
+                await sqlPromEsc("DELETE FROM prompts WHERE ai_id=", allPrompts[i].ai_id);
+            }
+        }
+        // clear all connected actions
+        let allActions = await sqlProm("SELECT * FROM action_queue");
+        for(let i = 0; i < allActions.length; i++) {
+            let promptATD = JSON.parse(allActions[i].additional_trigger_data);
+            if(promptATD.choice_data && promptATD.choice_data.owner === chooser && promptATD.choice_data.name === choiceName) {
+                messagesToClear.push([allActions[i].channel_id, allActions[i].message_id]);
+                await sqlPromEsc("DELETE FROM action_queue WHERE ai_id=", allActions[i].ai_id);
+            }
+        }
+        // clear all messages from actions and prompts
+        for(let i = 0; i < messagesToClear.length; i++) {
+            let msgChannel = await mainGuild.channels.fetch(messagesToClear[i][0]);
+            let msg = await msgChannel.messages.fetch(messagesToClear[i][1]);
+            let orig_text = msg.embeds[0].description.split(PROMPT_SPLIT)[0];
+            // update message
+            embed = basicEmbed(`${orig_text}${PROMPT_SPLIT} A choice was unchosen, invalidating this message.`, EMBED_RED);
+            embed.components = [];
+            msg.edit(embed); 
+        }
+        return messagesToClear.length;
+    }
+    
+    /**
+    Choice checker - is complete?
+    **/
+    this.choiceCheckCompletion = async function(chooser, choiceName) {
+        // check all connected prompts
+        let found = 0;
+        let allPrompts = await sqlProm("SELECT * FROM prompts");
+        for(let i = 0; i < allPrompts.length; i++) {
+            let promptATD = JSON.parse(allPrompts[i].additional_trigger_data);
+            if(promptATD.choice_data && promptATD.choice_data.owner === chooser && promptATD.choice_data.name === choiceName) {
+                found++;
+            }
+        }
+        // clear all connected actions
+        let allActions = await sqlProm("SELECT * FROM action_queue");
+        for(let i = 0; i < allActions.length; i++) {
+            let promptATD = JSON.parse(allActions[i].additional_trigger_data);
+            if(promptATD.choice_data && promptATD.choice_data.owner === chooser && promptATD.choice_data.name === choiceName) {
+                found++;
+            }
+        }
+        // delete choice
+        if(found === 0) {
+            // remove button from message
+            let choiceData = await choicesGetByOwner(choiceName, chooser);
+            if(!choiceData) return found;
+            let msgChannel = await mainGuild.channels.fetch(choiceData.choice_channel);
+            let msg = await msgChannel.messages.fetch(choiceData.choice_msg);
+            let embed = msg.embeds;
+            embed.components = [];
+            msg.edit(embed); 
+            // delete choice in db
+            await choicesDeleteByOwner(choiceName, chooser);
+        }
+        return found;
+    }
+
     
     /**
     Choices: Reset
@@ -133,6 +213,14 @@ module.exports = function() {
     **/
     this.choicesDeleteByOwner = function(choiceName, ownerId) {
         return sqlProm("DELETE FROM choices WHERE name=" + connection.escape(choiceName) + " AND owner=" + connection.escape(ownerId));
+    }
+    
+    /** PUBLIC
+    Updates a choice
+    **/
+    this.choicesUpdateByOwner = function(choiceName, ownerId, column, val) {
+        if(!(["choice_msg","choice_channel","prompt","ability"].includes(column))) return;
+        return sqlProm("UPDATE choices SET " + column + "=" + connection.escape(val) +  " WHERE name=" + connection.escape(choiceName) + " AND owner=" + connection.escape(ownerId));
     }
     
 }

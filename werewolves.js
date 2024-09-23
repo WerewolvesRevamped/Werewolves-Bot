@@ -888,7 +888,7 @@ client.on('interactionCreate', async interaction => {
                 embed.components = [ { type: 1, components: [ cancelEndButton ] } ];
                 interaction.update(embed);
             break;
-            case "choice": // choice reply
+            case "choice":  {// choice reply
                 // get arguments
                 const interactionArgSplit = interactionArg.split("-");
                 if(interactionArgSplit.length != 2) {
@@ -900,17 +900,43 @@ client.on('interactionCreate', async interaction => {
                 const chooser = interaction.member.id;
                 // get choice data
                 let choiceData = await choicesGetByOwner(choiceName, chooser);
-                let choiceCreatorId = srcToValue(choiceData.src_ref)
-                // deletes choice
-                await choicesDeleteByOwner(choiceName, chooser);
+                let choiceCreatorId = srcToValue(choiceData.src_ref);
                 // update message
                 embed = basicEmbed(`${orig_text}${PROMPT_SPLIT} Choice chosen.`, EMBED_GREEN);
-                embed.components = [ ];
+                let unchooseButton = { type: 2, label: "Revert Choice", style: 4, custom_id: `revert-choice:${choiceName}` };
+                embed.components = [ { type: 1, components: [ unchooseButton ] } ];
                 interaction.update(embed);
                 // run trigger
                 abilityLog(`✅ **Choice Chose:** <@${chooser}> chose \`${optionName}\` for \`${choiceName}\`.`);
-                await triggerPlayer(choiceCreatorId, "Choice Chosen Complex", { chooser: `player:${chooser}`, chosen: parseOption(optionName) }); 
-            break;
+                await triggerPlayer(choiceCreatorId, "Choice Chosen Complex", { chooser: `player:${chooser}`, chosen: parseOption(optionName), choice_data: { name: choiceName, owner: chooser } }); 
+                // check choice completion
+                await choiceCheckCompletion(chooser, choiceName);
+            } break;
+            case "revert-choice": {
+                const choiceName = interactionArg;
+                const chooser = interaction.member.id;
+                // get choice data
+                let choiceData = await choicesGetByOwner(choiceName, chooser);
+                
+                // remove prompts and actions
+                let clearedCount = await choiceUnchoose(orig_text, chooser, choiceName);
+                
+                if(clearedCount > 0) { // there was something to clear -> can be unchosen
+                    // update message
+                    embed = basicEmbed(`${orig_text}${PROMPT_SPLIT} Choice unchosen.`, EMBED_RED);
+                    embed.components = [ ];
+                    interaction.update(embed);
+                    
+                    // create new choice
+                    choicesChoosingPrompt(choiceData.src_name, choiceData.src_ref, JSON.parse(choiceData.ability), choiceData.prompt);
+                } else {
+                    // update message
+                    embed = basicEmbed(`${orig_text}${PROMPT_SPLIT} Cannot unchose choice.`, EMBED_RED);
+                    embed.components = [ ];
+                    interaction.update(embed);
+                }
+            
+            } break;
         }
     }
 });
