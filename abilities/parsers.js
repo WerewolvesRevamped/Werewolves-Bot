@@ -117,8 +117,8 @@ module.exports = function() {
             // others; @all without @self
             case "@others":
                 let all = await getAllLivingIDs();
-                self = srcToValue(self);
-                return all.filter(el => el != self);
+                let pself = srcToValue(self);
+                return all.filter(el => el != pself);
             // all dead players
             case "@dead":
                 return await getAllDeadIDs();
@@ -531,9 +531,9 @@ module.exports = function() {
                     abilityLog(`❗ **Error:** Used \`@ThisAttr\` in invalid context!`);
                     return [ ];
                 }
-                self = srcToValue(self);
-                let attrName = getCustomAttributeName(self);
-                return [ { ai_id: self, name: attrName } ];
+                let pself = srcToValue(self);
+                let attrName = getCustomAttributeName(pself);
+                return [ { ai_id: pself, name: attrName } ];
             default:
                 let parsed = parseAttributeName(selectorTarget);
                 if(verifyAttribute(parsed) && attrNames.includes(parsed)) {
@@ -603,12 +603,12 @@ module.exports = function() {
                     abilityLog(`❗ **Error:** Used \`@ThisAttr\` in invalid context!`);
                     return [ ];
                 }
-                self = srcToValue(self);
-                return [ self ];
+                let pself = srcToValue(self);
+                return [ pself ];
             default:
                 let parsedRole = parseRole(selectorTarget);
                 if(verifyRole(parsedRole)) {
-                    let connections = await connectionGet(`${parsedRole}:${src_ref}`);
+                    let connections = await connectionGet(`${parsedRole}:${self}`);
                     return connections.map(el => el.channel_id);
                 } else {
                     abilityLog(`❗ **Error:** Invalid extra role selector target \`${selectorTarget}\`!`);
@@ -630,8 +630,8 @@ module.exports = function() {
                 abilityLog(`❗ **Error:** Used \`@Self\` in invalid context!`);
                 return null;
             }
-            self = srcToValue(self);
-            return self;
+            let pself = srcToValue(self);
+            return pself;
         }
         // parse group
         let parsedGroupName = parseGroupName(selectorTarget);
@@ -705,8 +705,8 @@ module.exports = function() {
                 abilityLog(`❗ **Error:** Used \`@Self\` in invalid context!`);
                 return null;
             }
-            self = srcToValue(self); // get poll name
-            return self; 
+            let pself = srcToValue(self); // get poll name
+            return pself; 
         } else {
             if(verifyPoll(selectorTarget)) {
                 return selectorTarget;
@@ -821,7 +821,7 @@ module.exports = function() {
         [], // vote manipulation
         null, // whispering
         ["add","remove"], // joining
-        ["add","remove"], // granting
+        ["add","remove","transfer"], // granting
         null, // loyalty
         null, // obstruction
         ["creation","addition","deletion","cancellation"], // poll

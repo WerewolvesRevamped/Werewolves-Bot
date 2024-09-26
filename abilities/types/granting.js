@@ -44,6 +44,29 @@ module.exports = function() {
                 result = await grantingRemove(src_name, src_ref, target, activeExtraRole);
                 return result;
             break;
+            case "transfer":
+                // check parameters
+                if(!ability.transfer_to) {
+                    abilityLog(`❗ **Error:** Missing arguments for type \`${ability.type}\`!`);
+                    return { msg: "Granting failed! " + abilityError, success: false };
+                }
+                // parse parameters
+                let transferTo = await parsePlayerSelector(ability.transfer_to, src_ref, additionalTriggerData);
+                let activeExtraRole2 = await parseActiveExtraRoleSelector(ability.role, src_ref, additionalTriggerData);
+                if(activeExtraRole2.length != 1) {
+                    abilityLog(`❗ **Error:** Tried to grant ${activeExtraRole2.length} roles!`);
+                    return { msg: "Granting failed! " + abilityError, success: false };
+                }
+                let role2 = await parseRoleSelector(ability.role, src_ref, additionalTriggerData);
+                if(role2.length != 1) {
+                    abilityLog(`❗ **Error:** Tried to grant ${role2.length} roles!`);
+                    return { msg: "Granting failed! " + abilityError, success: false };
+                }
+                role2 = role2[0];
+                activeExtraRole2 = activeExtraRole2[0];
+                result = await grantingTransfer(src_name, src_ref, target, transferTo, activeExtraRole2, role2);
+                return result;
+            break;
         }
     }
     
@@ -92,6 +115,18 @@ module.exports = function() {
             if(targets.length === 1) return { msg: "Granting succeeded!", success: true, target: `player:${targets[0]}` };
         }
         return { msg: "Grantings succeeded!", success: true, target: `player:${targets[0]}` };
+    }
+    
+    /**
+    Ability: Granting - Transfer
+    transfers a role from one player to another player
+    **/
+    this.grantingTransfer = async function(src_name, src_ref, targets, transferTo, activeExtraRole, role) {
+        let remove = await grantingRemove(src_name, src_ref, targets, activeExtraRole);
+        let add = await grantingAdd(src_name, src_ref, transferTo, role);
+        
+        if(add.success) return { msg: "Transfer succeeded!", success: true, target: `player:${transferTo[0]}` };
+        else return { msg: "Transfer failed!", success: false, target: `player:${transferTo[0]}` };
     }
     
     
