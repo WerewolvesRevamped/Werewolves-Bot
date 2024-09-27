@@ -34,7 +34,8 @@ module.exports = function() {
         ["139855429357273088","☢️"], // Swurtle
         ["489047121840963585","🐙"], // Alphaviki
         ["839150186613702749","🕯️"], //phantom
-        ["405803301251055617","4️⃣"] // harperette
+        ["405803301251055617","4️⃣"], // harperette
+        ["406536328965128194","🦆"], // aleeeeeeeeex
     ];
 
     this.parseAlias = function(alias) {

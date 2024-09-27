@@ -1114,6 +1114,15 @@ module.exports = function() {
             defRole = "substitute";
         }
         
+        if(idEmojis.map(el => el[1]).includes(args[0]) && checkGamephase) {
+            let emojiIndex = idEmojis.map(el => el[1]).indexOf(args[0]);
+            let playerIndex = idEmojis.map(el => el[0]).indexOf(member.id);
+            if(emojiIndex != playerIndex) {
+                channel.send("⛔ This emoji is reserved by another player!").then(m => m.edit(`⛔ This emoji is reserved by <@${idEmojis[emojiIndex][0]}>!`));
+                return;
+            }
+        }
+        
         if(!isSignedUp(member) && !isSub(member)) {
 			// Sign Up
 			channel.send("✳ " + msg).then(message => {
