@@ -133,37 +133,10 @@ module.exports = function() {
 	}
 	
 	this.cmdWebhook = function(channel, member, args) {
-		// Create a webhook for the author
-		let webhookName = member ? member.displayName : client.user.username;
-		let webhookAvatar = member ? member.user.displayAvatarURL() : client.user.displayAvatarURL();
 		let webhookMsg = args.join(" ");
 		webhookMsg = webhookMsg.replace(/:~/g, ":");
 		if(!(webhookMsg.length > 0)) webhookMsg = "|| ||";
-		channel.fetchWebhooks()
-			.then(webhooks => {
-				// search for webhook 
-				let webhook = webhooks.find(w => w.name == webhookName);
-				// webhook exists
-				if(webhook) {
-					webhook.send(webhookMsg);
-				} else { // no webhook
-					if(webhooks.size < 10) { // empty slot
-						channel.createWebhook({name: webhookName, avatar: webhookAvatar})
-						.then(webhook => {
-							// Send webhook
-							webhook.send(webhookMsg)
-						})
-						.catch(err => { 
-							// Webhook couldn't be created
-							logO(err); 
-							sendError(messsage.channel, err, "Could not create webhook");
-						});
-					} else { // no empty slot
-						channel.send("**" + webhookName + "**: " + webhookMsg);
-						webhooks.first().delete();
-					}
-				}
-			});
+        sendMessageDisguiseMember(channel.id, webhookMsg, member);
 	}
 	
     
@@ -195,7 +168,11 @@ module.exports = function() {
 							// Ignore if it's same channel as source
 							if(destination.channel_id != message.channel.id) { 	
                                 // send message
-                                sendMessageDisguise(description.channel_id, message.content, source.name);
+                                if(source.name) {
+                                    sendMessageDisguise(destination.channel_id, message.content, source.name);
+                                } else {
+                                    sendMessageDisguiseMember(destination.channel_id, message.content, message.member);
+                                }
 							}		
 						});
 					}, () => {

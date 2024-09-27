@@ -728,6 +728,7 @@ module.exports = function() {
         
         // end of phase
         await attributeCleanup();
+        await whisperingCleanup();
         await choicesReset();
         await killqKillall();
         
@@ -794,6 +795,7 @@ module.exports = function() {
         
         // end of phase
         await attributeCleanup();
+        await whisperingCleanup();
         await choicesReset();
         await killqKillall();
         

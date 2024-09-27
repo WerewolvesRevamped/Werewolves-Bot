@@ -666,6 +666,12 @@ module.exports = function() {
                 abilityLog(`❗ **Error:** Invalid location \`${selectorTarget}\`. Defaulted to \`${def}\`!`);
                 return { value: def, type: "location", default: true };              
             }
+        } else if(selectorTarget[0] === "`") { // location is an active extra role
+            let paers = await parseActiveExtraRoleSelector(selector, self, additionalTriggerData);
+            if(paers.length === 1) return { value: paers[0], type: "player_attr", default: false };
+            // else
+            abilityLog(`❗ **Error:** Invalid extra role \`${selectorTarget}\`!`);
+            return { value: null, type: null, default: true };
         } else { // location is a player
             if(selectorTarget === "@self") {
                 if(!self) { // if no self is specified, @Self is invalid
@@ -795,7 +801,7 @@ module.exports = function() {
     /**
     Parse ability type
     **/
-    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","","manipulating","","joining","granting","","","poll","announcement","changing","","choices","ascend","descend","","","","","","feedback","success","failure","log","","process_evaluate","abilities"];
+    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","","manipulating","whispering","joining","granting","","","poll","announcement","changing","","choices","ascend","descend","","","","","","feedback","success","failure","log","","process_evaluate","abilities"];
     this.parseAbilityType = function(ability_type) {
         // get target
         let selectorTarget = selectorGetTarget(ability_type);
@@ -819,7 +825,7 @@ module.exports = function() {
         ["add","remove","change"], // applying
         null, // redirecting
         [], // vote manipulation
-        null, // whispering
+        [], // whispering
         ["add","remove"], // joining
         ["add","remove","transfer"], // granting
         null, // loyalty

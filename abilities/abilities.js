@@ -25,6 +25,7 @@ require("./types/applying.js")();
 require("./types/changing.js")();
 require("./types/ascend_descend.js")();
 require("./types/choices.js")();
+require("./types/whispering.js")();
 
 module.exports = function() {
     
@@ -117,6 +118,9 @@ module.exports = function() {
                 break;
                 case "choices":
                     feedback = await abilityChoices(src_ref, src_name, ability, additionalTriggerData);
+                break;
+                case "whispering":
+                    feedback = await abilityWhispering(src_ref, src_name, ability, additionalTriggerData);
                 break;
                 case "ascend":
                     feedback = await abilityAscend(src_ref, src_name, ability, additionalTriggerData);

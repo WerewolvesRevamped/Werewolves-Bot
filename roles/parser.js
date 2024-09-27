@@ -927,11 +927,17 @@ module.exports = function() {
             ability = { type: "manipulating", subtype: "relative", target: ttpp(fd[1]), manip_type: fd[2], manip_value: fd[3], duration: dd(fd[4], "permanent") };
         }
         /** WHISPERING **/
-        // manipulation by absolute value
+        // whispering with disguise
         exp = new RegExp("^Whisper to " + locationType + " as " + targetType + attrDuration + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "whispering", target: ttpp(fd[1], "role"), disguise: fd[2], duration: dd(fd[3], "permanent") };
+            ability = { type: "whispering", target: ttpp(fd[1], "location"), disguise: fd[2], duration: dd(fd[3], "permanent") };
+        }
+        // whispering without disguise
+        exp = new RegExp("^Whisper to " + locationType + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "whispering", target: ttpp(fd[1], "location"), duration: dd(fd[3], "permanent") };
         }
         /** JOINING **/
         // default joining

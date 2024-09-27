@@ -113,17 +113,22 @@ module.exports = function() {
     used to send a message to a location
     WIP: THIS CAN USE ABILITY SEND
     **/
-    this.locationSend = function(locationName, message, color = EMBED_GRAY, thumbnail = null, title = null) {
+    this.locationSend = async function(locationName, message, color = EMBED_GRAY, thumbnail = null, title = null) {
         let parsedLocationName = parseLocationName(locationName);
-        sql("SELECT channel_id FROM locations WHERE name = " + connection.escape(parsedLocationName), result => {
-            let loc_sc_id = result[0].channel_id;
-            let loc_sc = mainGuild.channels.cache.get(loc_sc_id);
-            embed = basicEmbed(message, color);
-            if(thumbnail) embed.embeds[0].thumbnail = { url: thumbnail }; // add thumbnail
-            if(title) embed.embeds[0].title = title; // add title
-            if(loc_sc) loc_sc.send(embed);
+        let loc_sc_id = await getLocationChannelByName(parsedLocationName);
+        let loc_sc = mainGuild.channels.cache.get(loc_sc_id);
+        embed = basicEmbed(message, color);
+        if(thumbnail) embed.embeds[0].thumbnail = { url: thumbnail }; // add thumbnail
+        if(title) embed.embeds[0].title = title; // add title
+        if(loc_sc) loc_sc.send(embed);
+    }
+    
+    this.getLocationChannelByName = function(locationName) {
+        return new Promise(res => {
+            sql("SELECT channel_id FROM locations WHERE name = " + connection.escape(locationName), result => {
+                res(result[0].channel_id);
+            });
         });
-
     }
     
     /** Create public channels **/

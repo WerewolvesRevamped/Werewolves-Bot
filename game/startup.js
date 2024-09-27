@@ -61,7 +61,7 @@ module.exports = function() {
                 if(channelName.length > 100 || channelName.length <= 0) channelName = "invalid";
 
                 // Create SC channel
-                channel.guild.channels.create({ name: channelName, type: ChannelType.GuildText,  permissionOverwrites: scPerms, parent: category })
+                channel.guild.channels.create({ name: channelName, type: ChannelType.GuildText,  permissionOverwrites: scPerms })
                 .then(sc => {
                     // Create a default connection with the player's ID
                     cmdConnectionAdd(sc, ["", player.id], true);

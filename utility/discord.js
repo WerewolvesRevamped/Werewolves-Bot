@@ -213,7 +213,7 @@ module.exports = function() {
     Sends a message to a specified channel id
     **/
     this.sendMessage = function(channel_id, msg) {
-        let con_sc = mainGuild.channels.cache.get(con_id); // get channel
+        let con_sc = mainGuild.channels.cache.get(channel_id); // get channel
         con_sc.send(msg); // send message
     }
     
@@ -231,7 +231,12 @@ module.exports = function() {
     /**
     Sends a message to a specified channel id with a disguise by using a webhook
     **/
-    this.sendMessageDisguise = async function(channel_id, msg, disguise) {
+    this.sendMessageDisguise = async function(channel_id, msg, disguise = null) {
+        if(!disguise) { // switch to disguise-less sending if no disguise is specified
+            sendMessage(channel_id, msg);
+            return;
+        }
+        
         // webhook defaults
         let webhookAvatar = client.user.displayAvatarURL();
         
@@ -255,6 +260,44 @@ module.exports = function() {
                 webhook = await con_sc.createWebhook({ name: disguise, avatar: webhookAvatar})
             } else { // no empty slot - skip disguised message and instead send normal message + delete another webhook
                 sendMessage(channel_id, `**${disguise}**: ${msg}`);
+                webhooks.first().delete();
+                return;
+            }
+        }
+        
+         // send message
+        webhook.send(msg);
+    }
+    
+    /**
+    Sends a message to a specified channel id with a disguise as a specific user by using a webhook
+    **/
+    this.sendMessageDisguiseMember = async function(channel_id, msg, member = null) {
+        if(!member) { // switch to disguise-less sending if no disguise is specified
+            sendMessage(channel_id, msg);
+            return;
+        }
+        
+        // get disguise name / avatar
+		let webhookName = member.displayName ?? client.user.username;
+		let webhookAvatar = member.user.displayAvatarURL() ?? client.user.displayAvatarURL();
+
+        // get channel
+        let con_sc = mainGuild.channels.cache.get(channel_id);
+        
+        // get webhooks of channel
+        let webhooks = await con_sc.fetchWebhooks();
+        
+        // search for correct webhook 
+        let webhook = webhooks.find(w => w.name == webhookName);
+        
+        // webhook doesnt exist
+        if(!webhook) {
+            if(webhooks.size < 10) { // empty slot
+                // create new wbehook
+                webhook = await con_sc.createWebhook({ name: webhookName, avatar: webhookAvatar})
+            } else { // no empty slot - skip disguised message and instead send normal message + delete another webhook
+                sendMessage(channel_id, `**${webhookName}**: ${msg}`);
                 webhooks.first().delete();
                 return;
             }

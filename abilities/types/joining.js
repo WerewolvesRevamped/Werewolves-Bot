@@ -205,7 +205,7 @@ module.exports = function() {
             let category = await mainGuild.channels.fetch(cachedSCs[cachedSCs.length - 1]);
             
             // Create SC channel
-            mainGuild.channels.create({ name: channelName, type: ChannelType.GuildText,  permissionOverwrites: scPerms, parent: category })
+            mainGuild.channels.create({ name: channelName, type: ChannelType.GuildText,  permissionOverwrites: scPerms })
             .then(async sc => {
                 // Create a default connection with the groups name
                 connectionAdd(sc.id, group);

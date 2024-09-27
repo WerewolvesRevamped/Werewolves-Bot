@@ -60,6 +60,14 @@ module.exports = function() {
         await createAttribute(src_name, src_ref, target_player, "player", dur, "role", role, channelId);
     }
     
+    /**
+    Create Whisper Attribute
+    creates a whisper attribute with two channels
+    **/
+    this.createWhisperAttribute = async function(src_name, src_ref, target_player, dur, conName = "", srcChannel = "", targetChannel = "") {
+        await createAttribute(src_name, src_ref, target_player, "player", dur, "whisper", conName, srcChannel, targetChannel);
+    }
+    
     /** PUBLIC
     Get role attribute's player id
     **/

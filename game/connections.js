@@ -22,6 +22,22 @@ module.exports = function() {
     }
     
     /**
+    Connection Get By Channel
+    retrieves a connection by channel id
+    **/
+    this.connectionGetByChannel = function(channelId) {
+        return sqlPromEsc("SELECT * FROM connected_channels WHERE channel_id=", channelId);
+    }
+    
+    /**
+    Connection Delete
+    deletes a connection by name
+    **/
+    this.connectionDelete = function(connectionName) {
+        return sqlPromEsc("DELETE FROM connected_channels WHERE id=", connectionName);
+    }
+    
+    /**
     Connection Send
     sends a message through a connection
     **/
