@@ -79,7 +79,7 @@ module.exports = function() {
         await createWhisperAttribute(src_name, src_ref, pid, dur_type, conName, whisperChannel.id, targetChannel.id);
         
         // feedback
-        return { msg: "Whispering executed!", success: true, target: `${target.type}:${target.value}` };
+        return { msg: "Whispering succeeded!", success: true, target: `${target.type}:${target.value}` };
     }
     
     

@@ -41,7 +41,7 @@ module.exports = function() {
         const ty2 = `${ty}.2`;
         // default prompt
         let promptMsg = `Give ${type1}`;
-        if(type2.length > 0) promptMsg += `and ${type2}`;
+        if(type2.length > 0) promptMsg += ` and ${type2}`;
         promptMsg += ` (\`${ty}${su?'.'+su:''}.${type2===''?'1':'2'}\`)`;
         if(type1.length === 0) promptMsg = `No Give (\`${tysu}\`)`
         // search for prompt in JSON

@@ -26,6 +26,7 @@ require("./types/changing.js")();
 require("./types/ascend_descend.js")();
 require("./types/choices.js")();
 require("./types/whispering.js")();
+require("./types/reset.js")();
 
 module.exports = function() {
     
@@ -121,6 +122,9 @@ module.exports = function() {
                 break;
                 case "whispering":
                     feedback = await abilityWhispering(src_ref, src_name, ability, additionalTriggerData);
+                break;
+                case "reset":
+                    feedback = await abilityReset(src_ref, src_name, ability, additionalTriggerData);
                 break;
                 case "ascend":
                     feedback = await abilityAscend(src_ref, src_name, ability, additionalTriggerData);
@@ -318,6 +322,9 @@ module.exports = function() {
                 const ownerText = srcRefToText(owner);
                 const sourceText = srcRefToText(source);
                 return `${name} (Attr-${val}) on ${ownerText} from ${sourceText}`;
+            break;
+            case "location":
+                return `#${val}`;
             break;
             case "result":
                 return raw.msg;

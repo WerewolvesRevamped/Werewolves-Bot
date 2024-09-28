@@ -801,7 +801,7 @@ module.exports = function() {
     /**
     Parse ability type
     **/
-    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","","manipulating","whispering","joining","granting","","","poll","announcement","changing","","choices","ascend","descend","","","","","","feedback","success","failure","log","","process_evaluate","abilities"];
+    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","","manipulating","whispering","joining","granting","","","poll","announcement","changing","","choices","ascend","descend","","","reset","","","feedback","success","failure","log","","process_evaluate","abilities"];
     this.parseAbilityType = function(ability_type) {
         // get target
         let selectorTarget = selectorGetTarget(ability_type);
@@ -839,7 +839,7 @@ module.exports = function() {
         [], // descend
         null, // disband
         null, // counting
-        null, // conversation reset
+        [], // conversation reset
         null, // cancel
         null, // switching
         [], // feedback
