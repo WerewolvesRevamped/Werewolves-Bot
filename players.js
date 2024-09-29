@@ -1241,6 +1241,9 @@ module.exports = function() {
 		// Get User by Name
 		user = client.users.cache.find(user => user.username.toLowerCase() === inUser);
 		if(user) return user.id;
+		// Get User by Global Name
+		user = client.users.cache.find(user => user.globalName && user.globalName.toLowerCase() === inUser);
+		if(user) return user.id;
 		// Get User by Nickname
 		user = guild.members.cache.find(member => member.nickname && member.nickname.toLowerCase() === inUser);
 		if(user) return user.id;
@@ -1275,7 +1278,7 @@ module.exports = function() {
 	}
 	
 	this.fixUserList = function(list, channel) {
-		let allPlayerNames = playerIDs.map(el => [channel.guild.members.cache.get(el)?.user.username,channel.guild.members.cache.get(el)?.nickname]).flat().filter(el => el).map(el => el.toLowerCase());
+		let allPlayerNames = playerIDs.map(el => [mainGuild.members.cache.get(el)?.user.username,mainGuild.members.cache.get(el)?.user.globalName,mainGuild.members.cache.get(el)?.nickname]).flat().filter(el => el).map(el => el.toLowerCase());
         //console.log(allPlayerNames);
 		let parsed = parseList(list.map(el => el.toLowerCase()), allPlayerNames);
 		return [...parsed.invalid, ...parsed.found];

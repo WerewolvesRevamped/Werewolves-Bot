@@ -549,7 +549,7 @@ module.exports = function() {
         const members = roleDescs.filter(el => el[0] == "members")[0][1] ?? "";
         const formalized = roleDescs.filter(el => el[0] == "formalized")[0][1] ?? "";
         // imsert the group into the databse
-        sql("INSERT INTO groups (name,display_name,team,desc_basics,desc_members,desc_formalized) VALUES (" + connection.escape(dbName) + "," + connection.escape(roleName) + "," + connection.escape(teamName) + "," + connection.escape(basics) + "," + connection.escape(members) + "," + connection.escape(formalized) + ")");
+        sql("INSERT INTO `groups` (name,display_name,team,desc_basics,desc_members,desc_formalized) VALUES (" + connection.escape(dbName) + "," + connection.escape(roleName) + "," + connection.escape(teamName) + "," + connection.escape(basics) + "," + connection.escape(members) + "," + connection.escape(formalized) + ")");
         // return nothing
         return null;
     }
@@ -816,7 +816,7 @@ module.exports = function() {
     Parses all groups
     **/
     async function parseGroups() {
-        return await runParser("groups", cachedGroups);
+        return await runParser("`groups`", cachedGroups);
     }
     
     /**

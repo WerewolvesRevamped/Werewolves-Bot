@@ -369,7 +369,7 @@ module.exports = function() {
     **/
     async function triggerHandlerGroup(pr, triggerName, additionalTriggerData = {}) {
         return await new Promise(res => {
-            sql("SELECT * FROM groups WHERE name=" + connection.escape(pr.name), async result => {
+            sql("SELECT * FROM `groups` WHERE name=" + connection.escape(pr.name), async result => {
                 if(!result[0]) {
                     abilityLog(`🔴 **Skipped Group:** <#${pr.channel_id}>. Unknown group \`${toTitleCase(pr.name)}\`.`);
                     res();
@@ -586,10 +586,10 @@ module.exports = function() {
                 let message = await abilitySendProm(src_ref, `${getAbilityEmoji(trigger.abilities[0].type)} ${promptMsg} ${scalingMessage}\nPlease submit your choice as a reply to this message.`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt");
                 if(ptype[0] === "immediate") { // immediate prompt
                     abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(trigger.abilities[0].type)} [${type1}, ${type2}] {Immediate}`);
-                    await createPrompt(message.id, message.channel.id, src_ref, src_name, trigger.abilities, restrictions,additionalTriggerData, "immediate", actionCount, type1, forced, type2);
+                    await createPrompt(message.id, message.channel.id, src_ref, src_name, trigger.abilities, restrictions,additionalTriggerData, "immediate", actionCount, forced, type1, type2);
                 } else if(ptype[0] === "end") { // end phase prompt
                     abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(trigger.abilities[0].type)} [${type1}, ${type2}] {End}`);
-                    await createPrompt(message.id, message.channel.id, src_ref, src_name, trigger.abilities, restrictions, additionalTriggerData, "end", actionCount, type1, forced, type2);
+                    await createPrompt(message.id, message.channel.id, src_ref, src_name, trigger.abilities, restrictions, additionalTriggerData, "end", actionCount, forced, type1, type2);
                 } else {
                     abilityLog(`❗ **Error:** Invalid prompt type!`);
                 }

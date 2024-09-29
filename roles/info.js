@@ -158,7 +158,7 @@ module.exports = function() {
     */
     this.getGroupEmbed = function(groupName, sections, guild) {
         return new Promise(res => {
-            sql("SELECT * FROM groups WHERE name = " + connection.escape(groupName), async result => {
+            sql("SELECT * FROM `groups` WHERE name = " + connection.escape(groupName), async result => {
                 result = result[0]; // there should always only be one role by a certain name
                 var embed = await getBasicEmbed(guild);
                 var members = result?.desc_members ?? "";

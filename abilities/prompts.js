@@ -469,14 +469,23 @@ module.exports = function() {
                 }
             } else { // two replies needed
                 let reply = replies[i].split(";");
-                if(reply.length != 2) {
+                let parsedReply1, parsedReply2;
+                if(reply.length > 2) { // too many replies
                     message.reply(basicEmbed("❌ You must specify exactly two arguments, separated by `;`.", EMBED_RED));
                     return;
+                } else if(reply.length == 2) { // two replies
+                    let reply1 = reply[0].trim();
+                    let reply2 = reply[1].trim();
+                    parsedReply1 = parsePromptReply(reply1, type1, message);
+                    parsedReply2 = parsePromptReply(reply2, type2, message);
+                } else { // one reply, attempt to parse
+                    parsedReply1 = parsePromptReply(reply[0], type1, message);
+                    parsedReply2 = parsePromptReply(reply[0], type2, message);
+                    if(parsedReply1 === false || parsedReply2 === false) {
+                        message.reply(basicEmbed("❌ Attempted to parse submission, but could not find the arguments. You must specify exactly two arguments, separated by `;`.", EMBED_RED));
+                        return;       
+                    }
                 }
-                let reply1 = reply[0].trim();
-                let reply2 = reply[1].trim();
-                let parsedReply1 = parsePromptReply(reply1, type1, message);
-                let parsedReply2 = parsePromptReply(reply2, type2, message);
                 // reply received
                 if(parsedReply1 !== false && parsedReply2 !== false) {
                     // save parsed reply
@@ -631,18 +640,40 @@ module.exports = function() {
     Parses an argument of type player in a prompt reply
     **/
     function parsePlayerReply(playerName) {
+        // check for basic player references
+        let pSplit = playerName.toLowerCase().split(/[\.,\-!\?\s ]/);
+        let basic = pSplit.map(el => getUser(null, el)).filter(el => el);
+        console.log("BASIC", pSplit, basic);
+        if(basic.length > 0) {
+            let pname = mainGuild.members.cache.get(basic[0])?.displayName ?? false; // get name through id
+            if(pname === false) { // this applies in case the player has left the server
+                message.reply(basicEmbed("❌ Player valid but cannot be found. Please contact Hosts.", EMBED_RED));
+                return false;
+            }
+            return [pname, `@id:${basic[0]}[player]`]; // return display name
+        }
+        
+        // more advanced search
         // similiar as implementation in fixUserList()
-		let allPlayerNames = playerIDs.map(el => [mainGuild.members.cache.get(el)?.user.username,mainGuild.members.cache.get(el)?.nickname]).flat().filter(el => el).map(el => el.toLowerCase());
+		let allPlayerNames = playerIDs.map(el => {
+            let mem = mainGuild.members.cache.get(el);
+            let usr = client.users.cache.get(el);
+            if(!mem || !usr) return null;
+            console.log(usr);
+            return [usr.username,usr.globalName,mem.nickname];
+        }).flat().filter(el => el).map(el => el.toLowerCase());
+        console.log(allPlayerNames);
         // check provided player name against all player names
-		let parsed = parseList([playerName.toLowerCase()], allPlayerNames);
-        if(parsed.invalid.length > 0) { // no player found -> false
+		let parsed = parseList(pSplit, allPlayerNames);
+        console.log("PARSED", parsed.found, parsed.invalid);
+        if(parsed.found.length == 0) { // no player found -> false
             return false;
         } else { // player found -> normalize to player.displayName
             let player = parsed.found[0];
             let parsedPlayer = parseUser(backupChannel, player); // parse player name/id/emoji to discord id
             let playerName = mainGuild.members.cache.get(parsedPlayer)?.displayName ?? false; // get name through id
             if(playerName === false) { // this applies in case the player has left the server
-                message.reply(basicEmbed("❌ Player valid but cannot be found.", EMBED_RED));
+                message.reply(basicEmbed("❌ Player valid but cannot be found. Please contact Hosts.", EMBED_RED));
                 return false;
             }
             return [playerName, `@id:${parsedPlayer}[player]`]; // return display name
@@ -654,10 +685,30 @@ module.exports = function() {
     **/
     function parseRoleReply(roleName) {
         let parsedRole = parseRole(roleName);
-        if(verifyRole(parsedRole)) {
+        if(verifyRole(parsedRole)) { // direct role
             return [toTitleCase(parsedRole), `${parsedRole}[role]`];
         } else {
-            return false;
+            let rSplit = roleName.toLowerCase().split(/[\.,\-!\?\s ]/);
+            let parsedRoles;
+            // search for three word roles
+            parsedRoles = rSplit.map((el,ind,arr) => parseRole(el + " " + (arr[ind + 1] ?? "") + " " + (arr[ind + 2] ?? ""))).filter(el => verifyRole(el));
+            if(parsedRoles.length > 0) return [toTitleCase(parsedRoles[0]), `${parsedRoles[0]}[role]`];
+            // search for two word roles
+            parsedRoles = rSplit.map((el,ind,arr) => parseRole(el + " " + (arr[ind + 1] ?? ""))).filter(el => verifyRole(el));
+            if(parsedRoles.length > 0) return [toTitleCase(parsedRoles[0]), `${parsedRoles[0]}[role]`];
+            // search for single word roles
+            parsedRoles = rSplit.map(el => parseRole(el)).filter(el => verifyRole(el));
+            if(parsedRoles.length > 0) return [toTitleCase(parsedRoles[0]), `${parsedRoles[0]}[role]`];
+            
+            // advanced searching
+            let parsed = parseList(rSplit, cachedRoles);
+            console.log("RParsed", parsed);
+            if(parsed.found.length == 0) { // no roles found -> false
+                return false;
+            } else { // role found -> normalize to player.displayName
+                let role = parsed.found[0];
+                 return [toTitleCase(role), `${role}[role]`];
+            }
         }
     }
     

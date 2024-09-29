@@ -41,7 +41,7 @@ module.exports = function() {
 			return; 
 		}
         // Get all groups values
-        sql("SELECT * FROM groups WHERE name = " + connection.escape(args[1]), async result => {
+        sql("SELECT * FROM `groups` WHERE name = " + connection.escape(args[1]), async result => {
             result = result[0];
             // get the basic embed
              var embed = await getBasicEmbed(channel.guild);

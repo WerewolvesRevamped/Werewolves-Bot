@@ -35,7 +35,7 @@ module.exports = function() {
     caches the current state of the groups database
     **/
     this.cacheGroups = function() {
-		sql("SELECT name FROM groups", result => {
+		sql("SELECT name FROM `groups`", result => {
 				cachedGroups = result.map(el => el.name);
 		}, () => {
 			log("Roles > ❗❗❗ Unable to cache groups!");
