@@ -688,7 +688,7 @@ module.exports = function() {
         if(verifyRole(parsedRole)) { // direct role
             return [toTitleCase(parsedRole), `${parsedRole}[role]`];
         } else {
-            let rSplit = roleName.toLowerCase().split(/[\.,\-!\?\s ]/);
+            let rSplit = roleName.toLowerCase().split(/[\.,\-!\?\s ]/).filter(el => !el.match(/^\d+$/));
             let parsedRoles;
             // search for three word roles
             parsedRoles = rSplit.map((el,ind,arr) => parseRole(el + " " + (arr[ind + 1] ?? "") + " " + (arr[ind + 2] ?? ""))).filter(el => verifyRole(el));
@@ -701,13 +701,17 @@ module.exports = function() {
             if(parsedRoles.length > 0) return [toTitleCase(parsedRoles[0]), `${parsedRoles[0]}[role]`];
             
             // advanced searching
-            let parsed = parseList(rSplit, cachedRoles);
+            let parsed = parseList(rSplit, [ cachedRoles, cachedAliases.map(el => el.alias).filter(el => el.length > 5) ].flat() );
             console.log("RParsed", parsed);
             if(parsed.found.length == 0) { // no roles found -> false
-                return false;
+                let parsedAlias = parseList(rSplit, cachedAliases.map(el => el.alias).filter(el => el.length > 2) );
+                console.log("RAParsed", parsed);
+                if(parsedAlias.found.length == 0) return false;
+                let role = parseRole(parsedAlias.found[0]);
+                return [toTitleCase(role), `${role}[role]`];
             } else { // role found -> normalize to player.displayName
-                let role = parsed.found[0];
-                 return [toTitleCase(role), `${role}[role]`];
+                let role = parseRole(parsed.found[0]);
+                return [toTitleCase(role), `${role}[role]`];
             }
         }
     }
