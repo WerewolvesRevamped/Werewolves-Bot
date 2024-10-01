@@ -41,7 +41,7 @@ module.exports = function() {
 			case "parse": cmdAttributesParse(message.channel); break;
             case "get": cmdAttributesGet(message.channel, args); break
 			case "list": cmdAttributesList(message.channel); break;
-			case "active": cmdAttributesActive(message.channel); break;
+			case "active": if(checkSafe(message)) cmdAttributesActive(message.channel); break;
 			case "delete": cmdAttributesDelete(message.channel, args); break;
 			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
 		}

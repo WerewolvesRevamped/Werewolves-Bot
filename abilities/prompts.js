@@ -158,7 +158,7 @@ module.exports = function() {
             const exeTime = getTime() - 1;
             
             // apply values
-            let clonedAbilities = JSON.parse(JSON.stringify(abilities));
+            let clonedAbilities = deepCopy(abilities);
             for(let j = 0; j < clonedAbilities.length; j++) {
                 clonedAbilities[j] = applyPromptValue(clonedAbilities[j], 0, selection1[1]);
                 if(type2 != "none") clonedAbilities[j] = applyPromptValue(clonedAbilities[j], 1, selection2[1]);
@@ -433,7 +433,7 @@ module.exports = function() {
         
         // iterate through replies - for restrictions and prompt reply validation
         for(let i = 0; i < replies.length; i++) {
-            let clonedAbilities = JSON.parse(JSON.stringify(abilities));
+            let clonedAbilities = deepCopy(abilities);
             // check which type of prompt
             if(type2 == "none") { // single reply needed
                 let reply = replies[i].trim();

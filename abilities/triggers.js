@@ -185,7 +185,7 @@ module.exports = function() {
                     return;
                 }
                 let parsed = JSON.parse(r[0].parsed);
-                let updatedAdditionalTriggerData = JSON.parse(JSON.stringify(additionalTriggerData)); // deep clone
+                let updatedAdditionalTriggerData = deepCopy(additionalTriggerData); // deep clone
                 updatedAdditionalTriggerData.attr_owner = getCustomAttributeOwner(r[0].ai_id);
                 updatedAdditionalTriggerData.attr_source = getCustomAttributeSource(r[0].ai_id);
                 await triggerHandlerParsedHandler(triggerName, updatedAdditionalTriggerData, parsed, `attribute:${r[0].ai_id}`, `attribute:${r[0].name}`);
@@ -300,7 +300,7 @@ module.exports = function() {
                 for(let pr of r) {
                     if(!pr.parsed) continue;
                     let parsed = JSON.parse(pr.parsed);
-                    let updatedAdditionalTriggerData = JSON.parse(JSON.stringify(additionalTriggerData)); // deep clone
+                    let updatedAdditionalTriggerData = deepCopy(additionalTriggerData); // deep clone
                     updatedAdditionalTriggerData.attr_owner = getCustomAttributeOwner(r[0].ai_id);
                     updatedAdditionalTriggerData.attr_source = getCustomAttributeSource(r[0].ai_id);
                     await triggerHandlerParsedHandler(triggerName, updatedAdditionalTriggerData, parsed, `attribute:${pr.ai_id}`, `attribute:${pr.name}`);

@@ -110,7 +110,7 @@ module.exports = function() {
             await createPoll(pollType, pollName, pollLocation, allOptions, src_ref);
         } else { // several polls
             for(let i = 0; i < pollCount; i++) {
-                await createPoll(pollType, `${pollName} #${i+1}`, pollLocation, JSON.parse(JSON.stringify(allOptions)), src_ref);
+                await createPoll(pollType, `${pollName} #${i+1}`, pollLocation, deepCopy(allOptions), src_ref);
             }
         }
         

@@ -164,7 +164,7 @@ module.exports = function() {
                         return false;
                     // COMPARISON - NOT EQUAL
                     case "not_equal":
-                        let conditionCopy = JSON.parse(JSON.stringify(condition)); // deep clone
+                        let conditionCopy = deepCopy(condition); // deep clone
                         conditionCopy.subtype = "equal";
                         let condBool = await resolveCondition(conditionCopy, src_ref, src_name, additionalTriggerData);
                         return !condBool;
