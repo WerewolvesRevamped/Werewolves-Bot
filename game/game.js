@@ -16,6 +16,7 @@ require("./teams.js")();
 require("./connections.js")();
 require("./storytime.js")();
 require("./death.js")();
+require("./ccs.js")();
 
 module.exports = function() {
 

@@ -8,8 +8,6 @@
 		- Players Module
 */
 module.exports = function() {
-	/* Variables */
-	this.cachedCCs = [];
 	
 	/* Handles cc command */
 	this.cmdCC = function(message, args, argsX) {
@@ -314,75 +312,8 @@ module.exports = function() {
 		});
 	}
 	
-	/* Cache CCs */
-	this.getCCCats = function() {
-		// Get CC Cats
-		sql("SELECT id FROM cc_cats", result => {
-			// Cache CC Cats
-			cachedCCs = result.map(el => el.id);
-		}, () => {
-			// Db error
-			log("CC > Database error. Could not cache cc cat list!");
-		});
-	}
 	
-	/* Adds somebody to a CC */
-	this.cmdCCAdd = function(channel, member, args, mode) {
-		// Check if CC
-		if(!mode && !isCC(channel)) {
-			channel.send("⛔ Command error. Can't use command outside a CC!");
-			return;
-		}
-		let ccOwner = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Member).filter(el => el.allow == 66560).map(el => el.id);
-		if(mode || isGameMaster(member, true) || ccOwner.includes(member.id)) {
-			players = parseUserList(channel, args, 1, member);
-			let playerList = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Member && el.allow > 0).map(el => el.id);
-			if(players && players.length > 0) {
-				players = players.filter(el => !playerList.includes(el));
-				players.forEach(el => { 
-					channel.permissionOverwrites.create(el, { ViewChannel: true}).then(c => {
-						if(!mode) channel.send(`✅ Added ${channel.guild.members.cache.get(el)} to the CC!`);
-					}).catch(err => { 
-						logO(err); 
-						sendError(channel, err, "Could not add to CC");
-					});
-				});
-			} else {
-				channel.send("⛔ Command error. No valid players, that are not part of this CC already, were provided!");
-			}
-		} else {
-			channel.send("⛔ Command error. You are not an owner of this CC!");
-		}
-	}
 	
-	/* Removes somebody to a CC */
-	this.cmdCCRemove = function(channel, member, args, mode) {
-		// Check if CC
-		if(!mode && !isCC(channel)) {
-			channel.send("⛔ Command error. Can't use command outside a CC!");
-			return;
-		}
-		let ccOwner = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Member).filter(el => el.allow == 66560).map(el => el.id);
-		if(mode || isGameMaster(member, true) || ccOwner.includes(member.id)) {
-			players = parseUserList(channel, args, 1, member);
-			let playerList = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Member && el.allow > 0).map(el => el.id);
-			if(players) players = players.filter(el => playerList.includes(el));
-			if(players && players.length > 0) {
-				players.forEach(el => { 
-					channel.permissionOverwrites.cache.get(el).delete().then(() => {
-						if(!mode) channel.send(`✅ Removed ${channel.guild.members.cache.get(el)} from the CC!`);
-					}).catch(err => { 
-						logO(err); 
-						sendError(channel, err, "Could not remove from CC");
-					});
-				});
-			} else {
-				channel.send("⛔ Command error. No valid players, that are part of this CC already, were provided!");
-			}
-		} else {
-			channel.send("⛔ Command error. You are not an owner of this CC!");
-		}
-	}
 	
 	/* Removes somebody to a CC */
 	this.cmdCCRename = function(channel, member, args, mode) {
@@ -747,8 +678,4 @@ module.exports = function() {
 		return [ getPerms(guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.ghost, ["write"], ["read"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.participant, ["write"], ["read"]), getPerms(stats.sub, ["write"], ["read"]) ];
 	}
 	
-	/* Checks if something is a cc*/
-	this.isCC = function(channel) {
-		return !channel.parent ? true : cachedCCs.includes(channel.parentId);
-	}
 }
