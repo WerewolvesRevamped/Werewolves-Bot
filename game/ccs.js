@@ -8,6 +8,14 @@
 		- Players Module
 */
 module.exports = function() {
+    
+    /**
+    Permissions
+    **/
+    const CC_PERMS_MEMBER = { ViewChannel: true };
+    const CC_PERMS_OWNER = { ViewChannel: true, ReadMessageHistory: true };
+    const CC_PERMS_LOCKED = { ViewChannel: true, ReadMessageHistory: null, SendMessages: false };
+    const CC_PERMS_NONE = null;
 
 	/**
     Command: $cc add
@@ -26,10 +34,14 @@ module.exports = function() {
         
         // get list of new members
         let players = parseUserList(channel, args, 1, member);
+        players = players.filter(el => !isCCMember(channel, el));
         // add members if at least one exists
         if(players && players.length > 0) {
-            players = players.filter(el => !isCCMember(channel, el));
-            channelAddMembers(channel, players);
+            // add members
+            players.forEach(async el => { 
+                let result = await channelSetPermission(channel, el, CC_PERMS_MEMBER);
+                if(result && !mode) channel.send(`✅ Added ${channel.guild.members.cache.get(el)} to the CC!`);
+            });
         } else {
             channel.send("⛔ Command error. No valid players, that are not part of this CC already, were provided!");
         }
@@ -52,56 +64,287 @@ module.exports = function() {
         
         // get list of members to remove
         let players = parseUserList(channel, args, 1, member);
+        players = players.filter(el => isCCMember(channel, el) && !isCCOwner(channel, el));
         // remove members if at least one exists
         if(players && players.length > 0) {
-            players = players.filter(el => !isCCMember(channel, el));
-            channelRemoveMembers(channel, players);
+            // set permissions to member
+            players.forEach(async el => { 
+                let result = await channelSetPermission(channel, el, CC_PERMS_NONE);
+                if(result && !mode) channel.send(`✅ Removed ${channel.guild.members.cache.get(el)} from the CC!`);
+            });
         } else {
-            channel.send("⛔ Command error. No valid players, that are not part of this CC already, were provided!");
+            channel.send("⛔ Command error. No valid players, that are part of this CC and not an owner, were provided!");
         }
 	}
+    
+	/**
+    Command: $cc promote
+    Sets the permissions of other users to owner
+    **/
+	this.cmdCCPromote = function(channel, member, args, mode) {
+		// Check if CC
+		if(!mode && !isCC(channel)) {
+			channel.send("⛔ Command error. Can't use command outside a CC!");
+			return;
+		}
+        // Check if owner
+		if(!isCCOwner(channel, member) && !mode && !isGameMaster(member, true)) {
+			channel.send("⛔ Command error. You are not an owner of this CC!");
+        }
+        
+        // get list of members to promote
+        let players = parseUserList(channel, args, 1, member);
+        players = players.filter(el => isCCMember(channel, el) && !isCCOwner(channel, el));
+        // remove members if at least one exists
+        if(players && players.length > 0) {
+            // set permissions to owner
+            players.forEach(async el => { 
+                let result = await channelSetPermission(channel, el, CC_PERMS_OWNER);
+                if(result && !mode) channel.send(`✅ Promoted ${channel.guild.members.cache.get(el)}!`);
+            });
+        } else {
+            channel.send("⛔ Command error. No valid players, that are part of this CC and not already an owner, were provided!");
+        }
+	}
+    
+	/**
+    Command: $cc demote
+    Sets the permissions of other users to member
+    **/
+	this.cmdCCDemote = function(channel, member, args, mode) {
+		// Check if CC
+		if(!mode && !isCC(channel)) {
+			channel.send("⛔ Command error. Can't use command outside a CC!");
+			return;
+		}
+        // Check if owner
+		if(!isCCOwner(channel, member) && !mode && !isGameMaster(member, true)) {
+			channel.send("⛔ Command error. You are not an owner of this CC!");
+        }
+        
+        // get list of members to demote
+        let players = parseUserList(channel, args, 1, member);
+        players = players.filter(el => isCCMember(channel, el) && isCCOwner(channel, el));
+        // remove members if at least one exists
+        if(players && players.length > 0) {
+            // set permissions to member
+            players.forEach(async el => { 
+                let result = await channelSetPermission(channel, el, CC_PERMS_MEMBER);
+                if(result && !mode) channel.send(`✅ Demoted ${channel.guild.members.cache.get(el)}!`);
+            });
+        } else {
+            channel.send("⛔ Command error. No valid players, that are part of this CC and an owner, were provided!");
+        }
+	}
+    
+    /**
+    Command: $cc leave
+    Removes yourself from a cc
+    **/
+	this.cmdCCLeave = async function(channel, member) {
+		// Check if CC
+		if(!isCC(channel)) {
+			channel.send("⛔ Command error. Can't use command outside a CC!");
+			return;
+		}
+        
+        // check if an owner remains
+        let members = getChannelMembers(channel);
+        let owners = getChannelOwners(channel);
+        let filteredOwners = owners.filter(el => el != member.id);
+        if(owners.length > 0 && filteredOwners == 0 && members.length > 1) {
+            channel.send(`⛔ Cannot leave a CC with members while there is not another owner!`);
+            return;
+        }
+        
+		// Remove permissions
+        let result = await channelSetPermission(channel, member.id, CC_PERMS_NONE);
+        if(result) channel.send(`✅ ${member} left the CC!`);
+	}
 	
+    
+    /**
+    Command: $cc rename
+    Renames a cc
+    **/
+	this.cmdCCRename = function(channel, member, args, mode) {
+		// Check if CC
+		if(!mode && !isCC(channel)) {
+			channel.send("⛔ Command error. Can't use command outside a CC!");
+			return;
+		}
+        // Check if owner
+		if(!isCCOwner(channel, member) && !mode && !isGameMaster(member, true)) {
+			channel.send("⛔ Command error. You are not an owner of this CC!");
+        }
+        
+        // clean cc name
+        let name = cleanCCName(args[1]);
+        // rename cc
+        channelRename(channel, name);
+    }
+    
+	/**
+    Command: $cc archive
+    Archives a cc
+    **/
+	this.cmdCCArchive = function(channel, member, mode) {
+		// Check if CC
+		if(!mode && !isCC(channel)) {
+			channel.send("⛔ Command error. Can't use command outside a CC!");
+			return;
+		}
+        // Check if owner
+		if(!isCCOwner(channel, member) && !mode && !isGameMaster(member, true)) {
+			channel.send("⛔ Command error. You are not an owner of this CC!");
+        }
+        
+        // rename channel
+        channelRename(channel, `🔒-${channel.name}`, true);
+        // set permissions
+        let ccList = getChannelMembers(channel);
+        ccList.forEach(el => {
+            channelSetPermission(channel, el, CC_PERMS_LOCKED);
+        });
+        if(!mode) channel.send("✅ Archived channel!");
+	}
+    
+    /**
+    Command: $cc list / $cc owners
+    Lists cc members / owners
+    **/
+	this.cmdCCList = function(channel, mode, mode2 = 0) {
+		// Check if CC
+		if(!mode2 && !isCC(channel)) {
+			channel.send("⛔ Command error. Can't use command outside a CC!");
+			return;
+		}
+		// Get lists
+        let ccMembers = getChannelMembers(channel);
+        let ccOwners = getChannelOwners(channel);
+        // Shuffle lists
+        ccMembers = shuffleArray(ccMembers);
+        ccOwners = shuffleArray(ccOwners);
+        // Get totals
+        let memberCount = ccMembers.length;
+        let ownerCount = ccOwners.length;
+        // Format lists
+        ccMembers = ccMembers.map(el => channel.guild.members.cache.get(el)).join("\n");
+        ccOwners = ccOwners.map(el => channel.guild.members.cache.get(el)).join("\n");
+		// Choose messages		
+		switch(mode) {
+			case 0: // $cc create
+                channel.send(`${ccOwners} has created a new CC!\n\n**CC Members** | Total: ${memberCount}\n${ccMembers}`);
+            break; // $cc create_hidden / $cc spam
+			case 1: case 4:
+                channel.send(`A new CC has been created!\n\n**CC Members** | Total: ${memberCount}\n${ccMembers}`);
+            break;
+			case 2: // $cc list
+                channel.send("✳ Listing CC members")
+                .then(m => { m.edit(`**CC Members** | Total: ${memberCount}\n${ccMembers}`); })
+                .catch(err => {logO(err); sendError(channel, err, "Could not list CC members"); });
+            break;
+			case 3: // $cc owners
+                channel.send("✳ Listing CC owners")
+                .then(m => { m.edit(`**CC Owners** | Total: ${ownerCount}\n${ccOwners}`); })
+                .catch(err => {logO(err); sendError(channel, err, "Could not list CC owners"); });
+            break;
+		}
+		
+	}
+    
+    /**
+    Cleans a cc name, removing disallowed emojis
+    **/
+    this.cleanCCName = function(name) {
+		name = name.replace(/🔒/,"lock");
+		name = name.replace(/🤖/,"bot");
+		name = name.replace(/👻/,"ghost");
+        return name;
+    }
+	
+    /**
+    Gets channel permission overwrites
+    **/
+    this.getChannelPermissionOverwrites = function(channel) {
+        return channel.permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Member);
+    }
+
+    /**
+    Gets cc members
+    **/
+    this.getChannelMembers = function(channel) {
+        let members = getChannelPermissionOverwrites(channel);
+        return members.filter(el => el.allow > 0).map(el => el.id);
+    }
+    
+    /**
+    Gets cc owners
+    **/
+    this.getChannelOwners = function(channel) {
+        let owners = getChannelPermissionOverwrites(channel);
+        return owners.filter(el => el.allow == 66560).map(el => el.id);
+    }
+    
     /**
     Checks if a member owns a specific channel
     **/
     this.isCCOwner = function(channel, member) {
-		let ccOwner = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Member).filter(el => el.allow == 66560).map(el => el.id);
-        return ccOwner.includes(member.id)
+		let ccOwner = getChannelOwners(channel);
+        return ccOwner.includes(member.id ?? member); // checks either a discord member or an id directly
     }
     
     /**
     Checks if a member is a member of a specific channel
     **/
     this.isCCMember = function(channel, member) {
-		let ccMember = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Member).filter(el => el.allow > 0).map(el => el.id);
-        return ccMember.includes(member.id)
+		let ccMember = getChannelMembers(channel);
+        return ccMember.includes(member.id ?? member); // checks either a discord member or an id directly
     }
     
     /**
-    Adds one or more members to a channel
+    Sets permissions for a member on a channel
     **/
-    this.channelAddMembers = function(channel, members, hidden = false) {
-        members.forEach(el => { 
-            channel.permissionOverwrites.create(el, { ViewChannel: true}).then(c => {
-                if(!hidden) channel.send(`✅ Added ${channel.guild.members.cache.get(el)} to the CC!`);
-            }).catch(err => { 
-                logO(err); 
-                sendError(channel, err, "Could not add to CC");
-            });
+    this.channelSetPermission = async function(channel, member, permission = null) {
+        return new Promise(res => {
+            if(!permission) { // if no permissions, then revoke
+                channel.permissionOverwrites.cache.get(member).delete()
+                .then(() => {
+                    res(true);
+                })
+                .catch(err =>  {
+                    logO(err); 
+                    sendError(channel, err, "Could not update channel permissions");
+                    res(false);
+                });
+            } else { // otherwise grant permissions
+            channel.permissionOverwrites.create(member, permission)
+                .then(() => {
+                    res(true);
+                }).catch(err => { 
+                    logO(err); 
+                    sendError(channel, err, "Could not update channel permissions");
+                    res(false);
+                });
+            }
         });
     }
     
     /**
-    Removes one or more members from a channel
+    Renames a channel
     **/
-    this.channelRemoveMembers = function(channel, members, hidden = false) {
-        members.forEach(el => { 
-            channel.permissionOverwrites.cache.get(el).delete().then(() => {
-                if(!hidden) channel.send(`✅ Removed ${channel.guild.members.cache.get(el)} from the CC!`);
-            }).catch(err => { 
-                logO(err); 
-                sendError(channel, err, "Could not remove from CC");
-            });
+    this.channelRename = function(channel, name, hidden = false) {
+        // make sure length is valid
+        name = name.substr(0, 100);
+        // rename
+        channel.edit({ name: name })
+        .then(c => {
+            if(!hidden) c.send("✅ Renamed channel to `" + c.name + "`!");
+        })
+        .catch(err => {
+            // Permission error
+            logO(err); 
+            sendError(channel, err, "Could not rename channel");
         });
     }
     
