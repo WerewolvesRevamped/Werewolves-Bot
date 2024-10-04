@@ -1,5 +1,5 @@
 /*
-	Module for CCs 
+	Module for CCs & SCs
 		- Creates ccs
 		- Checks if something is a cc
 		
@@ -262,7 +262,83 @@ module.exports = function() {
 		name = name.replace(/👻/,"ghost");
         return name;
     }
+    
+    /**
+    Command: $sc add
+    Adds somebody to a sc
+    **/
+    this.cmdSCAdd = function(channel, member, args) {
+        cmdCCAdd(channel, member, args, 1);
+        players = parseUserList(channel, args, 1, member);
+        players.forEach(p => channel.send(`**<@${p}> has been added to <#${channel.id}>.**`));
+    }
+    
+    /**
+    Command: $sc remove
+    Removes somebody from a sc
+    **/
+    this.cmdSCRemove = function(channel, member, args) {
+        cmdCCRemove(channel, member, args, 1);
+        players = parseUserList(channel, args, 1, member);
+        players.forEach(p => channel.send(`**<@${p}> has been removed from <#${channel.id}>.**`));
+    }
+    
+    /**
+    Command: $sc clear
+    Removes everyone from a sc
+    **/
+	this.cmdSCClear = function(channel) {
+		if(!isSC(channel)) {
+			channel.send("⛔ Command error. Can't use command outside a SC!");
+			return;
+		}
+		// set permissions
+        let ccList = getChannelMembers(channel);
+        ccList.forEach(el => {
+            channelSetPermission(channel, el, CC_PERMS_NONE);
+        });
+	}
 	
+    /**
+    Command: $sc clean
+    Removes everyone from a sc and bulkdeletes
+    **/
+	this.cmdSCClean = async function(channel) {
+		if(!isSC(channel)) {
+			channel.send("⛔ Command error. Can't use command outside a SC!");
+			return;
+		}
+		// set permissions
+        let ccList = getChannelMembers(channel);
+        ccList.forEach(el => {
+            channelSetPermission(channel, el, CC_PERMS_NONE);
+        });
+        // bulk delete
+		let messages = await channel.messages.fetch();
+        let first = messages.last();
+        await channel.bulkDelete(messages);
+	}
+	
+    /**
+    Command: $sc change 
+    Changes a sc to another role
+    **/
+	this.cmdSCChange = function(channel, args) {
+		let role = verifyRole(args[1]);
+		if(!args[1] || !role ) {
+			channel.send("⛔ Command error. You must provide a valid role!");
+			return;
+		}
+		if(!isSC(channel)) {
+			channel.send("⛔ Command error. Can't use command outside a SC!");
+			return;
+		}
+        args.shift();
+		channelRename(channel, args.join(" "));
+		cmdInfoEither(channel, [args.join(" ")], true, true);
+        channel.send(`**<@&${stats.participant}> Your role has changed to \`${toTitleCase(args.join(" "))}\`.**`);
+	}
+    
     /**
     Gets channel permission overwrites
     **/
