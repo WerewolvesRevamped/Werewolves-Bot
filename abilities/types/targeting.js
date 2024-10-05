@@ -193,7 +193,7 @@ module.exports = function() {
     **/
     function getAttributeTarget(ai_id) {
         return new Promise(res => {
-            sql("SELECT active_attributes FROM polls WHERE ai_id=" + connection.escape(ai_id), result => {
+            sql("SELECT target FROM active_attributes WHERE ai_id=" + connection.escape(ai_id), result => {
                 res(result[0].target);
             });	
         });

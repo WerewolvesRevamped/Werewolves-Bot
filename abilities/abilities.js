@@ -27,6 +27,7 @@ require("./types/ascend_descend.js")();
 require("./types/choices.js")();
 require("./types/whispering.js")();
 require("./types/reset.js")();
+require("./types/counting.js")();
 
 module.exports = function() {
     
@@ -125,6 +126,9 @@ module.exports = function() {
                 break;
                 case "reset":
                     feedback = await abilityReset(src_ref, src_name, ability, additionalTriggerData);
+                break;
+                case "counting":
+                    feedback = await abilityCounting(src_ref, src_name, ability, additionalTriggerData);
                 break;
                 case "ascend":
                     feedback = await abilityAscend(src_ref, src_name, ability, additionalTriggerData);
