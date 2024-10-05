@@ -80,7 +80,7 @@ module.exports = function() {
             /** P/E Reformatting **/
             for(let i = 0; i < thisTriggerAbilities.length; i++) {
                 // is process and next is evaluate
-                if(thisTriggerAbilities[i].ability.type === "process" && thisTriggerAbilities[i + 1].ability.type === "evaluate") {
+                if(thisTriggerAbilities[i].ability.type === "process" && thisTriggerAbilities[i + 1] && thisTriggerAbilities[i + 1].ability.type === "evaluate") {
                     // get p/e
                     let process = thisTriggerAbilities[i].ability;
                     let evaluate = thisTriggerAbilities[i + 1].ability;
@@ -96,6 +96,14 @@ module.exports = function() {
                     // reformat p/e
                     thisTriggerAbilities[i].ability = { type: "process_evaluate", process: process, evaluate: evaluate, id: abilityCounter++ }; // replace "process" with a combined P/E ability
                     thisTriggerAbilities[i + 1].ability = { type: "blank" }; // delete "evaluate"
+                }
+                // is process and no next / evaluate
+                if(thisTriggerAbilities[i].ability.type === "process" && !thisTriggerAbilities[i + 1]) {
+                    // get p/e
+                    let process = thisTriggerAbilities[i].ability;
+                    let evaluate = { type: "evaluate", sub_abilities: [] };
+                    // reformat p/e
+                    thisTriggerAbilities[i].ability = { type: "process_evaluate", process: process, evaluate: evaluate, id: abilityCounter++ }; // replace "process" with a combined P/E ability
                 }
                 // is evaluate and no process
                 else if((i === 0 || thisTriggerAbilities[i - 1].ability.type != "process") && thisTriggerAbilities[i].ability.type === "evaluate") {
@@ -479,22 +487,38 @@ module.exports = function() {
             cond = { type: "existence", target: ttpp(fd[1]) };
         }
         /** Logic **/
+        let doubleLogic = false;
         // not
         exp = new RegExp("^not \\((.+?)\\)$", "g");
         fd = exp.exec(condition);
         if(fd) {
             cond = { type: "logic", subtype: "not", condition: parseCondition(fd[1]) };
         }
+        // and x2
+        exp = new RegExp("^\\((.+?)\\) and \\((.+?)\\) and \\((.+?)\\)$", "g");
+        fd = exp.exec(condition);
+        if(fd) {
+            console.log("DOUBLE AND");
+            doubleLogic = true;
+            cond = { type: "logic", subtype: "and", condition1: parseCondition(fd[1]), condition2: parseCondition(`(${fd[2]}) and (${fd[3]})`) };
+        }
         // and
         exp = new RegExp("^\\((.+?)\\) and \\((.+?)\\)$", "g");
         fd = exp.exec(condition);
-        if(fd) {
+        if(fd && !doubleLogic) {
             cond = { type: "logic", subtype: "and", condition1: parseCondition(fd[1]), condition2: parseCondition(fd[2]) };
+        }
+        // or x2
+        exp = new RegExp("^\\((.+?)\\) or \\((.+?)\\) or \\((.+?)\\)$", "g");
+        fd = exp.exec(condition);
+        if(fd) {
+            doubleLogic = true;
+            cond = { type: "logic", subtype: "or", condition1: parseCondition(fd[1]), condition2: parseCondition(`(${fd[2]}) or (${fd[3]})`) };
         }
         // or
         exp = new RegExp("^\\((.+?)\\) or \\((.+?)\\)$", "g");
         fd = exp.exec(condition);
-        if(fd) {
+        if(fd && !doubleLogic) {
             cond = { type: "logic", subtype: "or", condition1: parseCondition(fd[1]), condition2: parseCondition(fd[2]) };
         }
         /** Attribute **/

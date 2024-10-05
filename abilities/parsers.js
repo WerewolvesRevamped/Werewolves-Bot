@@ -268,6 +268,7 @@ module.exports = function() {
     async function parsePlayerPropertyAccess(selector, property) {
         property = property.toLowerCase();
         let output = [];
+        let random = false;
         // iterate players
         for(let i = 0; i < selector.length; i++) {
             let playerData = await getPlayer(selector[i]);
@@ -286,10 +287,19 @@ module.exports = function() {
                 case "alignment":
                     output.push(playerData.alignment);
                 break;
+                case "randomplayer":
+                    output.push(selector[i]);
+                    random = true;
+                break;
                 default:  
                     abilityLog(`❗ **Error:** Invalid player property access \`${property}\`!`);
                 break;
             }
+        }
+        // randomize output
+        if(random) {
+            let shuffledOutput = shuffleArray(output);
+            return output[0];
         }
         // return output
         return output;
@@ -304,6 +314,7 @@ module.exports = function() {
         const selSplit = selector.toLowerCase().split(",").map(el => el.split(":"));
         // get all players
         let allPlayers = await getAllPlayers();
+        //allPlayers.forEach(el => console.log(el));
         // set flags
         let aliveOnly = true;
         let selectAll = true;
@@ -316,6 +327,7 @@ module.exports = function() {
                 compVal = compVal.substr(1);
                 compInverted = true;
             }
+            //console.log("PLAYERS", allPlayers.map(el => el.id).join(";"));
             //console.log("AS", compName, compVal, compInverted);
             let compValSplit;
             switch(compName) {
@@ -339,8 +351,8 @@ module.exports = function() {
                 break;
                 // Alignment
                 case "align":
-                    if(!compInverted) allPlayers = allPlayers.filter(el => el.alignment === compVal);
-                    else allPlayers = allPlayers.filter(el => el.alignment != compVal);
+                    if(!compInverted) allPlayers = allPlayers.filter(el => el.team === compVal);
+                    else allPlayers = allPlayers.filter(el => el.team != compVal);
                 break;
                 // Full Category
                 case "fullcat":

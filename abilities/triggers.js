@@ -204,7 +204,7 @@ module.exports = function() {
         await triggerHandlerPlayers(triggerName, additionalTriggerData);
         //await triggerHandlerPlayersRoleAttributes(triggerName, additionalTriggerData);
         //await triggerHandlerGroups(triggerName, additionalTriggerData);
-        //await triggerHandlerPolls(triggerName, additionalTriggerData);
+        await triggerHandlerPolls(triggerName, additionalTriggerData);
         //await triggerHandlerAttributes(triggerName, additionalTriggerData);
     }
     
@@ -412,6 +412,7 @@ module.exports = function() {
                         if(selector.includes(additionalTriggerData.this)) {
                             await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
                         } else {
+                            console.log("Failed Selector Condition", selector);
                             abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\`.`);
                         }
                     break;
