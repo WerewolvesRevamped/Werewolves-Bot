@@ -1026,7 +1026,7 @@ module.exports = function() {
         exp = new RegExp("^Loyalty to " + locationType + " \\(" + loyaltySubtype + "\\)$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "loyalty", subtype: fd[2], target: fd[1] };
+            ability = { type: "loyalty", subtype: fd[2].toLowerCase(), target: fd[1] };
         }
         /** OBSTRUCTING **/
         // obstruct all

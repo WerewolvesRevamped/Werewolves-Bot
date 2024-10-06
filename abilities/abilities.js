@@ -28,6 +28,7 @@ require("./types/choices.js")();
 require("./types/whispering.js")();
 require("./types/reset.js")();
 require("./types/counting.js")();
+require("./types/loyalty.js")();
 
 module.exports = function() {
     
@@ -129,6 +130,9 @@ module.exports = function() {
                 break;
                 case "counting":
                     feedback = await abilityCounting(src_ref, src_name, ability, additionalTriggerData);
+                break;
+                case "loyalty":
+                    feedback = await abilityLoyalty(src_ref, src_name, ability, additionalTriggerData);
                 break;
                 case "ascend":
                     feedback = await abilityAscend(src_ref, src_name, ability, additionalTriggerData);

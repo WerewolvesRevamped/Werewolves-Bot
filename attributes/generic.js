@@ -68,6 +68,14 @@ module.exports = function() {
         await createAttribute(src_name, src_ref, target_player, "player", dur, "whisper", conName, srcChannel, targetChannel);
     }
     
+    /**
+    Create Loyalty Attribute
+    creates a loyalty attribute to a specific group/alignment
+    **/
+    this.createLoyaltyAttribute = async function(src_name, src_ref, target_player, dur, subtype = "alignment", target = "") {
+        await createAttribute(src_name, src_ref, target_player, "player", dur, "loyalty", subtype, target);
+    }
+    
     /** PUBLIC
     Get role attribute's player id
     **/
