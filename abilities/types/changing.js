@@ -74,6 +74,9 @@ module.exports = function() {
             // update player role
             await setPlayerRole(targets[i], role);
             
+            // delete all "permanent" attributes
+            await deleteAttributePlayer(targets[i], "duration", "permanent");
+            
             // run starting trigger
             await triggerPlayerRole(targets[i], "Starting");
             
@@ -116,11 +119,22 @@ module.exports = function() {
         }
         // iterate through targets
         for(let i = 0; i < targets.length; i++) {
+            let isPlayerLoyal = await isLoyal(targets[i]);
+            if(isPlayerLoyal) {
+                // log
+                abilityLog(`❎ <@${targets[i]}> alignment change failed due to loyalty.`);
+                if(targets.length === 1) return { msg: "Changing failed!", success: false, target: `player:${targets[0]}` };
+                continue;
+            }
+            
             // update player alignment
             await setPlayerAlignment(targets[i], alignment);
             
             // alignment change info embed
             await abilitySendProm(`player:${targets[i]}`, `Your alignment has changed to \`${toTitleCase(alignment)}\`!`, EMBED_PURPLE, true, false, img, "Alignment Change");
+            
+            // log
+            abilityLog(`✅ <@${targets[i]}> alignment changed to \`${toTitleCase(alignment)}\`.`);
             
             // return result
             if(targets.length === 1) return { msg: "Changing succeeded!", success: true, target: `player:${targets[0]}` };
