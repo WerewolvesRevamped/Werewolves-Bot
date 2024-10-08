@@ -179,38 +179,38 @@ module.exports = function() {
             let hasDef = await hasDefense(targets[i], "banish", src_ref, src_name, i > origMaxIndex);
             if(hasDef) continue;
             
-            // run the on death trigger
-            await killDeathTriggers(targets[i], src_ref, "attack", src_name)
+            // run the on Banishment trigger
+            await banishTriggers(targets[i], src_ref, "banish", src_name)
             
-            // execute the kill
-            await queueKill(targets[i]);
-            abilityLog(`✅ ${srcRefToText(src_ref)} attacked <@${targets[i]}> - successful.`);
-            success = true; // if attack succeeds set to true
+            // execute the Banishment
+            await queueBanish(targets[i]);
+            abilityLog(`✅ ${srcRefToText(src_ref)} banished <@${targets[i]}> - successful.`);
+            success = true; // if Banishment succeeds set to true
         }
         
-        return success ? { msg: "Attack successful!", success: true, target: `player:${targets[0]}` } : { msg: "Attack failed!", success: false, target: `player:${targets[0]}` }; // if at least one player dies its a success
+        return success ? { msg: "Banishment successful!", success: true, target: `player:${targets[0]}` } : { msg: "Banishment failed!", success: false, target: `player:${targets[0]}` }; // if at least one player dies its a success
     }
     
     /** PRIVATE
-    Ability: Killing - True Kill
-    just kills without anything else being evaluated
+    Ability: Killing - True Banishment
+    just banishes without anything else being evaluated
     **/
-    async function killingTrueKill(src_name, src_ref, targets) {
+    async function killingTrueBanish(src_name, src_ref, targets) {
         let success = false;
         for(let i = 0; i < targets.length; i++) {
             // for every target, add all other player that are absent at their location to targets
             let absentPlayers = await getAbsences(targets[i], "true kill", src_ref);
             if(absentPlayers[0]) targets.push(...absentPlayers);
             
-            // run the on death trigger
-            await killDeathTriggers(targets[i], src_ref, "true kill", src_name)
+            // run the on Banishment trigger
+            await banishTriggers(targets[i], src_ref, "true banish", src_name)
             
-            // execute the kill
-            await queueKill(targets[i]);
-            abilityLog(`✅ ${srcRefToText(src_ref)} true killed <@${targets[i]}>.`);
-            success = true; // True Kill always succeeds
+            // execute the Banishment
+            await queueBanish(targets[i]);
+            abilityLog(`✅ ${srcRefToText(src_ref)} true banished <@${targets[i]}>.`);
+            success = true; // True Banishment always succeeds
         }
-        return success ? { msg: "True Kill successful!", success: true, target: `player:${targets[0]}` } : { msg: "True Kill failed!", success: false, target: `player:${targets[0]}` }; // if at least one player dies its a success
+        return success ? { msg: "True Banishment successful!", success: true, target: `player:${targets[0]}` } : { msg: "True Banishment failed!", success: false, target: `player:${targets[0]}` }; // if at least one player dies its a success
     }
     
     /** PRIVATE
@@ -325,6 +325,15 @@ module.exports = function() {
     Queues a kill
     **/
     async function queueKill(pid) {
+        await killqAdd(pid);
+        doStorytimeCheck();
+        killqScheduled = true;
+    }
+    
+    /** PRIVATE
+    Queues a banishment
+    **/
+    async function queueBanish(pid) { // WIP: How should this actually work?
         await killqAdd(pid);
         doStorytimeCheck();
         killqScheduled = true;
