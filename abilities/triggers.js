@@ -408,6 +408,8 @@ module.exports = function() {
                 switch(triggerName) {
                     case "On Death Complex":
                     case "On Killed Complex":
+                    case "On Banishment Complex":
+                    case "On Banished Complex":
                         let selector = await parsePlayerSelector(param);
                         if(selector.includes(additionalTriggerData.this)) {
                             await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);

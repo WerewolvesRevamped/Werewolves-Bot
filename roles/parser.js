@@ -24,7 +24,7 @@ module.exports = function() {
     const passiveTriggers = ["Passive", "Passive End Day", "Passive End Night", "Passive Start Day", "Passive Start Night", "Passive Start Phase", "Passive End Phase"];
     const electionTriggers = ["On Election", "On Mayor Election", "On Reporter Election", "On Guardian Election"];
     const defenseTriggers = ["On Defense", "On Passive Defense", "On Partial Defense", "On Recruitment Defense", "On Active Defense", "On Absence Defense"];
-    const basicTriggerTypes = [...actionTimings, "Starting", ...passiveTriggers, "On Death", "On Killed","On Visited", "On Action", "On Disbandment", "On Lynch", ...electionTriggers, ...defenseTriggers, "On Betrayal", "On Poll Closed", "On Poll Win", "On Role Change", "On Removal", "On End"]; // basic trigger types
+    const basicTriggerTypes = [...actionTimings, "Starting", ...passiveTriggers, "On Death", "On Killed", "On Banished", "On Banishment", "On Visited", "On Action", "On Disbandment", "On Lynch", ...electionTriggers, ...defenseTriggers, "On Betrayal", "On Poll Closed", "On Poll Win", "On Role Change", "On Removal", "On End"]; // basic trigger types
     const bullets = ["•","‣","◦","·","⁃","⹀"];
 
     /**
@@ -561,12 +561,12 @@ module.exports = function() {
     const str = "(" + rawStr + ")";
     const decNum = "(-?\\d+\\.\\d+)";
     const abilityType = "(Killing|Investigating|Targeting|Disguising|Protecting|Applying|Redirecting|Vote Manipulating|Whispering|Joining|Granting|Loyalty|Obstructing|Poll Manipulating|Announcements|Changing|Copying|Choices|Ascend|Descend|Disband|Counting|Conversation Reset|Cancel|Switching|Process|Evaluate|Action|Feedback|Action|Success|Failure)";
-    const abilitySubtype = "((Kill|Attack|Lynch|True) Killing|(Role|Alignment|Category|Class|Count|Attribute) Investigating|(Target|Untarget) Targeting|() Disguising|(Absence|Active|Passive|Partial|Recruitment) Protecting|(Add|Remove|Change) Applying|() Redirecting|(Absolute|Relative) Vote Manipulating|() Whispering|(Add|Remove) Joining|(Add|Remove|Transfer) Granting|() Loyalty|() Obstructing|(Addition|Creation|Cancelling|Deletion|Manipulation) Poll Manipulating|() Announcements|(Role|Alignment|Group) Changing|(Ability|Full) Copying|(Creating|Choosing) Choices|() Ascend|() Descend|() Disband|(Increment|Decrement|Set) Counting|() Conversation Reset|() Cancel|() Switching|() Process|() Evaluate|() Action|() Feedback|() Action|() Success|() Failure)";
+    const abilitySubtype = "((Kill|Attack|Lynch|True|Banish|True Banish) Killing|(Role|Alignment|Category|Class|Count|Attribute) Investigating|(Target|Untarget) Targeting|() Disguising|(Absence|Active|Passive|Partial|Recruitment) Protecting|(Add|Remove|Change) Applying|() Redirecting|(Absolute|Relative) Vote Manipulating|() Whispering|(Add|Remove) Joining|(Add|Remove|Transfer) Granting|() Loyalty|() Obstructing|(Addition|Creation|Cancelling|Deletion|Manipulation) Poll Manipulating|() Announcements|(Role|Alignment|Group) Changing|(Ability|Full) Copying|(Creating|Choosing) Choices|() Ascend|() Descend|() Disband|(Increment|Decrement|Set) Counting|() Conversation Reset|() Cancel|() Switching|() Process|() Evaluate|() Action|() Feedback|() Action|() Success|() Failure)";
     const bulletsRegex = /(•|‣|◦|·|⁃|⹀)/;
 
     // specific
     const investAffected = "( [\\(\\),SDWD ]*)?";
-    const defenseAttackSubtypes = "(Attacks|Kills|Lynches|Attacks & Lynches|All)";
+    const defenseAttackSubtypes = "(Attacks|Kills|Lynches|Attacks & Lynches|All|Banishments)";
     const defenseSubtypes = "(Absence at " + locationType + "|Active Defense|Passive Defense|Partial Defense|Recruitment Defense)";
     const defensePhases = "(Day|Night)";
     const attrValue = "([^,]+?)";
@@ -779,7 +779,7 @@ module.exports = function() {
         **/
         
         /** KILLING **/
-        exp = new RegExp("^(Kill|Attack|Lynch|True Kill) " + targetType + "$", "g");
+        exp = new RegExp("^(Kill|Attack|Lynch|True Kill|Banish|True Banish) " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
             ability = { type: "killing", subtype: lc(fd[1]), target: ttpp(fd[2]) };
@@ -1494,7 +1494,7 @@ module.exports = function() {
                     // attempt to parse complex triggers
                     /** On Target Death / On Target Visited **/
                     var exp, fd, complexTrigger;
-                    exp = new RegExp("^On " + targetType +  " (Death|Killed|Visited)$", "g");
+                    exp = new RegExp("^On " + targetType +  " (Death|Killed|Visited|Banished|Banishment)$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
                         complexTrigger = "On " + fd[2] + ";" + ttpp(fd[1]);

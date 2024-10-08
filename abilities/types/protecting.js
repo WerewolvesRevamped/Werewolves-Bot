@@ -123,10 +123,10 @@ module.exports = function() {
             let attrPhase = defenses[i].val4;
             // check if killing type matches alllowed types
             let allowed_type =
-                    attrKillType == "all"
-                || (kill_type == "attack" && (attrKillType == "attacks" || attrKillType == "kills" || attrKillType == "attacks_lynches"))
-                || (kill_type == "kill" && (attrKillType == "kills"))
-                || (kill_type == "lynches" && (attrKillType == "lynches" || attrKillType == "attacks_lynches"));
+                    (kill_type == "attack" && (attrKillType == "attacks" || attrKillType == "kills" || attrKillType == "attacks_lynches" || attrKillType == "all"))
+                || (kill_type == "kill" && (attrKillType == "kills" || attrKillType == "all"))
+                || (kill_type == "lynches" && (attrKillType == "lynches" || attrKillType == "attacks_lynches" || attrKillType == "all"))
+                || (kill_type == "banish" && (attrKillType == "banishments"));
             // check if from matches selector
             let selectorList = await parsePlayerSelector(attrSelector);
             let srcVal = srcToValue(from);

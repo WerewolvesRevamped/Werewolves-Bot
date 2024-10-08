@@ -39,6 +39,14 @@ module.exports = function() {
                 result = await killingTrueKill(src_name, src_ref, targets);
                 return result;
             break;
+            case "banish":
+                result = await killingBanish(src_name, src_ref, targets);
+                return result;
+            break;
+            case "true banish":
+                result = await killingTrueBanish(src_name, src_ref, targets);
+                return result;
+            break;
         }
     }
     
@@ -155,6 +163,57 @@ module.exports = function() {
     }
     
     /** PRIVATE
+    Ability: Killing - Banish
+    **/
+    async function killingBanish(src_name, src_ref, targets) {
+        let success = false;
+        let origMaxIndex = targets.length - 1;
+        
+        // iterate through all attack targets
+        for(let i = 0; i < targets.length; i++) {
+            // for every target, add all other player that are absent at their location to targets
+            let absentPlayers = await getAbsences(targets[i], "attack", src_ref);
+            if(absentPlayers[0]) targets.push(...absentPlayers);
+            
+            // check if player has a defense
+            let hasDef = await hasDefense(targets[i], "banish", src_ref, src_name, i > origMaxIndex);
+            if(hasDef) continue;
+            
+            // run the on death trigger
+            await killDeathTriggers(targets[i], src_ref, "attack", src_name)
+            
+            // execute the kill
+            await queueKill(targets[i]);
+            abilityLog(`✅ ${srcRefToText(src_ref)} attacked <@${targets[i]}> - successful.`);
+            success = true; // if attack succeeds set to true
+        }
+        
+        return success ? { msg: "Attack successful!", success: true, target: `player:${targets[0]}` } : { msg: "Attack failed!", success: false, target: `player:${targets[0]}` }; // if at least one player dies its a success
+    }
+    
+    /** PRIVATE
+    Ability: Killing - True Kill
+    just kills without anything else being evaluated
+    **/
+    async function killingTrueKill(src_name, src_ref, targets) {
+        let success = false;
+        for(let i = 0; i < targets.length; i++) {
+            // for every target, add all other player that are absent at their location to targets
+            let absentPlayers = await getAbsences(targets[i], "true kill", src_ref);
+            if(absentPlayers[0]) targets.push(...absentPlayers);
+            
+            // run the on death trigger
+            await killDeathTriggers(targets[i], src_ref, "true kill", src_name)
+            
+            // execute the kill
+            await queueKill(targets[i]);
+            abilityLog(`✅ ${srcRefToText(src_ref)} true killed <@${targets[i]}>.`);
+            success = true; // True Kill always succeeds
+        }
+        return success ? { msg: "True Kill successful!", success: true, target: `player:${targets[0]}` } : { msg: "True Kill failed!", success: false, target: `player:${targets[0]}` }; // if at least one player dies its a success
+    }
+    
+    /** PRIVATE
     Kill / Death triggers
     triggers the triggers used by attack, kill and true kill
     **/
@@ -165,6 +224,21 @@ module.exports = function() {
         // complex triggers
         await triggerHandler("On Death Complex", { attacker: src_ref, death_type: type, attack_source: src_name, this: target }); 
         await triggerHandler("On Killed Complex", { attacker: src_ref, death_type: type, attack_source: src_name, this: target }); 
+        // passive
+        await triggerHandler("Passive");
+    }
+    
+    /** PRIVATE
+    Banish triggers
+    triggers the triggers used by banish and true banish
+    **/
+    async function banishTriggers(target, src_ref, type, src_name) {
+        // normal triggers
+        await triggerPlayer(target, "On Banished", { attacker: src_ref, death_type: type, attack_source: src_name }); 
+        await triggerPlayer(target, "On Banishment", { attacker: src_ref, death_type: type, attack_source: src_name }); 
+        // complex triggers
+        await triggerHandler("On Banished Complex", { attacker: src_ref, death_type: type, attack_source: src_name, this: target }); 
+        await triggerHandler("On Banishment Complex", { attacker: src_ref, death_type: type, attack_source: src_name, this: target }); 
         // passive
         await triggerHandler("Passive");
     }
