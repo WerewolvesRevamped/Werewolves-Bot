@@ -97,6 +97,9 @@ module.exports = function() {
             // role change info embed
             await abilitySendProm(`player:${targets[i]}`, `Your role has changed to \`${toTitleCase(role)}\`!`, EMBED_PURPLE, true, false, img, "Role Change");
             
+            // role change trigger
+            await triggerPlayer(targets[i], "On Role Change", { role_changer: srcToValue(src_ref) }); 
+            
             // log
             abilityLog(`✅ <@${targets[i]}> role changed to \`${toTitleCase(role)}\`.`);
             

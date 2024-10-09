@@ -172,7 +172,7 @@ module.exports = function() {
         // iterate through all attack targets
         for(let i = 0; i < targets.length; i++) {
             // for every target, add all other player that are absent at their location to targets
-            let absentPlayers = await getAbsences(targets[i], "attack", src_ref);
+            let absentPlayers = await getAbsences(targets[i], "banish", src_ref);
             if(absentPlayers[0]) targets.push(...absentPlayers);
             
             // check if player has a defense
@@ -199,7 +199,7 @@ module.exports = function() {
         let success = false;
         for(let i = 0; i < targets.length; i++) {
             // for every target, add all other player that are absent at their location to targets
-            let absentPlayers = await getAbsences(targets[i], "true kill", src_ref);
+            let absentPlayers = await getAbsences(targets[i], "true banish", src_ref);
             if(absentPlayers[0]) targets.push(...absentPlayers);
             
             // run the on Banishment trigger

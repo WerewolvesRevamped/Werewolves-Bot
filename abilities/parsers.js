@@ -201,6 +201,12 @@ module.exports = function() {
                 } else {
                     return invalidSelector(selectorTarget);
                 }
+            case "@rolechanger":
+                if(additionalTriggerData.role_changer) {
+                    return [ additionalTriggerData.role_changer ];
+                } else {
+                    return invalidSelector(selectorTarget);
+                }
             
             // unknown selector
             default:
