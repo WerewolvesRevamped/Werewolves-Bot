@@ -443,11 +443,15 @@ module.exports = function() {
                 // default direct trigger execution
                 default:
                     await trigger(pollData.src_ref, "On Poll Closed", { winner: maxVotesData[0] }); 
+                    await triggerPlayer(maxVotesData[0], "On Poll Win", { }); 
+                    await triggerPlayer(maxVotesData[0], "On Poll Win Complex", { poll_name: pollName }); 
                 break;
                 // for group polls a random executor is chosen
                 case "group":
                     let executor = shuffleArray(maxVotesValidVoters)[0];
                     await trigger(pollData.src_ref, "On Poll Closed", { winner: maxVotesData[0], executor: executor }); 
+                    await triggerPlayer(maxVotesData[0], "On Poll Win", { }); 
+                    await triggerPlayer(maxVotesData[0], "On Poll Win Complex", { poll_name: pollName }); 
                 break;
                 
             }

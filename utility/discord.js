@@ -131,6 +131,7 @@ module.exports = function() {
     Removes a discord role until it succeeds
     **/
     this.removeRoleRecursive = function(member, channel, remRole, name, iteration = 1) {
+        if(!member) { log("Cannot find member in removeRoleRecursive"); return; }
 		return new Promise((resolve) => {
             member.roles.remove(remRole).then(async r => {
                 if(member.roles.cache.get(remRole)) {
@@ -153,6 +154,7 @@ module.exports = function() {
     Adds a discord role until it succeeds
     */
     this.addRoleRecursive = function(member, channel, addRole, name, iteration = 1) {
+        if(!member) { log("Cannot find member in addRoleRecursive"); return; }
 		return new Promise((resolve) => {
             member.roles.add(addRole).then(async r => {
                 if(!member.roles.cache.get(addRole)) {

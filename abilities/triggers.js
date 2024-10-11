@@ -429,6 +429,15 @@ module.exports = function() {
                             abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\` with \`${triggerAbilityType}\`.`);
                         }
                     break;
+                    case "On Poll Win Complex":
+                        let poll = additionalTriggerData.poll_name.trim().toLowerCase().replace(/[^a-z]/g,"");
+                        let paramPoll = selectorGetTarget(param);
+                        if(poll === paramPoll) {
+                             await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
+                        } else {
+                            abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${paramPoll}\` with \`${poll}\`.`);
+                        }
+                    break;
                     case "Choice Chosen Complex":
                         let option = parseOption(param);
                         if(option === additionalTriggerData.chosen) {

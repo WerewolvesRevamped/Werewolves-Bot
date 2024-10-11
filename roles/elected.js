@@ -114,6 +114,7 @@ module.exports = function() {
         var reportMsg;
         // Get info
         sql("SELECT role FROM players WHERE id = " + connection.escape(player_id), result => {
+            if(!result[0] || !result[0].role) { log("Cannot find role in reporterMessage"); return; }
             let rName = toTitleCase(result[0].role);
             let rEmoji = getRoleEmoji(rName);
             if(!rEmoji) rEmoji = "";

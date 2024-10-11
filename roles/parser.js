@@ -1523,6 +1523,13 @@ module.exports = function() {
                     }
                     /** Choice Chosen **/
                     var exp, fd, complexTrigger;
+                    exp = new RegExp("^On Poll `" + str +  "` Win$", "g");
+                    fd = exp.exec(curTriggerName);
+                    if(fd) {
+                        complexTrigger = "On Poll Win;" + ttpp(fd[1].trim().toLowerCase().replace(/[^a-z]/g,""), "poll");
+                    }
+                    /** Choice Chosen **/
+                    var exp, fd, complexTrigger;
                     exp = new RegExp("^Choice `" + str +  "` Chosen$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
