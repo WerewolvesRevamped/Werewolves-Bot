@@ -293,7 +293,7 @@ module.exports = function() {
         // iterate through all object values
         objRecReplace(ability, (key, property) => {
             // check if its a string type value
-            if(typeof property !== "string") return;
+            if(typeof property !== "string") return property;
             // to lower case
             let val = property.toLowerCase();
             if(val.indexOf("@selection") >= 0 && promptIndex == 0) {

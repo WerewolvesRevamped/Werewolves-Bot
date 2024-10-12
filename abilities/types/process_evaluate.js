@@ -135,9 +135,25 @@ module.exports = function() {
                             return first.value[0] === second.value[0].success;
                         } else if(first.type === "number" && second.type === "result") {
                             return first.value[0] === (await parseNumber(second.value[0].result));
-                        }else if(first.type === "result" && second.type === "number") {
+                        } else if(first.type === "result" && second.type === "number") {
                             return (await parseNumber(first.value[0].result)) === second.value[0];
-                        }
+                        } else if(first.type === "result" && second.type === "role") {
+                            return first.value[0].role === second.value[0];
+                        } else if(first.type === "role" && second.type === "result") {
+                            return first.value[0] === second.value[0].role;
+                        } else if(first.type === "result" && second.type === "class") {
+                            return first.value[0].class === second.value[0];
+                        } else if(first.type === "class" && second.type === "result") {
+                            return first.value[0] === second.value[0].class;
+                        } else if(first.type === "result" && second.type === "category") {
+                            return first.value[0].category === second.value[0];
+                        } else if(first.type === "category" && second.type === "result") {
+                            return first.value[0] === second.value[0].category;
+                        } else if(first.type === "result" && second.type === "alignment") {
+                            return first.value[0].alignment === second.value[0];
+                        } else if(first.type === "alignment" && second.type === "result") {
+                            return first.value[0] === second.value[0].alignment;
+                        } 
                         // no comparison can be made
                         return false;
                     // COMPARISON - LESS THAN

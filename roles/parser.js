@@ -551,7 +551,7 @@ module.exports = function() {
 
     /** REGEX - Reminder: You need double \'s here **/
     // general
-    const targetType = "(`[^`]*`|@\\S*|&\\S*|#\\S*|%[^%]+%|randomize\\(.+?\\)|shuffle\\(.+?\\)|most_freq_role\\(.+?\\)|\\d+)";
+    const targetType = "(`[^`]*`|`[^`]*`\\[\\w+\\]|@\\S*|&\\S*|#\\S*|%[^%]+%|randomize\\(.+?\\)|shuffle\\(.+?\\)|most_freq_role\\(.+?\\)|\\d+)";
     const attrDuration = "( \\(~[^\)]+\\))?";
     const locationType = "(`[^`]*`|@\\S*|#\\S*)"; // extended version of target type
     const groupType = "(@\\S*|#\\S*)"; // reduced version of location type

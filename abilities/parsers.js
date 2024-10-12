@@ -70,6 +70,8 @@ module.exports = function() {
             // ACTIVE ATTRIBUTE
             case "activeattribute":
                 return { value: await parseActiveAttributeSelector(selector, self, additionalTriggerData, self), type: "activeAttribute" };
+            case "category":
+                return { value: [ parseCategory(selector) ], type: "category" };
             // UNKNOWN
             default:
                 abilityLog(`❗ **Error:** Invalid selector type \`${selectorType}\`!`);
@@ -961,6 +963,15 @@ module.exports = function() {
     this.parseOptionDisplay = function(option) {
         let target = option.split("[")[0];
         return target.trim();
+    }
+    
+    /**
+    Parse Category
+    parses a role category
+    **/
+    this.parseCategory = function(category) {
+        let target = selectorGetTarget(category);
+        return target.replace(/`/g, "");
     }
     
     /**

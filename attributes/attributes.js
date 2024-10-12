@@ -6,6 +6,7 @@
 require("./help.js")();
 require("./custom.js")();
 require("./generic.js")();
+require("./role.js")();
 
 module.exports = function() {
     

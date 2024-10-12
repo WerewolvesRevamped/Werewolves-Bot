@@ -12,7 +12,7 @@ module.exports = function() {
         let result;
         // check parameters
         if(!ability.target) {
-            abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
+            abilityLog(`❗ **Error:** Missing arguments for type \`${ability.type}\`!`);
             return { msg: "Investigation failed! " + abilityError, success: false };
         }
         // parse parameters
@@ -37,6 +37,22 @@ module.exports = function() {
             break;
             case "alignment":
                 result = await investigatingAlignment(src_name, src_ref, target, ability.affected_by_wd ?? false, ability.affected_by_sd ?? false);
+                return result;
+            break;
+            case "attribute":  
+                // check parameters
+                if(!ability.attribute) {
+                    abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
+                    return { msg: "Investigation failed! " + abilityError, success: false };
+                }
+                let attr = parseAttributeSelector(ability.attribute, src_ref, additionalTriggerData);
+                // can only apply a single attribute
+                if(attr.length != 1) {
+                    abilityLog(`❗ **Error:** Tried to investigate for ${attr.length} attributes!`);
+                    return { msg: "Investigation failed! " + abilityError, success: false };
+                }
+                attr = attr[0];
+                result = await investigatingAttribute(src_name, src_ref, target, attr, ability.affected_by_wd ?? false, ability.affected_by_sd ?? false);
                 return result;
             break;
             case "player_count":
@@ -125,6 +141,26 @@ module.exports = function() {
             abilityLog(`✅ ${srcRefToText(src_ref)} investigated <@${targets[0]}>'s alignment as \`${toTitleCase(rdata.role.team)}\`${rdata.type?' ('+rdata.type+')':''}.`);
             return { msg: `Investigated <@${targets[0]}>'s alignment: \`${toTitleCase(rdata.role.team)}\``, success: true, target: `player:${targets[0]}`, result: `${toTitleCase(rdata.role.team)}[alignment]`, alignment: rdata.role.team };
         }
+    }
+    
+    /**
+    Ability: Investigating - Attribute
+    **/
+    this.investigatingAttribute = async function(src_name, src_ref, targets, attribute, affected_by_wd, affected_by_sd) {
+        // single target check
+        if(targets.length != 1) {
+            return singleTargetCheck(targets, src_ref);
+        }
+        // get data
+        let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);
+        let hasRoleAttributeResult = await hasRoleAttribute(rdata.role.role, attribute);
+        let directAttributes = await queryAttributePlayer(targets[0], "val1", attribute);
+        let found = hasRoleAttributeResult || directAttributes.length > 0;
+        
+        // feedback
+        abilityLog(`✅ ${srcRefToText(src_ref)} investigated <@${targets[0]}> for attribute \`${toTitleCase(attribute)}\` ⇒ \`${found}\` ${rdata.type?' ('+rdata.type+')':''}.`);
+        if(found) return { msg: `Investigated <@${targets[0]}> for attribute \`${toTitleCase(attribute)}\` ⇒ Attribute Found`, success: true, target: `player:${targets[0]}` };
+        else return { msg: `Investigated <@${targets[0]}> for attribute \`${toTitleCase(attribute)}\` ⇒ Attribute __Not__ Found`, success: false, target: `player:${targets[0]}` };
     }
     
     /**
