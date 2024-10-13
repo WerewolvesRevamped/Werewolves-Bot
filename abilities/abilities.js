@@ -29,6 +29,7 @@ require("./types/whispering.js")();
 require("./types/reset.js")();
 require("./types/counting.js")();
 require("./types/loyalty.js")();
+require("./types/disband.js")();
 
 module.exports = function() {
     

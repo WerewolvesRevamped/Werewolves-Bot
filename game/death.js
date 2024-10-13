@@ -90,14 +90,14 @@ module.exports = function() {
 		}
 	}
 
-	/** PRIVATE
+	/** PUBLIC
     Command: $killq killall
     **/
-	async function cmdKillqKillall(channel) {
-        let players = await killqKillall();
+	this.cmdKillqKillall = async function (channel) {
+        let playerCount = await killqKillall();
         
         // feedback
-        channel.send("✳ Killed `" + players.length + "` player" + (players.length != 1 ? "s" : "") + "!");
+        channel.send("✳ Killed `" + playerCount + "` player" + (playerCount != 1 ? "s" : "") + "!");
 	}
 
 	/** PRIVATE
@@ -165,6 +165,20 @@ module.exports = function() {
         removeRoleRecursive(player, false, stats.mayor2, "mayor 2");
         removeRoleRecursive(player, false, stats.reporter, "reporter");
         removeRoleRecursive(player, false, stats.guardian, "guardian");
+        
+        // retrieve all attributes of the player and set to dead
+        let playerAttributes =  await queryAttributePlayer(player_id, "owner", player_id);
+        for(let i = 0; i < playerAttributes.length; i++) {
+            // check if group should be disbanded
+            if(playerAttributes[i].attr_type === "group_membership" && playerAttributes[i].val2 === "owner") {
+                let allGroupOwners = await queryAttribute("attr_type", "group_membership", "val1", playerAttributes[i].val1, "val2", "owner", "alive", 1);
+                if(allGroupOwners.length === 1) { // Disband
+                    await groupsDisband(playerAttributes[i].val1);
+                }
+            }
+            // set attribute to dead
+            updateAttributeAlive(playerAttributes[i].ai_id, 0);
+        }
         
         // add to storytime
         if(!silent) await bufferStorytime(`<@${player_id}> has died!`);

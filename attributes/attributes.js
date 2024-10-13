@@ -64,7 +64,7 @@ module.exports = function() {
                     const ownerText = srcRefToText(`${attribute.owner_type}:${attribute.owner}`);
                     const attrList = `${attribute.val1};${attribute.val2};${attribute.val3};${attribute.val4}`;
                     return `\`${attribute.ai_id}\`: **${toTitleCase(attribute.attr_type)}** - ${ownerText} (~${toTitleCase(attribute.duration)}) [${attrList}] {${srcNameToText(attribute.src_name)} - ${srcRefToText(attribute.src_ref)}}`;
-                }), 20).map(el => el.join("\n")).forEach(el => channel.send(el));
+                }), 15).map(el => el.join("\n")).forEach(el => channel.send(el));
 			} else { 
 				// No attributes exist
 				channel.send("⛔ Database error. Could not find any active attribute instances!");
@@ -119,7 +119,7 @@ module.exports = function() {
     /**
     Checks if a attribute column name is valid**/
     function isValidAttributeColumnName(name) {
-        return ["owner","src_name","src_ref","attr_type","duration","val1","val2","val3","val4"].includes(name);
+        return ["owner","src_name","src_ref","attr_type","duration","val1","val2","val3","val4","applied_phase","used","target","counter","alive"].includes(name);
     }
     
     function validateAttributeColumnName(name) {
@@ -135,8 +135,10 @@ module.exports = function() {
     Attribute Query for anyone
     queries an attribute for anyone
     **/
-    this.queryAttribute = async function(column, val, column2 = null, val2 = null) {
-        if(column2) return await twoColumnQueryGeneric(column, val, column2, val2);
+    this.queryAttribute = async function(column, val, column2 = null, val2 = null, column3 = null, val3 = null, column4 = null, val4 = null) {
+        if(column4) return await fourColumnQueryGeneric(column, val, column2, val2, column3, val3, column4, val4);
+        else if(column3) return await threeColumnQueryGeneric(column, val, column2, val2, column3, val3);
+        else if(column2) return await twoColumnQueryGeneric(column, val, column2, val2);
         else return await singleColumnQueryGeneric(column, val);
     }
     
@@ -155,13 +157,34 @@ module.exports = function() {
         return sqlProm("SELECT * FROM active_attributes WHERE " + column + "=" + connection.escape(val) + " AND " + column2 + "=" + connection.escape(val2) + " ORDER BY ai_id ASC");
     }
     
+    function threeColumnQueryGeneric(column, val, column2, val2, column3, val3) {
+        // make sure column is valid
+        if(!validateAttributeColumnName(column)) return [];
+        if(!validateAttributeColumnName(column2)) return [];
+        if(!validateAttributeColumnName(column3)) return [];
+        // query attribute
+        return sqlProm("SELECT * FROM active_attributes WHERE " + column + "=" + connection.escape(val) + " AND " + column2 + "=" + connection.escape(val2) + " AND " + column3 + "=" + connection.escape(val3) + " ORDER BY ai_id ASC");
+    }
+    
+    function fourColumnQueryGeneric(column, val, column2, val2, column3, val3, column4, val4) {
+        // make sure column is valid
+        if(!validateAttributeColumnName(column)) return [];
+        if(!validateAttributeColumnName(column2)) return [];
+        if(!validateAttributeColumnName(column3)) return [];
+        if(!validateAttributeColumnName(column4)) return [];
+        // query attribute
+        return sqlProm("SELECT * FROM active_attributes WHERE " + column + "=" + connection.escape(val) + " AND " + column2 + "=" + connection.escape(val2) + " AND " + column3 + "=" + connection.escape(val3) + " AND " + column4 + "=" + connection.escape(val4) + " ORDER BY ai_id ASC");
+    }
+    
     
     /**
     Attribute Query for Player
     queries an attribute for a specific player
     **/
-    this.queryAttributePlayer = async function(player, column, val, column2 = null, val2 = null) {
-        if(column2) return await twoColumnQuery(player, column, val, column2, val2);
+    this.queryAttributePlayer = async function(player, column, val, column2 = null, val2 = null, column3 = null, val3 = null, column4 = null, val4 = null) {
+        if(column4) return await fourColumnQuery(player, column, val, column2, val2, column3, val3, column4, val4);
+        else if(column3) return await threeColumnQuery(player, column, val, column2, val2, column3, val3);
+        else if(column2) return await twoColumnQuery(player, column, val, column2, val2);
         else return await singleColumnQuery(player, column, val);
     }
     
@@ -179,12 +202,34 @@ module.exports = function() {
         // query attribute
         return sqlProm("SELECT * FROM active_attributes WHERE owner=" + connection.escape(player) + " AND " + column + "=" + connection.escape(val) + " AND " + column2 + "=" + connection.escape(val2) + " ORDER BY ai_id ASC");
     }
+    
+    function threeColumnQuery(player, column, val, column2, val2, column3, val3) {
+        // make sure column is valid
+        if(!validateAttributeColumnName(column)) return [];
+        if(!validateAttributeColumnName(column2)) return [];
+        if(!validateAttributeColumnName(column3)) return [];
+        // query attribute
+        return sqlProm("SELECT * FROM active_attributes WHERE owner=" + connection.escape(player) + " AND " + column + "=" + connection.escape(val) + " AND " + column2 + "=" + connection.escape(val2) + " AND " + column3 + "=" + connection.escape(val3) + " ORDER BY ai_id ASC");
+    }
+    
+    function fourColumnQuery(player, column, val, column2, val2, column3, val3, column4, val4) {
+        // make sure column is valid
+        if(!validateAttributeColumnName(column)) return [];
+        if(!validateAttributeColumnName(column2)) return [];
+        if(!validateAttributeColumnName(column3)) return [];
+        if(!validateAttributeColumnName(column4)) return [];
+        // query attribute
+        return sqlProm("SELECT * FROM active_attributes WHERE owner=" + connection.escape(player) + " AND " + column + "=" + connection.escape(val) + " AND " + column2 + "=" + connection.escape(val2) + " AND " + column3 + "=" + connection.escape(val3) + " AND " + column4 + "=" + connection.escape(val4) + " ORDER BY ai_id ASC");
+    }
+    
     /**
     Attribute Deletion for Player
     delets an attribute for a specific player
     **/
-    this.deleteAttributePlayer = async function(player, column, val, column2 = null, val2 = null) {
-        if(column2) return await twoColumnDeletion(player, column, val, column2, val2);
+    this.deleteAttributePlayer = async function(player, column, val, column2 = null, val2 = null, column3 = null, val3 = null, column4 = null, val4 = null) {
+        if(column4) return await twoColumnDeletion(player, column, val, column2, val2, column3, val3, column4, val4);
+        else if(column3) return await twoColumnDeletion(player, column, val, column2, val2, column3, val3);
+        else if(column2) return await twoColumnDeletion(player, column, val, column2, val2);
         else return await singleColumnDeletion(player, column, val);
     }
     
@@ -201,6 +246,25 @@ module.exports = function() {
         if(!validateAttributeColumnName(column2)) return [];
         // delete attribute
         return sqlProm("DELETE FROM active_attributes WHERE owner=" + connection.escape(player) + " AND " + column + "=" + connection.escape(val) + " AND " + column2 + "=" + connection.escape(val2));
+    }
+    
+    function threeColumnDeletion(player, column, val, column2, val2, column3, val3) {
+        // make sure column is valid
+        if(!validateAttributeColumnName(column)) return [];
+        if(!validateAttributeColumnName(column2)) return [];
+        if(!validateAttributeColumnName(column3)) return [];
+        // delete attribute
+        return sqlProm("DELETE FROM active_attributes WHERE owner=" + connection.escape(player) + " AND " + column + "=" + connection.escape(val) + " AND " + column2 + "=" + connection.escape(val2) + " AND " + column3 + "=" + connection.escape(val3));
+    }
+    
+    function fourColumnDeletion(player, column, val, column2, val2, column3, val3, column4, val4) {
+        // make sure column is valid
+        if(!validateAttributeColumnName(column)) return [];
+        if(!validateAttributeColumnName(column2)) return [];
+        if(!validateAttributeColumnName(column3)) return [];
+        if(!validateAttributeColumnName(column4)) return [];
+        // delete attribute
+        return sqlProm("DELETE FROM active_attributes WHERE owner=" + connection.escape(player) + " AND " + column + "=" + connection.escape(val) + " AND " + column2 + "=" + connection.escape(val2) + " AND " + column3 + "=" + connection.escape(val3) + " AND " + column4 + "=" + connection.escape(val4));
     }
     
     /**
@@ -276,6 +340,43 @@ module.exports = function() {
     function incrementAttribute(id) {
         // update attribute
         return sqlPromEsc("UPDATE active_attributes SET used=used+1 WHERE ai_id=", id);
+    }
+    
+    /** PUBLIC
+    Update val1-4
+    updates val1-4 by ai id
+    **/
+    this.updateAttributeVal1 = function(id, newVal) {
+        // update attribute
+        return updateAttributeValue(id, "val1", newVal);
+    }
+    this.updateAttributeVal2 = function(id, newVal) {
+        // update attribute
+        return updateAttributeValue(id, "val2", newVal);
+    }
+    this.updateAttributeVal3 = function(id, newVal) {
+        // update attribute
+        return updateAttributeValue(id, "val3", newVal);
+    }
+    this.updateAttributeVal4 = function(id, newVal) {
+        // update attribute
+        return updateAttributeValue(id, "val4", newVal);
+    }
+    
+    /** PUBLIC
+    Updates the alive column
+    **/
+    this.updateAttributeAlive = function(id, newVal) {
+        // update attribute
+        return updateAttributeValue(id, "alive", newVal);
+    }
+    
+    /** PRIVATE
+    Update an attribute column
+    **/
+    function updateAttributeValue(id, val, newVal) {
+        // update attribute
+        return sqlPromEsc("UPDATE active_attributes SET " + val + "=" + connection.escape(newVal) + " WHERE ai_id=", id);
     }
     
 }

@@ -77,6 +77,18 @@ module.exports = function() {
             // delete all "permanent" attributes
             await deleteAttributePlayer(targets[i], "duration", "permanent");
             
+            // convert group memberships to visitor
+            let groupMembershipsMember = await queryAttributePlayer(targets[i], "attr_type", "group_membership", "val2", "member");
+            let groupMembershipsOwner = await queryAttributePlayer(targets[i], "attr_type", "group_membership", "val2", "owner");
+            for(let j = 0; j < groupMembershipsMember.length; j++) {
+                await updateAttributeVal2(groupMembershipsMember[j].ai_id, "visitor");
+                abilityLog(`✅ <@${targets[i]}> demoted ${toTitleCase(groupMembershipsMember[j].val1)} membership to \`Visitor\`.`);
+            }
+            for(let j = 0; j < groupMembershipsOwner.length; j++) {
+                await updateAttributeVal2(groupMembershipsOwner[j].ai_id, "visitor");
+                abilityLog(`✅ <@${targets[i]}> demoted ${toTitleCase(groupMembershipsOwner[j].val1)} membership to \`Visitor\`.`);
+            }
+            
             // run starting trigger
             await triggerPlayerRole(targets[i], "Starting");
             
