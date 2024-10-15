@@ -47,6 +47,31 @@ module.exports = function() {
                 result = await countingSet(src_name, src_ref, targetParsed.value[0], targetParsed.type, num);
                 return result;
             break;
+            case "increment_math":
+            case "decrement_math":
+            case "set_math":
+                // check parameters
+                if(!ability.rounding || !ability.variable) {
+                    abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
+                    return { msg: "Counting failed! " + abilityError, success: false };
+                }
+                // divide
+                let variable = await parseNumber(ability.variable);
+                let div = variable / num;
+                let rounded;
+                // round
+                switch(ability.rounding) {
+                    case "ceil": rounded = Math.ceil(div); break;
+                    case "floor": rounded = Math.floor(div); break;
+                    case "round": rounded = Math.round(div); break;
+                }
+                switch(ability.subtype) {
+                    case "increment_math": result = await countingIncrement(src_name, src_ref, targetParsed.value[0], targetParsed.type, rounded); break;
+                    case "decrement_math": result = await countingDecrement(src_name, src_ref, targetParsed.value[0], targetParsed.type, rounded); break;
+                    case "set_math": result = await countingSet(src_name, src_ref, targetParsed.value[0], targetParsed.type, rounded); break;
+                }
+                return result;
+            break;
         }
     }
     

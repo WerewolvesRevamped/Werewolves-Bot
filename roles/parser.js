@@ -556,7 +556,7 @@ module.exports = function() {
     const locationType = "(`[^`]*`|@\\S*|#\\S*)"; // extended version of target type
     const groupType = "(@\\S*|#\\S*)"; // reduced version of location type
     const attributeName = targetType;
-    const num = "(-?\\d+|calc\\(.*?\\)|@Selection|@SecondarySelection|@Selection\\[[^\\]+]\\]|@SecondarySelection\\[[^\\]+]\\])";
+    const num = "(-?\\d+|@Selection|@SecondarySelection|@Selection\\[[^\\]+]\\]|@SecondarySelection\\[[^\\]+]\\])";
     const rawStr = "[\\w\\s\\d@]+";
     const str = "(" + rawStr + ")";
     const decNum = "(-?\\d+\\.\\d+)";
@@ -1266,25 +1266,25 @@ module.exports = function() {
         if(fd) {
             ability = { type: "counting", subtype: "set", counter_value: fd[1], target: "@self[player]" };
         }
-        // increment self by 1, for target
+        // increment by 1, for target
         exp = new RegExp("^Increment Counter for " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
             ability = { type: "counting", subtype: "increment", counter_value: 1, target: ttpp(fd[1]) };
         }
-        // decrement self by 1, for target
+        // decrement by 1, for target
         exp = new RegExp("^Decrement Counter for " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
             ability = { type: "counting", subtype: "decrement", counter_value: 1, target: ttpp(fd[1]) };
         }
-        // increment self by value, for target
+        // increment by value, for target
         exp = new RegExp("^Increment Counter by " + num + " for " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
             ability = { type: "counting", subtype: "increment", counter_value: fd[1], target: ttpp(fd[2]) };
         }
-        // decrement self by value, for target
+        // decrement by value, for target
         exp = new RegExp("^Decrement Counter by " + num + " for " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
@@ -1295,6 +1295,42 @@ module.exports = function() {
         fd = exp.exec(abilityLine);
         if(fd) {
             ability = { type: "counting", subtype: "set", counter_value: fd[1], target: ttpp(fd[2]) };
+        }
+        // increment self by math value
+        exp = new RegExp("^Increment Counter by (ceil|floor|round) (\\$total|\\$living|\\$phase)/" + num + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "counting", subtype: "increment_math", rounding: fd[1], variable: fd[2], counter_value: fd[3], target: "@self[player]" };
+        }
+        // decrement self by math value
+        exp = new RegExp("^Decrement Counter by (ceil|floor|round) (\\$total|\\$living|\\$phase)/" + num + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "counting", subtype: "decrement_math", rounding: fd[1], variable: fd[2], counter_value: fd[3], target: "@self[player]" };
+        }
+        // set counter to math value
+        exp = new RegExp("^Set Counter to (ceil|floor|round) (\\$total|\\$living|\\$phase)/" + num + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "counting", subtype: "set_math", rounding: fd[1], variable: fd[2], counter_value: fd[3], target: "@self[player]" };
+        }
+        // increment by math value, for target
+        exp = new RegExp("^Increment Counter by (ceil|floor|round) (\\$total|\\$living|\\$phase)/" + num + " for " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "counting", subtype: "increment_math", rounding: fd[1], variable: fd[2], counter_value: fd[3], target: ttpp(fd[4]) };
+        }
+        // decrement by math value, for target
+        exp = new RegExp("^Decrement Counter by (ceil|floor|round) (\\$total|\\$living|\\$phase)/" + num + " for " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "counting", subtype: "decrement_math", rounding: fd[1], variable: fd[2], counter_value: fd[3], target: ttpp(fd[4]) };
+        }
+        // set counter to math value, for target
+        exp = new RegExp("^Set Counter to (ceil|floor|round) (\\$total|\\$living|\\$phase)/" + num + " for " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "counting", subtype: "set_math", rounding: fd[1], variable: fd[2], counter_value: fd[3], target: ttpp(fd[4]) };
         }
         /** CONVERSATION RESET **/
         // conversation reset self
