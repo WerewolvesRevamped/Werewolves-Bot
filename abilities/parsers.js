@@ -821,7 +821,7 @@ module.exports = function() {
     /**
     Parse ability type
     **/
-    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","","manipulating","whispering","joining","granting","","","poll","announcement","changing","","choices","ascend","descend","","","reset","","","feedback","success","failure","log","","process_evaluate","abilities"];
+    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","","manipulating","whispering","joining","granting","","","poll","announcement","changing","","choices","ascend","descend","","counting","reset","","","feedback","success","failure","log","","process_evaluate","abilities"];
     this.parseAbilityType = function(ability_type) {
         // get target
         let selectorTarget = selectorGetTarget(ability_type);
@@ -858,7 +858,7 @@ module.exports = function() {
         [], // ascend
         [], // descend
         null, // disband
-        null, // counting
+        ["increment","decrement","set","increment_math","decrement_math","set_math"], // counting
         [], // conversation reset
         null, // cancel
         null, // switching
@@ -913,8 +913,15 @@ module.exports = function() {
                 return +selectorTarget;
             } else { // division
                 let splitSel = selectorTarget.split("/");
-                if(splitSel.length == 2 && !isNaN(splitSel[0]) && !isNaN(splitSel[1])) {
-                    return (+splitSel[0]) / (+splitSel[1]);
+                if(splitSel.length == 2) {
+                    let val1 = await parseNumber(splitSel[0]);
+                    let val2 = await parseNumber(splitSel[1]);
+                     if(!isNaN(val1) && !isNaN(val2)) {
+                        return (+val1) / (+val2);
+                     } else {
+                        abilityLog(`❗ **Error:** Invalid number in division \`${selectorTarget}\`!`);
+                        return 0;         
+                     }
                 } else {
                     abilityLog(`❗ **Error:** Invalid number \`${selectorTarget}\`!`);
                     return 0;         

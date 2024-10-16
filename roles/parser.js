@@ -719,14 +719,6 @@ module.exports = function() {
                 parsedScaling.push({ type: "multiplier", quantity: +fd[1], odd: false, even: true });
                 scalFound = true;
             }
-            /** Split Scaling **/
-            // always
-            exp = new RegExp("^\\*(\\d+)$", "g");
-            fd = exp.exec(scaling[scal]);
-            if(fd) {
-                parsedScaling.push({ type: "split", quantity: +fd[1] });
-                scalFound = true;
-            }
             /** Dynamic Scaling **/
             exp = new RegExp("^(\\$total|\\$living)/(\\d+)$", "g");
             fd = exp.exec(scaling[scal]);
