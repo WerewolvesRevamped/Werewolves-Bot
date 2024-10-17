@@ -307,6 +307,20 @@ module.exports = function() {
                 case "alignment":
                     output.push(playerData.alignment);
                 break;
+                case "target":
+                    output.push(playerData.target);
+                break;
+                case "counter":
+                    output.push(playerData.counter);
+                break;
+                case "publicvotingpower":
+                    let publicVotingPower = await pollValue(selector[i], "public");
+                    output.push(publicVotingPower);
+                break;
+                case "privatevotingpower":
+                    let privateVotingPower = await pollValue(selector[i], "private");
+                    output.push(privateVotingPower);
+                break;
                 case "randomplayer":
                     output.push(selector[i]);
                     random = true;
@@ -474,7 +488,7 @@ module.exports = function() {
     Get all single player 
     **/
     function getPlayer(id) {
-        return sqlPromOneEsc("SELECT players.id,players.role,players.orig_role,players.alive,players.alignment,role.class,role.category,role.team,orig_role.class AS orig_class,orig_role.category AS orig_cat,orig_role.team AS orig_align FROM players INNER JOIN roles AS role ON players.role=role.name INNER JOIN roles AS orig_role ON players.orig_role=orig_role.name WHERE players.type='player' AND players.id=", id);
+        return sqlPromOneEsc("SELECT players.id,players.role,players.orig_role,players.alive,players.alignment,players.target,players.counter,role.class,role.category,role.team,orig_role.class AS orig_class,orig_role.category AS orig_cat,orig_role.team AS orig_align FROM players INNER JOIN roles AS role ON players.role=role.name INNER JOIN roles AS orig_role ON players.orig_role=orig_role.name WHERE players.type='player' AND players.id=", id);
     }
     
     /**
