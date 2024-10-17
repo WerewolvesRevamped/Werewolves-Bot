@@ -266,6 +266,12 @@ module.exports = function() {
     Parses a property access
     **/
     async function parsePropertyAccess(result, property, type) {
+        // return count for any type
+        if(property === "count") {
+            return result.value.length;
+        }
+        
+        // select function depending on type
         switch(type) {
             case "player":
                 return parsePlayerPropertyAccess(result.value, property);
