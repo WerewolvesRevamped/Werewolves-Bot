@@ -209,6 +209,12 @@ module.exports = function() {
                 } else {
                     return invalidSelector(selectorTarget);
                 }
+            case "@chooser":
+                if(additionalTriggerData.chooser) {
+                    return [ additionalTriggerData.chooser ];
+                } else {
+                    return invalidSelector(selectorTarget);
+                }
             
             // unknown selector
             default:
@@ -399,6 +405,13 @@ module.exports = function() {
                     let groupMembers = await getAllGroupMembers(compVal);
                     if(!compInverted) allPlayers = allPlayers.filter(el => groupMembers.includes(el.id));
                     else allPlayers = allPlayers.filter(el => !groupMembers.includes(el.id));
+                break;
+                // Attr - Find players that have a certain custom attribute
+                case "attr":
+                    let attrCustomOwners = await queryAttribute("attr_type", "custom", "val1", compVal);
+                    attrCustomOwners = attrCustomOwners.map(el => el.owner);
+                    if(!compInverted) allPlayers = allPlayers.filter(el => attrCustomOwners.includes(el.id));
+                    else allPlayers = allPlayers.filter(el => !attrCustomOwners.includes(el.id));
                 break;
                 // AttrRole - Find players that have a certain role attribute
                 case "attrrole":
