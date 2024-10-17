@@ -458,6 +458,13 @@ module.exports = function() {
     }
     
     /**
+    Get all teams 
+    **/
+    function getAllTeams() {
+        return sqlProm("SELECT * FROM teams");
+    }
+    
+    /**
     Get all single player 
     **/
     function getPlayer(id) {
@@ -528,7 +535,7 @@ module.exports = function() {
     }
     
     /**
-    Parse Attribue Selector
+    Parse Attribute Selector
     parses a attribute type selector
     **/
     this.parseAttributeSelector = function(selector, self = null, additionalTriggerData = {}) {
@@ -587,6 +594,7 @@ module.exports = function() {
         // get target
         let selectorTarget = selectorGetTarget(selector);
         switch(selectorTarget) {
+            // result
             case "@result":
             case "@result1":
             case "@result2":
@@ -605,6 +613,12 @@ module.exports = function() {
                 }
                 abilityLog(`❗ **Error:** Failed to cast result to alignment!`);
                 return [ ];
+            // all teams
+            case "&All":
+                let allTeams = await getAllTeams();
+                return allTeams.map(el => el.name);
+            break;
+            // team name selector
             default:
                 let parsed = parseTeam(selectorTarget);
                 if(verifyTeam(parsed)) {
