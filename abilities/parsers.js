@@ -560,7 +560,7 @@ module.exports = function() {
     **/
     this.parseAttributeSelector = function(selector, self = null, additionalTriggerData = {}) {
         // get target
-        let selectorTarget = selectorGetTarget(selector);
+        let selectorTarget = selectorGetTarget(selector.split(":")[0]); // split to remove active attribute selector info in case we parse an active attribute as a normal one
         switch(selectorTarget) {
             default:
                 let parsed = parseAttributeName(selectorTarget);
@@ -595,11 +595,34 @@ module.exports = function() {
                 let attrName = getCustomAttributeName(pself);
                 return [ { ai_id: pself, name: attrName } ];
             default:
-                let parsed = parseAttributeName(selectorTarget);
+                let splitTarget = selectorTarget.split(":");
+                let parsed = parseAttributeName(splitTarget[0]);
+                console.log(parsed, verifyAttribute(parsed), attrNames.includes(parsed));
                 if(verifyAttribute(parsed) && attrNames.includes(parsed)) {
-                    return attributes.filter(el => el[3] === parsed).map(el => { return { ai_id: el[0], name: el[3] } });
+                    let filtered;
+                    switch(splitTarget.length) {
+                        case 1: // just attribute name
+                            filtered = attributes.filter(el => el[3] === parsed);
+                        break;
+                        case 2: // attribute name and src_ref/src_name
+                            filtered = attributes.filter(el => el[3] === parsed && (el[1].split(":")[1] === splitTarget[1] || el[4].split(":")[1] === splitTarget[1]));
+                        break;
+                        case 3:  // attribute name and value1 (+ maybe src_ref/src_name)
+                            if(splitTarget[1].length === 0) {
+                                filtered = attributes.filter(el => el[3] === parsed && el[5] === splitTarget[2]);
+                            } else {
+                                filtered = attributes.filter(el => el[3] === parsed && (el[1].split(":")[1] === splitTarget[1] || el[4].split(":")[1] === splitTarget[1]) && el[5] === splitTarget[2]);
+                            }
+                        break;
+                        default:
+                            abilityLog(`❗ **Error:** Invalid active attribute selector target format \`${selectorTarget}\`!`);
+                            return [ ];
+                        break;
+                    }
+                    // return 
+                    return filtered.map(el => { return { ai_id: el[0], name: el[3] } });
                 } else {
-                    abilityLog(`❗ **Error:** Invalid attribute selector target \`${selectorTarget}\`!`);
+                    abilityLog(`❗ **Error:** Invalid active attribute selector target \`${selectorTarget}\`!`);
                     return [ ];
                 }
         }

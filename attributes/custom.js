@@ -71,12 +71,12 @@ module.exports = function() {
 	}
 
     /** Custom Attribute Cache
-    Format: [ai_id,src_ref,owner_ref,attr_name]
+    Format: [ai_id,src_ref,owner_ref,attr_name,src_name,value1(val2)]
     **/
     this.cachedActiveCustomAttributes = [];
     this.cacheActiveCustomAttributes = async function() {
-        let result = await sqlProm("SELECT ai_id,src_ref,owner,owner_type,val1 AS name FROM active_attributes WHERE attr_type='custom'");
-        cachedActiveCustomAttributes = result.map(el => [el.ai_id, el.src_ref, `${el.owner_type}:${el.owner}`, el.name]);
+        let result = await sqlProm("SELECT ai_id,src_ref,src_name,owner,owner_type,val1 AS name,val2 FROM active_attributes WHERE attr_type='custom'");
+        cachedActiveCustomAttributes = result.map(el => [el.ai_id, el.src_ref, `${el.owner_type}:${el.owner}`, el.name, el.src_name, el.val2]);
     }
     
     this.getCustomAttributeOwner = function(ai_id) {
@@ -95,6 +95,18 @@ module.exports = function() {
         let found = cachedActiveCustomAttributes.find(el => el[0] === +ai_id);
         if(found) return found[3];
         else return `unknown`;
+    }
+    
+    this.getCustomAttributeSourceName = function(ai_id) {
+        let found = cachedActiveCustomAttributes.find(el => el[0] === +ai_id);
+        if(found) return found[4];
+        else return `unknown:unknown`;
+    }
+    
+    this.getCustomAttributeVal1 = function(ai_id) {
+        let found = cachedActiveCustomAttributes.find(el => el[0] === +ai_id);
+        if(found) return found[5];
+        else return ``;
     }
     
     // checks if a specific owner has a certain custom attribute
