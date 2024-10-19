@@ -30,7 +30,7 @@ module.exports = function() {
             return { msg: "Redirecting failed! " + abilityError, success: false };
         }
         // select subtype
-        result = await redirecting(src_name, src_ref, target[0], ability.source, ability.subtype, duration);
+        result = await redirecting(src_name, src_ref, ability.target, ability.source, ability.subtype, duration);
         return result;
 
     }
@@ -41,7 +41,7 @@ module.exports = function() {
     **/
     this.redirecting = async function(src_name, src_ref, target, source, type, duration) {
         await createRedirectionAttribute(src_name, src_ref, srcToValue(src_ref), duration, target, source, type);
-        abilityLog(`✅ <@${srcToValue(src_ref)}> now has a redirection for \`${type}\` to <@${target}> affecting \`${source}\` for \`${getDurationName(duration)}\`.`);
+        abilityLog(`✅ <@${srcToValue(src_ref)}> now has a redirection for \`${type}\` to \`${target}\` affecting \`${source}\` for \`${getDurationName(duration)}\`.`);
         return { msg: "Redirecting succeeded!", success: true, target: `player:${target}` };
     }
     
@@ -58,6 +58,7 @@ module.exports = function() {
     Apply redirection
     **/
     this.applyRedirection = async function(target, sourceAny, abilityType = "", abilitySubtype = "") {
+        if(!target) return target;
         // allow both direct id types as well as player:<id> format
         let sourceSplit = sourceAny.split(":");
         let source = sourceSplit.length === 2 ? sourceSplit[1] : sourceAny;
@@ -84,7 +85,6 @@ module.exports = function() {
         let parsedAbilitySubype = parseAbilitySubtype(abilitySubtype + " " + abilityType);
         let filteredRedirections = [];
         for(let i = 0; i < targetRedirections.length; i++) {
-            let validSources = await parsePlayerSelector(targetRedirections[i].val2);
             let type = await parseSelector(targetRedirections[i].val3);
             let typeMatch = false;
             // check if there is a type match
@@ -101,18 +101,23 @@ module.exports = function() {
                 break;
             }
             // check if there is a source match
+            let validSources = await parsePlayerSelector(targetRedirections[i].val2, `player:${source}`);
             let sourceMatch = false;
             if(validSources.includes(source)) sourceMatch = true;
             // save if both match
             //console.log(`Checking Redirection for ${targetRedirections[i].ai_id}: type match? ${typeMatch}; source match? ${sourceMatch}`);
-            if(typeMatch && sourceMatch) filteredRedirections.push(targetRedirections[i].val1);
+            if(typeMatch && sourceMatch) {
+                let newTarget = await parsePlayerSelector(targetRedirections[i].val1, `player:${source}`);
+                filteredRedirections.push([newTarget,targetRedirections[i].ai_id]);
+            }
         }
         // return last redirection if applicable - otherwise return normal target
         if(filteredRedirections.length > 0) {
             let newTarget = filteredRedirections[filteredRedirections.length - 1];
             //console.log(`Redirected from ${target} to ${newTarget}!`);
-            abilityLog(`✅ Redirected from <@${target}> to <@${newTarget}>!`);
-            return await applyRedirectionOnce(newTarget, source, abilityType, abilitySubtype); // recursively redirect 
+            abilityLog(`✅ Redirected from <@${target}> to <@${newTarget[0]}>!`);
+            await useAttribute(newTarget[1]);
+            return await applyRedirectionOnce(newTarget[0], source, abilityType, abilitySubtype); // recursively redirect 
         } else {
             //console.log(`Did not redirect ${target}!`);
             return target;
