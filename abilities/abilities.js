@@ -30,6 +30,7 @@ require("./types/reset.js")();
 require("./types/counting.js")();
 require("./types/loyalty.js")();
 require("./types/disband.js")();
+require("./types/redirecting.js")();
 
 module.exports = function() {
     
@@ -134,6 +135,9 @@ module.exports = function() {
                 break;
                 case "loyalty":
                     feedback = await abilityLoyalty(src_ref, src_name, ability, additionalTriggerData);
+                break;
+                case "redirecting":
+                    feedback = await abilityRedirecting(src_ref, src_name, ability, additionalTriggerData);
                 break;
                 case "ascend":
                     feedback = await abilityAscend(src_ref, src_name, ability, additionalTriggerData);

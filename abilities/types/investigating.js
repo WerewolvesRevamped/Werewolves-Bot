@@ -17,6 +17,8 @@ module.exports = function() {
         }
         // parse parameters
         let target = await parsePlayerSelector(ability.target, src_ref, additionalTriggerData);
+        // apply redirection
+        target = await applyRedirection(target, src_ref, ability.type, ability.subtype);
         // select subtype
         switch(ability.subtype) {
             default:

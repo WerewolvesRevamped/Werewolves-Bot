@@ -906,16 +906,40 @@ module.exports = function() {
         }
         /** REDIRECTING **/
         // redirect from all
-        exp = new RegExp("^Redirect `" + redirectSubtype + "` to " + targetType + "$", "g");
+        exp = new RegExp("^Redirect `" + redirectSubtype + "` to " + targetType + attrDuration + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "redirecting", subtype: fd[1], target: ttpp(fd[2]), source: "@All[player]" };
+            ability = { type: "redirecting", subtype: ttpp(fd[1], "abilityCategory"), target: ttpp(fd[2]), source: "@All[player]", duration: dd(fd[4], "permanent") };
         }
         // redirect from certain players
-        exp = new RegExp("^Redirect `" + redirectSubtype + "` from " + targetType + " to " + targetType + "$", "g");
+        exp = new RegExp("^Redirect `" + redirectSubtype + "` from " + targetType + " to " + targetType + attrDuration + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "redirecting", subtype: fd[1], target: ttpp(fd[3]), source: ttpp(fd[2]) };
+            ability = { type: "redirecting", subtype: ttpp(fd[1], "abilityCategory"), target: ttpp(fd[3]), source: ttpp(fd[2]), duration: dd(fd[4], "permanent") };
+        }
+        // redirect from all (type)
+        exp = new RegExp("^Redirect `" + abilityType + "` to " + targetType + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "redirecting", subtype: ttpp(fd[1], "abilityType"), target: ttpp(fd[2]), source: "@All[player]", duration: dd(fd[4], "permanent") };
+        }
+        // redirect from certain players (type)
+        exp = new RegExp("^Redirect `" + abilityType + "` from " + targetType + " to " + targetType + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "redirecting", subtype: ttpp(fd[1], "abilityType"), target: ttpp(fd[3]), source: ttpp(fd[2]), duration: dd(fd[4], "permanent") };
+        }
+        // redirect from all (subtype)
+        exp = new RegExp("^Redirect `" + abilitySubtype + "` to " + targetType + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "redirecting", subtype: ttpp(fd[1], "abilitySubtype"), target: ttpp(fd[2]), source: "@All[player]", duration: dd(fd[4], "permanent") };
+        }
+        // redirect from certain players (subtype)
+        exp = new RegExp("^Redirect `" + abilitySubtype + "` from " + targetType + " to " + targetType + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "redirecting", subtype: ttpp(fd[1], "abilitySubtype"), target: ttpp(fd[3]), source: ttpp(fd[2]), duration: dd(fd[4], "permanent") };
         }
         /** VOTE MANIPULATION **/
         // manipulation by absolute value

@@ -11,7 +11,7 @@ module.exports = function() {
     this.abilityManipulating = async function(src_ref, src_name, ability, additionalTriggerData) {
         let result;
         // check parameters
-        if(!ability.target || !ability.manip_type || !ability.manip_value || !ability.duration) {
+        if(!ability.target || !ability.manip_type || !ability.manip_value) {
             abilityLog(`❗ **Error:** Missing arguments for type \`${ability.type}\`!`);
             return { msg: "Manipulating failed! " + abilityError, success: false };
         }

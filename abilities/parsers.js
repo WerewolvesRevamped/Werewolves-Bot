@@ -61,6 +61,9 @@ module.exports = function() {
             // ABILITY SUBTYPE
             case "abilitysubtype":
                 return { value: [ parseAbilitySubtype(selector) ], type: "abilitySubype" };
+            // ABILITY SUBTYPE
+            case "abilitycategory":
+                return { value: [ parseAbilityCategory(selector) ], type: "abilityCategory" };
             // NUMBER
             case "number":
                 return { value: [ await parseNumber(selector) ], type: "number" };
@@ -900,6 +903,21 @@ module.exports = function() {
         } else {
             abilityLog(`❗ **Error:** Invalid ability type \`${selectorTarget}\`. Defaulted to \`none\`!`);
             return "none";
+        }
+    }
+    
+    /**
+    Parse ability category
+    **/
+    const abilityCategoryNames = ["all", "non-killing abilities"];
+    this.parseAbilityCategory = function(ability_category) {
+        // get target
+        let selectorTarget = selectorGetTarget(ability_category);
+        if(abilityCategoryNames.includes(selectorTarget)) {
+            return selectorTarget;
+        } else {
+            abilityLog(`❗ **Error:** Invalid ability category \`${selectorTarget}\`. Defaulted to \`all\`!`);
+            return "all";
         }
     }
     

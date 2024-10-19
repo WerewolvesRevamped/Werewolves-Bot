@@ -76,6 +76,14 @@ module.exports = function() {
         await createAttribute(src_name, src_ref, target_player, "player", dur, "loyalty", subtype, target);
     }
     
+    /**
+    Create Redirection Attribute
+    creates a redirection attribute to another player
+    **/
+    this.createRedirectionAttribute = async function(src_name, src_ref, target_player, dur, target = "", source = "", type = "all") {
+        await createAttribute(src_name, src_ref, target_player, "player", dur, "redirection", target, source, type);
+    }
+    
     /** PUBLIC
     Get role attribute's player id
     **/
