@@ -20,6 +20,7 @@ module.exports = function() {
         let from_selector = ability.defense_from_target ?? "@All"; // this selector should be parsed at argument runtime, not now
         let during_phase = parsePhaseType(ability.defense_during ?? "all");
         let target = await parsePlayerSelector(ability.target, src_ref, additionalTriggerData);
+        target = await applyRedirection(target, src_ref, ability.type, ability.subtype);
         let dur_type = parseDuration(ability.duration ?? "permanent");
         // select subtype
         switch(ability.subtype) {
@@ -51,6 +52,7 @@ module.exports = function() {
                 }
                 let loc = await parseLocation(ability.absence_at, src_ref, additionalTriggerData);
                 loc = loc.value;
+                loc = await applyRedirection(loc, src_ref, ability.type, ability.subtype);
                 result = await protectingAbsence(src_name, src_ref, target, loc, from_type, from_selector, during_phase, dur_type);
                 return result;
             break;

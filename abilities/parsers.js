@@ -894,7 +894,7 @@ module.exports = function() {
     /**
     Parse ability type
     **/
-    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","","manipulating","whispering","joining","granting","","","poll","announcement","changing","","choices","ascend","descend","","counting","reset","","","feedback","success","failure","log","","process_evaluate","abilities"];
+    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","redirecting","manipulating","whispering","joining","granting","loyalty","","poll","announcement","changing","","choices","ascend","descend","","counting","reset","","","feedback","success","failure","log","","process_evaluate","abilities"];
     this.parseAbilityType = function(ability_type) {
         // get target
         let selectorTarget = selectorGetTarget(ability_type);
@@ -931,12 +931,12 @@ module.exports = function() {
         ["weakly","strongly"], // disguising
         ["active-defense","passive-defense","partial-defense","recruitment-defense","absence"], // protecting
         ["add","remove","change"], // applying
-        null, // redirecting
+        [], // redirecting
         [], // vote manipulation
         [], // whispering
         ["add","remove"], // joining
         ["add","remove","transfer"], // granting
-        null, // loyalty
+        [], // loyalty
         null, // obstruction
         ["creation","addition","deletion","cancellation"], // poll
         [], // announcement

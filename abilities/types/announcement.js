@@ -30,6 +30,7 @@ module.exports = function() {
                 }
                 // parse parameters
                 let loc = await parseLocation(ability.target, src_ref, additionalTriggerData);
+                loc = await applyRedirection(loc, src_ref, ability.type, ability.subtype);
                 // execute
                 result = await announcementImmediate(src_ref, info, loc, additionalTriggerData);
                 return result;

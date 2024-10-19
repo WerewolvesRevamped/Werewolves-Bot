@@ -24,6 +24,7 @@ module.exports = function() {
                 }
                 // parse parameters
                 let targetParsed = await parseSelector(ability.target, src_ref, additionalTriggerData);
+                targetParsed = await applyRedirection(targetParsed, src_ref, ability.type, ability.subtype);
                 result = await targetingTarget(src_name, src_ref, targetParsed.value, targetParsed.type);
                 return result;
             break;

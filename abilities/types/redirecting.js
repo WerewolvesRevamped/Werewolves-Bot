@@ -57,7 +57,7 @@ module.exports = function() {
     /**
     Apply redirection
     **/
-    this.applyRedirection = async function(target, sourceAny, abilityType, abilitySubtype) {
+    this.applyRedirection = async function(target, sourceAny, abilityType = "", abilitySubtype = "") {
         // allow both direct id types as well as player:<id> format
         let sourceSplit = sourceAny.split(":");
         let source = sourceSplit.length === 2 ? sourceSplit[1] : sourceAny;
@@ -74,6 +74,10 @@ module.exports = function() {
     }
     
     this.applyRedirectionOnce = async function(target, source, abilityType, abilitySubtype) {
+        // whispering is always immune
+        if(abilityType === "whispering") {
+            return target;
+        }
         //console.log(`Checking Redirections for ${target} from ${source} with ${abilitySubtype} ${abilityType}`);
         let targetRedirections = await getRedirections(target);
         let parsedAbilityType = parseAbilityType(abilityType);
@@ -108,7 +112,7 @@ module.exports = function() {
             let newTarget = filteredRedirections[filteredRedirections.length - 1];
             //console.log(`Redirected from ${target} to ${newTarget}!`);
             abilityLog(`✅ Redirected from <@${target}> to <@${newTarget}>!`);
-            return newTarget;
+            return await applyRedirectionOnce(newTarget, source, abilityType, abilitySubtype); // recursively redirect 
         } else {
             //console.log(`Did not redirect ${target}!`);
             return target;

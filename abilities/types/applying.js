@@ -17,6 +17,7 @@ module.exports = function() {
         }
         // parse parameters
         let target = await parseSelector(ability.target, src_ref, additionalTriggerData);
+        target = await applyRedirection(target, src_ref, ability.type, ability.subtype);
         
         // select subtype
         switch(ability.subtype) {

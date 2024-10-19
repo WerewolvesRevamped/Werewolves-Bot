@@ -17,6 +17,7 @@ module.exports = function() {
         }
         // parse parameters
         let target = await parsePlayerSelector(ability.target, src_ref, additionalTriggerData);
+        target = await applyRedirection(target, src_ref, ability.type, ability.subtype);
         let role = await parseRoleSelector(ability.disguise, src_ref, additionalTriggerData);
         let duration = parseDuration(ability.duration ?? "permanent");
         // select subtype
