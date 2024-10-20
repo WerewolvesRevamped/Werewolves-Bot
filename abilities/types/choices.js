@@ -31,7 +31,7 @@ module.exports = function() {
                 }
                 // parse parameters
                 const target = await parsePlayerSelector(ability.target, src_ref, additionalTriggerData);
-                target = await applyRedirection(target, src_ref, ability.type, ability.subtype);
+                target = await applyRedirection(target, src_ref, ability.type, ability.subtype, additionalTriggerData);
                 const options = ability.options.map(el => parseOptionDisplay(el));
                 // can only apply a single attribute
                 if(target.length != 1) {

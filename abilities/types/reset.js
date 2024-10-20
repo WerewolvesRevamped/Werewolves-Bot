@@ -18,7 +18,7 @@ module.exports = function() {
         
         // parse parameters
         let target = await parseLocation(ability.target, src_ref, additionalTriggerData);
-        target = await applyRedirection(target, src_ref, ability.type);
+        target = await applyRedirection(target, src_ref, ability.type, additionalTriggerData);
         
         // get channel to conversation reset
         let cid = await getSrcRefChannel(`${target.type}:${target.value}`);

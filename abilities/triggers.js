@@ -472,6 +472,8 @@ module.exports = function() {
         // extend additional trigger data
         let additionalTriggerData = JSON.parse(JSON.stringify(additionalTriggerDataOriginal));
         additionalTriggerData.parameters = trigger?.parameters ?? {};
+        // any visitless ability is also direct
+        if(additionalTriggerData.parameters.visitless === true) additionalTriggerData.parameters.direct = true;
         
         // handle action scaling
         const actionScaling = trigger?.parameters?.scaling ?? [];

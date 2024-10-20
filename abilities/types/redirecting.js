@@ -57,8 +57,9 @@ module.exports = function() {
     /**
     Apply redirection
     **/
-    this.applyRedirection = async function(target, sourceAny, abilityType = "", abilitySubtype = "") {
+    this.applyRedirection = async function(target, sourceAny, abilityType = "", abilitySubtype = "", additionalTriggerData = {}) {
         if(!target) return target;
+        if(additionalTriggerData.parameters && additionalTriggerData.parameters.direct) return target; // cannot redirect a direct ability
         // allow both direct id types as well as player:<id> format
         let sourceSplit = sourceAny.split(":");
         let source = sourceSplit.length === 2 ? sourceSplit[1] : sourceAny;

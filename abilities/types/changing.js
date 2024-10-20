@@ -25,7 +25,7 @@ module.exports = function() {
             case "role":
                 // parse parameters
                 let targetsRole = await parsePlayerSelector(ability.target, src_ref, additionalTriggerData);
-                targetsRole = await applyRedirection(targetsRole, src_ref, ability.type, ability.subtype);
+                targetsRole = await applyRedirection(targetsRole, src_ref, ability.type, ability.subtype, additionalTriggerData);
                 let roles = await parseRoleSelector(ability.change_to, src_ref, additionalTriggerData);
                 // can only apply a single attribute
                 if(roles.length != 1) {
@@ -38,7 +38,7 @@ module.exports = function() {
             case "alignment":
                 // parse parameters
                 let targetsAlignment = await parsePlayerSelector(ability.target, src_ref, additionalTriggerData);
-                targetsAlignment = await applyRedirection(targetsAlignment, src_ref, ability.type, ability.subtype);
+                targetsAlignment = await applyRedirection(targetsAlignment, src_ref, ability.type, ability.subtype, additionalTriggerData);
                 let alignments = await parseAlignment(ability.change_to, src_ref, additionalTriggerData);
                 // can only apply a single attribute
                 if(alignments.length != 1) {
