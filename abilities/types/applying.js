@@ -17,6 +17,7 @@ module.exports = function() {
         }
         // parse parameters
         let target = await parseSelector(ability.target, src_ref, additionalTriggerData);
+        console.log(target);
         target = await applyRedirection(target, src_ref, ability.type, ability.subtype, additionalTriggerData);
         
         // select subtype
@@ -26,11 +27,6 @@ module.exports = function() {
                 return { msg: "Applying failed! " + abilityError, success: false };
             break;
             case "add":
-                // check parameters
-                if(!ability.duration) {
-                    abilityLog(`❗ **Error:** Missing arguments for type \`${ability.type}\`!`);
-                    return { msg: "Applying failed! " + abilityError, success: false };
-                }
                 let attr = parseAttributeSelector(ability.attribute, src_ref, additionalTriggerData);
                 // can only apply a single attribute
                 if(attr.length != 1) {
@@ -72,6 +68,13 @@ module.exports = function() {
     this.applyingAdd = async function(src_name, src_ref, targets, attr, duration, val1, val2, val3) {
         // iterate through targets
         for(let i = 0; i < targets.value.length; i++) {
+            // handle visit
+            let result = await visit(src_ref, targets.value[i], attr, "applying", "add");
+            if(result) {
+                if(targets.value.length === 1) return visitReturn(result, "Applying failed!", "Applying succeeded!");
+                else continue;
+            }
+            
             await createCustomAttribute(src_name, src_ref, targets.value[i], targets.type, duration, attr, val1, val2, val3);
             abilityLog(`✅ ${srcRefToText(targets.type + ':' + targets.value[i])} had ${attr} applied for \`${getDurationName(duration)}\`.`);
             // run Starting trigger

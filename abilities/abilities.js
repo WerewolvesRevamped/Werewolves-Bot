@@ -7,6 +7,7 @@ require("./parsers.js")();
 require("./prompts.js")();
 require("./restrictions.js")();
 require("./scaling.js")();
+require("./visit.js")();
 
 /** Ability Types **/
 require("./types/joining.js")();
@@ -31,6 +32,7 @@ require("./types/counting.js")();
 require("./types/loyalty.js")();
 require("./types/disband.js")();
 require("./types/redirecting.js")();
+require("./types/cancel.js")();
 
 module.exports = function() {
     
@@ -138,6 +140,9 @@ module.exports = function() {
                 break;
                 case "redirecting":
                     feedback = await abilityRedirecting(src_ref, src_name, ability, additionalTriggerData);
+                break;
+                case "cancel":
+                    feedback = await abilityCancel(src_ref, src_name, ability, additionalTriggerData);
                 break;
                 case "ascend":
                     feedback = await abilityAscend(src_ref, src_name, ability, additionalTriggerData);

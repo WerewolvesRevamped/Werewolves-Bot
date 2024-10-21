@@ -65,12 +65,17 @@ module.exports = function() {
         let source = sourceSplit.length === 2 ? sourceSplit[1] : sourceAny;
         
         // allow both singular targets as well as target arrays
-        if(Array.isArray(target)) {
+        if(target.value && Array.isArray(target.value)) { // .value array
             for(let i = 0; i < target.length; i++) {
                 target[i] = await applyRedirectionOnce(target[i], source, abilityType, abilitySubtype);
             }
             return target;
-        } else {
+        } else if(Array.isArray(target)) { // ARRAY
+            for(let i = 0; i < target.length; i++) {
+                target[i] = await applyRedirectionOnce(target[i], source, abilityType, abilitySubtype);
+            }
+            return target;
+        } else { // SINGLE VALUE
             return await applyRedirectionOnce(target, source, abilityType, abilitySubtype);
         }
     }

@@ -1366,13 +1366,25 @@ module.exports = function() {
         exp = new RegExp("^Cancel$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "cancel", cancel_with: "Failure" };
+            ability = { type: "cancel", subtype: "direct" };
         }
-        // cancel with specific result
-        exp = new RegExp("^Cancel with (Failure|Success|" + rawStr + ")$", "g");
+        // cancel with failure
+        exp = new RegExp("^Cancel with Failure$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "cancel", cancel_with: fd[1] };
+            ability = { type: "cancel", subtype: "direct" };
+        }
+        // cancel with specific result
+        exp = new RegExp("^Cancel with Success$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "cancel", subtype: "success" };
+        }
+        // cancel with specific result
+        exp = new RegExp("^Cancel with `(" + rawStr + ")`$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "cancel", subtype: "with", cancel_with: fd[1] };
         }
         /** SWITCHING **/
         // switching
@@ -1566,12 +1578,12 @@ module.exports = function() {
                     exp = new RegExp("^On " + targetType + " Visited \\[" + abilityType + "\\]$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
-                        complexTrigger = "On Visited;" + ttpp(fd[1]) + ";" + ttpp(fd[2], "abilityType");
+                        complexTrigger = "On Visited Target;" + ttpp(fd[1]) + ";" + ttpp(fd[2], "abilityType");
                     }
                     exp = new RegExp("^On " + targetType + " Visited \\[" + abilitySubtype + "\\]$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
-                        complexTrigger = "On Visited;" + ttpp(fd[1]) + ";" + ttpp(fd[2], "abilitySubtype");
+                        complexTrigger = "On Visited Target;" + ttpp(fd[1]) + ";" + ttpp(fd[2], "abilitySubtype");
                     }
                     /** Choice Chosen **/
                     var exp, fd, complexTrigger;
