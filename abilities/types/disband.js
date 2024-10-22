@@ -11,7 +11,7 @@ module.exports = function() {
     **/
     this.groupsDisband = async function(group) {
         return new Promise(res => {
-            sql("SELECT * FROM active_groups WHERE name=" + connection.escape(group), async result => {
+            sql("SELECT * FROM active_groups WHERE disbanded=0 AND name=" + connection.escape(group), async result => {
                 let groupChannel = await mainGuild.channels.fetch(result[0].channel_id);
                 // update permissions
                 let groupMembers = groupChannel.permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Member);
@@ -23,6 +23,8 @@ module.exports = function() {
                 groupChannel.send(embed);
                 // disband active group
                 await sqlPromEsc("UPDATE active_groups SET disbanded=1 WHERE ai_id=", result[0].ai_id);
+                // resolve disband
+                res();
             });
         });
     }

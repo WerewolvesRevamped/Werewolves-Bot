@@ -17,7 +17,6 @@ module.exports = function() {
         }
         // parse parameters
         let target = await parseSelector(ability.target, src_ref, additionalTriggerData);
-        console.log(target);
         target = await applyRedirection(target, src_ref, ability.type, ability.subtype, additionalTriggerData);
         
         // select subtype
@@ -72,7 +71,7 @@ module.exports = function() {
             let result = await visit(src_ref, targets.value[i], attr, "applying", "add");
             if(result) {
                 if(targets.value.length === 1) return visitReturn(result, "Applying failed!", "Applying succeeded!");
-                else continue;
+                continue;
             }
             
             await createCustomAttribute(src_name, src_ref, targets.value[i], targets.type, duration, attr, val1, val2, val3);
@@ -97,6 +96,15 @@ module.exports = function() {
 
         // iterate through targets
         for(let i = 0; i < targets.value.length; i++) {
+            // handle visit
+            let result = await visit(src_ref, targets.value[i], attrName[0], "applying", "remove");
+            if(result) {
+                if(targets.value.length === 1) return visitReturn(result, "Unapplying failed!", "Unapplying succeeded!");
+                if(result.success) successes++;
+                else failures++;
+                continue;
+            }
+            
             // does not have attribute, so no removal needed
             if(!hasCustomAttribute(`${targets.type}:${targets.value[i]}`, attrName[0])) {
                 abilityLog(`✅ ${srcRefToText(targets.type + ':' + targets.value[i])} does not have ${attrName[0]}, unapplying skipped.`);
@@ -135,6 +143,15 @@ module.exports = function() {
         let successes = 0;
         // iterate through targets
         for(let i = 0; i < targets.value.length; i++) {
+            // handle visit
+            let result = await visit(src_ref, targets.value[i], attribute, "applying", "change");
+            if(result) {
+                if(targets.value.length === 1) return visitReturn(result, "Attribute changing failed!", "Attribute changing succeeded!");
+                if(result.success) successes++;
+                else failures++;
+                continue;
+            }
+            
             let attr = parseActiveAttributeSelector(attribute, src_ref, {}, `${targets.type}:${targets.value[i]}`);
             // can only apply a single attribute
             if(attr.length === 0) {

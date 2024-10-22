@@ -26,6 +26,10 @@ module.exports = function() {
         let target = await parseLocation(ability.target, src_ref, additionalTriggerData);
         let dur_type = parseDuration(ability.duration ?? "permanent");
         
+        // handle visit
+        let resultV = await visit(src_ref, target.value, disguise, "whispering");
+        if(resultV) return visitReturn(resultV, "Whispering failed!", "Whispering succeeded!");
+        
         // parse player data
         let pid = srcToValue(src_ref);
         let role = srcToValue(src_name);

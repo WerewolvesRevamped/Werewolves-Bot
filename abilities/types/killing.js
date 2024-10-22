@@ -60,6 +60,13 @@ module.exports = function() {
         
         // iterate through all attack targets
         for(let i = 0; i < targets.length; i++) {
+            // handle visit
+            let result = await visit(src_ref, targets[i], "", "killing", "attack");
+            if(result) {
+                if(targets.length === 1) return visitReturn(result, "Attack failed!", "Attack succeeded!");
+                continue;
+            }
+            
             // for every target, add all other player that are absent at their location to targets
             let absentPlayers = await getAbsences(targets[i], "attack", src_ref);
             if(absentPlayers[0]) targets.push(...absentPlayers);
@@ -89,6 +96,13 @@ module.exports = function() {
         
         // iterate through all attack targets
         for(let i = 0; i < targets.length; i++) {
+            // handle visit
+            let result = await visit(src_ref, targets[i], "", "killing", "lynch");
+            if(result) {
+                if(targets.length === 1) return visitReturn(result, "Lynch failed!", "Lynch succeeded!");
+                continue;
+            }
+            
             // for every target, add all other player that are absent at their location to targets
             let absentPlayers = await getAbsences(targets[i], "lynch", src_ref);
             if(absentPlayers[0]) targets.push(...absentPlayers);
@@ -121,6 +135,13 @@ module.exports = function() {
         
         // iterate through all attack targets
         for(let i = 0; i < targets.length; i++) {
+            // handle visit
+            let result = await visit(src_ref, targets[i], "", "killing", "kill");
+            if(result) {
+                if(targets.length === 1) return visitReturn(result, "Kill failed!", "Kill succeeded!");
+                continue;
+            }
+            
             // for every target, add all other player that are absent at their location to targets
             let absentPlayers = await getAbsences(targets[i], "kill", src_ref);
             if(absentPlayers[0]) targets.push(...absentPlayers);
@@ -148,6 +169,13 @@ module.exports = function() {
     async function killingTrueKill(src_name, src_ref, targets) {
         let success = false;
         for(let i = 0; i < targets.length; i++) {
+            // handle visit
+            let result = await visit(src_ref, targets[i], "", "killing", "true kill");
+            if(result) {
+                if(targets.length === 1) return visitReturn(result, "True Kill failed!", "True Kill succeeded!");
+                continue;
+            }
+            
             // for every target, add all other player that are absent at their location to targets
             let absentPlayers = await getAbsences(targets[i], "true kill", src_ref);
             if(absentPlayers[0]) targets.push(...absentPlayers);
@@ -172,6 +200,13 @@ module.exports = function() {
         
         // iterate through all attack targets
         for(let i = 0; i < targets.length; i++) {
+            // handle visit
+            let result = await visit(src_ref, targets[i], "", "killing", "banish");
+            if(result) {
+                if(targets.length === 1) return visitReturn(result, "Banishment failed!", "Banishment succeeded!");
+                continue;
+            }
+            
             // for every target, add all other player that are absent at their location to targets
             let absentPlayers = await getAbsences(targets[i], "banish", src_ref);
             if(absentPlayers[0]) targets.push(...absentPlayers);
@@ -199,6 +234,13 @@ module.exports = function() {
     async function killingTrueBanish(src_name, src_ref, targets) {
         let success = false;
         for(let i = 0; i < targets.length; i++) {
+            // handle visit
+            let result = await visit(src_ref, targets[i], "", "killing", "true banish");
+            if(result) {
+                if(targets.length === 1) return visitReturn(result, "True Banishment failed!", "True Banishment succeeded!");
+                continue;
+            }
+            
             // for every target, add all other player that are absent at their location to targets
             let absentPlayers = await getAbsences(targets[i], "true banish", src_ref);
             if(absentPlayers[0]) targets.push(...absentPlayers);

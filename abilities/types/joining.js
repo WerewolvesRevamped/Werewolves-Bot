@@ -56,6 +56,13 @@ module.exports = function() {
     **/
     this.joiningAdd = async function(src_name, src_ref, targets, group, type, dur_type) {
         for(let i = 0; i < targets.length; i++) {
+            // handle visit
+            let result = await visit(src_ref, targets[i], group, "joining", "add");
+            if(result) {
+                if(targets.length === 1) return visitReturn(result, "Joining failed!", "Joining succeeded!");
+                continue;
+            }
+            
             // check if target is already part of the group
             let attrs = await queryAttributePlayer(targets[i], "val1", group);
             if(attrs.length > 1) { // already part of the group, skip
@@ -90,6 +97,13 @@ module.exports = function() {
     **/
     this.joiningRemove = async function(src_name, src_ref, targets, group) {
         for(let i = 0; i < targets.length; i++) {
+            // handle visit
+            let result = await visit(src_ref, targets[i], group, "joining", "remove");
+            if(result) {
+                if(targets.length === 1) return visitReturn(result, "Joining failed!", "Joining succeeded!");
+                continue;
+            }
+            
             // check if target is already part of the group
             let attrs = await queryAttributePlayer(targets[i], "val1", group);
             if(attrs.length > 0) { // in group, can be removed

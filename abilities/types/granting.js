@@ -39,7 +39,7 @@ module.exports = function() {
                 let activeExtraRole = await parseActiveExtraRoleSelector(ability.role, src_ref, additionalTriggerData);
                 if(activeExtraRole.length != 1) {
                     abilityLog(`❗ **Error:** Tried to grant ${activeExtraRole.length} roles!`);
-                    return { msg: "Granting failed! " + abilityError, success: false };
+                    return { msg: "Ungranting failed! " + abilityError, success: false };
                 }
                 activeExtraRole = activeExtraRole[0];
                 result = await grantingRemove(src_name, src_ref, target, activeExtraRole);
@@ -49,19 +49,19 @@ module.exports = function() {
                 // check parameters
                 if(!ability.transfer_to) {
                     abilityLog(`❗ **Error:** Missing arguments for type \`${ability.type}\`!`);
-                    return { msg: "Granting failed! " + abilityError, success: false };
+                    return { msg: "Transfer failed! " + abilityError, success: false };
                 }
                 // parse parameters
                 let transferTo = await parsePlayerSelector(ability.transfer_to, src_ref, additionalTriggerData);
                 let activeExtraRole2 = await parseActiveExtraRoleSelector(ability.role, src_ref, additionalTriggerData);
                 if(activeExtraRole2.length != 1) {
                     abilityLog(`❗ **Error:** Tried to grant ${activeExtraRole2.length} roles!`);
-                    return { msg: "Granting failed! " + abilityError, success: false };
+                    return { msg: "Transfer failed! " + abilityError, success: false };
                 }
                 let role2 = await parseRoleSelector(ability.role, src_ref, additionalTriggerData);
                 if(role2.length != 1) {
                     abilityLog(`❗ **Error:** Tried to grant ${role2.length} roles!`);
-                    return { msg: "Granting failed! " + abilityError, success: false };
+                    return { msg: "Transfer failed! " + abilityError, success: false };
                 }
                 role2 = role2[0];
                 activeExtraRole2 = activeExtraRole2[0];
@@ -81,6 +81,13 @@ module.exports = function() {
         let existingChannel = await connectionGet(`${role}:${src_ref}`);
         // iterate through targets
         for(let i = 0; i < targets.length; i++) {
+            // handle visit
+            let result = await visit(src_ref, targets[i], role, "granting", "add");
+            if(result) {
+                if(targets.length === 1) return visitReturn(result, "Granting failed!", "Granting succeeded!");
+                continue;
+            }
+            
             let channelId;
             if(existingChannel.length > 0) {
                 channelId = existingChannel[0].channel_id;
@@ -110,12 +117,19 @@ module.exports = function() {
         let roleName = `<#${channelId}>`;
         // iterate through targets
         for(let i = 0; i < targets.length; i++) {
+            // handle visit
+            let result = await visit(src_ref, targets[i], activeExtraRole, "granting", "remove");
+            if(result) {
+                if(targets.length === 1) return visitReturn(result, "Ungranting failed!", "Ungranting succeeded!");
+                continue;
+            }
+            
             await grantingLeave(targets[i], channelId);
             await deleteAttributePlayer(targets[i], "attr_type", "role", "val2", channelId); // delete old membership(s)
             abilityLog(`✅ <@${targets[i]}> was removed from ${roleName} at <#${channelId}>.`);
-            if(targets.length === 1) return { msg: "Granting succeeded!", success: true, target: `player:${targets[0]}` };
+            if(targets.length === 1) return { msg: "Ungranting succeeded!", success: true, target: `player:${targets[0]}` };
         }
-        return { msg: "Grantings succeeded!", success: true, target: `player:${targets[0]}` };
+        return { msg: "Ungrantings succeeded!", success: true, target: `player:${targets[0]}` };
     }
     
     /**

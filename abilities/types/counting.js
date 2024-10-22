@@ -80,6 +80,10 @@ module.exports = function() {
     Ability: Counting - Set
     **/
     async function countingSet(src_name, src_ref, target, targetType, num) {
+        // handle visit
+        let result = await visit(src_ref, target, num, "counting", "set");
+        if(result) return visitReturn(result, "Counting failed!", "Counter updated!");
+        
         // update counter
         await setCounter(`${targetType}:${target}`, num);
         
@@ -93,6 +97,10 @@ module.exports = function() {
     Ability: Counting - Increment
     **/
     async function countingIncrement(src_name, src_ref, target, targetType, num) {
+        // handle visit
+        let result = await visit(src_ref, target, num, "counting", "increment");
+        if(result) return visitReturn(result, "Counting failed!", "Counter incremented!");
+        
         // get counter
         let counter = await getCounter(`${targetType}:${target}`);
         
@@ -112,6 +120,10 @@ module.exports = function() {
     Ability: Counting - Decrement
     **/
     async function countingDecrement(src_name, src_ref, target, targetType, num) {
+        // handle visit
+        let result = await visit(src_ref, target, num, "counting", "decrement");
+        if(result) return visitReturn(result, "Counting failed!", "Counter decremented!");
+        
         // get counter
         let counter = await getCounter(`${targetType}:${target}`);
         

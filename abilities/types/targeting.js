@@ -49,8 +49,13 @@ module.exports = function() {
             return { msg: "Targeting failed! " + abilityError, success: false };
         }
         
-        // update target
         let target = targets[0];
+        
+        // handle visit
+        let result = await visit(src_ref, target, targetType, "targeting", "target");
+        if(result) return visitReturn(result, "Targeting failed!", "Target updated!");
+    
+        // update target
         await setTarget(src_ref, `${targetType}:${target}`);
         
         abilityLog(`✅ ${srcRefToText(src_ref)} targeted ${srcRefToText(targetType+':'+target)}.`);

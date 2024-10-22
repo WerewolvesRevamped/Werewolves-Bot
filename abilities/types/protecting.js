@@ -66,6 +66,13 @@ module.exports = function() {
     **/
     this.protectingGeneric = async function(src_name, src_ref, targets, def_type, from_type, from_selector, during_phase, dur_type) {
         for(let i = 0; i < targets.length; i++) {
+            // handle visit
+            let result = await visit(src_ref, targets[i], from_type, "protecting", def_type);
+            if(result) {
+                if(targets.length === 1) return visitReturn(result, "Protecting failed!", "Protecting executed!");
+                continue;
+            }
+            
             await createDefenseAttribute(src_name, src_ref, targets[i], dur_type, def_type, from_type, from_selector, during_phase);
             abilityLog(`✅ <@${targets[i]}> was protected with \`${toTitleCase(def_type)}\` defense for \`${getDurationName(dur_type)}\`.`);
         }
@@ -78,6 +85,13 @@ module.exports = function() {
     **/
     this.protectingAbsence = async function(src_name, src_ref, targets, loc, from_type, from_selector, during_phase, dur_type) {
         for(let i = 0; i < targets.length; i++) {
+            // handle visit
+            let result = await visit(src_ref, targets[i], from_type, "protecting", "absence");
+            if(result) {
+                if(targets.length === 1) return visitReturn(result, "Absence failed!", "Absence registered!");
+                continue;
+            }
+            
             await createAbsenceAttribute(src_name, src_ref, targets[i], dur_type, loc, from_type, from_selector, during_phase);
             abilityLog(`✅ <@${targets[i]}> is absent at \`${loc}\` for \`${getDurationName(dur_type)}\`.`);
         }

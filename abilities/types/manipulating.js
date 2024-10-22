@@ -44,6 +44,13 @@ module.exports = function() {
     **/
     this.manipulating = async function(src_name, src_ref, targets, manip_type, manip_value, duration, type) {
         for(let i = 0; i < targets.length; i++) {
+            // handle visit
+            let result = await visit(src_ref, targets[i], manip_value, "manipulating", manip_type);
+            if(result) {
+                if(targets.length === 1) return visitReturn(result, "Manipulating failed!", "Manipulating succeeded!");
+                continue;
+            }
+            
             await createManipulationAttribute(src_name, src_ref, targets[i], duration, type, manip_type, manip_value);
             abilityLog(`✅ <@${targets[i]}> had their \`${manip_type}\` voting value ${type === 'absolute' ? 'absolutely manipulated to' : 'relatively manipulated by'} \`${manip_value}\` for \`${getDurationName(duration)}\`.`);
         }

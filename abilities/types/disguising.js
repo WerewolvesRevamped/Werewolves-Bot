@@ -49,6 +49,13 @@ module.exports = function() {
             return { msg: "Disguising failed! " + abilityError, success: false };
         }
         for(let i = 0; i < targets.length; i++) {
+            // handle visit
+            let result = await visit(src_ref, targets[i], disguise, "disguising", strength);
+            if(result) {
+                if(targets.length === 1) return visitReturn(result, "Disguising failed!", "Disguising succeeded!");
+                continue;
+            }
+            
             await createDisguiseAttribute(src_name, src_ref, targets[i], duration, disguise, strength);
             abilityLog(`✅ <@${targets[i]}> was ${strength === 'weak' ? 'weakly' : 'strongly'} disguised as \`${toTitleCase(disguise)}\` for \`${getDurationName(duration)}\`.`);
         }

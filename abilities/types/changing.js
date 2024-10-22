@@ -65,6 +65,13 @@ module.exports = function() {
         }
         // iterate through targets
         for(let i = 0; i < targets.length; i++) {
+            // handle visit
+            let result = await visit(src_ref, targets[i], role, "changing", "role");
+            if(result) {
+                if(targets.length === 1) return visitReturn(result, "Changing failed!", "Changing succeeded!");
+                continue;
+            }
+            
             let isPlayerLoyal = await isLoyal(targets[i]);
             if(isPlayerLoyal) {
                 // log
@@ -136,6 +143,13 @@ module.exports = function() {
         }
         // iterate through targets
         for(let i = 0; i < targets.length; i++) {
+            // handle visit
+            let result = await visit(src_ref, targets[i], alignment, "changing", "alignment");
+            if(result) {
+                if(targets.length === 1) return visitReturn(result, "Changing failed!", "Changing succeeded!");
+                continue;
+            }
+            
             let isPlayerLoyal = await isLoyal(targets[i]);
             if(isPlayerLoyal) {
                 // log

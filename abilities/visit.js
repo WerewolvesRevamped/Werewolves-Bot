@@ -20,6 +20,14 @@ module.exports = function() {
         let targetPlayer = targetPlayerSplit.length === 2 ? targetPlayerSplit[1] : targetPlayerAny;
         let targetPlayerLong = targetPlayerSplit.length === 2 ? targetPlayerAny : `unknown:` + targetPlayerSplit[0];
         
+        // no visit to self
+        if(sourcePlayer === targetPlayer) return null;
+        
+        // get all living ids; check if both are players and alive
+        let living = await getAllLivingIDs();
+        if(!living.includes(sourcePlayer)) return null;
+        if(!living.includes(targetPlayer)) return null;
+        
         // increment visitid
         visitId++;
         let thisVisitId = visitId;

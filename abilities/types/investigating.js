@@ -87,6 +87,11 @@ module.exports = function() {
         if(targets.length != 1) {
             return singleTargetCheck(targets, src_ref);
         }
+        
+        // handle visit
+        let result = await visit(src_ref, targets[0], "", "investigating", "role");
+        if(result) return visitReturn(result, "Investigation failed!", "Investigation succeeded!");
+        
         // get data
         let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);
         // feedback
@@ -102,6 +107,11 @@ module.exports = function() {
         if(targets.length != 1) {
             return singleTargetCheck(targets, src_ref);
         }
+        
+        // handle visit
+        let result = await visit(src_ref, targets[0], "", "investigating", "class");
+        if(result) return visitReturn(result, "Investigation failed!", "Investigation succeeded!");
+        
         // get data
         let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);
         // feedback
@@ -117,6 +127,11 @@ module.exports = function() {
         if(targets.length != 1) {
             return singleTargetCheck(targets, src_ref);
         }
+        
+        // handle visit
+        let result = await visit(src_ref, targets[0], "", "investigating", "category");
+        if(result) return visitReturn(result, "Investigation failed!", "Investigation succeeded!");
+        
         // get data
         let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);
         // feedback
@@ -132,6 +147,11 @@ module.exports = function() {
         if(targets.length != 1) {
             return singleTargetCheck(targets, src_ref);
         }
+        
+        // handle visit
+        let result = await visit(src_ref, targets[0], "", "investigating", "alignment");
+        if(result) return visitReturn(result, "Investigation failed!", "Investigation succeeded!");
+        
         // get data
         let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);
         if(rdata.type === "") {
@@ -153,6 +173,11 @@ module.exports = function() {
         if(targets.length != 1) {
             return singleTargetCheck(targets, src_ref);
         }
+        
+        // handle visit
+        let result = await visit(src_ref, targets[0], attribute, "investigating", "attribute");
+        if(result) return visitReturn(result, "Investigation failed!", "Investigation succeeded!");
+        
         // get data
         let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);
         let hasRoleAttributeResult = await hasRoleAttribute(rdata.role.role, attribute);

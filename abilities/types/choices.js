@@ -49,6 +49,10 @@ module.exports = function() {
     creates a choice
     **/
     async function choicesCreation(src_name, src_ref, target, choiceName, options) {
+        // handle visit
+        let result = await visit(src_ref, target, choiceName, "choices", "creation");
+        if(result) return visitReturn(result, "Choice creation failed!", "Choice creation succeeded!");
+        
         // create choice
         await sqlProm("INSERT INTO choices (name, options, src_ref, src_name, owner) VALUES (" + connection.escape(choiceName) + "," + connection.escape(options.join(",")) + "," + connection.escape(src_ref) + "," + connection.escape(src_name) + "," + connection.escape(target) + ")");
         // feedback
