@@ -76,6 +76,7 @@ module.exports = function() {
             
             await createCustomAttribute(src_name, src_ref, targets.value[i], targets.type, duration, attr, val1, val2, val3);
             abilityLog(`✅ ${srcRefToText(targets.type + ':' + targets.value[i])} had ${attr} applied for \`${getDurationName(duration)}\`.`);
+            
             // run Starting trigger
             let latestCustomAttr = await queryAttribute("attr_type", "custom");
             await triggerAttribute(latestCustomAttr[latestCustomAttr.length - 1].ai_id, "Starting");

@@ -405,6 +405,7 @@ module.exports = function() {
             // COMPLEX TRIGGERS
             if(trigger.complex) {
                 let param = trigger.trigger_parameter;
+                let param2 = trigger.trigger_parameter2 ?? null;
                 switch(triggerName) {
                     case "On Death Complex":
                     case "On Killed Complex":
@@ -420,13 +421,40 @@ module.exports = function() {
                     break;
                     case "On Action Complex":
                         let abilityType = await parseSelector(param);
-                        let triggerAbilityType = additionalTriggerData.ability_subtype + additionalTriggerData.ability_type;
+                        let triggerAbilityType = (abilityType.type === "abilitySubtype" ? additionalTriggerData.ability_subtype : "") + additionalTriggerData.ability_type;
                         abilityType = abilityType.value[0].toLowerCase().replace(/[^a-z]+/,"");
                         triggerAbilityType = triggerAbilityType.replace(/[^a-z]+/,"");
                         if(abilityType === triggerAbilityType) {
                              await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
                         } else {
                             abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\` with \`${triggerAbilityType}\`.`);
+                        }
+                    break;
+                    case "On Visited Complex":
+                        let abilityType2 = await parseSelector(param);
+                        let triggerAbilityType2 = (abilityType2.type === "abilitySubtype" ? additionalTriggerData.visit_subtype : "") + additionalTriggerData.visit_type;
+                        abilityType2 = abilityType2.value[0].toLowerCase().replace(/[^a-z]+/,"");
+                        triggerAbilityType2 = triggerAbilityType2.replace(/[^a-z]+/,"");
+                        if(abilityType2 === triggerAbilityType2) {
+                             await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
+                        } else {
+                            abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\` with \`${triggerAbilityType2}\`.`);
+                        }
+                    break;
+                    case "On Visited Target Complex":
+                        let abilityType3 = await parseSelector(param2);
+                        let triggerAbilityType3 = (abilityType3.type === "abilitySubtype" ? additionalTriggerData.visit_subtype : "") + additionalTriggerData.visit_type;
+                        abilityType3 = abilityType3.value[0].toLowerCase().replace(/[^a-z]+/,"");
+                        triggerAbilityType3 = triggerAbilityType3.replace(/[^a-z]+/,"");
+                        let selector2 = await parsePlayerSelector(param);
+                        if(abilityType3 === triggerAbilityType3) {
+                            if(selector2.includes(additionalTriggerData.this)) {
+                                await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
+                            } else {
+                                abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\`.`);
+                            }
+                        } else {
+                            abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param2}\` with \`${triggerAbilityType3}\`.`);
                         }
                     break;
                     case "On Poll Win Complex":

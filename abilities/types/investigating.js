@@ -89,6 +89,7 @@ module.exports = function() {
         }
         
         // handle visit
+        console.log(targets);
         let result = await visit(src_ref, targets[0], "", "investigating", "role");
         if(result) return visitReturn(result, "Investigation failed!", "Investigation succeeded!");
         

@@ -60,7 +60,7 @@ module.exports = function() {
                 return { value: [ parseAbilityType(selector) ], type: "abilityType" };
             // ABILITY SUBTYPE
             case "abilitysubtype":
-                return { value: [ parseAbilitySubtype(selector) ], type: "abilitySubype" };
+                return { value: [ parseAbilitySubtype(selector) ], type: "abilitySubtype" };
             // ABILITY SUBTYPE
             case "abilitycategory":
                 return { value: [ parseAbilityCategory(selector) ], type: "abilityCategory" };

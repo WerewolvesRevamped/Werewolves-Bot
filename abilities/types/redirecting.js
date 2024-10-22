@@ -66,8 +66,8 @@ module.exports = function() {
         
         // allow both singular targets as well as target arrays
         if(target.value && Array.isArray(target.value)) { // .value array
-            for(let i = 0; i < target.length; i++) {
-                target[i] = await applyRedirectionOnce(target[i], source, abilityType, abilitySubtype);
+            for(let i = 0; i < target.value.length; i++) {
+                target.value[i] = await applyRedirectionOnce(target.value[i], source, abilityType, abilitySubtype);
             }
             return target;
         } else if(Array.isArray(target)) { // ARRAY
@@ -114,7 +114,8 @@ module.exports = function() {
             //console.log(`Checking Redirection for ${targetRedirections[i].ai_id}: type match? ${typeMatch}; source match? ${sourceMatch}`);
             if(typeMatch && sourceMatch) {
                 let newTarget = await parsePlayerSelector(targetRedirections[i].val1, `player:${source}`);
-                filteredRedirections.push([newTarget,targetRedirections[i].ai_id]);
+                if(newTarget.length > 1) abilityLog(`❗ **Error:** Attempted to redirect to several players, picked first player!`);
+                filteredRedirections.push([newTarget[0],targetRedirections[i].ai_id]);
             }
         }
         // return last redirection if applicable - otherwise return normal target

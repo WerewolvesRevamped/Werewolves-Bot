@@ -12,6 +12,7 @@ module.exports = function() {
     this.cancelledVisits = [];
     this.cancelledVisitsFeedback = []
     this.visit = async function(sourcePlayerAny, targetPlayerAny, visitParameter, abilityType, abilitySubtype) {
+        console.log("Visit", sourcePlayerAny, targetPlayerAny, visitParameter, abilityType, abilitySubtype);
         // allow both direct id types as well as player:<id> format
         let sourcePlayerSplit = sourcePlayerAny.split(":");
         let sourcePlayer = sourcePlayerSplit.length === 2 ? sourcePlayerSplit[1] : sourcePlayerAny;
@@ -35,7 +36,7 @@ module.exports = function() {
         // run triggers
         await triggerPlayer(targetPlayerAny, "On Visited", { visitor: sourcePlayerLong, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
         await triggerPlayer(targetPlayerAny, "On Visited Complex", { visitor: sourcePlayerLong, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
-        await triggerHandler("On Visited Target Complex", { visitor: sourcePlayerLong, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, this: targetPlayerLong, visit_id: visitId }); 
+        await triggerHandler("On Visited Target Complex", { visitor: sourcePlayerLong, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, this: targetPlayer, visit_id: visitId }); 
         
         // check if is canceled
         if(cancelledVisits.includes(thisVisitId)) {

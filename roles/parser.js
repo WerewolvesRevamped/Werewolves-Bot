@@ -172,6 +172,7 @@ module.exports = function() {
                 let trsplit = triggers.triggers[t].trigger.split(/;/);
                 triggers.triggers[t].trigger = trsplit[0] + " Complex";
                 triggers.triggers[t].trigger_parameter = trsplit[1];
+                if(trsplit[2]) triggers.triggers[t].trigger_parameter2 = trsplit[2];
                 triggers.triggers[t].complex = true;
             }
             
