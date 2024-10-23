@@ -70,6 +70,11 @@ module.exports = function() {
                 await increaseActionQuantity(src_ref, ability);
             }
             
+            let src_refAction = src_ref;
+            if(additionalTriggerData.visitless) {
+                src_refAction = "null:null";
+            }
+            
             // execute ability
             abilityLog(`🟢 **Executing Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) \`\`\`${JSON.stringify(ability).substr(0,1800)}\`\`\``);
             let feedback;
@@ -79,79 +84,79 @@ module.exports = function() {
                     feedback = { msg: "", success: false };
                 break;
                 case "joining":
-                    feedback = await abilityJoining(src_ref, src_name, ability, additionalTriggerData);
+                    feedback = await abilityJoining(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "investigating":
-                    feedback = await abilityInvestigating(src_ref, src_name, ability, additionalTriggerData);
+                    feedback = await abilityInvestigating(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "disguising":
-                    feedback = await abilityDisguising(src_ref, src_name, ability, additionalTriggerData);
+                    feedback = await abilityDisguising(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "killing":
-                    feedback = await abilityKilling(src_ref, src_name, ability, additionalTriggerData);
+                    feedback = await abilityKilling(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "protecting":
-                    feedback = await abilityProtecting(src_ref, src_name, ability, additionalTriggerData);
+                    feedback = await abilityProtecting(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "log":
-                    feedback = await abilityLogging(src_ref, src_name, ability, additionalTriggerData);
+                    feedback = await abilityLogging(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "targeting":
-                    feedback = await abilityTargeting(src_ref, src_name, ability, additionalTriggerData);
+                    feedback = await abilityTargeting(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "process_evaluate":
-                    feedback = await abilityProcessEvaluate(src_ref, src_name, ability, additionalTriggerData);
+                    feedback = await abilityProcessEvaluate(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "abilities":
-                    feedback = await abilityAbilities(src_ref, src_name, ability, additionalTriggerData);
+                    feedback = await abilityAbilities(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "announcement":
-                    feedback = await abilityAnnouncement(src_ref, src_name, ability, additionalTriggerData);
+                    feedback = await abilityAnnouncement(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "poll":
-                    feedback = await abilityPoll(src_ref, src_name, ability, additionalTriggerData);
+                    feedback = await abilityPoll(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "granting":
-                    feedback = await abilityGranting(src_ref, src_name, ability, additionalTriggerData);
+                    feedback = await abilityGranting(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "manipulating":
-                    feedback = await abilityManipulating(src_ref, src_name, ability, additionalTriggerData);
+                    feedback = await abilityManipulating(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "applying":
-                    feedback = await abilityApplying(src_ref, src_name, ability, additionalTriggerData);
+                    feedback = await abilityApplying(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "changing":
-                    feedback = await abilityChanging(src_ref, src_name, ability, additionalTriggerData);
+                    feedback = await abilityChanging(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "choices":
-                    feedback = await abilityChoices(src_ref, src_name, ability, additionalTriggerData);
+                    feedback = await abilityChoices(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "whispering":
-                    feedback = await abilityWhispering(src_ref, src_name, ability, additionalTriggerData);
+                    feedback = await abilityWhispering(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "reset":
-                    feedback = await abilityReset(src_ref, src_name, ability, additionalTriggerData);
+                    feedback = await abilityReset(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "counting":
-                    feedback = await abilityCounting(src_ref, src_name, ability, additionalTriggerData);
+                    feedback = await abilityCounting(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "loyalty":
-                    feedback = await abilityLoyalty(src_ref, src_name, ability, additionalTriggerData);
+                    feedback = await abilityLoyalty(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "redirecting":
-                    feedback = await abilityRedirecting(src_ref, src_name, ability, additionalTriggerData);
+                    feedback = await abilityRedirecting(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "cancel":
-                    feedback = await abilityCancel(src_ref, src_name, ability, additionalTriggerData);
+                    feedback = await abilityCancel(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "ascend":
-                    feedback = await abilityAscend(src_ref, src_name, ability, additionalTriggerData);
+                    feedback = await abilityAscend(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "descend":
-                    feedback = await abilityDescend(src_ref, src_name, ability, additionalTriggerData);
+                    feedback = await abilityDescend(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "feedback":
-                    let info = await parseInfo(ability.feedback, src_ref, additionalTriggerData);
+                    let info = await parseInfo(ability.feedback, src_refAction, additionalTriggerData);
                     feedback = { msg: info, success: true };
                 break;
                 case "success":

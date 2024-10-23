@@ -57,10 +57,10 @@ module.exports = function() {
                 return { value: [ await parseInfo(selector, self, additionalTriggerData) ], type: "info" };
             // ABILITY TYPE
             case "abilitytype":
-                return { value: [ parseAbilityType(selector) ], type: "abilityType" };
+                return { value: [ parseAbilityType(selector, self, additionalTriggerData) ], type: "abilityType" };
             // ABILITY SUBTYPE
             case "abilitysubtype":
-                return { value: [ parseAbilitySubtype(selector) ], type: "abilitySubtype" };
+                return { value: [ parseAbilitySubtype(selector, self, additionalTriggerData) ], type: "abilitySubtype" };
             // ABILITY SUBTYPE
             case "abilitycategory":
                 return { value: [ parseAbilityCategory(selector) ], type: "abilityCategory" };
@@ -215,6 +215,18 @@ module.exports = function() {
             case "@chooser":
                 if(additionalTriggerData.chooser) {
                     return [ additionalTriggerData.chooser ];
+                } else {
+                    return invalidSelector(selectorTarget);
+                }
+            case "@visitor":
+                if(additionalTriggerData.visitor) {
+                    return [ additionalTriggerData.visitor ];
+                } else {
+                    return invalidSelector(selectorTarget);
+                }
+            case "@visitparameter":
+                if(additionalTriggerData.visitparameter) {
+                    return [ additionalTriggerData.visitparameter ];
                 } else {
                     return invalidSelector(selectorTarget);
                 }
@@ -541,6 +553,13 @@ module.exports = function() {
                 }
                 abilityLog(`❗ **Error:** Failed to cast result to role!`);
                 return [ ];
+            case "@visitparameter":
+                if(additionalTriggerData.visitparameter) {
+                    return [ parseRole(additionalTriggerData.visitparameter) ];
+                } else {
+                    abilityLog(`❗ **Error:** Invalid role selector target \`${selectorTarget}\`!`);
+                    return [ ];
+                }
             default:
                 let parsedRole = parseRole(selectorTarget);
                 if(verifyRole(parsedRole)) {
@@ -565,6 +584,13 @@ module.exports = function() {
         // get target
         let selectorTarget = selectorGetTarget(selector.split(":")[0]); // split to remove active attribute selector info in case we parse an active attribute as a normal one
         switch(selectorTarget) {
+            case "@visitparameter":
+                if(additionalTriggerData.visitparameter) {
+                    return [ parseAttributeName(additionalTriggerData.visitparameter) ];
+                } else {
+                    abilityLog(`❗ **Error:** Invalid attribute selector target \`${selectorTarget}\`!`);
+                    return [ ];
+                }
             default:
                 let parsed = parseAttributeName(selectorTarget);
                 if(verifyAttribute(parsed)) {
@@ -659,6 +685,13 @@ module.exports = function() {
                 }
                 abilityLog(`❗ **Error:** Failed to cast result to alignment!`);
                 return [ ];
+            case "@visitparameter":
+                if(additionalTriggerData.visitparameter) {
+                    return [ parseTeam(additionalTriggerData.visitparameter) ];
+                } else {
+                    abilityLog(`❗ **Error:** Invalid alignment selector target \`${selectorTarget}\`!`);
+                    return [ ];
+                }
             // all teams
             case "&All":
                 let allTeams = await getAllTeams();
@@ -895,11 +928,18 @@ module.exports = function() {
     Parse ability type
     **/
     const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","redirecting","manipulating","whispering","joining","granting","loyalty","","poll","announcement","changing","","choices","ascend","descend","","counting","reset","","","feedback","success","failure","log","","process_evaluate","abilities"];
-    this.parseAbilityType = function(ability_type) {
+    this.parseAbilityType = function(ability_type, self = null, additionalTriggerData = {}) {
         // get target
         let selectorTarget = selectorGetTarget(ability_type);
         if(abilityTypeNames.includes(selectorTarget)) {
             return selectorTarget;
+        } else if(selectorTarget == "@visittype") {
+            if(additionalTriggerData.visittype) {
+                return [ additionalTriggerData.visittype.toLowerCase() ];
+            } else {
+                abilityLog(`❗ **Error:** Invalid ability type selector target \`${selectorTarget}\`!`);
+                return [ ];
+            }
         } else {
             abilityLog(`❗ **Error:** Invalid ability type \`${selectorTarget}\`. Defaulted to \`none\`!`);
             return "none";
@@ -957,7 +997,7 @@ module.exports = function() {
         [], // process_evaluate
         [], // abilities
         ];
-    this.parseAbilitySubtype = function(ability_subtype) {
+    this.parseAbilitySubtype = function(ability_subtype, self = null, additionalTriggerData = {}) {
         // get target
         const selectorTarget = selectorGetTarget(ability_subtype);
         const selectorTargetSplit = selectorTarget.split(" ");
@@ -977,6 +1017,13 @@ module.exports = function() {
             } else { // invalid subtype
                 abilityLog(`❗ **Error:** Invalid ability subtype \`${selectorTargetSplit[0]}\` in \`${selectorTarget}\`. Defaulted to \`none none\`!`);
                 return "none none";
+            }
+        } else if(selectorTarget == "@visitsubtype") {
+            if(additionalTriggerData.visitsubtype) {
+                return [ additionalTriggerData.visitsubtype.toLowerCase() ];
+            } else {
+                abilityLog(`❗ **Error:** Invalid ability subtype selector target \`${selectorTarget}\`!`);
+                return [ ];
             }
         } else { // type is invalid
             abilityLog(`❗ **Error:** Invalid ability type \`${selectorTargetSplit[1]}\` in \`${selectorTarget}\`. Defaulted to \`none none\`!`);
