@@ -124,6 +124,7 @@ module.exports = function() {
             //console.log(`Redirected from ${target} to ${newTarget}!`);
             abilityLog(`✅ Redirected from <@${target}> to <@${newTarget[0]}>!`);
             await useAttribute(newTarget[1]);
+            await triggerPlayer(newTarget[0], "On Redirect", { visitor: source }); 
             return await applyRedirectionOnce(newTarget[0], source, abilityType, abilitySubtype); // recursively redirect 
         } else {
             //console.log(`Did not redirect ${target}!`);
