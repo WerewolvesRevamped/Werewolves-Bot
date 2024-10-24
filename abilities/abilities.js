@@ -149,6 +149,9 @@ module.exports = function() {
                 case "cancel":
                     feedback = await abilityCancel(src_refAction, src_name, ability, additionalTriggerData);
                 break;
+                case "disband":
+                    feedback = await abilityDisband(src_refAction, src_name, ability, additionalTriggerData);
+                break;
                 case "ascend":
                     feedback = await abilityAscend(src_refAction, src_name, ability, additionalTriggerData);
                 break;

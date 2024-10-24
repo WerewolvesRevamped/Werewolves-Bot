@@ -202,10 +202,10 @@ module.exports = function() {
     this.triggerHandler = async function(triggerName, additionalTriggerData = {}) {
         abilityLog(`🔷 **Trigger:** ${triggerName}`);  
         await triggerHandlerPlayers(triggerName, additionalTriggerData);
-        //await triggerHandlerPlayersRoleAttributes(triggerName, additionalTriggerData);
-        //await triggerHandlerGroups(triggerName, additionalTriggerData);
+        await triggerHandlerPlayersRoleAttributes(triggerName, additionalTriggerData);
+        await triggerHandlerGroups(triggerName, additionalTriggerData);
         await triggerHandlerPolls(triggerName, additionalTriggerData);
-        //await triggerHandlerAttributes(triggerName, additionalTriggerData);
+        await triggerHandlerAttributes(triggerName, additionalTriggerData);
     }
     
     /**
