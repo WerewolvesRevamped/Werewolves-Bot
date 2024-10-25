@@ -18,7 +18,7 @@ module.exports = function() {
         
         // parse parameters
         let target = await parseLocation(ability.target, src_ref, additionalTriggerData);
-        target = await applyRedirection(target, src_ref, ability.type, additionalTriggerData);
+        target = await applyRedirection(target.value, src_ref, ability.type, additionalTriggerData);
         
         // handle visit
         let resultV = await visit(src_ref, target.value, "", "reset");

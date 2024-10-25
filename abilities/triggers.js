@@ -480,8 +480,27 @@ module.exports = function() {
                 }
             }
             // NORMAL TRIGGERS
-            else { // always execute for normal triggers
-                await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
+            else { // always execute for normal triggers, except actually not
+                // check src name
+                switch(triggerName) {
+                    case "On Defense":
+                    case "On Active Defense":
+                    case "On Passive Defense":
+                    case "On Partial Defense":
+                    case "On Recruitment Defense":
+                        console.log(additionalTriggerData.src_name, src_name);
+                        if(additionalTriggerData.src_name != src_name) {
+                            abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Src name mismatch.`);        
+                        } else {
+                            // execute trigger
+                            await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
+                        }
+                    break;
+                    default:
+                        // execute trigger
+                        await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
+                    break;
+                }
             }
         }
     }

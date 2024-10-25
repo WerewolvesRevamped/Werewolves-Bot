@@ -52,7 +52,7 @@ module.exports = function() {
                 }
                 let loc = await parseLocation(ability.absence_at, src_ref, additionalTriggerData);
                 loc = loc.value;
-                loc = await applyRedirection(loc, src_ref, ability.type, ability.subtype, additionalTriggerData);
+                loc = await applyRedirection(loc.value, src_ref, ability.type, ability.subtype, additionalTriggerData);
                 result = await protectingAbsence(src_name, src_ref, target, loc, from_type, from_selector, during_phase, dur_type);
                 return result;
             break;

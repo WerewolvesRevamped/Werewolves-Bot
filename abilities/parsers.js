@@ -631,16 +631,36 @@ module.exports = function() {
                     let filtered;
                     switch(splitTarget.length) {
                         case 1: // just attribute name
-                            filtered = attributes.filter(el => el[3] === parsed);
+                            filtered = attributes.filter(el => {
+                                let nameMatch = el[3] === parsed;
+                                return nameMatch;
+                            });
                         break;
                         case 2: // attribute name and src_ref/src_name
-                            filtered = attributes.filter(el => el[3] === parsed && (el[1].split(":")[1] === splitTarget[1] || el[4].split(":")[1] === splitTarget[1]));
+                            filtered = attributes.filter(el => {
+                                let nameMatch = el[3] === parsed;
+                                let srcRefMatch = el[1].split(":")[1] === splitTarget[1];
+                                let srcNameMatch = el[4].split(":")[1] === splitTarget[1];
+                                let selfMatch = splitTarget[1] === "self" && el[1].split(":")[1] === srcToValue(self);
+                                return nameMatch && (srcRefMatch || srcNameMatch || selfMatch);
+                            });
                         break;
                         case 3:  // attribute name and value1 (+ maybe src_ref/src_name)
                             if(splitTarget[1].length === 0) {
-                                filtered = attributes.filter(el => el[3] === parsed && el[5] === splitTarget[2]);
+                                filtered = attributes.filter(el => {
+                                    let nameMatch = el[3] === parsed;
+                                    let val1Match = el[5] === splitTarget[2];
+                                    return nameMatch && val1Match;
+                                });
                             } else {
-                                filtered = attributes.filter(el => el[3] === parsed && (el[1].split(":")[1] === splitTarget[1] || el[4].split(":")[1] === splitTarget[1]) && el[5] === splitTarget[2]);
+                                filtered = attributes.filter(el => {
+                                    let nameMatch = el[3] === parsed;
+                                    let srcRefMatch = el[1].split(":")[1] === splitTarget[1];
+                                    let srcNameMatch = el[4].split(":")[1] === splitTarget[1];
+                                    let selfMatch = splitTarget[1] === "self" && el[1].split(":")[1] === srcToValue(self);
+                                    let val1Match = el[5] === splitTarget[2];
+                                    return nameMatch && (srcRefMatch || srcNameMatch || selfMatch) && val1Match;
+                                });
                             }
                         break;
                         default:
@@ -979,16 +999,16 @@ module.exports = function() {
         [], // loyalty
         null, // obstruction
         ["creation","addition","deletion","cancellation"], // poll
-        [], // announcement
+        ["immediate","buffer"], // announcement
         ["role","alignment"], // changing
         null, // copying
         ["creation","choosing"], // choices
         [], // ascend
         [], // descend
-        null, // disband
+        [], // disband
         ["increment","decrement","set","increment_math","decrement_math","set_math"], // counting
         [], // conversation reset
-        null, // cancel
+        [], // cancel
         null, // switching
         [], // feedback
         [], // success
