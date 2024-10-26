@@ -143,7 +143,25 @@ module.exports = function() {
                 let target = await getTarget(self);
                 if(!target) return [ ];
                 target = srcToValue(target);
-                return [ target ];
+                return [ target ];  
+            case "@members":
+                if(!self) { // if no self is specified, @Self is invalid
+                    abilityLog(`❗ **Error:** Used \`@Members\` in invalid context!`);
+                    return [ ];
+                }
+                let val2 = srcToValue(self);
+                let type2 = srcToType(self);
+                switch(type2) {
+                    default:
+                        abilityLog(`❗ **Error:** Used \`@Members\` with invalid self type \`${type2}\`!`);
+                        return [ ];
+                    case "group":
+                        let gMembers = await groupGetMembers(val2);
+                        return gMembers.map(el => el.id);
+                    case "team": 
+                        let tMembers = await teamGetMembers(val2);
+                        return tMembers.map(el => el.id);
+                }
             
             // trigger dependent selectors
             case "@deathtype":

@@ -258,9 +258,9 @@ module.exports = function() {
             case "group":
                 return ref; // group ref already is channel id
             case "poll":
-                return backupChannelId; // WIP: poll log is hardcoded
             case "attribute":
-                return backupChannelId; // WIP: poll log is hardcoded
+            case "team":
+                return backupChannelId;
             case "location":
                 return await abilitySendGetLocationChannel(ref);
             default:
@@ -319,6 +319,7 @@ module.exports = function() {
     group (channel id) / group (name)
     player_group (member id) / group (name)
     poll (name) / poll (name)
+    team (name) / team (name)
     attribute (ai id) / attribute (name)
     **/
     
@@ -340,6 +341,7 @@ module.exports = function() {
             case "alignment":
             case "poll":
             case "role":
+            case "team":
                 return `\`${toTitleCase(val)}\``;
             case "attribute":
                 const owner = getCustomAttributeOwner(val);

@@ -161,6 +161,13 @@ module.exports = function() {
         });
     }
     
+    /** PUBLIC
+    Get group members
+    **/
+    this.groupGetMembers = function(groupName) {
+        return sqlPromEsc("SELECT players.id FROM players JOIN active_attributes ON active_attributes.owner=players.id WHERE players.type='player' AND players.alive=1 AND active_attributes.attr_type='group_membership' AND active_attributes.val1=", groupName)
+    }
+    
     
     
 }

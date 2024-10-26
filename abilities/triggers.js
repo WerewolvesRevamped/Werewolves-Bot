@@ -36,6 +36,9 @@ module.exports = function() {
             case "group":
                 await triggerGroup(val, triggerName, additionalTriggerData, true);
             break;
+            case "team":
+                await triggerTeam(val, triggerName, additionalTriggerData, true);
+            break;
             case "poll":
                 await triggerPoll(val, triggerName, additionalTriggerData, true);
             break;
@@ -132,7 +135,7 @@ module.exports = function() {
         if(!fromTrigger) abilityLog(`🔷 **Trigger:** ${triggerName} for <#${channel_id}>`);  
         return new Promise(res => {
             // get all players
-            sql("SELECT name,channel_id FROM active_groups WHERE disbanded=0 AND channel_id=" + connection.escape(channel_id), async r => {
+            sql("SELECT name,channel_id FROM active_groups WHERE disbanded=0 AND channel_id=" + connection.escape(channel_id) + " OR name=" + connection.escape(channel_id), async r => {
                 //trigger handler
                 if(!r[0]) {
                     abilityLog(`❗ **Skipped Trigger:** Cannot find matching group for ${channel_id}.`);
@@ -140,6 +143,28 @@ module.exports = function() {
                     return;
                 }
                 await triggerHandlerGroup(r[0], triggerName, additionalTriggerData);
+                // resolve outer promise
+                res();
+            });
+        });
+    }
+    
+     /**
+    Trigger Team
+    triggers a trigger for a specified team
+    **/
+    this.triggerTeam = function(teamName, triggerName, additionalTriggerData = {}, fromTrigger = false) {
+        if(!fromTrigger) abilityLog(`🔷 **Trigger:** ${triggerName} for ${toTitleCase(teamName)}`);  
+        return new Promise(res => {
+            // get all players
+            sql("SELECT * FROM teams WHERE active=1 AND name=" + connection.escape(teamName), async r => {
+                //trigger handler
+                if(!r[0]) {
+                    abilityLog(`❗ **Skipped Trigger:** Cannot find matching team for ${toTitleCase(teamName)}.`);
+                    res();
+                    return;
+                }
+                await triggerHandlerTeam(r[0], triggerName, additionalTriggerData);
                 // resolve outer promise
                 res();
             });
@@ -206,6 +231,7 @@ module.exports = function() {
         await triggerHandlerGroups(triggerName, additionalTriggerData);
         await triggerHandlerPolls(triggerName, additionalTriggerData);
         await triggerHandlerAttributes(triggerName, additionalTriggerData);
+        await triggerHandlerTeams(triggerName, additionalTriggerData);
     }
     
     /**
@@ -256,11 +282,29 @@ module.exports = function() {
     **/
     function triggerHandlerGroups(triggerName, additionalTriggerData = {}) {
         return new Promise(res => {
-            // get all players
+            // get all groups
             sql("SELECT name,channel_id FROM active_groups WHERE disbanded=0", async r => {
                 // get their groups's data
                 for(let pr of r) {
                     await triggerHandlerGroup(pr, triggerName, additionalTriggerData);
+                }
+                // resolve outer promise
+                res();
+            });
+        });
+    }
+    
+    /**
+    Trigger Handler - Teams
+    handles a trigger triggering for ALL teams
+    **/
+    function triggerHandlerTeams(triggerName, additionalTriggerData = {}) {
+        return new Promise(res => {
+            // get all teams
+            sql("SELECT * FROM teams WHERE active=1", async r => {
+                // get their team's data
+                for(let pr of r) {
+                    await triggerHandlerTeam(pr, triggerName, additionalTriggerData);
                 }
                 // resolve outer promise
                 res();
@@ -386,6 +430,24 @@ module.exports = function() {
                 // resolve outer promise
                 res();
             });            
+        });
+    }
+    
+    /**
+    Trigger Handler - Team
+    handles trigger triggering for a single team
+    **/
+    async function triggerHandlerTeam(pr, triggerName, additionalTriggerData = {}) {
+        return await new Promise(async res => {
+            // parse the formalized desc into an object
+            if(!pr.parsed) {
+                abilityLog(`🔴 **Skipped Team:** ${pr.name}. Invalid team \`${pr.display_name}\`.`);
+                res();
+                return;
+            }
+            let parsed = JSON.parse(pr.parsed);
+            await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `team:${pr.name}`, `team:${pr.name}`);
+            res();
         });
     }
     

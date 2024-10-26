@@ -120,5 +120,12 @@ module.exports = function() {
         return name.toLowerCase().replace(/[^a-z ]/g,"").trim();
     }
     
+    /** PUBLIC
+    Get team members
+    **/
+    this.teamGetMembers = function(teamName) {
+        return sqlPromEsc("SELECT id FROM players WHERE alignment=", teamName)
+    }
+    
     
 }
