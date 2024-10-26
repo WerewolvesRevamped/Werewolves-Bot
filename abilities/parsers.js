@@ -75,6 +75,8 @@ module.exports = function() {
                 return { value: await parseActiveAttributeSelector(selector, self, additionalTriggerData, self), type: "activeAttribute" };
             case "category":
                 return { value: [ parseCategory(selector) ], type: "category" };
+            case "source":
+                return { value: [ parseSourceSelector(selector) ], type: "source" };
             // UNKNOWN
             default:
                 abilityLog(`❗ **Error:** Invalid selector type \`${selectorType}\`!`);
@@ -159,12 +161,6 @@ module.exports = function() {
             case "@attacker":
                 if(additionalTriggerData.attacker) {
                     return [ additionalTriggerData.attacker ];
-                } else {
-                    return invalidSelector(selectorTarget);
-                }
-            case "@attacksource":
-                if(additionalTriggerData.attack_source) {
-                    return [ additionalTriggerData.attack_source ];
                 } else {
                     return invalidSelector(selectorTarget);
                 }
@@ -571,6 +567,31 @@ module.exports = function() {
                     return parsePropertyAccess(result, contents[2], infType);
                 } else {
                     abilityLog(`❗ **Error:** Invalid role selector target \`${selectorTarget}\`!`);
+                    return [ ];
+                }
+        }
+    }
+    
+    /**
+    Parse Source Selector
+    parses a attribute type selector
+    **/
+    this.parseSourceSelector = function(selector, self = null, additionalTriggerData = {}) {
+        // get target
+        let selectorTarget = selectorGetTarget(selector); 
+        switch(selectorTarget) {
+            case "@attacksource":
+                if(additionalTriggerData.attack_source) {
+                    return [ additionalTriggerData.attack_source ];
+                } else {
+                    abilityLog(`❗ **Error:** Invalid source selector target \`${selectorTarget}\`!`);
+                    return [ ];
+                }
+            default:
+                if(selectorTarget.split(":").length === 2) {
+                    return [ selectorTarget.toLowerCase() ];
+                } else {
+                    abilityLog(`❗ **Error:** Invalid attribute selector target \`${selectorTarget}\`!`);
                     return [ ];
                 }
         }
