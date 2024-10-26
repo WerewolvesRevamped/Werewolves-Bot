@@ -91,10 +91,12 @@ module.exports = function() {
             let groupMembershipsOwner = await queryAttributePlayer(targets[i], "attr_type", "group_membership", "val2", "owner");
             for(let j = 0; j < groupMembershipsMember.length; j++) {
                 await updateAttributeVal2(groupMembershipsMember[j].ai_id, "visitor");
+                await triggerGroup(groupMembershipsMember[j].val1, "On Betrayal", { });
                 abilityLog(`✅ <@${targets[i]}> demoted ${toTitleCase(groupMembershipsMember[j].val1)} membership to \`Visitor\`.`);
             }
             for(let j = 0; j < groupMembershipsOwner.length; j++) {
                 await updateAttributeVal2(groupMembershipsOwner[j].ai_id, "visitor");
+                await triggerGroup(groupMembershipsOwner[j].val1, "On Betrayal", { });
                 abilityLog(`✅ <@${targets[i]}> demoted ${toTitleCase(groupMembershipsOwner[j].val1)} membership to \`Visitor\`.`);
             }
             
