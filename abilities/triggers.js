@@ -420,14 +420,18 @@ module.exports = function() {
                         }
                     break;
                     case "On Action Complex":
-                        let abilityType = await parseSelector(param);
-                        let triggerAbilityType = (abilityType.type === "abilitySubtype" ? additionalTriggerData.ability_subtype : "") + additionalTriggerData.ability_type;
-                        abilityType = abilityType.value[0].toLowerCase().replace(/[^a-z]+/,"");
-                        triggerAbilityType = triggerAbilityType.replace(/[^a-z]+/,"");
-                        if(abilityType === triggerAbilityType) {
-                             await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
+                        if(additionalTriggerData.src_name != src_name) {
+                            abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Src name mismatch.`);        
                         } else {
-                            abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\` with \`${triggerAbilityType}\`.`);
+                            let abilityType = await parseSelector(param);
+                            let triggerAbilityType = (abilityType.type === "abilitySubtype" ? additionalTriggerData.ability_subtype : "") + additionalTriggerData.ability_type;
+                            abilityType = abilityType.value[0].toLowerCase().replace(/[^a-z]+/,"");
+                            triggerAbilityType = triggerAbilityType.replace(/[^a-z]+/,"");
+                            if(abilityType === triggerAbilityType) {
+                                 await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
+                            } else {
+                                abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\` with \`${triggerAbilityType}\`.`);
+                            }
                         }
                     break;
                     case "On Visited Complex":
@@ -488,7 +492,7 @@ module.exports = function() {
                     case "On Passive Defense":
                     case "On Partial Defense":
                     case "On Recruitment Defense":
-                        console.log(additionalTriggerData.src_name, src_name);
+                    case "On Action":
                         if(additionalTriggerData.src_name != src_name) {
                             abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Src name mismatch.`);        
                         } else {
