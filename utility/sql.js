@@ -52,7 +52,7 @@ module.exports = function() {
     Sets a stat in the stat database by numeric id
     */
 	this.sqlSetStat = function(id, value, resCallback = ()=>{}, errCallback = ()=>{}) {
-		return sql("UPDATE stats SET value = " + connection.escape(value) + " WHERE id = " + connection.escape(id), resCallback, errCallback);
+		sql("UPDATE stats SET value = " + connection.escape(value) + " WHERE id = " + connection.escape(id), resCallback, errCallback);
 	}
 
 	/**

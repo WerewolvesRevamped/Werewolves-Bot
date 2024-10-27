@@ -8,6 +8,11 @@ module.exports = function() {
     Runs queryRoles to query all roles from github
     **/
     this.cmdRolesQuery = async function(channel) {
+        if(stats.gamephase != gp.NONE) {
+            channel.send("⛔ Command error. Cannot query while ingame.");
+            return;
+        }
+        
         channel.send(`🔄 Querying roles. Please wait. This may take several minutes.`);
         try {
             const output = await queryRoles();
@@ -24,6 +29,11 @@ module.exports = function() {
     Runs queryRoles to query all ability sets from github
     **/
     this.cmdSetsQuery = async function(channel) {
+        if(stats.gamephase != gp.NONE) {
+            channel.send("⛔ Command error. Cannot query while ingame.");
+            return;
+        }
+        
         channel.send(`🔄 Querying ability sets. Please wait. This may take several minutes.`);
         try {
             const output = await querySets();
@@ -40,6 +50,11 @@ module.exports = function() {
     Runs queryInfo to query all info from github
     **/
     this.cmdInfomanageQuery = async function(channel) {
+        if(stats.gamephase != gp.NONE) {
+            channel.send("⛔ Command error. Cannot query while ingame.");
+            return;
+        }
+        
         channel.send(`🔄 Querying info. Please wait. This may take several minutes.`);
         try {
             const output = await queryInfo();
@@ -56,6 +71,11 @@ module.exports = function() {
     Runs queryGroups to query all groups from github
     **/
     this.cmdGroupsQuery = async function(channel) {
+        if(stats.gamephase != gp.NONE) {
+            channel.send("⛔ Command error. Cannot query while ingame.");
+            return;
+        }
+        
         channel.send(`🔄 Querying groups. Please wait. This may take several minutes.`);
         try {
             const output = await queryGroups();
@@ -72,6 +92,11 @@ module.exports = function() {
     Runs queryLocations to query all locations from github
     **/
     this.cmdLocationsQuery = async function(channel) {
+        if(stats.gamephase != gp.NONE) {
+            channel.send("⛔ Command error. Cannot query while ingame.");
+            return;
+        }
+        
         channel.send(`🔄 Querying locations. Please wait. This may take several minutes.`);
         try {
             const output = await queryLocations();
@@ -88,6 +113,11 @@ module.exports = function() {
     Runs queryPolls to query all polls from github
     **/
     this.cmdPollsQuery = async function(channel) {
+        if(stats.gamephase != gp.NONE) {
+            channel.send("⛔ Command error. Cannot query while ingame.");
+            return;
+        }
+        
         channel.send(`🔄 Querying polls. Please wait. This may take several minutes.`);
         try {
             const output = await queryPolls();
@@ -104,6 +134,11 @@ module.exports = function() {
     Runs queryAttributes to query all attributes from github
     **/
     this.cmdAttributesQuery = async function(channel) {
+        if(stats.gamephase != gp.NONE) {
+            channel.send("⛔ Command error. Cannot query while ingame.");
+            return;
+        }
+        
         channel.send(`🔄 Querying attributes. Please wait. This may take several minutes.`);
         try {
             const output = await queryAttributes();
@@ -120,6 +155,11 @@ module.exports = function() {
     Runs queryTeams to query all teams from github
     **/
     this.cmdTeamsQuery = async function(channel) {
+        if(stats.gamephase != gp.NONE) {
+            channel.send("⛔ Command error. Cannot query while ingame.");
+            return;
+        }
+        
         channel.send(`🔄 Querying teams. Please wait. This may take several minutes.`);
         try {
             const output = await queryTeams();
@@ -136,6 +176,11 @@ module.exports = function() {
     Parses all roles currently stored in the DB from desc_formalized to parsed
     **/
     this.cmdRolesParse = async function(channel) {
+        if(stats.gamephase != gp.NONE) {
+            channel.send("⛔ Command error. Cannot parse while ingame.");
+            return;
+        }
+        
         channel.send(`🔄 Parsing roles. Please wait. This may take several minutes.`);
         try {
             const output = await parseRoles();
@@ -153,6 +198,11 @@ module.exports = function() {
     Parses all groups currently stored in the DB from desc_formalized to parsed
     **/
     this.cmdGroupsParse = async function(channel) {
+        if(stats.gamephase != gp.NONE) {
+            channel.send("⛔ Command error. Cannot parse while ingame.");
+            return;
+        }
+        
         channel.send(`🔄 Parsing groups. Please wait. This may take several minutes.`);
         try {
             const output = await parseGroups();
@@ -170,6 +220,11 @@ module.exports = function() {
     Parses all polls currently stored in the DB from desc_formalized to parsed
     **/
     this.cmdPollsParse = async function(channel) {
+        if(stats.gamephase != gp.NONE) {
+            channel.send("⛔ Command error. Cannot parse while ingame.");
+            return;
+        }
+        
         channel.send(`🔄 Parsing polls. Please wait. This may take several minutes.`);
         try {
             const output = await parsePolls();
@@ -187,6 +242,11 @@ module.exports = function() {
     Parses all attributes currently stored in the DB from desc_formalized to parsed
     **/
     this.cmdAttributesParse = async function(channel) {
+        if(stats.gamephase != gp.NONE) {
+            channel.send("⛔ Command error. Cannot parse while ingame.");
+            return;
+        }
+        
         channel.send(`🔄 Parsing attributes. Please wait. This may take several minutes.`);
         try {
             const output = await parseAttributes();
@@ -204,6 +264,11 @@ module.exports = function() {
     Parses all teams currently stored in the DB from desc_formalized to parsed
     **/
     this.cmdTeamsParse = async function(channel) {
+        if(stats.gamephase != gp.NONE) {
+            channel.send("⛔ Command error. Cannot parse while ingame.");
+            return;
+        }
+        
         channel.send(`🔄 Parsing teams. Please wait. This may take several minutes.`);
         try {
             const output = await parseTeams();
@@ -221,6 +286,11 @@ module.exports = function() {
     Updates all github linked data
     **/
     this.cmdUpdate = async function(channel) {
+        if(stats.gamephase != gp.NONE) {
+            channel.send("⛔ Command error. Cannot query or parse while ingame");
+            return;
+        }
+        
         var output;
         /** Pre Parsing */
         // query ability sets
@@ -848,6 +918,11 @@ module.exports = function() {
     parses a single game element
     **/
     this.cmdParse = async function(channel, args) {
+        if(stats.gamephase != gp.NONE && !(args[2] === "force" || args[2] === "f")) {
+            channel.send("⛔ Command error. Cannot parse while ingame. To ignore this warning specify 'force' as a third argument.");
+            return;
+        }
+        
         let result = await runParser(args[0], [ args[1] ]);
         result.output.forEach(el => channel.send(`❗ ${el}`));
         channel.send(`Parsed \`${args[1]}\` as \`${args[0]}\`.`);

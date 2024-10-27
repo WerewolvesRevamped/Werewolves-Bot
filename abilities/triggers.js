@@ -822,6 +822,7 @@ module.exports = function() {
         
         // update teams
         await updateActiveTeams();
+        if(stats.gamephase != gp.INGAME) return;
         
         // pause queue checker during event
         pauseActionQueueChecker = false;
