@@ -329,6 +329,7 @@ module.exports = function() {
     this.killqScheduled = false;
     this.createActionQueueChecker =  function() {
         setInterval(async () => {
+            if(stats.gamephase != gp.INGAME) return;
             if(skipActionQueueChecker || pauseActionQueueChecker) return;
             if(killqScheduled) {
                 await killqKillall();

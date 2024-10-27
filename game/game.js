@@ -48,6 +48,8 @@ module.exports = function() {
 		getCCs();
 		cacheRoleInfo();
         getPRoles();
+        // enable action queue checker 
+        pauseActionQueueChecker = false;
 		// Assign roles
 		startOnePlayer(channel, channel.guild.roles.cache.get(stats.signed_up).members.toJSON(), 0);
 		createSCs(channel, debug);
@@ -344,14 +346,23 @@ module.exports = function() {
     }
 	
 	this.cmdEnd = function(channel) {
-		cmdGamephaseSet(channel, ["set", gp.POSTGAME]);
-		channel.guild.roles.cache.get(stats.participant).members.forEach(el => {
-            addRoleRecursive(el, channel, stats.dead_participant, "dead participant");
-		});
-        channel.guild.roles.cache.get(stats.sub).members.forEach(el => {
-            addRoleRecursive(el, channel, stats.dead_participant, "dead participant");
-		});
+		gameEnd();
 	}
+    
+    this.gameEnd = async function() {
+        // update gamephase
+        await sqlProm("UPDATE stats SET value=" + connection.escape(gp.POSTGAME) + " WHERE id=1");
+        stats.gamephase = gp.POSTGAME;
+        // update gp channel
+        updateGameStatus();
+        // update player roles
+		mainGuild.roles.cache.get(stats.participant).members.forEach(el => {
+            addRoleRecursive(el, backupChannelId, stats.dead_participant, "dead participant");
+		});
+        mainGuild.roles.cache.get(stats.sub).members.forEach(el => {
+            addRoleRecursive(el, backupChannelId, stats.dead_participant, "dead participant");
+		});
+    }
 	
 	/* Handles reset command */
 	this.cmdReset = function(channel, debug) {
@@ -382,6 +393,10 @@ module.exports = function() {
         choicesReset();
         // reset kill queue
         killqClear();
+        // reset teams
+        resetTeams();
+        // disable action queue checker 
+        pauseActionQueueChecker = true;
 		// Reset Poll Count
 		sqlSetStat(13, 1, result => {
 			channel.send("✅ Successfully reset poll counter!");

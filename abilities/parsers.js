@@ -414,6 +414,7 @@ module.exports = function() {
                 break;
                 // Alignment
                 case "align":
+                case "alignment":
                     if(!compInverted) allPlayers = allPlayers.filter(el => el.team === compVal);
                     else allPlayers = allPlayers.filter(el => el.team != compVal);
                 break;

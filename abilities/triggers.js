@@ -820,6 +820,9 @@ module.exports = function() {
         await bufferStorytime("The game has started!");
         await postStorytime();
         
+        // update teams
+        await updateActiveTeams();
+        
         // pause queue checker during event
         pauseActionQueueChecker = false;
     }
@@ -832,6 +835,7 @@ module.exports = function() {
         // pause queue checker during event
         pauseActionQueueChecker = true;
         
+        // execute forced prompts from previous phase
         await executeForcedPrompts();
         await clearPrompts();
         
@@ -858,6 +862,10 @@ module.exports = function() {
         await whisperingCleanup();
         await choicesReset();
         await killqKillall();
+        
+        // update teams
+        await updateActiveTeams();
+        if(stats.gamephase != gp.INGAME) return;
         
         // storytime
         await postStorytime();
@@ -887,6 +895,10 @@ module.exports = function() {
         // handle killq
         await killqKillall();
         
+        // update teams
+        await updateActiveTeams();
+        if(stats.gamephase != gp.INGAME) return;
+        
         // pause queue checker during event
         pauseActionQueueChecker = false;
     }
@@ -899,6 +911,7 @@ module.exports = function() {
         // pause queue checker during event
         pauseActionQueueChecker = true;
         
+        // execute forced prompts from previous phase
         await executeForcedPrompts();
         await clearPrompts();
         
@@ -925,6 +938,10 @@ module.exports = function() {
         await whisperingCleanup();
         await choicesReset();
         await killqKillall();
+        
+        // update teams
+        await updateActiveTeams();
+        if(stats.gamephase != gp.INGAME) return;
         
         // storytime
         await postStorytime();
@@ -953,6 +970,10 @@ module.exports = function() {
         
         // handle killq
         await killqKillall();
+        
+        // update teams
+        await updateActiveTeams();
+        if(stats.gamephase != gp.INGAME) return;
         
         // pause queue checker during event
         pauseActionQueueChecker = false;

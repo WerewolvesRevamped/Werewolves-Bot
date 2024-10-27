@@ -159,7 +159,7 @@ module.exports = function() {
     adds a "." if the last character is not punctation
     **/
     this.autoPunctate = function(txt) {
-        if(/[\.,!\?\)\(\]\[\}\{\-]/.test(txt[txt.length - 1])) {
+        if(/[\.,!\?\)\(\]\[\}\{\-\*]/.test(txt[txt.length - 1])) {
             return txt;
         } else {
             return txt + ".";

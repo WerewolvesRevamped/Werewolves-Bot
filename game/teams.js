@@ -127,5 +127,66 @@ module.exports = function() {
         return sqlPromEsc("SELECT id FROM players WHERE alignment=", teamName)
     }
     
+    /** PUBLIC
+    team update handler
+    **/
+    this.updateActiveTeams = async function() {
+        // new teams
+        let toBeActivated = await sqlProm("SELECT name,display_name FROM teams WHERE name IN (SELECT DISTINCT alignment FROM players WHERE alive=1) AND active=0");
+        
+        for(let i = 0; i < toBeActivated.length; i++) {
+            await sqlPromEsc("UPDATE teams SET active=1 WHERE name=", toBeActivated[i].name);
+            abilityLog(`❇️ **Team Created:** Team ${toBeActivated[i].display_name} was created.`);
+        }
+        
+        // teams that have lost
+        let toBeDeactivated = await sqlProm("SELECT name,display_name FROM teams WHERE name NOT IN (SELECT DISTINCT alignment FROM players WHERE alive=1) AND active=1");
+        
+        for(let i = 0; i < toBeDeactivated.length; i++) {
+            await sqlPromEsc("UPDATE teams SET active=0 WHERE name=", toBeDeactivated[i].name);
+            abilityLog(`❇️ **Team Loss:** Team ${toBeDeactivated[i].display_name} has lost.`);
+        }
+        
+        // check win conditions of all remaining teams
+        let activeTeams = await sqlProm("SELECT name,display_name,win_condition FROM teams WHERE active=1");
+        
+        let gameEnds = false;
+        for(let i = 0; i < activeTeams.length; i++) {
+            // evaluate which players may be alive
+            let winCond = activeTeams[i].win_condition.split(",");
+            let allowedPlayers = [];
+            for(let j = 0; j < winCond.length; j++) {
+                let selPlayers = await parsePlayerSelector(winCond[j], `team:${activeTeams[i].name}`);
+                allowedPlayers.push(...selPlayers);
+            }
+            // check if all players are included
+            let all = await getAllLivingIDs();
+            let teamHasWon = all.every(el => allowedPlayers.includes(el));
+            // if so a team has won
+            if(teamHasWon) {
+                gameEnds = true;
+                abilityLog(`❇️ **Team Victory:** Team ${activeTeams[i].display_name} has won.`);
+                await bufferStorytime(`Team ${activeTeams[i].display_name} has won!`);
+            }
+        }
+        
+        if(gameEnds) {
+            // final trigger
+            await triggerHandler("On End"); 
+            // end game
+            await gameEnd();
+            await bufferStorytime(`**The game has ended!**`);
+            // storytime
+            await postStorytime();
+        }
+    }
+    
+    /** PUBLIC
+    reset teams
+    **/
+    this.resetTeams = async function() {
+        await sqlProm("UPDATE teams SET active=0");
+    }
+    
     
 }
