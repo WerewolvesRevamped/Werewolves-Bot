@@ -20,6 +20,9 @@ module.exports = function() {
         // execute the kill
         await killPlayer(self, true);
         
+        // set final status as win
+        await setFinalResult(self, 1);
+        
         // log ascension
         abilityLog(`🪽 **Ascension:** <@${self}> wins!`);
         
@@ -45,6 +48,9 @@ module.exports = function() {
         // execute the kill
         await killPlayer(self, true);
         
+        // set final status as loss
+        await setFinalResult(self, 0);
+        
         // log descension
         abilityLog(`☠️ **Descension:** <@${self}> loses!`);
         
@@ -55,5 +61,18 @@ module.exports = function() {
         return { msg: "Descension succeeded!", success: false };
     }
     
+    
+    /** PUBLIC
+    Set Final Result
+    set the final result for a player
+    // WIP: Maybe this should be in player module
+    **/
+    this.setFinalResult = function(player_id, status) {
+        return new Promise(res => {
+            sql("UPDATE players SET final_result=" + connection.escape(status) + " WHERE id=" + connection.escape(player_id), result => {
+                res();
+            });	
+        });
+    }
     
 }

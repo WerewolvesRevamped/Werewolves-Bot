@@ -167,6 +167,8 @@ module.exports = function() {
                 gameEnds = true;
                 abilityLog(`❇️ **Team Victory:** Team ${activeTeams[i].display_name} has won.`);
                 await bufferStorytime(`Team ${activeTeams[i].display_name} has won!`);
+                // set all team members as winners
+                await sqlPromEsc("UPDATE players SET final_result=1 WHERE alignment=", activeTeams[i].name);
             }
         }
         
@@ -178,6 +180,19 @@ module.exports = function() {
             await bufferStorytime(`**The game has ended!**`);
             // storytime
             await postStorytime();
+            // get winners & losers
+            let allLosers = await sqlProm("SELECT * FROM players WHERE final_result=0");
+            let allWinners = await sqlProm("SELECT * FROM players WHERE final_result=1");
+            let allLosersText = chunkArray(allLosers.map(el => `${el.emoji} - <@${el.id}> (${toTitleCase(el.role)})`), 10).map(el => el.join("\n"));
+            let allWinnersText = chunkArray(allWinners.map(el => `${el.emoji} - <@${el.id}> (${toTitleCase(el.role)})`), 10).map(el => el.join("\n"));
+            for(let i = 0; i < allWinnersText.length; i++) {
+                let indexText = allWinnersText.length > 1 ? (allWinnersText + 1) + '/' + allWinnersText.length : "";
+                await locationSend("storytime", `${allWinnersText[i]}`, EMBED_GREEN, null, `Final Results - Winners ${indexText}`);
+            }
+            for(let i = 0; i < allLosersText.length; i++) {
+                let indexText = allLosersText.length > 1 ? (allLosersText + 1) + '/' + allLosersText.length : "";
+                await locationSend("storytime", `${allLosersText[i]}`, EMBED_RED, null, `Final Results - Losers ${indexText}`);
+            }
         }
     }
     
