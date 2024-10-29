@@ -964,6 +964,18 @@ module.exports = function() {
     parses an info message which may contain other selectors
     **/
     this.parseInfo = async function(selector, self, additionalTriggerData) {
+        // check if its a selector
+        let selectorTargetNormal = selectorGetTarget(selector);
+        switch(selectorTargetNormal) { // if its not a selector, simply continue so no default case here
+            case "@actionfeedback":
+                if(additionalTriggerData.action_feedback) {
+                    return additionalTriggerData.action_feedback;
+                } else {
+                    abilityLog(`❗ **Error:** Invalid info selector target \`${selectorTargetNormal}\`!`);
+                    return [ ];
+                }
+        }
+        
         // get target
         let selectorTarget = selector.split("`[")[0]; // we cant actually use the util function as it converts to lower case
         selectorTarget = selectorTarget.replace(/`/g,"");
@@ -1002,6 +1014,13 @@ module.exports = function() {
         } else if(selectorTarget == "@visittype") {
             if(additionalTriggerData.visittype) {
                 return [ additionalTriggerData.visittype.toLowerCase() ];
+            } else {
+                abilityLog(`❗ **Error:** Invalid ability type selector target \`${selectorTarget}\`!`);
+                return [ ];
+            }
+        } else if(selectorTarget == "@actionabilitytype") {
+            if(additionalTriggerData.ability_type) {
+                return [ additionalTriggerData.ability_type.toLowerCase() ];
             } else {
                 abilityLog(`❗ **Error:** Invalid ability type selector target \`${selectorTarget}\`!`);
                 return [ ];

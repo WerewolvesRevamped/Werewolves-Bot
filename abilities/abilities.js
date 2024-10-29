@@ -176,9 +176,9 @@ module.exports = function() {
             
             // on action trigger
             const actionTarget = feedback.target ? feedback.target : null;
-            await trigger(src_ref, "On Action", { action_result: feedback.result, action_target: actionTarget, src_name: src_name }); 
-            await trigger(src_ref, "On Action Complex", { action_result: feedback.result, action_target: actionTarget, ability_type: ability.type, ability_subtype: "", src_name: src_name }); 
-            if(ability.subtype) await trigger(src_ref, "On Action Complex", { action_result: feedback.result, action_target: actionTarget, ability_type: ability.type, ability_subtype: ability.subtype, src_name: src_name }); 
+            await trigger(src_ref, "On Action", { action_result: feedback.result, action_target: actionTarget, action_feedback: feedback.msg, ability_type: ability.type, src_name: src_name }); 
+            await trigger(src_ref, "On Action Complex", { action_result: feedback.result, action_target: actionTarget, action_feedback: feedback.msg, ability_type: ability.type, ability_subtype: "", src_name: src_name }); 
+            if(ability.subtype) await trigger(src_ref, "On Action Complex", { action_result: feedback.result, action_target: actionTarget, action_feedback: feedback.msg, ability_type: ability.type, ability_subtype: ability.subtype, src_name: src_name }); 
             
             // check choice completion (if applicable)
             if(additionalTriggerData.choice_data) {
