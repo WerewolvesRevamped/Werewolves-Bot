@@ -391,6 +391,10 @@ module.exports = function() {
                 case "counter":
                     output.push(teamData.counter);
                 break;
+                case "members":
+                    let mem = await sqlProm("SELECT id FROM players WHERE alignment=", selector[i]);
+                    output.push(...mem);
+                break;
                 default:  
                     abilityLog(`❗ **Error:** Invalid team property access \`${property}\`!`);
                 break;
@@ -418,6 +422,21 @@ module.exports = function() {
                 case "counter":
                     output.push(attrData.counter);
                 break;
+                case "source":
+                    let val = srcToValue(attrData.src_ref);
+                    let type = srcToType(attrData.src_ref);
+                    if(type === "player") output.push(val);
+                    else abilityLog(`❗ **Error:** Can't return non-player source in attribute property acess!`);
+                break;
+                case "value1":
+                    output.push(attrData.val2);
+                break;
+                case "value2":
+                    output.push(attrData.val3);
+                break;
+                case "value3":
+                    output.push(attrData.val4);
+                break;
                 default:  
                     abilityLog(`❗ **Error:** Invalid attribute property access \`${property}\`!`);
                 break;
@@ -444,6 +463,11 @@ module.exports = function() {
                 break;
                 case "counter":
                     output.push(groupData.counter);
+                break;
+                case "members":
+                    let mem = await groupGetMembers(groupData.name);
+                    mem = mem.map(el => el.id);
+                    output.push(...mem);
                 break;
                 default:  
                     abilityLog(`❗ **Error:** Invalid group property access \`${property}\`!`);
