@@ -244,6 +244,12 @@ module.exports = function() {
                 } else {
                     return invalidSelector(selectorTarget);
                 }
+            case "@ind":
+                if(additionalTriggerData.ind) {
+                    return [ additionalTriggerData.ind ];
+                } else {
+                    return invalidSelector(selectorTarget);
+                }
             
             // unknown selector
             default:

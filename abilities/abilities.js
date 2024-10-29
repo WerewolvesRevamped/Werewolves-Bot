@@ -33,6 +33,7 @@ require("./types/loyalty.js")();
 require("./types/disband.js")();
 require("./types/redirecting.js")();
 require("./types/cancel.js")();
+require("./types/for_each.js")();
 
 module.exports = function() {
     
@@ -151,6 +152,9 @@ module.exports = function() {
                 break;
                 case "disband":
                     feedback = await abilityDisband(src_refAction, src_name, ability, additionalTriggerData);
+                break;
+                case "for_each":
+                    feedback = await abilityForEach(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "ascend":
                     feedback = await abilityAscend(src_refAction, src_name, ability, additionalTriggerData);
