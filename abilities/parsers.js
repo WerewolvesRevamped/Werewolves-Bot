@@ -301,6 +301,15 @@ module.exports = function() {
             case "player":
                 return parsePlayerPropertyAccess(result.value, property);
             break;
+            case "team":
+                return parseTeamPropertyAccess(result.value, property);
+            break;
+            case "attribute":
+                return parseAttributePropertyAccess(result.value, property);
+            break;
+            case "group":
+                return parseGroupPropertyAccess(result.value, property);
+            break;
             default:
                 return invalidSelector(selectorTarget);
             break;
@@ -317,7 +326,7 @@ module.exports = function() {
         // iterate players
         for(let i = 0; i < selector.length; i++) {
             let playerData = await getPlayer(selector[i]);
-            console.log(playerData);
+            //console.log(playerData);
             // execute property access
             switch(property) {
                 case "role":
@@ -359,6 +368,87 @@ module.exports = function() {
         if(random) {
             let shuffledOutput = shuffleArray(output);
             return output[0];
+        }
+        // return output
+        return output;
+    }
+    
+    /** PRIVATE
+    Parses a property access on a team
+    **/
+    async function parseTeamPropertyAccess(selector, property) {
+        property = property.toLowerCase();
+        let output = [];
+        // iterate players
+        for(let i = 0; i < selector.length; i++) {
+            let teamData = await getTeam(selector[i]);
+            //console.log(teamData);
+            // execute property access
+            switch(property) {
+                case "target":
+                    output.push(teamData.target);
+                break;
+                case "counter":
+                    output.push(teamData.counter);
+                break;
+                default:  
+                    abilityLog(`❗ **Error:** Invalid team property access \`${property}\`!`);
+                break;
+            }
+        }
+        // return output
+        return output;
+    }
+    
+    /** PRIVATE
+    Parses a property access on a team
+    **/
+    async function parseAttributePropertyAccess(selector, property) {
+        property = property.toLowerCase();
+        let output = [];
+        // iterate players
+        for(let i = 0; i < selector.length; i++) {
+            let attrData = await getAttribute(selector[i]);
+            //console.log(teamData);
+            // execute property access
+            switch(property) {
+                case "target":
+                    output.push(attrData.target);
+                break;
+                case "counter":
+                    output.push(attrData.counter);
+                break;
+                default:  
+                    abilityLog(`❗ **Error:** Invalid attribute property access \`${property}\`!`);
+                break;
+            }
+        }
+        // return output
+        return output;
+    }
+    
+    /** PRIVATE
+    Parses a property access on a group
+    **/
+    async function parseGroupPropertyAccess(selector, property) {
+        property = property.toLowerCase();
+        let output = [];
+        // iterate players
+        for(let i = 0; i < selector.length; i++) {
+            let groupData = await getGroup(selector[i]);
+            //console.log(teamData);
+            // execute property access
+            switch(property) {
+                case "target":
+                    output.push(groupData.target);
+                break;
+                case "counter":
+                    output.push(groupData.counter);
+                break;
+                default:  
+                    abilityLog(`❗ **Error:** Invalid group property access \`${property}\`!`);
+                break;
+            }
         }
         // return output
         return output;
@@ -511,10 +601,31 @@ module.exports = function() {
     }
     
     /**
-    Get all single player 
+    Get a single player 
     **/
     function getPlayer(id) {
         return sqlPromOneEsc("SELECT players.id,players.role,players.orig_role,players.alive,players.alignment,players.target,players.counter,role.class,role.category,role.team,orig_role.class AS orig_class,orig_role.category AS orig_cat,orig_role.team AS orig_align FROM players INNER JOIN roles AS role ON players.role=role.name INNER JOIN roles AS orig_role ON players.orig_role=orig_role.name WHERE players.type='player' AND players.id=", id);
+    }
+    
+    /**
+    Get a single team
+    **/
+    function getTeam(name) {
+        return sqlPromOneEsc("SELECT * FROM teams WHERE name=", name);
+    }
+    
+    /**
+    Get a single attribute
+    **/
+    function getAttribute(id) {
+        return sqlPromOneEsc("SELECT * FROM active_attributes WHERE ai_id=", id);
+    }
+    
+    /**
+    Get a single group
+    **/
+    function getGroup(id) {
+        return sqlPromOneEsc("SELECT * FROM active_groups WHERE channel_id=", id);
     }
     
     /**
