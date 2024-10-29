@@ -75,6 +75,8 @@ module.exports = function() {
                 return { value: await parseActiveAttributeSelector(selector, self, additionalTriggerData, self), type: "activeAttribute" };
             case "category":
                 return { value: [ parseCategory(selector) ], type: "category" };
+            case "killingtype":
+                return { value: [ parseKillingType(selector, self, additionalTriggerData) ], type: "killingType" };
             case "source":
                 return { value: [ parseSourceSelector(selector) ], type: "source" };
             // UNKNOWN
@@ -164,18 +166,6 @@ module.exports = function() {
                 }
             
             // trigger dependent selectors
-            case "@deathtype":
-                if(additionalTriggerData.death_type) {
-                    return [ additionalTriggerData.death_type ];
-                } else {
-                    return invalidSelector(selectorTarget);
-                }
-            case "@killingtype":
-                if(additionalTriggerData.killing_type) {
-                    return [ additionalTriggerData.killing_type ];
-                } else {
-                    return invalidSelector(selectorTarget);
-                }
             case "@attacker":
                 if(additionalTriggerData.attacker) {
                     return [ additionalTriggerData.attacker ];
@@ -1043,6 +1033,37 @@ module.exports = function() {
         } else {
             abilityLog(`❗ **Error:** Invalid ability category \`${selectorTarget}\`. Defaulted to \`all\`!`);
             return "all";
+        }
+    }
+    
+    /**
+    Parse killing type
+    **/
+    const killingTypeNames = ["attack","kill","lynch","true kill","banish","true banish"];
+    this.parseKillingType = function(killing_type, self = null, additionalTriggerData = {}) {
+        // get target
+        let selectorTarget = selectorGetTarget(killing_type);
+        
+        switch(selectorTarget) {
+            case "@deathtype":
+                if(additionalTriggerData.death_type) {
+                    return additionalTriggerData.death_type;
+                } else {
+                    return invalidSelector(selectorTarget);
+                }
+            case "@killingtype":
+                if(additionalTriggerData.killing_type) {
+                    return additionalTriggerData.killing_type;
+                } else {
+                    return invalidSelector(selectorTarget);
+                }
+            default:      
+                if(killingTypeNames.includes(selectorTarget)) {
+                    return selectorTarget;
+                } else {
+                    abilityLog(`❗ **Error:** Invalid killing type \`${selectorTarget}\`. Defaulted to \`attack\`!`);
+                    return "attack";
+                }
         }
     }
     

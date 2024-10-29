@@ -1638,6 +1638,7 @@ module.exports = function() {
     poll
     abilityType
     abilitySubtype
+    killingType
     location (locations includes unique locations as well as all players and groups)
     source (may be a group, alignment, attribute, player, poll)
     info (just text)
@@ -1697,8 +1698,8 @@ module.exports = function() {
                 case "@ActionAbilityType": return "abilityType";
                 case "@ActionFeedback": return "info";
                 case "@AttackSource": return "source";
-                case "@DeathType": return "info";
-                case "@KillingType": return "info";
+                case "@DeathType": return "killingType";
+                case "@KillingType": return "killingType";
                 case "@VisitType": return "abilityType";
                 case "@VisitParameter": return "unknown";
                 case "@ThisAttr": return "attribute";
