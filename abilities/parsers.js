@@ -392,7 +392,8 @@ module.exports = function() {
                     output.push(teamData.counter);
                 break;
                 case "members":
-                    let mem = await sqlProm("SELECT id FROM players WHERE alignment=", selector[i]);
+                    let mem = await sqlPromEsc("SELECT id FROM players WHERE alignment=", selector[i]);
+                    mem = mem.map(el => el.id);
                     output.push(...mem);
                 break;
                 default:  
@@ -610,6 +611,50 @@ module.exports = function() {
         }
     }
     
+    /** PRIVATE
+    Parses an advanced team selector
+    **/
+    async function parseAdvancedTeamSelector(selector, self, additionalTriggerData) {
+        // split selector into its components
+        const selSplit = selector.toLowerCase().split(",").map(el => el.split(":"));
+        // get all teams
+        let allTeams = await getAllTeams();
+        // allTeams.forEach(el => console.log(el));
+        // iterate through all selector components
+        for(let i = 0; i < selSplit.length; i++) {
+            const compName = selSplit[i][0];
+            let compVal = selSplit[i][1];
+            let compInverted = false;
+            if(compVal[0] === "!") {
+                compVal = compVal.substr(1);
+                compInverted = true;
+            }
+            //console.log("TEAMS", allTeams.map(el => el.id).join(";"));
+            //console.log("AS", compName, compVal, compInverted);
+            let compValSplit;
+            switch(compName) {
+                default:
+                    abilityLog(`❗ **Error:** Unknown advanced selector component \`${compName}\`!`);
+                break;
+                // Alignment
+                case "align":
+                case "alignment":
+                    if(!compInverted) allTeams = allTeams.filter(el => el.name === compVal);
+                    else allTeams = allTeams.filter(el => el.name != compVal);
+                break;
+                // Attr - Find players that have a certain custom attribute
+                case "attr":
+                    let attrCustomOwners = await queryAttribute("attr_type", "custom", "val1", compVal);
+                    attrCustomOwners = attrCustomOwners.map(el => el.owner);
+                    if(!compInverted) allTeams = allTeams.filter(el => attrCustomOwners.includes(el.name));
+                    else allTeams = allTeams.filter(el => !attrCustomOwners.includes(el.name));
+                break;
+            }
+        }
+        // return
+        return allTeams.map(el => el.name);
+    }
+    
     /**
     Get all player 
     **/
@@ -777,7 +822,7 @@ module.exports = function() {
     Parse Active Attribute Selector
     parses a attribute type selector for active attributes
     **/
-    this.parseActiveAttributeSelector = function(selector, self = null, additionalTriggerData = {}, onElement = null) {
+    this.parseActiveAttributeSelector = async function(selector, self = null, additionalTriggerData = {}, onElement = null) {
         // get all attributes on the target element
         if(!onElement) return [ ];
         let attributes = getCustomAttributes(onElement);
@@ -841,6 +886,11 @@ module.exports = function() {
                     }
                     // return 
                     return filtered.map(el => { return { ai_id: el[0], name: el[3] } });
+                } else if (PROPERTY_ACCESS.test(selectorTarget)) { // property access
+                    let contents = selectorTarget.match(PROPERTY_ACCESS); // get the selector
+                    let infType = inferType(`@${contents[1]}`);
+                    let result = await parseSelector(`@${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
+                    return parsePropertyAccess(result, contents[2], infType);
                 } else {
                     abilityLog(`❗ **Error:** Invalid active attribute selector target \`${selectorTarget}\`!`);
                     return [ ];
@@ -853,6 +903,7 @@ module.exports = function() {
     Parse Alignment
     parses an alignment name
     **/
+    const ADVANCED_SELECTOR_TEAM = /^&\((.+)\)$/;
     this.parseAlignment = async function(selector, self = null, additionalTriggerData = {}) {
         // get target
         let selectorTarget = selectorGetTarget(selector);
@@ -884,7 +935,7 @@ module.exports = function() {
                     return [ ];
                 }
             // all teams
-            case "&All":
+            case "&all":
                 let allTeams = await getAllTeams();
                 return allTeams.map(el => el.name);
             break;
@@ -898,6 +949,9 @@ module.exports = function() {
                     let infType = inferType(`@${contents[1]}`);
                     let result = await parseSelector(`@${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
                     return parsePropertyAccess(result, contents[2], infType);
+                } else if (ADVANCED_SELECTOR_TEAM.test(selectorTarget)) { // advanced selector
+                    let contents = selectorTarget.match(ADVANCED_SELECTOR_TEAM);
+                    return await parseAdvancedTeamSelector(contents[1], self, additionalTriggerData);
                 } else {
                     abilityLog(`❗ **Error:** Invalid team selector target \`${selectorTarget}\`!`);
                     return [ ];

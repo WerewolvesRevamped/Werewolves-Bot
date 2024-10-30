@@ -17,9 +17,9 @@ module.exports = function() {
         }
         if(!ability.info) ability.info = "";
         // parse parameters
-        let selector = await parsePlayerSelector(ability.selector, src_ref, additionalTriggerData);
-        console.log(`Logging ${selector}${ability.info?' as '+ability.info:''}`);
-        return { msg: `Logging ${selector}${ability.info?' as '+ability.info:''}`, success: true };
+        let selector = await parseSelector(ability.selector, src_ref, additionalTriggerData);
+        console.log(`Logging ${selector.value}${ability.info?' as '+ability.info:''}`);
+        return { msg: `Logging ${selector.value}${ability.info?' as '+ability.info:''}`, success: true };
     }
     
 }

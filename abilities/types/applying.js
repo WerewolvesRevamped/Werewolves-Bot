@@ -114,7 +114,7 @@ module.exports = function() {
                 continue;
             }
             // get attribute
-            let attr = parseActiveAttributeSelector(attribute, src_ref, {}, `${targets.type}:${targets.value[i]}`);
+            let attr = await parseActiveAttributeSelector(attribute, src_ref, {}, `${targets.type}:${targets.value[i]}`);
             // can only apply a single attribute
             if(attr.length === 0) {
                 abilityLog(`❗ **Error:** Tried to unapply no attributes!`);
@@ -154,7 +154,7 @@ module.exports = function() {
                 continue;
             }
             
-            let attr = parseActiveAttributeSelector(attribute, src_ref, {}, `${targets.type}:${targets.value[i]}`);
+            let attr = await parseActiveAttributeSelector(attribute, src_ref, {}, `${targets.type}:${targets.value[i]}`);
             // can only apply a single attribute
             if(attr.length === 0) {
                 abilityLog(`❗ **Error:** Tried to change no attributes!`);
