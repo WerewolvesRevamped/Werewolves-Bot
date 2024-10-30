@@ -74,7 +74,7 @@ module.exports = function() {
             case "activeattribute":
                 return { value: await parseActiveAttributeSelector(selector, self, additionalTriggerData, self), type: "activeAttribute" };
             case "category":
-                return { value: [ parseCategory(selector) ], type: "category" };
+                return { value: await parseCategory(selector, self, additionalTriggerData), type: "category" };
             case "killingtype":
                 return { value: [ parseKillingType(selector, self, additionalTriggerData) ], type: "killingType" };
             case "source":
@@ -254,6 +254,11 @@ module.exports = function() {
                     let infType = inferType(`@${contents[1]}`);
                     let result = await parseSelector(`@${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
                     return parsePropertyAccess(result, contents[2], infType);
+                } else if (PROPERTY_ACCESS_TEAM.test(selectorTarget)) { // property access
+                    let contents = selectorTarget.match(PROPERTY_ACCESS_TEAM); // get the selector
+                    let infType = inferType(`&${contents[1]}`);
+                    let result = await parseSelector(`&${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
+                    return parsePropertyAccess(result, contents[2], infType);
                 } else { // invalid access
                     return invalidSelector(selectorTarget);
                 }
@@ -301,7 +306,7 @@ module.exports = function() {
             case "player":
                 return parsePlayerPropertyAccess(result.value, property);
             break;
-            case "team":
+            case "alignment":
                 return parseTeamPropertyAccess(result.value, property);
             break;
             case "attribute":
@@ -310,8 +315,12 @@ module.exports = function() {
             case "group":
                 return parseGroupPropertyAccess(result.value, property);
             break;
+            case "role":
+                return parseRolePropertyAccess(result.value, property);
+            break;
             default:
-                return invalidSelector(selectorTarget);
+                abilityLog(`❗ **Error:** Invalid property access type \`${type}\`!`);
+                return [ ];
             break;
         }
     }
@@ -323,6 +332,7 @@ module.exports = function() {
         property = property.toLowerCase();
         let output = [];
         let random = false;
+        let mostFreq = false;
         // iterate players
         for(let i = 0; i < selector.length; i++) {
             let playerData = await getPlayer(selector[i]);
@@ -359,15 +369,32 @@ module.exports = function() {
                     output.push(selector[i]);
                     random = true;
                 break;
+                case "mostfreqrole":
+                    output.push(playerData.role);
+                    mostFreq = true;
+                break;
                 default:  
                     abilityLog(`❗ **Error:** Invalid player property access \`${property}\`!`);
                 break;
             }
         }
+        // return most frequent occurence
+        if(mostFreq) {
+            // shuffle so that "ties" are randomized
+            let shuffledOutput = shuffleArray(output);
+    
+            // sort by frequency
+            let mostFreq = shuffledOutput.sort((a,b) => {
+                return shuffledOutput.filter(v => v === a).length - shuffledOutput.filter(v => v === b).length;
+            });
+            
+            // return most frequent role
+            return [ mostFreq.pop() ];
+        }
         // randomize output
         if(random) {
             let shuffledOutput = shuffleArray(output);
-            return output[0];
+            return [ shuffledOutput[0] ];
         }
         // return output
         return output;
@@ -414,7 +441,7 @@ module.exports = function() {
         // iterate players
         for(let i = 0; i < selector.length; i++) {
             let attrData = await getAttribute(selector[i]);
-            //console.log(teamData);
+            //console.log(attrData);
             // execute property access
             switch(property) {
                 case "target":
@@ -456,7 +483,7 @@ module.exports = function() {
         // iterate players
         for(let i = 0; i < selector.length; i++) {
             let groupData = await getGroup(selector[i]);
-            //console.log(teamData);
+            //console.log(groupData);
             // execute property access
             switch(property) {
                 case "target":
@@ -472,6 +499,40 @@ module.exports = function() {
                 break;
                 default:  
                     abilityLog(`❗ **Error:** Invalid group property access \`${property}\`!`);
+                break;
+            }
+        }
+        // return output
+        return output;
+    }
+    
+    /** PRIVATE
+    Parses a property access on a role
+    **/
+    async function parseRolePropertyAccess(selector, property) {
+        property = property.toLowerCase();
+        let output = [];
+        // iterate players
+        for(let i = 0; i < selector.length; i++) {
+            let roleData = await getRole(selector[i]);
+            //console.log(roleData);
+            // execute property access
+            switch(property) {
+                case "class":
+                    output.push(roleData.class);
+                break;
+                case "category":
+                    output.push(roleData.category);
+                break;
+                case "team":
+                case "alignment":
+                    output.push(roleData.team);
+                break;
+                case "type":
+                    output.push(roleData.type);
+                break;
+                default:  
+                    abilityLog(`❗ **Error:** Invalid role property access \`${property}\`!`);
                 break;
             }
         }
@@ -642,7 +703,7 @@ module.exports = function() {
                     if(!compInverted) allTeams = allTeams.filter(el => el.name === compVal);
                     else allTeams = allTeams.filter(el => el.name != compVal);
                 break;
-                // Attr - Find players that have a certain custom attribute
+                // Attr - Find teams that have a certain custom attribute
                 case "attr":
                     let attrCustomOwners = await queryAttribute("attr_type", "custom", "val1", compVal);
                     attrCustomOwners = attrCustomOwners.map(el => el.owner);
@@ -695,6 +756,13 @@ module.exports = function() {
     **/
     function getGroup(id) {
         return sqlPromOneEsc("SELECT * FROM active_groups WHERE channel_id=", id);
+    }
+    
+    /**
+    Get a single role
+    **/
+    function getRole(name) {
+        return sqlPromOneEsc("SELECT * FROM roles WHERE name=", name);
     }
     
     /**
@@ -759,6 +827,11 @@ module.exports = function() {
                     let contents = selectorTarget.match(PROPERTY_ACCESS); // get the selector
                     let infType = inferType(`@${contents[1]}`);
                     let result = await parseSelector(`@${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
+                    return parsePropertyAccess(result, contents[2], infType);
+                } else if (PROPERTY_ACCESS_TEAM.test(selectorTarget)) { // property access
+                    let contents = selectorTarget.match(PROPERTY_ACCESS_TEAM); // get the selector
+                    let infType = inferType(`&${contents[1]}`);
+                    let result = await parseSelector(`&${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
                     return parsePropertyAccess(result, contents[2], infType);
                 } else {
                     abilityLog(`❗ **Error:** Invalid role selector target \`${selectorTarget}\`!`);
@@ -891,6 +964,11 @@ module.exports = function() {
                     let infType = inferType(`@${contents[1]}`);
                     let result = await parseSelector(`@${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
                     return parsePropertyAccess(result, contents[2], infType);
+                } else if (PROPERTY_ACCESS_TEAM.test(selectorTarget)) { // property access
+                    let contents = selectorTarget.match(PROPERTY_ACCESS_TEAM); // get the selector
+                    let infType = inferType(`&${contents[1]}`);
+                    let result = await parseSelector(`&${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
+                    return parsePropertyAccess(result, contents[2], infType);
                 } else {
                     abilityLog(`❗ **Error:** Invalid active attribute selector target \`${selectorTarget}\`!`);
                     return [ ];
@@ -904,6 +982,7 @@ module.exports = function() {
     parses an alignment name
     **/
     const ADVANCED_SELECTOR_TEAM = /^&\((.+)\)$/;
+    const PROPERTY_ACCESS_TEAM = /^&(.+)->(.+)$/;
     this.parseAlignment = async function(selector, self = null, additionalTriggerData = {}) {
         // get target
         let selectorTarget = selectorGetTarget(selector);
@@ -948,6 +1027,11 @@ module.exports = function() {
                     let contents = selectorTarget.match(PROPERTY_ACCESS); // get the selector
                     let infType = inferType(`@${contents[1]}`);
                     let result = await parseSelector(`@${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
+                    return parsePropertyAccess(result, contents[2], infType);
+                } else if (PROPERTY_ACCESS_TEAM.test(selectorTarget)) { // property access
+                    let contents = selectorTarget.match(PROPERTY_ACCESS_TEAM); // get the selector
+                    let infType = inferType(`&${contents[1]}`);
+                    let result = await parseSelector(`&${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
                     return parsePropertyAccess(result, contents[2], infType);
                 } else if (ADVANCED_SELECTOR_TEAM.test(selectorTarget)) { // advanced selector
                     let contents = selectorTarget.match(ADVANCED_SELECTOR_TEAM);
@@ -1406,9 +1490,21 @@ module.exports = function() {
     Parse Category
     parses a role category
     **/
-    this.parseCategory = function(category) {
-        let target = selectorGetTarget(category);
-        return target.replace(/`/g, "");
+    this.parseCategory = async function(category, self = null, additionalTriggerData = {}) {
+        let selectorTarget = selectorGetTarget(category);
+        selectorTarget = selectorTarget.replace(/`/g, "");
+        if (PROPERTY_ACCESS.test(selectorTarget)) { // property access
+            let contents = selectorTarget.match(PROPERTY_ACCESS); // get the selector
+            let infType = inferType(`@${contents[1]}`);
+            let result = await parseSelector(`@${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
+            return parsePropertyAccess(result, contents[2], infType);
+        } else if (PROPERTY_ACCESS_TEAM.test(selectorTarget)) { // property access
+            let contents = selectorTarget.match(PROPERTY_ACCESS_TEAM); // get the selector
+            let infType = inferType(`&${contents[1]}`);
+            let result = await parseSelector(`&${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
+            return parsePropertyAccess(result, contents[2], infType);
+        }
+        return [ selectorTarget ] ;
     }
     
     /**

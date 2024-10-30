@@ -1674,22 +1674,24 @@ module.exports = function() {
         }
         
         let first = targetType[0];
-        if(/->/.test(targetType)) {
-            let properties = targetType.split(/->/);
+        if(/\->/.test(targetType)) {
+            let properties = targetType.toLowerCase().split(/\->/);
             switch(properties[properties.length - 1]) {
-                case "Role": return "role";
-                case "Category": return "category";
-                case "OriginalRole": return "role";
-                case "Alignment": return "alignment";
-                case "Counter": return "number";
-                case "PublicVotingPower": return "number";
-                case "PrivateVotingPower": return "number";
-                case "OwnerRole": return "role";
-                case "OwnerPlayer": return "player";
-                case "Value1": return "unknown";
-                case "Value2": return "unknown";
-                case "Value3": return "unknown";
-                case "Members": return "player";
+                case "role": return "role";
+                case "category": return "category";
+                case "originalrole": return "role";
+                case "alignment": return "alignment";
+                case "counter": return "number";
+                case "publicvotingpower": return "number";
+                case "privatevotingpower": return "number";
+                case "ownerrole": return "role";
+                case "ownerplayer": return "player";
+                case "value1": return "unknown";
+                case "value2": return "unknown";
+                case "value3": return "unknown";
+                case "members": return "player";
+                case "mostfreqrole": return "role";
+                default: return "unknown";
             }
         } else if(first == "&") {
             return "alignment";
