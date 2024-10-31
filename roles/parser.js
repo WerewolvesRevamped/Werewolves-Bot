@@ -1675,7 +1675,8 @@ module.exports = function() {
         let first = targetType[0];
         if(/\->/.test(targetType)) {
             let properties = targetType.toLowerCase().split(/\->/);
-            switch(properties[properties.length - 1]) {
+            if(properties.at(-1).substr(0, 4) === "attr") return "activeAttribute";
+            switch(properties.at(-1)) {
                 case "role": return "role";
                 case "category": return "category";
                 case "originalrole": return "role";

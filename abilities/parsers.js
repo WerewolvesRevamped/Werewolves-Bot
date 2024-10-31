@@ -95,6 +95,7 @@ module.exports = function() {
     const ID_SELECTOR_EXTENDED = /^@id:(\d+)\[player\]$/;
     const ADVANCED_SELECTOR = /^@\((.+)\)$/;
     const PROPERTY_ACCESS = /^@(.+)->(.+)$/;
+    const ATTR_PROPERTY = /^attr\((\w+)\)$/;
     this.parsePlayerSelector = async function(selector, self = null, additionalTriggerData = {}) {
         let selectorTarget = selectorGetTarget(selector);
         /** WIP: Needs to be able to parse much more! **/
@@ -322,6 +323,7 @@ module.exports = function() {
                 return parseTeamPropertyAccess(result.value, property);
             break;
             case "attribute":
+            case "activeAttribute":
                 return parseAttributePropertyAccess(result.value, property);
             break;
             case "group":
@@ -386,7 +388,13 @@ module.exports = function() {
                     mostFreq = true;
                 break;
                 default:  
-                    abilityLog(`❗ **Error:** Invalid player property access \`${property}\`!`);
+                    if(ATTR_PROPERTY.test(property)) {
+                        let contents = property.match(ATTR_PROPERTY); // get the selector
+                        let attr = await queryAttributePlayer(selector[i], "attr_type", "custom", "val1", contents[1].toLowerCase());
+                        output.push(...attr.map(el => el.ai_id));
+                    } else {
+                        abilityLog(`❗ **Error:** Invalid player property access \`${property}\`!`);
+                    }
                 break;
             }
         }
@@ -436,7 +444,13 @@ module.exports = function() {
                     output.push(...mem);
                 break;
                 default:  
-                    abilityLog(`❗ **Error:** Invalid team property access \`${property}\`!`);
+                    if(ATTR_PROPERTY.test(property)) {
+                        let contents = property.match(ATTR_PROPERTY); // get the selector
+                        let attr = await queryAttribute("owner", selector[i], "attr_type", "custom", "val1", contents[1].toLowerCase());
+                        output.push(...attr.map(el => el.ai_id));
+                    } else {
+                        abilityLog(`❗ **Error:** Invalid team property access \`${property}\`!`);
+                    }
                 break;
             }
         }
@@ -510,7 +524,13 @@ module.exports = function() {
                     output.push(...mem);
                 break;
                 default:  
-                    abilityLog(`❗ **Error:** Invalid group property access \`${property}\`!`);
+                    if(ATTR_PROPERTY.test(property)) {
+                        let contents = property.match(ATTR_PROPERTY); // get the selector
+                        let attr = await queryAttribute("owner", selector[i], "attr_type", "custom", "val1", contents[1].toLowerCase());
+                        output.push(...attr.map(el => el.ai_id));
+                    } else {
+                        abilityLog(`❗ **Error:** Invalid group property access \`${property}\`!`);
+                    }
                 break;
             }
         }
