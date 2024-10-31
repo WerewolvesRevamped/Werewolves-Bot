@@ -107,10 +107,10 @@ module.exports = function() {
             let emoji = getLUTEmoji(pollType, pollName);
             await abilitySendProm(`${pollLocation.type}:${pollLocation.value}`, `No Poll: **${toTitleCase(pollName)}** ${emoji}\n\nThe poll will not take place this time.`);
         } else if(pollCount === 1) { // single poll
-            await createPoll(pollType, pollName, pollLocation, allOptions, src_ref);
+            await createPoll(pollType, pollName, pollLocation, allOptions, src_ref, src_name);
         } else { // several polls
             for(let i = 0; i < pollCount; i++) {
-                await createPoll(pollType, `${pollName} #${i+1}`, pollLocation, deepCopy(allOptions), src_ref);
+                await createPoll(pollType, `${pollName} #${i+1}`, pollLocation, deepCopy(allOptions), src_ref, src_name);
             }
         }
         

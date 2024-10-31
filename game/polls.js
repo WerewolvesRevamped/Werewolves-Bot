@@ -210,7 +210,7 @@ module.exports = function() {
     pollLocation: Output of parseLocation
     options: an array of objects of form { id: <id>, emoji: <emoji>, type: "player" } or { name: <name>, emoji: <emoji>, type: "emoji" }
     **/
-    this.createPoll = async function(pollType, pollName, pollLocation, options, src_ref) {
+    this.createPoll = async function(pollType, pollName, pollLocation, options, src_ref, src_name) {
         // get lut emoji if applicable
         let emoji = getLUTEmoji(pollType, pollName);
         
@@ -245,14 +245,14 @@ module.exports = function() {
             await pollReact(pollDisMsg, emojis);
         }
         // create in DB
-        await createPollInDB(pollType, pollName, initialMsg.channel.id, initialMsg.id, pollMsgs, src_ref);
+        await createPollInDB(pollType, pollName, initialMsg.channel.id, initialMsg.id, pollMsgs, src_ref, src_name);
     }
     
 	/** PRIVATE
     Creates an active poll entry in DB
     **/
-    function createPollInDB(type, name, channel, initial_message, messages, src_ref) {
-        return sqlProm("INSERT INTO active_polls (type, name, channel, initial_message, messages, src_ref) VALUES (" + connection.escape(type) + "," + connection.escape(name) + "," + connection.escape(channel) + "," + connection.escape(initial_message) + "," + connection.escape(messages)+ "," + connection.escape(src_ref) + ")");
+    function createPollInDB(type, name, channel, initial_message, messages, src_ref, src_name) {
+        return sqlProm("INSERT INTO active_polls (type, name, channel, initial_message, messages, src_ref, src_name) VALUES (" + connection.escape(type) + "," + connection.escape(name) + "," + connection.escape(channel) + "," + connection.escape(initial_message) + "," + connection.escape(messages)+ "," + connection.escape(src_ref)+ "," + connection.escape(src_name) + ")");
     }
     
     
@@ -349,11 +349,11 @@ module.exports = function() {
             // evaluate vote count
             let votes = 0;
             for(let i = 0; i < validVoters.length; i++) {
-                votes += await pollValue(validVoters[i].id, pollPublicType);
+                votes += await pollValue(validVoters[i].id, pollPublicType, pollData.src_name);
             }
             
             // if no votes, continue
-            if(votes <= 0) continue;
+            if(votes < 0 || (voters.length === 0)) continue;
             
             // get candidate from emoji
             let candidate = emojiToID(reac.emoji);
@@ -370,6 +370,8 @@ module.exports = function() {
             if(showVoters) msg = `(${votes}) ${reac.emoji} ${candidateName} **-** ${validVoters.join(', ')}` + (invalidVoters.length>0 ? ` (Invalid Votes: ${invalidVoters.join(', ')})` : "");
             else msg = `(${votes}) ${reac.emoji} ${candidateName}`;
             outputLines.push(msg);
+            
+            if(votes <= 0) continue;
             
             // check if winner
             if(votes == maxVotes && candidate != "Abstain") {
@@ -473,10 +475,16 @@ module.exports = function() {
     /** PRIVATE
     Evaluate vote value
     **/
-    async function pollValue(player_id, type) {
+    async function pollValue(player_id, type, src_name) {
         if(type === "private") { // PRIVATE POLLS
+            // get group membership type
+            let voteValue = 0;
+            let grpName = srcToValue(src_name);
+            let grpMem = await queryAttributePlayer(player_id, "attr_type", "group_membership", "val1", grpName);
+            if(["member","owner"].includes(grpMem[0].val2)) voteValue = 1;
+            console.log(grpName, grpMem, voteValue);
+            
             const voteManipulations = await getManipulations(player_id, "private");
-            let voteValue = 1;
             // add private votes
             for(let i = 0; i < voteManipulations.length; i++) {
                 switch(voteManipulations[i].val1) {
