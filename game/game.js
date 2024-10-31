@@ -21,7 +21,7 @@ require("./channels.js")();
 module.exports = function() {
 
 	/* Handles start command */
-	this.cmdStart = function(channel, debug) {
+	this.cmdStart = async function(channel, debug) {
 		if(stats.gamephase == gp.SETUP || (debug && stats.gamephase == gp.NONE)) {
             // start
         } else { 
@@ -39,6 +39,43 @@ module.exports = function() {
                 return; 
             }
 		}
+        
+        // check requires and unique role values
+        let roles = await sqlProm("SELECT roles.name,roles.parsed FROM roles JOIN players WHERE players.role=roles.name");
+        let roleNames = roles.map(el => el.name.toLowerCase());
+        console.log(roleNames);
+        for(let i = 0; i < roles.length; i++) {
+            let rName = roles[i].name;
+            // parse role description
+            let parsed = JSON.parse(roles[i].parsed);
+            if(!parsed) {
+                channel.send(`⛔ List error. Cannot start game with invalid parsed role \`${rName}\`.`); 
+                return;
+            }
+            // check requirements
+            let requires = parsed.requires ?? [];
+            for(let j = 0; j < requires.length; j++) {
+                let parsed = parseRole(requires[j]);
+                if(!roleNames.includes(parsed)) {
+                    channel.send(`⛔ List error. Cannot start game with role \`${rName}\` without having requirement \`${requires[j]}\`.`); 
+                    return;
+                }
+            }
+            // check unique role
+            let unique = parsed.unique ?? false;
+            if(unique) {
+                let filtered = roleNames.filter(el => el === rName);
+                if(filtered.length != 1) {
+                    channel.send(`⛔ List error. Cannot start game with \`${filtered.length}\` instances of unique role \`${rName}\`.`); 
+                    return;
+                }
+            }
+        }
+        
+        channel.send(`⛔ Debug error. Would've started game.`); 
+        return;
+        
+        
 		channel.send("✳ Game is called `" + stats.game + "`");
         createLocations();
 		// Set Gamephase

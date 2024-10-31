@@ -1345,7 +1345,7 @@ module.exports = function() {
     **/
     const abilitySubtypeNames = [
         ["attack","kill","lynch","true-kill"], // killing
-        ["role","alignment","class","category","player_count"], // investigating
+        ["role","alignment","class","category","player_count","count"], // investigating
         ["target","untarget"], // targeting
         ["weakly","strongly"], // disguising
         ["active-defense","passive-defense","partial-defense","recruitment-defense","absence"], // protecting

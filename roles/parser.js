@@ -499,7 +499,6 @@ module.exports = function() {
         exp = new RegExp("^\\((.+?)\\) and \\((.+?)\\) and \\((.+?)\\)$", "g");
         fd = exp.exec(condition);
         if(fd) {
-            console.log("DOUBLE AND");
             doubleLogic = true;
             cond = { type: "logic", subtype: "and", condition1: parseCondition(fd[1]), condition2: parseCondition(`(${fd[2]}) and (${fd[3]})`) };
         }

@@ -600,7 +600,7 @@ module.exports = function() {
     deletes the entire contents of the groups database
     **/
      function clearGroups() {
-		return sqlProm("DELETE FROM groups");
+		return sqlProm("DELETE FROM `groups`");
 	}
     
     /** 
