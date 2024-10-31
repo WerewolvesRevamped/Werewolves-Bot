@@ -236,7 +236,7 @@ module.exports = function() {
         
         // delete owned attribute duration attributes
         for(let i = 0; i < attr.length; i++) {
-            let childAttrs = await sqlProm("SEELCT ai_id FROM active_attributes WHERE (duration='attribute' OR duration='untiluseattribute') AND src_ref=" + connection.escape(`attribute:${attr[i].ai_id}`));
+            let childAttrs = await sqlProm("SELECT ai_id FROM active_attributes WHERE (duration='attribute' OR duration='untiluseattribute') AND src_ref=" + connection.escape(`attribute:${attr[i].ai_id}`));
             for(let j = 0; j < childAttrs.length; j++) {
                 await deleteAttribute(childAttrs[j].ai_id);
             }

@@ -682,6 +682,10 @@ client.on("messageCreate", async message => {
     case "elect":
 		if(checkGM(message)) cmdElect(message.channel, args);
     break;
+    /* Discord Role */
+    case "dr":
+		if(checkGM(message)) cmdDR(message.channel, args);
+    break;
 	/* Invalid Command */
 	default:
 		message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");

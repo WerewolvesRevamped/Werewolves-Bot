@@ -17,6 +17,7 @@ require("./connections.js")();
 require("./storytime.js")();
 require("./death.js")();
 require("./channels.js")();
+require("./discord_roles.js")();
 
 module.exports = function() {
 

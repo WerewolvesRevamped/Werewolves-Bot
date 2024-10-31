@@ -96,6 +96,7 @@ module.exports = function() {
                 channelId = await grantingCreate(role, targets[i], src_ref);
             }
             await createRoleAttribute(src_name, src_ref, targets[i], "persistent", role, channelId);
+            assignDR(targets[i], role);
             abilityLog(`✅ <@${targets[i]}> was granted ${toTitleCase(role)} at <#${channelId}>.`);
             // run Starting trigger if new role
             if(existingChannel.length === 0) { 
@@ -124,6 +125,11 @@ module.exports = function() {
                 continue;
             }
             
+            // revoke discord role
+            let queried = await queryAttributePlayer(targets[i], "attr_type", "role", "val2", channelId); // delete old membership(s)
+            unassignDR(targets[i], queried[0].val1);
+            
+            // leave
             await grantingLeave(targets[i], channelId);
             await deleteAttributePlayer(targets[i], "attr_type", "role", "val2", channelId); // delete old membership(s)
             abilityLog(`✅ <@${targets[i]}> was removed from ${roleName} at <#${channelId}>.`);

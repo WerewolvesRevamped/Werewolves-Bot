@@ -79,12 +79,13 @@ module.exports = function() {
                 "force_demote_signedup": ["fdsn"],
                 "image": ["img"],
                 "infomanage": ["im"],
-                "groups": ["group"],
+                "groups": ["group","grp","grps"],
                 "attributes": ["attribute","attr"],
                 "locations": ["location", "loc", "locs"],
                 "teams": ["team","tm"],
                 "details": ["il","id"],
-                "killq": ["kq"]
+                "killq": ["kq"],
+                "dr": ["discord_role","drole"]
         };
         for(let cmd in aliases) {
             if(aliases[cmd].indexOf(alias) != -1) return cmd;

@@ -74,7 +74,7 @@ module.exports = function() {
 	/* Lists all groups names */
 	this.cmdGroupsList = function(channel) {
 		// Get all groups
-		sql("SELECT * FROM groups ORDER BY name ASC", result => {
+		sql("SELECT * FROM `groups` ORDER BY name ASC", result => {
 			if(result.length > 0) {
 				// At least one group exists
 				channel.send("✳️ Sending a list of currently existing groups:");
