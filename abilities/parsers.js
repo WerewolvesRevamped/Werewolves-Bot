@@ -630,8 +630,15 @@ module.exports = function() {
                 break;
                 // Attr - Find players that have a certain custom attribute
                 case "attr":
+                    // check for normal attribute ownership
                     let attrCustomOwners = await queryAttribute("attr_type", "custom", "val1", compVal);
                     attrCustomOwners = attrCustomOwners.map(el => el.owner);
+                    // check for role attribute ownership
+                    for(let j = 0; j < allPlayers.length; j++) {
+                        let hasRA = await playerHasRoleAttribute(allPlayers[j].id, compVal);
+                        if(hasRA) attrCustomOwners.push(allPlayers[j].id);
+                    }
+                    // filter
                     if(!compInverted) allPlayers = allPlayers.filter(el => attrCustomOwners.includes(el.id));
                     else allPlayers = allPlayers.filter(el => !attrCustomOwners.includes(el.id));
                 break;
