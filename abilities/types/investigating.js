@@ -16,7 +16,9 @@ module.exports = function() {
             return { msg: "Investigation failed! " + abilityError, success: false };
         }
         // parse parameters
-        let target = await parsePlayerSelector(ability.target, src_ref, additionalTriggerData);
+        let target;
+        if(ability.subtype != "count") target = await parsePlayerSelector(ability.target, src_ref, additionalTriggerData);
+        else target = await parseRoleSelector(ability.target, src_ref, additionalTriggerData);
         // apply redirection
         target = await applyRedirection(target, src_ref, ability.type, ability.subtype, additionalTriggerData);
         // select subtype
@@ -59,6 +61,10 @@ module.exports = function() {
             break;
             case "player_count":
                 result = await investigatingPlayerCount(src_name, src_ref, target, ability.target);
+                return result;
+            break;
+            case "count":
+                result = await investigatingCount(src_name, src_ref, target, ability.affected_by_wd ?? false, ability.affected_by_sd ?? false);
                 return result;
             break;
         }
@@ -199,6 +205,30 @@ module.exports = function() {
         // feedback
         abilityLog(`✅ ${srcRefToText(src_ref)} investigated \`${selectorTarget}\`'s count as \`${count}\`.`);
         return { msg: `Investigated \`${selectorTarget}\`'s count: \`${count}\``, success: true, result: `${count}[number]` };
+    }
+    
+    /**
+    Ability: Investigating - Count
+    **/
+    this.investigatingCount = async function(src_name, src_ref, targets, affected_by_wd, affected_by_sd) {
+        // get all living players
+        let ids = await getAllLivingIDs();
+        
+        // retrieve all roles
+        let roles = [];
+        for(let i = 0; i < ids.length; i++) {  
+            let rdata = await getVisibleRoleData(ids[i], affected_by_wd, affected_by_sd);
+            roles.push(rdata.role.role);
+        }
+        
+        // filter out roles that match target
+        let found = roles.filter(el => targets.includes(el));
+        
+        // get count
+        let count = found.length;
+        // feedback
+        abilityLog(`✅ ${srcRefToText(src_ref)} investigated \`${targets.join(",")}\` count as \`${count}\`.`);
+        return { msg: `Investigated \`${targets.join(",")}\` count: \`${count}\``, success: true, result: `${count}[number]` };
     }
     
     /**
