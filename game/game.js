@@ -18,6 +18,7 @@ require("./storytime.js")();
 require("./death.js")();
 require("./channels.js")();
 require("./discord_roles.js")();
+require("./host_information.js")();
 
 module.exports = function() {
 
@@ -42,9 +43,8 @@ module.exports = function() {
 		}
         
         // check requires and unique role values
-        let roles = await sqlProm("SELECT roles.name,roles.parsed FROM roles JOIN players WHERE players.role=roles.name");
+        let roles = await sqlProm("SELECT roles.name,roles.parsed,players.id FROM roles JOIN players WHERE players.role=roles.name");
         let roleNames = roles.map(el => el.name.toLowerCase());
-        console.log(roleNames);
         for(let i = 0; i < roles.length; i++) {
             let rName = roles[i].name;
             // parse role description
@@ -71,11 +71,28 @@ module.exports = function() {
                     return;
                 }
             }
+            // check host information
+            if(/%(.+?)%/.test(roles[i].parsed)) {
+                let matches = [], match = null;
+                var hostInfo = new RegExp("%(.+?)%", "g"); 
+                while(match = hostInfo.exec(roles[i].parsed)){
+                  matches.push(match[1].toLowerCase());
+                }
+                matches = removeDuplicates(matches);
+                let missingMatches = [];
+                for(let j = 0; j < matches.length; j++) {
+                    let hi = await getHostInformation(roles[i].id, matches[j]);
+                    if(hi.length != 1) missingMatches.push(matches[j]);
+                }
+                if(missingMatches.length > 0) {
+                    channel.send(`⛔ List error. Cannot start game with role \`${rName}\` on <@${roles[i].id}> without host information. The following information is missing: ${missingMatches.map(el => '\`' + el + '\`').join(", ")}.`); 
+                    return;
+                }
+            }
         }
         
-        channel.send(`⛔ Debug error. Would've started game.`); 
-        return;
-        
+        //channel.send(`⛔ Debug error. Would've started game.`); 
+        //return;
         
 		channel.send("✳ Game is called `" + stats.game + "`");
         createLocations();
@@ -433,6 +450,8 @@ module.exports = function() {
         killqClear();
         // reset teams
         resetTeams();
+        // reset host information
+        resetHostInformation();
         // disable action queue checker 
         pauseActionQueueChecker = true;
 		// Reset Poll Count

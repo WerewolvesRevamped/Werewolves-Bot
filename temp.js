@@ -85,7 +85,8 @@ module.exports = function() {
                 "teams": ["team","tm"],
                 "details": ["il","id"],
                 "killq": ["kq"],
-                "dr": ["discord_role","drole"]
+                "dr": ["discord_role","drole"],
+                "host_information": ["hi","host_info"]
         };
         for(let cmd in aliases) {
             if(aliases[cmd].indexOf(alias) != -1) return cmd;

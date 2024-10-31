@@ -4,7 +4,10 @@
 **/
 module.exports = function() {
 	
-	/* Handles cc command */
+    /**
+    Command: $dr
+    discord role command
+    **/
 	this.cmdDR = function(channel, args) {
 		// Check subcommand
 		if(!args[0]) { 

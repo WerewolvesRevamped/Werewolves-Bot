@@ -1712,6 +1712,11 @@ module.exports = function() {
                 case "@Chosen": return "option";
                 default: return "player";
             }
+        } else if(first == "%") {
+            if(targetType.substr(1, 4) === "Role") return "role";
+            else if(targetType.substr(1, 6) === "Player") return "player";
+            else if(targetType === "%PartialRoleList%") return "info";
+            else return "unknown";
         } else if(first == "#") {
             return "location";
         } else if(first == "`") {

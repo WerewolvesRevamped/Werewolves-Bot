@@ -686,6 +686,10 @@ client.on("messageCreate", async message => {
     case "dr":
 		if(checkGM(message)) cmdDR(message.channel, args);
     break;
+    /* Host Information */
+    case "host_information":
+		if(checkGM(message)) cmdHostInformation(message.channel, args);
+    break;
 	/* Invalid Command */
 	default:
 		message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
