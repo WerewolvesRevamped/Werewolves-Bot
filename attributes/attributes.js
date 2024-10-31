@@ -227,8 +227,23 @@ module.exports = function() {
     delets an attribute for a specific player
     **/
     this.deleteAttributePlayer = async function(player, column, val, column2 = null, val2 = null, column3 = null, val3 = null, column4 = null, val4 = null) {
-        if(column4) return await twoColumnDeletion(player, column, val, column2, val2, column3, val3, column4, val4);
-        else if(column3) return await twoColumnDeletion(player, column, val, column2, val2, column3, val3);
+        // get attribute
+        let attr;
+        if(column4) attr = await fourColumnQuery(player, column, val, column2, val2, column3, val3, column4, val4);
+        else if(column3) attr = await threeColumnQuery(player, column, val, column2, val2, column3, val3);
+        else if(column2) attr = await twoColumnQuery(player, column, val, column2, val2);
+        else attr = await singleColumnQuery(player, column, val);
+        
+        // delete owned attribute duration attributes
+        for(let i = 0; i < attr.length; i++) {
+            let childAttrs = await sqlProm("SEELCT ai_id FROM active_attributes WHERE (duration='attribute' OR duration='untiluseattribute') AND src_ref=" + connection.escape(`attribute:${attr[i].ai_id}`));
+            for(let j = 0; j < childAttrs.length; j++) {
+                await deleteAttribute(childAttrs[j].ai_id);
+            }
+        }
+        
+        if(column4) return await fourColumnDeletion(player, column, val, column2, val2, column3, val3, column4, val4);
+        else if(column3) return await threeColumnDeletion(player, column, val, column2, val2, column3, val3);
         else if(column2) return await twoColumnDeletion(player, column, val, column2, val2);
         else return await singleColumnDeletion(player, column, val);
     }
@@ -278,16 +293,11 @@ module.exports = function() {
         if(isDay()) await cleanupDeleteAttribute("nextnight", phaseNumeric - 1); // at the start of a day cleanup next night attributes, unless they were applied previous night
     }
     
-    function cleanupDeleteAttribute(dur_type, val) {
-        return new Promise(res => {
-            sql("DELETE FROM active_attributes WHERE duration=" + connection.escape(dur_type) + " AND applied_phase<" + connection.escape(val), result => {
-                res(true);
-            }, () => {
-                // DB error
-                abilityLog(`❗ **Error:** Failed while cleaning up \`${dur_type}\` attributes!`);  
-                res(false)
-            });
-        })
+    async function cleanupDeleteAttribute(dur_type, val) {
+        let attrs = await sqlProm("SELECT ai_id FROM active_attributes WHERE duration=" + connection.escape(dur_type) + " AND applied_phase<" + connection.escape(val));
+        for(let i = 0; i < attrs.length; i++) {
+            await deleteAttribute(attrs[i].ai_id);
+        }
     }
     
     /**
@@ -298,7 +308,7 @@ module.exports = function() {
         // get attribute
         let attr = await getAttribute(id);
         // delete until use type attribute
-        if(attr.duration === "untiluse") {
+        if(attr.duration === "untiluse" || attr.duration === "untiluseattribute") {
             await deleteAttribute(id);
         }
         // delete until second use type attribute if already used once
@@ -328,7 +338,12 @@ module.exports = function() {
     Delete Attribute
     deletes an attribute by ai id
     **/
-    this.deleteAttribute = function(id) {
+    this.deleteAttribute = async function(id) {
+        // delete owned attribute duration attributes
+        let childAttrs = await sqlProm("SELECT ai_id FROM active_attributes WHERE (duration='attribute' OR duration='untiluseattribute') AND src_ref=" + connection.escape(`attribute:${id}`));
+        for(let j = 0; j < childAttrs.length; j++) {
+            await deleteAttribute(childAttrs[j].ai_id);
+        }
         // delete attribute
         return sqlPromEsc("DELETE FROM active_attributes WHERE ai_id=", id);
     }
