@@ -240,6 +240,18 @@ module.exports = function() {
                 } else {
                     return invalidSelector(selectorTarget);
                 }
+            case "@voters":
+                if(additionalTriggerData.voters) {
+                    return additionalTriggerData.voters;
+                } else {
+                    return invalidSelector(selectorTarget);
+                }
+            case "@othervoters":
+                if(additionalTriggerData.other_voters) {
+                    return additionalTriggerData.other_voters;
+                } else {
+                    return invalidSelector(selectorTarget);
+                }
             
             // unknown selector
             default:

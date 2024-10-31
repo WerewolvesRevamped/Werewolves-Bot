@@ -438,20 +438,22 @@ module.exports = function() {
         
         // on poll closed trigger
         if(doTrigger) {
+            let otherVoters = maxVotesValidVoters;
+            otherVoters = otherVoters.filter(el => el != maxVotesData[0]);
             let srcType = srcToType(pollData.src_ref);
             switch(srcType) {
                 // default direct trigger execution
                 default:
-                    await trigger(pollData.src_ref, "On Poll Closed", { winner: maxVotesData[0] }); 
-                    await triggerPlayer(maxVotesData[0], "On Poll Win", { }); 
-                    await triggerPlayer(maxVotesData[0], "On Poll Win Complex", { poll_name: pollName }); 
+                    await trigger(pollData.src_ref, "On Poll Closed", { winner: maxVotesData[0], voters: maxVotesValidVoters, other_voters: otherVoters }); 
+                    await triggerPlayer(maxVotesData[0], "On Poll Win", { voters: maxVotesValidVoters, other_voters: otherVoters }); 
+                    await triggerPlayer(maxVotesData[0], "On Poll Win Complex", { poll_name: pollName, voters: maxVotesValidVoters, other_voters: otherVoters }); 
                 break;
                 // for group polls a random executor is chosen
                 case "group":
                     let executor = shuffleArray(maxVotesValidVoters)[0];
-                    await trigger(pollData.src_ref, "On Poll Closed", { winner: maxVotesData[0], executor: executor }); 
-                    await triggerPlayer(maxVotesData[0], "On Poll Win", { }); 
-                    await triggerPlayer(maxVotesData[0], "On Poll Win Complex", { poll_name: pollName }); 
+                    await trigger(pollData.src_ref, "On Poll Closed", { winner: maxVotesData[0], executor: executor, voters: maxVotesValidVoters, other_voters: otherVoters }); 
+                    await triggerPlayer(maxVotesData[0], "On Poll Win", { voters: maxVotesValidVoters, other_voters: otherVoters }); 
+                    await triggerPlayer(maxVotesData[0], "On Poll Win Complex", { poll_name: pollName, voters: maxVotesValidVoters, other_voters: otherVoters }); 
                 break;
                 
             }
