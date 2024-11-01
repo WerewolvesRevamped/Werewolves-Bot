@@ -84,6 +84,7 @@ module.exports = function() {
         await createAttribute(src_name, src_ref, target_player, "player", dur, "redirection", target, source, type);
     }
     
+    
     /** PUBLIC
     Get role attribute's player id
     **/
@@ -107,4 +108,11 @@ module.exports = function() {
         await createAttribute(src_name, src_ref, target_poll, "poll", dur, "poll_result", poll, subtype, target, subtype2);
     }
     
+    /**
+    Create Poll Disqualification Attribute
+    creates a poll disqualification attribute
+    **/
+    this.createPollDisqualificationAttribute = async function(src_name, src_ref, target_poll, dur, poll = "lynch", subtype = "disqualified", target = "") {
+        await createAttribute(src_name, src_ref, target_poll, "poll", dur, "poll_disqualification", poll, subtype, target);
+    }
 }

@@ -52,6 +52,13 @@ module.exports = function() {
                 result = await pollCancel(src_name, src_ref, pollType, duration);
                 return result;
             break;
+            case "manipulation":
+                duration = parseDuration(ability.duration ?? "untiluse");
+                let manipTarget = await parsePlayerSelector(ability.manip_target, src_ref, additionalTriggerData);
+                let manipType = parseManipTypePoll(ability.manip_type);
+                result = await pollManipulation(src_name, src_ref, pollType, duration, manipTarget, manipType);
+                return result;
+            break;
         }
     }
     
@@ -71,6 +78,17 @@ module.exports = function() {
         await createPollResultAttribute(src_name, src_ref, pollType, duration, pollType, "cancel");
         abilityLog(`✅ ${toTitleCase(pollType)} was cancelled.`);
         return { msg: "Poll cancelled!", success: true, target: `poll:${pollType}` };
+    }
+    
+    /** PRIVATE
+    Ability: Poll - Manipulation
+    **/
+    async function pollManipulation(src_name, src_ref, pollType, duration, manipTarget, manipType) {
+        for(let i = 0; i < manipTarget.length; i++) {
+            await createPollDisqualificationAttribute(src_name, src_ref, pollType, duration, pollType, manipTarget[i], manipType);
+            abilityLog(`✅ ${toTitleCase(pollType)} was manipulated to have <@${manipTarget[i]}> as \`${manipType}\`.`);
+        }
+        return { msg: "Poll manipulated!", success: true, target: `poll:${pollType}` };
     }
     
     /** PUBLIC
@@ -93,6 +111,15 @@ module.exports = function() {
         const name = pollData.display_name;
         
         const allOptions = await optionListData(options);
+        let allOptionsFiltered = [];
+        
+        // filter out options that are unvotable
+        for(let i = 0; i < allOptions.length; i++) {
+            if(!allOptions[i].id) continue; // only check players
+            let unvotable = await queryAttribute("attr_type", "poll_disqualification", "val1", pollType, "val2", allOptions[i].id, "val3", "unvotable");
+            if(unvotable.length === 0) allOptionsFiltered.push(allOptions[i]);
+            else await useAttribute(unvotable[0].ai_id);
+        }
         
         // calculate poll count
         let pollCount = 1;
@@ -107,10 +134,10 @@ module.exports = function() {
             let emoji = getLUTEmoji(pollType, pollName);
             await abilitySendProm(`${pollLocation.type}:${pollLocation.value}`, `No Poll: **${toTitleCase(pollName)}** ${emoji}\n\nThe poll will not take place this time.`);
         } else if(pollCount === 1) { // single poll
-            await createPoll(pollType, pollName, pollLocation, allOptions, src_ref, src_name);
+            await createPoll(pollType, pollName, pollLocation, allOptionsFiltered, src_ref, src_name);
         } else { // several polls
             for(let i = 0; i < pollCount; i++) {
-                await createPoll(pollType, `${pollName} #${i+1}`, pollLocation, deepCopy(allOptions), src_ref, src_name);
+                await createPoll(pollType, `${pollName} #${i+1}`, pollLocation, deepCopy(allOptionsFiltered), src_ref, src_name);
             }
         }
         

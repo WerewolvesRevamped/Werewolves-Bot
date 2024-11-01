@@ -1584,7 +1584,7 @@ module.exports = function() {
         if(attributesValidDurationTypes.includes(dur_type)) {
             return dur_type;
         } else {
-            abilityLog(`❗ **Error:** Invalid duration type \`${mem_type}\`. Defaulted to \`phase\`!`);
+            abilityLog(`❗ **Error:** Invalid duration type \`${dur_type}\`. Defaulted to \`phase\`!`);
             return "phase";   
         }
     }
@@ -1651,6 +1651,23 @@ module.exports = function() {
         } else {
             abilityLog(`❗ **Error:** Invalid manipulation type \`${manip_type}\`. Defaulted to \`public\`!`);
             return "public";
+        }
+    }
+    
+    
+    /**
+    Parse Manip Type
+    parses a manipulation type
+    defaults to "public" (public voting power);
+    **/
+    const manipTypesPoll = ["unvotable","disqualified"];
+    this.parseManipTypePoll = function(manip_type) {
+        manip_type = manip_type.toLowerCase();
+        if(manipTypesPoll.includes(manip_type)) {
+            return manip_type;
+        } else {
+            abilityLog(`❗ **Error:** Invalid manipulation type \`${manip_type}\`. Defaulted to \`unvotable\`!`);
+            return "unvotable";
         }
     }
     
