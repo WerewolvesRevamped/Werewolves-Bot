@@ -551,7 +551,7 @@ module.exports = function() {
 
     /** REGEX - Reminder: You need double \'s here **/
     // general
-    const targetType = "(`[^`]*`|`[^`]*`\\[\\w+\\]|@\\S*|&\\S*|#\\S*|%[^%]+%|randomize\\(.+?\\)|shuffle\\(.+?\\)|most_freq_role\\(.+?\\)|\\d+)";
+    const targetType = "(`[^`]*`|`[^`]*`\\[\\w+\\]|@\\S*|&\\S*|#\\S*|%[^%]+%|\\d+)";
     const attrDuration = "( \\(~[^\)]+\\))?";
     const locationType = "(`[^`]*`|@\\S*|#\\S*)"; // extended version of target type
     const groupType = "(@\\S*|#\\S*)"; // reduced version of location type
@@ -1127,11 +1127,23 @@ module.exports = function() {
         if(fd) {
             ability = { type: "poll", subtype: "deletion", target: ttpp(fd[1], "poll"), duration: dd(fd[2], "untiluse") };
         }
-        // Delete a poll
+        // Poll Disqualification Manipulation
         exp = new RegExp("^Manipulate `" + str + "` Poll \\(" + targetType + " is `" + pollManipManipSubtype + "`\\)" + attrDuration + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
             ability = { type: "poll", subtype: "manipulation", target: ttpp(fd[1], "poll"), manip_target: fd[2], manip_type: lc(fd[3]), duration: dd(fd[4], "untiluse") };
+        }
+        // Poll Votes Manipulation
+        exp = new RegExp("^Manipulate `" + str + "` Poll \\(" + targetType + " has `" + num + "` votes\\)" + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "poll", subtype: "votes", target: ttpp(fd[1], "poll"), manip_target: fd[2], manip_type: "visible", manip_value: fd[3], duration: dd(fd[4], "untiluse") };
+        }
+        // Poll Votes Manipulation
+        exp = new RegExp("^Manipulate `" + str + "` Poll \\(" + targetType + " has `" + num + "` hidden votes\\)" + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "poll", subtype: "votes", target: ttpp(fd[1], "poll"), manip_target: fd[2], manip_type: "hidden", manip_value: fd[3], duration: dd(fd[4], "untiluse") };
         }
         /** ANNOUNCEMENTS **/
         // reveal

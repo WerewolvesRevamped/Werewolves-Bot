@@ -59,6 +59,14 @@ module.exports = function() {
                 result = await pollManipulation(src_name, src_ref, pollType, duration, manipTarget, manipType);
                 return result;
             break;
+            case "votes":
+                duration = parseDuration(ability.duration ?? "untiluse");
+                let manipTarget2 = await parsePlayerSelector(ability.manip_target, src_ref, additionalTriggerData);
+                let manipType2 = parseManipTypeVotes(ability.manip_type);
+                let manipValue = await parseNumber(ability.manip_value);
+                result = await pollVotes(src_name, src_ref, pollType, duration, manipTarget2, manipType2, manipValue);
+                return result;
+            break;
         }
     }
     
@@ -89,6 +97,17 @@ module.exports = function() {
             abilityLog(`✅ ${toTitleCase(pollType)} was manipulated to have <@${manipTarget[i]}> as \`${manipType}\`.`);
         }
         return { msg: "Poll manipulated!", success: true, target: `poll:${pollType}` };
+    }
+    
+    /** PRIVATE
+    Ability: Poll - Votes
+    **/
+    async function pollVotes(src_name, src_ref, pollType, duration, manipTarget, manipType, manipValue) {
+        for(let i = 0; i < manipTarget.length; i++) {
+            await createPollVotesAttribute(src_name, src_ref, pollType, duration, pollType, manipTarget[i], manipType, manipValue);
+            abilityLog(`✅ ${toTitleCase(pollType)} was manipulated to have \`${manipValue}\` ${manipType} votes  for <@${manipTarget[i]}>.`);
+        }
+        return { msg: "Poll votes manipulated!", success: true, target: `poll:${pollType}` };
     }
     
     /** PUBLIC

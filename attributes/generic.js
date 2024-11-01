@@ -115,4 +115,12 @@ module.exports = function() {
     this.createPollDisqualificationAttribute = async function(src_name, src_ref, target_poll, dur, poll = "lynch", subtype = "disqualified", target = "") {
         await createAttribute(src_name, src_ref, target_poll, "poll", dur, "poll_disqualification", poll, subtype, target);
     }
+    
+    /**
+    Create Poll Votes Attribute
+    creates a poll votes attribute
+    **/
+    this.createPollVotesAttribute = async function(src_name, src_ref, target_poll, dur, poll = "lynch", subtype = "visible", target = "", val = 0) {
+        await createAttribute(src_name, src_ref, target_poll, "poll", dur, "poll_votes", poll, subtype, target, val);
+    }
 }

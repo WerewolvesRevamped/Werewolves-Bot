@@ -337,10 +337,15 @@ module.exports = function() {
         
         // generate output
         let outputLines = [];
+        let forceResult = false;
         let maxVotes = -1, maxVotesData = [], maxVotesValidVoters = [];
         for(let j = 0; j < allReactions.length; j++) {
             const reac = allReactions[j];
             const voters = reac.users.filter(el => allowedVoters.indexOf(el.id) > -1);
+            
+            // get candidate from emoji
+            let candidate = emojiToID(reac.emoji);
+            if(!candidate) candidate = pollEmojiToName(reac.emoji);
             
             // remove invalid votes through duplication
             const validVoters = voters.filter(el => duplicateVoters.indexOf(el.id) === -1);
@@ -352,24 +357,43 @@ module.exports = function() {
                 votes += await pollValue(validVoters[i].id, pollPublicType, pollData.src_name);
             }
             
-            // if no votes, continue
-            if(votes < 0 || (voters.length === 0)) continue;
+            // get extra votes
+            let extraVisible = await queryAttribute("attr_type", "poll_votes", "val1", pollType, "val2", candidate, "val3", "visible");
+            let extraHidden = await queryAttribute("attr_type", "poll_votes", "val1", pollType, "val2", candidate, "val3", "hidden");
+            // use attributes
+            for(let i = 0; i < extraVisible.length; i++) {
+                await useAttribute(extraVisible[i].ai_id);
+            }
+            for(let i = 0; i < extraHidden.length; i++) {
+                await useAttribute(extraHidden[i].ai_id);
+            }
+            // count votes
+            extraVisible = extraVisible.map(el => +el.val4).reduce((a,b) => a+b, 0);
+            extraHidden = extraHidden.map(el => +el.val4).reduce((a,b) => a+b, 0);
+            votes += extraVisible;
+            votes += extraHidden;
             
-            // get candidate from emoji
-            let candidate = emojiToID(reac.emoji);
-            if(!candidate) candidate = pollEmojiToName(reac.emoji);
+            // if no votes, continue
+            if(votes < 0 || (voters.length === 0 && votes === 0)) continue;
             
             // if no valid voters, but votes
-            if(validVoters.length === 0) validVoters = "*Unknown*";
+            let validVotersText = validVoters.join(', ');
+            if(validVoters.length === 0) validVotersText = "*Unknown*";
             
             // candidate name
             let candidateName = candidate.match(/^\d+$/) ? `<@${candidate}>` : candidate;
             
             // create message
             let msg;
-            if(showVoters) msg = `(${votes}) ${reac.emoji} ${candidateName} **-** ${validVoters.join(', ')}` + (invalidVoters.length>0 ? ` (Invalid Votes: ${invalidVoters.join(', ')})` : "");
-            else msg = `(${votes}) ${reac.emoji} ${candidateName}`;
-            outputLines.push(msg);
+            let displayVotes = votes - extraHidden;
+            if(validVoters.length === 0 && invalidVoters.length === 0 && votes > 0 && displayVotes === 0) {
+                // nothing - this is the case when nobody votes and an invisible vote was played which should not be displayed
+                forceResult = true; // forces result in case of no votes
+            } else {
+                if(showVoters) msg = `(${displayVotes}) ${reac.emoji} ${candidateName} **-** ${validVotersText}` + (invalidVoters.length>0 ? ` (Invalid Votes: ${invalidVoters.join(', ')})` : "");
+                else msg = `(${displayVotes}) ${reac.emoji} ${candidateName}`;
+                outputLines.push(msg);
+            }
             
             if(votes <= 0) continue;
             
@@ -389,7 +413,7 @@ module.exports = function() {
         
         // send poll results
         doTrigger = false;
-        if(outputLines.length > 0 || pollCancelled) {
+        if(outputLines.length > 0 || pollCancelled || forceResult) {
             let msgFull = outputLines.join("\n");
             let embed;
             if(pollCancelled) { // CANCELLED - NO WINNER

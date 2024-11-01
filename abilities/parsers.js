@@ -1400,13 +1400,13 @@ module.exports = function() {
         ["active-defense","passive-defense","partial-defense","recruitment-defense","absence"], // protecting
         ["add","remove","change"], // applying
         [], // redirecting
-        [], // vote manipulation
+        ["absolute","relative"], // vote manipulation
         [], // whispering
         ["add","remove"], // joining
         ["add","remove","transfer"], // granting
         [], // loyalty
         null, // obstruction
-        ["creation","addition","deletion","cancellation"], // poll
+        ["creation","addition","deletion","cancellation","manipulation","votes"], // poll
         ["immediate","buffer"], // announcement
         ["role","alignment"], // changing
         null, // copying
@@ -1654,11 +1654,10 @@ module.exports = function() {
         }
     }
     
-    
     /**
-    Parse Manip Type
-    parses a manipulation type
-    defaults to "public" (public voting power);
+    Parse Manip Type Poll
+    parses a manipulation type for poll disqualification manipulation
+    defaults to "unvotable"
     **/
     const manipTypesPoll = ["unvotable","disqualified"];
     this.parseManipTypePoll = function(manip_type) {
@@ -1668,6 +1667,22 @@ module.exports = function() {
         } else {
             abilityLog(`❗ **Error:** Invalid manipulation type \`${manip_type}\`. Defaulted to \`unvotable\`!`);
             return "unvotable";
+        }
+    }
+    
+    /**
+    Parse Manip Type Votes
+    parses a manipulation type for poll votes manipulation
+    defaults to "visible"
+    **/
+    const manipTypesVotes = ["visible","hidden"];
+    this.parseManipTypeVotes = function(manip_type) {
+        manip_type = manip_type.toLowerCase();
+        if(manipTypesVotes.includes(manip_type)) {
+            return manip_type;
+        } else {
+            abilityLog(`❗ **Error:** Invalid manipulation type \`${manip_type}\`. Defaulted to \`visible\`!`);
+            return "visible";
         }
     }
     
