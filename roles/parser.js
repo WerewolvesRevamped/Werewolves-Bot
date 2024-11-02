@@ -1049,7 +1049,7 @@ module.exports = function() {
         exp = new RegExp("^Obstruct " + targetType + attrDuration + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "obstructing", target: ttpp(fd[1]), duration: dd(fd[2], "permanent") };
+            ability = { type: "obstructing", target: ttpp(fd[1]), duration: dd(fd[2], "permanent"), obstructed_ability: "", obstructed_subtype: "", custom_feedback: "" };
         }
         // obstruct specific ability type
         exp = new RegExp("^Obstruct " + abilityType + " for " + targetType + attrDuration + "$", "g");

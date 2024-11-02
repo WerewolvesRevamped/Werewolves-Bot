@@ -17,6 +17,7 @@ module.exports = function() {
         }
         // parse parameters
         let target = await parsePlayerSelector(ability.target, src_ref, additionalTriggerData);
+        target = await applyRedirection(target, src_ref, ability.type, "", additionalTriggerData);
         let abilityType = await parseSelector(ability.subtype, src_ref, additionalTriggerData);
         let duration = parseDuration(ability.duration ?? "permanent");
         // check parameters
@@ -88,7 +89,7 @@ module.exports = function() {
         //console.log(`Checking Redirections for ${target} from ${source} with ${abilitySubtype} ${abilityType}`);
         let targetRedirections = await getRedirections(target);
         let parsedAbilityType = parseAbilityType(abilityType);
-        let parsedAbilitySubype = parseAbilitySubtype(abilitySubtype + " " + abilityType);
+        let parsedAbilitySubype = abilitySubtype ? parseAbilitySubtype(abilitySubtype + " " + abilityType) : "none none";
         let filteredRedirections = [];
         for(let i = 0; i < targetRedirections.length; i++) {
             let type = await parseSelector(targetRedirections[i].val3);

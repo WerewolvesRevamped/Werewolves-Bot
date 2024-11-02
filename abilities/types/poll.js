@@ -105,7 +105,7 @@ module.exports = function() {
     async function pollVotes(src_name, src_ref, pollType, duration, manipTarget, manipType, manipValue) {
         for(let i = 0; i < manipTarget.length; i++) {
             await createPollVotesAttribute(src_name, src_ref, pollType, duration, pollType, manipTarget[i], manipType, manipValue);
-            abilityLog(`✅ ${toTitleCase(pollType)} was manipulated to have \`${manipValue}\` ${manipType} votes  for <@${manipTarget[i]}>.`);
+            abilityLog(`✅ ${toTitleCase(pollType)} was manipulated to have \`${manipValue}\` ${manipType} votes for <@${manipTarget[i]}>.`);
         }
         return { msg: "Poll votes manipulated!", success: true, target: `poll:${pollType}` };
     }

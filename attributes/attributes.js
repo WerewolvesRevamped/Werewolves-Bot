@@ -64,7 +64,7 @@ module.exports = function() {
                     const ownerText = srcRefToText(`${attribute.owner_type}:${attribute.owner}`);
                     const attrList = `${attribute.val1};${attribute.val2};${attribute.val3};${attribute.val4}`;
                     return `\`${attribute.ai_id}\`: **${toTitleCase(attribute.attr_type)}** - ${ownerText} (~${toTitleCase(attribute.duration)}) [${attrList}] {${srcNameToText(attribute.src_name)} - ${srcRefToText(attribute.src_ref)}}`;
-                }), 15).map(el => el.join("\n")).forEach(el => channel.send(el));
+                }), 10).map(el => el.join("\n")).forEach(el => channel.send(el));
 			} else { 
 				// No attributes exist
 				channel.send("⛔ Database error. Could not find any active attribute instances!");

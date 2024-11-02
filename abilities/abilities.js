@@ -34,6 +34,7 @@ require("./types/disband.js")();
 require("./types/redirecting.js")();
 require("./types/cancel.js")();
 require("./types/for_each.js")();
+require("./types/obstructing.js")();
 
 module.exports = function() {
     
@@ -152,6 +153,9 @@ module.exports = function() {
                 break;
                 case "disband":
                     feedback = await abilityDisband(src_refAction, src_name, ability, additionalTriggerData);
+                break;
+                case "obstructing":
+                    feedback = await abilityObstructing(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "for_each":
                     feedback = await abilityForEach(src_refAction, src_name, ability, additionalTriggerData);

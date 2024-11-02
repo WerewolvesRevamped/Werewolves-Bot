@@ -48,8 +48,8 @@ module.exports = function() {
     Create Obstruction Attribute
     creates an obstruction attribute with specific affected abilities and obstruction feedback
     **/
-    this.createObstructionAttribute = async function(src_name, src_ref, target_player, dur, affected_abilities = "", feedback = "") {
-        await createAttribute(src_name, src_ref, target_player, "player", dur, "obstruction", affected_abilities, feedback);
+    this.createObstructionAttribute = async function(src_name, src_ref, target_player, dur, affected_type = "", affected_subtype = "", feedback = "") {
+        await createAttribute(src_name, src_ref, target_player, "player", dur, "obstruction", affected_type, affected_subtype, feedback);
     }
     
     /**

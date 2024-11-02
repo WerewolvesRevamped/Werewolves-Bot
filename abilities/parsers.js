@@ -1317,7 +1317,7 @@ module.exports = function() {
     /**
     Parse ability type
     **/
-    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","redirecting","manipulating","whispering","joining","granting","loyalty","","poll","announcement","changing","","choices","ascend","descend","","counting","reset","","","feedback","success","failure","log","","process_evaluate","abilities"];
+    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","redirecting","manipulating","whispering","joining","granting","loyalty","obstructing","poll","announcement","changing","","choices","ascend","descend","","counting","reset","","","feedback","success","failure","log","","process_evaluate","abilities"];
     this.parseAbilityType = function(ability_type, self = null, additionalTriggerData = {}) {
         // get target
         let selectorTarget = selectorGetTarget(ability_type);
@@ -1405,7 +1405,7 @@ module.exports = function() {
         ["add","remove"], // joining
         ["add","remove","transfer"], // granting
         [], // loyalty
-        null, // obstruction
+        [], // obstruction
         ["creation","addition","deletion","cancellation","manipulation","votes"], // poll
         ["immediate","buffer"], // announcement
         ["role","alignment"], // changing

@@ -633,6 +633,7 @@ module.exports = function() {
                 let role = parseRoleReply(randomRole.name);
                 return role;
             default:
+                abilityLog(`❗ **Error:** Unknown random prompt reply type \`${type}\`!`);
                 return false;
         }
     }
