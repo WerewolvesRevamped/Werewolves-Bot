@@ -4,6 +4,8 @@
 **/
 module.exports = function() {
 	
+    this.cachedDR = null;
+    
     /**
     Command: $dr
     discord role command
@@ -68,6 +70,7 @@ module.exports = function() {
         
         sql("INSERT INTO discord_roles (name, id) VALUES (" + connection.escape(args[1]) + "," + connection.escape(args[2]) + ")", result => {
             channel.send(`✅ Registered <@&${args[2]}> as ${toTitleCase(args[1])}.`);
+            cacheDR();
         }, () => {
 			channel.send("⛔ Database error. Couldn't register discord role!");
         });
@@ -92,6 +95,7 @@ module.exports = function() {
         
         sql("DELETE FROM discord_roles WHERE name=" + connection.escape(args[1]), result => {
             channel.send(`✅ Deleted ${toTitleCase(args[1])} from DR.`);
+            cacheDR();
         }, () => {
 			channel.send("⛔ Database error. Couldn't delete discord role!");
         });
@@ -130,6 +134,15 @@ module.exports = function() {
         
         // add role
         member.roles.remove(existing[0].id);
+    }
+    
+    /**
+    Caches DR
+    **/
+    this.cacheDR = async function() {
+        // get role
+        let drs = await sqlProm("SELECT * FROM discord_roles");
+        cachedDR = drs.map(el => ({ name: el.name, id: el.id }));
     }
         
 }

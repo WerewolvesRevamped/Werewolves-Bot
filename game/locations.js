@@ -187,8 +187,9 @@ module.exports = function() {
                 return stats.ghost ? getPerms(stats.ghost, allow, deny) : null; 
             case "substitute":
                 return stats.substitute ? getPerms(stats.substitute, allow, deny) : null; 
-            default:
-                return null;
+            default: // check if a matching discord role exists
+                let filtered = cachedDR.filter(el => el.name === type);
+                return filtered.length === 1 ? getPerms(filtered[0].id, allow, deny) : null;
         }
     }
     

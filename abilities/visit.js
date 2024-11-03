@@ -22,7 +22,7 @@ module.exports = function() {
         let targetPlayerLong = targetPlayerSplit.length === 2 ? targetPlayerAny : `unknown:` + targetPlayerSplit[0];
         
         // no visit to self
-        //if(sourcePlayer === targetPlayer) return null;
+        if(sourcePlayer === targetPlayer) return null;
         
         // get all living ids; check if both are players and alive
         let living = await getAllLivingIDs();

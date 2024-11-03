@@ -667,6 +667,7 @@ module.exports = function() {
                 break;
                 // Attr - Find players that have a certain custom attribute
                 case "attr":
+                case "attribute":
                     // check for normal attribute ownership
                     let attrCustomOwners = await queryAttribute("attr_type", "custom", "val1", compVal);
                     attrCustomOwners = attrCustomOwners.map(el => el.owner);
@@ -1142,6 +1143,10 @@ module.exports = function() {
         if(cachedGroups.indexOf(parsedGroupName) >= 0) {
             // get channel id
             let groupData = await groupGetData(parsedGroupName);
+            if(!groupData || !groupData.channel_id) {
+                abilityLog(`❗ **Error:** Could not find group \`${parsedGroupName}\`!`);
+                return null;
+            }
             return groupData.channel_id;
         } else {
             abilityLog(`❗ **Error:** Invalid group \`${selectorTarget}\`!`);
@@ -1397,7 +1402,7 @@ module.exports = function() {
         ["role","alignment","class","category","player_count","count"], // investigating
         ["target","untarget"], // targeting
         ["weakly","strongly"], // disguising
-        ["active-defense","passive-defense","partial-defense","recruitment-defense","absence"], // protecting
+        ["active","passive","partial","recruitment","absence"], // protecting
         ["add","remove","change"], // applying
         [], // redirecting
         ["absolute","relative"], // vote manipulation
