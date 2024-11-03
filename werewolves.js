@@ -791,11 +791,45 @@ client.on("messageReactionRemove", async (reaction, user) => {
 client.on("guildMemberRemove", async member => {
     if(member.guild.id != stats.log_guild) return;
 	log(`❌ ${member.user} has left the server!`);
-	sql("UPDATE players SET alive = 0 WHERE id = " + connection.escape(member.id), result => {
-		log("✅ Killed `" +  member.displayName + "`!");
-	}, () => {
-		log("⛔ Database error. Could not kill `" +  member.displayName + "`!");
-	});	
+    // check if is player
+    let check = await sqlPromOneEsc("SELECT * FROM players WHERE id=", member.id);
+    if(check) {
+        // Signup phase -> signout
+        switch(+stats.gamephase) {
+            case gp.SIGNUP:
+                sql("DELETE FROM players WHERE id = " + connection.escape(member.id), result => {
+                    log("✅ Signed out `" +  member.displayName + "`!");
+                }, () => {
+                    log("⛔ Database error. Could not kill `" +  member.displayName + "`!");
+                });	
+            break;
+            // Setup phase -> signout + inform host
+            case gp.SETUP:
+                sql("DELETE FROM players WHERE id = " + connection.escape(member.id), result => {
+                    log("✅ Signed out `" +  member.displayName + "`!");
+                    log(`<@&${stats.host}>`);
+                }, () => {
+                    log("⛔ Database error. Could not kill `" +  member.displayName + "`!");
+                    log(`<@&${stats.host}>`);
+                });	
+            break;
+            // Ingame phase -> kill + inform host
+            case gp.INGAME:
+                if(check.alive != 0) {
+                    sql("UPDATE players SET alive = 0 WHERE id = " + connection.escape(member.id), result => {
+                        log("✅ Killed `" +  member.displayName + "`!");
+                        log(`<@&${stats.host}>`);
+                    }, () => {
+                        log("⛔ Database error. Could not kill `" +  member.displayName + "`!");
+                        log(`<@&${stats.host}>`);
+                    });	
+                }
+            break;
+        }
+    }
+    
+    
+
 });
 
 /* Join Detection */
