@@ -520,7 +520,7 @@ module.exports = function() {
             let voteValue = 0;
             let grpName = srcToValue(src_name);
             let grpMem = await queryAttributePlayer(player_id, "attr_type", "group_membership", "val1", grpName);
-            if(["member","owner"].includes(grpMem[0].val2)) voteValue = 1;
+            if(grpMem[0] && ["member","owner"].includes(grpMem[0].val2)) voteValue = 1;
             console.log(grpName, grpMem, voteValue);
             
             const voteManipulations = await getManipulations(player_id, "private");

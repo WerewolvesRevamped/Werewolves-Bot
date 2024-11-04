@@ -117,8 +117,8 @@ module.exports = function() {
                 const first = await parseSelector(condition.first, src_ref, additionalTriggerData);
                 const second = await parseSelector(condition.second, src_ref, additionalTriggerData);
                 
-                //console.log("FIRST", first.type, first.value[0]);
-                //console.log("SECOND", second.type, second.value[0]);
+                console.log("FIRST", first.type, first.value[0]);
+                console.log("SECOND", second.type, second.value[0]);
                 
                 // switch by subtype
                 switch(condition.subtype) {
@@ -128,15 +128,15 @@ module.exports = function() {
                     // COMPARISON - EQUAL
                     case "equal":
                         if(first.type === second.type) { // same type, do direct type comparison
-                            return first.value === second.value;
+                            return first.value[0] === second.value[0];
                         } else if(first.type === "result" && second.type === "success") {
                             return first.value[0].success === second.value[0];
                         } else if(first.type === "success" && second.type === "result") {
                             return first.value[0] === second.value[0].success;
                         } else if(first.type === "number" && second.type === "result") {
-                            return first.value[0] === (await parseNumber(second.value[0].result));
+                            return first.value[0] === (await parseNumber(second.value[0].result, src_ref, additionalTriggerData));
                         } else if(first.type === "result" && second.type === "number") {
-                            return (await parseNumber(first.value[0].result)) === second.value[0];
+                            return (await parseNumber(first.value[0].result, src_ref, additionalTriggerData)) === second.value[0];
                         } else if(first.type === "result" && second.type === "role") {
                             return first.value[0].role === second.value[0];
                         } else if(first.type === "role" && second.type === "result") {
@@ -161,9 +161,9 @@ module.exports = function() {
                         if(first.type === second.type && first.type === "number") { // same type, do direct type comparison
                             return first.value < second.value;
                         } else if(first.type === "number" && second.type === "result") {
-                            return first.value[0] < (await parseNumber(second.value[0].result));
+                            return first.value[0] < (await parseNumber(second.value[0].result, src_ref, additionalTriggerData));
                         }else if(first.type === "result" && second.type === "number") {
-                            return (await parseNumber(first.value[0].result)) < second.value[0];
+                            return (await parseNumber(first.value[0].result, src_ref, additionalTriggerData)) < second.value[0];
                         }
                         // no comparison can be made
                         return false;
@@ -172,9 +172,9 @@ module.exports = function() {
                         if(first.type === second.type && first.type === "number") { // same type, do direct type comparison
                             return first.value < second.value;
                         } else if(first.type === "number" && second.type === "result") {
-                            return first.value[0] < (await parseNumber(second.value[0].result));
+                            return first.value[0] < (await parseNumber(second.value[0].result, src_ref, additionalTriggerData));
                         } else if(first.type === "result" && second.type === "number") {
-                            return (await parseNumber(first.value[0].result)) < second.value[0];
+                            return (await parseNumber(first.value[0].result, src_ref, additionalTriggerData)) < second.value[0];
                         }
                         // no comparison can be made
                         return false;

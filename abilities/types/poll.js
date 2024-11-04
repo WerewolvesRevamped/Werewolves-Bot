@@ -63,7 +63,7 @@ module.exports = function() {
                 duration = parseDuration(ability.duration ?? "untiluse");
                 let manipTarget2 = await parsePlayerSelector(ability.manip_target, src_ref, additionalTriggerData);
                 let manipType2 = parseManipTypeVotes(ability.manip_type);
-                let manipValue = await parseNumber(ability.manip_value);
+                let manipValue = await parseNumber(ability.manip_value, src_ref, additionalTriggerData);
                 result = await pollVotes(src_name, src_ref, pollType, duration, manipTarget2, manipType2, manipValue);
                 return result;
             break;

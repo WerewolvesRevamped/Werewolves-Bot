@@ -1694,6 +1694,7 @@ module.exports = function() {
                 case "originalrole": return "role";
                 case "alignment": return "alignment";
                 case "counter": return "number";
+                case "count": return "number";
                 case "publicvotingpower": return "number";
                 case "privatevotingpower": return "number";
                 case "ownerrole": return "role";

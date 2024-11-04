@@ -66,7 +66,7 @@ module.exports = function() {
                 return { value: [ parseAbilityCategory(selector) ], type: "abilityCategory" };
             // NUMBER
             case "number":
-                return { value: [ await parseNumber(selector) ], type: "number" };
+                return { value: [ await parseNumber(selector, self, additionalTriggerData) ], type: "number" };
             // ATTRIBUTE
             case "attribute":
                 return { value: parseAttributeSelector(selector), type: "attribute" };
@@ -1468,13 +1468,23 @@ module.exports = function() {
     Parse Number
     parses a number
     **/
-    this.parseNumber = async function(selector) {
+    this.parseNumber = async function(selector, self = null, additionalTriggerData = {}) {
         // get target
         let selectorTarget = selectorGetTarget(selector);
         selectorTarget = selectorTarget.replace(/`/g,"");
         // is number?
         if(!isNaN(selectorTarget)) { // direct number
             return +selectorTarget;
+        } else if (PROPERTY_ACCESS.test(selectorTarget)) { // property access
+            let contents = selectorTarget.match(PROPERTY_ACCESS); // get the selector
+            let infType = inferType(`@${contents[1]}`);
+            let result = await parseSelector(`@${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
+            return + (await parsePropertyAccess(result, contents[2], infType));
+        } else if (PROPERTY_ACCESS_TEAM.test(selectorTarget)) { // property access
+            let contents = selectorTarget.match(PROPERTY_ACCESS_TEAM); // get the selector
+            let infType = inferType(`&${contents[1]}`);
+            let result = await parseSelector(`&${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
+            return + (await parsePropertyAccess(result, contents[2], infType));
         } else { // not a number
             selectorTarget = await applyVariables(selectorTarget);
             if(!isNaN(selectorTarget)) { // direct variable
@@ -1482,8 +1492,8 @@ module.exports = function() {
             } else { // division
                 let splitSel = selectorTarget.split("/");
                 if(splitSel.length == 2) {
-                    let val1 = await parseNumber(splitSel[0]);
-                    let val2 = await parseNumber(splitSel[1]);
+                    let val1 = await parseNumber(splitSel[0], self, additionalTriggerData);
+                    let val2 = await parseNumber(splitSel[1], self, additionalTriggerData);
                      if(!isNaN(val1) && !isNaN(val2)) {
                         return (+val1) / (+val2);
                      } else {

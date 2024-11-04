@@ -824,6 +824,36 @@ module.exports = function() {
         await updateActiveTeams();
         if(stats.gamephase != gp.INGAME) return;
         
+        
+        // passive start actions
+        await triggerHandler("Passive Start Day");
+        await triggerHandler("Start Day");
+        await triggerHandler("Passive Start Phase");
+        await triggerHandler("Start Phase");
+        
+        // handle killq
+        await killqKillall();
+        
+        // immediate actions
+        await triggerHandler("Immediate Day");
+        await triggerHandler("Immediate");
+        
+        // end actions
+        await triggerHandler("End Day");
+        await triggerHandler("End Phase");
+        await triggerHandler("Start Night");
+        await triggerHandler("Start Phase");
+        
+        // passive
+        await triggerHandler("Passive");
+        
+        // handle killq
+        await killqKillall();
+        
+        // update teams
+        await updateActiveTeams();
+        if(stats.gamephase != gp.INGAME) return;
+        
         // pause queue checker during event
         pauseActionQueueChecker = false;
     }
@@ -832,7 +862,7 @@ module.exports = function() {
     Event: Start Night
     triggers at the start of the night
     **/
-    this.eventStartNight = async function() {
+    this.eventStartNight = async function(newPhase = null) {
         // pause queue checker during event
         pauseActionQueueChecker = true;
         
@@ -871,6 +901,9 @@ module.exports = function() {
         // storytime
         await postStorytime();
         
+        // set new phase
+        if(newPhase) await setPhase(newPhase);
+        
         // passive start actions
         await triggerHandler("Passive Start Night");
         await triggerHandler("Start Night");
@@ -908,7 +941,7 @@ module.exports = function() {
     Event: Start Day
     triggers at the start of the day
     **/
-    this.eventStartDay = async function() {
+    this.eventStartDay = async function(newPhase = null) {
         // pause queue checker during event
         pauseActionQueueChecker = true;
         
@@ -946,6 +979,9 @@ module.exports = function() {
         
         // storytime
         await postStorytime();
+        
+        // set new phase
+        if(newPhase) await setPhase(newPhase);
         
         // passive start actions
         await triggerHandler("Passive Start Day");

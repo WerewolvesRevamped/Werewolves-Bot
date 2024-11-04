@@ -794,8 +794,8 @@ client.on("guildMemberRemove", async member => {
     // check if is player
     let check = await sqlPromOneEsc("SELECT * FROM players WHERE id=", member.id);
     if(check) {
-        // Signup phase -> signout
         switch(+stats.gamephase) {
+            // Signup phase -> signout
             case gp.SIGNUP:
                 sql("DELETE FROM players WHERE id = " + connection.escape(member.id), result => {
                     log("✅ Signed out `" +  member.displayName + "`!");

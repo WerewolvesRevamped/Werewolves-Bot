@@ -18,7 +18,7 @@ module.exports = function() {
         // parse parameters
         let targetParsed = await parseSelector(ability.target, src_ref, additionalTriggerData);
         targetParsed = await applyRedirection(targetParsed, src_ref, ability.type, ability.subtype, additionalTriggerData);
-        let num = await parseNumber(ability.counter_value);
+        let num = await parseNumber(ability.counter_value, src_ref, additionalTriggerData);
         
         // can only target exactly one target
         if(targetParsed.value.length > 1) {

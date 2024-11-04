@@ -96,20 +96,19 @@ module.exports = function() {
             newPhaseName = "d" + phaseNum;
         }
         // update phase
-        let result1 = await setPhase(newPhaseName);
-        let result2 = await setSubphase(SUBPHASE.MAIN);
+        let result = await setSubphase(SUBPHASE.MAIN);
         // feedback
-        if(result1 && result2) {
-            channel.send(`✅ Incremented phase to \`${toTitleCase(newPhaseName)}\`!`);
+        if(result) {
+            channel.send(`✅ Incrementing phase to \`${toTitleCase(newPhaseName)}\`!`);
         } else {
             channel.send(`⛔ Command error.  Could not increment phase.`);
         }
         
         // trigger start phase events
         if(isDay(newPhaseName)) {
-            eventStartDay();
+            eventStartDay(newPhaseName);
         } else {
-            eventStartNight();
+            eventStartNight(newPhaseName);
         }
     }
     

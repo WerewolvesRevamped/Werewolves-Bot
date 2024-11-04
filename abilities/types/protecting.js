@@ -51,8 +51,10 @@ module.exports = function() {
                     return { msg: "Absence failed! " + abilityError, success: false };
                 }
                 let loc = await parseLocation(ability.absence_at, src_ref, additionalTriggerData);
+                console.log(loc);
                 loc = loc.value;
-                loc = await applyRedirection(loc.value, src_ref, ability.type, ability.subtype, additionalTriggerData);
+                loc = await applyRedirection(loc, src_ref, ability.type, ability.subtype, additionalTriggerData);
+                console.log(loc);
                 result = await protectingAbsence(src_name, src_ref, target, loc, from_type, from_selector, during_phase, dur_type);
                 return result;
             break;
@@ -159,9 +161,9 @@ module.exports = function() {
             if(allowed_type && allowed_from && allowed_phase) {
                 matchingDefenses.push(defenses[i]);
             } else {
-                //console.log("Defense failed: ", kill_type, attrKillType, allowed_type);
-                //console.log("Defense failed: ", from, attrSelector.toLowerCase().split("[")[0], selectorList, allowed_from);
-                //console.log("Defense failed: ", isDay(), isNight(), attrPhase, allowed_phase);
+                console.log("Defense failed: ", kill_type, attrKillType, allowed_type);
+                console.log("Defense failed: ", from, attrSelector.toLowerCase().split("[")[0], selectorList, allowed_from);
+                console.log("Defense failed: ", isDay(), isNight(), attrPhase, allowed_phase);
             }
         }
         // return matching conditions

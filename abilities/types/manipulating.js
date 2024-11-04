@@ -20,7 +20,7 @@ module.exports = function() {
         target = await applyRedirection(target, src_ref, ability.type, ability.subtype, additionalTriggerData);
         let duration = parseDuration(ability.duration ?? "permanent");
         let manip_type = parseManipType(ability.manip_type);
-        let manip_value = await parseNumber(ability.manip_value);
+        let manip_value = await parseNumber(ability.manip_value, src_ref, additionalTriggerData);
         // select subtype
         switch(ability.subtype) {
             default:
