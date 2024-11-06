@@ -892,7 +892,7 @@ module.exports = function() {
     
     /**
     Parse Source Selector
-    parses a attribute type selector
+    parses a source type selector
     **/
     this.parseSourceSelector = function(selector, self = null, additionalTriggerData = {}) {
         // get target
@@ -909,7 +909,7 @@ module.exports = function() {
                 if(selectorTarget.split(":").length === 2) {
                     return [ selectorTarget.toLowerCase() ];
                 } else {
-                    abilityLog(`❗ **Error:** Invalid attribute selector target \`${selectorTarget}\`!`);
+                    abilityLog(`❗ **Error:** Invalid source selector target \`${selectorTarget}\`!`);
                     return [ ];
                 }
         }
@@ -919,7 +919,7 @@ module.exports = function() {
     Parse Attribute Selector
     parses a attribute type selector
     **/
-    this.parseAttributeSelector = function(selector, self = null, additionalTriggerData = {}) {
+    this.parseAttributeSelector = function(selector, self = null, additionalTriggerData = {}, noErr = false) {
         // get target
         let selectorTarget = selectorGetTarget(selector.split(":")[0]); // split to remove active attribute selector info in case we parse an active attribute as a normal one
         switch(selectorTarget) {
@@ -927,7 +927,7 @@ module.exports = function() {
                 if(additionalTriggerData.visitparameter) {
                     return [ parseAttributeName(additionalTriggerData.visitparameter) ];
                 } else {
-                    abilityLog(`❗ **Error:** Invalid attribute selector target \`${selectorTarget}\`!`);
+                    if(!noErr) abilityLog(`❗ **Error:** Invalid attribute selector target \`${selectorTarget}\`!`);
                     return [ ];
                 }
             default:
@@ -935,7 +935,7 @@ module.exports = function() {
                 if(verifyAttribute(parsed)) {
                     return [ parsed ];
                 } else {
-                    abilityLog(`❗ **Error:** Invalid attribute selector target \`${selectorTarget}\`!`);
+                    if(!noErr) abilityLog(`❗ **Error:** Invalid attribute selector target \`${selectorTarget}\`!`);
                     return [ ];
                 }
         }
@@ -951,7 +951,7 @@ module.exports = function() {
         let attributes = getCustomAttributes(onElement);
         let attrNames = attributes.map(el => el[3]);
         // get target
-        let selectorTarget = selectorGetTarget(selector);
+        let selectorTarget = selectorGetTarget(selector.replace(/`/g,""));
         switch(selectorTarget) {
             // ThisAttr
             case "@thisattr":
@@ -961,11 +961,12 @@ module.exports = function() {
                 }
                 let pself = srcToValue(self);
                 let attrName = getCustomAttributeName(pself);
-                return [ { ai_id: pself, name: attrName } ];
+                return [ { ai_id: pself, name: attrName, type: "custom" } ];
             default:
                 let splitTarget = selectorTarget.split(":");
                 let parsed = parseAttributeName(splitTarget[0]);
-                console.log(parsed, verifyAttribute(parsed), attrNames.includes(parsed));
+                let parsedGeneric = parseGenericAttributeType(splitTarget[0]);
+                //console.log(parsed, parsedGeneric, verifyAttribute(parsed), attrNames.includes(parsed));
                 if(verifyAttribute(parsed) && attrNames.includes(parsed)) {
                     let filtered;
                     switch(splitTarget.length) {
@@ -1008,17 +1009,48 @@ module.exports = function() {
                         break;
                     }
                     // return 
-                    return filtered.map(el => { return { ai_id: el[0], name: el[3] } });
+                    return filtered.map(el => { return { ai_id: el[0], name: el[3], type: "custom" } });
+                } else if(onElement && parsedGeneric) { // check for generic attribute
+                    let srcVal = srcToValue(onElement);
+                    let genericAttrs = await getGenericAttributes(srcVal);
+                    console.log(genericAttrs);
+                    let filtered;
+                    switch(splitTarget.length) {
+                        case 1: // just attribute name
+                            filtered = genericAttrs.filter(el => {
+                                let typeMatch = parseGenericAttributeType(el.attr_type) === parsedGeneric;
+                                return typeMatch;
+                            });
+                        break;
+                        case 2: // attribute name and src_ref/src_name
+                            filtered = genericAttrs.filter(el => {
+                                let typeMatch = parseGenericAttributeType(el.attr_type) === parsedGeneric;
+                                let srcRefMatch = el.src_ref.split(":")[1] === splitTarget[1];
+                                let srcNameMatch = el.src_name.split(":")[1] === splitTarget[1];
+                                let val1Match = el.val1 === splitTarget[1].toLowerCase();
+                                let selfMatch = splitTarget[1] === "self" && el.src_ref.split(":")[1] === srcToValue(self);
+                                return typeMatch && (srcRefMatch || srcNameMatch || val1Match || selfMatch);
+                            });
+                        break;
+                        default:
+                            abilityLog(`❗ **Error:** Invalid active attribute selector target format \`${selectorTarget}\`!`);
+                            return [ ];
+                        break;
+                    }
+                    // return 
+                    return filtered.map(el => { return { ai_id: el.ai_id, name: parseGenericAttributeType(el.attr_type), type: "generic" } });
                 } else if (PROPERTY_ACCESS.test(selectorTarget)) { // property access
                     let contents = selectorTarget.match(PROPERTY_ACCESS); // get the selector
                     let infType = inferType(`@${contents[1]}`);
                     let result = await parseSelector(`@${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
-                    return parsePropertyAccess(result, contents[2], infType);
+                    let pa = await parsePropertyAccess(result, contents[2], infType);
+                    return pa.map(el => ({ ai_id: el, name: getCustomAttributeName(el), type: "custom" }));
                 } else if (PROPERTY_ACCESS_TEAM.test(selectorTarget)) { // property access
                     let contents = selectorTarget.match(PROPERTY_ACCESS_TEAM); // get the selector
                     let infType = inferType(`&${contents[1]}`);
                     let result = await parseSelector(`&${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
-                    return parsePropertyAccess(result, contents[2], infType);
+                    let pa = await parsePropertyAccess(result, contents[2], infType);
+                    return pa.map(el => ({ ai_id: el, name: getCustomAttributeName(el), type: "custom" }));
                 } else {
                     abilityLog(`❗ **Error:** Invalid active attribute selector target \`${selectorTarget}\`!`);
                     return [ ];
@@ -1698,6 +1730,20 @@ module.exports = function() {
         } else {
             abilityLog(`❗ **Error:** Invalid manipulation type \`${manip_type}\`. Defaulted to \`visible\`!`);
             return "visible";
+        }
+    }
+    
+    /**
+    Parse Generic Attribute Name
+    defaults to "visible"
+    **/
+    const genericAttributeTypeNames = ["disguise","defense","absence","manipulation","groupmembership","obstruction","pollcount","pollresult","polldisqualification","pollvotes","role","redirection","loyalty","whisper"];
+    this.parseGenericAttributeType = function(attrTypeName) {
+        attrTypeName = attrTypeName.toLowerCase().replace(/_/g,"");
+        if(genericAttributeTypeNames.includes(attrTypeName)) {
+            return attrTypeName;
+        } else {
+            return null;
         }
     }
     

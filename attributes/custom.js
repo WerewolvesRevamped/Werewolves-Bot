@@ -116,8 +116,8 @@ module.exports = function() {
         else return false;
     }
     
-    // checks if a specific owner has a certain custom attribute
-    this.getCustomAttributes = function(owner, name) {
+    // gets all custom attributes from a player
+    this.getCustomAttributes = function(owner) {
         let found = cachedActiveCustomAttributes.filter(el => el[2] === owner);
         if(found.length > 0) return found;
         else return [];

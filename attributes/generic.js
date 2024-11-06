@@ -123,4 +123,13 @@ module.exports = function() {
     this.createPollVotesAttribute = async function(src_name, src_ref, target_poll, dur, poll = "lynch", subtype = "visible", target = "", val = 0) {
         await createAttribute(src_name, src_ref, target_poll, "poll", dur, "poll_votes", poll, subtype, target, val);
     }
+    
+    /**
+    gets all generic attributes from a player
+    **/
+    this.getGenericAttributes = async function(owner) {
+        let found = await sqlPromEsc("SELECT * FROM active_attributes WHERE owner=", owner);
+        if(found.length > 0) return found;
+        else return [];
+    }
 }

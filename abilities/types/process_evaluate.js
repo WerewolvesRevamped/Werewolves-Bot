@@ -117,8 +117,8 @@ module.exports = function() {
                 const first = await parseSelector(condition.first, src_ref, additionalTriggerData);
                 const second = await parseSelector(condition.second, src_ref, additionalTriggerData);
                 
-                console.log("FIRST", first.type, first.value[0]);
-                console.log("SECOND", second.type, second.value[0]);
+                //console.log("FIRST", first.type, first.value[0]);
+                //console.log("SECOND", second.type, second.value[0]);
                 
                 // switch by subtype
                 switch(condition.subtype) {
