@@ -297,9 +297,9 @@ module.exports = function() {
             // to lower case
             let val = property.toLowerCase();
             if(val.indexOf("@selection") >= 0 && promptIndex == 0) {
-                return promptValue;
+                return property.replace(/@[sS]election(\[\w+\])?/g, promptValue);
             } else if(val.indexOf("@secondaryselection") >= 0 && promptIndex == 1) {
-                return promptValue;
+                return val.replace(/@[sS]econdary[sS]election(\[\w+\])?/g, promptValue);
             }
             // default
             return property;
@@ -597,19 +597,26 @@ module.exports = function() {
     function parsePromptReply(text, type, message = null) {
         switch(type) {
             case "player":
-                let player = parsePlayerReply(text);
+                let player = parsePlayerReply(text, message);
                 if(player === false) {
                     if(message) message.reply(basicEmbed("❌ You must specify a valid player.", EMBED_RED));
                     return false;
                 }
                 return player;
             case "role":
-                let role = parseRoleReply(text);
+                let role = parseRoleReply(text, message);
                 if(role === false) {
                     if(message) message.reply(basicEmbed("❌ You must specify a valid role.", EMBED_RED));
                     return false;
                 }
                 return role;
+            case "boolean":
+                let bool = parseBooleanReply(text, message);
+                if(bool === false) {
+                    if(message) message.reply(basicEmbed("❌ You must specify either yes or no.", EMBED_RED));
+                    return false;
+                }
+                return bool;
             default:
                 if(message) message.reply(basicEmbed("❌ Invalid prompt.", EMBED_RED));
                 return false;
@@ -632,6 +639,10 @@ module.exports = function() {
                 let randomRole = roles[Math.floor(Math.random() * roles.length)];
                 let role = parseRoleReply(randomRole.name);
                 return role;
+            case "boolean":
+                let boolRand = Math.floor(Math.random() * 2);
+                let bool = parseBooleanReply(["true","false"][boolRand]);
+                return bool;
             default:
                 abilityLog(`❗ **Error:** Unknown random prompt reply type \`${type}\`!`);
                 return false;
@@ -641,18 +652,19 @@ module.exports = function() {
     /**
     Parses an argument of type player in a prompt reply
     **/
-    function parsePlayerReply(playerName) {
+    function parsePlayerReply(playerName, message = null) {
         // check for basic player references
         let pSplit = playerName.toLowerCase().split(/[\.,\-!\?\s ]/);
         let basic = pSplit.map(el => getUser(null, el)).filter(el => el);
         console.log("BASIC", pSplit, basic);
         if(basic.length > 0) {
             let pname = mainGuild.members.cache.get(basic[0])?.displayName ?? false; // get name through id
+            let pname2 = mainGuild.members.cache.get(basic[0])?.user.displayName ?? false; // get name through id
             if(pname === false) { // this applies in case the player has left the server
-                message.reply(basicEmbed("❌ Player valid but cannot be found. Please contact Hosts.", EMBED_RED));
+                if(message) message.reply(basicEmbed("❌ Player valid but cannot be found. Please contact Hosts.", EMBED_RED));
                 return false;
             }
-            return [pname, `@id:${basic[0]}[player]`]; // return display name
+            return [`${pname} (${pname2})`, `@id:${basic[0]}[player]`]; // return display name
         }
         
         // more advanced search
@@ -674,18 +686,19 @@ module.exports = function() {
             let player = parsed.found[0];
             let parsedPlayer = parseUser(backupChannel, player); // parse player name/id/emoji to discord id
             let playerName = mainGuild.members.cache.get(parsedPlayer)?.displayName ?? false; // get name through id
+            let playerName2 = mainGuild.members.cache.get(parsedPlayer)?.user.displayName ?? false; // get name through id
             if(playerName === false) { // this applies in case the player has left the server
-                message.reply(basicEmbed("❌ Player valid but cannot be found. Please contact Hosts.", EMBED_RED));
+                if(message) message.reply(basicEmbed("❌ Player valid but cannot be found. Please contact Hosts.", EMBED_RED));
                 return false;
             }
-            return [playerName, `@id:${parsedPlayer}[player]`]; // return display name
+            return [`${playerName} (${playerName2})`, `@id:${parsedPlayer}[player]`]; // return display name
         }
     }
     
     /**
     Parses an argument of type role in a prompt reply
     **/
-    function parseRoleReply(roleName) {
+    function parseRoleReply(roleName, message = null) {
         let parsedRole = parseRole(roleName);
         if(verifyRole(parsedRole)) { // direct role
             return [toTitleCase(parsedRole), `${parsedRole}[role]`];
@@ -715,6 +728,32 @@ module.exports = function() {
                 let role = parseRole(parsed.found[0]);
                 return [toTitleCase(role), `${role}[role]`];
             }
+        }
+    }
+    
+    /**
+    Parses an argument of type boolean in a prompt reply
+    **/
+    function parseBooleanReply(bool, message = null) {
+        let boolParsed = bool.toLowerCase().replace(/[^a-z ]+/g,"").trim();
+        boolParsed = boolParsed.replace(/(.)\1+/g, "$1"); // remove duplicate consecutive letters
+        let trueNames = ["true","yes","yea","ye","yus","yeah","corect","inded","do","alr","yep","yup","ok","confirm","alright","y","reveal","accept","yip","yah"];
+        let falseNames = ["false","no","stop","nope","no","nono","incorect","deny","reject","cancel","dont","stop","undo","not","nah","nay","cease","n"];
+        
+        // search for a yes/no answer
+        if(trueNames.includes(boolParsed)) { // check for direct yes match
+            return ["Yes / Confirm","true[boolean]"];
+        } else if(falseNames.includes(boolParsed)) { // direct no match
+            return ["No / Reject","false[boolean]"];
+        } else { // split by words
+            let bSplit = boolParsed.split(" ");
+            // count matches
+            let yCount = bSplit.filter(el => trueNames.includes(el)).length;
+            let nCount = bSplit.filter(el => falseNames.includes(el)).length;
+            // check if its one of the two cases
+            if(yCount > 0 && yCount > nCount) return ["Yes / Confirm","true[boolean]"];
+            if(nCount > 0 && nCount > yCount) return ["No / Reject","false[boolean]"];
+            else return false;
         }
     }
     

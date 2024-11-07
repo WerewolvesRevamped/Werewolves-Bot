@@ -67,6 +67,9 @@ module.exports = function() {
             // NUMBER
             case "number":
                 return { value: [ await parseNumber(selector, self, additionalTriggerData) ], type: "number" };
+            // BOOLEAN
+            case "boolean":
+                return { value: [ parseBoolean(selector, self, additionalTriggerData) ], type: "boolean" };
             // ATTRIBUTE
             case "attribute":
                 return { value: parseAttributeSelector(selector), type: "attribute" };
@@ -1537,6 +1540,22 @@ module.exports = function() {
                     return 0;         
                 }
             }
+        }
+    }
+    
+    /**
+    Parse Boolean
+    parses a boolean
+    **/
+    this.parseBoolean = function(selector, self = null, additionalTriggerData = {}) {
+        // get target
+        let selectorTarget = selectorGetTarget(selector);
+        // is boolean?
+        if(["true","false"].includes(selectorTarget)) { // direct boolean
+            return selectorTarget;
+        } else { // not a boolean
+            abilityLog(`❗ **Error:** Invalid boolean \`${selectorTarget}\`!`);
+            return "false";       
         }
     }
     

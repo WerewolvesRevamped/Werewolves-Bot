@@ -551,7 +551,7 @@ module.exports = function() {
 
     /** REGEX - Reminder: You need double \'s here **/
     // general
-    const targetType = "(`[^`]*`|`[^`]*`\\[\\w+\\]|@\\S*|&\\S*|#\\S*|%[^%]+%|\\d+)";
+    const targetType = "(`[^`]*`|`[^`]*`\\[\\w+\\]|@\\S*|&\\S*|#\\S*|%[^%]+%|\\d+|f?F?alse|t?T?rue)";
     const attrDuration = "( \\(~[^\)]+\\))?";
     const locationType = "(`[^`]*`|@\\S*|#\\S*)"; // extended version of target type
     const groupType = "(@\\S*|#\\S*)"; // reduced version of location type
@@ -579,7 +579,7 @@ module.exports = function() {
     const joiningSubtype = "(Member|Owner|Visitor)";
     const loyaltySubtype = "(Group|Alignment)";
     const pollManipManipSubtype = "(Unvotable|Disqualified)";
-    const targetingType = "(Player|Dead|Role|Attribute|Category|Full Category|List: [^\\)]+)";
+    const targetingType = "(Player|Dead|Role|Attribute|Category|Full Category|Boolean)";
 
     /**
     Parse Abilities
@@ -1661,6 +1661,7 @@ module.exports = function() {
     activeAttribute (an active attribute)
     choice (name of a choice)
     option (name of an option in a choice)
+    boolean (true/false)
     **/
     function ttpp(targetType, defaultType = "infer") {
         // pre-existing type annotation
@@ -1740,6 +1741,9 @@ module.exports = function() {
         } else {
             if(/^\d+$/.test(targetType)) {
                 return "number";
+            }
+            if(["true","false"].includes(targetType.toLowerCase())) {
+                return "boolean";
             }
             return "unknown"; // this should never occur
         }
