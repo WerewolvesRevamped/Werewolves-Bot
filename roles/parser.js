@@ -90,6 +90,7 @@ module.exports = function() {
                         if(el.ability.type === "condition") storedCondition = el.condition;
                         let ret = el;
                         ret.condition_text = ret.condition ?? storedCondition;
+                        if(!ret.condition_text) ret.condition_text = "Always";
                         ret.condition = parseCondition(ret.condition_text);
                         return ret;
                     });
@@ -113,7 +114,7 @@ module.exports = function() {
                     let storedConditionIndex = -1;
                     // parse conditions
                     for(let i = 0; i < evaluate.sub_abilities.length; i++) {
-                        if(evaluate.sub_abilities[i].ability.type === "condition") { // store a condiiton and create an abilities block
+                        if(evaluate.sub_abilities[i].ability.type === "condition") { // store a condition and create an abilities block
                             storedCondition = true;
                             storedConditionIndex = i;
                             evaluate.sub_abilities[i].condition_text = evaluate.sub_abilities[i].condition;
@@ -560,8 +561,8 @@ module.exports = function() {
     const rawStr = "[\\w\\s\\d@]+";
     const str = "(" + rawStr + ")";
     const decNum = "(-?\\d+\\.\\d+)";
-    const abilityType = "(Killing|Investigating|Targeting|Disguising|Protecting|Applying|Redirecting|Vote Manipulating|Whispering|Joining|Granting|Loyalty|Obstructing|Poll Manipulating|Announcements|Changing|Copying|Choices|Ascend|Descend|Disband|Counting|Conversation Reset|Cancel|Switching|Process|Evaluate|Action|Feedback|Action|Success|Failure)";
-    const abilitySubtype = "((Kill|Attack|Lynch|True|Banish|True Banish) Killing|(Role|Alignment|Category|Class|Count|Attribute) Investigating|(Target|Untarget) Targeting|() Disguising|(Absence|Active|Passive|Partial|Recruitment) Protecting|(Add|Remove|Change) Applying|() Redirecting|(Absolute|Relative) Vote Manipulating|() Whispering|(Add|Remove) Joining|(Add|Remove|Transfer) Granting|() Loyalty|() Obstructing|(Addition|Creation|Cancelling|Deletion|Manipulation) Poll Manipulating|() Announcements|(Role|Alignment|Group) Changing|(Ability|Full) Copying|(Creating|Choosing) Choices|() Ascend|() Descend|() Disband|(Increment|Decrement|Set) Counting|() Conversation Reset|() Cancel|() Switching|() Process|() Evaluate|() Action|() Feedback|() Action|() Success|() Failure)";
+    const abilityType = "(Killing|Investigating|Targeting|Disguising|Protecting|Applying|Redirecting|Vote Manipulating|Whispering|Joining|Granting|Loyalty|Obstructing|Poll Manipulating|Announcements|Changing|Copying|Choices|Ascend|Descend|Disband|Counting|Conversation Reset|Cancel|Switching|Process|Evaluate|Action|Feedback|Action|Success|Failure|Shuffle)";
+    const abilitySubtype = "((Kill|Attack|Lynch|True|Banish|True Banish) Killing|(Role|Alignment|Category|Class|Count|Attribute) Investigating|(Target|Untarget) Targeting|() Disguising|(Absence|Active|Passive|Partial|Recruitment) Protecting|(Add|Remove|Change) Applying|() Redirecting|(Absolute|Relative) Vote Manipulating|() Whispering|(Add|Remove) Joining|(Add|Remove|Transfer) Granting|() Loyalty|() Obstructing|(Addition|Creation|Cancelling|Deletion|Manipulation) Poll Manipulating|() Announcements|(Role|Alignment|Group) Changing|(Ability|Full) Copying|(Creating|Choosing) Choices|() Ascend|() Descend|() Disband|(Increment|Decrement|Set) Counting|() Conversation Reset|() Cancel|() Switching|() Process|() Evaluate|() Action|() Feedback|() Action|() Success|() Failure|() Shuffle)";
     const bulletsRegex = /(•|‣|◦|·|⁃|⹀)/;
 
     // specific
@@ -1463,6 +1464,31 @@ module.exports = function() {
         fd = exp.exec(abilityLine);
         if(fd) {
             ability = { type: "for_each", target: ttpp(fd[1]) };
+        }
+        /** SHUFFLE **/
+        // 2
+        exp = new RegExp("^Shuffle " + targetType + " " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "shuffle", targets: [ ttpp(fd[1]), ttpp(fd[2]) ] };
+        }
+        // 3
+        exp = new RegExp("^Shuffle " + targetType + " " + targetType + " " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "shuffle", targets: [ ttpp(fd[1]), ttpp(fd[2]), ttpp(fd[3]) ] };
+        }
+        // 4
+        exp = new RegExp("^Shuffle " + targetType + " " + targetType + " " + targetType + " " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "shuffle", targets: [ ttpp(fd[1]), ttpp(fd[2]), ttpp(fd[3]), ttpp(fd[4]) ] };
+        }
+        // 5
+        exp = new RegExp("^Shuffle " + targetType + " " + targetType + " " + targetType + " " + targetType + " " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "shuffle", targets: [ ttpp(fd[1]), ttpp(fd[2]), ttpp(fd[3]), ttpp(fd[4]), ttpp(fd[5]) ] };
         }
 
         

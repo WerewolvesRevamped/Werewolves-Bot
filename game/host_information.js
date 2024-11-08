@@ -19,7 +19,7 @@ module.exports = function() {
 			case "add": cmdHostInformationAdd(channel, args); break;
 			case "list": cmdHostInformationList(channel); break;
 			case "remove": cmdHostInformationRemove(channel, args); break;
-			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
+			default: channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
 		}
 	}
     

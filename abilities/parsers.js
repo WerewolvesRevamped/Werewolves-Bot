@@ -1337,7 +1337,7 @@ module.exports = function() {
             let infType = inferType(spl[i]);
             if(infType != "unknown") {
                 let parsed = await parseSelector(`${spl[i]}[${infType}]`, self, additionalTriggerData);
-                //console.log(infType, spl[i], parsed.type, parsed.value);
+                console.log(infType, spl[i], parsed.type, parsed.value);
                 let strs = [];
                 // iterate through selector list
                 for(let j = 0; j < parsed.value.length; j++) {

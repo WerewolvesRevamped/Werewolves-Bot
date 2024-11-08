@@ -35,6 +35,7 @@ require("./types/redirecting.js")();
 require("./types/cancel.js")();
 require("./types/for_each.js")();
 require("./types/obstructing.js")();
+require("./types/shuffle.js")();
 
 module.exports = function() {
     
@@ -165,6 +166,9 @@ module.exports = function() {
                 break;
                 case "descend":
                     feedback = await abilityDescend(src_refAction, src_name, ability, additionalTriggerData);
+                break;
+                case "shuffle":
+                    feedback = await abilityShuffle(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "feedback":
                     let info = await parseInfo(ability.feedback, src_refAction, additionalTriggerData);
