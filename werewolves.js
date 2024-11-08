@@ -691,6 +691,10 @@ client.on("messageCreate", async message => {
     case "host_information":
 		if(checkGM(message)) cmdHostInformation(message.channel, args);
     break;
+    /* Check Win */
+    case "check_win":
+		if(checkGM(message)) await updateActiveTeams();
+    break;
 	/* Invalid Command */
 	default:
 		message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");

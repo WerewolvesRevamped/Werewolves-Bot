@@ -46,6 +46,7 @@ module.exports = function() {
             case "division":
                 let div = scaling.quantity;
                 let divNum = await parseNumber(div);
+                if(divNum == 0) return 1; // minimum of 1
                 return divNum;
             break;
             

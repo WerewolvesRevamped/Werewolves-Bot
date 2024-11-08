@@ -686,7 +686,9 @@ module.exports = function() {
             exp = new RegExp("^Condition: (.+)$", "g");
             fd = exp.exec(restrictions[rest]);
             if(fd) {
-                parsedRestrictions.push({ type: "condition", condition: parseCondition(fd[1]) });
+                let condType = "precondition";
+                if(fd[1].toLowerCase().includes("@selection") || fd[1].toLowerCase().includes("@secondaryselection")) condType = "condition";
+                parsedRestrictions.push({ type: condType, condition: parseCondition(fd[1]) });
                 restFound = true;
             }
             /** DEFAULT **/

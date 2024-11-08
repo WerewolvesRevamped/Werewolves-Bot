@@ -106,6 +106,11 @@ module.exports = function() {
                     return resolveCondition(restriction.condition, src_ref, null, additionalTriggerData);
                 }
             break;
+            // PRECONDITION
+            case "precondition":
+                // cannot be evaluated pre-prompt: always true
+                return resolveCondition(restriction.condition, src_ref, null, additionalTriggerData);
+            break;
             // ATTRIBUTE
             case "attribute":
                 // cannot be evaluated pre-prompt: always true

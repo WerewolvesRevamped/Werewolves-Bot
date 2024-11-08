@@ -159,6 +159,7 @@ module.exports = function() {
                 let selPlayers = await parsePlayerSelector(winCond[j], `team:${activeTeams[i].name}`);
                 allowedPlayers.push(...selPlayers);
             }
+            //console.log(activeTeams[i].name, allowedPlayers);
             // check if all players are included
             let all = await getAllLivingIDs();
             let teamHasWon = all.every(el => allowedPlayers.includes(el));

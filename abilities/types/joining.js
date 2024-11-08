@@ -64,7 +64,7 @@ module.exports = function() {
             }
             
             // check if target is already part of the group
-            let attrs = await queryAttributePlayer(targets[i], "val1", group);
+            let attrs = await queryAttributePlayer(targets[i], "attr_type", "group_membership", "val1", group);
             if(attrs.length > 1) { // already part of the group, skip
                 abilityLog(`❎ <@${targets[i]}> could not join ${toTitleCase(group)} - multiple memberships found.`);  
                 if(targets.length === 1) return { msg: "Joining failed! " + abilityFailure, success: false, target: `player:${targets[0]}` };
@@ -72,7 +72,7 @@ module.exports = function() {
                 let oldMembership = getMembershipTier(attrs[0].val2)
                 let newMembership = getMembershipTier(type);
                 if(newMembership > oldMembership) { // new membership is higher than before, upgrade
-                    await deleteAttributePlayer(targets[i], "val1", group); // delete old membership
+                    await deleteAttributePlayer(targets[i], "attr_type", "group_membership", "val1", group); // delete old membership
                     await createGroupMembershipAttribute(src_name, src_ref, targets[i], dur_type, group, type); // create new membership
                     abilityLog(`✅ <@${targets[i]}> promoted ${toTitleCase(group)} membership to \`${toTitleCase(type)}\` for \`${getDurationName(dur_type)}\`.`);
                     if(targets.length === 1) return { msg: "Joining succeeded!", success: true, target: `player:${targets[0]}` };
@@ -105,7 +105,7 @@ module.exports = function() {
             }
             
             // check if target is already part of the group
-            let attrs = await queryAttributePlayer(targets[i], "val1", group);
+            let attrs = await queryAttributePlayer(targets[i], "attr_type", "group_membership", "val1", group);
             if(attrs.length > 0) { // in group, can be removed
                 await deleteAttributePlayer(targets[i], "attr_type", "group_membership", "val1", group); // delete old membership(s)
                 await groupsLeave(targets[i], group);
@@ -201,6 +201,7 @@ module.exports = function() {
     
     /** Groups: Create
     creates a group, takes a group name and optional first member id
+    WIP: should probably be in groups
     **/
     this.groupsCreate = async function(group, firstMember = null) {
         return new Promise(async res => {

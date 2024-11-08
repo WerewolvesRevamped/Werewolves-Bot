@@ -637,26 +637,31 @@ module.exports = function() {
                     else allPlayers = allPlayers.filter(el => el.class != compValSplit[0] || el.category != compValSplit[1]);
                 break;
                 // Original Role
+                case "origrole":
                 case "orig_role":
                     if(!compInverted) allPlayers = allPlayers.filter(el => el.orig_role === compVal);
                     else allPlayers = allPlayers.filter(el => el.orig_role != compVal);
                 break;
                 // Original Role Category
+                case "origcat":
                 case "orig_cat":
                     if(!compInverted) allPlayers = allPlayers.filter(el => el.orig_cat === compVal);
                     else allPlayers = allPlayers.filter(el => el.orig_cat != compVal);
                 break;
                 // Original Role Class
+                case "origclass":
                 case "orig_class":
                     if(!compInverted) allPlayers = allPlayers.filter(el => el.orig_class === compVal);
                     else allPlayers = allPlayers.filter(el => el.orig_class != compVal);
                 break;
                 // Original Alignment
+                case "origalign":
                 case "orig_align":
                     if(!compInverted) allPlayers = allPlayers.filter(el => el.orig_align === compVal);
                     else allPlayers = allPlayers.filter(el => el.orig_align != compVal);
                 break;
                 // Original Full Category
+                case "origfullcat":
                 case "orig_fullcat":
                     compValSplit = compVal.split("-");
                     if(!compInverted) allPlayers = allPlayers.filter(el => el.orig_class === compValSplit[0] && el.orig_cat === compValSplit[1]);
@@ -1162,7 +1167,7 @@ module.exports = function() {
     parses a group name
     WIP: DOESNT CONSIDER THE :'ed GROUP NAMES
     **/
-    this.parseGroup = async function(selector, self = null) {
+    this.parseGroup = async function(selector, self = null, additionalTriggerData = {}, forceCreate = false) {
         // get target
         let selectorTarget = selectorGetTarget(selector);
         if(selectorTarget === "@self") {
@@ -1178,10 +1183,17 @@ module.exports = function() {
         if(cachedGroups.indexOf(parsedGroupName) >= 0) {
             // get channel id
             let groupData = await groupGetData(parsedGroupName);
+             // create group if force create is set to true
+            if(forceCreate && (!groupData || !groupData.channel_id)) {
+                await groupsCreate(parsedGroupName);
+                groupData = await groupGetData(parsedGroupName);
+            }
+            // check if group exists
             if(!groupData || !groupData.channel_id) {
                 abilityLog(`❗ **Error:** Could not find group \`${parsedGroupName}\`!`);
                 return null;
             }
+            // return channel id
             return groupData.channel_id;
         } else {
             abilityLog(`❗ **Error:** Invalid group \`${selectorTarget}\`!`);
@@ -1203,7 +1215,7 @@ module.exports = function() {
             if(verifyLocationName(selectorTarget)) {
                 return { value: parseLocationName(selectorTarget), type: "location", default: false };
             } else if(verifyGroup(selectorTarget)) {
-                let group = await parseGroup(selectorTarget);
+                let group = await parseGroup(selectorTarget, self, additionalTriggerData, true);
                 return { value: group, type: "group", default: false };   
             } else {
                 let def = cachedLocations[0]; // default is whatever location is first
@@ -1337,7 +1349,7 @@ module.exports = function() {
             let infType = inferType(spl[i]);
             if(infType != "unknown") {
                 let parsed = await parseSelector(`${spl[i]}[${infType}]`, self, additionalTriggerData);
-                console.log(infType, spl[i], parsed.type, parsed.value);
+                //console.log(infType, spl[i], parsed.type, parsed.value);
                 let strs = [];
                 // iterate through selector list
                 for(let j = 0; j < parsed.value.length; j++) {
@@ -1530,7 +1542,7 @@ module.exports = function() {
                     let val1 = await parseNumber(splitSel[0], self, additionalTriggerData);
                     let val2 = await parseNumber(splitSel[1], self, additionalTriggerData);
                      if(!isNaN(val1) && !isNaN(val2)) {
-                        return (+val1) / (+val2);
+                        return Math.round((+val1) / (+val2));
                      } else {
                         abilityLog(`❗ **Error:** Invalid number in division \`${selectorTarget}\`!`);
                         return 0;         
