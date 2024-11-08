@@ -65,9 +65,9 @@ module.exports = function() {
     Create Prompt
     creates a new prompt in the prompt table
     **/
-    this.createPrompt = async function(mid, cid, src_ref, src_name, abilities, restrictions, additionalTriggerData, prompt_type, amount, forced, type1, type2 = "none") {
+    this.createPrompt = async function(mid, cid, src_ref, src_name, abilities, restrictions, additionalTriggerData, prompt_type, amount, forced, triggerName, type1, type2 = "none") {
         await new Promise(res => {
-            sql("INSERT INTO prompts (message_id,channel_id,src_ref,src_name,abilities,type1,type2,prompt_type,restrictions,additional_trigger_data,amount,forced) VALUES (" + connection.escape(mid) + "," + connection.escape(cid) + "," + connection.escape(src_ref) + "," + connection.escape(src_name) + "," + connection.escape(JSON.stringify(abilities)) + "," + connection.escape(type1.toLowerCase()) + "," + connection.escape(type2.toLowerCase()) + "," + connection.escape(prompt_type) + "," + connection.escape(JSON.stringify(restrictions)) + "," + connection.escape(JSON.stringify(additionalTriggerData)) + "," + amount + "," + connection.escape(forced) + ")", result => {
+            sql("INSERT INTO prompts (message_id,channel_id,src_ref,src_name,abilities,type1,type2,prompt_type,restrictions,additional_trigger_data,amount,forced,trigger_name) VALUES (" + connection.escape(mid) + "," + connection.escape(cid) + "," + connection.escape(src_ref) + "," + connection.escape(src_name) + "," + connection.escape(JSON.stringify(abilities)) + "," + connection.escape(type1.toLowerCase()) + "," + connection.escape(type2.toLowerCase()) + "," + connection.escape(prompt_type) + "," + connection.escape(JSON.stringify(restrictions)) + "," + connection.escape(JSON.stringify(additionalTriggerData)) + "," + amount + "," + connection.escape(forced) + "," + connection.escape(triggerName) + ")", result => {
                 res();
             });            
         });
@@ -166,7 +166,7 @@ module.exports = function() {
             
             // create several actions if necessary
             for(let j = 0; j < actionCount; j++) {
-                await createAction(repl_msg.id, repl_msg.channel.id, src_ref, prompt.src_name, clonedAbilities, abilities, promptType, type1, type2, exeTime, JSON.parse(prompt.restrictions), additionalTriggerData, selection1[1], prompt.forced);
+                await createAction(repl_msg.id, repl_msg.channel.id, src_ref, prompt.src_name, clonedAbilities, abilities, promptType, type1, type2, exeTime, JSON.parse(prompt.restrictions), additionalTriggerData, selection1[1], prompt.forced, prompt.trigger_name);
             }
         }
         
@@ -257,8 +257,8 @@ module.exports = function() {
     /**
     Sets the execution time of all end queued action to the past, executing them all on the next check
     **/
-    this.executeEndQueuedAction = function() {
-        return sqlProm("UPDATE action_queue SET execute_time=" + connection.escape(getTime() - 1) + " WHERE execute_time=" + endActionTime);
+    this.executeEndQueuedAction = function(triggerName) {
+        return sqlProm("UPDATE action_queue SET execute_time=" + connection.escape(getTime() - 1) + " WHERE execute_time=" + endActionTime + " AND trigger_name=" + connection.escape(triggerName));
     }
     
     /**
@@ -311,9 +311,9 @@ module.exports = function() {
     Create Queued Action
     creates an action in the action queue which will be executed at a specified time
     **/
-    this.createAction = async function (mid, cid, src_ref, src_name, abilities, orig_ability, prompt_type, type1, type2, time, restrictions, additionalTriggerData, target, forced) {
+    this.createAction = async function (mid, cid, src_ref, src_name, abilities, orig_ability, prompt_type, type1, type2, time, restrictions, additionalTriggerData, target, forced, triggerName) {
         await new Promise(res => {
-            sql("INSERT INTO action_queue (message_id,channel_id,src_ref,src_name,abilities,orig_ability,type1,type2,execute_time, prompt_type, restrictions, target, additional_trigger_data, forced) VALUES (" + connection.escape(mid) + "," + connection.escape(cid) + "," + connection.escape(src_ref) + "," + connection.escape(src_name) + "," + connection.escape(JSON.stringify(abilities)) + "," + connection.escape(JSON.stringify(orig_ability)) + "," + connection.escape(type1) + "," + connection.escape(type2) + "," + connection.escape(time) + "," + connection.escape(prompt_type) + "," + connection.escape(JSON.stringify(restrictions)) + "," + connection.escape(target) + "," + connection.escape(JSON.stringify(additionalTriggerData)) + "," + connection.escape(forced) + ")", result => {
+            sql("INSERT INTO action_queue (message_id,channel_id,src_ref,src_name,abilities,orig_ability,type1,type2,execute_time, prompt_type, restrictions, target, additional_trigger_data, forced,trigger_name) VALUES (" + connection.escape(mid) + "," + connection.escape(cid) + "," + connection.escape(src_ref) + "," + connection.escape(src_name) + "," + connection.escape(JSON.stringify(abilities)) + "," + connection.escape(JSON.stringify(orig_ability)) + "," + connection.escape(type1) + "," + connection.escape(type2) + "," + connection.escape(time) + "," + connection.escape(prompt_type) + "," + connection.escape(JSON.stringify(restrictions)) + "," + connection.escape(target) + "," + connection.escape(JSON.stringify(additionalTriggerData)) + "," + connection.escape(forced) + "," + connection.escape(triggerName) + ")", result => {
                 res();
             });            
         });
@@ -532,7 +532,7 @@ module.exports = function() {
         // iterate through replies - for execution
         for(let i = 0; i < replies.length; i++) {
             // schedule actions
-            await createAction(repl_msg.id, repl_msg.channel.id, src_ref, src_name, promptAppliedAbilities[i], abilities, promptType, type1, type2, exeTime, restrictions, additionalTriggerData, parsedReplies[i][1], forced);
+            await createAction(repl_msg.id, repl_msg.channel.id, src_ref, src_name, promptAppliedAbilities[i], abilities, promptType, type1, type2, exeTime, restrictions, additionalTriggerData, parsedReplies[i][1], forced, prompt.trigger_name);
         }
         
         

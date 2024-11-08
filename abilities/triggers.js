@@ -677,7 +677,7 @@ module.exports = function() {
                         let message = await sendSelectionlessPrompt(src_ref, ptype[0], `${getAbilityEmoji(trigger.abilities[0].type)} ${promptMsg}${PROMPT_SPLIT}`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt");
                         abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(trigger.abilities[0].type)} {Selectionless}`);
                         // schedule actions
-                        await createAction(message.id, message.channel.id, src_ref, src_name, trigger.abilities, trigger.abilities, ptype[0], "none", "none", neverActionTime, restrictions, additionalTriggerData, "notarget", forced);
+                        await createAction(message.id, message.channel.id, src_ref, src_name, trigger.abilities, trigger.abilities, ptype[0], "none", "none", neverActionTime, restrictions, additionalTriggerData, "notarget", forced, triggerName);
                     }
                 } else { // no prompt
                     for(let i = 0; i < actionCount; i++) { 
@@ -696,10 +696,10 @@ module.exports = function() {
                 let message = await abilitySendProm(src_ref, `${getAbilityEmoji(trigger.abilities[0].type)} ${promptMsg} ${scalingMessage}\nPlease submit your choice as a reply to this message.`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt");
                 if(ptype[0] === "immediate") { // immediate prompt
                     abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(trigger.abilities[0].type)} [${type}] {Immediate}`);
-                    await createPrompt(message.id, message.channel.id, src_ref, src_name, trigger.abilities, restrictions, additionalTriggerData, "immediate", actionCount, forced, type);
+                    await createPrompt(message.id, message.channel.id, src_ref, src_name, trigger.abilities, restrictions, additionalTriggerData, "immediate", actionCount, forced, triggerName, type);
                 } else if(ptype[0] === "end") { // end phase prompt
                     abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(trigger.abilities[0].type)} [${type}] {End}`);
-                    await createPrompt(message.id, message.channel.id, src_ref, src_name, trigger.abilities, restrictions, additionalTriggerData, "end", actionCount, forced, type);
+                    await createPrompt(message.id, message.channel.id, src_ref, src_name, trigger.abilities, restrictions, additionalTriggerData, "end", actionCount, forced, triggerName, type);
                 } else {
                     abilityLog(`❗ **Error:** Invalid prompt type!`);
                 }
@@ -713,10 +713,10 @@ module.exports = function() {
                 let message = await abilitySendProm(src_ref, `${getAbilityEmoji(trigger.abilities[0].type)} ${promptMsg} ${scalingMessage}\nPlease submit your choice as a reply to this message.`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt");
                 if(ptype[0] === "immediate") { // immediate prompt
                     abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(trigger.abilities[0].type)} [${type1}, ${type2}] {Immediate}`);
-                    await createPrompt(message.id, message.channel.id, src_ref, src_name, trigger.abilities, restrictions,additionalTriggerData, "immediate", actionCount, forced, type1, type2);
+                    await createPrompt(message.id, message.channel.id, src_ref, src_name, trigger.abilities, restrictions,additionalTriggerData, "immediate", actionCount, forced, triggerName, type1, type2);
                 } else if(ptype[0] === "end") { // end phase prompt
                     abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(trigger.abilities[0].type)} [${type1}, ${type2}] {End}`);
-                    await createPrompt(message.id, message.channel.id, src_ref, src_name, trigger.abilities, restrictions, additionalTriggerData, "end", actionCount, forced, type1, type2);
+                    await createPrompt(message.id, message.channel.id, src_ref, src_name, trigger.abilities, restrictions, additionalTriggerData, "end", actionCount, forced, triggerName, type1, type2);
                 } else {
                     abilityLog(`❗ **Error:** Invalid prompt type!`);
                 }
@@ -798,6 +798,7 @@ module.exports = function() {
                 return [ "immediate", true ];
             case "Start Night": case "Start Day": case "Start Phase":
             case "End Night": case "End Day": case "End Phase":
+            case "Pre-End Night": case "Pre-End Day":
                 return [ "end", true ];
         }
     }
@@ -870,14 +871,30 @@ module.exports = function() {
         await executeForcedPrompts();
         await clearPrompts();
         
+        // execute delayed actions
+        skipActionQueueChecker = true;
+        await executeDelayedQueuedAction();
+        await actionQueueChecker();
+        skipActionQueueChecker = false;
+        
+        // execute pre-end actions (before polls)
+        skipActionQueueChecker = true;
+        await executeEndQueuedAction("Pre-End Night");
+        await actionQueueChecker();
+        skipActionQueueChecker = false;
+        
         // close polls
         await closePolls();
         
         // handle queued end actions; also redo immediate queued actions even if normally none should be present
         skipActionQueueChecker = true;
-        await executeDelayedQueuedAction();
+        await executeEndQueuedAction("End Day");
         await actionQueueChecker();
-        await executeEndQueuedAction();
+        await executeEndQueuedAction("End Phase");
+        await actionQueueChecker();
+        await executeEndQueuedAction("Start Night");
+        await actionQueueChecker();
+        await executeEndQueuedAction("Start Phase");
         await actionQueueChecker();
         skipActionQueueChecker = false;
         
@@ -906,9 +923,7 @@ module.exports = function() {
         
         // passive start actions
         await triggerHandler("Passive Start Night");
-        await triggerHandler("Start Night");
         await triggerHandler("Passive Start Phase");
-        await triggerHandler("Start Phase");
         
         // handle killq
         await killqKillall();
@@ -918,6 +933,7 @@ module.exports = function() {
         await triggerHandler("Immediate");
         
         // end actions
+        await triggerHandler("Pre-End Night");
         await triggerHandler("End Night");
         await triggerHandler("End Phase");
         await triggerHandler("Start Day");
@@ -949,14 +965,30 @@ module.exports = function() {
         await executeForcedPrompts();
         await clearPrompts();
         
+        // execute delayed actions
+        skipActionQueueChecker = true;
+        await executeDelayedQueuedAction();
+        await actionQueueChecker();
+        skipActionQueueChecker = false;
+        
+        // execute pre-end actions (before polls)
+        skipActionQueueChecker = true;
+        await executeEndQueuedAction("Pre-End Night");
+        await actionQueueChecker();
+        skipActionQueueChecker = false;
+        
         // close polls
         await closePolls();
         
         // handle queued end actions; also redo immediate queued actions even if normally none should be present
         skipActionQueueChecker = true;
-        await executeDelayedQueuedAction();
+        await executeEndQueuedAction("End Night");
         await actionQueueChecker();
-        await executeEndQueuedAction();
+        await executeEndQueuedAction("End Phase");
+        await actionQueueChecker();
+        await executeEndQueuedAction("Start Day");
+        await actionQueueChecker();
+        await executeEndQueuedAction("Start Phase");
         await actionQueueChecker();
         skipActionQueueChecker = false;
         
@@ -985,9 +1017,7 @@ module.exports = function() {
         
         // passive start actions
         await triggerHandler("Passive Start Day");
-        await triggerHandler("Start Day");
         await triggerHandler("Passive Start Phase");
-        await triggerHandler("Start Phase");
         
         // handle killq
         await killqKillall();
@@ -997,6 +1027,7 @@ module.exports = function() {
         await triggerHandler("Immediate");
         
         // end actions
+        await triggerHandler("Pre-End Day");
         await triggerHandler("End Day");
         await triggerHandler("End Phase");
         await triggerHandler("Start Night");
