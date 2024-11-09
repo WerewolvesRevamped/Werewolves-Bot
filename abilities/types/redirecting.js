@@ -16,15 +16,8 @@ module.exports = function() {
             return { msg: "Redirecting failed! " + abilityError, success: false };
         }
         // parse parameters
-        let target = await parsePlayerSelector(ability.target, src_ref, additionalTriggerData);
-        target = await applyRedirection(target, src_ref, ability.type, "", additionalTriggerData);
         let abilityType = await parseSelector(ability.subtype, src_ref, additionalTriggerData);
         let duration = parseDuration(ability.duration ?? "permanent");
-        // check parameters
-        if(target.length != 1) {
-            abilityLog(`❗ **Error:** Can only redirect to exactly 1 player!`);
-            return { msg: "Redirecting failed! " + abilityError, success: false };
-        }
         // check parameters
         if(abilityType.value.length != 1) {
             abilityLog(`❗ **Error:** Invalid ability type for redirection!`);
@@ -37,8 +30,8 @@ module.exports = function() {
     }
     
     /**
-    Ability: Manipulating - Absolute/Relative
-    adds a vote manipulation to a player
+    Ability: Redirecting
+    adds a redirection attribute
     **/
     this.redirecting = async function(src_name, src_ref, target, source, type, duration) {
         await createRedirectionAttribute(src_name, src_ref, srcToValue(src_ref), duration, target, source, type);

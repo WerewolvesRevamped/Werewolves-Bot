@@ -339,7 +339,11 @@ module.exports = function() {
                 await postStorytimeImmediate();
                 storytimeCheckScheduled = false
             }
-            await actionQueueChecker();
+            let count = await actionQueueChecker();
+            // check for wins after immediate abilities outside of phase change
+            if(count > 0 && !skipActionQueueChecker && !pauseActionQueueChecker) {
+                await updateActiveTeams();
+            }
         }, 10 * 1000)
     }
     
@@ -388,6 +392,8 @@ module.exports = function() {
             embed.components = [];
             promptMessage.edit(embed); 
         }
+        
+        return actionsToExecute.length;
     }
     
     /**

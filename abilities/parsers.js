@@ -80,8 +80,10 @@ module.exports = function() {
                 return { value: await parseCategory(selector, self, additionalTriggerData), type: "category" };
             case "killingtype":
                 return { value: [ parseKillingType(selector, self, additionalTriggerData) ], type: "killingType" };
+            case "class":
+                return { value: await parseClass(selector, self, additionalTriggerData), type: "class" };
             case "source":
-                return { value: [ parseSourceSelector(selector) ], type: "source" };
+                return { value: parseSourceSelector(selector, self, additionalTriggerData), type: "source" };
             // UNKNOWN
             default:
                 abilityLog(`❗ **Error:** Invalid selector type \`${selectorType}\`!`);
@@ -340,6 +342,9 @@ module.exports = function() {
             case "role":
                 return parseRolePropertyAccess(result.value, property);
             break;
+            case "result":
+                return parseResultPropertyAccess(result.value, property);
+            break;
             default:
                 abilityLog(`❗ **Error:** Invalid property access type \`${type}\`!`);
                 return [ ];
@@ -580,6 +585,51 @@ module.exports = function() {
         return output;
     }
     
+    /** PRIVATE
+    Parses a property access on a result
+    **/
+    async function parseResultPropertyAccess(selector, property) {
+        property = property.toLowerCase();
+        let output = [];
+        // iterate results
+        for(let i = 0; i < selector.length; i++) {
+            //console.log(selector);
+            let resultData = selector[i];
+            // execute property access
+            switch(property) {
+                case "class":
+                    output.push(resultData.class);
+                break;
+                case "category":
+                    output.push(resultData.category);
+                break;
+                case "role":
+                    output.push(resultData.role);
+                break;
+                case "alignment":
+                    output.push(resultData.alignment);
+                break;
+                case "result":
+                    output.push(resultData.alignment);
+                break;
+                case "success":
+                    output.push(resultData.success);
+                break;
+                case "target":
+                    output.push(resultData.target);
+                break;
+                case "message":
+                    output.push(resultData.msg);
+                break;
+                default:  
+                    abilityLog(`❗ **Error:** Invalid result property access \`${property}\`!`);
+                break;
+            }
+        }
+        // return output
+        return output;
+    }
+    
     
     /** PRIVATE
     Parses an advanced player selector
@@ -596,7 +646,7 @@ module.exports = function() {
         // iterate through all selector components
         for(let i = 0; i < selSplit.length; i++) {
             const compName = selSplit[i][0];
-            let compVal = selSplit[i][1];
+            let compVal = selSplit[i][1].toLowerCase().replace(/\-/g," ");
             let compInverted = false;
             if(compVal[0] === "!") {
                 compVal = compVal.substr(1);
@@ -905,6 +955,7 @@ module.exports = function() {
     this.parseSourceSelector = function(selector, self = null, additionalTriggerData = {}) {
         // get target
         let selectorTarget = selectorGetTarget(selector); 
+        selectorTarget = selectorTarget.replace(/`/g, "");
         switch(selectorTarget) {
             case "@attacksource":
                 if(additionalTriggerData.attack_source) {
@@ -1250,7 +1301,11 @@ module.exports = function() {
                 }
             } else {
                 let parsedPlayer = await parsePlayerSelector(selectorTarget, self, additionalTriggerData);
-                return { value: parsedPlayer, type: "player", default: false };
+                if(parsedPlayer.length != 1) {
+                    abilityLog(`❗ **Error:** Cannot use ${parsedPlayer.length} players as a location!`);
+                    return { value: null, type: null, default: true };
+                }
+                return { value: parsedPlayer[0], type: "player", default: false };
             }
         }
     }
@@ -1423,13 +1478,15 @@ module.exports = function() {
                 if(additionalTriggerData.death_type) {
                     return additionalTriggerData.death_type;
                 } else {
-                    return invalidSelector(selectorTarget);
+                    abilityLog(`❗ **Error:** Invalid killing type selector target \`${sel}\`!`);
+                    return [ ];
                 }
             case "@killingtype":
                 if(additionalTriggerData.killing_type) {
                     return additionalTriggerData.killing_type;
                 } else {
-                    return invalidSelector(selectorTarget);
+                    abilityLog(`❗ **Error:** Invalid killing type selector target \`${sel}\`!`);
+                    return [ ];
                 }
             default:      
                 if(killingTypeNames.includes(selectorTarget)) {
@@ -1438,6 +1495,35 @@ module.exports = function() {
                     abilityLog(`❗ **Error:** Invalid killing type \`${selectorTarget}\`. Defaulted to \`attack\`!`);
                     return "attack";
                 }
+        }
+    }
+    
+    /**
+    Parse class
+    **/
+    this.parseClass = function(class_name, self = null, additionalTriggerData = {}) {
+        // get target
+        let selectorTarget = selectorGetTarget(class_name);
+        selectorTarget = selectorTarget.replace(/`/g, "");
+        switch(selectorTarget) {
+            // result
+            case "@result":
+            case "@result1":
+            case "@result2":
+            case "@result3":
+            case "@result4":
+            case "@result5":
+            case "@result6":
+            case "@result7":
+            case "@actionresult":
+                let result = parseResult(selectorTarget, additionalTriggerData);
+                if(result.class) {
+                    return [ result.class ];
+                }
+                abilityLog(`❗ **Error:** Failed to cast result to class!`);
+                return [ ];
+            default:      
+                return [ selectorTarget ];
         }
     }
     

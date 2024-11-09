@@ -58,12 +58,13 @@ module.exports = function() {
     this.triggerPlayer = async function(player_id, triggerName, additionalTriggerData = {}, fromTrigger = false) {
         if(!fromTrigger) abilityLog(`🔷 **Trigger:** ${triggerName} for <@${player_id}>`);  
         // primary roles
-        await triggerPlayerRole(player_id, triggerName, additionalTriggerData, fromTrigger);
+        await triggerPlayerRole(player_id, triggerName, additionalTriggerData, true);
         // role type attributes (additional roles)
-        await triggerPlayerAttr(player_id, triggerName, additionalTriggerData, fromTrigger);
+        await triggerPlayerAttr(player_id, triggerName, additionalTriggerData, true);
     }
     
     this.triggerPlayerRole = async function(player_id, triggerName, additionalTriggerData = {}, fromTrigger = false) {
+        if(!fromTrigger) abilityLog(`🔷 **Trigger:** ${triggerName} for <@${player_id}> (Role)`);  
         return new Promise(res => {
             // get all players
             sql("SELECT role,id FROM players WHERE type='player' AND id=" + connection.escape(player_id), async r => {
@@ -81,6 +82,7 @@ module.exports = function() {
     }
     
     this.triggerPlayerAttr = async function(player_id, triggerName, additionalTriggerData = {}, fromTrigger = false) {
+        if(!fromTrigger) abilityLog(`🔷 **Trigger:** ${triggerName} for <@${player_id}> (Attr)`);  
         return new Promise(res => {
             // get all players
             sql("SELECT players.id,active_attributes.ai_id,active_attributes.val1 AS role,active_attributes.val2 AS channel_id FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.attr_type='role' AND id=" + connection.escape(player_id), async r => {
@@ -487,12 +489,16 @@ module.exports = function() {
                         } else {
                             let abilityType = await parseSelector(param);
                             let triggerAbilityType = (abilityType.type === "abilitySubtype" ? additionalTriggerData.ability_subtype : "") + additionalTriggerData.ability_type;
-                            abilityType = abilityType.value[0].toLowerCase().replace(/[^a-z]+/,"");
-                            triggerAbilityType = triggerAbilityType.replace(/[^a-z]+/,"");
-                            if(abilityType === triggerAbilityType) {
-                                 await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
-                            } else {
-                                abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\` with \`${triggerAbilityType}\`.`);
+                            if(abilityType.type === "abilityType" && additionalTriggerData.ability_subtype.length > 0) { // dont pass for subtypes when looking for a type
+                                abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\` with a \`${triggerAbilityType}\` subtype.`);
+                            } else { // type/subtype type match
+                                abilityType = abilityType.value[0].toLowerCase().replace(/[^a-z]+/,"");
+                                triggerAbilityType = triggerAbilityType.replace(/[^a-z]+/,"");
+                                if(abilityType === triggerAbilityType) {
+                                     await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
+                                } else {
+                                    abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\` with \`${triggerAbilityType}\`.`);
+                                }
                             }
                         }
                     break;
@@ -811,6 +817,10 @@ module.exports = function() {
         // pause queue checker during event
         pauseActionQueueChecker = true;
         
+        // update teams
+        await updateActiveTeams();
+        if(stats.gamephase != gp.INGAME) return;
+        
         // starting
         await triggerHandler("Starting");
         
@@ -915,11 +925,11 @@ module.exports = function() {
         await updateActiveTeams();
         if(stats.gamephase != gp.INGAME) return;
         
-        // storytime
-        await postStorytime();
-        
         // set new phase
         if(newPhase) await setPhase(newPhase);
+        
+        // storytime
+        await postStorytime();
         
         // passive start actions
         await triggerHandler("Passive Start Night");
@@ -1009,11 +1019,11 @@ module.exports = function() {
         await updateActiveTeams();
         if(stats.gamephase != gp.INGAME) return;
         
-        // storytime
-        await postStorytime();
-        
         // set new phase
         if(newPhase) await setPhase(newPhase);
+        
+        // storytime
+        await postStorytime();
         
         // passive start actions
         await triggerHandler("Passive Start Day");

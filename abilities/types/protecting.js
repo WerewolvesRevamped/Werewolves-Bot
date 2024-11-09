@@ -20,7 +20,7 @@ module.exports = function() {
         let from_selector = ability.defense_from_target ?? "@All"; // this selector should be parsed at argument runtime, not now
         let during_phase = parsePhaseType(ability.defense_during ?? "all");
         let target = await parsePlayerSelector(ability.target, src_ref, additionalTriggerData);
-        target = await applyRedirection(target, src_ref, ability.type, ability.subtype, additionalTriggerData);
+        target = await applyRedirection(target, src_ref, ability.type, ability.subtype.split(" ")[0], additionalTriggerData);
         let dur_type = parseDuration(ability.duration ?? "permanent");
         // select subtype
         switch(ability.subtype) {
@@ -151,6 +151,7 @@ module.exports = function() {
             let srcType = srcToType(from);
             let allowed_from = 
                         srcType === "player" && selectorList.includes(srcVal)
+                    || srcType === "player_group" && selectorList.includes(srcVal)
                     || attrSelector.toLowerCase().split("[")[0] === "@all";
             // check if phase matches current phase
             let allowed_phase = 
@@ -161,9 +162,9 @@ module.exports = function() {
             if(allowed_type && allowed_from && allowed_phase) {
                 matchingDefenses.push(defenses[i]);
             } else {
-                //console.log("Defense failed: ", kill_type, attrKillType, allowed_type);
-                //console.log("Defense failed: ", from, attrSelector.toLowerCase().split("[")[0], selectorList, allowed_from);
-                //console.log("Defense failed: ", isDay(), isNight(), attrPhase, allowed_phase);
+                console.log("Defense failed: ", kill_type, attrKillType, allowed_type);
+                console.log("Defense failed: ", from, attrSelector.toLowerCase().split("[")[0], selectorList, allowed_from);
+                console.log("Defense failed: ", isDay(), isNight(), attrPhase, allowed_phase);
             }
         }
         // return matching conditions

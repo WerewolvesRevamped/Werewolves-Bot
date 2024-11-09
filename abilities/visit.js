@@ -72,8 +72,8 @@ module.exports = function() {
         }
         
         // run triggers
-        await triggerPlayer(targetPlayerAny, "On Visited", { visitor: sourcePlayerLong, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
-        await triggerPlayer(targetPlayerAny, "On Visited Complex", { visitor: sourcePlayerLong, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
+        await triggerPlayer(targetPlayer, "On Visited", { visitor: sourcePlayerLong, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
+        await triggerPlayer(targetPlayer, "On Visited Complex", { visitor: sourcePlayerLong, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
         await triggerHandler("On Visited Target Complex", { visitor: sourcePlayerLong, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, this: targetPlayer, visit_id: visitId }); 
         
         // check if is canceled

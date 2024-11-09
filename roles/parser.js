@@ -1140,13 +1140,13 @@ module.exports = function() {
         exp = new RegExp("^Manipulate `" + str + "` Poll \\(" + targetType + " has `" + num + "` votes\\)" + attrDuration + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "poll", subtype: "votes", target: ttpp(fd[1], "poll"), manip_target: fd[2], manip_type: "visible", manip_value: fd[3], duration: dd(fd[4], "untiluse") };
+            ability = { type: "poll", subtype: "votes", target: ttpp(fd[1], "poll"), manip_target: ttpp(fd[2]), manip_type: "visible", manip_value: fd[3], duration: dd(fd[4], "untiluse") };
         }
         // Poll Votes Manipulation
         exp = new RegExp("^Manipulate `" + str + "` Poll \\(" + targetType + " has `" + num + "` hidden votes\\)" + attrDuration + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "poll", subtype: "votes", target: ttpp(fd[1], "poll"), manip_target: fd[2], manip_type: "hidden", manip_value: fd[3], duration: dd(fd[4], "untiluse") };
+            ability = { type: "poll", subtype: "votes", target: ttpp(fd[1], "poll"), manip_target: ttpp(fd[2]), manip_type: "hidden", manip_value: fd[3], duration: dd(fd[4], "untiluse") };
         }
         /** ANNOUNCEMENTS **/
         // reveal
@@ -1713,6 +1713,8 @@ module.exports = function() {
             return targetType.split("[")[1].split("]")[0];
         }
         
+        targetType = targetType.toLowerCase();
+        
         let first = targetType[0];
         if(/\->/.test(targetType)) {
             let properties = targetType.toLowerCase().split(/\->/);
@@ -1720,6 +1722,11 @@ module.exports = function() {
             switch(properties.at(-1)) {
                 case "role": return "role";
                 case "category": return "category";
+                case "class": return "class";
+                case "success": return "success";
+                case "message": return "info";
+                case "success": return "success";
+                case "target": return "unknown";
                 case "originalrole": return "role";
                 case "alignment": return "alignment";
                 case "counter": return "number";
@@ -1739,31 +1746,31 @@ module.exports = function() {
             return "alignment";
         } else if(first == "@") {
             switch(targetType) {
-                case "@ActionAbilityType": return "abilityType";
-                case "@ActionFeedback": return "info";
-                case "@AttackSource": return "source";
-                case "@DeathType": return "killingType";
-                case "@KillingType": return "killingType";
-                case "@VisitType": return "abilityType";
-                case "@VisitParameter": return "unknown";
-                case "@ThisAttr": return "attribute";
-                case "@ActionResult": return "info";
-                case "@Result": case "@Result1": case "@Result2": case "@Result3": 
-                case "@Result4": case "@Result5": case "@Result6": case "@Result7": 
-                case "@ActionResult": return "result";
-                case "@Chosen": return "option";
+                case "@actionabilitytype": return "abilityType";
+                case "@actionfeedback": return "info";
+                case "@attacksource": return "source";
+                case "@deathtype": return "killingType";
+                case "@killingtype": return "killingType";
+                case "@visittype": return "abilityType";
+                case "@visitparameter": return "unknown";
+                case "@thisattr": return "attribute";
+                case "@actionresult": return "info";
+                case "@result": case "@result1": case "@result2": case "@result3": 
+                case "@result4": case "@result5": case "@result6": case "@result7": 
+                case "@actionResult": return "result";
+                case "@chosen": return "option";
                 default: return "player";
             }
         } else if(first == "%") {
-            if(targetType.substr(1, 4) === "Role") return "role";
-            else if(targetType.substr(1, 6) === "Player") return "player";
-            else if(targetType === "%PartialRoleList%") return "info";
+            if(targetType.substr(1, 4) === "role") return "role";
+            else if(targetType.substr(1, 6) === "player") return "player";
+            else if(targetType === "%partialrolelist%") return "info";
             else return "unknown";
         } else if(first == "#") {
             return "location";
         } else if(first == "`") {
             switch(targetType) {
-                case "`Success`": case "`Failure`": return "success";
+                case "`success`": case "`failure`": return "success";
                 default: return targetType.includes("@") || targetType.length > 30 ? "info" : "role";
             }
         } else {
