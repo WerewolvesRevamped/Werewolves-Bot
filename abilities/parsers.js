@@ -84,6 +84,8 @@ module.exports = function() {
                 return { value: await parseClass(selector, self, additionalTriggerData), type: "class" };
             case "source":
                 return { value: parseSourceSelector(selector, self, additionalTriggerData), type: "source" };
+            case "option":
+                return { value: parseOptionSelector(selector, self, additionalTriggerData), type: "option" };
             // UNKNOWN
             default:
                 abilityLog(`❗ **Error:** Invalid selector type \`${selectorType}\`!`);
@@ -922,6 +924,13 @@ module.exports = function() {
                     abilityLog(`❗ **Error:** Invalid role selector target \`${selectorTarget}\`!`);
                     return [ ];
                 }
+            case "@chosen":
+                if(additionalTriggerData.chosen) {
+                    return [ parseRole(additionalTriggerData.chosen) ];
+                } else {
+                    abilityLog(`❗ **Error:** Invalid role selector target \`${selectorTarget}\`!`);
+                    return [ ];
+                }
             default:
                 let parsedRole = parseRole(selectorTarget);
                 if(verifyRole(parsedRole)) {
@@ -971,6 +980,27 @@ module.exports = function() {
                     abilityLog(`❗ **Error:** Invalid source selector target \`${selectorTarget}\`!`);
                     return [ ];
                 }
+        }
+    }
+    
+    /**
+    Parse Option Selector
+    parses an option type selector
+    **/
+    this.parseOptionSelector = function(selector, self = null, additionalTriggerData = {}) {
+        // get target
+        let selectorTarget = selectorGetTarget(selector); 
+        selectorTarget = selectorTarget.replace(/`/g, "");
+        switch(selectorTarget) {
+            case "@chosen":
+                if(additionalTriggerData.chosen) {
+                    return [ additionalTriggerData.chosen ];
+                } else {
+                    abilityLog(`❗ **Error:** Invalid chosen selector target \`${selectorTarget}\`!`);
+                    return [ ];
+                }
+            default:
+                return [ selectorTarget ];
         }
     }
     

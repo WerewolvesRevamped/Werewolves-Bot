@@ -951,6 +951,7 @@ client.on('interactionCreate', async interaction => {
                 interaction.update(embed);
                 // run trigger
                 abilityLog(`✅ **Choice Chose:** <@${chooser}> chose \`${optionName}\` for \`${choiceName}\`.`);
+                await triggerPlayer(choiceCreatorId, "Choice Chosen", { chooser: `player:${chooser}`, chosen: parseOption(optionName), choice_data: { name: choiceName, owner: chooser } }); 
                 await triggerPlayer(choiceCreatorId, "Choice Chosen Complex", { chooser: `player:${chooser}`, chosen: parseOption(optionName), choice_data: { name: choiceName, owner: chooser } }); 
                 // check choice completion
                 await choiceCheckCompletion(chooser, choiceName);

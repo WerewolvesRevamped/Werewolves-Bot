@@ -24,7 +24,7 @@ module.exports = function() {
     const passiveTriggers = ["Passive", "Passive End Day", "Passive End Night", "Passive Start Day", "Passive Start Night", "Passive Start Phase", "Passive End Phase"];
     const electionTriggers = ["On Election", "On Mayor Election", "On Reporter Election", "On Guardian Election"];
     const defenseTriggers = ["On Defense", "On Passive Defense", "On Partial Defense", "On Recruitment Defense", "On Active Defense", "On Absence Defense"];
-    const basicTriggerTypes = [...actionTimings, "Starting", ...passiveTriggers, "On Death", "On Killed", "On Banished", "On Banishment", "On Visited", "On Action", "On Disbandment", "On Lynch", ...electionTriggers, ...defenseTriggers, "On Betrayal", "On Poll Closed", "On Poll Win", "On Role Change", "On Removal", "On End"]; // basic trigger types
+    const basicTriggerTypes = [...actionTimings, "Starting", ...passiveTriggers, "On Death", "On Killed", "On Banished", "On Banishment", "On Visited", "On Action", "On Disbandment", "On Lynch", ...electionTriggers, ...defenseTriggers, "On Betrayal", "On Poll Closed", "On Poll Win", "On Role Change", "On Removal", "On End", "Choice Chosen"]; // basic trigger types
     const bullets = ["•","‣","◦","·","⁃","⹀"];
 
     /**
@@ -496,6 +496,20 @@ module.exports = function() {
         if(fd) {
             cond = { type: "logic", subtype: "not", condition: parseCondition(fd[1]) };
         }
+        // and / or
+        exp = new RegExp("^\\((.+?)\\) and \\((.+?)\\) or \\((.+?)\\)$", "g");
+        fd = exp.exec(condition);
+        if(fd) {
+            doubleLogic = true;
+            cond = { type: "logic", subtype: "and", condition1: parseCondition(fd[1]), condition2: parseCondition(`(${fd[2]}) or (${fd[3]})`) };
+        }
+        // or / and
+        exp = new RegExp("^\\((.+?)\\) or \\((.+?)\\) and \\((.+?)\\)$", "g");
+        fd = exp.exec(condition);
+        if(fd) {
+            doubleLogic = true;
+            cond = { type: "logic", subtype: "and", condition1: parseCondition(`(${fd[1]}) or (${fd[2]})`), condition2: parseCondition(fd[3]) };
+        }
         // and x2
         exp = new RegExp("^\\((.+?)\\) and \\((.+?)\\) and \\((.+?)\\)$", "g");
         fd = exp.exec(condition);
@@ -557,7 +571,7 @@ module.exports = function() {
     const locationType = "(`[^`]*`|@\\S*|#\\S*)"; // extended version of target type
     const groupType = "(@\\S*|#\\S*)"; // reduced version of location type
     const attributeName = targetType;
-    const num = "(-?\\d+|@Selection|@SecondarySelection|@Selection\\[[^\\]+]\\]|@SecondarySelection\\[[^\\]+]\\])";
+    const num = "(-?\\d+|@Selection|@SecondarySelection|@Selection\\[[^\\]+]\\]|@SecondarySelection\\[[^\\]+]\\]|%Number%)";
     const rawStr = "[\\w\\s\\d@]+";
     const str = "(" + rawStr + ")";
     const decNum = "(-?\\d+\\.\\d+)";
@@ -580,7 +594,7 @@ module.exports = function() {
     const joiningSubtype = "(Member|Owner|Visitor)";
     const loyaltySubtype = "(Group|Alignment)";
     const pollManipManipSubtype = "(Unvotable|Disqualified)";
-    const targetingType = "(Player|Dead|Role|Attribute|Category|Full Category|Boolean)";
+    const targetingType = "(Player|Dead|Role|Attribute|Category|Full Category|Boolean|Option)";
 
     /**
     Parse Abilities
@@ -1765,6 +1779,7 @@ module.exports = function() {
         } else if(first == "%") {
             if(targetType.substr(1, 4) === "role") return "role";
             else if(targetType.substr(1, 6) === "player") return "player";
+            else if(targetType.substr(1, 6) === "number") return "number";
             else if(targetType === "%partialrolelist%") return "info";
             else return "unknown";
         } else if(first == "#") {
