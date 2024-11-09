@@ -162,9 +162,9 @@ module.exports = function() {
             if(allowed_type && allowed_from && allowed_phase) {
                 matchingDefenses.push(defenses[i]);
             } else {
-                console.log("Defense failed: ", kill_type, attrKillType, allowed_type);
-                console.log("Defense failed: ", from, attrSelector.toLowerCase().split("[")[0], selectorList, allowed_from);
-                console.log("Defense failed: ", isDay(), isNight(), attrPhase, allowed_phase);
+                //console.log("Defense failed: ", kill_type, attrKillType, allowed_type);
+                //console.log("Defense failed: ", from, attrSelector.toLowerCase().split("[")[0], selectorList, allowed_from);
+                //console.log("Defense failed: ", isDay(), isNight(), attrPhase, allowed_phase);
             }
         }
         // return matching conditions

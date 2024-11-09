@@ -1759,6 +1759,7 @@ module.exports = function() {
                 case "@result4": case "@result5": case "@result6": case "@result7": 
                 case "@actionResult": return "result";
                 case "@chosen": return "option";
+                case "@attacklocation": return "location";
                 default: return "player";
             }
         } else if(first == "%") {

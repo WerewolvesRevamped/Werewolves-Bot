@@ -1299,6 +1299,24 @@ module.exports = function() {
                         let source = getCustomAttributeSource(val);
                         return { value: srcToValue(source), type: srcToType(source), default: false };
                 }
+            } else if(selectorTarget === "@attacklocation") {
+                // try attacker
+                if(additionalTriggerData.attacker) { // if no self is specified, @Self is invalid
+                    let val = srcToValue(additionalTriggerData.attacker);
+                    let typ = srcToType(additionalTriggerData.attacker);
+                    if(typ === "player") return { value: val, type: "player", default: false};
+                }
+                // try attack source
+                if(additionalTriggerData.attack_source) {
+                    let val = srcToValue(additionalTriggerData.attack_source);
+                    let typ = srcToType(additionalTriggerData.attack_source);
+                    if(typ === "group") {
+                        let groupData = await groupGetData(val);
+                        return { value: groupData.channel_id, type: "group", default: false};
+                    }
+                }
+                abilityLog(`❗ **Error:** Used \`@AttackLocation\` in invalid context!`);
+                return [ ];
             } else {
                 let parsedPlayer = await parsePlayerSelector(selectorTarget, self, additionalTriggerData);
                 if(parsedPlayer.length != 1) {
