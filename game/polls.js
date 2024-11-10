@@ -351,10 +351,13 @@ module.exports = function() {
             const validVoters = voters.filter(el => duplicateVoters.indexOf(el.id) === -1);
             const invalidVoters = voters.filter(el => duplicateVoters.indexOf(el.id) != -1 && el != client.user.id);
             
+            console.log("All Voters", validVoters, invalidVoters);
+            
             // evaluate vote count
             let votes = 0;
             for(let i = 0; i < validVoters.length; i++) {
                 votes += await pollValue(validVoters[i].id, pollPublicType, pollData.src_name);
+                console.log(i, votes);
             }
             
             // get extra votes
@@ -553,6 +556,7 @@ module.exports = function() {
             }
             // return vote total
             let totalVotes = voteValue + ((voteValue>=0 ? 1 : -1) * specialVoteValue);
+            console.log(totalVotes, voteManipulations, specialVoteManipulations);
             return totalVotes;
         } else { // UNKNOWN / OTHER POLLS
             return 1;

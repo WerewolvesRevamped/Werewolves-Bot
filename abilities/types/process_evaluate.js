@@ -244,7 +244,7 @@ module.exports = function() {
                     return false;
                 }
                 let targets = await parseSelector(condition.target, src_ref, additionalTriggerData);
-                let attribute = parseAttribute(condition.attribute, src_ref, additionalTriggerData);
+                let attribute = parseAttributeSelector(condition.attribute, src_ref, additionalTriggerData);
                 for(let i = 0; i < targets.value.length; i++) {
                     let bool = hasCustomAttribute(`${targets.type}:${targets.value[i]}`, attribute);
                     if(targets.type === "player") { // additionally check for role attribute

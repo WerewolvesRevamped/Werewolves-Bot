@@ -943,6 +943,10 @@ client.on('interactionCreate', async interaction => {
                 const chooser = interaction.member.id;
                 // get choice data
                 let choiceData = await choicesGetByOwner(choiceName, chooser);
+                if(!choiceData) { // cant find choice (can happen when reactor is not choice owner)
+                    interaction.deferUpdate();
+                    return;
+                }
                 let choiceCreatorId = srcToValue(choiceData.src_ref);
                 // update message
                 embed = basicEmbed(`${orig_text}${PROMPT_SPLIT} Choice chosen.`, EMBED_GREEN);

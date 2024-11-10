@@ -307,6 +307,9 @@ module.exports = function() {
     this.useAttribute = async function(id) {
         // get attribute
         let attr = await getAttribute(id);
+        if(!attr) { // attribute already removed
+            return;
+        }
         // delete until use type attribute
         if(attr.duration === "untiluse" || attr.duration === "untiluseattribute") {
             await deleteAttribute(id);

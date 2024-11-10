@@ -366,8 +366,14 @@ module.exports = function() {
             case "location":
                 return `#${val}`;
             break;
+            case "killingtype":
+                return toTitleCase(val);
+            break;
             case "result":
                 return raw.msg;
+            case "info":
+                return val;
+            break;
             case "unknown":
             default:
                 return `UNKNOWN \`${src_ref}\``;

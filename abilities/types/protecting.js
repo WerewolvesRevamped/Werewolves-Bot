@@ -143,7 +143,7 @@ module.exports = function() {
             let allowed_type =
                     (kill_type == "attack" && (attrKillType == "attacks" || attrKillType == "kills" || attrKillType == "attacks_lynches" || attrKillType == "all"))
                 || (kill_type == "kill" && (attrKillType == "kills" || attrKillType == "all"))
-                || (kill_type == "lynches" && (attrKillType == "lynches" || attrKillType == "attacks_lynches" || attrKillType == "all"))
+                || (kill_type == "lynch" && (attrKillType == "lynches" || attrKillType == "attacks_lynches" || attrKillType == "all"))
                 || (kill_type == "banish" && (attrKillType == "banishments"));
             // check if from matches selector
             let selectorList = await parsePlayerSelector(attrSelector);
@@ -162,9 +162,9 @@ module.exports = function() {
             if(allowed_type && allowed_from && allowed_phase) {
                 matchingDefenses.push(defenses[i]);
             } else {
-                //console.log("Defense failed: ", kill_type, attrKillType, allowed_type);
-                //console.log("Defense failed: ", from, attrSelector.toLowerCase().split("[")[0], selectorList, allowed_from);
-                //console.log("Defense failed: ", isDay(), isNight(), attrPhase, allowed_phase);
+                console.log("Defense failed: ", kill_type, attrKillType, allowed_type);
+                console.log("Defense failed: ", from, attrSelector.toLowerCase().split("[")[0], selectorList, allowed_from);
+                console.log("Defense failed: ", isDay(), isNight(), attrPhase, allowed_phase);
             }
         }
         // return matching conditions

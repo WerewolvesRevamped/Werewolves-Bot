@@ -664,12 +664,17 @@ module.exports = function() {
         let basic = pSplit.map(el => getUser(null, el)).filter(el => el);
         console.log("BASIC", pSplit, basic);
         if(basic.length > 0) {
-            let pname = mainGuild.members.cache.get(basic[0])?.displayName ?? false; // get name through id
-            let pname2 = mainGuild.members.cache.get(basic[0])?.user.displayName ?? false; // get name through id
-            if(pname === false) { // this applies in case the player has left the server
+            let member = mainGuild.members.cache.get(basic[0]);
+            if(!member) { // this applies in case the player has left the server
                 if(message) message.reply(basicEmbed("❌ Player valid but cannot be found. Please contact Hosts.", EMBED_RED));
                 return false;
             }
+            if(!isParticipant(member)) { // this applies in case the player is not a participant
+                if(message) message.reply(basicEmbed("❌ Player is not a participant.", EMBED_RED));
+                return false;
+            }
+            let pname = member?.displayName ?? false; // get name through id
+            let pname2 = member?.user.displayName ?? false; // get name through id
             return [`${pname} (${pname2})`, `@id:${basic[0]}[player]`]; // return display name
         }
         

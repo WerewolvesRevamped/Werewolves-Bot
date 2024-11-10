@@ -1148,7 +1148,7 @@ module.exports = function() {
         exp = new RegExp("^Manipulate `" + str + "` Poll \\(" + targetType + " is `" + pollManipManipSubtype + "`\\)" + attrDuration + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "poll", subtype: "manipulation", target: ttpp(fd[1], "poll"), manip_target: fd[2], manip_type: lc(fd[3]), duration: dd(fd[4], "untiluse") };
+            ability = { type: "poll", subtype: "manipulation", target: ttpp(fd[1], "poll"), manip_target: ttpp(fd[2]), manip_type: lc(fd[3]), duration: dd(fd[4], "untiluse") };
         }
         // Poll Votes Manipulation
         exp = new RegExp("^Manipulate `" + str + "` Poll \\(" + targetType + " has `" + num + "` votes\\)" + attrDuration + "$", "g");
@@ -1772,7 +1772,7 @@ module.exports = function() {
                 case "@result": case "@result1": case "@result2": case "@result3": 
                 case "@result4": case "@result5": case "@result6": case "@result7": 
                 case "@actionResult": return "result";
-                case "@chosen": return "option";
+                case "@chosen": case "@option": return "option";
                 case "@attacklocation": return "location";
                 default: return "player";
             }

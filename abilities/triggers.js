@@ -653,6 +653,7 @@ module.exports = function() {
         if(secondary) prompts.push(secondary);
         
         if(choice) {
+            console.log("A");
             await choicesChoosingPrompt(src_name, src_ref, trigger.abilities[0], promptOverwrite);
             return;
         }

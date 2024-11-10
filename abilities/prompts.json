@@ -18,5 +18,7 @@
     "granting.resign": "You may resign from your position during any phase.",
     
     "comment_4": "Role-specific Custom Prompts",
+    "psychic_wolf.1": "You may submit a player and a role and you will learn whether that player has that role or not.",
+    "saboteur_wolf.1": "You may choose one player to disqualify from the next election. Should they win the poll nobody will be elected.",
     "flute_charmer.1": "Which player would you like to charm?"
 }

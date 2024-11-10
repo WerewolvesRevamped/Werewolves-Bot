@@ -112,9 +112,10 @@ module.exports = function() {
             if(hasDef) continue;
             
             // run the on death trigger
-            await triggerPlayer(targets[i], "On Death", { attacker: src_ref, death_type: "lynch", attack_source: src_name }); 
-            await triggerPlayer(targets[i], "On Lynch", { attacker: src_ref, death_type: "lynch", attack_source: src_name }); 
-            await triggerHandler("On Death Complex", { attacker: src_ref, death_type: "lynch", attack_source: src_name, this: targets[i] }); 
+            let attacker = srcToValue(src_ref);
+            await triggerPlayer(targets[i], "On Death", { attacker: attacker, death_type: "lynch", attack_source: src_name }); 
+            await triggerPlayer(targets[i], "On Lynch", { attacker: attacker, death_type: "lynch", attack_source: src_name }); 
+            await triggerHandler("On Death Complex", { attacker: attacker, death_type: "lynch", attack_source: src_name, this: targets[i] }); 
             await triggerHandler("Passive");
             
             // execute the kill
@@ -170,7 +171,7 @@ module.exports = function() {
         let success = false;
         for(let i = 0; i < targets.length; i++) {
             // handle visit
-            let result = await visit(src_ref, targets[i], "", "killing", "true kill");
+            let result = await visit(src_ref, targets[i], "", "killing", "true-kill");
             if(result) {
                 if(targets.length === 1) return visitReturn(result, "True Kill failed!", "True Kill succeeded!");
                 continue;
@@ -261,12 +262,13 @@ module.exports = function() {
     triggers the triggers used by attack, kill and true kill
     **/
     async function killDeathTriggers(target, src_ref, type, src_name) {
+        let attacker = srcToValue(src_ref);
         // normal triggers
-        await triggerPlayer(target, "On Death", { attacker: src_ref, death_type: type, attack_source: src_name }); 
-        await triggerPlayer(target, "On Killed", { attacker: src_ref, death_type: type, attack_source: src_name }); 
+        await triggerPlayer(target, "On Death", { attacker: attacker, death_type: type, attack_source: src_name }); 
+        await triggerPlayer(target, "On Killed", { attacker: attacker, death_type: type, attack_source: src_name }); 
         // complex triggers
-        await triggerHandler("On Death Complex", { attacker: src_ref, death_type: type, attack_source: src_name, this: target }); 
-        await triggerHandler("On Killed Complex", { attacker: src_ref, death_type: type, attack_source: src_name, this: target }); 
+        await triggerHandler("On Death Complex", { attacker: attacker, death_type: type, attack_source: src_name, this: target }); 
+        await triggerHandler("On Killed Complex", { attacker: attacker, death_type: type, attack_source: src_name, this: target }); 
         // passive
         await triggerHandler("Passive");
     }
@@ -276,12 +278,13 @@ module.exports = function() {
     triggers the triggers used by banish and true banish
     **/
     async function banishTriggers(target, src_ref, type, src_name) {
+        let attacker = srcToValue(src_ref);
         // normal triggers
-        await triggerPlayer(target, "On Banished", { attacker: src_ref, death_type: type, attack_source: src_name }); 
-        await triggerPlayer(target, "On Banishment", { attacker: src_ref, death_type: type, attack_source: src_name }); 
+        await triggerPlayer(target, "On Banished", { attacker: attacker, death_type: type, attack_source: src_name }); 
+        await triggerPlayer(target, "On Banishment", { attacker: attacker, death_type: type, attack_source: src_name }); 
         // complex triggers
-        await triggerHandler("On Banished Complex", { attacker: src_ref, death_type: type, attack_source: src_name, this: target }); 
-        await triggerHandler("On Banishment Complex", { attacker: src_ref, death_type: type, attack_source: src_name, this: target }); 
+        await triggerHandler("On Banished Complex", { attacker: attacker, death_type: type, attack_source: src_name, this: target }); 
+        await triggerHandler("On Banishment Complex", { attacker: attacker, death_type: type, attack_source: src_name, this: target }); 
         // passive
         await triggerHandler("Passive");
     }
@@ -335,26 +338,27 @@ module.exports = function() {
             abilityLog(`✅ ${srcRefToText(src_ref)} attacked <@${pid}> - failed due to:\`\`\`${JSON.stringify(defense)}\`\`\``);
             let defSrc = defense.src_ref;
             // run defense triggers
-            await trigger(defSrc, "On Defense", { attacker: src_ref, killing_type: type, attack_source: src_name, src_name: defense.src_name }); 
+            let attacker = srcToValue(src_ref);
+            await trigger(defSrc, "On Defense", { attacker: attacker, killing_type: type, attack_source: src_name, src_name: defense.src_name }); 
             switch(defenseType) {
                 case "absence":
-                    await trigger(defSrc, "On Absence Defense", { attacker: src_ref, killing_type: type, attack_source: src_name, src_name: defense.src_name }); 
+                    await trigger(defSrc, "On Absence Defense", { attacker: attacker, killing_type: type, attack_source: src_name, src_name: defense.src_name }); 
                     await useAttribute(defense.ai_id);
                 break;
                 case "active":
-                    await trigger(defSrc, "On Active Defense", { attacker: src_ref, killing_type: type, attack_source: src_name, src_name: defense.src_name }); 
+                    await trigger(defSrc, "On Active Defense", { attacker: attacker, killing_type: type, attack_source: src_name, src_name: defense.src_name }); 
                     await useAttribute(defense.ai_id);
                 break;
                 case "passive":
-                    await trigger(defSrc, "On Passive Defense", { attacker: src_ref, killing_type: type, attack_source: src_name, src_name: defense.src_name }); 
+                    await trigger(defSrc, "On Passive Defense", { attacker: attacker, killing_type: type, attack_source: src_name, src_name: defense.src_name }); 
                     await useAttribute(defense.ai_id);
                 break;
                 case "partial":
-                    await trigger(defSrc, "On Partial Defense", { attacker: src_ref, killing_type: type, attack_source: src_name, src_name: defense.src_name }); 
+                    await trigger(defSrc, "On Partial Defense", { attacker: attacker, killing_type: type, attack_source: src_name, src_name: defense.src_name }); 
                     await useAttribute(defense.ai_id);
                 break;
                 case "recruitment":
-                    await trigger(defSrc, "On Recruitment Defense", { attacker: src_ref, killing_type: type, attack_source: src_name, src_name: defense.src_name }); 
+                    await trigger(defSrc, "On Recruitment Defense", { attacker: attacker, killing_type: type, attack_source: src_name, src_name: defense.src_name }); 
                     await useAttribute(defense.ai_id);
                 break;
             }
