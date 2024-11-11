@@ -155,7 +155,7 @@ module.exports = function() {
         }
         
         // handle visit
-        let result = await visit(src_ref, targets[0], "", "investigating", "alignment"`Investigated <@${targets[0]}>'s alignment: \`%1\``);
+        let result = await visit(src_ref, targets[0], "", "investigating", "alignment", `Investigated <@${targets[0]}>'s alignment: \`%1\``);
         if(result) return visitReturn(result, "Investigation failed!", "Investigation succeeded!");
         
         // get data

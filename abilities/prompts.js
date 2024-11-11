@@ -149,7 +149,7 @@ module.exports = function() {
                 repl_msg = await sendPromptReplyConfirmMessage(promptMessage, promptType, `You did not submit a target, but the action is forced. The following target was selected: ${selection1[0]}` + PROMPT_SPLIT, true); 
             } else { // random selection
                 selection1 = await randomPromptReply(type1);
-                selection2 = await randomPromptReply(type2);
+                if(type2 != "none") selection2 = await randomPromptReply(type2);
                 if(type2 === "none") repl_msg = await sendPromptReplyConfirmMessage(promptMessage, promptType, `You did not submit a target, but the action is forced. A random target is selected: ${selection1[0]}` + PROMPT_SPLIT, true); 
                 else repl_msg = await sendPromptReplyConfirmMessage(promptMessage, promptType, `You did not submit a target, but the action is forced. A random target is selected: ${selection1[0]} and ${selection2[0]}` + PROMPT_SPLIT, true); 
             }
