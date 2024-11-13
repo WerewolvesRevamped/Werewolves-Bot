@@ -468,13 +468,13 @@ module.exports = function() {
         exp = new RegExp("^" + targetType + " < " + targetType + "$", "g");
         fd = exp.exec(condition);
         if(fd) {
-            cond = { type: "comparison", subtype: "less_than", first: ttpp(fd[1]), second: ttpp(fd[2]) };
+            cond = { type: "comparison", subtype: "less_than", first: ttpp(fd[1], "number"), second: ttpp(fd[2], "number") };
         }
         // Greater Than
         exp = new RegExp("^" + targetType + " > " + targetType + "$", "g");
         fd = exp.exec(condition);
         if(fd) {
-            cond = { type: "comparison", subtype: "greater_than", first: ttpp(fd[1]), second: ttpp(fd[2]) };
+            cond = { type: "comparison", subtype: "greater_than", first: ttpp(fd[1], "number"), second: ttpp(fd[2], "number") };
         }
         // Not
         exp = new RegExp("^" + targetType + " is not " + targetType + "$", "g");
@@ -963,25 +963,25 @@ module.exports = function() {
         exp = new RegExp("^Manipulate " + targetType + "'s `" + manipSubtype + "` to `" + num + "`" + attrDuration + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "manipulating", subtype: "absolute", target: ttpp(fd[1]), manip_type: fd[2], manip_value: +fd[3], duration: dd(fd[4], "permanent") };
+            ability = { type: "manipulating", subtype: "absolute", target: ttpp(fd[1]), manip_type: fd[2], manip_value: ttpp(fd[3], "number"), duration: dd(fd[4], "permanent") };
         }
         // manipulation by relative value
         exp = new RegExp("^Manipulate " + targetType + "'s `" + manipSubtype + "` by `" + num + "`" + attrDuration + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "manipulating", subtype: "relative", target: ttpp(fd[1]), manip_type: fd[2], manip_value: +fd[3], duration: dd(fd[4], "permanent") };
+            ability = { type: "manipulating", subtype: "relative", target: ttpp(fd[1]), manip_type: fd[2], manip_value: ttpp(fd[3], "number"), duration: dd(fd[4], "permanent") };
         }
         // manipulation by absolute value - selector variant
         exp = new RegExp("^Manipulate " + targetType + "'s `" + manipSubtype + "` to " + targetType + attrDuration + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "manipulating", subtype: "absolute", target: ttpp(fd[1]), manip_type: fd[2], manip_value: fd[3], duration: dd(fd[4], "permanent") };
+            ability = { type: "manipulating", subtype: "absolute", target: ttpp(fd[1]), manip_type: fd[2], manip_value: ttpp(fd[3], "number"), duration: dd(fd[4], "permanent") };
         }
         // manipulation by relative value - selector variant
         exp = new RegExp("^Manipulate " + targetType + "'s `" + manipSubtype + "` by " + targetType + attrDuration + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "manipulating", subtype: "relative", target: ttpp(fd[1]), manip_type: fd[2], manip_value: fd[3], duration: dd(fd[4], "permanent") };
+            ability = { type: "manipulating", subtype: "relative", target: ttpp(fd[1]), manip_type: fd[2], manip_value: ttpp(fd[3], "number"), duration: dd(fd[4], "permanent") };
         }
         /** WHISPERING **/
         // whispering with disguise
