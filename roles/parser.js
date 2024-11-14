@@ -566,7 +566,7 @@ module.exports = function() {
 
     /** REGEX - Reminder: You need double \'s here **/
     // general
-    const targetType = "(`[^`]*`|`[^`]*`\\[\\w+\\]|@\\S*|&\\S*|#\\S*|%[^%]+%|\\d+|f?F?alse|t?T?rue)";
+    const targetType = "(`[^`]*`|`[^`]*`\\[\\w+\\]|@\\S*|&\\S*|#\\S*|%[^%]+%|\-?\\d+|f?F?alse|t?T?rue)";
     const attrDuration = "( \\(~[^\)]+\\))?";
     const locationType = "(`[^`]*`|@\\S*|#\\S*)"; // extended version of target type
     const groupType = "(@\\S*|#\\S*)"; // reduced version of location type

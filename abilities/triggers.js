@@ -689,7 +689,7 @@ module.exports = function() {
                     for(let i = 0; i < actionCount; i++) { 
                         for(const ability of trigger.abilities) {
                             let feedback = await executeAbility(src_ref, src_name, ability, restrictions, additionalTriggerData);
-                            if(feedback && feedback.msg) abilitySend(src_ref, feedback.msg);
+                            if(feedback && feedback.msg && (srcToType(src_ref) != "attribute")) abilitySend(src_ref, feedback.msg);
                         }
                     }
                 }

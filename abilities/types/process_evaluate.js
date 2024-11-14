@@ -117,8 +117,8 @@ module.exports = function() {
                 const first = await parseSelector(condition.first, src_ref, additionalTriggerData);
                 const second = await parseSelector(condition.second, src_ref, additionalTriggerData);
                 
-                //console.log("FIRST", first.type, first.value[0]);
-                //console.log("SECOND", second.type, second.value[0]);
+                console.log("FIRST", first.type, first.value[0]);
+                console.log("SECOND", second.type, second.value[0]);
                 
                 // switch by subtype
                 switch(condition.subtype) {
@@ -159,7 +159,7 @@ module.exports = function() {
                     // COMPARISON - LESS THAN
                     case "less_than":
                         if(first.type === second.type && first.type === "number") { // same type, do direct type comparison
-                            return first.value < second.value;
+                            return first.value[0] < second.value[0];
                         } else if(first.type === "number" && second.type === "result") {
                             return first.value[0] < (await parseNumber(second.value[0].result, src_ref, additionalTriggerData));
                         }else if(first.type === "result" && second.type === "number") {
@@ -170,11 +170,11 @@ module.exports = function() {
                     // COMPARISON - GREATER THAN
                     case "greater_than":
                         if(first.type === second.type && first.type === "number") { // same type, do direct type comparison
-                            return first.value < second.value;
+                            return first.value[0] > second.value[0];
                         } else if(first.type === "number" && second.type === "result") {
-                            return first.value[0] < (await parseNumber(second.value[0].result, src_ref, additionalTriggerData));
+                            return first.value[0] > (await parseNumber(second.value[0].result, src_ref, additionalTriggerData));
                         } else if(first.type === "result" && second.type === "number") {
-                            return (await parseNumber(first.value[0].result, src_ref, additionalTriggerData)) < second.value[0];
+                            return (await parseNumber(first.value[0].result, src_ref, additionalTriggerData)) > second.value[0];
                         }
                         // no comparison can be made
                         return false;
@@ -215,6 +215,7 @@ module.exports = function() {
                         }
                         condBool1 = await resolveCondition(condition.condition1, src_ref, src_name, additionalTriggerData);
                         condBool2 = await resolveCondition(condition.condition2, src_ref, src_name, additionalTriggerData);
+                        console.log(condBool1, condBool2);
                         return condBool1 && condBool2;
                     // LOGIC - OR
                     case "or":

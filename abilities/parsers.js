@@ -13,8 +13,8 @@ module.exports = function() {
     this.parseSelector = async function(selector, self, additionalTriggerData = {}) {
         let selectorTarget = selectorGetTarget(selector);
         let selectorType = selectorGetType(selector);
-        // if type is unknown, but it is a @Self selector, get type from self
-        if(selectorType === "unknown" && selectorTarget === "@self" && self) {
+        // It is a @Self selector -> get type from self
+        if(selectorTarget === "@self" && self) {
             selectorType = srcToType(self);
         }
         // switch through types
@@ -1077,6 +1077,7 @@ module.exports = function() {
     **/
     this.parseAttributeSelector = function(selector, self = null, additionalTriggerData = {}, noErr = false) {
         // get target
+        selector = selector.replace(/`/g, "");
         let selectorTarget = selectorGetTarget(selector.split(":")[0]); // split to remove active attribute selector info in case we parse an active attribute as a normal one
         switch(selectorTarget) {
             case "@visitparameter":
@@ -1667,7 +1668,7 @@ module.exports = function() {
     **/
     const abilitySubtypeNames = [
         ["attack","kill","lynch","true-kill"], // killing
-        ["role","alignment","class","category","player_count","count"], // investigating
+        ["role","alignment","class","category","player_count","count","attribute"], // investigating
         ["target","untarget"], // targeting
         ["weakly","strongly"], // disguising
         ["active","passive","partial","recruitment","absence"], // protecting
@@ -1743,6 +1744,20 @@ module.exports = function() {
         // is number?
         if(!isNaN(selectorTarget)) { // direct number
             return +selectorTarget;
+        } else if(selectorTarget === "@selection") {
+            if(additionalTriggerData.selection) {
+                return await parseNumber(additionalTriggerData.selection, self, additionalTriggerData);
+            } else {
+                abilityLog(`❗ **Error:** Invalid number selector target \`${selectorTarget}\`!`);
+                return 0;
+            }
+        } else if(selectorTarget === "@secondaryselection") {
+            if(additionalTriggerData.secondaryselection) {
+                return await parseNumber(additionalTriggerData.secondaryselection, self, additionalTriggerData);
+            } else {
+                abilityLog(`❗ **Error:** Invalid number selector target \`${selectorTarget}\`!`);
+                return 0;
+            }
         } else if (PROPERTY_ACCESS.test(selectorTarget)) { // property access
             let contents = selectorTarget.match(PROPERTY_ACCESS); // get the selector
             let infType = inferType(`@${contents[1]}`);

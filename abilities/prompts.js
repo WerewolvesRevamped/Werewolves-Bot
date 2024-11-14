@@ -18,6 +18,7 @@ module.exports = function() {
     returns a prompt message
     **/
     this.getPromptMessage = function(ability, promptOverwrite, type1 = "", type2 = "") {
+        console.log(ability);
         // apply prompt overwrite if applicable
         if(promptOverwrite) {
             let poSplit = promptOverwrite.split(":");
@@ -623,6 +624,13 @@ module.exports = function() {
                     return false;
                 }
                 return bool;
+            case "number":
+                let num = parseNumberReply(text, message);
+                if(num === false) {
+                    if(message) message.reply(basicEmbed("❌ You must specify a valid number.", EMBED_RED));
+                    return false;
+                }
+                return num;
             default:
                 if(message) message.reply(basicEmbed("❌ Invalid prompt.", EMBED_RED));
                 return false;
@@ -649,6 +657,10 @@ module.exports = function() {
                 let boolRand = Math.floor(Math.random() * 2);
                 let bool = parseBooleanReply(["true","false"][boolRand]);
                 return bool;
+            case "number":
+                let numRand = Math.floor(Math.random() * 11) - 5;
+                let num = parseNumberReply(numRand);
+                return num;
             default:
                 abilityLog(`❗ **Error:** Unknown random prompt reply type \`${type}\`!`);
                 return false;
@@ -765,6 +777,42 @@ module.exports = function() {
             if(yCount > 0 && yCount > nCount) return ["Yes / Confirm","true[boolean]"];
             if(nCount > 0 && nCount > yCount) return ["No / Reject","false[boolean]"];
             else return false;
+        }
+    }
+    
+    /**
+    Parses an argument of type number in a prompt reply
+    **/
+    function parseNumberReply(num, message = null) {
+        let numParsed = num.toLowerCase().replace(/[^a-z0-9\- ]+/g,"").trim();
+        
+        let numberNames = ["zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"];
+        let negate = ["minus","negative"];
+        
+        if(!isNaN(numParsed)) { // direct number
+            return [+numParsed, `${+numParsed}[number]`];
+        } else {
+            let nSplit = numParsed.split(" ");
+            
+            // check for matches
+            for(let i = 0; i < nSplit.length; i++) {
+                // number
+                if(!isNaN(nSplit[i])) {
+                    return [+nSplit[i], `${+nSplit[i]}[number]`];
+                }
+                // number word
+                if(numberNames.includes(nSplit[i])) {
+                    if(i > 0 && negate.includes(nSplit[i - 1])) { // negated
+                        let numNum = numberNames.indexOf(nSplit[i]);
+                        return [-numNum, `${-numNum}[number]`];
+                    }
+                    let numNum = numberNames.indexOf(nSplit[i]);
+                    return [+numNum, `${+numNum}[number]`];
+                }
+            }
+            
+            // not found
+            return false;
         }
     }
     

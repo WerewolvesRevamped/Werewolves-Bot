@@ -1,7 +1,11 @@
 {
     "comment_1": "Generic Default Prompts",
     "investigating.role.1": "Which player would you like to investigate?",
+    "investigating.attribute.1": "Which player would you like to investigate?",
+    "disguising.weakly.1": "You may weakly disguise yourself. Which role would you like to disguise yourself as?",
     "disguising.weakly.2": "You may weakly disguise another player. Please specify a player and a role, separated by `;`.",
+    "disguising.strongly.1": "You may strongly disguise yourself. Which role would you like to disguise yourself as?",
+    "disguising.strongly.2": "You may strongly disguise another player. Please specify a player and a role, separated by `;`.",
     "killing.attack.1": "Who do you want to attack?",
     "targeting.target.1": "You may submit a new target.",
     "targeting.target.player": "Who would you like to target?",
@@ -12,12 +16,17 @@
     "succession.target": "You may not select the same target two times in a row. You may resubmit another target as a reply to the original prompt.",
     "attribute.lacks": "You may only use this ability on targets __without__ a certain attribute.",
     "attribute.has": "You may only use this ability on targets __with__ a certain attribute.",
+    "condition": "Invalid submission. You likely submitted an invalid value. If necessary, please ask Hosts for clarification!",
     
     "comment_3": "Generic Custom Prompts",
     "targeting.emergency.player": "Once per game, you may change your target a second time in a phase. Reply to this prompt to do so and ignore the prompt if you do not want to use your emergency use yet.",
     "granting.resign": "You may resign from your position during any phase.",
     
     "comment_4": "Role-specific Custom Prompts",
+    "crowd_seeker.1": "You may submit three player and a role each and you will learn whether that player has that role or not.",
+    "oracle.1": "The alignment of which two players would you like to compare?",
+    "clairvoyant_fox.1": "You may choose to either join the wolfpack or to investigate another player.",
+    "disguised_fox.1": "You may choose to either join the wolfpack or to strongly disguise yourself.",
     "psychic_wolf.1": "You may submit a player and a role and you will learn whether that player has that role or not.",
     "saboteur_wolf.1": "You may choose one player to disqualify from the next election. Should they win the poll nobody will be elected.",
     "flute_charmer.1": "Which player would you like to charm?"

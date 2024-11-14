@@ -132,9 +132,14 @@ module.exports = function() {
         const allOptions = await optionListData(options);
         let allOptionsFiltered = [];
         
+        console.log(allOptions);
+        
         // filter out options that are unvotable
         for(let i = 0; i < allOptions.length; i++) {
-            if(!allOptions[i].id) continue; // only check players
+            if(!allOptions[i].id) {
+                allOptionsFiltered.push(allOptions[i]);
+                continue; // only check players
+            }
             let unvotable = await queryAttribute("attr_type", "poll_disqualification", "val1", pollType, "val2", allOptions[i].id, "val3", "unvotable");
             if(unvotable.length === 0) allOptionsFiltered.push(allOptions[i]);
             else await useAttribute(unvotable[0].ai_id);

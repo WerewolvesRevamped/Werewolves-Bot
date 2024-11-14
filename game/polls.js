@@ -351,7 +351,7 @@ module.exports = function() {
             const validVoters = voters.filter(el => duplicateVoters.indexOf(el.id) === -1);
             const invalidVoters = voters.filter(el => duplicateVoters.indexOf(el.id) != -1 && el != client.user.id);
             
-            console.log("All Voters", validVoters, invalidVoters);
+            console.log("All Voters", validVoters.map(el => el.globalName), invalidVoters.map(el => el.globalName));
             
             // evaluate vote count
             let votes = 0;
@@ -523,7 +523,9 @@ module.exports = function() {
             let voteValue = 0;
             let grpName = srcToValue(src_name);
             let grpMem = await queryAttributePlayer(player_id, "attr_type", "group_membership", "val1", grpName);
+            let grpMemAll = await queryAttribute("attr_type", "group_membership", "val1", grpName);
             if(grpMem[0] && ["member","owner"].includes(grpMem[0].val2)) voteValue = 1;
+            if(grpMemAll.length === 0) voteValue = 1;
             console.log(grpName, grpMem, voteValue);
             
             const voteManipulations = await getManipulations(player_id, "private");
@@ -587,8 +589,8 @@ module.exports = function() {
             case "⛔": return "Abstain";
             case "❌": return "Cancel";
             case "❓": return "Random";
-            case client.emojis.cache.get(stats.yes_emoji): return "Yes";
-            case client.emojis.cache.get(stats.no_emoji): return "No";
+            case `<:${client.emojis.cache.get(stats.yes_emoji).name}:${client.emojis.cache.get(stats.yes_emoji).id}>`: return "Yes";
+            case `<:${client.emojis.cache.get(stats.no_emoji).name}:${client.emojis.cache.get(stats.no_emoji).id}>`: return "No";
         }
     }
     

@@ -270,11 +270,13 @@ module.exports = function() {
             case "group":
                 return ref; // group ref already is channel id
             case "poll":
-            case "attribute":
             case "team":
                 return backupChannelId;
             case "location":
                 return await abilitySendGetLocationChannel(ref);
+            case "attribute":
+                let owner = getCustomAttributeOwner(ref);
+                return getSrcRefChannel(owner);
             default:
                 abilityLog(`❗ **Error:** Unknown type for get src_ref channel!`);
                 return null;

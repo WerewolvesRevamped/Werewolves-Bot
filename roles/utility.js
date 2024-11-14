@@ -161,7 +161,7 @@ module.exports = function() {
     **/
     this.parseGroupName = function(input) {
 		input = input.toLowerCase(); // change group name to lower case
-        input = input.replace(/[^a-z]/g, "").trim(); // remove any non a-z characters
+        input = input.replace(/\-/g," ").replace(/[^a-z ]/g, "").trim(); // remove any non a-z, space characters
 		return input;
 	}
     
@@ -170,7 +170,7 @@ module.exports = function() {
     **/
     this.verifyGroup = function(input) {
         if(cachedGroups.length == 0) return true; // if cache is currently not loaded just allow it
-		let inputGroup = input.replace(/[^a-z]/g,"").trim(); // parse group name
+		let inputGroup = input.replace(/\-/g," ").replace(/[^a-z ]/g,"").trim(); // parse group name
 		let group = cachedGroups.find(el => el === inputGroup); // check if group is in cache
 		return group ? true : false;
 	}
