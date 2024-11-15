@@ -18,7 +18,6 @@ module.exports = function() {
     returns a prompt message
     **/
     this.getPromptMessage = function(ability, promptOverwrite, type1 = "", type2 = "") {
-        console.log(ability);
         // apply prompt overwrite if applicable
         if(promptOverwrite) {
             let poSplit = promptOverwrite.split(":");
@@ -297,6 +296,14 @@ module.exports = function() {
             if(typeof property !== "string") return property;
             // to lower case
             let val = property.toLowerCase();
+            // in property access -> dont type annotate
+            let notTyped = promptValue.replace(/\[.+\]/, "");
+            if(val.indexOf("@selection->") >= 0 && promptIndex == 0) {
+                return property.replace(/@[sS]election/g, notTyped);
+            } else if(val.indexOf("@secondaryselection->") >= 0 && promptIndex == 1) {
+                return val.replace(/@[sS]econdary[sS]election/g, notTyped);
+            }
+            // normal
             if(val.indexOf("@selection") >= 0 && promptIndex == 0) {
                 return property.replace(/@[sS]election(\[\w+\])?/g, promptValue);
             } else if(val.indexOf("@secondaryselection") >= 0 && promptIndex == 1) {
@@ -488,7 +495,7 @@ module.exports = function() {
                     parsedReply2 = parsePromptReply(reply2, type2, message);
                 } else { // one reply, attempt to parse
                     parsedReply1 = parsePromptReply(reply[0], type1, message);
-                    parsedReply2 = parsePromptReply(reply[0], type2, message);
+                    parsedReply2 = parsePromptReply(reply[0], type2, message, true);
                     if(parsedReply1 === false || parsedReply2 === false) {
                         message.reply(basicEmbed("❌ Attempted to parse submission, but could not find the arguments. You must specify exactly two arguments, separated by `;`.", EMBED_RED));
                         return;       
@@ -601,7 +608,8 @@ module.exports = function() {
     Parses an argument of a prompt reply
     Returns an array of type [displayValue, actualValue]
     **/
-    function parsePromptReply(text, type, message = null) {
+    function parsePromptReply(text, type, message = null, reverse = false) {
+        if(reverse) text = text.split(" ").reverse().join(" "); // invert so a second reply is searched for from end if necessary
         switch(type) {
             case "player":
                 let player = parsePlayerReply(text, message);

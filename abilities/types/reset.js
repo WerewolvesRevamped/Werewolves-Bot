@@ -21,6 +21,7 @@ module.exports = function() {
         target.value = await applyRedirection(target.value, src_ref, ability.type, "", additionalTriggerData);
         
         // handle visit
+        console.log("CONVORESET", src_ref, target);
         let resultV = await visit(src_ref, target.value, "", "reset");
         if(resultV) return visitReturn(resultV, "Conversation reset failed!", "Conversation reset succeeded!");
         
@@ -35,8 +36,8 @@ module.exports = function() {
         // resend first message
         targetChannel.send({ embeds: first.embeds, content: first.content });
         
-        // feedback
-        return { msg: "Conversation reset succeeded!", success: true, target: `${target.type}:${target.value}` };
+        // feedback -> no message for conversation reset as that would often be in the reset channel
+        return { msg: "", success: true, target: `${target.type}:${target.value}` };
     }
     
 }

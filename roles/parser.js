@@ -584,7 +584,7 @@ module.exports = function() {
     const defenseAttackSubtypes = "(Attacks|Kills|Lynches|Attacks & Lynches|All|Banishments)";
     const defenseSubtypes = "(Absence at " + locationType + "|Active Defense|Passive Defense|Partial Defense|Recruitment Defense)";
     const defensePhases = "(Day|Night)";
-    const attrValue = "([^,]+?)";
+    const attrValue = "([^,~]+?)";
     const attrData1 = "\\(" + attrValue + "\\)";
     const attrData2 = "\\(" + attrValue + "," + attrValue + "\\)";
     const attrData3 = "\\(" + attrValue + "," + attrValue + "," + attrValue + "\\)";
@@ -1382,7 +1382,7 @@ module.exports = function() {
         exp = new RegExp("^Conversation Reset$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "reset", target: "@self[player]" };
+            ability = { type: "reset", target: "@self[unknown]" };
         }
         // conversation reset target
         exp = new RegExp("^Conversation Reset " + targetType + "$", "g");

@@ -38,7 +38,12 @@ module.exports = function() {
                     abilityLog(`❗ **Error:** Tried to create a choice for ${target.length} players!`);
                     return { msg: "Choices failed! " + abilityError, success: false };
                 }
-                result = await choicesCreation(src_name, src_ref, target[0], choice, options);
+                // check if is forced
+                let forcedSel = "";
+                if(additionalTriggerData.parameters.forced && additionalTriggerData.parameters.forced_sel) {
+                    forcedSel = additionalTriggerData.parameters.forced_sel;
+                }
+                result = await choicesCreation(src_name, src_ref, target[0], choice, options, forcedSel);
                 return result;
             break;
         }
@@ -48,13 +53,13 @@ module.exports = function() {
     Ability: Choices Creation
     creates a choice
     **/
-    async function choicesCreation(src_name, src_ref, target, choiceName, options) {
+    async function choicesCreation(src_name, src_ref, target, choiceName, options, forcedSel) {
         // handle visit
         let result = await visit(src_ref, target, choiceName, "choices", "creation");
         if(result) return visitReturn(result, "Choice creation failed!", "Choice creation succeeded!");
         
         // create choice
-        await sqlProm("INSERT INTO choices (name, options, src_ref, src_name, owner) VALUES (" + connection.escape(choiceName) + "," + connection.escape(options.join(",")) + "," + connection.escape(src_ref) + "," + connection.escape(src_name) + "," + connection.escape(target) + ")");
+        await sqlProm("INSERT INTO choices (name, options, src_ref, src_name, owner, forced) VALUES (" + connection.escape(choiceName) + "," + connection.escape(options.join(",")) + "," + connection.escape(src_ref) + "," + connection.escape(src_name) + "," + connection.escape(target) + "," + connection.escape(forcedSel) + ")");
         // feedback
         let optionsText = options.map(el => "`" + el + "`").join(", ");
         abilityLog(`✅ Created choice \`${choiceName}\` for <@${target}> with options: ${optionsText}.`);
@@ -196,6 +201,25 @@ module.exports = function() {
         return found;
     }
 
+    /**
+    Choices: Forced
+    executes forced choices
+    **/
+    this.executeForcedChoices = async function() {
+        // get choices 
+        let choices = await sqlProm("SELECT * FROM choices WHERE forced <> '' AND chosen=0");
+        
+        // apply forced choices
+        for(let i = 0; i < choices.length; i++) {
+            let optionName = choices[i].forced;
+            let choiceName = choices[i].name;
+            let choiceCreatorId = srcToValue(choices[i].src_ref);
+            let chooser = choices[i].owner;
+            abilityLog(`✅ **Choice Chose:** <@${chooser}> chose \`${optionName}\` for \`${choiceName}\`.`);
+            await triggerPlayer(choiceCreatorId, "Choice Chosen", { chooser: `player:${chooser}`, chosen: parseOption(optionName), choice_data: { name: choiceName, owner: chooser } }); 
+            await triggerPlayer(choiceCreatorId, "Choice Chosen Complex", { chooser: `player:${chooser}`, chosen: parseOption(optionName), choice_data: { name: choiceName, owner: chooser } });
+        }        
+    }
     
     /**
     Choices: Reset
@@ -224,7 +248,7 @@ module.exports = function() {
     Updates a choice
     **/
     this.choicesUpdateByOwner = function(choiceName, ownerId, column, val) {
-        if(!(["choice_msg","choice_channel","prompt","ability"].includes(column))) return;
+        if(!(["choice_msg","choice_channel","prompt","ability","chosen"].includes(column))) return;
         return sqlProm("UPDATE choices SET " + column + "=" + connection.escape(val) +  " WHERE name=" + connection.escape(choiceName) + " AND owner=" + connection.escape(ownerId));
     }
     

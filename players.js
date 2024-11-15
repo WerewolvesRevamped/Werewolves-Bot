@@ -347,6 +347,50 @@ module.exports = function() {
 		});
 	
 	}
+	/* Lists all votes */
+	this.cmdPlayersVotes = function(channel) {
+		// Get a list of players
+		sql("SELECT id,emoji,role FROM players WHERE type='player' AND alive=1", async result => {
+			let playerListArray = [];
+            for(let i = 0; i < result.length; i++) {
+                let el = result[i];
+                let rName = toTitleCase(el.role.split(",")[0]);
+                if(rName == "Merged") rName = el.role.split(",")[2];
+                let rEmoji = getRoleEmoji(rName);
+                let publicVotingPower = await pollValue(el.id, "public");
+                let privateVotingPower = await pollValue(el.id, "private");
+                let publicText = `Public: ${publicVotingPower}`;
+                let privateText = `Private: ${privateVotingPower}`;
+                if(publicVotingPower != 1) publicText = `**${publicText}**`;
+                if(privateVotingPower != 1) privateText = `**${privateText}**`;
+                rEmoji = (rEmoji ? `<:${rEmoji.name}:${rEmoji.id}> | ` : "❓ | ");
+                playerListArray.push(`${rEmoji}${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"} (${el.role.split(",").map(role => toTitleCase(role)).join(" + ")}) | ${publicText}, ${privateText}`);
+            }
+            const perMessageCount = 18;
+			let playerList = [], counter = 0;
+			for(let i = 0; i < playerListArray.length; i++) {
+				if(!playerList[Math.floor(counter/perMessageCount)]) playerList[Math.floor(counter/perMessageCount)] = [];
+				playerList[Math.floor(counter/perMessageCount)].push(playerListArray[i]);
+				counter++;
+			}
+			channel.send("**Players** | Total: " + result.length);
+			for(let i = 0; i < playerList.length; i++) {
+				// Print message
+				channel.send("✳ Listing players " + (i+1)  + "/" + (playerList.length) + "...").then(m => {
+					m.edit(playerList[i].join("\n"));
+				}).catch(err => {
+					logO(err); 
+					sendError(channel, err, "Could not list signed up players");
+				});
+			}
+		}, () => {
+			// DB error
+			channel.send("⛔ Database error. Could not list signed up players!");
+		});
+	
+	}
+    
+    
 	/* Lists all signedup players */
 	this.cmdPlayersListAlive = function(channel) {
 		// Get a list of players

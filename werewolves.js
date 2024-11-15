@@ -957,6 +957,8 @@ client.on('interactionCreate', async interaction => {
                 abilityLog(`✅ **Choice Chose:** <@${chooser}> chose \`${optionName}\` for \`${choiceName}\`.`);
                 await triggerPlayer(choiceCreatorId, "Choice Chosen", { chooser: `player:${chooser}`, chosen: parseOption(optionName), choice_data: { name: choiceName, owner: chooser } }); 
                 await triggerPlayer(choiceCreatorId, "Choice Chosen Complex", { chooser: `player:${chooser}`, chosen: parseOption(optionName), choice_data: { name: choiceName, owner: chooser } }); 
+                // set as chosen
+                await choicesUpdateByOwner(choiceName, chooser, "chosen", 1);
                 // check choice completion
                 await choiceCheckCompletion(chooser, choiceName);
             } break;
@@ -974,6 +976,9 @@ client.on('interactionCreate', async interaction => {
                     embed = basicEmbed(`${orig_text}${PROMPT_SPLIT} Choice unchosen.`, EMBED_RED);
                     embed.components = [ ];
                     interaction.update(embed);
+                    
+                    // set as unchosen
+                    await choicesUpdateByOwner(choiceName, chooser, "chosen", 0);
                     
                     // create new choice
                     choicesChoosingPrompt(choiceData.src_name, choiceData.src_ref, JSON.parse(choiceData.ability), choiceData.prompt);

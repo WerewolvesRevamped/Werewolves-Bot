@@ -132,8 +132,6 @@ module.exports = function() {
         const allOptions = await optionListData(options);
         let allOptionsFiltered = [];
         
-        console.log(allOptions);
-        
         // filter out options that are unvotable
         for(let i = 0; i < allOptions.length; i++) {
             if(!allOptions[i].id) {

@@ -11,6 +11,9 @@
     "targeting.target.player": "Who would you like to target?",
     "targeting.target.role": "Which role would you like to target?",
     "protecting.absence.1": "Who do you want to sleep with?",
+    "choices.choosing": "You may choose one of the options.",
+    "manipulating.absolute.2": "Which two players would you like to manipulate the vote of?",
+    "poll.votes.1": "Which player would you like to manipulate the starting votes of?",
     
     "comment_2": "Restriction Messages",
     "succession.target": "You may not select the same target two times in a row. You may resubmit another target as a reply to the original prompt.",
@@ -24,10 +27,14 @@
     
     "comment_4": "Role-specific Custom Prompts",
     "crowd_seeker.1": "You may submit three player and a role each and you will learn whether that player has that role or not.",
-    "oracle.1": "The alignment of which two players would you like to compare?",
+    "oracle.1": "The alignment of which two players would you like to compare? Please specify two player names, separated by `;`.",
     "clairvoyant_fox.1": "You may choose to either join the wolfpack or to investigate another player.",
     "disguised_fox.1": "You may choose to either join the wolfpack or to strongly disguise yourself.",
+    "gallant_fox.1": "You may choose to either join the wolfpack or to protect a player for the next night and day.",
     "psychic_wolf.1": "You may submit a player and a role and you will learn whether that player has that role or not.",
     "saboteur_wolf.1": "You may choose one player to disqualify from the next election. Should they win the poll nobody will be elected.",
-    "flute_charmer.1": "Which player would you like to charm?"
+    "flute_charmer.1": "Which player would you like to charm?",
+    "pyromancer.1": "You may choose to either powder a player or to ignite all powdered players.",
+    "pyromancer.2": "Which player would you like to powder?",
+    "dog.1": "You may choose one of these roles. You will immediately change into the role you choose."
 }

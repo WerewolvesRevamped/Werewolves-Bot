@@ -1408,6 +1408,8 @@ module.exports = function() {
                     case "attribute":
                         let source = getCustomAttributeSource(val);
                         return { value: srcToValue(source), type: srcToType(source), default: false };
+                    case "group":
+                        return { value: val, type: "group", default: false };
                 }
             } else if(selectorTarget === "@attacklocation") {
                 // try attacker
@@ -1944,7 +1946,7 @@ module.exports = function() {
     **/
     const defenseFromTypes = ["attacks","kills","lynches","attacks_lynches","all"];
     this.parseDefenseFromType = function(defro_type) {
-        defro_type = defro_type.toLowerCase().replace(/ /g,"_").replace(/[^a-z]/g,"");
+        defro_type = defro_type.toLowerCase().replace(/ (& )?/g,"_").replace(/[^a-z_]/g,"");
         if(defenseFromTypes.includes(defro_type)) {
             return defro_type;
         } else {

@@ -41,6 +41,7 @@ module.exports = function() {
 			case "players log2": cmdPlayersLog2(message.channel); break;
 			case "players log3": cmdPlayersLog3(message.channel); break;
 			case "players log4": cmdPlayersLog4(message.channel); break;
+			case "players votes": cmdPlayersVotes(message.channel); break;
 			case "players roles": cmdPlayersRoleList(message.channel); break;
 			case "cc cleanup": cmdCCCleanup(message.channel); break;
 			case "roles sc_cleanup": cmdRolesScCleanup(message.channel); break;

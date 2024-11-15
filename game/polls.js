@@ -514,19 +514,23 @@ module.exports = function() {
         await initialMsg.unpin();
     }
     
-    /** PRIVATE
+    /** PUBLIC
     Evaluate vote value
     **/
-    async function pollValue(player_id, type, src_name) {
+    this.pollValue = async function(player_id, type, src_name = null) {
         if(type === "private") { // PRIVATE POLLS
             // get group membership type
             let voteValue = 0;
-            let grpName = srcToValue(src_name);
-            let grpMem = await queryAttributePlayer(player_id, "attr_type", "group_membership", "val1", grpName);
-            let grpMemAll = await queryAttribute("attr_type", "group_membership", "val1", grpName);
-            if(grpMem[0] && ["member","owner"].includes(grpMem[0].val2)) voteValue = 1;
-            if(grpMemAll.length === 0) voteValue = 1;
-            console.log(grpName, grpMem, voteValue);
+            if(src_name) { // check for a specific group
+                let grpName = srcToValue(src_name);
+                let grpMem = await queryAttributePlayer(player_id, "attr_type", "group_membership", "val1", grpName);
+                let grpMemAll = await queryAttribute("attr_type", "group_membership", "val1", grpName);
+                if(grpMem[0] && ["member","owner"].includes(grpMem[0].val2)) voteValue = 1;
+                if(grpMemAll.length === 0) voteValue = 1; // empty group -> anyone can vote
+                console.log(grpName, grpMem, voteValue);
+            } else {
+                voteValue = 1; // default for 1 if no group is specified
+            }
             
             const voteManipulations = await getManipulations(player_id, "private");
             // add private votes

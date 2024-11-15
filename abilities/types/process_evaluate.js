@@ -117,8 +117,8 @@ module.exports = function() {
                 const first = await parseSelector(condition.first, src_ref, additionalTriggerData);
                 const second = await parseSelector(condition.second, src_ref, additionalTriggerData);
                 
-                console.log("FIRST", first.type, first.value[0]);
-                console.log("SECOND", second.type, second.value[0]);
+                console.log("FIRST", condition.first, first.type, first.value[0]);
+                console.log("SECOND", condition.second, second.type, second.value[0]);
                 
                 // switch by subtype
                 switch(condition.subtype) {
@@ -215,7 +215,6 @@ module.exports = function() {
                         }
                         condBool1 = await resolveCondition(condition.condition1, src_ref, src_name, additionalTriggerData);
                         condBool2 = await resolveCondition(condition.condition2, src_ref, src_name, additionalTriggerData);
-                        console.log(condBool1, condBool2);
                         return condBool1 && condBool2;
                     // LOGIC - OR
                     case "or":

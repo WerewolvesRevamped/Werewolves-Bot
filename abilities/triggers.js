@@ -878,6 +878,7 @@ module.exports = function() {
         pauseActionQueueChecker = true;
         
         // execute forced prompts from previous phase
+        await executeForcedChoices();
         await executeForcedPrompts();
         await clearPrompts();
         
@@ -972,6 +973,7 @@ module.exports = function() {
         pauseActionQueueChecker = true;
         
         // execute forced prompts from previous phase
+        await executeForcedChoices();
         await executeForcedPrompts();
         await clearPrompts();
         

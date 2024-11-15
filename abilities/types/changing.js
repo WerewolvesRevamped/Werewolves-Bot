@@ -125,6 +125,9 @@ module.exports = function() {
             // role change trigger
             await triggerPlayer(targets[i], "On Role Change", { role_changer: srcToValue(src_ref) }); 
             
+            // passive
+            await triggerHandler("Passive");
+            
             // log
             abilityLog(`✅ <@${targets[i]}> role changed to \`${toTitleCase(role)}\`.`);
             
@@ -167,6 +170,9 @@ module.exports = function() {
             
             // alignment change info embed
             await abilitySendProm(`player:${targets[i]}`, `Your alignment has changed to \`${toTitleCase(alignment)}\`!`, EMBED_PURPLE, true, false, img, "Alignment Change");
+            
+            // passive
+            await triggerHandler("Passive");
             
             // log
             abilityLog(`✅ <@${targets[i]}> alignment changed to \`${toTitleCase(alignment)}\`.`);
