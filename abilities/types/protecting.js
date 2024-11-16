@@ -29,19 +29,19 @@ module.exports = function() {
                 return { msg: "Protecting failed! " + abilityError, success: false };
             break;
             case "active defense":
-                result = await protectingGeneric(src_name, src_ref, target, "active", from_type, from_selector, during_phase, dur_type);
+                result = await protectingGeneric(src_name, src_ref, target, "active", from_type, from_selector, during_phase, dur_type, additionalTriggerData);
                 return result;
             break;
             case "passive defense":
-                result = await protectingGeneric(src_name, src_ref, target, "passive", from_type, from_selector, during_phase, dur_type);
+                result = await protectingGeneric(src_name, src_ref, target, "passive", from_type, from_selector, during_phase, dur_type, additionalTriggerData);
                 return result;
             break;
             case "partial defense":
-                result = await protectingGeneric(src_name, src_ref, target, "partial", from_type, from_selector, during_phase, dur_type);
+                result = await protectingGeneric(src_name, src_ref, target, "partial", from_type, from_selector, during_phase, dur_type, additionalTriggerData);
                 return result;
             break;
             case "recruitment defense":
-                result = await protectingGeneric(src_name, src_ref, target, "recruitment", from_type, from_selector, during_phase, dur_type);
+                result = await protectingGeneric(src_name, src_ref, target, "recruitment", from_type, from_selector, during_phase, dur_type, additionalTriggerData);
                 return result;
             break;
             case "absence":
@@ -55,7 +55,7 @@ module.exports = function() {
                 loc = loc.value;
                 loc = await applyRedirection(loc, src_ref, ability.type, ability.subtype, additionalTriggerData);
                 console.log(loc);
-                result = await protectingAbsence(src_name, src_ref, target, loc, from_type, from_selector, during_phase, dur_type);
+                result = await protectingAbsence(src_name, src_ref, target, loc, from_type, from_selector, during_phase, dur_type, additionalTriggerData);
                 return result;
             break;
         }
@@ -66,13 +66,15 @@ module.exports = function() {
     Ability: Protecting - Active/Passive/Partial/Recruitment
     adds a disguise to a player
     **/
-    this.protectingGeneric = async function(src_name, src_ref, targets, def_type, from_type, from_selector, during_phase, dur_type) {
+    this.protectingGeneric = async function(src_name, src_ref, targets, def_type, from_type, from_selector, during_phase, dur_type, additionalTriggerData) {
         for(let i = 0; i < targets.length; i++) {
             // handle visit
-            let result = await visit(src_ref, targets[i], from_type, "protecting", def_type);
-            if(result) {
-                if(targets.length === 1) return visitReturn(result, "Protecting failed!", "Protecting executed!");
-                continue;
+            if(additionalTriggerData.parameters.visitless !== true) {
+                let result = await visit(src_ref, targets[i], from_type, "protecting", def_type);
+                if(result) {
+                    if(targets.length === 1) return visitReturn(result, "Protecting failed!", "Protecting executed!");
+                    continue;
+                }
             }
             
             await createDefenseAttribute(src_name, src_ref, targets[i], dur_type, def_type, from_type, from_selector, during_phase);
@@ -85,13 +87,15 @@ module.exports = function() {
     Ability: Protecting - Absence
     adds a disguise to a player
     **/
-    this.protectingAbsence = async function(src_name, src_ref, targets, loc, from_type, from_selector, during_phase, dur_type) {
+    this.protectingAbsence = async function(src_name, src_ref, targets, loc, from_type, from_selector, during_phase, dur_type, additionalTriggerData) {
         for(let i = 0; i < targets.length; i++) {
             // handle visit
-            let result = await visit(src_ref, targets[i], from_type, "protecting", "absence");
-            if(result) {
-                if(targets.length === 1) return visitReturn(result, "Absence failed!", "Absence registered!");
-                continue;
+            if(additionalTriggerData.parameters.visitless !== true) {
+                let result = await visit(src_ref, targets[i], from_type, "protecting", "absence");
+                if(result) {
+                    if(targets.length === 1) return visitReturn(result, "Absence failed!", "Absence registered!");
+                    continue;
+                }
             }
             
             await createAbsenceAttribute(src_name, src_ref, targets[i], dur_type, loc, from_type, from_selector, during_phase);

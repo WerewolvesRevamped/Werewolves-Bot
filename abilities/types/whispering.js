@@ -27,8 +27,10 @@ module.exports = function() {
         let dur_type = parseDuration(ability.duration ?? "permanent");
         
         // handle visit
-        let resultV = await visit(src_ref, target.value, disguise, "whispering");
-        if(resultV) return visitReturn(resultV, "Whispering failed!", "Whispering succeeded!");
+        if(additionalTriggerData.parameters.visitless !== true) {
+            let resultV = await visit(src_ref, target.value, disguise, "whispering");
+            if(resultV) return visitReturn(resultV, "Whispering failed!", "Whispering succeeded!");
+        }
         
         // parse player data
         let pid = srcToValue(src_ref);

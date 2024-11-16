@@ -14,6 +14,8 @@
     "choices.choosing": "You may choose one of the options.",
     "manipulating.absolute.2": "Which two players would you like to manipulate the vote of?",
     "poll.votes.1": "Which player would you like to manipulate the starting votes of?",
+    "process_evaluate.role": "Please submit a role.",
+    "process_evaluate.player": "Please submit a player.",
     
     "comment_2": "Restriction Messages",
     "succession.target": "You may not select the same target two times in a row. You may resubmit another target as a reply to the original prompt.",

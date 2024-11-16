@@ -475,7 +475,7 @@ module.exports = function() {
                     case "On Killed Complex":
                     case "On Banishment Complex":
                     case "On Banished Complex":
-                        let selector = await parsePlayerSelector(param);
+                        let selector = await parsePlayerSelector(param, src_ref, additionalTriggerData);
                         if(selector.includes(additionalTriggerData.this)) {
                             await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
                         } else {
@@ -487,7 +487,7 @@ module.exports = function() {
                         if(additionalTriggerData.src_name != src_name) {
                             abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Src name mismatch.`);        
                         } else {
-                            let abilityType = await parseSelector(param);
+                            let abilityType = await parseSelector(param, src_ref, additionalTriggerData);
                             let triggerAbilityType = (abilityType.type === "abilitySubtype" ? additionalTriggerData.ability_subtype : "") + additionalTriggerData.ability_type;
                             if(abilityType.type === "abilityType" && additionalTriggerData.ability_subtype.length > 0) { // dont pass for subtypes when looking for a type
                                 abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\` with a \`${triggerAbilityType}\` subtype.`);
@@ -503,7 +503,7 @@ module.exports = function() {
                         }
                     break;
                     case "On Visited Complex":
-                        let abilityType2 = await parseSelector(param);
+                        let abilityType2 = await parseSelector(param, src_ref, additionalTriggerData);
                         let triggerAbilityType2 = (abilityType2.type === "abilitySubtype" ? additionalTriggerData.visit_subtype : "") + additionalTriggerData.visit_type;
                         abilityType2 = abilityType2.value[0].toLowerCase().replace(/[^a-z]+/,"");
                         triggerAbilityType2 = triggerAbilityType2.replace(/[^a-z]+/,"");
@@ -514,11 +514,11 @@ module.exports = function() {
                         }
                     break;
                     case "On Visited Target Complex":
-                        let abilityType3 = await parseSelector(param2);
+                        let abilityType3 = await parseSelector(param2, src_ref, additionalTriggerData);
                         let triggerAbilityType3 = (abilityType3.type === "abilitySubtype" ? additionalTriggerData.visit_subtype : "") + additionalTriggerData.visit_type;
                         abilityType3 = abilityType3.value[0].toLowerCase().replace(/[^a-z]+/,"");
                         triggerAbilityType3 = triggerAbilityType3.replace(/[^a-z]+/,"");
-                        let selector2 = await parsePlayerSelector(param);
+                        let selector2 = await parsePlayerSelector(param, src_ref, additionalTriggerData);
                         if(abilityType3 === triggerAbilityType3) {
                             if(selector2.includes(additionalTriggerData.this)) {
                                 await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
@@ -539,7 +539,7 @@ module.exports = function() {
                         }
                     break;
                     case "Choice Chosen Complex":
-                        let option = parseOption(param);
+                        let option = parseOption(param, src_ref, additionalTriggerData);
                         if(option === additionalTriggerData.chosen) {
                             await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
                         } else {

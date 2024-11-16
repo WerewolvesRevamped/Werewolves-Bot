@@ -37,6 +37,8 @@ module.exports = function() {
         const tysu1l = `${tysu}.${typ1}`;
         const tysu2 = `${tysu}.2`;
         const tysu2l = `${tysu}.${typ1}_${typ2}`;
+        const ty1l = `${ty}.${typ1}`;
+        const ty2l = `${ty}.${typ1}_${typ2}`;
         const ty1 = `${ty}.1`;
         const ty2 = `${ty}.2`;
         // default prompt
@@ -53,8 +55,10 @@ module.exports = function() {
         else if(type2 !== "" && ty && su && prompts[tysu2l]) return prompts[tysu2l];
         else if(type2 !== "" && ty && su && prompts[tysu2]) return prompts[tysu2];
         else if(type2 !== "" && ty && su && prompts[tysu]) return prompts[tysu];
+        else if(type2 === "" && ty  && prompts[ty1l]) return prompts[ty1l];
         else if(type2 === "" && ty  && prompts[ty1]) return prompts[ty1];
         else if(type2 === "" && ty  && prompts[ty]) return prompts[ty];
+        else if(type2 !== "" && ty  && prompts[ty2l]) return prompts[ty2l];
         else if(type2 !== "" && ty  && prompts[ty2]) return prompts[ty2];
         else if(type2 !== "" && ty  && prompts[ty]) return prompts[ty];
         // return default prompt

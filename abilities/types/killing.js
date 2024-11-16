@@ -25,27 +25,27 @@ module.exports = function() {
                 return { msg: "Killing failed! " + abilityError, success: false };
             break;
             case "attack":
-                result = await killingAttack(src_name, src_ref, targets);
+                result = await killingAttack(src_name, src_ref, targets, additionalTriggerData);
                 return result;
             break;
             case "kill":
-                result = await killingKill(src_name, src_ref, targets);
+                result = await killingKill(src_name, src_ref, targets, additionalTriggerData);
                 return result;
             break;
             case "lynch":
-                result = await killingLynch(src_name, src_ref, targets);
+                result = await killingLynch(src_name, src_ref, targets, additionalTriggerData);
                 return result;
             break;
             case "true kill":
-                result = await killingTrueKill(src_name, src_ref, targets);
+                result = await killingTrueKill(src_name, src_ref, targets, additionalTriggerData);
                 return result;
             break;
             case "banish":
-                result = await killingBanish(src_name, src_ref, targets);
+                result = await killingBanish(src_name, src_ref, targets, additionalTriggerData);
                 return result;
             break;
             case "true banish":
-                result = await killingTrueBanish(src_name, src_ref, targets);
+                result = await killingTrueBanish(src_name, src_ref, targets, additionalTriggerData);
                 return result;
             break;
         }
@@ -54,17 +54,19 @@ module.exports = function() {
     /** PRIVATE
     Ability: Killing - Attack
     **/
-    async function killingAttack(src_name, src_ref, targets) {
+    async function killingAttack(src_name, src_ref, targets, additionalTriggerData) {
         let success = false;
         let origMaxIndex = targets.length - 1;
         
         // iterate through all attack targets
         for(let i = 0; i < targets.length; i++) {
             // handle visit
-            let result = await visit(src_ref, targets[i], "", "killing", "attack");
-            if(result) {
-                if(targets.length === 1) return visitReturn(result, "Attack failed!", "Attack succeeded!");
-                continue;
+            if(additionalTriggerData.parameters.visitless !== true) {
+                let result = await visit(src_ref, targets[i], "", "killing", "attack");
+                if(result) {
+                    if(targets.length === 1) return visitReturn(result, "Attack failed!", "Attack succeeded!");
+                    continue;
+                }
             }
             
             // for every target, add all other player that are absent at their location to targets
@@ -90,17 +92,19 @@ module.exports = function() {
     /** PRIVATE
     Ability: Killing - Lynch
     **/
-    async function killingLynch(src_name, src_ref, targets) {
+    async function killingLynch(src_name, src_ref, targets, additionalTriggerData) {
         let success = false;
         let origMaxIndex = targets.length - 1;
         
         // iterate through all attack targets
         for(let i = 0; i < targets.length; i++) {
             // handle visit
-            let result = await visit(src_ref, targets[i], "", "killing", "lynch");
-            if(result) {
-                if(targets.length === 1) return visitReturn(result, "Lynch failed!", "Lynch succeeded!");
-                continue;
+            if(additionalTriggerData.parameters.visitless !== true) {
+                let result = await visit(src_ref, targets[i], "", "killing", "lynch");
+                if(result) {
+                    if(targets.length === 1) return visitReturn(result, "Lynch failed!", "Lynch succeeded!");
+                    continue;
+                }
             }
             
             // for every target, add all other player that are absent at their location to targets
@@ -130,17 +134,19 @@ module.exports = function() {
     /** PRIVATE
     Ability: Killing - Kill
     **/
-    async function killingKill(src_name, src_ref, targets) {
+    async function killingKill(src_name, src_ref, targets, additionalTriggerData) {
         let success = false;
         let origMaxIndex = targets.length - 1;
         
         // iterate through all attack targets
         for(let i = 0; i < targets.length; i++) {
             // handle visit
-            let result = await visit(src_ref, targets[i], "", "killing", "kill");
-            if(result) {
-                if(targets.length === 1) return visitReturn(result, "Kill failed!", "Kill succeeded!");
-                continue;
+            if(additionalTriggerData.parameters.visitless !== true) {
+                let result = await visit(src_ref, targets[i], "", "killing", "kill");
+                if(result) {
+                    if(targets.length === 1) return visitReturn(result, "Kill failed!", "Kill succeeded!");
+                    continue;
+                }
             }
             
             // for every target, add all other player that are absent at their location to targets
@@ -167,14 +173,16 @@ module.exports = function() {
     Ability: Killing - True Kill
     just kills without anything else being evaluated
     **/
-    async function killingTrueKill(src_name, src_ref, targets) {
+    async function killingTrueKill(src_name, src_ref, targets, additionalTriggerData) {
         let success = false;
         for(let i = 0; i < targets.length; i++) {
             // handle visit
-            let result = await visit(src_ref, targets[i], "", "killing", "true-kill");
-            if(result) {
-                if(targets.length === 1) return visitReturn(result, "True Kill failed!", "True Kill succeeded!");
-                continue;
+            if(additionalTriggerData.parameters.visitless !== true) {
+                let result = await visit(src_ref, targets[i], "", "killing", "true-kill");
+                if(result) {
+                    if(targets.length === 1) return visitReturn(result, "True Kill failed!", "True Kill succeeded!");
+                    continue;
+                }
             }
             
             // for every target, add all other player that are absent at their location to targets
@@ -195,17 +203,19 @@ module.exports = function() {
     /** PRIVATE
     Ability: Killing - Banish
     **/
-    async function killingBanish(src_name, src_ref, targets) {
+    async function killingBanish(src_name, src_ref, targets, additionalTriggerData) {
         let success = false;
         let origMaxIndex = targets.length - 1;
         
         // iterate through all attack targets
         for(let i = 0; i < targets.length; i++) {
             // handle visit
-            let result = await visit(src_ref, targets[i], "", "killing", "banish");
-            if(result) {
-                if(targets.length === 1) return visitReturn(result, "Banishment failed!", "Banishment succeeded!");
-                continue;
+            if(additionalTriggerData.parameters.visitless !== true) {
+                let result = await visit(src_ref, targets[i], "", "killing", "banish");
+                if(result) {
+                    if(targets.length === 1) return visitReturn(result, "Banishment failed!", "Banishment succeeded!");
+                    continue;
+                }
             }
             
             // for every target, add all other player that are absent at their location to targets
@@ -232,14 +242,16 @@ module.exports = function() {
     Ability: Killing - True Banishment
     just banishes without anything else being evaluated
     **/
-    async function killingTrueBanish(src_name, src_ref, targets) {
+    async function killingTrueBanish(src_name, src_ref, targets, additionalTriggerData) {
         let success = false;
         for(let i = 0; i < targets.length; i++) {
             // handle visit
-            let result = await visit(src_ref, targets[i], "", "killing", "true banish");
-            if(result) {
-                if(targets.length === 1) return visitReturn(result, "True Banishment failed!", "True Banishment succeeded!");
-                continue;
+            if(additionalTriggerData.parameters.visitless !== true) {
+                let result = await visit(src_ref, targets[i], "", "killing", "true banish");
+                if(result) {
+                    if(targets.length === 1) return visitReturn(result, "True Banishment failed!", "True Banishment succeeded!");
+                    continue;
+                }
             }
             
             // for every target, add all other player that are absent at their location to targets

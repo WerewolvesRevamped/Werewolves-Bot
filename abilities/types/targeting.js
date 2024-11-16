@@ -25,7 +25,7 @@ module.exports = function() {
                 // parse parameters
                 let targetParsed = await parseSelector(ability.target, src_ref, additionalTriggerData);
                 targetParsed = await applyRedirection(targetParsed, src_ref, ability.type, ability.subtype, additionalTriggerData);
-                result = await targetingTarget(src_name, src_ref, targetParsed.value, targetParsed.type);
+                result = await targetingTarget(src_name, src_ref, targetParsed.value, targetParsed.type, additionalTriggerData);
                 return result;
             break;
             case "untarget":
@@ -38,7 +38,7 @@ module.exports = function() {
     /** PRIVATE
     Ability: Targeting - Target
     **/
-    async function targetingTarget(src_name, src_ref, targets, targetType) {
+    async function targetingTarget(src_name, src_ref, targets, targetType, additionalTriggerData) {
         // can only target exactly one target
         if(targets.length > 1) {
             abilityLog(`❗ **Error:** ${srcRefToText(src_ref)} tried to target more than one target at a time!`);  
@@ -52,8 +52,10 @@ module.exports = function() {
         let target = targets[0];
         
         // handle visit
-        let result = await visit(src_ref, target, targetType, "targeting", "target");
-        if(result) return visitReturn(result, "Targeting failed!", "Target updated!");
+        if(additionalTriggerData.parameters.visitless !== true) {
+            let result = await visit(src_ref, target, targetType, "targeting", "target");
+            if(result) return visitReturn(result, "Targeting failed!", "Target updated!");
+        }
     
         // update target
         await setTarget(src_ref, `${targetType}:${target}`);

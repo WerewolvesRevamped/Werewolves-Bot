@@ -40,11 +40,11 @@ module.exports = function() {
             case "add":
                 let mem_type = parseMembershipType(ability.membership_type ?? "member");
                 let dur_type = parseDuration(ability.duration ?? "persistent");
-                result = await joiningAdd(src_name, src_ref, target, group_name, mem_type, dur_type);
+                result = await joiningAdd(src_name, src_ref, target, group_name, mem_type, dur_type, additionalTriggerData);
                 return result;
             break;
             case "remove":
-                result = await joiningRemove(src_name, src_ref, target, group_name);
+                result = await joiningRemove(src_name, src_ref, target, group_name, additionalTriggerData);
                 return result;
             break;
         }
@@ -54,13 +54,15 @@ module.exports = function() {
     Ability: Joining - Add
     adds a player (or several) to a group
     **/
-    this.joiningAdd = async function(src_name, src_ref, targets, group, type, dur_type) {
+    this.joiningAdd = async function(src_name, src_ref, targets, group, type, dur_type, additionalTriggerData) {
         for(let i = 0; i < targets.length; i++) {
             // handle visit
-            let result = await visit(src_ref, targets[i], group, "joining", "add");
-            if(result) {
-                if(targets.length === 1) return visitReturn(result, "Joining failed!", "Joining succeeded!");
-                continue;
+            if(additionalTriggerData.parameters.visitless !== true) {
+                let result = await visit(src_ref, targets[i], group, "joining", "add");
+                if(result) {
+                    if(targets.length === 1) return visitReturn(result, "Joining failed!", "Joining succeeded!");
+                    continue;
+                }
             }
             
             // check if target is already part of the group
@@ -95,13 +97,15 @@ module.exports = function() {
     Ability: Joining - Remove
     removes a player from a group
     **/
-    this.joiningRemove = async function(src_name, src_ref, targets, group) {
+    this.joiningRemove = async function(src_name, src_ref, targets, group, additionalTriggerData) {
         for(let i = 0; i < targets.length; i++) {
             // handle visit
-            let result = await visit(src_ref, targets[i], group, "joining", "remove");
-            if(result) {
-                if(targets.length === 1) return visitReturn(result, "Joining failed!", "Joining succeeded!");
-                continue;
+            if(additionalTriggerData.parameters.visitless !== true) {
+                let result = await visit(src_ref, targets[i], group, "joining", "remove");
+                if(result) {
+                    if(targets.length === 1) return visitReturn(result, "Joining failed!", "Joining succeeded!");
+                    continue;
+                }
             }
             
             // check if target is already part of the group

@@ -95,8 +95,10 @@ module.exports = function() {
             break;
             case "player":
                 // handle visit
-                let result = await visit(src_ref, loc.value, info, "announcement", "immediate");
-                if(result) return visitReturn(result, "Announcement failed!", "");
+                if(additionalTriggerData.parameters.visitless !== true) {
+                    let result = await visit(src_ref, loc.value, info, "announcement", "immediate");
+                    if(result) return visitReturn(result, "Announcement failed!", "");
+                }
             
                 abilitySend(`player:${loc.value}`, info, EMBED_GRAY, false, false, img, "Announcement");
             break;

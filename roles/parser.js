@@ -1753,6 +1753,8 @@ module.exports = function() {
                 case "value2": return "unknown";
                 case "value3": return "unknown";
                 case "members": return "player";
+                case "players": return "player";
+                case "randomplayer": return "player";
                 case "mostfreqrole": return "role";
                 default: return "unknown";
             }

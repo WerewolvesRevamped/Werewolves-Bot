@@ -272,17 +272,17 @@ module.exports = function() {
                     return await parseAdvancedPlayerSelector(contents[1], self, additionalTriggerData);
                 } else if (PROPERTY_ACCESS.test(selectorTarget)) { // property access
                     let contents = selectorTarget.match(PROPERTY_ACCESS); // get the selector
-                    let infType = inferType(`@${contents[1]}`);
+                    let infType = await inferTypeRuntime(`@${contents[1]}`, self, additionalTriggerData);
                     let result = await parseSelector(`@${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
                     return parsePropertyAccess(result, contents[2], infType);
                 } else if (PROPERTY_ACCESS_TEAM.test(selectorTarget)) { // property access
                     let contents = selectorTarget.match(PROPERTY_ACCESS_TEAM); // get the selector
-                    let infType = inferType(`&${contents[1]}`);
+                    let infType = await inferTypeRuntime(`&${contents[1]}`, self, additionalTriggerData);
                     let result = await parseSelector(`&${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
                     return parsePropertyAccess(result, contents[2], infType);
                 }  else if (PROPERTY_ACCESS_GROUP.test(selectorTarget)) { // property access
                     let contents = selectorTarget.match(PROPERTY_ACCESS_GROUP); // get the selector
-                    let infType = inferType(`#${contents[1]}`);
+                    let infType = await inferTypeRuntime(`#${contents[1]}`, self, additionalTriggerData);
                     let result = await parseSelector(`#${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
                     return parsePropertyAccess(result, contents[2], infType);
                 } else if (HOST_INFORMATION.test(selectorTarget)) { // host information
@@ -608,6 +608,13 @@ module.exports = function() {
                 case "type":
                     output.push(roleData.type);
                 break;
+                case "players":
+                    let all = await getAllPlayers();
+                    all = all.filter(el => el.alive == 1);
+                    all = all.filter(el => el.role === selector[i]);
+                    all = all.map(el => el.id);
+                    output.push(...all);
+                break;
                 default:  
                     abilityLog(`❗ **Error:** Invalid role property access \`${property}\`!`);
                 break;
@@ -801,6 +808,15 @@ module.exports = function() {
                     // filter
                     if(!compInverted) allPlayers = allPlayers.filter(el => attrCustomOwners.includes(el.id));
                     else allPlayers = allPlayers.filter(el => !attrCustomOwners.includes(el.id));
+                break;
+                // AttrSelf - Find players that have a certain custom attribute CREATED BY SELF
+                case "attrself":
+                    // check for normal attribute ownership
+                    let attrSelfCustomOwners = await queryAttribute("attr_type", "custom", "val1", compVal, "src_ref", self);
+                    attrSelfCustomOwners = attrSelfCustomOwners.map(el => el.owner);
+                    // filter
+                    if(!compInverted) allPlayers = allPlayers.filter(el => attrSelfCustomOwners.includes(el.id));
+                    else allPlayers = allPlayers.filter(el => !attrSelfCustomOwners.includes(el.id));
                 break;
                 // AttrRole - Find players that have a certain role attribute
                 case "attrrole":
@@ -999,17 +1015,17 @@ module.exports = function() {
                     return [ parsedRole ];
                 } else if (PROPERTY_ACCESS.test(selectorTarget)) { // property access
                     let contents = selectorTarget.match(PROPERTY_ACCESS); // get the selector
-                    let infType = inferType(`@${contents[1]}`);
+                    let infType = await inferTypeRuntime(`@${contents[1]}`, self, additionalTriggerData);
                     let result = await parseSelector(`@${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
                     return parsePropertyAccess(result, contents[2], infType);
                 } else if (PROPERTY_ACCESS_TEAM.test(selectorTarget)) { // property access
                     let contents = selectorTarget.match(PROPERTY_ACCESS_TEAM); // get the selector
-                    let infType = inferType(`&${contents[1]}`);
+                    let infType = await inferTypeRuntime(`&${contents[1]}`, self, additionalTriggerData);
                     let result = await parseSelector(`&${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
                     return parsePropertyAccess(result, contents[2], infType);
                 }  else if (PROPERTY_ACCESS_GROUP.test(selectorTarget)) { // property access
                     let contents = selectorTarget.match(PROPERTY_ACCESS_GROUP); // get the selector
-                    let infType = inferType(`#${contents[1]}`);
+                    let infType = await inferTypeRuntime(`#${contents[1]}`, self, additionalTriggerData);
                     let result = await parseSelector(`#${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
                     return parsePropertyAccess(result, contents[2], infType);
                 } else if (HOST_INFORMATION.test(selectorTarget)) { // host information
@@ -1198,19 +1214,19 @@ module.exports = function() {
                     return filtered.map(el => { return { ai_id: el.ai_id, name: parseGenericAttributeType(el.attr_type), type: "generic" } });
                 } else if (PROPERTY_ACCESS.test(selectorTarget)) { // property access
                     let contents = selectorTarget.match(PROPERTY_ACCESS); // get the selector
-                    let infType = inferType(`@${contents[1]}`);
+                    let infType = await inferTypeRuntime(`@${contents[1]}`, self, additionalTriggerData);
                     let result = await parseSelector(`@${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
                     let pa = await parsePropertyAccess(result, contents[2], infType);
                     return pa.map(el => ({ ai_id: el, name: getCustomAttributeName(el), type: "custom" }));
                 } else if (PROPERTY_ACCESS_TEAM.test(selectorTarget)) { // property access
                     let contents = selectorTarget.match(PROPERTY_ACCESS_TEAM); // get the selector
-                    let infType = inferType(`&${contents[1]}`);
+                    let infType = await inferTypeRuntime(`&${contents[1]}`, self, additionalTriggerData);
                     let result = await parseSelector(`&${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
                     let pa = await parsePropertyAccess(result, contents[2], infType);
                     return pa.map(el => ({ ai_id: el, name: getCustomAttributeName(el), type: "custom" }));
                 }  else if (PROPERTY_ACCESS_GROUP.test(selectorTarget)) { // property access
                     let contents = selectorTarget.match(PROPERTY_ACCESS_GROUP); // get the selector
-                    let infType = inferType(`#${contents[1]}`);
+                    let infType = await inferTypeRuntime(`#${contents[1]}`, self, additionalTriggerData);
                     let result = await parseSelector(`#${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
                     let pa = await parsePropertyAccess(result, contents[2], infType);
                     return pa.map(el => ({ ai_id: el, name: getCustomAttributeName(el), type: "custom" }));
@@ -1270,17 +1286,17 @@ module.exports = function() {
                     return [ parsed ];
                 } else if (PROPERTY_ACCESS.test(selectorTarget)) { // property access
                     let contents = selectorTarget.match(PROPERTY_ACCESS); // get the selector
-                    let infType = inferType(`@${contents[1]}`);
+                    let infType = await inferTypeRuntime(`@${contents[1]}`, self, additionalTriggerData);
                     let result = await parseSelector(`@${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
                     return parsePropertyAccess(result, contents[2], infType);
                 } else if (PROPERTY_ACCESS_TEAM.test(selectorTarget)) { // property access
                     let contents = selectorTarget.match(PROPERTY_ACCESS_TEAM); // get the selector
-                    let infType = inferType(`&${contents[1]}`);
+                    let infType = await inferTypeRuntime(`&${contents[1]}`, self, additionalTriggerData);
                     let result = await parseSelector(`&${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
                     return parsePropertyAccess(result, contents[2], infType);
                 } else if (PROPERTY_ACCESS_GROUP.test(selectorTarget)) { // property access
                     let contents = selectorTarget.match(PROPERTY_ACCESS_GROUP); // get the selector
-                    let infType = inferType(`#${contents[1]}`);
+                    let infType = await inferTypeRuntime(`#${contents[1]}`);
                     let result = await parseSelector(`#${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
                     return parsePropertyAccess(result, contents[2], infType);
                 } else if (ADVANCED_SELECTOR_TEAM.test(selectorTarget)) { // advanced selector
@@ -1539,7 +1555,7 @@ module.exports = function() {
         let spl = selectorTarget.split(" ");
         // convert text segments to selectors if applicable
         for(let i = 0; i < spl.length; i++) {
-            let infType = inferType(spl[i]);
+            let infType = await inferTypeRuntime(spl[i], self, additionalTriggerData);
             if(infType != "unknown") {
                 let parsed = await parseSelector(`${spl[i]}[${infType}]`, self, additionalTriggerData);
                 //console.log(infType, spl[i], parsed.type, parsed.value);
@@ -1762,17 +1778,17 @@ module.exports = function() {
             }
         } else if (PROPERTY_ACCESS.test(selectorTarget)) { // property access
             let contents = selectorTarget.match(PROPERTY_ACCESS); // get the selector
-            let infType = inferType(`@${contents[1]}`);
+            let infType = await inferTypeRuntime(`@${contents[1]}`, self, additionalTriggerData);
             let result = await parseSelector(`@${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
             return + (await parsePropertyAccess(result, contents[2], infType));
         } else if (PROPERTY_ACCESS_TEAM.test(selectorTarget)) { // property access
             let contents = selectorTarget.match(PROPERTY_ACCESS_TEAM); // get the selector
-            let infType = inferType(`&${contents[1]}`);
+            let infType = await inferTypeRuntime(`&${contents[1]}`, self, additionalTriggerData);
             let result = await parseSelector(`&${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
             return + (await parsePropertyAccess(result, contents[2], infType));
         } else if (PROPERTY_ACCESS_GROUP.test(selectorTarget)) { // property access
             let contents = selectorTarget.match(PROPERTY_ACCESS_GROUP); // get the selector
-            let infType = inferType(`#${contents[1]}`);
+            let infType = await inferTypeRuntime(`#${contents[1]}`, self, additionalTriggerData);
             let result = await parseSelector(`#${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
             return + (await parsePropertyAccess(result, contents[2], infType));
         } else if (HOST_INFORMATION.test(selectorTarget)) { // host information
@@ -1873,17 +1889,17 @@ module.exports = function() {
         selectorTarget = selectorTarget.replace(/`/g, "");
         if (PROPERTY_ACCESS.test(selectorTarget)) { // property access
             let contents = selectorTarget.match(PROPERTY_ACCESS); // get the selector
-            let infType = inferType(`@${contents[1]}`);
+            let infType = await inferTypeRuntime(`@${contents[1]}`, self, additionalTriggerData);
             let result = await parseSelector(`@${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
             return parsePropertyAccess(result, contents[2], infType);
         } else if (PROPERTY_ACCESS_TEAM.test(selectorTarget)) { // property access
             let contents = selectorTarget.match(PROPERTY_ACCESS_TEAM); // get the selector
-            let infType = inferType(`&${contents[1]}`);
+            let infType = await inferTypeRuntime(`&${contents[1]}`, self, additionalTriggerData);
             let result = await parseSelector(`&${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
             return parsePropertyAccess(result, contents[2], infType);
         } else if (PROPERTY_ACCESS_GROUP.test(selectorTarget)) { // property access
             let contents = selectorTarget.match(PROPERTY_ACCESS_GROUP); // get the selector
-            let infType = inferType(`#${contents[1]}`);
+            let infType = await inferTypeRuntime(`#${contents[1]}`, self, additionalTriggerData);
             let result = await parseSelector(`#${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
             return parsePropertyAccess(result, contents[2], infType);
         }
@@ -2032,6 +2048,21 @@ module.exports = function() {
         } else {
             return null;
         }
+    }
+    
+    /**
+    Infer Type at Run Time
+    **/
+    this.inferTypeRuntime = async function(val, self, additionalTriggerData) {
+        if(val === "@self") {
+            return srcToType(self);
+        } else if(val === "@target") {
+            let target = await getTarget(self);
+            let targetType = srcToType(target);
+            console.log(`Inferred target type as ${targetType} from ${target}`);
+            return targetType;
+        }
+        return inferType(val);
     }
     
     

@@ -37,15 +37,15 @@ module.exports = function() {
                 return { msg: "Counting failed! " + abilityError, success: false };
             break;
             case "increment":
-                result = await countingIncrement(src_name, src_ref, targetParsed.value[0], targetParsed.type, num);
+                result = await countingIncrement(src_name, src_ref, targetParsed.value[0], targetParsed.type, num, additionalTriggerData);
                 return result;
             break;
             case "decrement":
-                result = await countingDecrement(src_name, src_ref, targetParsed.value[0], targetParsed.type, num);
+                result = await countingDecrement(src_name, src_ref, targetParsed.value[0], targetParsed.type, num, additionalTriggerData);
                 return result;
             breakset
             case "set":
-                result = await countingSet(src_name, src_ref, targetParsed.value[0], targetParsed.type, num);
+                result = await countingSet(src_name, src_ref, targetParsed.value[0], targetParsed.type, num, additionalTriggerData);
                 return result;
             break;
             case "increment_math":
@@ -67,9 +67,9 @@ module.exports = function() {
                     case "round": rounded = Math.round(div); break;
                 }
                 switch(ability.subtype) {
-                    case "increment_math": result = await countingIncrement(src_name, src_ref, targetParsed.value[0], targetParsed.type, rounded); break;
-                    case "decrement_math": result = await countingDecrement(src_name, src_ref, targetParsed.value[0], targetParsed.type, rounded); break;
-                    case "set_math": result = await countingSet(src_name, src_ref, targetParsed.value[0], targetParsed.type, rounded); break;
+                    case "increment_math": result = await countingIncrement(src_name, src_ref, targetParsed.value[0], targetParsed.type, rounded, additionalTriggerData); break;
+                    case "decrement_math": result = await countingDecrement(src_name, src_ref, targetParsed.value[0], targetParsed.type, rounded, additionalTriggerData); break;
+                    case "set_math": result = await countingSet(src_name, src_ref, targetParsed.value[0], targetParsed.type, rounded, additionalTriggerData); break;
                 }
                 return result;
             break;
@@ -79,10 +79,12 @@ module.exports = function() {
     /** PRIVATE
     Ability: Counting - Set
     **/
-    async function countingSet(src_name, src_ref, target, targetType, num) {
+    async function countingSet(src_name, src_ref, target, targetType, num, additionalTriggerData) {
         // handle visit
-        let result = await visit(src_ref, target, num, "counting", "set");
-        if(result) return visitReturn(result, "Counting failed!", "Counter updated!");
+        if(additionalTriggerData.parameters.visitless !== true) {
+            let result = await visit(src_ref, target, num, "counting", "set");
+            if(result) return visitReturn(result, "Counting failed!", "Counter updated!");
+        }
         
         // update counter
         await setCounter(`${targetType}:${target}`, num);
@@ -96,10 +98,12 @@ module.exports = function() {
     /** PRIVATE
     Ability: Counting - Increment
     **/
-    async function countingIncrement(src_name, src_ref, target, targetType, num) {
+    async function countingIncrement(src_name, src_ref, target, targetType, num, additionalTriggerData) {
         // handle visit
-        let result = await visit(src_ref, target, num, "counting", "increment");
-        if(result) return visitReturn(result, "Counting failed!", "Counter incremented!");
+        if(additionalTriggerData.parameters.visitless !== true) {
+            let result = await visit(src_ref, target, num, "counting", "increment");
+            if(result) return visitReturn(result, "Counting failed!", "Counter incremented!");
+        }
         
         // get counter
         let counter = await getCounter(`${targetType}:${target}`);
@@ -119,10 +123,12 @@ module.exports = function() {
     /** PRIVATE
     Ability: Counting - Decrement
     **/
-    async function countingDecrement(src_name, src_ref, target, targetType, num) {
+    async function countingDecrement(src_name, src_ref, target, targetType, num, additionalTriggerData) {
         // handle visit
-        let result = await visit(src_ref, target, num, "counting", "decrement");
-        if(result) return visitReturn(result, "Counting failed!", "Counter decremented!");
+        if(additionalTriggerData.parameters.visitless !== true) {
+            let result = await visit(src_ref, target, num, "counting", "decrement");
+            if(result) return visitReturn(result, "Counting failed!", "Counter decremented!");
+        }
         
         // get counter
         let counter = await getCounter(`${targetType}:${target}`);

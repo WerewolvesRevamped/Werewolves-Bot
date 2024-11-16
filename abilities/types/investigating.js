@@ -28,19 +28,19 @@ module.exports = function() {
                 return { msg: "Investigation failed! " + abilityError, success: false };
             break;
             case "role":
-                result = await investigatingRole(src_name, src_ref, target, ability.affected_by_wd ?? false, ability.affected_by_sd ?? false);
+                result = await investigatingRole(src_name, src_ref, target, ability.affected_by_wd ?? false, ability.affected_by_sd ?? false, additionalTriggerData);
                 return result;
             break;
             case "class":
-                result = await investigatingClass(src_name, src_ref, target, ability.affected_by_wd ?? false, ability.affected_by_sd ?? false);
+                result = await investigatingClass(src_name, src_ref, target, ability.affected_by_wd ?? false, ability.affected_by_sd ?? false, additionalTriggerData);
                 return result;
             break;
             case "category":
-                result = await investigatingCategory(src_name, src_ref, target, ability.affected_by_wd ?? false, ability.affected_by_sd ?? false);
+                result = await investigatingCategory(src_name, src_ref, target, ability.affected_by_wd ?? false, ability.affected_by_sd ?? false, additionalTriggerData);
                 return result;
             break;
             case "alignment":
-                result = await investigatingAlignment(src_name, src_ref, target, ability.affected_by_wd ?? false, ability.affected_by_sd ?? false);
+                result = await investigatingAlignment(src_name, src_ref, target, ability.affected_by_wd ?? false, ability.affected_by_sd ?? false, additionalTriggerData);
                 return result;
             break;
             case "attribute":  
@@ -56,7 +56,7 @@ module.exports = function() {
                     return { msg: "Investigation failed! " + abilityError, success: false };
                 }
                 attr = attr[0];
-                result = await investigatingAttribute(src_name, src_ref, target, attr, ability.affected_by_wd ?? false, ability.affected_by_sd ?? false);
+                result = await investigatingAttribute(src_name, src_ref, target, attr, ability.affected_by_wd ?? false, ability.affected_by_sd ?? false, additionalTriggerData);
                 return result;
             break;
             case "player_count":
@@ -88,15 +88,17 @@ module.exports = function() {
     /**
     Ability: Investigating - Role
     **/
-    this.investigatingRole = async function(src_name, src_ref, targets, affected_by_wd, affected_by_sd) {
+    this.investigatingRole = async function(src_name, src_ref, targets, affected_by_wd, affected_by_sd, additionalTriggerData) {
         // single target check
         if(targets.length != 1) {
             return singleTargetCheck(targets, src_ref);
         }
         
         // handle visit
-        let result = await visit(src_ref, targets[0], "", "investigating", "role", `Investigated <@${targets[0]}>'s role: \`%1\``);
-        if(result) return visitReturn(result, "Investigation failed!", "Investigation succeeded!");
+        if(additionalTriggerData.parameters.visitless !== true) {
+            let result = await visit(src_ref, targets[0], "", "investigating", "role", `Investigated <@${targets[0]}>'s role: \`%1\``);
+            if(result) return visitReturn(result, "Investigation failed!", "Investigation succeeded!");
+        }
         
         // get data
         let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);
@@ -108,15 +110,17 @@ module.exports = function() {
     /**
     Ability: Investigating - Class
     **/
-    this.investigatingClass = async function(src_name, src_ref, targets, affected_by_wd, affected_by_sd) {
+    this.investigatingClass = async function(src_name, src_ref, targets, affected_by_wd, affected_by_sd, additionalTriggerData) {
         // single target check
         if(targets.length != 1) {
             return singleTargetCheck(targets, src_ref);
         }
         
         // handle visit
-        let result = await visit(src_ref, targets[0], "", "investigating", "class", `Investigated <@${targets[0]}>'s class: \`%1\``);
-        if(result) return visitReturn(result, "Investigation failed!", "Investigation succeeded!");
+        if(additionalTriggerData.parameters.visitless !== true) {
+            let result = await visit(src_ref, targets[0], "", "investigating", "class", `Investigated <@${targets[0]}>'s class: \`%1\``);
+            if(result) return visitReturn(result, "Investigation failed!", "Investigation succeeded!");
+        }
         
         // get data
         let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);
@@ -128,15 +132,17 @@ module.exports = function() {
     /**
     Ability: Investigating - Category
     **/
-    this.investigatingCategory = async function(src_name, src_ref, targets, affected_by_wd, affected_by_sd) {
+    this.investigatingCategory = async function(src_name, src_ref, targets, affected_by_wd, affected_by_sd, additionalTriggerData) {
         // single target check
         if(targets.length != 1) {
             return singleTargetCheck(targets, src_ref);
         }
         
         // handle visit
-        let result = await visit(src_ref, targets[0], "", "investigating", "category", `Investigated <@${targets[0]}>'s category: \`%1\``);
-        if(result) return visitReturn(result, "Investigation failed!", "Investigation succeeded!");
+        if(additionalTriggerData.parameters.visitless !== true) {
+            let result = await visit(src_ref, targets[0], "", "investigating", "category", `Investigated <@${targets[0]}>'s category: \`%1\``);
+            if(result) return visitReturn(result, "Investigation failed!", "Investigation succeeded!");
+        }
         
         // get data
         let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);
@@ -148,15 +154,17 @@ module.exports = function() {
     /**
     Ability: Investigating - Alignment
     **/
-    this.investigatingAlignment = async function(src_name, src_ref, targets, affected_by_wd, affected_by_sd) {
+    this.investigatingAlignment = async function(src_name, src_ref, targets, affected_by_wd, affected_by_sd, additionalTriggerData) {
         // single target check
         if(targets.length != 1) {
             return singleTargetCheck(targets, src_ref);
         }
         
         // handle visit
-        let result = await visit(src_ref, targets[0], "", "investigating", "alignment", `Investigated <@${targets[0]}>'s alignment: \`%1\``);
-        if(result) return visitReturn(result, "Investigation failed!", "Investigation succeeded!");
+        if(additionalTriggerData.parameters.visitless !== true) {
+            let result = await visit(src_ref, targets[0], "", "investigating", "alignment", `Investigated <@${targets[0]}>'s alignment: \`%1\``);
+            if(result) return visitReturn(result, "Investigation failed!", "Investigation succeeded!");
+        }
         
         // get data
         let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);
@@ -174,15 +182,17 @@ module.exports = function() {
     /**
     Ability: Investigating - Attribute
     **/
-    this.investigatingAttribute = async function(src_name, src_ref, targets, attribute, affected_by_wd, affected_by_sd) {
+    this.investigatingAttribute = async function(src_name, src_ref, targets, attribute, affected_by_wd, affected_by_sd, additionalTriggerData) {
         // single target check
         if(targets.length != 1) {
             return singleTargetCheck(targets, src_ref);
         }
         
         // handle visit
-        let result = await visit(src_ref, targets[0], attribute, "investigating", "attribute");
-        if(result) return visitReturn(result, "Investigation failed!", "Investigation succeeded!");
+        if(additionalTriggerData.parameters.visitless !== true) {
+            let result = await visit(src_ref, targets[0], attribute, "investigating", "attribute");
+            if(result) return visitReturn(result, "Investigation failed!", "Investigation succeeded!");
+        }
         
         // get data
         let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);

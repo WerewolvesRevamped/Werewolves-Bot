@@ -21,9 +21,11 @@ module.exports = function() {
         target.value = await applyRedirection(target.value, src_ref, ability.type, "", additionalTriggerData);
         
         // handle visit
-        console.log("CONVORESET", src_ref, target);
-        let resultV = await visit(src_ref, target.value, "", "reset");
-        if(resultV) return visitReturn(resultV, "Conversation reset failed!", "Conversation reset succeeded!");
+        if(additionalTriggerData.parameters.visitless !== true) {
+            console.log("CONVORESET", src_ref, target);
+            let resultV = await visit(src_ref, target.value, "", "reset");
+            if(resultV) return visitReturn(resultV, "Conversation reset failed!", "Conversation reset succeeded!");
+        }
         
         // get channel to conversation reset
         let cid = await getSrcRefChannel(`${target.type}:${target.value}`);

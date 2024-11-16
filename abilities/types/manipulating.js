@@ -28,11 +28,11 @@ module.exports = function() {
                 return { msg: "Manipulating failed! " + abilityError, success: false };
             break;
             case "absolute":
-                result = await manipulating(src_name, src_ref, target, manip_type, manip_value, duration, "absolute");
+                result = await manipulating(src_name, src_ref, target, manip_type, manip_value, duration, "absolute", additionalTriggerData);
                 return result;
             break;
             case "relative":
-                result = await manipulating(src_name, src_ref, target, manip_type, manip_value, duration, "relative");
+                result = await manipulating(src_name, src_ref, target, manip_type, manip_value, duration, "relative", additionalTriggerData);
                 return result;
             break;
         }
@@ -42,13 +42,15 @@ module.exports = function() {
     Ability: Manipulating - Absolute/Relative
     adds a vote manipulation to a player
     **/
-    this.manipulating = async function(src_name, src_ref, targets, manip_type, manip_value, duration, type) {
+    this.manipulating = async function(src_name, src_ref, targets, manip_type, manip_value, duration, type, additionalTriggerData) {
         for(let i = 0; i < targets.length; i++) {
             // handle visit
-            let result = await visit(src_ref, targets[i], manip_value, "manipulating", manip_type);
-            if(result) {
-                if(targets.length === 1) return visitReturn(result, "Manipulating failed!", "Manipulating succeeded!");
-                continue;
+            if(additionalTriggerData.parameters.visitless !== true) {
+                let result = await visit(src_ref, targets[i], manip_value, "manipulating", manip_type);
+                if(result) {
+                    if(targets.length === 1) return visitReturn(result, "Manipulating failed!", "Manipulating succeeded!");
+                    continue;
+                }
             }
             
             await createManipulationAttribute(src_name, src_ref, targets[i], duration, type, manip_type, manip_value);

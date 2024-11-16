@@ -25,7 +25,7 @@ module.exports = function() {
         else targetSubype = "";
         let customFeedback = ability.custom_feedback ?? [];
         // execute ability
-        result = await obstructing(src_name, src_ref, target, duration, targetType, targetSubype, customFeedback);
+        result = await obstructing(src_name, src_ref, target, duration, targetType, targetSubype, customFeedback, additionalTriggerData);
         return result;
     }
     
@@ -33,13 +33,15 @@ module.exports = function() {
     Ability: Obstructing
     adds an obstruction to a player
     **/
-    this.obstructing = async function(src_name, src_ref, targets, duration, targetType, targetSubype, customFeedback) {
+    this.obstructing = async function(src_name, src_ref, targets, duration, targetType, targetSubype, customFeedback, additionalTriggerData) {
         for(let i = 0; i < targets.length; i++) {
             // handle visit
-            let result = await visit(src_ref, targets[i], targetType, "obstructing");
-            if(result) {
-                if(targets.length === 1) return visitReturn(result, "Obstructing failed!", "Obstructing succeeded!");
-                continue;
+            if(additionalTriggerData.parameters.visitless !== true) {
+                let result = await visit(src_ref, targets[i], targetType, "obstructing");
+                if(result) {
+                    if(targets.length === 1) return visitReturn(result, "Obstructing failed!", "Obstructing succeeded!");
+                    continue;
+                }
             }
             
             await createObstructionAttribute(src_name, src_ref, targets[i], duration, targetType, targetSubype, JSON.stringify(customFeedback));

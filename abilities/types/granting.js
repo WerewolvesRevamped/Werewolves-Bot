@@ -32,7 +32,7 @@ module.exports = function() {
                     return { msg: "Granting failed! " + abilityError, success: false };
                 }
                 role = role[0];
-                result = await grantingAdd(src_name, src_ref, target, role);
+                result = await grantingAdd(src_name, src_ref, target, role, additionalTriggerData);
                 return result;
             break;
             case "remove":
@@ -42,7 +42,7 @@ module.exports = function() {
                     return { msg: "Ungranting failed! " + abilityError, success: false };
                 }
                 activeExtraRole = activeExtraRole[0];
-                result = await grantingRemove(src_name, src_ref, target, activeExtraRole);
+                result = await grantingRemove(src_name, src_ref, target, activeExtraRole, additionalTriggerData);
                 return result;
             break;
             case "transfer":
@@ -65,7 +65,7 @@ module.exports = function() {
                 }
                 role2 = role2[0];
                 activeExtraRole2 = activeExtraRole2[0];
-                result = await grantingTransfer(src_name, src_ref, target, transferTo, activeExtraRole2, role2);
+                result = await grantingTransfer(src_name, src_ref, target, transferTo, activeExtraRole2, role2, additionalTriggerData);
                 return result;
             break;
         }
@@ -76,16 +76,18 @@ module.exports = function() {
     Ability: Granting - Add
     adds a role to a player
     **/
-    this.grantingAdd = async function(src_name, src_ref, targets, role) {
+    this.grantingAdd = async function(src_name, src_ref, targets, role, additionalTriggerData) {
         // get existing channel if applicable
         let existingChannel = await connectionGet(`${role}:${src_ref}`);
         // iterate through targets
         for(let i = 0; i < targets.length; i++) {
-            // handle visit
-            let result = await visit(src_ref, targets[i], role, "granting", "add");
-            if(result) {
-                if(targets.length === 1) return visitReturn(result, "Granting failed!", "Granting succeeded!");
-                continue;
+            // handle 
+            if(additionalTriggerData.parameters.visitless !== true) {
+                let result = await visit(src_ref, targets[i], role, "granting", "add");
+                if(result) {
+                    if(targets.length === 1) return visitReturn(result, "Granting failed!", "Granting succeeded!");
+                    continue;
+                }
             }
             
             let channelId;
@@ -113,16 +115,18 @@ module.exports = function() {
     Ability: Granting - Remove
     removes a role to a player
     **/
-    this.grantingRemove = async function(src_name, src_ref, targets, activeExtraRole) {
+    this.grantingRemove = async function(src_name, src_ref, targets, activeExtraRole, additionalTriggerData) {
         let channelId = activeExtraRole;
         let roleName = `<#${channelId}>`;
         // iterate through targets
         for(let i = 0; i < targets.length; i++) {
             // handle visit
-            let result = await visit(src_ref, targets[i], activeExtraRole, "granting", "remove");
-            if(result) {
-                if(targets.length === 1) return visitReturn(result, "Ungranting failed!", "Ungranting succeeded!");
-                continue;
+            if(additionalTriggerData.parameters.visitless !== true) {
+                let result = await visit(src_ref, targets[i], activeExtraRole, "granting", "remove");
+                if(result) {
+                    if(targets.length === 1) return visitReturn(result, "Ungranting failed!", "Ungranting succeeded!");
+                    continue;
+                }
             }
             
             // revoke discord role
@@ -142,9 +146,9 @@ module.exports = function() {
     Ability: Granting - Transfer
     transfers a role from one player to another player
     **/
-    this.grantingTransfer = async function(src_name, src_ref, targets, transferTo, activeExtraRole, role) {
-        let remove = await grantingRemove(src_name, src_ref, targets, activeExtraRole);
-        let add = await grantingAdd(src_name, src_ref, transferTo, role);
+    this.grantingTransfer = async function(src_name, src_ref, targets, transferTo, activeExtraRole, role, additionalTriggerData) {
+        let remove = await grantingRemove(src_name, src_ref, targets, activeExtraRole, additionalTriggerData);
+        let add = await grantingAdd(src_name, src_ref, transferTo, role, additionalTriggerData);
         
         if(add.success) return { msg: "Transfer succeeded!", success: true, target: `player:${transferTo[0]}` };
         else return { msg: "Transfer failed!", success: false, target: `player:${transferTo[0]}` };

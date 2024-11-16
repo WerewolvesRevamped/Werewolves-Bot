@@ -34,11 +34,11 @@ module.exports = function() {
                 }
                 attr = attr[0];
                 let duration = parseDuration(ability.duration ?? "permanent");
-                result = await applyingAdd(src_name, src_ref, target, attr, duration, ability.val1 ?? "", ability.val2 ?? "", ability.val3 ?? "");
+                result = await applyingAdd(src_name, src_ref, target, attr, duration, ability.val1 ?? "", ability.val2 ?? "", ability.val3 ?? "", additionalTriggerData);
                 return result;
             break;
             case "remove":
-                result = await applyingRemove(src_name, src_ref, additionalTriggerData, target, ability.attribute);
+                result = await applyingRemove(src_name, src_ref, additionalTriggerData, target, ability.attribute, additionalTriggerData);
                 return result;
             break;
             case "change":
@@ -53,7 +53,7 @@ module.exports = function() {
                     abilityLog(`❗ **Error:** Invalid index for change applying!`);
                     return { msg: "Applying failed! " + abilityError, success: false };
                 }
-                result = await applyingChange(src_name, src_ref, target, ability.attribute, index, ability.attr_value);
+                result = await applyingChange(src_name, src_ref, target, ability.attribute, index, ability.attr_value, additionalTriggerData);
                 return result;
             break;
         }
@@ -64,14 +64,16 @@ module.exports = function() {
     Ability: Applying - Add
     adds an attribute to a player
     **/
-    this.applyingAdd = async function(src_name, src_ref, targets, attr, duration, val1, val2, val3) {
+    this.applyingAdd = async function(src_name, src_ref, targets, attr, duration, val1, val2, val3, additionalTriggerData) {
         // iterate through targets
         for(let i = 0; i < targets.value.length; i++) {
             // handle visit
-            let result = await visit(src_ref, targets.value[i], attr, "applying", "add");
-            if(result) {
-                if(targets.value.length === 1) return visitReturn(result, "Applying failed!", "Applying succeeded!");
-                continue;
+            if(additionalTriggerData.parameters.visitless !== true) {
+                let result = await visit(src_ref, targets.value[i], attr, "applying", "add");
+                if(result) {
+                    if(targets.value.length === 1) return visitReturn(result, "Applying failed!", "Applying succeeded!");
+                    continue;
+                }
             }
             
             await createCustomAttribute(src_name, src_ref, targets.value[i], targets.type, duration, attr, val1, val2, val3);
@@ -90,7 +92,7 @@ module.exports = function() {
     Ability: Applying - Remove
     removes an attribute from a player
     **/
-    this.applyingRemove = async function(src_name, src_ref, additionalTriggerData, targets, attribute) {
+    this.applyingRemove = async function(src_name, src_ref, additionalTriggerData, targets, attribute, additionalTriggerData) {
         let failures = 0;
         let successes = 0;
         let attrName = parseAttributeSelector(attribute, src_ref, additionalTriggerData, true);
@@ -112,12 +114,14 @@ module.exports = function() {
         // iterate through targets
         for(let i = 0; i < targets.value.length; i++) {
             // handle visit
-            let result = await visit(src_ref, targets.value[i], attrName[0], "applying", "remove");
-            if(result) {
-                if(targets.value.length === 1) return visitReturn(result, "Unapplying failed!", "Unapplying succeeded!");
-                if(result.success) successes++;
-                else failures++;
-                continue;
+            if(additionalTriggerData.parameters.visitless !== true) {
+                let result = await visit(src_ref, targets.value[i], attrName[0], "applying", "remove");
+                if(result) {
+                    if(targets.value.length === 1) return visitReturn(result, "Unapplying failed!", "Unapplying succeeded!");
+                    if(result.success) successes++;
+                    else failures++;
+                    continue;
+                }
             }
             
             // does not have attribute, so no removal needed
@@ -154,18 +158,20 @@ module.exports = function() {
     Ability: Applying - Change
     changes an attribute for a player
     **/
-    this.applyingChange = async function(src_name, src_ref, targets, attribute, index, val) {
+    this.applyingChange = async function(src_name, src_ref, targets, attribute, index, val, additionalTriggerData) {
         let failures = 0;
         let successes = 0;
         // iterate through targets
         for(let i = 0; i < targets.value.length; i++) {
             // handle visit
-            let result = await visit(src_ref, targets.value[i], attribute, "applying", "change");
-            if(result) {
-                if(targets.value.length === 1) return visitReturn(result, "Attribute changing failed!", "Attribute changing succeeded!");
-                if(result.success) successes++;
-                else failures++;
-                continue;
+            if(additionalTriggerData.parameters.visitless !== true) {
+                let result = await visit(src_ref, targets.value[i], attribute, "applying", "change");
+                if(result) {
+                    if(targets.value.length === 1) return visitReturn(result, "Attribute changing failed!", "Attribute changing succeeded!");
+                    if(result.success) successes++;
+                    else failures++;
+                    continue;
+                }
             }
             
             let attr = await parseActiveAttributeSelector(attribute, src_ref, {}, `${targets.type}:${targets.value[i]}`);

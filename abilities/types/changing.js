@@ -32,7 +32,7 @@ module.exports = function() {
                     abilityLog(`❗ **Error:** Tried to change to ${roles.length} roles!`);
                     return { msg: "Changing failed! " + abilityError, success: false };
                 }
-                result = await changingRole(src_name, src_ref, targetsRole, roles[0]);
+                result = await changingRole(src_name, src_ref, targetsRole, roles[0], additionalTriggerData);
                 return result;
             break;
             case "alignment":
@@ -45,7 +45,7 @@ module.exports = function() {
                     abilityLog(`❗ **Error:** Tried to change to ${alignments.length} alignments!`);
                     return { msg: "Changing failed! " + abilityError, success: false };
                 }
-                result = await changingAlignment(src_name, src_ref, targetsAlignment, alignments[0]);
+                result = await changingAlignment(src_name, src_ref, targetsAlignment, alignments[0], additionalTriggerData);
                 return result;
             break;
         }
@@ -56,7 +56,7 @@ module.exports = function() {
     Ability: Changing - Role
     changes a player's role
     **/
-    this.changingRole = async function(src_name, src_ref, targets, role) {
+    this.changingRole = async function(src_name, src_ref, targets, role, additionalTriggerData) {
         // get role image
         let img = null;
         let refImg = await refToImg(`role:${role}`);
@@ -66,10 +66,12 @@ module.exports = function() {
         // iterate through targets
         for(let i = 0; i < targets.length; i++) {
             // handle visit
-            let result = await visit(src_ref, targets[i], role, "changing", "role");
-            if(result) {
-                if(targets.length === 1) return visitReturn(result, "Changing failed!", "Changing succeeded!");
-                continue;
+            if(additionalTriggerData.parameters.visitless !== true) {
+                let result = await visit(src_ref, targets[i], role, "changing", "role");
+                if(result) {
+                    if(targets.length === 1) return visitReturn(result, "Changing failed!", "Changing succeeded!");
+                    continue;
+                }
             }
             
             let isPlayerLoyal = await isLoyal(targets[i]);
@@ -141,7 +143,7 @@ module.exports = function() {
     Ability: Changing - Alignment
     changes a player's alignment
     **/
-    this.changingAlignment = async function(src_name, src_ref, targets, alignment) {
+    this.changingAlignment = async function(src_name, src_ref, targets, alignment, additionalTriggerData) {
         // get alignment image
         let img = null;
         let refImg = await refToImg(`alignment:${alignment}`);
@@ -151,10 +153,12 @@ module.exports = function() {
         // iterate through targets
         for(let i = 0; i < targets.length; i++) {
             // handle visit
-            let result = await visit(src_ref, targets[i], alignment, "changing", "alignment");
-            if(result) {
-                if(targets.length === 1) return visitReturn(result, "Changing failed!", "Changing succeeded!");
-                continue;
+            if(additionalTriggerData.parameters.visitless !== true) {
+                let result = await visit(src_ref, targets[i], alignment, "changing", "alignment");
+                if(result) {
+                    if(targets.length === 1) return visitReturn(result, "Changing failed!", "Changing succeeded!");
+                    continue;
+                }
             }
             
             let isPlayerLoyal = await isLoyal(targets[i]);

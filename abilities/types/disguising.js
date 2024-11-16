@@ -27,11 +27,11 @@ module.exports = function() {
                 return { msg: "Disguising failed! " + abilityError, success: false };
             break;
             case "weakly":
-                result = await disguising(src_name, src_ref, target, role, duration, "weak");
+                result = await disguising(src_name, src_ref, target, role, duration, "weak", additionalTriggerData);
                 return result;
             break;
             case "strongly":
-                result = await disguising(src_name, src_ref, target, role, duration, "strong");
+                result = await disguising(src_name, src_ref, target, role, duration, "strong", additionalTriggerData);
                 return result;
             break;
         }
@@ -41,7 +41,7 @@ module.exports = function() {
     Ability: Disguising - Weak/Strong
     adds a disguise to a player
     **/
-    this.disguising = async function(src_name, src_ref, targets, disguises, duration, strength) {
+    this.disguising = async function(src_name, src_ref, targets, disguises, duration, strength, additionalTriggerData) {
         // check its just a single disguise
         let disguise = disguises[0];
         if(disguises.length != 1) {
@@ -50,10 +50,12 @@ module.exports = function() {
         }
         for(let i = 0; i < targets.length; i++) {
             // handle visit
-            let result = await visit(src_ref, targets[i], disguise, "disguising", strength);
-            if(result) {
-                if(targets.length === 1) return visitReturn(result, "Disguising failed!", "Disguising succeeded!");
-                continue;
+            if(additionalTriggerData.parameters.visitless !== true) {
+                let result = await visit(src_ref, targets[i], disguise, "disguising", strength);
+                if(result) {
+                    if(targets.length === 1) return visitReturn(result, "Disguising failed!", "Disguising succeeded!");
+                    continue;
+                }
             }
             
             await createDisguiseAttribute(src_name, src_ref, targets[i], duration, disguise, strength);

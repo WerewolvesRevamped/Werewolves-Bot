@@ -43,7 +43,7 @@ module.exports = function() {
                 if(additionalTriggerData.parameters.forced && additionalTriggerData.parameters.forced_sel) {
                     forcedSel = additionalTriggerData.parameters.forced_sel;
                 }
-                result = await choicesCreation(src_name, src_ref, target[0], choice, options, forcedSel);
+                result = await choicesCreation(src_name, src_ref, target[0], choice, options, forcedSel, additionalTriggerData);
                 return result;
             break;
         }
@@ -53,10 +53,12 @@ module.exports = function() {
     Ability: Choices Creation
     creates a choice
     **/
-    async function choicesCreation(src_name, src_ref, target, choiceName, options, forcedSel) {
+    async function choicesCreation(src_name, src_ref, target, choiceName, options, forcedSel, additionalTriggerData) {
         // handle visit
-        let result = await visit(src_ref, target, choiceName, "choices", "creation");
-        if(result) return visitReturn(result, "Choice creation failed!", "Choice creation succeeded!");
+        if(additionalTriggerData.parameters.visitless !== true) {
+            let result = await visit(src_ref, target, choiceName, "choices", "creation");
+            if(result) return visitReturn(result, "Choice creation failed!", "Choice creation succeeded!");
+        }
         
         // create choice
         await sqlProm("INSERT INTO choices (name, options, src_ref, src_name, owner, forced) VALUES (" + connection.escape(choiceName) + "," + connection.escape(options.join(",")) + "," + connection.escape(src_ref) + "," + connection.escape(src_name) + "," + connection.escape(target) + "," + connection.escape(forcedSel) + ")");
