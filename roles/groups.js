@@ -168,6 +168,10 @@ module.exports = function() {
         return sqlPromEsc("SELECT players.id FROM players JOIN active_attributes ON active_attributes.owner=players.id WHERE players.type='player' AND players.alive=1 AND active_attributes.attr_type='group_membership' AND active_attributes.val1=", groupName)
     }
     
+    this.groupGetMembersAll = function(groupName) {
+        return sqlPromEsc("SELECT players.id FROM players JOIN active_attributes ON active_attributes.owner=players.id WHERE players.type='player' AND active_attributes.attr_type='group_membership' AND active_attributes.val1=", groupName)
+    }
+    
     
     
 }

@@ -124,7 +124,11 @@ module.exports = function() {
     Get team members
     **/
     this.teamGetMembers = function(teamName) {
-        return sqlPromEsc("SELECT id FROM players WHERE alignment=", teamName)
+        return sqlPromEsc("SELECT id FROM players WHERE type='player' AND alive=1 AND alignment=", teamName)
+    }
+    
+    this.teamGetMembersAll = function(teamName) {
+        return sqlPromEsc("SELECT id FROM players WHERE type='player' AND alignment=", teamName)
     }
     
     /** PUBLIC

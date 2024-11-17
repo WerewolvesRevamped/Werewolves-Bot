@@ -104,7 +104,8 @@ module.exports = function() {
     const PROPERTY_ACCESS = /^@(.+)->(.+)$/;
     const ATTR_PROPERTY = /^attr\((\w+)\)$/;
     const HOST_INFORMATION = /^%.+%$/;
-    this.parsePlayerSelector = async function(selector, self = null, additionalTriggerData = {}) {
+    this.INCLUDE_DEAD_PLAYERS = false;
+    this.parsePlayerSelector = async function(selector, self = null, additionalTriggerData = {}, aliveOnly = true) {
         let selectorTarget = selectorGetTarget(selector);
         /** WIP: Needs to be able to parse much more! **/
         switch(selectorTarget) {
@@ -131,12 +132,25 @@ module.exports = function() {
                 }
             // all (living) players
             case "@all":
-                return await getAllLivingIDs();
+                if(aliveOnly) {
+                    return await getAllLivingIDs();
+                } else {   
+                    let dead = await getAllDeadIDs();
+                    let alive = await getAllLivingIDs();
+                    return [...dead, ...alive];
+                }
             // others; @all without @self
             case "@others":
-                let all = await getAllLivingIDs();
-                let pself = srcToValue(self);
-                return all.filter(el => el != pself);
+                if(aliveOnly) {
+                    let all = await getAllLivingIDs();
+                    let pself = srcToValue(self);
+                    return all.filter(el => el != pself);
+                } else {
+                    let dead = await getAllDeadIDs();
+                    let alive = await getAllLivingIDs();
+                    let pself = srcToValue(self);
+                    return  [...dead, ...alive].filter(el => el != pself);
+                }
             // all dead players
             case "@dead":
                 return await getAllDeadIDs();
@@ -167,11 +181,21 @@ module.exports = function() {
                         abilityLog(`❗ **Error:** Used \`@Members\` with invalid self type \`${type2}\`!`);
                         return [ ];
                     case "group":
-                        let gMembers = await groupGetMembers(val2);
-                        return gMembers.map(el => el.id);
+                        if(aliveOnly) {
+                            let gMembers = await groupGetMembers(val2);
+                            return gMembers.map(el => el.id);
+                        } else {
+                            let gMembers = await groupGetMembersAll(val2);
+                            return gMembers.map(el => el.id);
+                        }
                     case "team": 
-                        let tMembers = await teamGetMembers(val2);
-                        return tMembers.map(el => el.id);
+                        if(aliveOnly) {
+                            let tMembers = await teamGetMembers(val2);
+                            return tMembers.map(el => el.id);
+                        } else {
+                            let tMembers = await teamGetMembersAll(val2);
+                            return tMembers.map(el => el.id);
+                        }
                 }
             
             // trigger dependent selectors
@@ -269,7 +293,7 @@ module.exports = function() {
                     return [ id ];
                 } else if (ADVANCED_SELECTOR.test(selectorTarget)) { // advanced selector
                     let contents = selectorTarget.match(ADVANCED_SELECTOR);
-                    return await parseAdvancedPlayerSelector(contents[1], self, additionalTriggerData);
+                    return await parseAdvancedPlayerSelector(contents[1], self, additionalTriggerData, aliveOnly);
                 } else if (PROPERTY_ACCESS.test(selectorTarget)) { // property access
                     let contents = selectorTarget.match(PROPERTY_ACCESS); // get the selector
                     let infType = await inferTypeRuntime(`@${contents[1]}`, self, additionalTriggerData);
@@ -705,14 +729,14 @@ module.exports = function() {
     /** PRIVATE
     Parses an advanced player selector
     **/
-    async function parseAdvancedPlayerSelector(selector, self, additionalTriggerData) {
+    async function parseAdvancedPlayerSelector(selector, self, additionalTriggerData, aliveOnlyDefault = true) {
         // split selector into its components
         const selSplit = selector.toLowerCase().split(",").map(el => el.split(":"));
         // get all players
         let allPlayers = await getAllPlayers();
         //allPlayers.forEach(el => console.log(el));
         // set flags
-        let aliveOnly = true;
+        let aliveOnly = aliveOnlyDefault;
         let selectAll = true;
         // iterate through all selector components
         for(let i = 0; i < selSplit.length; i++) {

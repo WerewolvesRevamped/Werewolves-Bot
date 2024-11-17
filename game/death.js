@@ -110,8 +110,8 @@ module.exports = function() {
     /** PUBLIC
    Adds somebody to the kill queue
    **/
-   this.killqAdd = function(pid) {
-        return sqlProm("INSERT INTO killq (id) VALUES (" + connection.escape(pid) + ")");
+   this.killqAdd = function(pid, src_ref = "host:host", type = "true kill", src_name = "role:host") {
+        return sqlProm("INSERT INTO killq (id, src_ref, src_name, type) VALUES (" + connection.escape(pid) + "," + connection.escape(src_ref) + "," + connection.escape(src_name) + "," + connection.escape(type) + ")");
    }
     
     /** PUBLIC
@@ -119,12 +119,57 @@ module.exports = function() {
     **/
     this.killqKillall = async function() {
             // get players
-        let players = await sqlProm("SELECT id FROM killq");
-        players = removeDuplicates(players.map(el => el.id));
+        let players = await sqlProm("SELECT * FROM killq");
+        playersFiltered = removeDuplicates(players.map(el => el.id));
         
         // kill players
-        for(let i = 0; i < players.length; i++) {
-            await killPlayer(players[i]);
+        for(let i = 0; i < playersFiltered.length; i++) {
+            await killPlayer(playersFiltered[i]);
+            
+            // get all attacks/etc and select a random one to trigger the triggers
+            let deaths = players.filter(el => el.id === playersFiltered[i]);
+            let selDeath = deaths[Math.floor(Math.random() * deaths.length)];
+            console.log(playersFiltered[i], deaths, selDeath);
+            // get the important values
+            let target = playersFiltered[i];
+            let attacker = srcToValue(selDeath.src_ref);
+            let src_name = selDeath.src_name;
+            let type = selDeath.type;
+            // call triggers
+            switch(type) {
+                case "attack":
+                case "kill":
+                case "true kill":
+                    // normal triggers
+                    await triggerPlayer(target, "On Death", { attacker: attacker, death_type: type, attack_source: src_name }); 
+                    await triggerPlayer(target, "On Killed", { attacker: attacker, death_type: type, attack_source: src_name }); 
+                    // complex triggers
+                    await triggerHandler("On Death Complex", { attacker: attacker, death_type: type, attack_source: src_name, this: target }); 
+                    await triggerHandler("On Killed Complex", { attacker: attacker, death_type: type, attack_source: src_name, this: target }); 
+                    // passive
+                    await triggerHandler("Passive");
+                break;
+                case "lynch":
+                    // normal triggers
+                    await triggerPlayer(target, "On Death", { attacker: attacker, death_type: "lynch", attack_source: src_name }); 
+                    await triggerPlayer(target, "On Lynch", { attacker: attacker, death_type: "lynch", attack_source: src_name }); 
+                    // complex triggers
+                    await triggerHandler("On Death Complex", { attacker: attacker, death_type: "lynch", attack_source: src_name, this: target }); 
+                    // passive
+                    await triggerHandler("Passive");
+                break;
+                case "banish":
+                case "true banish":
+                    // normal triggers
+                    await triggerPlayer(target, "On Banished", { attacker: attacker, death_type: type, attack_source: src_name }); 
+                    await triggerPlayer(target, "On Banishment", { attacker: attacker, death_type: type, attack_source: src_name }); 
+                    // complex triggers
+                    await triggerHandler("On Banished Complex", { attacker: attacker, death_type: type, attack_source: src_name, this: target }); 
+                    await triggerHandler("On Banishment Complex", { attacker: attacker, death_type: type, attack_source: src_name, this: target }); 
+                    // passive
+                    await triggerHandler("Passive");
+                break;
+            }
         }
         
         // clear killq
