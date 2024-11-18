@@ -284,7 +284,22 @@ module.exports = function() {
                     return additionalTriggerData.other_voters;
                 } else {
                     return invalidSelector(selectorTarget);
+                } 
+            case "@result":
+            case "@result1":
+            case "@result2":
+            case "@result3":
+            case "@result4":
+            case "@result5":
+            case "@result6":
+            case "@result7":
+            case "@actionresult":
+                let result = parseResult(selectorTarget, additionalTriggerData);
+                if(result.target && srcToType(result.target) === "player") {
+                    return [ srcToValue(result.target) ];
                 }
+                abilityLog(`❗ **Error:** Failed to cast result to player!`);
+                return [ ];
 
             // unknown selector
             default:
