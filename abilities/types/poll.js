@@ -114,9 +114,9 @@ module.exports = function() {
     returns if a specific poll is cancelled and consumes the attribute
     **/
     this.attemptPollCancellation = async function(pollType) {
-        let allCancellations = await queryAttribute("attr_type", "poll_result", "val2", "cancel"); // get all cancellations
+        let allCancellations = await queryAttribute("attr_type", "poll_result", "val1", pollType, "val2", "cancel"); // get all cancellations
         if(allCancellations <= 0) return false; // no cancellations
-        // consume attribute
+        // consume attribute1
         await useAttribute(allCancellations[0].ai_id);
         return true;
     }
