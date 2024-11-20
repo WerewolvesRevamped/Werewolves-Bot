@@ -277,10 +277,12 @@ module.exports = function() {
                     return false;
                 }
                 let targets = await parsePlayerSelector(condition.target, src_ref, additionalTriggerData);
-                let group = await parseGroupName(condition.group);
+                console.log(targets);
+                let group = await parseGroupName(selectorGetTarget(condition.group));
                 if(cachedGroups.indexOf(group) === -1) return false;
                 for(let i = 0; i < targets.length; i++) {
-                    let attrs = await queryAttributePlayer(targets[i], "val1", group);
+                    let attrs = await queryAttributePlayer(targets[i], "attr_type", "group_membership", "val1", group);
+                    console.log(attrs);
                     if(attrs.length <= 0) return false;
                 }
                 return true;

@@ -116,7 +116,7 @@ module.exports = function() {
     this.attemptPollCancellation = async function(pollType) {
         let allCancellations = await queryAttribute("attr_type", "poll_result", "val1", pollType, "val2", "cancel"); // get all cancellations
         if(allCancellations <= 0) return false; // no cancellations
-        // consume attribute1
+        // consume attribute
         await useAttribute(allCancellations[0].ai_id);
         return true;
     }

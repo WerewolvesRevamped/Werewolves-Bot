@@ -65,6 +65,86 @@ module.exports = function() {
         return promptMsg;
     }
     
+    async function getPromptMessageRestriction(restriction, src_ref, additionalTriggerData) {
+        if(restriction.type === "condition") {
+            let txt = await getPromptMessageRestrictionCondition(restriction.condition, src_ref, additionalTriggerData);
+            return `${txt}.`;
+        } else {
+            return getPromptMessage(restriction);
+        }
+    }
+    
+    async function getPromptMessageRestrictionCondition(condition, src_ref, additionalTriggerData, inverted = false) {
+        switch(condition.type) {
+            default:
+                return "";
+            case "comparison":
+                const first = getPromptMessageRestrictionConditionValue(condition.first);
+                const second = getPromptMessageRestrictionConditionValue(condition.second);
+                switch(condition.subtype) {
+                    default:
+                        return "";
+                    case "equal":
+                        return !inverted ? `${first} is __not__ the same as ${second}, but should be.` : `${first} is the same as ${second}, but should __not__ be`;
+                    case "less_than":
+                        return !inverted ? `${first} is __not__ less than ${second}, but should be.` : `${first} is less than ${second}, but should __not__ be`;
+                    case "greater_than":
+                        return !inverted ? `${first} is __not__ greater than ${second}, but should be.` : `${first} is greater than ${second}, but should __not__ be`;
+                    case "not_equal":
+                        return !inverted ? `${first} is the same as ${second}, but should __not__ be.` : `${first} is __not__ the same as ${second}, but should be`;
+                }
+            case "logic":
+                switch(condition.subtype) {
+                    default:
+                        return "";
+                    case "not":
+                        let cond = getPromptMessageRestrictionCondition(condition.condition, src_ref, additionalTriggerData, true);
+                        return cond;
+                    case "and":
+                    case "or":
+                        let cond1 = await resolveCondition(condition.condition1, src_ref, src_name, additionalTriggerData);
+                        let cond2 = await resolveCondition(condition.condition2, src_ref, src_name, additionalTriggerData);
+                        let cond1Text = getPromptMessageRestrictionCondition(condition.condition1, src_ref, additionalTriggerData);
+                        let cond2Text = getPromptMessageRestrictionCondition(condition.condition2, src_ref, additionalTriggerData);
+                        if(!cond1 && cond2) return cond1Text
+                        else if(cond1 && !cond2) return cond2Text;
+                        return !inverted ? `${cond1Text} ${condition.subtype} ${cond2Text}` : `not (${cond1Text} ${condition.subtype} ${cond2Text})`;
+                }
+            case "existence":
+                let sel = getPromptMessageRestrictionConditionValue(condition.target);
+                return !inverted ? `${sel} does __exist__` : `${sel} does exist, but should __not__`;
+            case "attribute":
+                let atar = getPromptMessageRestrictionConditionValue(condition.target);
+                let attr = getPromptMessageRestrictionConditionValue(condition.attribute);
+                return !inverted ? `${attr} does __not__ have ${attr}` : `${attr} does have ${attr}, but should __not__`;
+            case "selector":
+                let sel1 = getPromptMessageRestrictionConditionValue(condition.target);
+                let sel2 = getPromptMessageRestrictionConditionValue(condition.selector);
+                return !inverted ? `${sel1} ist not part of ${sel2}` : `${sel1} ist part of ${sel2}, but should __not__ be`;
+            case "membership":
+                let sel1b = getPromptMessageRestrictionConditionValue(condition.target);
+                let sel2b = getPromptMessageRestrictionConditionValue(condition.group);
+                return !inverted ? `${sel1b} ist __not__ part of ${sel2b}` : `${sel1b} ist part of ${sel2b}, but should __not__ be`;
+        }
+    }
+    
+    function getPromptMessageRestrictionConditionValue(selector) {
+        let val = selectorGetTarget(selector);
+        let type = selectorGetType(selector);
+        switch(val) {
+            case "@selection":
+            case "@secondaryselection":
+                return `the selected ${type}`;
+            case "@target":
+                return `your target`;
+            case "@self":
+                return `you`;
+            default:
+                val = val.replace(/[#&@]+/g, "");
+                return srcRefToText(`${type}:${val}`);
+        }
+    }
+    
     /** 
     Create Prompt
     creates a new prompt in the prompt table
@@ -473,7 +553,7 @@ module.exports = function() {
                     for(let i = 0; i < restrictions.length; i++) {
                         let passed = await handleRestriction(src_ref, promptAppliedAbility[0], restrictions[i], RESTR_POST, parsedReply[1], additionalTriggerData);
                         if(!passed) {
-                            let msg = getPromptMessage(restrictions[i]);
+                            let msg = await getPromptMessageRestriction(restrictions[i], src_ref, additionalTriggerData);
                             let embed = basicEmbed(`You cannot execute this ability due to a restriction: ${msg}`, EMBED_RED);
                             message.reply(embed);
                             return;
@@ -523,7 +603,7 @@ module.exports = function() {
                     for(let i = 0; i < restrictions.length; i++) {
                         let passed = await handleRestriction(src_ref, promptAppliedAbility[0], restrictions[i], RESTR_POST, parsedReply1[1], additionalTriggerData);
                         if(!passed) {
-                            let msg = getPromptMessage(restrictions[i]);
+                            let msg = await getPromptMessageRestriction(restrictions[i], src_ref, additionalTriggerData);
                             let embed = basicEmbed(`You cannot execute this ability due to a restriction: ${msg}`, EMBED_RED);
                             message.reply(embed);
                             return;
