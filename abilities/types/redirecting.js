@@ -107,18 +107,24 @@ module.exports = function() {
             // save if both match
             //console.log(`Checking Redirection for ${targetRedirections[i].ai_id}: type match? ${typeMatch}; source match? ${sourceMatch}`);
             if(typeMatch && sourceMatch) {
-                let newTarget = await parsePlayerSelector(targetRedirections[i].val1, `player:${source}`);
+                let newTarget = await parsePlayerSelector(targetRedirections[i].val1, `player:${target}`);
+                console.log(targetRedirections[i].val1, `player:${source}`, newTarget);
                 if(newTarget.length > 1) abilityLog(`❗ **Error:** Attempted to redirect to several players, picked first player!`);
+                if(newTarget.length === 0) abilityLog(`❗ **Error:** Attempted to redirect to no player!`);
                 filteredRedirections.push([newTarget[0],targetRedirections[i].ai_id]);
             }
         }
         // return last redirection if applicable - otherwise return normal target
         if(filteredRedirections.length > 0) {
             let newTarget = filteredRedirections[filteredRedirections.length - 1];
+            if(!newTarget[0]) {
+                abilityLog(`❎ Could not redirect as target was invalid!`);
+                return target;
+            }
             //console.log(`Redirected from ${target} to ${newTarget}!`);
             abilityLog(`✅ Redirected from <@${target}> to <@${newTarget[0]}>!`);
             await useAttribute(newTarget[1]);
-            await triggerPlayer(newTarget[0], "On Redirect", { visitor: source }); 
+            await triggerPlayer(target, "On Redirect", { visitor: source }); 
             return await applyRedirectionOnce(newTarget[0], source, abilityType, abilitySubtype); // recursively redirect 
         } else {
             //console.log(`Did not redirect ${target}!`);

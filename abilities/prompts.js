@@ -42,10 +42,10 @@ module.exports = function() {
         const ty1 = `${ty}.1`;
         const ty2 = `${ty}.2`;
         // default prompt
-        let promptMsg = `Give ${type1}`;
+        let promptMsg = `Please submit a ${type1}`;
         if(type2.length > 0) promptMsg += ` and ${type2}`;
         promptMsg += ` (\`${ty}${su?'.'+su:''}.${type2===''?'1':'2'}\`)`;
-        if(type1.length === 0) promptMsg = `No Give (\`${tysu}\`)`
+        if(type1.length === 0) promptMsg = `Please select an option (\`${tysu}\`)`
         // search for prompt in JSON
         if(type1 === "" && ty && su && prompts[tysu]) return prompts[tysu];
         else if(type1 === "" && ty && prompts[ty]) return prompts[ty];
@@ -68,6 +68,8 @@ module.exports = function() {
     async function getPromptMessageRestriction(restriction, src_ref, additionalTriggerData) {
         if(restriction.type === "condition") {
             let txt = await getPromptMessageRestrictionCondition(restriction.condition, src_ref, additionalTriggerData);
+            txt = txt.replace(/you is/g, "you are");
+            txt = txt.replace(/you does/g, "you do");
             return `${txt}.`;
         } else {
             return getPromptMessage(restriction);
@@ -120,11 +122,11 @@ module.exports = function() {
             case "selector":
                 let sel1 = getPromptMessageRestrictionConditionValue(condition.target);
                 let sel2 = getPromptMessageRestrictionConditionValue(condition.selector);
-                return !inverted ? `${sel1} ist not part of ${sel2}` : `${sel1} ist part of ${sel2}, but should __not__ be`;
+                return !inverted ? `${sel1} is not part of ${sel2}` : `${sel1} ist part of ${sel2}, but should __not__ be`;
             case "membership":
                 let sel1b = getPromptMessageRestrictionConditionValue(condition.target);
                 let sel2b = getPromptMessageRestrictionConditionValue(condition.group);
-                return !inverted ? `${sel1b} ist __not__ part of ${sel2b}` : `${sel1b} ist part of ${sel2b}, but should __not__ be`;
+                return !inverted ? `${sel1b} is __not__ part of ${sel2b}` : `${sel1b} ist part of ${sel2b}, but should __not__ be`;
         }
     }
     

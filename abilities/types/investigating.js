@@ -19,6 +19,8 @@ module.exports = function() {
         let target;
         if(ability.subtype != "count") target = await parsePlayerSelector(ability.target, src_ref, additionalTriggerData);
         else target = await parseRoleSelector(ability.target, src_ref, additionalTriggerData);
+        // save original target
+        additionalTriggerData.orig_target = target[0];
         // apply redirection
         target = await applyRedirection(target, src_ref, ability.type, ability.subtype, additionalTriggerData);
         // select subtype
@@ -96,7 +98,7 @@ module.exports = function() {
         
         // handle visit
         if(additionalTriggerData.parameters.visitless !== true) {
-            let result = await visit(src_ref, targets[0], "", "investigating", "role", `Investigated <@${targets[0]}>'s role: \`%1\``);
+            let result = await visit(src_ref, targets[0], "", "investigating", "role", `Investigated <@${additionalTriggerData.orig_target}>'s role: \`%1\``);
             if(result) return visitReturn(result, "Investigation failed!", "Investigation succeeded!");
         }
         
@@ -104,7 +106,7 @@ module.exports = function() {
         let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);
         // feedback
         abilityLog(`✅ ${srcRefToText(src_ref)} investigated <@${targets[0]}>'s role as \`${toTitleCase(rdata.role.role)}\`${rdata.type?' ('+rdata.type+')':''}.`);
-        return { msg: `Investigated <@${targets[0]}>'s role: \`${toTitleCase(rdata.role.role)}\``, success: true, target: `player:${targets[0]}`, result: `${toTitleCase(rdata.role.role)}[role]`, role: rdata.role.role };
+        return { msg: `Investigated <@${additionalTriggerData.orig_target}>'s role: \`${toTitleCase(rdata.role.role)}\``, success: true, target: `player:${targets[0]}`, result: `${toTitleCase(rdata.role.role)}[role]`, role: rdata.role.role };
     }
     
     /**
@@ -118,7 +120,7 @@ module.exports = function() {
         
         // handle visit
         if(additionalTriggerData.parameters.visitless !== true) {
-            let result = await visit(src_ref, targets[0], "", "investigating", "class", `Investigated <@${targets[0]}>'s class: \`%1\``);
+            let result = await visit(src_ref, targets[0], "", "investigating", "class", `Investigated <@${additionalTriggerData.orig_target}>'s class: \`%1\``);
             if(result) return visitReturn(result, "Investigation failed!", "Investigation succeeded!");
         }
         
@@ -126,7 +128,7 @@ module.exports = function() {
         let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);
         // feedback
         abilityLog(`✅ ${srcRefToText(src_ref)} investigated <@${targets[0]}>'s class as \`${toTitleCase(rdata.role.class)}\`${rdata.type?' ('+rdata.type+')':''}.`);
-        return { msg: `Investigated <@${targets[0]}>'s class: \`${toTitleCase(rdata.role.class)}\``, success: true, target: `player:${targets[0]}`, result: `${toTitleCase(rdata.role.class)}[class]`, class: rdata.role.class };
+        return { msg: `Investigated <@${additionalTriggerData.orig_target}>'s class: \`${toTitleCase(rdata.role.class)}\``, success: true, target: `player:${targets[0]}`, result: `${toTitleCase(rdata.role.class)}[class]`, class: rdata.role.class };
     }
     
     /**
@@ -140,7 +142,7 @@ module.exports = function() {
         
         // handle visit
         if(additionalTriggerData.parameters.visitless !== true) {
-            let result = await visit(src_ref, targets[0], "", "investigating", "category", `Investigated <@${targets[0]}>'s category: \`%1\``);
+            let result = await visit(src_ref, targets[0], "", "investigating", "category", `Investigated <@${additionalTriggerData.orig_target}>'s category: \`%1\``);
             if(result) return visitReturn(result, "Investigation failed!", "Investigation succeeded!");
         }
         
@@ -148,7 +150,7 @@ module.exports = function() {
         let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);
         // feedback
         abilityLog(`✅ ${srcRefToText(src_ref)} investigated <@${targets[0]}>'s category as \`${toTitleCase(rdata.role.category)}\`${rdata.type?' ('+rdata.type+')':''}.`);
-        return { msg: `Investigated <@${targets[0]}>'s category: \`${toTitleCase(rdata.role.category)}\``, success: true, target: `player:${targets[0]}`, result: `${toTitleCase(rdata.role.category)}[category]`, category: rdata.role.category };
+        return { msg: `Investigated <@${additionalTriggerData.orig_target}>'s category: \`${toTitleCase(rdata.role.category)}\``, success: true, target: `player:${targets[0]}`, result: `${toTitleCase(rdata.role.category)}[category]`, category: rdata.role.category };
     }
     
     /**
@@ -162,7 +164,7 @@ module.exports = function() {
         
         // handle visit
         if(additionalTriggerData.parameters.visitless !== true) {
-            let result = await visit(src_ref, targets[0], "", "investigating", "alignment", `Investigated <@${targets[0]}>'s alignment: \`%1\``);
+            let result = await visit(src_ref, targets[0], "", "investigating", "alignment", `Investigated <@${additionalTriggerData.orig_target}>'s alignment: \`%1\``);
             if(result) return visitReturn(result, "Investigation failed!", "Investigation succeeded!");
         }
         
@@ -171,11 +173,11 @@ module.exports = function() {
         if(rdata.type === "") {
             // feedback - no disguise
             abilityLog(`✅ ${srcRefToText(src_ref)} investigated <@${targets[0]}>'s alignment as \`${toTitleCase(rdata.role.alignment)}\`${rdata.type?' ('+rdata.type+')':''}.`);
-            return { msg: `Investigated <@${targets[0]}>'s alignment: \`${toTitleCase(rdata.role.alignment)}\``, success: true, target: `player:${targets[0]}`, result: `${toTitleCase(rdata.role.alignment)}[alignment]`, alignment: rdata.role.alignment };
+            return { msg: `Investigated <@${additionalTriggerData.orig_target}>'s alignment: \`${toTitleCase(rdata.role.alignment)}\``, success: true, target: `player:${targets[0]}`, result: `${toTitleCase(rdata.role.alignment)}[alignment]`, alignment: rdata.role.alignment };
         } else {
             // feedback - disguise
             abilityLog(`✅ ${srcRefToText(src_ref)} investigated <@${targets[0]}>'s alignment as \`${toTitleCase(rdata.role.team)}\`${rdata.type?' ('+rdata.type+')':''}.`);
-            return { msg: `Investigated <@${targets[0]}>'s alignment: \`${toTitleCase(rdata.role.team)}\``, success: true, target: `player:${targets[0]}`, result: `${toTitleCase(rdata.role.team)}[alignment]`, alignment: rdata.role.team };
+            return { msg: `Investigated <@${additionalTriggerData.orig_target}>'s alignment: \`${toTitleCase(rdata.role.team)}\``, success: true, target: `player:${targets[0]}`, result: `${toTitleCase(rdata.role.team)}[alignment]`, alignment: rdata.role.team };
         }
     }
     
@@ -202,8 +204,8 @@ module.exports = function() {
         
         // feedback
         abilityLog(`✅ ${srcRefToText(src_ref)} investigated <@${targets[0]}> for attribute \`${toTitleCase(attribute)}\` ⇒ \`${found}\` ${rdata.type?' ('+rdata.type+')':''}.`);
-        if(found) return { msg: `Investigated <@${targets[0]}> for attribute \`${toTitleCase(attribute)}\` ⇒ Attribute Found`, success: true, target: `player:${targets[0]}` };
-        else return { msg: `Investigated <@${targets[0]}> for attribute \`${toTitleCase(attribute)}\` ⇒ Attribute __Not__ Found`, success: false, target: `player:${targets[0]}` };
+        if(found) return { msg: `Investigated <@${additionalTriggerData.orig_target}> for attribute \`${toTitleCase(attribute)}\` ⇒ Attribute Found`, success: true, target: `player:${targets[0]}` };
+        else return { msg: `Investigated <@${additionalTriggerData.orig_target}> for attribute \`${toTitleCase(attribute)}\` ⇒ Attribute __Not__ Found`, success: false, target: `player:${targets[0]}` };
     }
     
     /**

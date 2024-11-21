@@ -277,7 +277,6 @@ module.exports = function() {
                     return false;
                 }
                 let targets = await parsePlayerSelector(condition.target, src_ref, additionalTriggerData);
-                console.log(targets);
                 let group = await parseGroupName(selectorGetTarget(condition.group));
                 if(cachedGroups.indexOf(group) === -1) return false;
                 for(let i = 0; i < targets.length; i++) {
