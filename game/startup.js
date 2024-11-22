@@ -66,7 +66,11 @@ module.exports = function() {
                     // Create a default connection with the player's ID
                     cmdConnectionAdd(sc, ["", player.id], true);
                     // Send info message for each role
-                    result.forEach(el => cmdInfo(sc, [ el.name ], true, false));
+                    result.forEach(async el => {
+                        cmdInfo(sc, [ el.name ], true, false);
+                        await sleep(3000);
+                        cmdGetCard(sc, el.name);
+                    });
 
                     // Move into sc category
                     sc.setParent(category,{ lockPermissions: false }).then(m => {

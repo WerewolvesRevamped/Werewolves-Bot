@@ -61,9 +61,9 @@ module.exports = function() {
                             abilityLog(`✅ <@${sourcePlayer}> was obstructed (${Math.round(rand*100)/100}): \`${customFeedback[j].feedback}\`.`);
                             if(templateMessage) {
                                 let feedback = templateMessage.replace(/\%1/g, customFeedback[j].feedback);
-                                return { msg: feedback, success: true };
+                                return { msg: feedback, success: true, role: customFeedback[j].feedback, class: customFeedback[j].feedback, category: customFeedback[j].feedback, alignment: customFeedback[j].feedback };
                             } else {
-                                return { msg: customFeedback[j].feedback, success: true };
+                                return { msg: customFeedback[j].feedback, success: true, class: customFeedback[j].feedback, category: customFeedback[j].feedback, alignment: customFeedback[j].feedback };
                             }
                         }
                     }
@@ -95,12 +95,18 @@ module.exports = function() {
     Visit Return
     **/
     this.visitReturn = function(visitResult, defaultError, defaultSuccess) {
+        let res = visitResult;
         if(!visitResult.msg) {
-            if(visitResult.success) return { msg: defaultSuccess, success: true };
-            else return { msg: defaultError, success: false };
+            if(visitResult.success) {
+                res.msg = defaultSuccess;
+                return res;
+            } else {
+                res.msg = defaultError;
+                res.success = false;
+                return res;
+            }
         } else {
-            if(visitResult.success) return { msg: visitResult.msg, success: true };
-            else return { msg: visitResult.msg, success: false };
+            return res;
         }
     }
     
