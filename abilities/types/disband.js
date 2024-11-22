@@ -48,4 +48,22 @@ module.exports = function() {
         });
     }
     
+    /** Groups: Reopen
+    reopens a group
+    **/
+    this.groupsReopen = async function(group, id = 0) {
+        return new Promise(res => {
+            sql("SELECT * FROM active_groups WHERE disbanded=1 AND name=" + connection.escape(group) + " OR channel_id=" + connection.escape(id), async result => {
+                let groupChannel = await mainGuild.channels.fetch(result[0].channel_id);
+                // send reopen message
+                let embed = basicEmbed(`<#${groupChannel.id}> has been reopend.`, EMBED_GREEN);
+                groupChannel.send(embed);
+                // reopen active group
+                await sqlPromEsc("UPDATE active_groups SET disbanded=0 WHERE ai_id=", result[0].ai_id);
+                // resolve reopen
+                res();
+            });
+        });
+    }
+    
 }

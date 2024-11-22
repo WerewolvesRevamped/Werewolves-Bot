@@ -173,5 +173,23 @@ module.exports = function() {
     }
     
     
+    /** PUBLIC
+    group update handler
+    **/
+    this.updateGroups = async function() {
+        let toBeDisbanded = await sqlProm("SELECT name FROM active_groups WHERE disbanded=0 AND name NOT IN (SELECT DISTINCT val1 FROM active_attributes WHERE attr_type='group_membership' AND alive=1)");
+        
+        let toBeReopened = await sqlProm("SELECT name FROM active_groups WHERE disbanded=1 AND name IN (SELECT DISTINCT val1 FROM active_attributes WHERE attr_type='group_membership' AND alive=1)");
+        
+        for(let i = 0; i < toBeDisbanded.length; i++) {
+            await groupsDisband(toBeDisbanded[i].name);
+        }
+        
+        for(let i = 0; i < toBeReopened.length; i++) {
+            await groupsReopen(toBeReopened[i].name);
+        }
+        
+    }
+    
     
 }

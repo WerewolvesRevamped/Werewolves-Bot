@@ -924,6 +924,7 @@ module.exports = function() {
         // update teams
         await updateActiveTeams();
         if(stats.gamephase != gp.INGAME) return;
+        await updateGroups();
         
         // set new phase
         if(newPhase) await setPhase(newPhase);
@@ -958,6 +959,7 @@ module.exports = function() {
         // update teams
         await updateActiveTeams();
         if(stats.gamephase != gp.INGAME) return;
+        await updateGroups();
         
         // pause queue checker during event
         pauseActionQueueChecker = false;
@@ -1019,6 +1021,7 @@ module.exports = function() {
         // update teams
         await updateActiveTeams();
         if(stats.gamephase != gp.INGAME) return;
+        await updateGroups();
         
         // set new phase
         if(newPhase) await setPhase(newPhase);
@@ -1053,6 +1056,7 @@ module.exports = function() {
         // update teams
         await updateActiveTeams();
         if(stats.gamephase != gp.INGAME) return;
+        await updateGroups();
         
         // pause queue checker during event
         pauseActionQueueChecker = false;

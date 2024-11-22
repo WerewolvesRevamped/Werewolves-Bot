@@ -1241,6 +1241,7 @@ module.exports = function() {
                                 let srcNameMatch = el.src_name.split(":")[1] === splitTarget[1];
                                 let val1Match = el.val1 === splitTarget[1].toLowerCase();
                                 let selfMatch = splitTarget[1] === "self" && el.src_ref.split(":")[1] === srcToValue(self);
+                                console.log(el.src_name, splitTarget[1]);
                                 return typeMatch && (srcRefMatch || srcNameMatch || val1Match || selfMatch);
                             });
                         break;

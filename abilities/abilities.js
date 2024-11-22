@@ -46,7 +46,7 @@ module.exports = function() {
     Execute Ability
     executes an ability
     **/
-    this.executeAbility = async function(src_ref, src_name, ability, restrictions = [], additionalTriggerData = {}) {
+    this.executeAbility = async function(src_ref, src_name, ability, restrictions = [], additionalTriggerData = { parameters: {} }) {
         try {
             // if an executor is passed we use that instead of src_ref
             if(additionalTriggerData.executor) {

@@ -38,7 +38,7 @@ module.exports = function() {
                 return result;
             break;
             case "remove":
-                result = await applyingRemove(src_name, src_ref, additionalTriggerData, target, ability.attribute, additionalTriggerData);
+                result = await applyingRemove(src_name, src_ref, additionalTriggerData, target, ability.attribute);
                 return result;
             break;
             case "change":
@@ -92,23 +92,13 @@ module.exports = function() {
     Ability: Applying - Remove
     removes an attribute from a player
     **/
-    this.applyingRemove = async function(src_name, src_ref, additionalTriggerData, targets, attribute, additionalTriggerData) {
+    this.applyingRemove = async function(src_name, src_ref, additionalTriggerData, targets, attribute) {
         let failures = 0;
         let successes = 0;
         let attrName = parseAttributeSelector(attribute, src_ref, additionalTriggerData, true);
-        let attr = null;
+        let activeAttr = false;
         if(!attrName || !attrName[0]) {
-            if(targets.length > 1) {
-                abilityLog(`❗ **Error:** Cannot unapply an active attribute with several targets!`);
-                return { msg: "Unapplying failed! " + abilityError, success: false };
-            }
-            attr = await parseActiveAttributeSelector(attribute, src_ref, additionalTriggerData, src_ref);
-            console.log(attr);
-            attrName = attr.map(el => el.name);
-            if(attr.length === 0) {
-                abilityLog(`❗ **Error:** Cannot unapply active attribute - not found!`);
-                return { msg: "Unapplying failed! " + abilityError, success: false };
-            }
+            activeAttr = true;
         }
 
         // iterate through targets
@@ -125,16 +115,16 @@ module.exports = function() {
             }
             
             // does not have attribute, so no removal needed
-            if(!attr && !hasCustomAttribute(`${targets.type}:${targets.value[i]}`, attrName[0])) {
+            if(!activeAttr && !hasCustomAttribute(`${targets.type}:${targets.value[i]}`, attrName[0])) {
                 abilityLog(`✅ ${srcRefToText(targets.type + ':' + targets.value[i])} does not have ${attrName[0]}, unapplying skipped.`);
                 if(targets.value.length === 1) return { msg: "Unapplying succeeded!", success: true, target: `${targets.type}:${targets.value[0]}` };
                 successes++;
                 continue;
             }
             // get attribute
-            if(!attr) attr = await parseActiveAttributeSelector(attribute, src_ref, {}, `${targets.type}:${targets.value[i]}`);
+            let attr = await parseActiveAttributeSelector(attribute, src_ref, {}, `${targets.type}:${targets.value[i]}`);
             // can only apply a single attribute
-            if(attr.length === 0) {
+            if(!activeAttr && attr.length === 0) {
                 abilityLog(`❗ **Error:** Tried to unapply no attributes!`);
                 failures++;
                 continue;

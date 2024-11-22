@@ -41,10 +41,12 @@ module.exports = function() {
                 let mem_type = parseMembershipType(ability.membership_type ?? "member");
                 let dur_type = parseDuration(ability.duration ?? "persistent");
                 result = await joiningAdd(src_name, src_ref, target, group_name, mem_type, dur_type, additionalTriggerData);
+                await updateGroups();
                 return result;
             break;
             case "remove":
                 result = await joiningRemove(src_name, src_ref, target, group_name, additionalTriggerData);
+                await updateGroups();
                 return result;
             break;
         }
