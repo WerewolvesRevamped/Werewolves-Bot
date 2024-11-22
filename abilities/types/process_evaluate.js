@@ -22,8 +22,10 @@ module.exports = function() {
         abilityLog(`✳️ **Processing**`);
         // run all process abilities
         let results = [];
+        let doNotRecheckRestriction = false;
         for(let i = 0; i < process.length; i++) {
-            let result = await executeAbility(src_ref, src_name, process[i].ability, [], additionalTriggerData);
+            let result = await executeAbility(src_ref, src_name, process[i].ability, [], additionalTriggerData, doNotRecheckRestriction);
+            if(result) doNotRecheckRestriction = true;
             results.push(result);
         }
         
@@ -42,11 +44,12 @@ module.exports = function() {
             let condBool = await resolveCondition(condition, src_ref, src_name, additionalTriggerData);
             if(condBool) { // enter final branch
                 abilityLog(`▶️ **Entering Branch:** ${condTxt}`);
-                let result = await executeAbility(src_ref, src_name, evaluate[i].ability, [], additionalTriggerData);
-                return result;
+                let result = await executeAbility(src_ref, src_name, evaluate[i].ability, [], additionalTriggerData, doNotRecheckRestriction);
+                if(result) return result; // if no result CONTINUE
             } else if(condition.type === "always") { // additionally enter always branch
                 abilityLog(`▶️ **Always Branch:**`);
-                await executeAbility(src_ref, src_name, evaluate[i].ability, [], additionalTriggerData);
+                let result = await executeAbility(src_ref, src_name, evaluate[i].ability, [], additionalTriggerData, doNotRecheckRestriction);
+                if(result) doNotRecheckRestriction = true;
             } else { // skip branch
                 abilityLog(`◀️ **Skipping Branch:** ${condTxt}`);
             }
@@ -72,12 +75,15 @@ module.exports = function() {
         
         // run all process abilities
         let results = [];
+        let doNotRecheckRestriction = false;
         for(let i = 0; i < abilities.length; i++) {
-            let result = await executeAbility(src_ref, src_name, abilities[i], [], additionalTriggerData);
+            let result = await executeAbility(src_ref, src_name, abilities[i], [], additionalTriggerData, doNotRecheckRestriction);
+            if(result) doNotRecheckRestriction = true;
             results.push(result);
         }
 
         let lastResult = results[results.length - 1];
+        if(!lastResult) return null;
         // if no evaluate conditions matched, a failure is implied
         return { msg: lastResult.msg, success: lastResult.success };
     }

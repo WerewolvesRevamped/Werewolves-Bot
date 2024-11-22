@@ -466,8 +466,10 @@ module.exports = function() {
             await setLastTarget(curAction.src_ref, abilities[0], curAction.target);
             // execute the ability
             let feedback = [];
+            let doNotRecheckRestriction = false;
             for(let ability of abilities) {
-                let fed = await executeAbility(curAction.src_ref, curAction.src_name, ability, restrictions, additionalTriggerData);
+                let fed = await executeAbility(curAction.src_ref, curAction.src_name, ability, restrictions, additionalTriggerData, doNotRecheckRestriction);
+                if(fed) doNotRecheckRestriction = true;
                 if(fed && fed.msg) feedback.push(fed);
             }
             // send feedback

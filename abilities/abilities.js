@@ -46,7 +46,7 @@ module.exports = function() {
     Execute Ability
     executes an ability
     **/
-    this.executeAbility = async function(src_ref, src_name, ability, restrictions = [], additionalTriggerData = { parameters: {} }) {
+    this.executeAbility = async function(src_ref, src_name, ability, restrictions = [], additionalTriggerData = { parameters: {} }, doNotRecheckRestriction = false) {
         try {
             // if an executor is passed we use that instead of src_ref
             if(additionalTriggerData.executor) {
@@ -57,11 +57,13 @@ module.exports = function() {
             if(!isSrc(src_ref)) src_ref = `unknown:${src_ref}`;
             if(!isSrc(src_name)) src_name = `unknown:${src_name}`;
             // check restrictions again
-            for(let i = 0; i < restrictions.length; i++) {
-                let passed = await handleRestriction(src_ref, ability, restrictions[i], RESTR_POST, null, additionalTriggerData);
-                if(!passed) {
-                    abilityLog(`🔴 **Skipped Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}). Failed restriction \`${restrictions[i].type}\`.`);
-                    return;
+            if(!doNotRecheckRestriction) {
+                for(let i = 0; i < restrictions.length; i++) {
+                    let passed = await handleRestriction(src_ref, ability, restrictions[i], RESTR_POST, null, additionalTriggerData);
+                    if(!passed) {
+                        abilityLog(`🔴 **Skipped Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}). Failed restriction \`${restrictions[i].type}\`.`);
+                        return;
+                    }
                 }
             }
             
@@ -112,6 +114,7 @@ module.exports = function() {
                 break;
                 case "abilities":
                     feedback = await abilityAbilities(src_refAction, src_name, ability, additionalTriggerData);
+                    if(!feedback) return null;
                 break;
                 case "announcement":
                     feedback = await abilityAnnouncement(src_refAction, src_name, ability, additionalTriggerData);
@@ -179,6 +182,9 @@ module.exports = function() {
                 break;
                 case "failure":
                     feedback = { msg: "Ability failed!", success: false };
+                break;
+                case "continue":
+                    return null;
                 break;
             }
             

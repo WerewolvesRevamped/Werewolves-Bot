@@ -1462,6 +1462,12 @@ module.exports = function() {
         if(fd) {
             ability = { type: "success" };
         }
+        /** CONTINUE **/
+        exp = new RegExp("^Continue$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "continue" };
+        }
         /** LOGGING (DEBUG) **/
         // log named
         exp = new RegExp("^Log " + targetType + " as " + targetType + "$", "g");

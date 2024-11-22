@@ -117,7 +117,8 @@ module.exports = function() {
             // does not have attribute, so no removal needed
             if(!activeAttr && !hasCustomAttribute(`${targets.type}:${targets.value[i]}`, attrName[0])) {
                 abilityLog(`✅ ${srcRefToText(targets.type + ':' + targets.value[i])} does not have ${attrName[0]}, unapplying skipped.`);
-                if(targets.value.length === 1) return { msg: "Unapplying succeeded!", success: true, target: `${targets.type}:${targets.value[0]}` };
+                // failure for single target unapplying; success for multi target unapplying
+                if(targets.value.length === 1) return { msg: "Unapplying failed!", success: false, target: `${targets.type}:${targets.value[0]}` };
                 successes++;
                 continue;
             }
