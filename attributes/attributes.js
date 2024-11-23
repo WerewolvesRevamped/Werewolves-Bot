@@ -119,7 +119,7 @@ module.exports = function() {
     /**
     Checks if a attribute column name is valid**/
     function isValidAttributeColumnName(name) {
-        return ["owner","src_name","src_ref","attr_type","duration","val1","val2","val3","val4","applied_phase","used","target","counter","alive"].includes(name);
+        return ["owner","owner_type","src_name","src_ref","attr_type","duration","val1","val2","val3","val4","applied_phase","used","target","counter","alive"].includes(name);
     }
     
     function validateAttributeColumnName(name) {

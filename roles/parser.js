@@ -1198,7 +1198,7 @@ module.exports = function() {
         exp = new RegExp("^Group Change " + targetType + " to " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "changing", subtype: "group", target: ttpp(fd[1]), change_to: ttpp(fd[2], "group") };
+            ability = { type: "changing", subtype: "group", target: ttpp(fd[1], "group"), change_to: ttpp(fd[2], "group") };
         }
         /** COPYING **/
         // copy abilities, target to self

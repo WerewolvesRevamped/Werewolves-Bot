@@ -48,6 +48,25 @@ module.exports = function() {
                 result = await changingAlignment(src_name, src_ref, targetsAlignment, alignments[0], additionalTriggerData);
                 return result;
             break;
+            case "group":
+                // parse parameters
+                let targetsGroup = await parseGroup(ability.target, src_ref, additionalTriggerData);
+                targetsGroup = await applyRedirection(targetsGroup, src_ref, ability.type, ability.subtype, additionalTriggerData);
+                // group must exist
+                if(!targetsGroup) {
+                    abilityLog(`❗ **Error:** Tried to change a group that doesn't exist!`);
+                    return { msg: "Changing failed! " + abilityError, success: false };
+                }
+                let group = parseGroupName(selectorGetTarget(ability.change_to));
+                // group must exist
+                if(!group) {
+                    abilityLog(`❗ **Error:** Tried to change to a group that doesn't exist!`);
+                    return { msg: "Changing failed! " + abilityError, success: false };
+                }
+                result = await changingGroup(src_name, src_ref, targetsGroup, group, additionalTriggerData);
+                return result;
+            
+            break;
         }
     }
     
@@ -187,6 +206,52 @@ module.exports = function() {
         return { msg: "Changings succeeded!", success: true, target: `player:${targets[0]}` };
     }
     
+    /**
+    Ability: Changing - Group
+    changes a groups's group
+    **/
+    this.changingGroup = async function(src_name, src_ref, group, newGroupName, additionalTriggerData) {
+        // get role image
+        let img = null;
+        let refImg = await refToImg(`group:${newGroupName}`);
+        if(refImg) {
+            img = refImg;
+        }
+        
+        // update group group
+        await sqlProm("UPDATE active_groups SET name=" + connection.escape(newGroupName) + " WHERE channel_id=" + connection.escape(group));
+        
+        // delete all "permanent" attributes
+        let attrs = await queryAttribute("owner_type", "group", "owner", group, "duration", "permanent");
+        for(let i = 0; i < attrs.length; i++) {
+            await deleteAttribute(attrs[i].ai_id);
+        }
+        
+        // run starting trigger
+        await trigger(`group:${group}`, "Starting");
+        
+        // new group info embed
+        // get info embed
+        infoEmbed = await getGroupEmbed(newGroupName, ["basics","details"], mainGuild);
+        // get channel
+        let sc = mainGuild.channels.cache.get(group);
+        // send embed
+        sendEmbed(sc, infoEmbed, true);
+        
+        // rename channel
+        sc.edit({ name: newGroupName });
+        
+        // group change info embed
+        await abilitySendProm(`group:${group}`, `This group has changed to \`${toTitleCase(newGroupName)}\`!`, EMBED_PURPLE, true, false, img, "Group Change");
+        
+        // passive
+        await triggerHandler("Passive");
+        
+        // log
+        abilityLog(`✅ <#${group}> group changed to \`${toTitleCase(newGroupName)}\`.`);
+            
+        return { msg: "Changings succeeded!", success: true, target: `group:${group}` };
+    }
 
     /** PUBLIC
     Set Role

@@ -191,5 +191,143 @@ module.exports = function() {
         
     }
     
+    /**
+    Groups: Join
+    joins a group, creating it, if it doesnt exist
+    takes a target id and a group name
+    **/
+    this.groupsJoin = async function(target, group) {
+        return new Promise(res => {
+            sql("SELECT * FROM active_groups WHERE name=" + connection.escape(group), async result => {
+                if(result && result[0]) {
+                    // group exists, add target to group
+                    let groupChannel = await mainGuild.channels.fetch(result[0].channel_id);
+                    
+                    groupChannel.permissionOverwrites.create(target, { ViewChannel: true}).then(sc => {
+                        let embed = basicEmbed(`<@${target}> has joined <#${groupChannel.id}>.`, EMBED_GREEN);
+                        groupChannel.send(embed);
+                        res();
+                    }).catch(async err => { 
+                        logO(err); 
+                        let embed = basicEmbed(`Failed to add <@${target}> to <#${groupChannel.id}>.`, EMBED_RED);
+                        groupChannel.send(embed);
+                        res();
+                    });	
+                } else {
+                    // group doesnt exist, create it
+                    await groupsCreate(group, target); 
+                    res();
+                }
+            });
+        });
+    }
+    
+    /**
+    Groups: Leave
+    leave a group
+    takes a target id and a group name
+    **/
+    this.groupsLeave = async function(target, group) {
+        return new Promise(res => {
+            sql("SELECT * FROM active_groups WHERE name=" + connection.escape(group), async result => {
+                if(result && result[0]) {
+                    // group exists, add target to group
+                    let groupChannel = await mainGuild.channels.fetch(result[0].channel_id);
+                    groupChannel.permissionOverwrites.cache.get(target).delete().then(sc => {
+                        let embed = basicEmbed(`<@${target}> has left <#${groupChannel.id}>.`, EMBED_RED);
+                        groupChannel.send(embed);
+                        res();
+                    }).catch(async err => { 
+                        // Failure, Create a new SC Cat first
+                        logO(err); 
+                        let embed = basicEmbed(`Failed to remove <@${target}> from <#${groupChannel.id}>.`, EMBED_RED);
+                        groupChannel.send(embed);
+                        res();
+                    });	
+                } else {
+                    // group doesnt exist, create it
+                    await groupsCreate(group, target); 
+                    res();
+                }
+            });
+        });
+    }
+    
+    /**
+    Groups: Send
+    sends a message in a group that already exists
+    Replaces $name with the channel name link
+    **/
+    this.groupsSend = async function(group, message) {
+        return new Promise(res => {
+            sql("SELECT * FROM active_groups WHERE name=" + connection.escape(group), async result => {
+                if(result && result[0]) {
+                    // group exists, add target to group
+                    let groupChannel = await mainGuild.channels.fetch(result[0].channel_id);
+                    let msg = message.replace(`\$name`, `<#${groupChannel.id}>`);
+                    groupChannel.send(`${msg}`);
+                }
+            });
+        });
+    }
+    
+    /** Groups: Create
+    creates a group, takes a group name and optional first member id
+    WIP: should probably be in groups
+    **/
+    this.groupsCreate = async function(group, firstMember = null) {
+        return new Promise(async res => {
+            // Determine channel name
+            let channelName = group.substr(0, 100);
+            channelName = applyTheme(channelName);
+            
+            // get base sc permissions
+            let scPerms = getSCCatPerms(mainGuild);
+            
+            // if a first member is specified, grant them permissions to the channel
+            if(firstMember) {
+                scPerms.push(getPerms(firstMember, ["history", "read"], []));
+            }
+            
+            // get last sc cat
+            let category = await mainGuild.channels.fetch(cachedSCs[cachedSCs.length - 1]);
+            
+            // Create SC channel
+            mainGuild.channels.create({ name: channelName, type: ChannelType.GuildText,  permissionOverwrites: scPerms })
+            .then(async sc => {
+                // Create a default connection with the groups name
+                connectionAdd(sc.id, group);
+                // Send info message for each role
+                let infoEmbed = await getGroupEmbed(group, ["basics","details"], mainGuild);
+                sendEmbed(sc, infoEmbed, true);
+
+                // Move into sc category
+                sc.setParent(category,{ lockPermissions: false }).then(m => {
+                    // Success continue as usual
+                }).catch(async err => { 
+                    // Failure, Create a new SC Cat first
+                    logO(err); 
+                    await createNewSCCat(channel, sc);
+                });	
+                
+                // announce new group
+                if(firstMember) {
+                    let embed = basicEmbed(`<@${firstMember}> has created <#${sc.id}>.`, EMBED_GREEN);
+                    sc.send(embed);
+                } else {
+                    let embed = basicEmbed(`<#${sc.id}> has been created.`, EMBED_GREEN);
+                    sc.send(embed);
+                }
+                
+                // save group in DB
+                await sqlProm("INSERT INTO active_groups (name, channel_id) VALUES (" + connection.escape(group) + "," + connection.escape(sc.id) + ")");
+                
+                // end of create channel callback
+                res();
+            });
+        });
+        
+    }
+    
     
 }

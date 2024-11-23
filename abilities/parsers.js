@@ -1752,7 +1752,7 @@ module.exports = function() {
         [], // obstruction
         ["creation","addition","deletion","cancellation","manipulation","votes"], // poll
         ["immediate","buffer"], // announcement
-        ["role","alignment"], // changing
+        ["role","alignment","group"], // changing
         null, // copying
         ["creation","choosing"], // choices
         [], // ascend
