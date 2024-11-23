@@ -586,6 +586,7 @@ module.exports = function() {
         const promptPing = !(promptOverwrite.match(/^silent:.*$/)); // check if prompt should ping
         const forced = (trigger?.parameters?.forced ?? false) ? 1 : 0; // check if action is forced
         const forcedSel = trigger?.parameters?.forced_sel ?? null;
+        const promptLoc = ["Choice Chosen","Choice Chosen Complex"].includes(triggerName) ? additionalTriggerDataOriginal.chooser : src_ref;
         
         // extend additional trigger data
         let additionalTriggerData = JSON.parse(JSON.stringify(additionalTriggerDataOriginal));
@@ -700,7 +701,7 @@ module.exports = function() {
                 let type = toTitleCase(selectorGetType(prompts[0][1]));
                 let promptMsg = getPromptMessage(trigger.abilities[0], promptOverwrite, type);
                 let refImg = await refToImg(src_name);
-                let message = await abilitySendProm(src_ref, `${getAbilityEmoji(trigger.abilities[0].type)} ${promptMsg} ${scalingMessage}\nPlease submit your choice as a reply to this message.`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt");
+                let message = await abilitySendProm(promptLoc, `${getAbilityEmoji(trigger.abilities[0].type)} ${promptMsg} ${scalingMessage}\nPlease submit your choice as a reply to this message.`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt");
                 if(ptype[0] === "immediate") { // immediate prompt
                     abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(trigger.abilities[0].type)} [${type}] {Immediate}`);
                     await createPrompt(message.id, message.channel.id, src_ref, src_name, trigger.abilities, restrictions, additionalTriggerData, "immediate", actionCount, forced, triggerName, type);
@@ -717,7 +718,7 @@ module.exports = function() {
                 let type2 = toTitleCase(selectorGetType(prompts[1][1]));
                 let promptMsg = getPromptMessage(trigger.abilities[0], promptOverwrite, type1, type2);
                 let refImg = await refToImg(src_name);
-                let message = await abilitySendProm(src_ref, `${getAbilityEmoji(trigger.abilities[0].type)} ${promptMsg} ${scalingMessage}\nPlease submit your choice as a reply to this message.`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt");
+                let message = await abilitySendProm(promptLoc, `${getAbilityEmoji(trigger.abilities[0].type)} ${promptMsg} ${scalingMessage}\nPlease submit your choice as a reply to this message.`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt");
                 if(ptype[0] === "immediate") { // immediate prompt
                     abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(trigger.abilities[0].type)} [${type1}, ${type2}] {Immediate}`);
                     await createPrompt(message.id, message.channel.id, src_ref, src_name, trigger.abilities, restrictions,additionalTriggerData, "immediate", actionCount, forced, triggerName, type1, type2);
@@ -904,10 +905,6 @@ module.exports = function() {
         await actionQueueChecker();
         await executeEndQueuedAction("End Phase");
         await actionQueueChecker();
-        await executeEndQueuedAction("Start Night");
-        await actionQueueChecker();
-        await executeEndQueuedAction("Start Phase");
-        await actionQueueChecker();
         skipActionQueueChecker = false;
         
         // clear actions
@@ -933,6 +930,13 @@ module.exports = function() {
         
         // storytime
         await postStorytime();
+        
+        skipActionQueueChecker = true;
+        await executeEndQueuedAction("Start Night");
+        await actionQueueChecker();
+        await executeEndQueuedAction("Start Phase");
+        await actionQueueChecker();
+        skipActionQueueChecker = false;
         
         // passive start actions
         await triggerHandler("Passive Start Night");
@@ -1001,10 +1005,6 @@ module.exports = function() {
         await actionQueueChecker();
         await executeEndQueuedAction("End Phase");
         await actionQueueChecker();
-        await executeEndQueuedAction("Start Day");
-        await actionQueueChecker();
-        await executeEndQueuedAction("Start Phase");
-        await actionQueueChecker();
         skipActionQueueChecker = false;
         
         // clear actions
@@ -1030,6 +1030,13 @@ module.exports = function() {
         
         // storytime
         await postStorytime();
+        
+        skipActionQueueChecker = true;
+        await executeEndQueuedAction("Start Day");
+        await actionQueueChecker();
+        await executeEndQueuedAction("Start Phase");
+        await actionQueueChecker();
+        skipActionQueueChecker = false;
         
         // passive start actions
         await triggerHandler("Passive Start Day");

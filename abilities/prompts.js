@@ -230,6 +230,7 @@ module.exports = function() {
             // if specific forced selection is set
             if(forcedSel) {
                 let parsed = await parseSelector(forcedSel, src_ref, additionalTriggerData);
+                console.log(forcedSel, parsed);
                 selection1 = parsePromptReply(parsed.value[0], type1);
                 selection2 = null;
                 repl_msg = await sendPromptReplyConfirmMessage(promptMessage, promptType, `You did not submit a target, but the action is forced. The following target was selected: ${selection1[0]}` + PROMPT_SPLIT, true); 

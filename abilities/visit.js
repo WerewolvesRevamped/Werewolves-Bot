@@ -21,6 +21,18 @@ module.exports = function() {
         let targetPlayer = targetPlayerSplit.length === 2 ? targetPlayerSplit[1] : targetPlayerAny;
         let targetPlayerLong = targetPlayerSplit.length === 2 ? targetPlayerAny : `unknown:` + targetPlayerSplit[0];
         
+        // convert extra role channel ids to player ids
+        if(sourcePlayerSplit[0] === "player_attr") {
+            let attr = await roleAttributeGetPlayer(sourcePlayer);
+            sourcePlayer = attr.id;
+            sourcePlayerLong = `player_attr:${attr.id}`;
+        }
+        if(targetPlayerSplit[0] === "player_attr") {
+            let attr = await roleAttributeGetPlayer(targetPlayer);
+            targetPlayer = attr.id;
+            targetPlayerLong = `player_attr:${attr.id}`;
+        }
+        
         // no visit to self
         if(sourcePlayer === targetPlayer) return null;
         

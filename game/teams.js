@@ -184,7 +184,7 @@ module.exports = function() {
             await gameEnd();
             await bufferStorytime(`**The game has ended!**`);
             // storytime
-            await postStorytime();
+            await postStorytimeImmediate();
             // get winners & losers
             let allLosers = await sqlProm("SELECT * FROM players WHERE final_result=0");
             let allWinners = await sqlProm("SELECT * FROM players WHERE final_result=1");

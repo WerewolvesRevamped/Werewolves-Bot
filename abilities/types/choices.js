@@ -30,7 +30,15 @@ module.exports = function() {
                     return { msg: "Choices failed! " + abilityError, success: false };
                 }
                 // parse parameters
-                let target = await parsePlayerSelector(ability.target, src_ref, additionalTriggerData);
+                let target;
+                let type;
+                if(ability.target[0] === "`") {
+                    target = await parseActiveExtraRoleSelector(ability.target, src_ref, additionalTriggerData);
+                    type = "player_attr";
+                } else {
+                    target = await parsePlayerSelector(ability.target, src_ref, additionalTriggerData);
+                    type = "player";
+                }
                 target = await applyRedirection(target, src_ref, ability.type, ability.subtype, additionalTriggerData);
                 const options = ability.options.map(el => parseOptionDisplay(el));
                 // can only apply a single attribute
@@ -43,7 +51,7 @@ module.exports = function() {
                 if(additionalTriggerData.parameters.forced && additionalTriggerData.parameters.forced_sel) {
                     forcedSel = additionalTriggerData.parameters.forced_sel;
                 }
-                result = await choicesCreation(src_name, src_ref, target[0], choice, options, forcedSel, additionalTriggerData);
+                result = await choicesCreation(src_name, src_ref, `${type}:${target[0]}`, choice, options, forcedSel, additionalTriggerData);
                 return result;
             break;
         }
@@ -64,16 +72,16 @@ module.exports = function() {
         await sqlProm("INSERT INTO choices (name, options, src_ref, src_name, owner, forced) VALUES (" + connection.escape(choiceName) + "," + connection.escape(options.join(",")) + "," + connection.escape(src_ref) + "," + connection.escape(src_name) + "," + connection.escape(target) + "," + connection.escape(forcedSel) + ")");
         // feedback
         let optionsText = options.map(el => "`" + el + "`").join(", ");
-        abilityLog(`✅ Created choice \`${choiceName}\` for <@${target}> with options: ${optionsText}.`);
-        return { msg: "Choice creation succeeded!", success: true, target: `player:${target}` };
+        abilityLog(`✅ Created choice \`${choiceName}\` for ${srcRefToText(target)} with options: ${optionsText}.`);
+        return { msg: "Choice creation succeeded!", success: true, target: `${target}` };
     }
     
     /**
     Choice choosing prompt creation
     **/
-    this.choicesChoosingPrompt = async function(src_name, src_ref, ability, promptOverwrite) {
+    this.choicesChoosingPrompt = async function(src_name, owner, ability, promptOverwrite) {
         // get channel
-        const channel_id = await getSrcRefChannel(src_ref);
+        const channel_id = await getSrcRefChannel(owner);
         if(!channel_id) return;
         
         // get channel
@@ -81,15 +89,11 @@ module.exports = function() {
         
         // get relevant choice
         const choiceName = parseChoice(ability.choice);
-        const type = srcToType(src_ref);
-        if(!type) {
-            abilityLog(`❗ **Error:** ${type} cannot choice choose!`);
-            return;
-        }
-        const pid = srcToValue(src_ref);
-        const choice = await choicesGetByOwner(choiceName, pid);
+        
+        // check if choice exists
+        const choice = await choicesGetByOwner(choiceName, owner);
         if(!choice) {
-            abilityLog(`❗ **Error:** Could not find choice ${choiceName} for <@${pid}>!`);
+            abilityLog(`❗ **Error:** Could not find choice ${choiceName} for ${srcRefToText(owner)}!`);
             return;
         }
         
@@ -99,10 +103,10 @@ module.exports = function() {
         const message = await sendChoiceMessage(sc, `${getAbilityEmoji(ability.type)} ${promptMsg}${PROMPT_SPLIT}\nPlease select one of the choices by clicking the respective button. You may be prompted for additional selections after the choice.`, choiceName, choice.options, refImg, "Ability Prompt - Choice");
         
         // save choice message
-        let p1 = choicesUpdateByOwner(choiceName, pid, "ability", JSON.stringify(ability));
-        let p2 = choicesUpdateByOwner(choiceName, pid, "prompt", promptOverwrite);
-        let p3 = choicesUpdateByOwner(choiceName, pid, "choice_msg", message.id);
-        let p4 = choicesUpdateByOwner(choiceName, pid, "choice_channel", message.channel.id);
+        let p1 = choicesUpdateByOwner(choiceName, owner, "ability", JSON.stringify(ability));
+        let p2 = choicesUpdateByOwner(choiceName, owner, "prompt", promptOverwrite);
+        let p3 = choicesUpdateByOwner(choiceName, owner, "choice_msg", message.id);
+        let p4 = choicesUpdateByOwner(choiceName, owner, "choice_channel", message.channel.id);
         await Promise.all([p1, p2, p3, p4]);
     }
     
@@ -235,23 +239,30 @@ module.exports = function() {
     /** PUBLIC
     Get choice data
     **/
-    this.choicesGetByOwner = function(choiceName, ownerId) {
-        return sqlPromOne("SELECT * FROM choices WHERE name=" + connection.escape(choiceName) + " AND owner=" + connection.escape(ownerId));
+    this.choicesGetByOwner = function(choiceName, owner) {
+        return sqlPromOne("SELECT * FROM choices WHERE name=" + connection.escape(choiceName) + " AND owner=" + connection.escape(owner));
+    }
+    
+    /** PUBLIC
+    find choice by member or channel id
+    **/
+    this.choicesFind = function(choiceName, ownerId, ownerChannel) {
+        return sqlPromOne("SELECT * FROM choices WHERE name=" + connection.escape(choiceName) + " AND (owner=" + connection.escape(`player:${ownerId}`) + " OR owner=" + connection.escape(`player_attr:${ownerChannel}`) + ")");
     }
     
     /** PUBLIC
     Deletes choice 
     **/
-    this.choicesDeleteByOwner = function(choiceName, ownerId) {
-        return sqlProm("DELETE FROM choices WHERE name=" + connection.escape(choiceName) + " AND owner=" + connection.escape(ownerId));
+    this.choicesDeleteByOwner = function(choiceName, owner) {
+        return sqlProm("DELETE FROM choices WHERE name=" + connection.escape(choiceName) + " AND owner=" + connection.escape(owner));
     }
     
     /** PUBLIC
     Updates a choice
     **/
-    this.choicesUpdateByOwner = function(choiceName, ownerId, column, val) {
+    this.choicesUpdateByOwner = function(choiceName, owner, column, val) {
         if(!(["choice_msg","choice_channel","prompt","ability","chosen"].includes(column))) return;
-        return sqlProm("UPDATE choices SET " + column + "=" + connection.escape(val) +  " WHERE name=" + connection.escape(choiceName) + " AND owner=" + connection.escape(ownerId));
+        return sqlProm("UPDATE choices SET " + column + "=" + connection.escape(val) +  " WHERE name=" + connection.escape(choiceName) + " AND owner=" + connection.escape(owner));
     }
     
 }

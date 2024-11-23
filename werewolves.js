@@ -940,13 +940,15 @@ client.on('interactionCreate', async interaction => {
                 }
                 const choiceName = interactionArgSplit[0];
                 const optionName = interactionArgSplit[1];
-                const chooser = interaction.member.id;
+                const chooserMember = interaction.member.id
+                const chooserChannel = interaction.channel.id;
                 // get choice data
-                let choiceData = await choicesGetByOwner(choiceName, chooser);
+                let choiceData = await choicesFind(choiceName, chooserMember, chooserChannel);
                 if(!choiceData) { // cant find choice (can happen when reactor is not choice owner)
                     interaction.deferUpdate();
                     return;
                 }
+                let chooser = choiceData.owner;
                 let choiceCreatorId = srcToValue(choiceData.src_ref);
                 // update message
                 embed = basicEmbed(`${orig_text}${PROMPT_SPLIT} Choice chosen.`, EMBED_GREEN);
@@ -954,9 +956,9 @@ client.on('interactionCreate', async interaction => {
                 embed.components = [ { type: 1, components: [ unchooseButton ] } ];
                 interaction.update(embed);
                 // run trigger
-                abilityLog(`✅ **Choice Chose:** <@${chooser}> chose \`${optionName}\` for \`${choiceName}\`.`);
-                await triggerPlayer(choiceCreatorId, "Choice Chosen", { chooser: `player:${chooser}`, chosen: parseOption(optionName), choice_data: { name: choiceName, owner: chooser } }); 
-                await triggerPlayer(choiceCreatorId, "Choice Chosen Complex", { chooser: `player:${chooser}`, chosen: parseOption(optionName), choice_data: { name: choiceName, owner: chooser } }); 
+                abilityLog(`✅ **Choice Chose:** ${srcRefToText(chooser)} chose \`${optionName}\` for \`${choiceName}\`.`);
+                await triggerPlayer(choiceCreatorId, "Choice Chosen", { chooser: `${chooser}`, chosen: parseOption(optionName), choice_data: { name: choiceName, owner: chooser } }); 
+                await triggerPlayer(choiceCreatorId, "Choice Chosen Complex", { chooser: `${chooser}`, chosen: parseOption(optionName), choice_data: { name: choiceName, owner: chooser } }); 
                 // set as chosen
                 await choicesUpdateByOwner(choiceName, chooser, "chosen", 1);
                 // check choice completion
@@ -964,9 +966,15 @@ client.on('interactionCreate', async interaction => {
             } break;
             case "revert-choice": {
                 const choiceName = interactionArg;
-                const chooser = interaction.member.id;
+                const chooserMember = interaction.member.id;
+                const chooserChannel = interaction.channel.id;
                 // get choice data
-                let choiceData = await choicesGetByOwner(choiceName, chooser);
+                let choiceData = await choicesFind(choiceName, chooserMember, chooserChannel);
+                if(!choiceData) { // cant find choice (can happen when reactor is not choice owner)
+                    interaction.deferUpdate();
+                    return;
+                }
+                let chooser = choiceData.owner;
                 
                 // remove prompts and actions
                 let clearedCount = await choiceUnchoose(orig_text, chooser, choiceName);
@@ -981,7 +989,7 @@ client.on('interactionCreate', async interaction => {
                     await choicesUpdateByOwner(choiceName, chooser, "chosen", 0);
                     
                     // create new choice
-                    choicesChoosingPrompt(choiceData.src_name, choiceData.src_ref, JSON.parse(choiceData.ability), choiceData.prompt);
+                    choicesChoosingPrompt(choiceData.src_name, choiceData.owner, JSON.parse(choiceData.ability), choiceData.prompt);
                 } else {
                     // update message
                     embed = basicEmbed(`${orig_text}${PROMPT_SPLIT} Cannot unchose choice.`, EMBED_RED);

@@ -39,8 +39,8 @@ module.exports = function() {
             // LOCATION
             case "location":
                 let loc = await parseLocation(selector, self, additionalTriggerData);
-                let locs = loc ? [ loc ] : [ ];
-                return { value: locs, type: "role" };
+                let locs = loc ? [ loc.value ] : [ ];
+                return { value: locs, type: loc.type };
             // POLL
             case "poll":
                 let poll = await parsePoll(selector, self, additionalTriggerData);
@@ -251,7 +251,18 @@ module.exports = function() {
                 }
             case "@chooser":
                 if(additionalTriggerData.chooser) {
-                    return [ additionalTriggerData.chooser ];
+                    let val = srcToValue(additionalTriggerData.chooser);
+                    let type = srcToType(additionalTriggerData.chooser);
+                    switch(type) {
+                        case "player":
+                            return [ val ];
+                        case "player_attr":
+                            let attr = await roleAttributeGetPlayer(val);
+                            return [ attr.id ];
+                        default:
+                            abilityLog(`❗ **Error:** Used \`@Chooser\` with invalid chooser type \`${type}\`!`);
+                            return [ ];
+                    }
                 } else {
                     return invalidSelector(selectorTarget);
                 }
