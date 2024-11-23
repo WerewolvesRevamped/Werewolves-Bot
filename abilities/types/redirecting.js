@@ -82,6 +82,7 @@ module.exports = function() {
         //console.log(`Checking Redirections for ${target} from ${source} with ${abilitySubtype} ${abilityType}`);
         let targetRedirections = await getRedirections(target);
         let parsedAbilityType = parseAbilityType(abilityType);
+        abilitySubtype = abilitySubtype.replace(/ /g, "-"); // remove spaces
         let parsedAbilitySubype = abilitySubtype ? parseAbilitySubtype(abilitySubtype + " " + abilityType) : "none none";
         let filteredRedirections = [];
         for(let i = 0; i < targetRedirections.length; i++) {

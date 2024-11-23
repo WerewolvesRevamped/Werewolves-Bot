@@ -1442,6 +1442,13 @@ module.exports = function() {
         if(fd) {
             ability = { type: "feedback", feedback: ttpp(fd[1]) };
         }
+        /** FEEDBACK */
+        // stores feedback to result
+        exp = new RegExp("^Store " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "storing", selector: ttpp(fd[1]) };
+        }
         /** ACTION VALUES */
         // just values
         exp = new RegExp("^Action:$", "g");

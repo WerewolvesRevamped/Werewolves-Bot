@@ -228,7 +228,7 @@ module.exports = function() {
         for(let i = 0; i < targets.length; i++) {
             // handle visit
             if(additionalTriggerData.parameters.visitless !== true) {
-                let result = await visit(src_ref, targets[i], "", "killing", "true banish");
+                let result = await visit(src_ref, targets[i], "", "killing", "true-banish");
                 if(result) {
                     if(targets.length === 1) return visitReturn(result, "True Banishment failed!", "True Banishment succeeded!");
                     continue;

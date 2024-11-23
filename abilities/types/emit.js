@@ -10,11 +10,11 @@ module.exports = function() {
     /** PUBLIC
     Ability: Emit
     **/
-    this.abilityEmit = async function(src_ref, src_name, ability, additionalTriggerData) {
+    this.abilityEmitting = async function(src_ref, src_name, ability, additionalTriggerData) {
         // check parameters
         if(!ability.emit_value || !ability.selector) {
             abilityLog(`❗ **Error:** Missing arguments for type \`${ability.type}\`!`);
-            return { msg: "Emit failed! " + abilityError, success: false };
+            return { msg: "Emitting failed! " + abilityError, success: false };
         }
         
         // get target

@@ -471,8 +471,12 @@ module.exports = function() {
                 default:  
                     if(ATTR_PROPERTY.test(property)) {
                         let contents = property.match(ATTR_PROPERTY); // get the selector
-                        let attr = await queryAttributePlayer(selector[i], "attr_type", "custom", "val1", contents[1].toLowerCase());
+                        let attrName = contents[1].toLowerCase();
+                        let attr = await queryAttributePlayer(selector[i], "attr_type", "custom", "val1", attrName);
                         output.push(...attr.map(el => el.ai_id));
+                        // check for role attribute
+                        let hasRA = await playerHasRoleAttribute(selector[i], attrName);
+                        if(hasRA) output.push("0");
                     } else {
                         abilityLog(`❗ **Error:** Invalid player property access \`${property}\`!`);
                     }
@@ -1630,7 +1634,7 @@ module.exports = function() {
     /**
     Parse ability type
     **/
-    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","redirecting","manipulating","whispering","joining","granting","loyalty","obstructing","poll","announcement","changing","","choices","ascend","descend","","counting","reset","","","feedback","success","failure","log","","process_evaluate","abilities"];
+    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","redirecting","manipulating","whispering","joining","granting","loyalty","obstructing","poll","announcement","changing","","choices","ascend","descend","","counting","reset","","","feedback","success","failure","log","","process_evaluate","abilities","emit","storing"];
     this.parseAbilityType = function(ability_type, self = null, additionalTriggerData = {}) {
         // get target
         let selectorTarget = selectorGetTarget(ability_type);
@@ -1737,7 +1741,7 @@ module.exports = function() {
     Parse ability subtype
     **/
     const abilitySubtypeNames = [
-        ["attack","kill","lynch","true-kill"], // killing
+        ["attack","kill","lynch","true-kill","banish","true-banish"], // killing
         ["role","alignment","class","category","player_count","count","attribute"], // investigating
         ["target","untarget"], // targeting
         ["weakly","strongly"], // disguising
@@ -1768,6 +1772,8 @@ module.exports = function() {
         [], // log
         [], // process_evaluate
         [], // abilities
+        [], // emit
+        [], // storing
         ];
     this.parseAbilitySubtype = function(ability_subtype, self = null, additionalTriggerData = {}) {
         // get target
