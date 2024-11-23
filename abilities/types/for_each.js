@@ -18,7 +18,7 @@ module.exports = function() {
         // extract abilities
         const abilities = ability.sub_abilities;
         
-        // get selecto members
+        // get selector members
         const targets = await parsePlayerSelector(ability.target, src_ref, additionalTriggerData);
         
         // run all process abilities

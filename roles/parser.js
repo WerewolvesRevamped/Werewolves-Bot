@@ -24,7 +24,7 @@ module.exports = function() {
     const passiveTriggers = ["Passive", "Passive End Day", "Passive End Night", "Passive Start Day", "Passive Start Night", "Passive Start Phase", "Passive End Phase"];
     const electionTriggers = ["On Election", "On Mayor Election", "On Reporter Election", "On Guardian Election"];
     const defenseTriggers = ["On Defense", "On Passive Defense", "On Partial Defense", "On Recruitment Defense", "On Active Defense", "On Absence Defense"];
-    const basicTriggerTypes = [...actionTimings, "Starting", ...passiveTriggers, "On Death", "On Killed", "On Banished", "On Banishment", "On Visited", "On Action", "On Disbandment", "On Lynch", ...electionTriggers, ...defenseTriggers, "On Betrayal", "On Poll Closed", "On Poll Win", "On Role Change", "On Removal", "On End", "Choice Chosen", "On Redirect"]; // basic trigger types
+    const basicTriggerTypes = [...actionTimings, "Starting", ...passiveTriggers, "On Death", "On Killed", "On Banished", "On Banishment", "On Visited", "On Action", "On Disbandment", "On Lynch", ...electionTriggers, ...defenseTriggers, "On Betrayal", "On Poll Closed", "On Poll Win", "On Role Change", "On Removal", "On End", "Choice Chosen", "On Emitted", "On Redirect"]; // basic trigger types
     const bullets = ["•","‣","◦","·","⁃","⹀"];
 
     /**
@@ -1512,6 +1512,19 @@ module.exports = function() {
         if(fd) {
             ability = { type: "shuffle", targets: [ ttpp(fd[1]), ttpp(fd[2]), ttpp(fd[3]), ttpp(fd[4]), ttpp(fd[5]) ] };
         }
+        /** EMIT **/
+        // emit for somebody else
+        exp = new RegExp("^Emit `" + str + "` for " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "emit", selector: ttpp(fd[2]), emit_value: ttpp(fd[1], "option") };
+        }
+        // emit self
+        exp = new RegExp("^Emit `" + str + "`$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "emit", selector: "@self[player]", emit_value: ttpp(fd[1], "option") };
+        }
 
         
         /** Ability Types End */
@@ -1658,6 +1671,13 @@ module.exports = function() {
                     fd = exp.exec(curTriggerName);
                     if(fd) {
                         complexTrigger = "Choice Chosen;" + ttpp(fd[1].trim().toLowerCase().replace(/[^a-z]/g,""), "option");
+                    }
+                    /** On [Value] Emitted **/
+                    var exp, fd, complexTrigger;
+                    exp = new RegExp("^On `" + str +  "` Emitted$", "g");
+                    fd = exp.exec(curTriggerName);
+                    if(fd) {
+                        complexTrigger = "On Emitted;" + ttpp(fd[1].trim().toLowerCase().replace(/[^a-z]/g,""), "option");
                     }
                     /** Otherwise **/
                     if(!complexTrigger) { // could not find a complex trigger match

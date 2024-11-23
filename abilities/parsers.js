@@ -397,9 +397,11 @@ module.exports = function() {
                 return parseGroupPropertyAccess(result.value, property);
             break;
             case "location":
-                let groups = result.value.filter(el => el.type === "group");
-                groups = groups.map(el => el.value);
-                return parseGroupPropertyAccess(groups, property);
+                if(result.type === "group") {
+                    return parseGroupPropertyAccess([ result.value ], property);
+                } else {     
+                    abilityLog(`❗ **Error:** Invalid property access type \`${result.type}\`!`);
+                }
             break;
             case "role":
                 return parseRolePropertyAccess(result.value, property);

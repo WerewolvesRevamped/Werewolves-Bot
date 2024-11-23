@@ -36,6 +36,7 @@ require("./types/cancel.js")();
 require("./types/for_each.js")();
 require("./types/obstructing.js")();
 require("./types/shuffle.js")();
+require("./types/emit.js")();
 
 module.exports = function() {
     
@@ -172,6 +173,9 @@ module.exports = function() {
                 break;
                 case "shuffle":
                     feedback = await abilityShuffle(src_refAction, src_name, ability, additionalTriggerData);
+                break;
+                case "emit":
+                    feedback = await abilityEmit(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "feedback":
                     let info = await parseInfo(ability.feedback, src_refAction, additionalTriggerData);
