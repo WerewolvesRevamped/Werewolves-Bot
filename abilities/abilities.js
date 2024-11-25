@@ -292,7 +292,7 @@ module.exports = function() {
                 let owner = getCustomAttributeOwner(ref);
                 return getSrcRefChannel(owner);
             default:
-                abilityLog(`❗ **Error:** Unknown type for get src_ref channel!`);
+                abilityLog(`❗ **Error:** Unknown type ${type} for get src_ref channel!`);
                 return null;
         }
     }

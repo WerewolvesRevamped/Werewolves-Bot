@@ -21,6 +21,8 @@ module.exports = function() {
         switch(selectorType) {
             // PLAYER
             case "player": 
+            case "player_attr": 
+            case "player_group": 
                 return { value: await parsePlayerSelector(selector, self, additionalTriggerData), type: "player" };
             // ROLE
             case "role": 
@@ -168,7 +170,12 @@ module.exports = function() {
                 let target = await getTarget(self);
                 if(!target) return [ ];
                 target = srcToValue(target);
-                return [ target ];  
+                if(aliveOnly) {
+                    let all = await getAllLivingIDs();
+                    return all.includes(target) ? [ target ] : [ ];
+                } else {
+                    return [ target ];  
+                }
             case "@members":
                 if(!self) { // if no self is specified, @Self is invalid
                     abilityLog(`❗ **Error:** Used \`@Members\` in invalid context!`);

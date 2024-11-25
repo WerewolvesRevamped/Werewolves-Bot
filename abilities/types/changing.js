@@ -127,7 +127,7 @@ module.exports = function() {
             await triggerPlayerRole(targets[i], "Starting");
             
             // new role info embed
-            let channel_id = await getSrcRefChannel(src_ref);
+            let channel_id = await getSrcRefChannel(`player:${targets[i]}`);
             if(channel_id) {
                 // get info embed
                 infoEmbed = await getRoleEmbed(role, ["basics", "details"], mainGuild);
@@ -218,6 +218,9 @@ module.exports = function() {
             img = refImg;
         }
         
+        // get old group name
+        let oldGroupData = await sqlPromOneEsc("SELECT * FROM active_groups WHERE channel_id=", group);
+        
         // update group group
         await sqlProm("UPDATE active_groups SET name=" + connection.escape(newGroupName) + " WHERE channel_id=" + connection.escape(group));
         
@@ -225,6 +228,12 @@ module.exports = function() {
         let attrs = await queryAttribute("owner_type", "group", "owner", group, "duration", "permanent");
         for(let i = 0; i < attrs.length; i++) {
             await deleteAttribute(attrs[i].ai_id);
+        }
+        
+        // convert all group memberships
+        let attrsOldMems = await queryAttribute( "attr_type", "group_membership", "val1", oldGroupData.name);
+        for(let i = 0; i < attrsOldMems.length; i++) {
+            await updateAttributeVal1(attrsOldMems[i].ai_id, newGroupName);
         }
         
         // run starting trigger

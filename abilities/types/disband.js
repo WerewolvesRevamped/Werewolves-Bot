@@ -17,7 +17,7 @@ module.exports = function() {
         }
         // parse parameters
         let target = await parseGroup(ability.target, src_ref);
-        await groupsDisband("", target);
+        await groupsDisband("", target, true);
         
         return { msg: "Disbanding succeeded!", success: true };
     }
@@ -26,7 +26,7 @@ module.exports = function() {
     /** Groups: Disband
     disbands a group
     **/
-    this.groupsDisband = async function(group, id = 0) {
+    this.groupsDisband = async function(group, id = 0, forceDisband = false) {
         return new Promise(res => {
             sql("SELECT * FROM active_groups WHERE disbanded=0 AND name=" + connection.escape(group) + " OR channel_id=" + connection.escape(id), async result => {
                 let groupChannel = await mainGuild.channels.fetch(result[0].channel_id);
@@ -41,7 +41,8 @@ module.exports = function() {
                 // disband trigger
                 await trigger(`group:${result[0].channel_id}`, "On Disbandment", { }); 
                 // disband active group
-                await sqlPromEsc("UPDATE active_groups SET disbanded=1 WHERE ai_id=", result[0].ai_id);
+                if(forceDisband) await sqlPromEsc("UPDATE active_groups SET disbanded=2 WHERE ai_id=", result[0].ai_id);
+                else await sqlPromEsc("UPDATE active_groups SET disbanded=1 WHERE ai_id=", result[0].ai_id);
                 // resolve disband
                 res();
             });
