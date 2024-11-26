@@ -400,7 +400,7 @@ module.exports = function() {
             break;
             case "attribute":
             case "activeAttribute":
-                if(result.value[0].ai_id) result.value = result.value.map(el => el.ai_id);
+                if(result.value[0] && result.value[0].ai_id) result.value = result.value.map(el => el.ai_id);
                 return parseAttributePropertyAccess(result.value, property);
             break;
             case "group":
@@ -1191,8 +1191,8 @@ module.exports = function() {
         let selectorTarget = selectorGetTarget(selector.split(":")[0]); // split to remove active attribute selector info in case we parse an active attribute as a normal one
         switch(selectorTarget) {
             case "@visitparameter":
-                if(additionalTriggerData.visitparameter) {
-                    return [ parseAttributeName(additionalTriggerData.visitparameter) ];
+                if(additionalTriggerData.visit_parameter) {
+                    return [ parseAttributeName(additionalTriggerData.visit_parameter) ];
                 } else {
                     if(!noErr) abilityLog(`❗ **Error:** Invalid attribute selector target \`${selectorTarget}\`!`);
                     return [ ];

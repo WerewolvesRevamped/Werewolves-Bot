@@ -258,9 +258,9 @@ module.exports = function() {
                 let targets = await parseSelector(condition.target, src_ref, additionalTriggerData);
                 let attribute = parseAttributeSelector(condition.attribute, src_ref, additionalTriggerData);
                 for(let i = 0; i < targets.value.length; i++) {
-                    let bool = hasCustomAttribute(`${targets.type}:${targets.value[i]}`, attribute);
+                    let bool = hasCustomAttribute(`${targets.type}:${targets.value[i]}`, attribute[0]);
                     if(targets.type === "player") { // additionally check for role attribute
-                        let hasRA = await playerHasRoleAttribute(targets.value[i], attribute);
+                        let hasRA = await playerHasRoleAttribute(targets.value[i], attribute[0]);
                         if(hasRA) bool = true;
                     }
                     if(!bool) return false;
