@@ -16,21 +16,17 @@ module.exports = function() {
         // allow both direct id types as well as player:<id> format
         let sourcePlayerSplit = sourcePlayerAny.split(":");
         let sourcePlayer = sourcePlayerSplit.length === 2 ? sourcePlayerSplit[1] : sourcePlayerAny;
-        let sourcePlayerLong = sourcePlayerSplit.length === 2 ? sourcePlayerAny : `unknown:` + sourcePlayerSplit[0];
         let targetPlayerSplit = targetPlayerAny.split(":");
         let targetPlayer = targetPlayerSplit.length === 2 ? targetPlayerSplit[1] : targetPlayerAny;
-        let targetPlayerLong = targetPlayerSplit.length === 2 ? targetPlayerAny : `unknown:` + targetPlayerSplit[0];
         
         // convert extra role channel ids to player ids
         if(sourcePlayerSplit[0] === "player_attr") {
             let attr = await roleAttributeGetPlayer(sourcePlayer);
             sourcePlayer = attr.id;
-            sourcePlayerLong = `player_attr:${attr.id}`;
         }
         if(targetPlayerSplit[0] === "player_attr") {
             let attr = await roleAttributeGetPlayer(targetPlayer);
             targetPlayer = attr.id;
-            targetPlayerLong = `player_attr:${attr.id}`;
         }
         
         // no visit to self
@@ -84,9 +80,9 @@ module.exports = function() {
         }
         
         // run triggers
-        await triggerPlayer(targetPlayer, "On Visited", { visitor: sourcePlayerLong, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
-        await triggerPlayer(targetPlayer, "On Visited Complex", { visitor: sourcePlayerLong, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
-        await triggerHandler("On Visited Target Complex", { visitor: sourcePlayerLong, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, this: targetPlayer, visit_id: visitId }); 
+        await triggerPlayer(targetPlayer, "On Visited", { visitor: sourcePlayer, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
+        await triggerPlayer(targetPlayer, "On Visited Complex", { visitor: sourcePlayer, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
+        await triggerHandler("On Visited Target Complex", { visitor: sourcePlayer, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, this: targetPlayer, visit_id: visitId }); 
         
         // check if is canceled
         if(cancelledVisits.includes(thisVisitId)) {

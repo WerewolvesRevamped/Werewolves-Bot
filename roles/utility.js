@@ -205,6 +205,26 @@ module.exports = function() {
 		return group ? true : false;
 	}
     
+    /** Verify Class
+    Verifies if a class exists
+    **/
+    this.verifyClass = function(input) {
+        if(cachedClasses.length == 0) return true; // if cache is currently not loaded just allow it
+		let inputClass = input.toLowerCase().replace(/[^a-z]/g,"").trim(); // parse class name
+		let classs = cachedClasses.find(el => el === inputClass); // check if class is in cache
+		return classs ? true : false;
+	}
+    
+    /** Verify Category
+    Verifies if a category exists
+    **/
+    this.verifyCategory = function(input) {
+        if(cachedCategories.length == 0) return true; // if cache is currently not loaded just allow it
+		let inputCat = input.toLowerCase().replace(/[^a-z]/g,"").trim(); // parse cat name
+		let cat = cachedCategories.find(el => el === inputCat); // check if cat is in cache
+		return cat ? true : false;
+	}
+    
     /** Verify Info Message
     Verifies if an info message exists
     **/

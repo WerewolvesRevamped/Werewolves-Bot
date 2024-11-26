@@ -12,6 +12,8 @@ module.exports = function() {
     this.cachedGroups = [];
     this.cachedAttributes = [];
     this.cachedSets = [];
+    this.cacheCategories = [];
+    this.cacheClasses = [];
     this.cachedAliases = [];
     this.cachedInfoNames = [];
     this.iconLUT = [];
@@ -67,6 +69,30 @@ module.exports = function() {
 	}
     
     /**
+    Cache Categories
+    caches all categories
+    **/
+    this.cacheCategories = function() {
+		sql("SELECT DISTINCT category FROM roles", result => {
+				cachedCategories = result.map(el => el.category);
+		}, () => {
+			log("Roles > ❗❗❗ Unable to cache categories!");
+		});
+	}
+    
+    /**
+    Cache Classes
+    caches all classes
+    **/
+    this.cacheClasses = function() {
+		sql("SELECT DISTINCT class FROM roles", result => {
+				cachedCategories = result.map(el => el.class);
+		}, () => {
+			log("Roles > ❗❗❗ Unable to cache classes!");
+		});
+	}
+    
+    /**
     Cache Info Names
     caches the current state of the roles database
     **/
@@ -101,6 +127,8 @@ module.exports = function() {
         cacheAttributes();
         cacheInfoNames();
         cacheSets();
+        cacheCategories();
+        cacheClasses();
 	}
     
     

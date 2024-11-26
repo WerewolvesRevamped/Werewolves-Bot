@@ -1782,9 +1782,9 @@ module.exports = function() {
                 case "privatevotingpower": return "number";
                 case "ownerrole": return "role";
                 case "ownerplayer": return "player";
-                case "value1": return "unknown";
-                case "value2": return "unknown";
-                case "value3": return "unknown";
+                case "value1": return "string";
+                case "value2": return "string";
+                case "value3": return "string";
                 case "members": return "player";
                 case "players": return "player";
                 case "randomplayer": return "player";
@@ -1821,8 +1821,16 @@ module.exports = function() {
             return "location";
         } else if(first == "`") {
             switch(targetType) {
-                case "`success`": case "`failure`": return "success";
-                default: return targetType.includes("@") || targetType.length > 30 ? "info" : "role";
+                case "`success`": case "`failure`":
+                    return "success";
+                default:
+                    if(verifyRole(targetType)) return "role";
+                    if(verifyAttribute(targetType)) return "attribute";
+                    if(verifyTeam(targetType) || verifyTeamName(targetType)) return "alignment";
+                    if(verifyClass(targetType)) return "class";
+                    if(verifyCategory(targetType)) return "category";
+                    if(verifyPoll(targetType)) return "poll";
+                    return targetType.includes("@") || targetType.length > 30 ? "info" : "role";
             }
         } else {
             if(/^\d+$/.test(targetType)) {

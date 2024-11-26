@@ -19,14 +19,14 @@ module.exports = function() {
         const abilities = ability.sub_abilities;
         
         // get selector members
-        const targets = await parsePlayerSelector(ability.target, src_ref, additionalTriggerData);
+        const targets = await parseSelector(ability.target, src_ref, additionalTriggerData);
         
         // run all process abilities
         let results = [];
         for(let i = 0; i < abilities.length; i++) {
-            for(let j = 0; j < targets.length; j++) {
+            for(let j = 0; j < targets.value.length; j++) {
                 let additionalTriggerDataCopy = deepCopy(additionalTriggerData);
-                additionalTriggerDataCopy.ind = targets[j];
+                additionalTriggerDataCopy.ind = targets.value[j];
                 
                 if(abilities[i].condition) { // HAS CONDITION
                     let condition = abilities[i].condition;

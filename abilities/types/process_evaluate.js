@@ -120,8 +120,12 @@ module.exports = function() {
                     abilityLog(`❗ **Error:** Missing arguments for type \`${type}\`!`);
                     return false;
                 }
-                const first = await parseSelector(condition.first, src_ref, additionalTriggerData);
-                const second = await parseSelector(condition.second, src_ref, additionalTriggerData);
+                
+                let first, second;
+                if(selectorGetType(condition.second) != "string") first = await parseSelector(condition.first, src_ref, additionalTriggerData);
+                else first = { value: await parseStringSelector(condition.first, src_ref, additionalTriggerData), type: "string" };
+                if(selectorGetType(condition.first) != "string") second = await parseSelector(condition.second, src_ref, additionalTriggerData);
+                else second = { value: await parseStringSelector(condition.second, src_ref, additionalTriggerData), type: "string" };
                 
                 console.log("FIRST", condition.first, first.type, first.value[0]);
                 console.log("SECOND", condition.second, second.type, second.value[0]);
@@ -159,7 +163,9 @@ module.exports = function() {
                             return first.value[0].alignment === second.value[0];
                         } else if(first.type === "alignment" && second.type === "result") {
                             return first.value[0] === second.value[0].alignment;
-                        } 
+                        } else if(first.type === "string" || second.type === "string") {
+                            return first.value[0] === second.value[0];
+                        }
                         // no comparison can be made
                         return false;
                     // COMPARISON - LESS THAN

@@ -390,6 +390,9 @@ module.exports = function() {
             case "info":
                 return val;
             break;
+            case "abilitytype":
+                return `${getAbilityEmoji(val)} **${toTitleCase(val)}**`;
+            break;
             case "unknown":
             default:
                 return `UNKNOWN \`${src_ref}\``;

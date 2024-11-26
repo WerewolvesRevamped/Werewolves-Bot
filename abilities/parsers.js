@@ -88,6 +88,8 @@ module.exports = function() {
                 return { value: parseSourceSelector(selector, self, additionalTriggerData), type: "source" };
             case "option":
                 return { value: parseOptionSelector(selector, self, additionalTriggerData), type: "option" };
+            case "string":
+                return { value: await parseStringSelector(selector, self, additionalTriggerData), type: "string" };
             // UNKNOWN
             default:
                 abilityLog(`❗ **Error:** Invalid selector type \`${selectorType}\`!`);
@@ -398,6 +400,7 @@ module.exports = function() {
             break;
             case "attribute":
             case "activeAttribute":
+                if(result.value[0].ai_id) result.value = result.value.map(el => el.ai_id);
                 return parseAttributePropertyAccess(result.value, property);
             break;
             case "group":
@@ -480,7 +483,8 @@ module.exports = function() {
                         let contents = property.match(ATTR_PROPERTY); // get the selector
                         let attrName = contents[1].toLowerCase();
                         let attr = await queryAttributePlayer(selector[i], "attr_type", "custom", "val1", attrName);
-                        output.push(...attr.map(el => el.ai_id));
+                        attr = attr.map(el => el.ai_id);
+                        output.push(...attr);
                         // check for role attribute
                         let hasRA = await playerHasRoleAttribute(selector[i], attrName);
                         if(hasRA) output.push("0");
@@ -583,13 +587,13 @@ module.exports = function() {
                     else abilityLog(`❗ **Error:** Can't return non-player source in attribute property acess!`);
                 break;
                 case "value1":
-                    output.push(attrData.val2);
+                    output.push(attrData.val2.toLowerCase());
                 break;
                 case "value2":
-                    output.push(attrData.val3);
+                    output.push(attrData.val3.toLowerCase());
                 break;
                 case "value3":
-                    output.push(attrData.val4);
+                    output.push(attrData.val4.toLowerCase());
                 break;
                 default:  
                     abilityLog(`❗ **Error:** Invalid attribute property access \`${property}\`!`);
@@ -973,7 +977,7 @@ module.exports = function() {
     Get all teams 
     **/
     function getAllTeams() {
-        return sqlProm("SELECT * FROM teams");
+        return sqlProm("SELECT * FROM teams WHERE active=1");
     }
     
     /**
@@ -1148,6 +1152,33 @@ module.exports = function() {
             default:
                 return [ selectorTarget ];
         }
+    }
+    
+    /**
+    Parse String Selector
+    parses a string type selector
+    **/
+    this.parseStringSelector = async function(selector, self = null, additionalTriggerData = {}) {
+        // get target
+        let selectorTarget = selectorGetTarget(selector); 
+        selectorTarget = selectorTarget.replace(/`/g, "");
+        if (PROPERTY_ACCESS.test(selectorTarget)) { // property access
+            let contents = selectorTarget.match(PROPERTY_ACCESS); // get the selector
+            let infType = await inferTypeRuntime(`@${contents[1]}`, self, additionalTriggerData);
+            let result = await parseSelector(`@${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
+            return parsePropertyAccess(result, contents[2], infType);
+        } else if (PROPERTY_ACCESS_TEAM.test(selectorTarget)) { // property access
+            let contents = selectorTarget.match(PROPERTY_ACCESS_TEAM); // get the selector
+            let infType = await inferTypeRuntime(`&${contents[1]}`, self, additionalTriggerData);
+            let result = await parseSelector(`&${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
+            return parsePropertyAccess(result, contents[2], infType);
+        }  else if (PROPERTY_ACCESS_GROUP.test(selectorTarget)) { // property access
+            let contents = selectorTarget.match(PROPERTY_ACCESS_GROUP); // get the selector
+            let infType = await inferTypeRuntime(`#${contents[1]}`, self, additionalTriggerData);
+            let result = await parseSelector(`#${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
+            return parsePropertyAccess(result, contents[2], infType);
+        }
+        return [ selectorTarget ];
     }
     
     /**
@@ -1342,6 +1373,29 @@ module.exports = function() {
                 let allTeams = await getAllTeams();
                 return allTeams.map(el => el.name);
             break;
+            // self
+            case "&self":
+                if(!self) { // if no self is specified, &Self is invalid
+                    abilityLog(`❗ **Error:** Used \`&Self\` in invalid context!`);
+                    return [ ];
+                }
+                let val = srcToValue(self);
+                let type = srcToType(self);
+                switch(type) {
+                    default:
+                        abilityLog(`❗ **Error:** Used \`@Self\` with invalid self type \`${type}\`!`);
+                        return [ ];
+                    case "team":
+                        return [ val ];
+                }
+           // team in a for each loop
+            case "&ind":
+                if(additionalTriggerData.ind) {
+                    return [ additionalTriggerData.ind ];
+                } else {
+                    abilityLog(`❗ **Error:** Used \`&Ind\` in invalid context!`);
+                    return [ ];
+                }
             // team name selector
             default:
                 let parsed = parseTeam(selectorTarget);
@@ -1648,8 +1702,8 @@ module.exports = function() {
         if(abilityTypeNames.includes(selectorTarget)) {
             return selectorTarget;
         } else if(selectorTarget == "@visittype") {
-            if(additionalTriggerData.visittype) {
-                return [ additionalTriggerData.visittype.toLowerCase() ];
+            if(additionalTriggerData.visit_type) {
+                return [ additionalTriggerData.visit_type.toLowerCase() ];
             } else {
                 abilityLog(`❗ **Error:** Invalid ability type selector target \`${selectorTarget}\`!`);
                 return [ ];
