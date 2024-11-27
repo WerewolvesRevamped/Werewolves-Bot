@@ -1034,7 +1034,6 @@ module.exports = function() {
 			updateGameStatus();
 			getCCs();
 			getPRoles();
-            mayorCheck();
 		}, () => {
 			channel.send("⛔ Database error. Could not update player information!");
 		});

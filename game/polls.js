@@ -245,7 +245,7 @@ module.exports = function() {
             await pollReact(pollDisMsg, emojis);
         }
         // create in DB
-        await createPollInDB(pollType, pollName, initialMsg.channel.id, initialMsg.id, pollMsgs, src_ref, src_name);
+        await createPollInDB(pollType, pollName, initialMsg.channel.id, initialMsg.id, pollMsgs.join(","), src_ref, src_name);
     }
     
 	/** PRIVATE
@@ -299,15 +299,18 @@ module.exports = function() {
         
         // go through reactions
         let allReactions = [];
-        for(let i = 0; i < messages.length; i++) {
+        let msgsProms = messages.map(async m => {
             // fetch message
-            let msg = await channel.messages.fetch(messages[i]);
+            let msg = await channel.messages.fetch(m);
             // get reaction
             let reactions = msg.reactions.cache;
             reactions = reactions.map((data,emoji) => [data,emoji]);
-            for(let j = 0; j < reactions.length; j++) {
-                const data = reactions[j][0];
-                const emoji = reactions[j][1];
+            
+            // map to another data format
+            let reformattedReactions = [];
+            let reactionsProms = reactions.map(async rea => {
+                const data = rea[0];
+                const emoji = rea[1];
                 // get emoji
                 let em = client.emojis.cache.get(emoji);
                 let emojiText = (emoji.match(/\d+/) && em)  ? `<:${em.name.toLowerCase()}:${em.id}>` : emoji;
@@ -315,11 +318,19 @@ module.exports = function() {
                 await data.users.fetch();
                 let users = data.users.cache.toJSON();
                 // return data
-                reactions[j] = { emoji_id: emoji, emoji: emojiText, users: users, count: data.count, messageID: data.messageID };
-            }
+                reformattedReactions.push({ emoji_id: emoji, emoji: emojiText, users: users, count: data.count, messageID: data.messageID });
+            });
+            
+            // await all promises
+            await Promise.all(reactionsProms);
+            
             // add to all reactions
-            allReactions.push(...reactions);
-        }
+            allReactions.push(...reformattedReactions);
+        });
+        
+        
+        // await all promises
+        await Promise.all(msgsProms);
         
         // Find duplicate votes
 		let duplicateVoters = [];
@@ -338,9 +349,9 @@ module.exports = function() {
         // generate output
         let outputLines = [];
         let forceResult = false;
-        let maxVotes = -1, maxVotesData = [], maxVotesValidVoters = [];
-        for(let j = 0; j < allReactions.length; j++) {
-            const reac = allReactions[j];
+        let votesData = [];
+        let allReactionsProms = allReactions.map(async aR => {
+            const reac = aR;
             const voters = reac.users.filter(el => allowedVoters.indexOf(el.id) > -1);
             
             // get candidate from emoji
@@ -354,11 +365,17 @@ module.exports = function() {
             console.log("All Voters", validVoters.map(el => el.globalName), invalidVoters.map(el => el.globalName));
             
             // evaluate vote count
-            let votes = 0;
-            for(let i = 0; i < validVoters.length; i++) {
-                votes += await pollValue(validVoters[i].id, pollPublicType, pollData.src_name);
-                console.log(i, votes);
-            }
+            let votesArray = [];
+            let validVotersProms = validVoters.map(async vv => {
+                let vote = await pollValue(vv.id, pollPublicType, pollData.src_name);
+                votesArray.push(vote);
+            });
+            
+            // await all promises
+            await Promise.all(validVotersProms);
+            
+            // calculate votes
+            let votes = votesArray.reduce((a,b) => a+b, 0)
             
             // get extra votes
             let extraVisible = await queryAttribute("attr_type", "poll_votes", "val1", pollType, "val2", candidate, "val3", "visible");
@@ -377,7 +394,7 @@ module.exports = function() {
             votes += extraHidden;
             
             // if no votes, continue
-            if(votes < 0 || (voters.length === 0 && votes === 0)) continue;
+            if(votes < 0 || (voters.length === 0 && votes === 0)) return;
             
             // if no valid voters, but votes
             let validVotersText = validVoters.join(', ');
@@ -398,13 +415,26 @@ module.exports = function() {
                 outputLines.push(msg);
             }
             
-            if(votes <= 0) continue;
+            if(votes <= 0) return;
             
+            // save votes data
+            if(candidate != "Abstain") votesData.push({ votes: votes, candidate: candidate, validVoters: validVoters });
+        });
+        
+        // await all promises
+        await Promise.all(allReactionsProms);
+        
+        // evaluate winner
+        let maxVotes = -1, maxVotesData = [], maxVotesValidVoters = [];
+        for(let i = 0; i < votesData.length; i++) {
+            let votes = votesData[i].votes;
+            let candidate = votesData[i].candidate;
+            let validVoters = votesData[i].validVoters;
             // check if winner
-            if(votes == maxVotes && candidate != "Abstain") {
+            if(votes == maxVotes) {
                 maxVotesData.push(candidate);
                 maxVotesValidVoters = [];
-            } else if(votes > maxVotes && candidate != "Abstain") {
+            } else if(votes > maxVotes) {
                 maxVotesData = [ candidate ];
                 maxVotesValidVoters = validVoters.map(el => el.id);
                 maxVotes = votes;

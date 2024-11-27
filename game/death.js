@@ -194,8 +194,6 @@ module.exports = function() {
 	this.killPlayer = async function(player_id, silent = false) {
        // set to dead
        await setLivingStatus(player_id, 0);
-        // check mayor treshhold (and change roles if applicable)
-       await mayorCheck();
        // send a reporter message
        reporterMessage(player_id);
         

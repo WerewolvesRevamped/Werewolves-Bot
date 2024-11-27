@@ -566,9 +566,9 @@ module.exports = function() {
                         }
                     }
                     // store prompt reply message
-                    promptReplyMessages.push(`\`${parsedReply[0]}\``);
+                    promptReplyMessages.push(`${parsedReply[0]}`);
                     // log prompt reply
-                    abilityLog(`✅ **Prompt Reply:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) submitted \`${parsedReply[0]}\`.`);
+                    abilityLog(`✅ **Prompt Reply:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) submitted ${parsedReply[0]}.`);
                 } else { // invalid prompt reply
                     return;
                 }
@@ -616,9 +616,9 @@ module.exports = function() {
                         }
                     }
                     // store prompt reply message
-                    promptReplyMessages.push(`\`${parsedReply1[0]}\` and \`${parsedReply2[0]}\``);
+                    promptReplyMessages.push(`${parsedReply1[0]} and ${parsedReply2[0]}`);
                     // log prompt reply
-                    abilityLog(`✅ **Prompt Reply:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) submitted \`${parsedReply1[0]}\` and \`${parsedReply2[0]}\`.`);
+                    abilityLog(`✅ **Prompt Reply:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) submitted ${parsedReply1[0]}\and ${parsedReply2[0]}.`);
                 } else { // invalid prompt reply
                     return;
                 }
@@ -785,7 +785,7 @@ module.exports = function() {
             }
             let pname = member?.displayName ?? false; // get name through id
             let pname2 = member?.user.displayName ?? false; // get name through id
-            return [`${pname} (${pname2})`, `@id:${basic[0]}[player]`]; // return display name
+            return [`${idToEmoji(basic[0])} \`${pname} (${pname2})\``, `@id:${basic[0]}[player]`]; // return display name
         }
         
         // more advanced search
@@ -812,7 +812,7 @@ module.exports = function() {
                 if(message) message.reply(basicEmbed("❌ Player valid but cannot be found. Please contact Hosts.", EMBED_RED));
                 return false;
             }
-            return [`${playerName} (${playerName2})`, `@id:${parsedPlayer}[player]`]; // return display name
+            return [`${idToEmoji(parsedPlayer)} \`${playerName} (${playerName2})\``, `@id:${parsedPlayer}[player]`]; // return display name
         }
     }
     
@@ -822,19 +822,19 @@ module.exports = function() {
     function parseRoleReply(roleName, message = null) {
         let parsedRole = parseRole(roleName);
         if(verifyRole(parsedRole)) { // direct role
-            return [toTitleCase(parsedRole), `${parsedRole}[role]`];
+            return [`\`${toTitleCase(role)}\``, `${parsedRole}[role]`];
         } else {
             let rSplit = roleName.toLowerCase().split(/[\.,\-!\?\s ]/).filter(el => !el.match(/^\d+$/));
             let parsedRoles;
             // search for three word roles
             parsedRoles = rSplit.map((el,ind,arr) => parseRole(el + " " + (arr[ind + 1] ?? "") + " " + (arr[ind + 2] ?? ""))).filter(el => verifyRole(el));
-            if(parsedRoles.length > 0) return [toTitleCase(parsedRoles[0]), `${parsedRoles[0]}[role]`];
+            if(parsedRoles.length > 0) return [`\`${toTitleCase(parsedRoles[0])}\``, `${parsedRoles[0]}[role]`];
             // search for two word roles
             parsedRoles = rSplit.map((el,ind,arr) => parseRole(el + " " + (arr[ind + 1] ?? ""))).filter(el => verifyRole(el));
-            if(parsedRoles.length > 0) return [toTitleCase(parsedRoles[0]), `${parsedRoles[0]}[role]`];
+            if(parsedRoles.length > 0) return [`\`${toTitleCase(parsedRoles[0])}\``, `${parsedRoles[0]}[role]`];
             // search for single word roles
             parsedRoles = rSplit.map(el => parseRole(el)).filter(el => verifyRole(el));
-            if(parsedRoles.length > 0) return [toTitleCase(parsedRoles[0]), `${parsedRoles[0]}[role]`];
+            if(parsedRoles.length > 0) return [`\`${toTitleCase(parsedRoles[0])}\``, `${parsedRoles[0]}[role]`];
             
             // advanced searching
             let parsed = parseList(rSplit, [ cachedRoles, cachedAliases.map(el => el.alias).filter(el => el.length > 5) ].flat() );
@@ -844,10 +844,10 @@ module.exports = function() {
                 console.log("RAParsed", parsed);
                 if(parsedAlias.found.length == 0) return false;
                 let role = parseRole(parsedAlias.found[0]);
-                return [toTitleCase(role), `${role}[role]`];
+                return [`\`${toTitleCase(role)}\``, `${role}[role]`];
             } else { // role found -> normalize to player.displayName
                 let role = parseRole(parsed.found[0]);
-                return [toTitleCase(role), `${role}[role]`];
+                return [`\`${toTitleCase(role)}\``, `${role}[role]`];
             }
         }
     }
@@ -863,17 +863,17 @@ module.exports = function() {
         
         // search for a yes/no answer
         if(trueNames.includes(boolParsed)) { // check for direct yes match
-            return ["Yes / Confirm","true[boolean]"];
+            return ["\`Yes / Confirm\`","true[boolean]"];
         } else if(falseNames.includes(boolParsed)) { // direct no match
-            return ["No / Reject","false[boolean]"];
+            return ["\`No / Reject\`","false[boolean]"];
         } else { // split by words
             let bSplit = boolParsed.split(" ");
             // count matches
             let yCount = bSplit.filter(el => trueNames.includes(el)).length;
             let nCount = bSplit.filter(el => falseNames.includes(el)).length;
             // check if its one of the two cases
-            if(yCount > 0 && yCount > nCount) return ["Yes / Confirm","true[boolean]"];
-            if(nCount > 0 && nCount > yCount) return ["No / Reject","false[boolean]"];
+            if(yCount > 0 && yCount > nCount) return ["\`Yes / Confirm\`","true[boolean]"];
+            if(nCount > 0 && nCount > yCount) return ["\`No / Reject\`","false[boolean]"];
             else return false;
         }
     }
@@ -896,16 +896,16 @@ module.exports = function() {
             for(let i = 0; i < nSplit.length; i++) {
                 // number
                 if(!isNaN(nSplit[i])) {
-                    return [+nSplit[i], `${+nSplit[i]}[number]`];
+                    return [`\`${+nSplit[i]}\``, `${+nSplit[i]}[number]`];
                 }
                 // number word
                 if(numberNames.includes(nSplit[i])) {
                     if(i > 0 && negate.includes(nSplit[i - 1])) { // negated
                         let numNum = numberNames.indexOf(nSplit[i]);
-                        return [-numNum, `${-numNum}[number]`];
+                        return [`\`${-numNum}\``, `${-numNum}[number]`];
                     }
                     let numNum = numberNames.indexOf(nSplit[i]);
-                    return [+numNum, `${+numNum}[number]`];
+                    return [`\`${+numNum}\``, `${+numNum}[number]`];
                 }
             }
             
