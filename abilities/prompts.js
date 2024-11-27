@@ -118,7 +118,7 @@ module.exports = function() {
             case "attribute":
                 let atar = getPromptMessageRestrictionConditionValue(condition.target);
                 let attr = getPromptMessageRestrictionConditionValue(condition.attribute);
-                return !inverted ? `${attr} does __not__ have ${attr}` : `${attr} does have ${attr}, but should __not__`;
+                return !inverted ? `${atar} does __not__ have ${attr}` : `${atar} does have ${attr}, but should __not__`;
             case "selector":
                 let sel1 = getPromptMessageRestrictionConditionValue(condition.target);
                 let sel2 = getPromptMessageRestrictionConditionValue(condition.selector);

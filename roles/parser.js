@@ -423,6 +423,7 @@ module.exports = function() {
             let cond = parseCondition(maybeCondition);
             if(cond.type && cond.type != "error") return true;
         } catch(err) {
+            console.log(err);
             return false;
         }
     }
@@ -1130,7 +1131,7 @@ module.exports = function() {
         exp = new RegExp("^Create Poll in " + locationType + " as " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "poll", subtype: "creation", target: "@self[poll]", poll_location: ttpp(fd[1], "location"), poll_name: ttpp(fd[2]) };
+            ability = { type: "poll", subtype: "creation", target: "@self[poll]", poll_location: ttpp(fd[1], "location"), poll_name: ttpp(fd[2], "string") };
         }
         // Cancel polls resulting ability
         exp = new RegExp("^Cancel `" + str + "` Poll" + attrDuration + "$", "g");

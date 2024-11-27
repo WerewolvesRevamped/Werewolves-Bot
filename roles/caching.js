@@ -12,8 +12,8 @@ module.exports = function() {
     this.cachedGroups = [];
     this.cachedAttributes = [];
     this.cachedSets = [];
-    this.cacheCategories = [];
-    this.cacheClasses = [];
+    this.cachedCategories = [];
+    this.cachedClasses = [];
     this.cachedAliases = [];
     this.cachedInfoNames = [];
     this.iconLUT = [];
@@ -86,7 +86,7 @@ module.exports = function() {
     **/
     this.cacheClasses = function() {
 		sql("SELECT DISTINCT class FROM roles", result => {
-				cachedCategories = result.map(el => el.class);
+				cachedClasses = result.map(el => el.class);
 		}, () => {
 			log("Roles > ❗❗❗ Unable to cache classes!");
 		});

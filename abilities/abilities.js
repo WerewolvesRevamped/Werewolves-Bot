@@ -212,6 +212,7 @@ module.exports = function() {
         } 
         // Handle Errors
         catch(err) {
+            abilityLog(`❗ **Critical Error:** Ability execution of type ${ability?.type} __failed__ for ${src_name} (${src_ref}) due to an error. __**CHECK LOG**__`);
             console.log(`Error in ability ${ability?.type} for ${src_name} (${src_ref})`);
             console.log(err);
         }
@@ -372,12 +373,16 @@ module.exports = function() {
             case "team":
                 return `\`${toTitleCase(val)}\``;
             case "attribute":
-                const owner = getCustomAttributeOwner(val);
-                const source = getCustomAttributeSource(val);
-                const name = getCustomAttributeName(val);
-                const ownerText = srcRefToText(owner);
-                const sourceText = srcRefToText(source);
-                return `${name} (Attr-${val}) on ${ownerText} from ${sourceText}`;
+                if(!isNaN(val)) {
+                    const owner = getCustomAttributeOwner(val);
+                    const source = getCustomAttributeSource(val);
+                    const name = getCustomAttributeName(val);
+                    const ownerText = srcRefToText(owner);
+                    const sourceText = srcRefToText(source);
+                    return `${name} (Attr-${val}) on ${ownerText} from ${sourceText}`;
+                } else {
+                    return toTitleCase(val);
+                }
             break;
             case "location":
                 return `#${val}`;

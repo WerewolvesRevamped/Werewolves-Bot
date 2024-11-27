@@ -776,13 +776,17 @@ module.exports = function() {
             case "reset": emojiName = ""; break;
             case "cancel": emojiName = ""; break;
             case "switching": emojiName = ""; break;
-            case "process": emojiName = ""; break;
-            case "evaluate": emojiName = ""; break;
+            case "process_evaluate": emojiName = ""; break;
             case "feedback": emojiName = ""; break;
             case "action": emojiName = ""; break;
             case "failure": emojiName = ""; break;
             case "success": emojiName = ""; break;
             case "log": emojiName = ""; break;
+            case "for_each": emojiName = ""; break;
+            case "shuffle": emojiName = ""; break;
+            case "emit": emojiName = ""; break;
+            case "storing": emojiName = ""; break;
+            case "continue": emojiName = ""; break;
         }
         return emojiName ? getEmoji(emojiName) : "";
     }
