@@ -217,7 +217,7 @@ module.exports = function() {
 					case "resurrect":
 						help += "```yaml\nSyntax\n\n" + stats.prefix + "players resurrect <Player>\n```";
 						help += "```\nFunctionality\n\nResurrects a player indentified with <Player>, by setting their alive value to 1, removing the dead participant role, and adding the participant role.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "players resurrect mctsts\n< ✳ Resurrecting McTsts!\n< ✅ McTsts's alive value now is 1!\n```";
+						help += "```fix\nUsage\n\n> " + stats.prefix + "players resurrect mctsts\n< ✳️ Resurrecting McTsts!\n< ✅ McTsts's alive value now is 1!\n```";
 						help += "```diff\nAliases\n\n- pr\n```";
 					break;
 					case "signup":
@@ -334,7 +334,7 @@ module.exports = function() {
 			channel.send("**Players** | Total: " + result.length);
 			for(let i = 0; i < playerList.length; i++) {
 				// Print message
-				channel.send("✳ Listing players " + (i+1)  + "/" + (playerList.length) + "...").then(m => {
+				channel.send("✳️ Listing players " + (i+1)  + "/" + (playerList.length) + "...").then(m => {
 					m.edit(playerList[i].join("\n"));
 				}).catch(err => {
 					logO(err); 
@@ -376,7 +376,7 @@ module.exports = function() {
 			channel.send("**Players** | Total: " + result.length);
 			for(let i = 0; i < playerList.length; i++) {
 				// Print message
-				channel.send("✳ Listing players " + (i+1)  + "/" + (playerList.length) + "...").then(m => {
+				channel.send("✳️ Listing players " + (i+1)  + "/" + (playerList.length) + "...").then(m => {
 					m.edit(playerList[i].join("\n"));
 				}).catch(err => {
 					logO(err); 
@@ -412,7 +412,7 @@ module.exports = function() {
 			channel.send("**Alive Players** | Total: " + result.length);
 			for(let i = 0; i < playerList.length; i++) {
 				// Print message
-				channel.send("✳ Listing alive players " + (i+1)  + "/" + (playerList.length) + "...").then(m => {
+				channel.send("✳️ Listing alive players " + (i+1)  + "/" + (playerList.length) + "...").then(m => {
 					m.edit(playerList[i].join("\n"));
 				}).catch(err => {
 					logO(err); 
@@ -598,7 +598,7 @@ module.exports = function() {
 			channel.send("**Players** | Total: " + result.length + "\nTotal: " + totalMsgs + "; Public: " + totalMsgsPublic + "; Private: " + totalMsgsPrivate);
 			for(let i = 0; i < playerList.length; i++) {
 				// Print message
-				channel.send("✳ Listing players " + i  + "/" + (playerList.length) + "...").then(m => {
+				channel.send("✳️ Listing players " + i  + "/" + (playerList.length) + "...").then(m => {
 					m.edit(playerList[i].join("\n"));
 				}).catch(err => {
 					logO(err); 
@@ -638,7 +638,7 @@ module.exports = function() {
 			channel.send("**Alive Players** | Total: " + result.length + "\nTotal: " + totalMsgs + "; Public: " + totalMsgsPublic + "; Private: " + totalMsgsPrivate);
 			for(let i = 0; i < playerList.length; i++) {
 				// Print message
-				channel.send("✳ Listing players " + i  + "/" + (playerList.length) + "...").then(m => {
+				channel.send("✳️ Listing players " + i  + "/" + (playerList.length) + "...").then(m => {
 					m.edit(playerList[i].join("\n"));
 				}).catch(err => {
 					logO(err); 
@@ -663,7 +663,7 @@ module.exports = function() {
 			else playerList = playerList.filter(el => blacklist.indexOf(el) != -1);
 			let rID = playerList[Math.floor(Math.random() * playerList.length)];
 			channel.send(`⏺️ Randomizing out of: ${playerList.map(el => idToEmoji(el)).join(", ")}`);
-			channel.send(`✳ Selecting...`).then(m => m.edit(`▶️ Selected <@${rID}> (${idToEmoji(rID)})`));
+			channel.send(`✳️ Selecting...`).then(m => m.edit(`▶️ Selected <@${rID}> (${idToEmoji(rID)})`));
 		}, () => {
 			// DB error
 			channel.send("⛔ Database error. Could not retrieve list of participants!");
@@ -678,7 +678,7 @@ module.exports = function() {
         };
 		let val = Math.ceil(Math.random() * args[1]);
         channel.send(`⏺️ Randomizing from \`1\` to \`${args[1]}\``);
-        channel.send(`✳ Selecting...`).then(m => {
+        channel.send(`✳️ Selecting...`).then(m => {
             m.edit(`▶️ Selected \`${val}\``);
             if(repeat > 0) cmdRollNum(channel, args, --repeat);
         });
@@ -709,7 +709,7 @@ module.exports = function() {
 		sql("SELECT id,emoji FROM players WHERE type='player'", result => {
 			let playerList = result.map(el => `${el.emoji}  - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username.replace(/(_|\*|~)/g,"\\$1") : "*user left*"} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
 			// Print message
-			channel.send("✳ Listing signed up players").then(m => {
+			channel.send("✳️ Listing signed up players").then(m => {
 				m.edit("**Signed Up Players** | Total: " +  result.length + "\n" + playerList)
 			}).catch(err => {
 				logO(err); 
@@ -731,7 +731,7 @@ module.exports = function() {
                return (pa ? pa.displayName.toLowerCase() : "-") > (pb ? pb.displayName.toLowerCase() : "-") ? 1 : -1;
             }).map(el => `${el.emoji}  - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).displayName.replace(/(_|\*|~)/g,"\\$1") : "*user left*"}`).join("\n");
 			// Print message
-			channel.send("✳ Listing signed up players").then(m => {
+			channel.send("✳️ Listing signed up players").then(m => {
 				m.edit("**Signed Up Players (Alphabetical)** | Total: " +  result.length + "\n" + playerList)
 			}).catch(err => {
 				logO(err); 
@@ -749,7 +749,7 @@ module.exports = function() {
 		sql("SELECT id,emoji FROM players WHERE type='substitute'", result => {
 			let playerList = result.map(el => `${el.emoji}  - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username.replace(/(_|\*|~)/g,"\\$1") : "*user left*"} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
 			// Print message
-			channel.send("✳ Listing substitute players").then(m => {
+			channel.send("✳️ Listing substitute players").then(m => {
 				m.edit("**Substitute Players** | Total: " +  result.length + "\n" + playerList)
 			}).catch(err => {
 				logO(err); 
@@ -772,7 +772,7 @@ module.exports = function() {
 		sql("SELECT id,emoji FROM players WHERE alive = 1 AND type='player'", result => {
 			let playerList = result.map(el => `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username.replace(/(_|\*|~)/g,"\\$1") : "*user left*"} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
 			// Print message
-			channel.send("✳ Listing alive players").then(m => {
+			channel.send("✳️ Listing alive players").then(m => {
 				m.edit("**Alive Players** | Total: " +  result.length + "\n" + playerList)
 			}).catch(err => {
 				logO(err); 
@@ -795,7 +795,7 @@ module.exports = function() {
 		sql("SELECT id,emoji FROM players WHERE alive = 0 AND type='player'", result => {
 			let playerList = result.map(el => `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username.replace(/(_|\*|~)/g,"\\$1") : "*user left*"} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
 			// Print message
-			channel.send("✳ Listing dead players").then(m => {
+			channel.send("✳️ Listing dead players").then(m => {
 				m.edit("**Dead Players** | Total: " +  result.length + "\n" + playerList)
 			}).catch(err => {
 				logO(err); 
@@ -1040,7 +1040,7 @@ module.exports = function() {
 	}
 	
 	/* Resurrects a dead player */
-	this.cmdPlayersResurrect = function(channel, args) {
+	this.cmdPlayersResurrect = async function(channel, args) {
 		// Get user
 		var user = parseUser(channel, args[1]);
 		if(!user) { 
@@ -1050,12 +1050,15 @@ module.exports = function() {
 		} else {
 			// Send resurrect message
 			let playerName = channel.guild.members.cache.get(user).displayName;
-			channel.send("✳ Resurrecting " + playerName + "!");
-			// Set Roles
-            if(!stats.haunting) switchRoles(channel.guild.members.cache.get(user), channel, stats.dead_participant, stats.participant, "dead participant", "participant");
-            else switchRoles(channel.guild.members.cache.get(user), channel, stats.ghost, stats.participant, "ghost", "participant");
-			// Set DB Value
-			channel.send(stats.prefix + "players set alive " + user + " 1");
+			channel.send("✳️ Resurrecting " + playerName + "!");
+            // info
+			channel.send("ℹ️ Please consider the following things after resurrecting:\n• If applicable, reassign the discord roles for elected roles manually\n• Manually undo actions that occur on player deaths (e.g. delete reporter message)");
+            // Resurrect
+            await resurrectPlayer(user, true);
+            // reopen groups/teams
+            await updateActiveTeams();
+            await updateGroups();
+			channel.send("✅ Resurrected " + playerName + "!");
 		}
 	}
 	
@@ -1168,7 +1171,7 @@ module.exports = function() {
         
         if(!isSignedUp(member) && !isSub(member)) {
 			// Sign Up
-			channel.send("✳ " + msg).then(message => {
+			channel.send("✳️ " + msg).then(message => {
 				message.react(args[0].replace(/<|>/g,"")).then(r => {
 					sql("SELECT id FROM players WHERE emoji = " + connection.escape(args[0]), result => {
 						// Check if somebody is already signed up with this emoji
@@ -1212,7 +1215,7 @@ module.exports = function() {
 			});
 		} else {
 		// Change Emoji 
-			channel.send("✳ " + msg).then(message => {
+			channel.send("✳️ " + msg).then(message => {
 				message.react(args[0].replace(/<|>/g,"")).then(r => {
 					sql("SELECT id FROM players WHERE emoji = " + connection.escape(args[0]), result => {
 						// Check if somebody already has this emoji

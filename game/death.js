@@ -225,6 +225,32 @@ module.exports = function() {
         
         // add to storytime
         if(!silent) await bufferStorytime(`<@${player_id}> has died!`);
+	}   
+    
+    /** PUBLIC
+    Resurrect Player
+    resurrects a player
+    **/
+	this.resurrectPlayer = async function(player_id, silent = false) {
+       // set to aluve
+       await setLivingStatus(player_id, 1);
+        
+        let player = mainGuild.members.cache.get(player_id);
+        // revoke dead roles
+        removeRoleRecursive(player, false, stats.dead_participant, "dead participant");
+        removeRoleRecursive(player, false, stats.ghost, "ghost");
+        // grant participant role
+        addRoleRecursive(player, false, stats.participant, "participant");
+        
+        // retrieve all attributes of the player and set to alive
+        let playerAttributes =  await queryAttributePlayer(player_id, "owner", player_id);
+        for(let i = 0; i < playerAttributes.length; i++) {
+            // set attribute to alive
+            updateAttributeAlive(playerAttributes[i].ai_id, 1);
+        }
+        
+        // add to storytime
+        if(!silent) await bufferStorytime(`<@${player_id}> has been resurrected!`);
 	}
     
     /** PUBLIC
