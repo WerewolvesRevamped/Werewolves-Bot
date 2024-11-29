@@ -15,7 +15,6 @@ module.exports = function() {
         ["544125116640919557","▪️"], // Ethan.
         ["334066065112039425","🔥"], // Steinator
         ["490180990237540352","🧋"], // the kremblin
-        ["839994935897096202","🕯️"], // phantom
         ["334136126745083907","🐓"], // Jean D. Arch
         ["161551993704284171","🐼"], // kruthers
         /** LEGACY **/
@@ -72,7 +71,7 @@ module.exports = function() {
                 "gamephase": ["gp","game_phase","game-phase"],
                 "modify": ["mod"],
                 "say": [">"],
-                "ping": ["?"],
+                "ping": ["??"],
                 "elect": ["el", "elected"],
                 "list_substitutes": ["subs","list_subs","substitutes"],
                 "force_demote_all": ["fda"],

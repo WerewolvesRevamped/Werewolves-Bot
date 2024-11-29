@@ -8,7 +8,7 @@ module.exports = function() {
 	this.confirmAction = async function(data, message) {
 		// Check if the reaction was in time
 		if(+data.time + 20 >= getTime()) {
-			message.edit("✳ Executing `" + stats.prefix + data.action + "`!").then(async m => {
+			message.edit("✳️ Executing `" + stats.prefix + data.action + "`!").then(async m => {
 				await sleep(1000);
 				message.delete();
 			});

@@ -136,9 +136,10 @@ module.exports = function() {
     Set Custom Attribute Value #1
     set an attribute's val2 value by ai id to a specific value
     **/
-    function setCustomAttributeValue1(id, val) {
+    async function setCustomAttributeValue1(id, val) {
         // update attribute
-        return sqlPromEsc("UPDATE active_attributes SET val2=" + connection.escape(val) + " WHERE ai_id=", id);
+        await sqlPromEsc("UPDATE active_attributes SET val2=" + connection.escape(val) + " WHERE ai_id=", id);
+        await cacheActiveCustomAttributes();
     }
     
     /** PRIVATE

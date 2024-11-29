@@ -50,6 +50,7 @@ module.exports = function() {
     Check if a channel is a SC
     */
 	this.isPublic = function(channel) {
+        if(!channel) return false;
 		return !channel.parent ? false : channel.parentId === cachedPublic;
 	}
     

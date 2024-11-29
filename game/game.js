@@ -94,7 +94,7 @@ module.exports = function() {
         //channel.send(`⛔ Debug error. Would've started game.`); 
         //return;
         
-		channel.send("✳ Game is called `" + stats.game + "`");
+		channel.send("✳️ Game is called `" + stats.game + "`");
         createLocations();
 		// Set Gamephase
 		cmdGamephaseSet(channel, ["set", gp.INGAME]);

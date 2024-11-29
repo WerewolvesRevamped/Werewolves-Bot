@@ -108,13 +108,12 @@ module.exports = function() {
             break;
             // PRECONDITION
             case "precondition":
-                // cannot be evaluated pre-prompt: always true
                 return resolveCondition(restriction.condition, src_ref, null, additionalTriggerData);
             break;
             // ATTRIBUTE
             case "attribute":
                 // cannot be evaluated pre-prompt: always true
-                if(prePrompt) {
+                if(prePrompt && (restriction.target.includes("@selection") || restriction.target.includes("@secondaryselection"))) {
                     return true;
                 } else {
                     let targets = await parseSelector(restriction.target, src_ref, additionalTriggerData);

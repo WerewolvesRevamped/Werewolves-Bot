@@ -92,6 +92,7 @@ module.exports = function() {
 		// Get all attributes
 		sql("DELETE FROM active_attributes WHERE ai_id=" + connection.escape(args[1]), result => {
             channel.send("✅ Deleted active attribute instance.");
+            cacheActiveCustomAttributes();
 		}, () => {
 			// DB error
 			channel.send("⛔ Database error. Couldn't delete active attribute instance!");
@@ -105,6 +106,7 @@ module.exports = function() {
     this.attributesReset = function() {
 		// Reset active attributes Database
 		sql("DELETE FROM active_attributes");
+        cacheActiveCustomAttributes();
     }
     
     
@@ -242,10 +244,12 @@ module.exports = function() {
             }
         }
         
-        if(column4) return await fourColumnDeletion(player, column, val, column2, val2, column3, val3, column4, val4);
-        else if(column3) return await threeColumnDeletion(player, column, val, column2, val2, column3, val3);
-        else if(column2) return await twoColumnDeletion(player, column, val, column2, val2);
-        else return await singleColumnDeletion(player, column, val);
+        if(column4) await fourColumnDeletion(player, column, val, column2, val2, column3, val3, column4, val4);
+        else if(column3) await threeColumnDeletion(player, column, val, column2, val2, column3, val3);
+        else if(column2) await twoColumnDeletion(player, column, val, column2, val2);
+        else await singleColumnDeletion(player, column, val);
+        
+        await cacheActiveCustomAttributes();
     }
     
     function singleColumnDeletion(player, column, val) {
@@ -291,6 +295,7 @@ module.exports = function() {
         await cleanupDeleteAttribute("phase", phaseNumeric); // remove phase attributes of past phase(s)
         if(isNight()) await cleanupDeleteAttribute("nextday", phaseNumeric - 1); // at the start of a night cleanup next day attributes, unless they were applied previous day
         if(isDay()) await cleanupDeleteAttribute("nextnight", phaseNumeric - 1); // at the start of a day cleanup next night attributes, unless they were applied previous night
+        await cacheActiveCustomAttributes();
     }
     
     async function cleanupDeleteAttribute(dur_type, val) {
@@ -348,7 +353,8 @@ module.exports = function() {
             await deleteAttribute(childAttrs[j].ai_id);
         }
         // delete attribute
-        return sqlPromEsc("DELETE FROM active_attributes WHERE ai_id=", id);
+        await sqlPromEsc("DELETE FROM active_attributes WHERE ai_id=", id);
+        await cacheActiveCustomAttributes();
     }
     
     /** PRIVATE
