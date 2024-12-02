@@ -71,7 +71,7 @@ module.exports = function() {
                 "gamephase": ["gp","game_phase","game-phase"],
                 "modify": ["mod"],
                 "say": [">"],
-                "ping": ["??"],
+                "ping": ["?"],
                 "elect": ["el", "elected"],
                 "list_substitutes": ["subs","list_subs","substitutes"],
                 "force_demote_all": ["fda"],

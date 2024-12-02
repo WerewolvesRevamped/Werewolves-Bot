@@ -51,14 +51,7 @@ module.exports = function() {
                     abilityLog(`❗ **Error:** Missing arguments for subtype \`${ability.subtype}\`!`);
                     return { msg: "Investigation failed! " + abilityError, success: false };
                 }
-                let attr = parseAttributeSelector(ability.attribute, src_ref, additionalTriggerData);
-                // can only apply a single attribute
-                if(attr.length != 1) {
-                    abilityLog(`❗ **Error:** Tried to investigate for ${attr.length} attributes!`);
-                    return { msg: "Investigation failed! " + abilityError, success: false };
-                }
-                attr = attr[0];
-                result = await investigatingAttribute(src_name, src_ref, target, attr, ability.affected_by_wd ?? false, ability.affected_by_sd ?? false, additionalTriggerData);
+                result = await investigatingAttribute(src_name, src_ref, target, ability.attribute, ability.affected_by_wd ?? false, ability.affected_by_sd ?? false, additionalTriggerData);
                 return result;
             break;
             case "player_count":
@@ -184,28 +177,33 @@ module.exports = function() {
     /**
     Ability: Investigating - Attribute
     **/
-    this.investigatingAttribute = async function(src_name, src_ref, targets, attribute, affected_by_wd, affected_by_sd, additionalTriggerData) {
+    this.investigatingAttribute = async function(src_name, src_ref, targets, attr, affected_by_wd, affected_by_sd, additionalTriggerData) {
         // single target check
         if(targets.length != 1) {
             return singleTargetCheck(targets, src_ref);
         }
         
+        // get attr name
+        let attrName = parseAttributeSelector(attr, src_ref, additionalTriggerData, true);
+        attrName = attrName[0] ?? selectorGetTarget(attr.replace(/`/g,"")).split(":").join(": ").replace("groupmembership", "Group Membership");
+        
         // handle visit
         if(additionalTriggerData.parameters.visitless !== true) {
-            let result = await visit(src_ref, targets[0], attribute, "investigating", "attribute");
+            let result = await visit(src_ref, targets[0], attrName, "investigating", "attribute");
             if(result) return visitReturn(result, "Investigation failed!", "Investigation succeeded!");
         }
         
         // get data
+        let attribute = await parseActiveAttributeSelector(attr, src_ref, additionalTriggerData, targets[0]);
         let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);
-        let hasRoleAttributeResult = await hasRoleAttribute(rdata.role.role, attribute);
-        let directAttributes = await queryAttributePlayer(targets[0], "val1", attribute);
-        let found = hasRoleAttributeResult || directAttributes.length > 0;
+        let hasRoleAttributeResult = await hasRoleAttribute(rdata.role.role, attrName);
+        let directAttributes = await queryAttributePlayer(targets[0], "val1", attrName);
+        let found = attribute.length > 0 || hasRoleAttributeResult || directAttributes.length > 0;
         
         // feedback
-        abilityLog(`✅ ${srcRefToText(src_ref)} investigated <@${targets[0]}> for attribute \`${toTitleCase(attribute)}\` ⇒ \`${found}\` ${rdata.type?' ('+rdata.type+')':''}.`);
-        if(found) return { msg: `Investigated <@${additionalTriggerData.orig_target}> for attribute \`${toTitleCase(attribute)}\` ⇒ Attribute Found`, success: true, target: `player:${targets[0]}` };
-        else return { msg: `Investigated <@${additionalTriggerData.orig_target}> for attribute \`${toTitleCase(attribute)}\` ⇒ Attribute __Not__ Found`, success: false, target: `player:${targets[0]}` };
+        abilityLog(`✅ ${srcRefToText(src_ref)} investigated <@${targets[0]}> for attribute \`${toTitleCase(attrName)}\` ⇒ \`${found}\` ${rdata.type?' ('+rdata.type+')':''}.`);
+        if(found) return { msg: `Investigated <@${additionalTriggerData.orig_target}> for attribute \`${toTitleCase(attrName)}\` ⇒ Attribute Found`, success: true, target: `player:${targets[0]}` };
+        else return { msg: `Investigated <@${additionalTriggerData.orig_target}> for attribute \`${toTitleCase(attrName)}\` ⇒ Attribute __Not__ Found`, success: false, target: `player:${targets[0]}` };
     }
     
     /**
