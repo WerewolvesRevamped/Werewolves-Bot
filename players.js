@@ -813,37 +813,122 @@ module.exports = function() {
 			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "players substitute <current player id> <new player id>`!"); 
 			return; 
 		}
+       
         let originalPlayer = getUser(message.channel, args[1]);
+        let originalPlayerMember = message.channel.guild.members.cache.get(originalPlayer);
         let newPlayer = getUser(message.channel, args[2]);
         let newPlayerMember = message.channel.guild.members.cache.get(newPlayer);
-        if(!originalPlayer || !newPlayer) {
+        if(!originalPlayer || !originalPlayerMember || !newPlayer || !newPlayerMember) {
 			message.channel.send("⛔ Player error. Could not find player!"); 
 			return; 
         }
-        // substitution
-        let subRole = pRoles.find(el => el.id === originalPlayer).role;
-		cmdPlayersSet(message.channel, ["set", "role", originalPlayer, "substituted"]);
-		cmdPlayersSet(message.channel, ["set", "type", originalPlayer, "substituted"]);
-        // WIP: SHOULD BE KILLING THE OLD PLAYER
-		setTimeout(function () {
-			cmdPlayersSet(message.channel, ["set", "type", newPlayer, "player"]); 
-			cmdPlayersSet(message.channel, ["set", "role", newPlayer, subRole]); 
-            // add particpant role, remove sub role
-            switchRoles(newPlayerMember, message.channel, stats.sub, stats.participant, "substitute", "participant");
-		}, 10000);
+        
+        
+        message.channel.send(`✳️ Replacing <@${originalPlayer}> with <@${newPlayer}>! This may take a while. Please wait until execution is complete before executing further commands.`);
+        
+        // pause
+        pauseActionQueueChecker = true;
+        automationBusy = true;
+        
+        // get old player data
+        let oldPlayerData = await sqlPromOneEsc("SELECT * FROM players WHERE id=", originalPlayer);
+        
+        // initialize common escaped values
+        let oldId = connection.escape(originalPlayer);
+        let oldIdSrc = connection.escape(`player:${originalPlayer}`);
+        let oldIdSelector = connection.escape(`@id:${originalPlayer}[player]`);
+        let newId = connection.escape(newPlayer);
+        let newIdSrc = connection.escape(`player:${newPlayer}`);
+        let newIdSelector = connection.escape(`@id:${newPlayer}[player]`);
+        
+        // update new player data
+        await sqlPromEsc("UPDATE players SET type='player',role=" + connection.escape(oldPlayerData.role) +",orig_role=" + connection.escape(oldPlayerData.orig_role) +",alignment=" + connection.escape(oldPlayerData.alignment) +",alive=1,ccs=" + connection.escape(oldPlayerData.ccs) +",target=" + connection.escape(oldPlayerData.target) +",counter=" + connection.escape(oldPlayerData.counter) +" WHERE id=", newPlayer);
+        
+        // update old player data
+        await sqlPromEsc("UPDATE players SET type='substituted',role='substituted' WHERE id=", originalPlayer);
+        
+        // update
+        message.channel.send("✅ Updated basic player info!");
+        
+        // new player: add particpant role, remove sub role
+        switchRoles(newPlayerMember, message.channel, stats.sub, stats.participant, "substitute", "participant");
+        
+        // old player: remove particpant role, add dead participant role
+        switchRoles(originalPlayerMember, message.channel, stats.dead_participant, stats.sub, "dead participant", "substitute");
+        
+        // update various additional tables
+        await sqlProm(`UPDATE action_data SET src_ref=${newIdSrc} WHERE src_ref=${oldIdSrc}`);
+        await sqlProm(`UPDATE action_data SET last_target=${newIdSelector} WHERE last_target=${oldIdSelector}`);
+        await sqlProm(`UPDATE action_queue SET src_ref=${newIdSrc} WHERE src_ref=${oldIdSrc}`);
+        await sqlProm(`UPDATE action_queue SET target=${newIdSelector} WHERE target=${oldIdSelector}`);
+        await sqlProm(`UPDATE active_attributes SET owner=${newId} WHERE owner=${oldId}`);
+        await sqlProm(`UPDATE active_attributes SET src_ref=${newIdSrc} WHERE src_ref=${oldIdSrc}`);
+        await sqlProm(`UPDATE active_attributes SET val1=${newId} WHERE val1=${oldId}`);
+        await sqlProm(`UPDATE active_attributes SET val2=${newId} WHERE val2=${oldId}`);
+        await sqlProm(`UPDATE active_attributes SET val3=${newId} WHERE val3=${oldId}`);
+        await sqlProm(`UPDATE active_attributes SET val4=${newId} WHERE val4=${oldId}`);
+        await sqlProm(`UPDATE active_attributes SET val1=${newIdSrc} WHERE val1=${oldIdSrc}`);
+        await sqlProm(`UPDATE active_attributes SET val2=${newIdSrc} WHERE val2=${oldIdSrc}`);
+        await sqlProm(`UPDATE active_attributes SET val3=${newIdSrc} WHERE val3=${oldIdSrc}`);
+        await sqlProm(`UPDATE active_attributes SET val4=${newIdSrc} WHERE val4=${oldIdSrc}`);
+        await sqlProm(`UPDATE active_attributes SET val1=${newIdSelector} WHERE val1=${oldIdSelector}`);
+        await sqlProm(`UPDATE active_attributes SET val2=${newIdSelector} WHERE val2=${oldIdSelector}`);
+        await sqlProm(`UPDATE active_attributes SET val3=${newIdSelector} WHERE val3=${oldIdSelector}`);
+        await sqlProm(`UPDATE active_attributes SET val4=${newIdSelector} WHERE val4=${oldIdSelector}`);
+        await sqlProm(`UPDATE active_attributes SET target=${newIdSrc} WHERE target=${oldIdSrc}`);
+        await sqlProm(`UPDATE active_groups SET target=${newIdSrc} WHERE target=${oldIdSrc}`);
+        await sqlProm(`UPDATE active_polls SET src_ref=${newIdSrc} WHERE src_ref=${oldIdSrc}`);
+        await sqlProm(`UPDATE active_polls SET target=${newIdSrc} WHERE target=${oldIdSrc}`);
+        await sqlProm(`UPDATE choices SET src_ref=${newIdSrc} WHERE src_ref=${oldIdSrc}`);
+        await sqlProm(`UPDATE choices SET owner=${newIdSrc} WHERE owner=${oldIdSrc}`);
+        await sqlProm(`UPDATE connected_channels SET id=${newId} WHERE id=${oldId}`);
+        await sqlProm(`UPDATE host_information SET id=${newId} WHERE id=${oldId}`);
+        await sqlProm(`UPDATE host_information SET value=${newId} WHERE value=${oldId}`);
+        await sqlProm(`UPDATE killq SET id=${newId} WHERE id=${oldId}`);
+        await sqlProm(`UPDATE killq SET src_ref=${newIdSrc} WHERE src_ref=${oldIdSrc}`);
+        await sqlProm(`UPDATE players SET target=${newIdSrc} WHERE target=${oldIdSrc}`);
+        await sqlProm(`UPDATE prompts SET src_ref=${newIdSrc} WHERE src_ref=${oldIdSrc}`);
+        await sqlProm(`UPDATE teams SET target=${newIdSrc} WHERE target=${oldIdSrc}`);
+        
+        // update
+        message.channel.send("✅ Updated basic columns in all tables!");
+        
+        // replace within a string
+        await sqlProm(`UPDATE prompts SET additional_trigger_data = replace(additional_trigger_data, ${newId}, ${oldId}) WHERE additional_trigger_data LIKE ${connection.escape('%' + originalPlayer + '%')}`);
+        await sqlProm(`UPDATE action_queue SET additional_trigger_data = replace(additional_trigger_data, ${newId}, ${oldId}) WHERE additional_trigger_data LIKE ${connection.escape('%' + originalPlayer + '%')}`);
+        await sqlProm(`UPDATE action_queue SET abilities = replace(abilities, ${newId}, ${oldId}) WHERE abilities LIKE ${connection.escape('%' + originalPlayer + '%')}`);
+        
+        // update
+        message.channel.send("✅ Updated complex columns in all tables!");
+        
+        // cc substitutions
 		setTimeout(function () {
 			let categories = cachedCCs;
 			categories.push(...cachedSCs)
 			substituteChannels(message.channel, categories, 0, originalPlayer, newPlayer);
 		}, 15000);
+        
+        
+        // recache
 		setTimeout(function() {
             getIDs();
 			cacheRoleInfo();
 			getCCs();
 			getPRoles();
 			getCCCats();
-			message.channel.send("✅ Substitution complete!");
+            cacheActiveCustomAttributes();
+            cacheDR();
+			message.channel.send("✅ Recached values!");
 		}, 30000);
+        
+        // recache
+		setTimeout(function() {
+			message.channel.send("✅ Substitution complete!");
+            
+            // unpause
+            pauseActionQueueChecker = true;
+            automationBusy = true;
+		}, 35000);
 	}
 	
 	/* Substitutes a player */
@@ -1267,6 +1352,7 @@ module.exports = function() {
         } else {
             guild = channel.guild;
         }
+        inUser = inUser.toLowerCase();
 		// Get User by ID 
 		if(/^\d+$/.test(inUser)) {
 			user = client.users.cache.find(user => user.id === inUser);
@@ -1290,8 +1376,14 @@ module.exports = function() {
 		// Get User by Global Name
 		user = client.users.cache.find(user => user.globalName && user.globalName.toLowerCase() === inUser);
 		if(user) return user.id;
+		// Get User by Display Name
+		user = client.users.cache.find(user => user.displayName && user.displayName.toLowerCase() === inUser);
+		if(user) return user.id;
 		// Get User by Nickname
 		user = guild.members.cache.find(member => member.nickname && member.nickname.toLowerCase() === inUser);
+		if(user) return user.id;
+		// Get User by Display Name
+		user = guild.members.cache.find(member => member.displayName && member.displayName.toLowerCase() === inUser);
 		if(user) return user.id;
 		// Get User by Emoji 
 		user = emojiToID(inUser)

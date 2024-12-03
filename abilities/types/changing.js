@@ -82,6 +82,7 @@ module.exports = function() {
         if(refImg) {
             img = refImg;
         }
+
         // iterate through targets
         for(let i = 0; i < targets.length; i++) {
             // handle visit
@@ -101,8 +102,12 @@ module.exports = function() {
                 continue;
             }
             
+            // save old role
+            let oldRole = await sqlPromOneEsc("SELECT role FROM players WHERE id=",  targets[i]);
+            
             // update player role
             await setPlayerRole(targets[i], role);
+            getPRoles();
             
             // delete all "permanent" attributes
             await deleteAttributePlayer(targets[i], "duration", "permanent");
@@ -122,6 +127,10 @@ module.exports = function() {
                 await triggerGroup(groupData.channel_id, "On Betrayal", { });
                 abilityLog(`✅ <@${targets[i]}> demoted ${toTitleCase(groupMembershipsOwner[j].val1)} membership to \`Visitor\`.`);
             }
+            
+            // delete open prompts
+            await sqlPromEsc("DELETE FROM prompts WHERE src_ref=" + connection.escape(`player:${targets[i]}`) + " AND src_name=", `role:${oldRole.role}`);
+            await sqlPromEsc("DELETE FROM action_queue WHERE src_ref=" + connection.escape(`player:${targets[i]}`) + " AND src_name=", `role:${oldRole.role}`);
             
             // run starting trigger
             await triggerPlayerRole(targets[i], "Starting");

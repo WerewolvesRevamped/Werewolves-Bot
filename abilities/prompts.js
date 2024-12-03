@@ -806,10 +806,15 @@ module.exports = function() {
         } else { // player found -> normalize to player.displayName
             let player = parsed.found[0];
             let parsedPlayer = parseUser(backupChannel, player); // parse player name/id/emoji to discord id
-            let playerName = mainGuild.members.cache.get(parsedPlayer)?.displayName ?? false; // get name through id
-            let playerName2 = mainGuild.members.cache.get(parsedPlayer)?.user.displayName ?? false; // get name through id
+            let member = mainGuild.members.cache.get(parsedPlayer);
+            let playerName = member?.displayName ?? false; // get name through id
+            let playerName2 = member?.user.displayName ?? false; // get name through id
             if(playerName === false) { // this applies in case the player has left the server
                 if(message) message.reply(basicEmbed("❌ Player valid but cannot be found. Please contact Hosts.", EMBED_RED));
+                return false;
+            }
+            if(!isParticipant(member)) { // this applies in case the player is not a participant
+                if(message) message.reply(basicEmbed("❌ Player is not a participant.", EMBED_RED));
                 return false;
             }
             return [`${idToEmoji(parsedPlayer)} \`${playerName} (${playerName2})\``, `@id:${parsedPlayer}[player]`]; // return display name

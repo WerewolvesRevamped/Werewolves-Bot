@@ -1212,7 +1212,7 @@ module.exports = function() {
     Parse Active Attribute Selector
     parses a attribute type selector for active attributes
     **/
-    this.parseActiveAttributeSelector = async function(selector, self = null, additionalTriggerData = {}, onElement = null) {
+    this.parseActiveAttributeSelector = async function(selector, self = null, additionalTriggerData = {}, onElement = null, noErr = false) {
         // get all attributes on the target element
         if(!onElement) return [ ];
         let attributes = getCustomAttributes(onElement);
@@ -1271,7 +1271,7 @@ module.exports = function() {
                             }
                         break;
                         default:
-                            abilityLog(`❗ **Error:** Invalid active attribute selector target format \`${selectorTarget}\`!`);
+                            if(!noErr) abilityLog(`❗ **Error:** Invalid active attribute selector target format \`${selectorTarget}\`!`);
                             return [ ];
                         break;
                     }
@@ -1300,7 +1300,7 @@ module.exports = function() {
                             });
                         break;
                         default:
-                            abilityLog(`❗ **Error:** Invalid active attribute selector target format \`${selectorTarget}\`!`);
+                            if(!noErr) abilityLog(`❗ **Error:** Invalid active attribute selector target format \`${selectorTarget}\`!`);
                             return [ ];
                         break;
                     }
@@ -1325,7 +1325,7 @@ module.exports = function() {
                     let pa = await parsePropertyAccess(result, contents[2], infType);
                     return pa.map(el => ({ ai_id: el, name: getCustomAttributeName(el), type: "custom" }));
                 } else {
-                    abilityLog(`❗ **Error:** Invalid active attribute selector target \`${selectorTarget}\`!`);
+                    if(!noErr) abilityLog(`❗ **Error:** Invalid active attribute selector target \`${selectorTarget}\`!`);
                     return [ ];
                 }
         }

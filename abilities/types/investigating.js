@@ -194,7 +194,7 @@ module.exports = function() {
         }
         
         // get data
-        let attribute = await parseActiveAttributeSelector(attr, src_ref, additionalTriggerData, targets[0]);
+        let attribute = await parseActiveAttributeSelector(attr, src_ref, additionalTriggerData, targets[0], true);
         let rdata = await getVisibleRoleData(targets[0], affected_by_wd, affected_by_sd);
         let hasRoleAttributeResult = await hasRoleAttribute(rdata.role.role, attrName);
         let directAttributes = await queryAttributePlayer(targets[0], "val1", attrName);
