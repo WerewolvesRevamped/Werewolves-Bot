@@ -467,21 +467,26 @@ module.exports = function() {
                     }
                 } else if(maxVotesData[0] === "Random") { // SPECIAL RANDOM WINNER
                     // select random player
-                    const options = pollTypeData.options.split(", ");
+                    const options = pollTypeData.random.split(", ");
                     let allOptions = await optionListData(options);
                     allOptions = allOptions.filter(el => el.type === "player");
-                    allOptions = shuffleArray(allOptions);
-                    maxVotesData[0] = allOptions[0].id;
-                    // player win
-                    let disqualified = await queryAttribute("attr_type", "poll_disqualification", "val1", pollType, "val2", maxVotesData[0], "val3", "disqualified");
-                    if(disqualified.length === 0) { // SUCCESS
-                        msgFull += `\n\n**Winner:** <@${maxVotesData[0]}> with **${maxVotes}** votes!`;
-                        embed = basicEmbed(msgFull, EMBED_GREEN);
-                        doTrigger = true;
-                    } else { // DISQUALIFIED
-                        msgFull += `\n\n**Result:** <@${maxVotesData[0]}> is disqualified with **${maxVotes}** votes!`;
+                    if(allOptions.length === 0) {
+                        msgFull += `\n\n**Winner:** Random, but no players available for randomization.`;
                         embed = basicEmbed(msgFull, EMBED_RED);
-                        await useAttribute(disqualified[0].ai_id);
+                    } else {
+                        allOptions = shuffleArray(allOptions);
+                        maxVotesData[0] = allOptions[0].id;
+                        // player win
+                        let disqualified = await queryAttribute("attr_type", "poll_disqualification", "val1", pollType, "val2", maxVotesData[0], "val3", "disqualified");
+                        if(disqualified.length === 0) { // SUCCESS
+                            msgFull += `\n\n**Winner:** <@${maxVotesData[0]}> with **${maxVotes}** votes!`;
+                            embed = basicEmbed(msgFull, EMBED_GREEN);
+                            doTrigger = true;
+                        } else { // DISQUALIFIED
+                            msgFull += `\n\n**Result:** <@${maxVotesData[0]}> is disqualified with **${maxVotes}** votes!`;
+                            embed = basicEmbed(msgFull, EMBED_RED);
+                            await useAttribute(disqualified[0].ai_id);
+                        }
                     }
                 } else { // NON PLAYER WINNER
                     msgFull += `\n\n**Result:** **${maxVotesData[0]}** with **${maxVotes}** votes!`;
