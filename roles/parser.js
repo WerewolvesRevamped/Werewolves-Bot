@@ -494,27 +494,34 @@ module.exports = function() {
         // not
         exp = new RegExp("^not \\((.+?)\\)$", "g");
         fd = exp.exec(condition);
-        if(fd) {
+        if(fd && !doubleLogic) {
             cond = { type: "logic", subtype: "not", condition: parseCondition(fd[1]) };
+        }
+        // and x3
+        exp = new RegExp("^\\((.+?)\\) and \\((.+?)\\) and \\((.+?)\\) and \\((.+?)\\)$", "g");
+        fd = exp.exec(condition);
+        if(fd && !doubleLogic) {
+            doubleLogic = true;
+            cond = { type: "logic", subtype: "and", condition1: parseCondition(`(${fd[1]}) and (${fd[2]})`), condition2: parseCondition(`(${fd[3]}) and (${fd[4]})`) };
         }
         // and / or
         exp = new RegExp("^\\((.+?)\\) and \\((.+?)\\) or \\((.+?)\\)$", "g");
         fd = exp.exec(condition);
-        if(fd) {
+        if(fd && !doubleLogic) {
             doubleLogic = true;
             cond = { type: "logic", subtype: "and", condition1: parseCondition(fd[1]), condition2: parseCondition(`(${fd[2]}) or (${fd[3]})`) };
         }
         // or / and
         exp = new RegExp("^\\((.+?)\\) or \\((.+?)\\) and \\((.+?)\\)$", "g");
         fd = exp.exec(condition);
-        if(fd) {
+        if(fd && !doubleLogic) {
             doubleLogic = true;
             cond = { type: "logic", subtype: "and", condition1: parseCondition(`(${fd[1]}) or (${fd[2]})`), condition2: parseCondition(fd[3]) };
         }
         // and x2
         exp = new RegExp("^\\((.+?)\\) and \\((.+?)\\) and \\((.+?)\\)$", "g");
         fd = exp.exec(condition);
-        if(fd) {
+        if(fd && !doubleLogic) {
             doubleLogic = true;
             cond = { type: "logic", subtype: "and", condition1: parseCondition(fd[1]), condition2: parseCondition(`(${fd[2]}) and (${fd[3]})`) };
         }
@@ -524,10 +531,17 @@ module.exports = function() {
         if(fd && !doubleLogic) {
             cond = { type: "logic", subtype: "and", condition1: parseCondition(fd[1]), condition2: parseCondition(fd[2]) };
         }
+        // or x3
+        exp = new RegExp("^\\((.+?)\\) or \\((.+?)\\) or \\((.+?)\\) or \\((.+?)\\)$", "g");
+        fd = exp.exec(condition);
+        if(fd && !doubleLogic) {
+            doubleLogic = true;
+            cond = { type: "logic", subtype: "or", condition1: parseCondition(`(${fd[1]}) or (${fd[2]})`), condition2: parseCondition(`(${fd[3]}) or (${fd[4]})`) };
+        }
         // or x2
         exp = new RegExp("^\\((.+?)\\) or \\((.+?)\\) or \\((.+?)\\)$", "g");
         fd = exp.exec(condition);
-        if(fd) {
+        if(fd && !doubleLogic) {
             doubleLogic = true;
             cond = { type: "logic", subtype: "or", condition1: parseCondition(fd[1]), condition2: parseCondition(`(${fd[2]}) or (${fd[3]})`) };
         }

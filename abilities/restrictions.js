@@ -108,7 +108,6 @@ module.exports = function() {
             break;
             // PRECONDITION
             case "precondition":
-                console.log("PRECONDITION SELF", src_ref);
                 return resolveCondition(restriction.condition, src_ref, null, additionalTriggerData);
             break;
             // ATTRIBUTE
