@@ -65,6 +65,10 @@ module.exports = function() {
     adds an attribute to a player
     **/
     this.applyingAdd = async function(src_name, src_ref, targets, attr, duration, val1, val2, val3, additionalTriggerData) {
+        // apply variables
+        val1 = await applyVariables(val1);
+        val2 = await applyVariables(val2);
+        val3 = await applyVariables(val3);
         // iterate through targets
         for(let i = 0; i < targets.value.length; i++) {
             // handle visit

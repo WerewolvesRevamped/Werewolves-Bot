@@ -83,7 +83,7 @@ module.exports = function() {
                     // note: upgrading membership may downgrade duration. this is intentional (for simplicity)
                 } else { // old tier is higher or equal, skip
                     abilityLog(`❎ <@${targets[i]}> could not join ${toTitleCase(group)} as \`${toTitleCase(type)}\` - equal or higher membership present.`);  
-                    if(targets.length === 1) return { msg: "Joining failed! " + abilityFailure, success: false, target: `player:${targets[0]}` };
+                    if(targets.length === 1) return { msg: "Joining failed!", success: false, target: `player:${targets[0]}` };
                 }
             } else { // not part of the group,join
                 await createGroupMembershipAttribute(src_name, src_ref, targets[i], dur_type, group, type);

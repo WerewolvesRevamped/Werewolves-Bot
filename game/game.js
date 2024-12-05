@@ -417,6 +417,10 @@ module.exports = function() {
 	
 	/* Handles reset command */
 	this.cmdReset = function(channel, debug) {
+		if(stats.gamephase != gp.POSTGAME) {
+            channel.send("⛔ Command error. Can only reset game while in post-game state!");
+            return;
+        }
 		// Set Gamephase
 		cmdGamephaseSet(channel, ["set", gp.NONE]);
 		// Reset Connection

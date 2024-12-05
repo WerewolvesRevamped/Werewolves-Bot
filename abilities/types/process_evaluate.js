@@ -227,6 +227,7 @@ module.exports = function() {
                         }
                         condBool1 = await resolveCondition(condition.condition1, src_ref, src_name, additionalTriggerData);
                         condBool2 = await resolveCondition(condition.condition2, src_ref, src_name, additionalTriggerData);
+                        console.log("AND", condBool1, condBool2, "=>", condBool1 && condBool2);
                         return condBool1 && condBool2;
                     // LOGIC - OR
                     case "or":
@@ -236,6 +237,7 @@ module.exports = function() {
                         }
                         condBool1 = await resolveCondition(condition.condition1, src_ref, src_name, additionalTriggerData);
                         condBool2 = await resolveCondition(condition.condition2, src_ref, src_name, additionalTriggerData);
+                        console.log("OR", condBool1, condBool2, "=>", condBool1 || condBool2);
                         return condBool1 || condBool2;
                 }
             }

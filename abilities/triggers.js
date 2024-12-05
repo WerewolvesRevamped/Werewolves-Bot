@@ -60,7 +60,9 @@ module.exports = function() {
         // primary roles
         await triggerPlayerRole(player_id, triggerName, additionalTriggerData, true);
         // role type attributes (additional roles)
-        await triggerPlayerAttr(player_id, triggerName, additionalTriggerData, true);
+        await triggerPlayerAttrRole(player_id, triggerName, additionalTriggerData, true);
+        // custom type attributes
+        await triggerPlayerAttrCustom(player_id, triggerName, additionalTriggerData, true);
     }
     
     this.triggerPlayerRole = async function(player_id, triggerName, additionalTriggerData = {}, fromTrigger = false) {
@@ -81,7 +83,7 @@ module.exports = function() {
         });
     }
     
-    this.triggerPlayerAttr = async function(player_id, triggerName, additionalTriggerData = {}, fromTrigger = false) {
+    this.triggerPlayerAttrRole = async function(player_id, triggerName, additionalTriggerData = {}, fromTrigger = false) {
         if(!fromTrigger) abilityLog(`🔷 **Trigger:** ${triggerName} for <@${player_id}> (Attr)`);  
         return new Promise(res => {
             // get all players
@@ -95,6 +97,28 @@ module.exports = function() {
                         return;
                     }
                     await triggerHandlerPlayerRoleAttribute(r[i], triggerName, additionalTriggerData);
+                    await useAttribute(r[i].ai_id);
+                }
+                // resolve outer promise
+                res();
+            });
+        });
+    }
+    
+    this.triggerPlayerAttrCustom = async function(player_id, triggerName, additionalTriggerData = {}, fromTrigger = false) {
+        if(!fromTrigger) abilityLog(`🔷 **Trigger:** ${triggerName} for <@${player_id}> (Attr)`);  
+        return new Promise(res => {
+            // get all players
+            sql("SELECT active_attributes.ai_id FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.attr_type='custom' AND id=" + connection.escape(player_id), async r => {
+                // iterate through additional roles
+                for(let i = 0; i < r.length; i++) {
+                //trigger handler
+                    if(!r[i] || !r[i].ai_id) {
+                        abilityLog(`❗ **Skipped Trigger:** Cannot find valid active attribute for ${player_id} #${i}.`);
+                        res();
+                        return;
+                    }
+                    await triggerAttribute(r[i].ai_id, triggerName, additionalTriggerData, true);
                     await useAttribute(r[i].ai_id);
                 }
                 // resolve outer promise
@@ -501,31 +525,65 @@ module.exports = function() {
                             }
                         }
                     break;
+                    case "On Action Target Complex":
+                        if(additionalTriggerData.src_name != src_name) {
+                            abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Src name mismatch.`);        
+                        } else {
+                            let abilityType = await parseSelector(param2, src_ref, additionalTriggerData);
+                            let triggerAbilityType = (abilityType.type === "abilitySubtype" ? additionalTriggerData.visit_subtype : "") + additionalTriggerData.visit_type;
+                            if(abilityType.type === "abilityType" && additionalTriggerData.visit_subtype.length > 0) { // dont pass for subtypes when looking for a type
+                                abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\` with a \`${triggerAbilityType}\` subtype.`);
+                            }  else {
+                                abilityType = abilityType.value[0].toLowerCase().replace(/[^a-z]+/,"");
+                                triggerAbilityType = triggerAbilityType.replace(/[^a-z]+/,"");
+                                if(abilityType === triggerAbilityType) {
+                                    let selector2 = await parsePlayerSelector(param, src_ref, additionalTriggerData);
+                                    if(selector2.includes(additionalTriggerData.this)) {
+                                        await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
+                                    } else {
+                                        abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\`.`);
+                                    }
+                                     await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
+                                } else {
+                                    abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\` with \`${triggerAbilityType}\`.`);
+                                }
+                            }
+                        }
+                    break;
                     case "On Visited Complex":
                         let abilityType2 = await parseSelector(param, src_ref, additionalTriggerData);
                         let triggerAbilityType2 = (abilityType2.type === "abilitySubtype" ? additionalTriggerData.visit_subtype : "") + additionalTriggerData.visit_type;
-                        abilityType2 = abilityType2.value[0].toLowerCase().replace(/[^a-z]+/,"");
-                        triggerAbilityType2 = triggerAbilityType2.replace(/[^a-z]+/,"");
-                        if(abilityType2 === triggerAbilityType2) {
-                             await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
+                        if(abilityType2.type === "abilityType" && additionalTriggerData.visit_subtype.length > 0) { // dont pass for subtypes when looking for a type
+                            abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\` with a \`${triggerAbilityType2}\` subtype.`);
                         } else {
-                            abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\` with \`${triggerAbilityType2}\`.`);
+                            abilityType2 = abilityType.value[0].toLowerCase().replace(/[^a-z]+/,"");
+                            triggerAbilityType2 = triggerAbilityType2.replace(/[^a-z]+/,"");
+                            if(abilityType2 === triggerAbilityType2) {
+                                 await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
+                            } else {
+                                abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\` with \`${triggerAbilityType2}\`.`);
+                            }
                         }
                     break;
                     case "On Visited Target Complex":
                         let abilityType3 = await parseSelector(param2, src_ref, additionalTriggerData);
                         let triggerAbilityType3 = (abilityType3.type === "abilitySubtype" ? additionalTriggerData.visit_subtype : "") + additionalTriggerData.visit_type;
-                        abilityType3 = abilityType3.value[0].toLowerCase().replace(/[^a-z]+/,"");
-                        triggerAbilityType3 = triggerAbilityType3.replace(/[^a-z]+/,"");
-                        let selector2 = await parsePlayerSelector(param, src_ref, additionalTriggerData);
-                        if(abilityType3 === triggerAbilityType3) {
-                            if(selector2.includes(additionalTriggerData.this)) {
-                                await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
+                        if(abilityType3.type === "abilityType" && additionalTriggerData.visit_subtype.length > 0) { // dont pass for subtypes when looking for a type
+                            abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\` with a \`${triggerAbilityType3}\` subtype.`);
+                        }  else {
+                            abilityType3 = abilityType.value[0].toLowerCase().replace(/[^a-z]+/,"");
+                            triggerAbilityType3 = triggerAbilityType3.replace(/[^a-z]+/,"");
+                            if(abilityType3 === triggerAbilityType3) {
+                                let selector2 = await parsePlayerSelector(param, src_ref, additionalTriggerData);
+                                if(selector2.includes(additionalTriggerData.this)) {
+                                    await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
+                                } else {
+                                    abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\`.`);
+                                }
+                                 await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
                             } else {
-                                abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\`.`);
+                                abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\` with \`${triggerAbilityType3}\`.`);
                             }
-                        } else {
-                            abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param2}\` with \`${triggerAbilityType3}\`.`);
                         }
                     break;
                     case "On Poll Win Complex":

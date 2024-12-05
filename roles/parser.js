@@ -24,7 +24,7 @@ module.exports = function() {
     const passiveTriggers = ["Passive", "Passive End Day", "Passive End Night", "Passive Start Day", "Passive Start Night", "Passive Start Phase", "Passive End Phase"];
     const electionTriggers = ["On Election", "On Mayor Election", "On Reporter Election", "On Guardian Election"];
     const defenseTriggers = ["On Defense", "On Passive Defense", "On Partial Defense", "On Recruitment Defense", "On Active Defense", "On Absence Defense"];
-    const basicTriggerTypes = [...actionTimings, "Starting", ...passiveTriggers, "On Death", "On Killed", "On Banished", "On Banishment", "On Visited", "On Action", "On Disbandment", "On Lynch", ...electionTriggers, ...defenseTriggers, "On Betrayal", "On Poll Closed", "On Poll Win", "On Role Change", "On Removal", "On End", "Choice Chosen", "On Emitted", "On Redirect"]; // basic trigger types
+    const basicTriggerTypes = [...actionTimings, "Starting", ...passiveTriggers, "On Death", "On Killed", "On Banished", "On Banishment", "On Visited", "On Action", "On Disbandment", "On Lynch", ...electionTriggers, ...defenseTriggers, "On Betrayal", "On Poll Closed", "On Poll Win", "On Role Change", "On Removal", "On End", "Choice Chosen", "On Emitted", "On Redirect", "On Any Action"]; // basic trigger types
     const bullets = ["•","‣","◦","·","⁃","⹀"];
 
     /**
@@ -896,19 +896,19 @@ module.exports = function() {
         exp = new RegExp("^Apply " + attributeName + " to " + targetType + attrDuration + " " + attrData1 + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "applying", subtype: "add", target: ttpp(fd[2]), attribute: ttpp(fd[1],"attribute"), duration: dd(fd[3], "permanent"), val1: fd[fd.length-1] };
+            ability = { type: "applying", subtype: "add", target: ttpp(fd[2]), attribute: ttpp(fd[1],"attribute"), duration: dd(fd[3], "permanent"), val1: fd[fd.length-1].trim() };
         }
         // standard applying with parameter (2)
         exp = new RegExp("^Apply " + attributeName + " to " + targetType + attrDuration + " " + attrData2 + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "applying", subtype: "add", target: ttpp(fd[2]), attribute: ttpp(fd[1],"attribute"), duration: dd(fd[3], "permanent"), val1: fd[fd.length-2], val2: fd[fd.length-1] };
+            ability = { type: "applying", subtype: "add", target: ttpp(fd[2]), attribute: ttpp(fd[1],"attribute"), duration: dd(fd[3], "permanent"), val1: fd[fd.length-2].trim(), val2: fd[fd.length-1].trim() };
         }
         // standard applying with parameter (3)
         exp = new RegExp("^Apply " + attributeName + " to " + targetType + attrDuration + " " + attrData3 + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "applying", subtype: "add", target: ttpp(fd[2]), attribute: ttpp(fd[1],"attribute"), duration: dd(fd[3], "permanent"), val1: fd[fd.length-3], val2: fd[fd.length-2], val3: fd[fd.length-1] };
+            ability = { type: "applying", subtype: "add", target: ttpp(fd[2]), attribute: ttpp(fd[1],"attribute"), duration: dd(fd[3], "permanent"), val1: fd[fd.length-3].trim(), val2: fd[fd.length-2].trim(), val3: fd[fd.length-1].trim() };
         }
         // Remove Attribute
         exp = new RegExp("^Remove " + attributeName + " from " + targetType + "$", "g");
@@ -920,7 +920,7 @@ module.exports = function() {
         exp = new RegExp("^Change " + attributeName + " value `" + attrIndex + "` to `" + attrValue + "` for " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "applying", subtype: "change", target: ttpp(fd[4]), attribute: ttpp(fd[1],"activeAttribute"), attr_index: +fd[2], attr_value: fd[3]  };
+            ability = { type: "applying", subtype: "change", target: ttpp(fd[4]), attribute: ttpp(fd[1],"activeAttribute"), attr_index: +fd[2], attr_value: fd[3].trim()  };
         }
         /** REDIRECTING **/
         // redirect from all
@@ -1202,35 +1202,17 @@ module.exports = function() {
             ability = { type: "changing", subtype: "group", target: ttpp(fd[1], "group"), change_to: ttpp(fd[2], "group") };
         }
         /** COPYING **/
-        // copy abilities, target to self
-        exp = new RegExp("^Copy " + targetType + attrDuration + "$", "g");
-        fd = exp.exec(abilityLine);
-        if(fd) {
-            ability = { type: "copying", subtype: "ability", target: ttpp(fd[1]), copy_to: "@self[player]", duration: dd(fd[2], "permanent") };
-        }
-        // copy abilities, target to target2
-        exp = new RegExp("^Copy " + targetType + " to " + targetType + attrDuration + "$", "g");
-        fd = exp.exec(abilityLine);
-        if(fd) {
-            ability = { type: "copying", subtype: "ability", target: ttpp(fd[1]), copy_to: ttpp(fd[2]), duration: dd(fd[3], "permanent") };
-        }
-        // copy abilities, target to target
-        exp = new RegExp("^Duplicate " + targetType + "'s abilities" + attrDuration + "$", "g");
-        fd = exp.exec(abilityLine);
-        if(fd) {
-            ability = { type: "copying", subtype: "ability", target: ttpp(fd[1]), copy_to: ttpp(fd[1]), duration: dd(fd[2], "permanent") };
-        }
         // full copy
-        exp = new RegExp("^Full Copy " + targetType + "$", "g");
+        exp = new RegExp("^Copy " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "copying", subtype: "full", target: ttpp(fd[1]), copy_to: "@self[player]", suppressed: false, duration: dd(fd[2], "permanent") };
+            ability = { type: "copying", target: ttpp(fd[1]), copy_to: "@self[player]", suppressed: false, duration: dd(fd[2], "permanent") };
         }
         // full copy, surpressed
-        exp = new RegExp("^Full Copy " + targetType + " \\(Suppressed\\)$", "g");
+        exp = new RegExp("^Copy " + targetType + " \\(Suppressed\\)$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "copying", subtype: "full", target: ttpp(fd[1]), copy_to: "@self[player]", suppressed: true, duration: dd(fd[2], "permanent") };
+            ability = { type: "copying", target: ttpp(fd[1]), copy_to: "@self[player]", suppressed: true, duration: dd(fd[2], "permanent") };
         }
         /** CHOICES **/
         // choice choosing
@@ -1655,16 +1637,16 @@ module.exports = function() {
                     if(fd) {
                         complexTrigger = "On " + fd[1] + ";" + ttpp(fd[2], "abilitySubtype");
                     }
-                    /** On Target Visited [Ability]**/
-                    exp = new RegExp("^On " + targetType + " Visited \\[" + abilityType + "\\]$", "g");
+                    /** On Target Visited [Ability], On Target Action [Ability] **/
+                    exp = new RegExp("^On " + targetType + " (Visited|Action) \\[" + abilityType + "\\]$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
-                        complexTrigger = "On Visited Target;" + ttpp(fd[1]) + ";" + ttpp(fd[2], "abilityType");
+                        complexTrigger = "On " + fd[2] + " Target;" + ttpp(fd[1]) + ";" + ttpp(fd[3], "abilityType");
                     }
-                    exp = new RegExp("^On " + targetType + " Visited \\[" + abilitySubtype + "\\]$", "g");
+                    exp = new RegExp("^On " + targetType + " (Visited|Action) \\[" + abilitySubtype + "\\]$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
-                        complexTrigger = "On Visited Target;" + ttpp(fd[1]) + ";" + ttpp(fd[2], "abilitySubtype");
+                        complexTrigger = "On " + fd[2] + " Target;" + ttpp(fd[1]) + ";" + ttpp(fd[3], "abilitySubtype");
                     }
                     /** Choice Chosen **/
                     var exp, fd, complexTrigger;
@@ -1803,7 +1785,7 @@ module.exports = function() {
                 case "@killingtype": return "killingType";
                 case "@visittype": return "abilityType";
                 case "@visitparameter": return "unknown";
-                case "@thisattr": return "attribute";
+                case "@thisattr": return "activeAttribute";
                 case "@actionresult": return "info";
                 case "@result": case "@result1": case "@result2": case "@result3": 
                 case "@result4": case "@result5": case "@result6": case "@result7": 

@@ -16,6 +16,7 @@ module.exports = function() {
         // It is a @Self selector -> get type from self
         if(selectorTarget === "@self" && self) {
             selectorType = srcToType(self);
+            if(selectorType === "attribute") selectorType = "player"; // for attributes we want @Self to be the player. @ThisAttr is attribute instead
         }
         // switch through types
         switch(selectorType) {
@@ -228,9 +229,23 @@ module.exports = function() {
                 }
             case "@actiontarget":
                 if(additionalTriggerData.action_target) {
-                    return [ additionalTriggerData.action_target ];
+                    let val = srcToValue(additionalTriggerData.action_target);
+                    let type = srcToType(additionalTriggerData.action_target);
+                    if(!val) return [ ];  // invalid action target
+                    console.log("ACTION TARGET", additionalTriggerData.action_target, val, type);
+                    switch(type) {
+                        case "player":
+                            return [ val ];
+                        case "player_attr":
+                            let attr = await roleAttributeGetPlayer(val);
+                            return [ attr.id ];
+                        default:
+                            abilityLog(`❗ **Error:** Used \`@ActionTarget\` with invalid action target type \`${type}\`!`);
+                            return [ ];
+                    }
                 } else {
-                    return invalidSelector(selectorTarget);
+                    // allowed to be used in invalid context since some abilities return a target and others do not
+                    return [ ];
                 }
             case "@executor":
                 if(additionalTriggerData.executor) {
@@ -1539,7 +1554,7 @@ module.exports = function() {
                     case "player_attr":
                         return { value: val, type: "player_attr", default: false };
                     case "attribute":
-                        let source = getCustomAttributeSource(val);
+                        let source = getCustomAttributeOwner(val);
                         return { value: srcToValue(source), type: srcToType(source), default: false };
                     case "group":
                         return { value: val, type: "group", default: false };
@@ -2174,7 +2189,9 @@ module.exports = function() {
     **/
     this.inferTypeRuntime = async function(val, self, additionalTriggerData) {
         if(val === "@self") {
-            return srcToType(self);
+            let type = srcToType(self);
+            if(type === "attribute") type = "player"; // for attributes we want @Self to be the player. @ThisAttr is attribute instead
+            return type;
         } else if(val === "@target") {
             let target = await getTarget(self);
             let targetType = srcToType(target);
