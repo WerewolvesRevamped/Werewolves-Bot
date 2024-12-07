@@ -30,6 +30,7 @@ module.exports = function() {
                 }
                 // parse parameters
                 let loc = await parseLocation(ability.target, src_ref, additionalTriggerData);
+                if(loc.type == null) return { msg: "Announcement failed! " + abilityError, success: false }; // no location found
                 loc.value = await applyRedirection(loc.value, src_ref, ability.type, ability.subtype, additionalTriggerData);
                 // execute
                 result = await announcementImmediate(src_ref, info, loc, additionalTriggerData);

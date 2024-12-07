@@ -140,6 +140,7 @@ module.exports = function() {
 		});
 		sqlGetStat(24,  result => { 
 			stats.yes_emoji = result; 
+            idEmojis.push(["",`<:${client.emojis.cache.get(stats.yes_emoji).name}:${client.emojis.cache.get(stats.yes_emoji).id}>`]);
 			if(doLog) log("Stats > Cached yes emoji as `" + result + "`!")
 		}, () => {
             stats.yes_emoji = "false";
@@ -147,6 +148,7 @@ module.exports = function() {
 		});
 		sqlGetStat(25,  result => { 
 			stats.no_emoji = result; 
+            idEmojis.push(["",`<:${client.emojis.cache.get(stats.no_emoji).name}:${client.emojis.cache.get(stats.no_emoji).id}>`]);
 			if(doLog) log("Stats > Cached no emoji as `" + result + "`!")
 		}, () => {
             stats.no_emoji = false;

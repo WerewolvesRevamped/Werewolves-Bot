@@ -282,9 +282,9 @@ module.exports = function() {
             case "player":
                 return await abilitySendGetPlayerChannel(ref);
             case "player_attr":
-                return ref;
             case "group":
-                return ref; // group ref already is channel id
+            case "channel":
+                return ref;
             case "poll":
             case "team":
                 return backupChannelId;

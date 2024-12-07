@@ -722,16 +722,16 @@ module.exports = function() {
 	}
     
 	/* Lists all signedup players */
-	this.cmdListSignedupAlphabetical = function(channel) {
+    this.cmdListSignedupAlphabetical = function(channel) {
 		// Get a list of players
 		sql("SELECT id,emoji FROM players WHERE type='player'", result => {
 			let playerList = result.sort((a,b) => {
                 let pa = channel.guild.members.cache.get(a.id);
                 let pb = channel.guild.members.cache.get(b.id);
-               return (pa ? pa.displayName.toLowerCase() : "-") > (pb ? pb.displayName.toLowerCase() : "-") ? 1 : -1;
-            }).map(el => `${el.emoji}  - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).displayName.replace(/(_|\*|~)/g,"\\$1") : "*user left*"}`).join("\n");
+               return (pa ? pa.user.username.toLowerCase() : "-") > (pb ? pb.user.username.toLowerCase() : "-") ? 1 : -1;
+            }).map(el => `${el.emoji} ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username.replace(/(_|\*|~)/g,"\\$1") : "*user left*"}`).join("\n");
 			// Print message
-			channel.send("✳️ Listing signed up players").then(m => {
+			channel.send("✳ Listing signed up players").then(m => {
 				m.edit("**Signed Up Players (Alphabetical)** | Total: " +  result.length + "\n" + playerList)
 			}).catch(err => {
 				logO(err); 
@@ -1249,7 +1249,8 @@ module.exports = function() {
             let emojiIndex = idEmojis.map(el => el[1]).indexOf(args[0]);
             let playerIndex = idEmojis.map(el => el[0]).indexOf(member.id);
             if(emojiIndex != playerIndex) {
-                channel.send("⛔ This emoji is reserved by another player!").then(m => m.edit(`⛔ This emoji is reserved by <@${idEmojis[emojiIndex][0]}>!`));
+                if(idEmojis[emojiIndex][0]) channel.send("⛔ This emoji is reserved by another player!").then(m => m.edit(`⛔ This emoji is reserved by <@${idEmojis[emojiIndex][0]}>!`));
+                else channel.send("⛔ This emoji cannot be used!");
                 return;
             }
         }

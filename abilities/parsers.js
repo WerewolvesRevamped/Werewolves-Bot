@@ -1534,8 +1534,8 @@ module.exports = function() {
         } else if(selectorTarget[0] === "`") { // location is an active extra role
             let paers = await parseActiveExtraRoleSelector(selector, self, additionalTriggerData);
             if(paers.length === 1) return { value: paers[0], type: "player_attr", default: false };
-            // else
-            abilityLog(`❗ **Error:** Invalid extra role \`${selectorTarget}\`!`);
+            // else - not really an error... this should be a [] output 
+            //abilityLog(`❗ **Error:** Invalid active extra role location \`${selectorTarget}\`!`);
             return { value: null, type: null, default: true };
         } else { // location is a player
             if(selectorTarget === "@self") {

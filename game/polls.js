@@ -23,10 +23,49 @@ module.exports = function() {
 			case "list": cmdPollsList(message.channel); break;
 			case "active": cmdPollsActive(message.channel); break;
 			case "delete": cmdPollsDelete(message.channel, args); break;
-			case "close": closePolls(); break;
+			case "close_all": closePolls(); break;
+            case "new": cmdPollsNew(message.channel, args); break;
+            case "close": cmdPollsClose(message.channel, args); break;
 			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
 		}
 	}
+    
+    /**
+    Command: $polls new
+    Creates a new poll
+    **/
+    this.cmdPollsNew = async function(channel, args) {
+        // Check arguments
+		if(!args[1]) { 
+			channel.send("⛔ Syntax error. Not enough parameters!"); 
+			return; 
+		} else if(!verifyPoll(args[1])) {
+			channel.send("⛔ Command error. Invalid poll `" + args[1] + "`!"); 
+			return; 
+		}
+        pollCreate(`poll:${args[1]}`, `poll:${args[1]}`, args[1], args[2] ?? args[1], { value: channel.id, type: "channel", default: false });
+    }
+    
+    /**
+    Command: $polls close
+    Closes a specific poll
+    **/
+    this.cmdPollsClose = async function(channel, args) {
+        // Check arguments
+		if(!args[1]) { 
+			channel.send("⛔ Syntax error. Not enough parameters!"); 
+			return; 
+		} else if(!verifyPoll(args[1])) {
+			channel.send("⛔ Command error. Invalid poll `" + args[1] + "`!"); 
+			return; 
+		}
+        
+        let polls = await sqlPromEsc("SELECT * FROM active_polls WHERE type=", args[1]);
+        for(let i = 0; i < polls.length; i++) {
+            await closePoll(polls[i]);
+        }
+        await sqlPromEsc("DELETE FROM active_polls WHERE type=", args[1]);
+    }
     
     /**
     Command: $polls get
@@ -141,6 +180,28 @@ module.exports = function() {
 			channel.send("⛔ Database error. Couldn't delete active poll instance!");
 		});
 	}
+    
+    /**
+    Get Poll
+    gets a poll by message id
+    **/
+    this.getPoll = async function(id) {
+        let poll = await sqlPromOneEsc("SELECT * FROM active_polls WHERE messages LIKE ",  `%${id}%`);
+        if(poll) return poll;
+        else return false;
+    }
+    
+    /**
+    Cache Poll Messages
+    **/
+    this.cachePollMessages = async function() {
+        let allMsgs = await sqlProm("SELECT * FROM active_polls");
+        allMsgs.forEach(el => {
+            let msgs = el.messages.split(",");
+            let channel = mainGuild.channels.cache.get(el.channel);
+            msgs.forEach(el2 => channel.messages.fetch(el2));
+        });
+    }
     
     /**
     Polls: Reset
@@ -622,7 +683,7 @@ module.exports = function() {
     /**
     Converts a poll emoji to a poll name
     **/
-    function pollEmojiToName(name) {
+    this.pollEmojiToName = function(name) {
         name = name.toLowerCase();
         switch(name) {
             case "⛔": return "Abstain";

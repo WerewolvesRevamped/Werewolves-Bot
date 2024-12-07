@@ -70,6 +70,7 @@ client.on("ready", async () => {
         cacheColorsLUT();
         cacheActiveCustomAttributes();
         cacheDR();
+        cachePollMessages();
 		global.client.guilds.fetch(stats.log_guild).then(guild => {
 			guild.members.fetch().then((members) => {
                 //members.forEach(el => console.log(el.user.id));
@@ -771,7 +772,18 @@ client.on("messageReactionAdd", async (reaction, user) => {
             }
 		} else if(isGameMaster(reaction.message.guild.members.cache.get(user.id)) && !isParticipant(reaction.message.guild.members.cache.get(user.id)) && reaction.emoji == client.emojis.cache.get(stats.no_emoji)) {
 			reaction.message.delete();
-		}
+		} else if(stats.gamephase == gp.INGAME && isParticipant(reaction.message.guild.members.cache.get(user.id))) {
+            let poll = await getPoll(reaction.message.id);
+            if(poll) {
+                let emojiText = reaction.emoji.id ? `<:${reaction.emoji.name.toLowerCase()}:${reaction.emoji.id}>` : reaction.emoji.name;
+                let emojiPlayer = emojiToID(emojiText);
+                let emojiName = pollEmojiToName(emojiText);
+                let reacText = emojiText;
+                if(emojiPlayer) reacText += ` (<@${emojiPlayer}>)`;
+                if(emojiName) reacText += ` (${emojiName})`;
+                abilityLog(`🗳️ <@${user.id}> has added reaction ${reacText} on poll \`${poll.name}\`.`);
+            }
+        }
 	} 
 });
 
@@ -784,7 +796,18 @@ client.on("messageReactionRemove", async (reaction, user) => {
 	// Automatic unpinning
 	else if(reaction.emoji.name === "📌" && reaction.count == 0 && isParticipant(reaction.message.guild.members.cache.get(user.id))) {
 		reaction.message.unpin();
-	}
+	} else if(stats.gamephase == gp.INGAME && isParticipant(reaction.message.guild.members.cache.get(user.id))) {
+        let poll = await getPoll(reaction.message.id);
+        if(poll) {
+            let emojiText = reaction.emoji.id ? `<:${reaction.emoji.name.toLowerCase()}:${reaction.emoji.id}>` : reaction.emoji.name;
+            let emojiPlayer = emojiToID(emojiText);
+            let emojiName = pollEmojiToName(emojiText);
+            let reacText = emojiText;
+            if(emojiPlayer) reacText += ` (<@${emojiPlayer}>)`;
+            if(emojiName) reacText += ` (${emojiName})`;
+            abilityLog(`🗳️ <@${user.id}> has removed reaction ${reacText} on poll \`${poll.name}\`.`);
+        }
+    }
 });
 
 /* Leave Detection */

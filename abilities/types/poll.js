@@ -124,10 +124,12 @@ module.exports = function() {
     /** PRIVATE
     Ability: Poll - Creation
     **/
-    async function pollCreate(src_name, src_ref, pollType, pollName, pollLocation) {
+    this,pollCreate = async function(src_name, src_ref, pollType, pollName, pollLocation) {
         const pollData = await pollGetData(pollType);
         const options = pollData.options.split(", ");
         const name = pollData.display_name;
+        
+        if(pollLocation.type == null) return { msg: "Poll creation failed! " + abilityError, success: false }; // no location found
         
         const allOptions = await optionListData(options);
         let allOptionsFiltered = [];
