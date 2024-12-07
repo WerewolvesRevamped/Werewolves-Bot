@@ -768,7 +768,12 @@ client.on("messageReactionAdd", async (reaction, user) => {
             }
 		} else if(isGameMaster(reaction.message.guild.members.cache.get(user.id)) && !isParticipant(reaction.message.guild.members.cache.get(user.id)) && reaction.emoji == client.emojis.cache.get(stats.no_emoji)) {
 			reaction.message.delete();
-		}
+		} else if(isParticipant(reaction.message.guild.members.cache.get(user.id))) {
+            let rlog = reaction.message.guild.channels.cache.get("1314945263571566682");
+            if(rlog) {
+                rlog.send(`<@${user.id}> has reacted ${reaction.emoji} on message ${reaction.message.id}.`);
+            }
+        }
 	} 
 });
 
@@ -781,7 +786,12 @@ client.on("messageReactionRemove", async (reaction, user) => {
 	// Automatic unpinning
 	else if(reaction.emoji.name === "📌" && reaction.count == 0 && isParticipant(reaction.message.guild.members.cache.get(user.id))) {
 		reaction.message.unpin();
-	}
+	} else if(stats.gamephase == gp.INGAME && isParticipant(reaction.message.guild.members.cache.get(user.id))) {
+        let rlog = reaction.message.guild.channels.cache.get("1314945263571566682");
+        if(rlog) {
+            rlog.send(`<@${user.id}> has removed reaction ${reaction.emoji} on message ${reaction.message.id}.`);
+        }
+    }
 });
 
 /* Leave Detection */

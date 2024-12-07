@@ -467,6 +467,7 @@ module.exports = function() {
         ["839150186613702749","🕯️"], //phantom
         ["405803301251055617","4️⃣"], // harperette
         ["406536328965128194","🦆"], // aleeeeeeeeex
+        ["729439643451523073","<:meeple:1312192403129499659>"], // invincitank
     ];
     
     this.parseAlias = function(alias) {

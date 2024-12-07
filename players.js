@@ -46,7 +46,8 @@ module.exports = function() {
 			case "messages": 
 			case "msgs": cmdPlayersListMsgs(message.channel); break;
 			case "messages2": 
-			case "msgs2": cmdPlayersListMsgs2(message.channel, args); break;
+			case "msgs2": cmdPlayersListMsgs2(message.channel, args, "alive=1 AND"); break;
+			case "msgs3": cmdPlayersListMsgs2(message.channel, args, ""); break;
 			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
 		}
 	}
@@ -790,9 +791,9 @@ module.exports = function() {
 	
 	}
 	/* Lists message counts for living players    */
-	this.cmdPlayersListMsgs2 = function(channel, args) {
+	this.cmdPlayersListMsgs2 = function(channel, args, alive) {
 		// Get a list of players
-		sql("SELECT id,emoji,public_msgs,private_msgs FROM players WHERE alive=1 AND type='player'", result => {
+		sql("SELECT id,emoji,public_msgs,private_msgs FROM players WHERE " + alive + " type='player'", result => {
             let totalMsgs = 0;
             let totalMsgsPrivate = 0;
             let totalMsgsPublic = 0;
@@ -906,8 +907,8 @@ module.exports = function() {
 			let playerList = result.sort((a,b) => {
                 let pa = channel.guild.members.cache.get(a.id);
                 let pb = channel.guild.members.cache.get(b.id);
-               return (pa ? pa.displayName.toLowerCase() : "-") > (pb ? pb.displayName.toLowerCase() : "-") ? 1 : -1;
-            }).map(el => `${el.emoji}  - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).displayName.replace(/(_|\*|~)/g,"\\$1") : "*user left*"}`).join("\n");
+               return (pa ? pa.user.username.toLowerCase() : "-") > (pb ? pb.user.username.toLowerCase() : "-") ? 1 : -1;
+            }).map(el => `${el.emoji} ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username.replace(/(_|\*|~)/g,"\\$1") : "*user left*"}`).join("\n");
 			// Print message
 			channel.send("✳ Listing signed up players").then(m => {
 				m.edit("**Signed Up Players (Alphabetical)** | Total: " +  result.length + "\n" + playerList)
