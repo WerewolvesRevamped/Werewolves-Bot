@@ -6,6 +6,8 @@
 		- Cacheing player emojis
 		- Converting between emojis and user id
 */
+
+
 module.exports = function() {
 	/* Variables */
 	this.emojiIDs = null;

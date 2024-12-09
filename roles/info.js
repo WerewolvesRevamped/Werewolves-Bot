@@ -14,7 +14,7 @@ module.exports = function() {
     appendSection: WIP ??? (appends an additional section)
     editOnto: WIP ??? (edits the message onto another one instead of sending it)
     **/
-    this.cmdInfo = async function(channel, args, pin = false, noErr = false, simp = false, overwriteName = false, appendSection = false, editOnto = false, technical = false) {
+    this.cmdInfo = async function(channel, authorId, args, pin = false, noErr = false, simp = false, overwriteName = false, appendSection = false, editOnto = false, technical = false) {
 		// fix role name if necessary
         if(!args) {
             if(!noErr) channel.send("❗ Could not find role.");
@@ -55,26 +55,26 @@ module.exports = function() {
         // get the embed
         if(cachedRoles.includes(roleName)) {
             // message is a role
-            infoEmbed = await getRoleEmbed(roleName, sections, channel.guild);
+            infoEmbed = await getRoleEmbed(roleName, sections, channel.guild, authorId);
         } else if(cachedGroups.includes(roleName)) {
             // its a group
-            infoEmbed = await getGroupEmbed(roleName, sections, channel.guild);
+            infoEmbed = await getGroupEmbed(roleName, sections, channel.guild, authorId);
         } else if(cachedInfoNames.includes(roleName)) {
             // its an info
-            infoEmbed = await getInfoEmbed(roleName, channel.guild);
+            infoEmbed = await getInfoEmbed(roleName, channel.guild, authorId);
         } else if(cachedLocations.includes(roleName)) {
             // its a location
-            infoEmbed = await getLocationEmbed(roleName);
+            infoEmbed = await getLocationEmbed(roleName, authorId);
         } else if(cachedAttributes.includes(roleName)) {
             // its a location
-            infoEmbed = await getAttributeEmbed(roleName, sections);
+            infoEmbed = await getAttributeEmbed(roleName, sections, authorId);
         } else if(cachedTeams.includes(roleName)) {
             // its a team
-            infoEmbed = await getTeamEmbed(roleName, sections);
+            infoEmbed = await getTeamEmbed(roleName, sections, authorId);
         } else if(cachedTeamNames.includes(roleName)) {
             // its a team display name -> convert to name
             let ind = cachedTeamNames.indexOf(roleName);
-            infoEmbed = await getTeamEmbed(cachedTeams[ind], sections);
+            infoEmbed = await getTeamEmbed(cachedTeams[ind], sections, authorId);
         } else {
             // its nothing? should be impossible since verifyInfoMessage checks its one of the above minimum
             // can happen if running info pre caching
@@ -95,17 +95,17 @@ module.exports = function() {
     /**
     Info Shortcuts
     **/
-    this.cmdInfoTechnical = function(channel, args) { cmdInfo(channel, args, false, false, false, false, false, false, true); } // via $info_technical
-    this.cmdInfoIndirect = function(channel, args) { cmdInfo(channel, args, false, true); } // via ;
-    this.cmdInfoIndirectSimplified = function(channel, args) { cmdInfo(channel, args, false, true, true); } // via . 
-    this.cmdInfoIndirectTechnical = function(channel, args) { cmdInfo(channel, args, false, true, false, false, false, false, true); } // via ~
-    this.cmdInfopin = function(channel, args) { cmdInfo(channel, args, true); } // via $infopin
+    this.cmdInfoTechnical = function(channel, authorId, args) { cmdInfo(channel, authorId, args, false, false, false, false, false, false, true); } // via $info_technical
+    this.cmdInfoIndirect = function(channel, authorId, args) { cmdInfo(channel, authorId, args, false, true); } // via ;
+    this.cmdInfoIndirectSimplified = function(channel, authorId, args) { cmdInfo(channel, authorId, args, false, true, true); } // via . 
+    this.cmdInfoIndirectTechnical = function(channel, authorId, args) { cmdInfo(channel, authorId, args, false, true, false, false, false, false, true); } // via ~
+    this.cmdInfopin = function(channel, authorId, args) { cmdInfo(channel, authorId, args, true); } // via $infopin
     
     /**
     Get Info Embed
     Returns an info embed for an info message
     */
-    this.getInfoEmbed = function(infoName, guild) {
+    this.getInfoEmbed = function(infoName, guild, authorId = null) {
         return new Promise(res => {
             sql("SELECT * FROM info WHERE name = " + connection.escape(infoName), async result => {
                 result = result[0]; // there should always only be one role by a certain name
@@ -136,11 +136,11 @@ module.exports = function() {
                 if(!lutval) lutval = applyLUT(result.display_name);
                 if(lutval) { // set icon and name
                     //console.log(`${iconRepoBaseUrl}${lutval}`);
-                    embed.thumbnail = { "url": `${iconRepoBaseUrl}${lutval}.png` };
+                    embed.thumbnail = { "url": `${iconBaseUrl(authorId)}${lutval}.png` };
                     if(result.display_name.match(/\<\?[\w\d]*:[^>]{0,10}\>/)) { // emoji in title, use title
                         embed.title = applyET(result.display_name);
                     } else { // no emojis, use author title + icon
-                        embed.author = { "icon_url": `${iconRepoBaseUrl}${lutval}.png`, "name": applyTheme(result.display_name) };
+                        embed.author = { "icon_url": `${iconBaseUrl(authorId)}${lutval}.png`, "name": applyTheme(result.display_name) };
                     }
                 } else { // just set title afterwards
                     embed.title = applyET(result.display_name);
@@ -156,7 +156,7 @@ module.exports = function() {
     Get Group Embed
     Returns a group embed for a group message
     */
-    this.getGroupEmbed = function(groupName, sections, guild) {
+    this.getGroupEmbed = function(groupName, sections, guild, authorId = null) {
         return new Promise(res => {
             sql("SELECT * FROM `groups` WHERE name = " + connection.escape(groupName), async result => {
                 result = result[0]; // there should always only be one role by a certain name
@@ -182,8 +182,8 @@ module.exports = function() {
                 if(!lutval) lutval = applyLUT(result?.display_name ?? "Unknown");
                 if(lutval) { // set icon and name
                     //console.log(`${iconRepoBaseUrl}${lutval}`);
-                    embed.thumbnail = { "url": `${iconRepoBaseUrl}${lutval}.png` };
-                    embed.author = { "icon_url": `${iconRepoBaseUrl}${lutval}.png`, "name": applyTheme(result?.display_name ?? "Unknown") };
+                    embed.thumbnail = { "url": `${iconBaseUrl(authorId)}${lutval}.png` };
+                    embed.author = { "icon_url": `${iconBaseUrl(authorId)}${lutval}.png`, "name": applyTheme(result?.display_name ?? "Unknown") };
                 } else { // just set title afterwards
                     embed.title = applyET(result?.display_name ?? "Unknown");
                 }
@@ -198,7 +198,7 @@ module.exports = function() {
     Get Attribute Embed
     Returns an attribute embed for an attribute message
     */
-    this.getAttributeEmbed = function(attrName, sections) {
+    this.getAttributeEmbed = function(attrName, sections, authorId = null) {
         return new Promise(res => {
             sql("SELECT * FROM attributes WHERE name = " + connection.escape(attrName), async result => {
                 result = result[0]; // there should always only be one attribute by a certain name
@@ -218,8 +218,8 @@ module.exports = function() {
                 if(!lutval) lutval = applyLUT(result?.display_name ?? "Unknown");
                 if(lutval) { // set icon and name
                     //console.log(`${iconRepoBaseUrl}${lutval}`);
-                    embed.thumbnail = { "url": `${iconRepoBaseUrl}${lutval}.png` };
-                    embed.author = { "icon_url": `${iconRepoBaseUrl}${lutval}.png`, "name": applyTheme(result?.display_name ?? "Unknown") };
+                    embed.thumbnail = { "url": `${iconBaseUrl(authorId)}${lutval}.png` };
+                    embed.author = { "icon_url": `${iconBaseUrl(authorId)}${lutval}.png`, "name": applyTheme(result?.display_name ?? "Unknown") };
                 } else { // just set title afterwards
                     embed.title = applyET(result?.display_name ?? "Unknown");
                 }
@@ -234,7 +234,7 @@ module.exports = function() {
     Get Team Embed
     Returns a team embed for a team message
     */
-    this.getTeamEmbed = function(teamName, sections) {
+    this.getTeamEmbed = function(teamName, sections, authorId = null) {
         return new Promise(res => {
             sql("SELECT * FROM teams WHERE teams.name=" + connection.escape(teamName), async result => {
                 result = result[0]; // there should always only be one attribute by a certain name
@@ -259,8 +259,8 @@ module.exports = function() {
                 if(!lutval) lutval = applyLUT(result?.display_name ?? "Unknown");
                 if(lutval) { // set icon and name
                     //console.log(`${iconRepoBaseUrl}${lutval}`);
-                    embed.thumbnail = { "url": `${iconRepoBaseUrl}${lutval}.png` };
-                    embed.author = { "icon_url": `${iconRepoBaseUrl}${lutval}.png`, "name": applyTheme(result?.display_name ?? "Unknown") };
+                    embed.thumbnail = { "url": `${iconBaseUrl(authorId)}${lutval}.png` };
+                    embed.author = { "icon_url": `${iconBaseUrl(authorId)}${lutval}.png`, "name": applyTheme(result?.display_name ?? "Unknown") };
                 } else { // just set title afterwards
                     embed.title = applyET(result?.display_name ?? "Unknown");
                 }
@@ -275,7 +275,7 @@ module.exports = function() {
     Get Location Embed
     Returns a location embed for a group message
     */
-    this.getLocationEmbed = function(locationName) {
+    this.getLocationEmbed = function(locationName, authorId = null) {
         return new Promise(res => {
             sql("SELECT * FROM locations WHERE name = " + connection.escape(locationName), async result => {
                 result = result[0]; // there should always only be one role by a certain name
@@ -289,8 +289,8 @@ module.exports = function() {
                 if(!lutval) lutval = applyLUT(result?.display_name ?? "Unknown");
                 if(lutval) { // set icon and name
                     //console.log(`${iconRepoBaseUrl}${lutval}`);
-                    embed.thumbnail = { "url": `${iconRepoBaseUrl}${lutval}.png` };
-                    embed.author = { "icon_url": `${iconRepoBaseUrl}${lutval}.png`, "name": applyTheme(result?.display_name ?? "Unknown") };
+                    embed.thumbnail = { "url": `${iconBaseUrl(authorId)}${lutval}.png` };
+                    embed.author = { "icon_url": `${iconBaseUrl(authorId)}${lutval}.png`, "name": applyTheme(result?.display_name ?? "Unknown") };
                 } else { // just set title afterwards
                     embed.title = applyET(result?.display_name ?? "Unknown");
                 }
@@ -306,13 +306,13 @@ module.exports = function() {
     Returns an info embed for a role 
     WIP: Re-implement role filter
     **/
-    this.getRoleEmbed = function(roleName, visibleSections, guild) {
+    this.getRoleEmbed = function(roleName, visibleSections, guild, authorId = null) {
         return new Promise(res => {
             sql("SELECT * FROM roles WHERE name = " + connection.escape(roleName), async result => {
                 result = result[0]; // there should always only be one role by a certain name
                 if(!result) return null; // no data found
  
-                var embed = await getBasicRoleEmbed(result, guild);
+                var embed = await getBasicRoleEmbed(result, guild, authorId);
                 
                 // Build role name for title
                 let fancyRoleName = `${result.display_name} [${toTitleCase(result.class)} ${toTitleCase(result.category)}]`; // Default: Name [Class Category]
@@ -329,8 +329,8 @@ module.exports = function() {
                 let lutval = applyLUT(roleName);
                 if(!lutval) lutval = applyLUT(result.display_name);
                 if(lutval) { // set icon and name
-                    embed.thumbnail = { "url": `${iconRepoBaseUrl}${lutval}.png` };
-                    embed.author.icon_url = `${iconRepoBaseUrl}${lutval}.png`;
+                    embed.thumbnail = { "url": `${iconBaseUrl(authorId)}${lutval}.png` };
+                    embed.author.icon_url = `${iconBaseUrl(authorId)}${lutval}.png`;
                 }
                 
                 let isFormalized = false;
@@ -393,6 +393,24 @@ module.exports = function() {
         } else {
             channel.send("⛔ Command error. Invalid role `" + role + "`!"); 
         }
+    }
+    
+    /**
+    Get Icon Base Url
+    **/
+    this.iconBaseUrl = function(id) {
+        if(!id) return iconRepoBaseUrl;
+        let pack = getPack(id);
+        if(pack === 0) {
+            return iconRepoBaseUrl;
+        } else {
+            let pName = AVAILABLE_PACKS[pack - 1];
+            return skinpackUrl(pName);
+        }
+    }
+    
+    this.skinpackUrl = function(name) {
+        return`https://werewolves.me/cards/skinpack.php?pack=${name}&src=`;
     }
     
 }

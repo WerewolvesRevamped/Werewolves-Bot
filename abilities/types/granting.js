@@ -235,7 +235,7 @@ module.exports = function() {
                 // Create a default connection with the role and creators name
                 connectionAdd(sc.id, `${role}:${src_ref}`);
                 // Send info message for each role
-                let infoEmbed = await getRoleEmbed(role, ["basics","details"], mainGuild);
+                let infoEmbed = await getRoleEmbed(role, ["basics","details"], mainGuild, member);
                 sendEmbed(sc, infoEmbed, true);
 
                 // Move into sc category

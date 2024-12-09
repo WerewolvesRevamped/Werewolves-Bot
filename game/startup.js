@@ -67,7 +67,7 @@ module.exports = function() {
                     cmdConnectionAdd(sc, ["", player.id], true);
                     // Send info message for each role
                     result.forEach(async el => {
-                        cmdInfo(sc, [ el.name ], true, false);
+                        cmdInfo(sc, player.id, [ el.name ], true, false);
                         await sleep(3000);
                         cmdGetCard(sc, el.name);
                     });

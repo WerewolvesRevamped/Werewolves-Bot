@@ -27,6 +27,7 @@ require("./stats.js")();
 require("./confirm.js")();
 /* Functionality Modules */
 require("./players.js")();
+require("./players/packs.js")();
 require("./ccs.js")();
 require("./whispers.js")();
 require("./theme.js")();
@@ -71,6 +72,7 @@ client.on("ready", async () => {
         cacheActiveCustomAttributes();
         cacheDR();
         cachePollMessages();
+        cachePacks();
 		global.client.guilds.fetch(stats.log_guild).then(guild => {
 			guild.members.fetch().then((members) => {
                 //members.forEach(el => console.log(el.user.id));
@@ -275,7 +277,7 @@ client.on("messageCreate", async message => {
                 let msg = message.content.trim().substr(1).trim();
                 let msgRole = msg.match(/(".*?")|(\S+)/g) ? msg.match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "";
                 //console.log(msg + " => " + msgRole);
-                if(msg.match(/^[a-zA-Z ]*$/)) cmdInfoIndirectSimplified(message.channel, msgRole);
+                if(msg.match(/^[a-zA-Z ]*$/)) cmdInfoIndirectSimplified(message.channel, message.author.id, msgRole);
                 if(msgRole && stats.fancy_mode && verifyRole(msgRole.join(" "))) message.delete();
                 uncacheMessage(message);
                 return;
@@ -284,7 +286,7 @@ client.on("messageCreate", async message => {
                 let msg = message.content.trim().substr(1).trim();
                 let msgRole = msg.match(/(".*?")|(\S+)/g) ? msg.match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "";
                 //console.log(msg + " => " + msgRole);
-                if(msg.match(/^[a-zA-Z ]*$/)) cmdInfoIndirect(message.channel, msgRole, false, true, false);
+                if(msg.match(/^[a-zA-Z ]*$/)) cmdInfoIndirect(message.channel, message.author.id, msgRole, false, true, false);
                 if(msgRole && stats.fancy_mode && verifyRole(msgRole.join(" "))) message.delete();
                 uncacheMessage(message);
                 return;
@@ -293,7 +295,7 @@ client.on("messageCreate", async message => {
                 let msg = message.content.trim().substr(1).trim();
                 let msgRole = msg.match(/(".*?")|(\S+)/g) ? msg.match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "";
                 //console.log(msg + " => " + msgRole);
-                if(msg.match(/^[a-zA-Z ]*$/)) cmdInfoIndirectTechnical(message.channel, msgRole, false, true, false, false, false, false, true);
+                if(msg.match(/^[a-zA-Z ]*$/)) cmdInfoIndirectTechnical(message.channel, message.author.id, msgRole, false, true, false, false, false, false, true);
                 if(msgRole && stats.fancy_mode && verifyRole(msgRole.join(" "))) message.delete();
                 uncacheMessage(message);
                 return;
@@ -449,20 +451,20 @@ client.on("messageCreate", async message => {
 	break;
 	/* Role Info */ // Returns the info for a role set by the roles command (simplified)
 	case "info":
-		cmdInfo(message.channel, args, false, false, true);
+		cmdInfo(message.channel, message.author.id, args, false, false, true);
 	break;
 	/* Role Info */ // Returns the info for a role set by the roles command (basics/details)
     // NOT DOCUMENTED
 	case "details":
-		cmdInfo(message.channel, args);
+		cmdInfo(message.channel, message.author.id, args);
 	break;
 	/* Role Info */ // Returns the info for a role set by the roles command
 	case "info_technical":
-		cmdInfoTechnical(message.channel, args);
+		cmdInfoTechnical(message.channel, message.author.id, args);
 	break;
 	/* Role Info + Pin */ // Returns the info for a role set by the roles command & pins the message
 	case "infopin":
-		if(checkGM(message)) cmdInfopin(message.channel, args);
+		if(checkGM(message)) cmdInfopin(message.channel, message.author.id, args);
 	break;
 	/* Role Info */ // Returns the info for a role set by the roles command
 	case "infoedit": // WIP: READD this command
@@ -691,6 +693,10 @@ client.on("messageCreate", async message => {
     /* Host Information */
     case "host_information":
 		if(checkGM(message)) cmdHostInformation(message.channel, args);
+    break;
+    /* Host Information */
+    case "packs":
+		if(checkGM(message)) cmdPacks(message.channel, message.author, args);
     break;
 	/* Invalid Command */
 	default:

@@ -139,7 +139,7 @@ module.exports = function() {
             let channel_id = await getSrcRefChannel(`player:${targets[i]}`);
             if(channel_id) {
                 // get info embed
-                infoEmbed = await getRoleEmbed(role, ["basics", "details"], mainGuild);
+                infoEmbed = await getRoleEmbed(role, ["basics", "details"], mainGuild, targets[i]);
                 // get channel
                 let sc = mainGuild.channels.cache.get(channel_id);
                 // send embed

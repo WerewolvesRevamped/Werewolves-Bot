@@ -27,9 +27,9 @@ module.exports = function() {
     Get Basic Role Embed
     Returns the role embed template based on a role SELECT * query and the current guild
     **/
-    this.getBasicRoleEmbed = async function(result, guild) {
+    this.getBasicRoleEmbed = async function(result, guild, authorId = null) {
         // Get the role data
-        let roleData = await getRoleData(result.display_name, result.class, result.category, result.team);
+        let roleData = await getRoleData(result.display_name, result.class, result.category, result.team, authorId);
 
         var embed = await getBasicEmbed(guild);
         
@@ -44,10 +44,10 @@ module.exports = function() {
     /**
     Get Role Data
     **/
-    this.getRoleData = async function(roleName, rClass, rCategory, rTeam) {
+    this.getRoleData = async function(roleName, rClass, rCategory, rTeam, authorId = null) {
             
         // get the right folder
-        var url = iconRepoBaseUrl;
+        var url = iconBaseUrl(authorId);
         if(rClass == "solo") url += `Solo/${toTitleCase(rTeam)}`;
         else url += `${toTitleCase(rClass)}/${toTitleCase(rCategory)}`;
         // add file name
@@ -63,7 +63,7 @@ module.exports = function() {
             console.log("MISSING URL", url);
             let classesWithPlaceholders = ["townsfolk","werewolf","unaligned","solo"]; // list of classes with a specific placeholder icon
             let placeholderName = classesWithPlaceholders.includes(rClass) ? toTitleCase(rClass) : "Unaligned"; // if no specific placeholder icon exists default to UA
-            url = `${iconRepoBaseUrl}Placeholder/${placeholderName}.png?version=${stats.icon_version}`; // construct placeholder url
+            url = `${iconBaseUrl(authorId)}Placeholder/${placeholderName}.png?version=${stats.icon_version}`; // construct placeholder url
         }
         
         // get color

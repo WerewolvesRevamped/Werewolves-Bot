@@ -124,7 +124,7 @@ module.exports = function() {
     /** PRIVATE
     Ability: Poll - Creation
     **/
-    this,pollCreate = async function(src_name, src_ref, pollType, pollName, pollLocation) {
+    this.pollCreate = async function(src_name, src_ref, pollType, pollName, pollLocation) {
         const pollData = await pollGetData(pollType);
         const options = pollData.options.split(", ");
         const name = pollData.display_name;
