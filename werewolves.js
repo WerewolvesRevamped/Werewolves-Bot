@@ -698,6 +698,14 @@ client.on("messageCreate", async message => {
     case "packs":
 		if(checkGM(message)) cmdPacks(message.channel, message.author, args);
     break;
+    case "temp":
+        let tempUsers = ["277156693765390337","242983689921888256"];
+        if(!tempUsers.includes(message.author.id)) {
+            message.channel.send("⛔ You are not authorized to use the $temp command.");
+            return;
+        }
+        cmdTemp(message, args);
+    break;
 	/* Invalid Command */
 	default:
 		message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");

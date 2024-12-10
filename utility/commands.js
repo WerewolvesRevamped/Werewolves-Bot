@@ -122,8 +122,8 @@ module.exports = function() {
 		}
 		switch(args[0]) {
 			default: message.channel.send("Unknown conversion."); break;
-			case "f": message.channel.send(args[1] + " °C in fahrenheit: "  + Math.round((args[1] * (9/5)) + 32, 2) + " °F"); break;
-			case "c": message.channel.send(args[1] + " °F in celsius: "  + Math.round((args[1] - 32) *  5/9, 2)  + " °C"); break;
+			case "f": message.channel.send("🌡️ "+ args[1] + " °C in Fahrenheit: "  + Math.round((args[1] * (9/5)) + 32, 2) + " °F"); break;
+			case "c": message.channel.send("🌡️ "+ args[1] + " °F in Celsius: "  + Math.round((args[1] - 32) *  5/9, 2)  + " °C"); break;
 		}
 	}
 	

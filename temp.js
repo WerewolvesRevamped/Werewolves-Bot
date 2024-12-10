@@ -40,8 +40,7 @@ module.exports = function() {
         ["729439643451523073","<:meeple:1312192403129499659>"], // invincitank
     ];
 
-    this.parseAlias = function(alias) {
-        let aliases = {
+        this.ALIASES = {
                 "modrole": ["mr"],
                 "substitute": ["sub","unsub","unsubstitute"],
                 "spectate": ["s","spec","spectator"],
@@ -101,10 +100,14 @@ module.exports = function() {
                 "dr": ["discord_role","drole"],
                 "host_information": ["hi","host_info"]
         };
-        for(let cmd in aliases) {
-            if(aliases[cmd].indexOf(alias) != -1) return cmd;
+    this.parseAlias = function(alias) {
+        for(let cmd in ALIASES) {
+            if(ALIASES[cmd].indexOf(alias) != -1) return cmd;
         }
         return alias;
+    }
+    this.getAliases = function(inCmd) {
+        return ALIASES[inCmd];
     }
 
 }

@@ -52,25 +52,27 @@ module.exports = function() {
 							break;
 		}
 	}
-	
-	this.helpConfirm = function(member, args) {
-		let help = "";
-		switch(args[0]) {
-			case "":
-				if(isGameMaster(member)) help += stats.prefix + "confirm - Deletes webhook & user messages in bulk\n";
-			break;
-			case "confirm":
-				help += "```yaml\nSyntax\n\n" + stats.prefix + "confirm <Command>\n```";
-				help += "```\nFunctionality\n\nSkips the confirming stage of a command that requires confirming.\n```";
-				help += "```fix\nUsage\n\n> " + stats.prefix + "confirm reset```";
-			break;
-		}
-		return help;
-	}
+    
+    this.getWarning = function(action) {
+        switch(action) {
+            case "connection reset":
+			case "roles clear":
+			case "roles clear_alias": 
+			case "reset":
+			case "cc cleanup":
+			case "roles sc_cleanup":
+                return " **WARNING:** This is an irreversible destructive action that deletes a large amount of data. Are you __absolutely certain__ you want to perform this action?";
+            default:
+                return "";
+        }
+    }
 
 	/* Sends a confirmation message */
 	this.cmdConfirm = async function(message, action) {
-		message.channel.send("❗ Click the reaction in the next `20.0` seconds to confirm `" + message.content + "`!")
+        let cmdSplit = message.content.split(" ");
+        cmdSplit[0] = parseAlias(cmdSplit[0]);
+        let cmd = cmdSplit.join(" ");
+		message.channel.send("❗ Click the reaction in the next `20.0` seconds to confirm `" + cmd + "`!" + getWarning(action))
 		.then(m => {
             m.fetch();
 			m.react("✅").then(r => {
