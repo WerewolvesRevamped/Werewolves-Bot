@@ -356,8 +356,8 @@ client.on("messageCreate", async message => {
             member.voice.setChannel("1075235455123083264");
         }
     break;
-    case "image": // probably not documented? // WIP: seems to be missing
-        //cmdGetImg(message.channel, args.join(" "));
+    case "image": // probably not documented? 
+        cmdGetImg(message.channel, args.join(" "));
     break;
     case "card": // probably not documented?
         cmdGetCard(message.channel, args.join(" "));
@@ -417,6 +417,10 @@ client.on("messageCreate", async message => {
 	case "roles":
 		if(checkGM(message)) cmdRoles(message, args, argsX);
 	break;
+	/* Alias */ // Modify alias information for commands such as 'info'
+	case "alias":
+		if(checkGM(message)) cmdAlias(message, args, argsX);
+	break;
 	/* Infomanage */ // Modify info information for commands such as 'info'
 	case "infomanage":
 		if(checkGM(message)) cmdInfomanage(message, args, argsX);
@@ -468,11 +472,11 @@ client.on("messageCreate", async message => {
 	break;
 	/* Role Info */ // Returns the info for a role set by the roles command
 	case "infoedit": // WIP: READD this command
-		if(checkGM(message)) cmdInfoEdit(message.channel, args, argsX);
+		//if(checkGM(message)) cmdInfoEdit(message.channel, args, argsX);
 	break;
 	/* Role Info (Add) */ // Returns the info for a role set by the roles command, but with additions
 	case "infoadd": // WIP: READD this command
-		if(checkGM(message)) cmdInfoFancy(message.channel, [args[0]], false, false, false, false, ["", argsX[1].replace(/~/g, "\n").replace(/<\/>/g,"~")]);
+		//if(checkGM(message)) cmdInfoFancy(message.channel, [args[0]], false, false, false, false, ["", argsX[1].replace(/~/g, "\n").replace(/<\/>/g,"~")]);
 	break;
 	break;
 	/* Options */ // Modify options such as role ids and prefix
@@ -699,12 +703,15 @@ client.on("messageCreate", async message => {
 		if(checkGM(message)) cmdPacks(message.channel, message.author, args);
     break;
     case "temp":
-        let tempUsers = ["277156693765390337","242983689921888256"];
+        let tempUsers = ["277156693765390337","242983689921888256","544125116640919557"];
         if(!tempUsers.includes(message.author.id)) {
             message.channel.send("⛔ You are not authorized to use the $temp command.");
             return;
         }
         cmdTemp(message, args);
+    break;
+    case "time":
+        cmdTime(message.channel, args);
     break;
 	/* Invalid Command */
 	default:

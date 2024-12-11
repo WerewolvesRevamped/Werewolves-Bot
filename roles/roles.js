@@ -3,13 +3,13 @@
     The module for WWR roles
 **/
 require("./parser.js")();
-require("./help.js")();
 require("./caching.js")();
 require("./link.js")();
 require("./info.js")();
 require("./utility.js")();
 require("./elected.js")();
 require("./groups.js")();
+require("./alias.js")();
 
 module.exports = function() {
 	/**
@@ -259,5 +259,16 @@ module.exports = function() {
 			channel.send("⛔ Database error. Couldn't look for info list!");
 		});
 	}
+    
+    /**
+    Command: $image
+    Retrieves the image for a role
+    **/
+    this.cmdGetImg = async function(channel, role) {
+        let roleNameParsed = parseRole(role);
+        let roleData = await getRoleDataFromName(roleNameParsed);
+        if(!roleData || !roleData.url) channel.send("⛔ Command error. Cannot find url for `" + role + "`!"); 
+        else channel.send(roleData.url);
+    }
     
 }

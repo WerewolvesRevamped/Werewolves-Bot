@@ -677,6 +677,12 @@ module.exports = function() {
             case "random": return "❓";
             case "yes": return client.emojis.cache.get(stats.yes_emoji);
             case "no": return client.emojis.cache.get(stats.no_emoji);
+            case "a": return "🇦";
+            case "b": return "🇧";
+            case "c": return "🇨";
+            case "d": return "🇩";
+            case "e": return "🇪";
+            case "f": return "🇫";
         }
     }
 
@@ -691,6 +697,12 @@ module.exports = function() {
             case "❓": return "Random";
             case `<:${client.emojis.cache.get(stats.yes_emoji).name}:${client.emojis.cache.get(stats.yes_emoji).id}>`: return "Yes";
             case `<:${client.emojis.cache.get(stats.no_emoji).name}:${client.emojis.cache.get(stats.no_emoji).id}>`: return "No";
+            case "🇦": return "a";
+            case "🇧": return "b";
+            case "🇨": return "c";
+            case "🇩": return "d";
+            case "🇪": return "e";
+            case "🇫": return "f";
         }
     }
     

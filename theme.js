@@ -23,52 +23,6 @@ module.exports = function() {
 		}
 	}
 	
-	
-	/* Help for this module */
-	this.helpTheme = function(member, args) {
-		let help = "";
-		switch(args[0]) {
-			case "":
-				if(isGameMaster(member) || isHelper(member)) help += stats.prefix + "theme [set|remove|list|select] - Manages themes\n";
-			break;
-			case "theme":
-				if(!isGameMaster(member) && !isHelper(member)) break;
-				switch(args[1]) {
-					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "theme [set|remove|list|select]\n```";
-						help += "```\nFunctionality\n\nGroup of commands to handle renaming roles for themes. " + stats.prefix + "help theme <sub-command> for detailed help.```";
-						help += "```diff\nAliases\n\n- themes\n- th\n```";
-					break;
-					case "set":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "theme set <Theme Id> <Original Word> <Themed Word>\n```";
-						help += "```\nFunctionality\n\nReplaces all mentions of a word <Original Word> with <Theme Word> if theme <Theme Id> is selected.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "theme set customTheme citizen notCitizen\n< ✅ Replaced 'citizen' with 'notCitizen' in 'customTheme'!\n```";
-					break;
-					case "remove":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "theme remove <Theme Id> <Original Word>\n```";
-						help += "```\nFunctionality\n\nRemoves a themed word.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "theme remove customTheme citizen\n< ✅ Removed 'citizen' from 'customTheme'!\n```";
-					break;
-					case "list":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles list <Theme Id>\n```";
-						help += "```\nFunctionality\n\nLists all replaced words for a specific theme, or if no <Theme Id> is set, lists all theme.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "theme list\n\n< ✅ Current Themes: 'customTheme', 'default'!\n```";
-					break;
-					case "select":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "roles select <Theme Id>\n```";
-						help += "```\nFunctionality\n\nSets the current theme to <Theme Id>, if set to an invalid theme or 'default', default words are used.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "theme select customTheme\n< ✅ Selected 'customTheme' theme!\n```";
-					break;
-				}
-			break;
-		}
-		return help;
-	}
-	
-	
-	
-	
-	
 	/* Lists all themes/themed words */
 	this.cmdThemeList = function(channel, args) {
 		if(!args[1]) {

@@ -29,7 +29,7 @@ module.exports = function() {
 		switch(command) {
 			case "connection reset": cmdConnectionReset(message.channel); break;
 			case "roles clear": cmdRolesClear(message.channel); break;
-			case "roles clear_alias": cmdRolesClearAlias(message.channel); break;
+			case "alias clear": cmdAliasClear(message.channel); break;
 			case "start": cmdStart(message.channel, false); break;
 			case "start_debug": cmdStart(message.channel, true); break;
 			case "reset": cmdReset(message.channel); break;

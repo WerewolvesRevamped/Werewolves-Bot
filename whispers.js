@@ -36,55 +36,6 @@ module.exports = function() {
 		}
     }
 	
-	/* Help for this module */
-	this.helpWhispers = function(member, args) {
-		let help = "";
-		switch(args[0]) {
-			case "":
-				if(isGameMaster(member) || isHelper(member)) help += stats.prefix + "impersonate - Repeats a message as a webhook pretending to be somebody\n";
-				if(isGameMaster(member) || isHelper(member)) help += stats.prefix + "connection [add|remove|reset] - Manages connections\n";
-			break;
-			case "impersonate":
-				if(!isGameMaster(member) && !isHelper(member)) break;
-				help += "```yaml\nSyntax\n\n" + stats.prefix + "impersonate <User> <Message>\n```";
-				help += "```\nFunctionality\n\nRepeats a message as a webhook pretending to be a certain user.\n```";
-				help += "```fix\nUsage\n\n> " + stats.prefix + "impersonate 242983689921888256 Does this work?\n< Does this work?\n```";
-				help += "```diff\nAliases\n\n- imp\n```";
-			break;
-			case "connection":
-				if(!isGameMaster(member) && !isHelper(member)) break;
-				switch(args[1]) {
-					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "connection [add|remove|reset]\n```";
-						help += "```\nFunctionality\n\nGroup of commands to handle connected channels. " + stats.prefix + "help connection <sub-command> for detailed help.```";
-				help += "```diff\nAliases\n\n- con\n- whispers\n```";
-					break;
-					case "add":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "connection add <Connection Name> <Connection Diguise>\n```";
-						help += "```\nFunctionality\n\nConnects the channel to <Connection Name>. All channels that are connected to the same Connection Name, automatically have all messages copied over to all other channels in the connection, and receive copies from all messages from the other channels in it. If a disguise <Connection Disguise> is set, messages are copied over to other channels using the disguise as a name, instead of the name of a message's author.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "connection add example\n< ✅ Added connection example with no disguise!\n\n> " + stats.prefix + "connection add example Disguised\n< ✅ Added connection example with disguise Disguised!```";
-					break;
-					case "remove":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "connection remove\n```";
-						help += "```\nFunctionality\n\nRemoves all connections from the current channel.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "connection remove\n< ✅ Removed all connections from this channel!\n```";
-					break;
-					case "reset":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "connection reset\n```";
-						help += "```\nFunctionality\n\nRemoves all connections from all channels.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "connection reset\n< ❗ Click the reaction in the next 20.0 seconds to confirm " + stats.prefix + "connection reset!\n< ✅ Successfully reset connections!\n```";
-					break;
-					case "send":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "connection send <Connection Name> <Connection Disguise> <Text>\n```";
-						help += "```\nFunctionality\n\nSend a message <Text> with disguise <Connection Disguise> over a connection <Connection Name>.\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "connection send bartender fakebartender hi\n```";
-					break;
-				}
-			break;
-		}
-		return help;
-	}
-	
 	/* Adds a connection */
 	this.cmdConnectionAdd = function(channel, args, hidden = false) {
 		// Check arguments

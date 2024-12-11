@@ -5,6 +5,36 @@
 module.exports = function() {
     
     /**
+    Command: $time
+    **/
+    this.cmdTime = function(channel, args) {
+        if(!args[0]) {
+            let utcTime = new Date();
+            channel.send(`✅ My time is ${utcTime.toLocaleTimeString()}!`);
+        } else if(!args[1]) {
+            try {
+                let utcTime = new Date();
+                let time = parseTime(args[0] + (args[0].length === 2 ? utcTime.getMinutes() : ""));
+                let diff = (Math.round(((time - utcTime) / (60 * 60 * 1000)) * 4) - Math.round(utcTime.getTimezoneOffset() / 15)) / 4;
+                if(diff > 12) diff -= 24;
+                if(diff < -12) diff += 24;
+                if(diff > 12 || diff < -12) {
+                    channel.send("⛔ Time error. Could not parse your time!"); 
+                    return;
+                }
+                let plus = diff>=0 ? "+" : "";
+                diff = diff + "";
+                diff = diff.replace(".25", ":15");
+                diff = diff.replace(".5", ":30");
+                diff = diff.replace(".75", ":45");
+                channel.send(`✅ Your timezone is UTC${plus}${diff}!`);
+            } catch(err) {
+                channel.send("⛔ Time error. Could not parse your time!"); 
+            }
+        }
+    }
+    
+    /**
     Command: $edit
     Edits a bot message specified in arg0 to args1+
     */

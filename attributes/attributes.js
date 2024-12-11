@@ -3,7 +3,6 @@
     The module for implementing attributes
 **/
 
-require("./help.js")();
 require("./custom.js")();
 require("./generic.js")();
 require("./role.js")();
