@@ -39,7 +39,7 @@ module.exports = function() {
     Replaces php keywords so they do not show up in discord syntax highlighting
     **/
 	this.phpEscape = function(txt) {
-		return txt.replace(/(and|list|from|switch|Public|or|new|as|New|Use|While)/g, el => el.substr(0, 1) + "​" + el.substr(1));
+		return txt.replace(/'/g,"´").replace(/(and|list|from|switch|Public|or|new|as|New|Use|While)/g, el => el.substr(0, 1) + "​" + el.substr(1));
 	}
     
 	

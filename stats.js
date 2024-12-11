@@ -417,62 +417,6 @@ module.exports = function() {
 		}); 
 	}
 	
-	this.helpStats = function(member, args) {
-		let help = "";
-		switch(args[0]) {
-			case "":
-				if(isGameMaster(member)) help += stats.prefix + "options <Option Name> - Manages options\n";
-				if(isGameMaster(member)) help += stats.prefix + "gamephase [get|set] - Manages gamephase\n";
-			break;
-			case "options":
-				if(!isGameMaster(member)) break;
-					help += "```yaml\nSyntax\n\n" + stats.prefix + "options <Option Name> <New Value>\n```";
-					help += "```\nFunctionality\n\nReturns or sets (if <New Value> is set) the value of a bot option <Option Name>. A bot option can be a numeric id, or an option name.\n\nFor a list of all options run " + stats.prefix + "help options_list\n\n```";
-					help += "```fix\nUsage\n\n> " + stats.prefix + "options mayor\n< ✅ mayor currently is set to 588125889611431946!\n\n> " + stats.prefix + "options mayor 588125889611431946\n< ✅ Successfully updated mayor to 588125889611431946!```";
-					help += "```diff\nAliases\n\n- stat\n- stats\n- option\n```";
-			break;
-            case "options_list":
-				if(!isGameMaster(member)) break;
-                help += "```yaml\nprefix: The prefix the bot uses for commands\nparticipant: The id of the participant role\ngamemaster: The id of the gamemaster role\nspectator: The id of the spectator role\nsigned_up: The id of the signed up role\ndead_participant: The id of the dead participant role\nbot: The id of the bot role\nlog_guild: The id of the guild to use for logs\nlog_channel: The id of the channel to use for logs\nmayor: The id of the mayor role\nreporter: The id of the reporter role\nguardian: The id of the guardian role\ngame: The name of the game\ngamemaster_ingame: The id of the gamemaster ingame role\nadmin: The id of the admin role\nadmin_ingame: The id of the admin ingame role\nyes_emoji: The id of the yes emoji\nno_emoji: The id of the no emoji\nnew_game_ping: Role that gets pinged with certain commands\ngame_status: A VC that shows the status of the game\ncc_limit: Maximum amount of ccs one person can create (<-10 for none)\nmayor2: The id of the second mayor role (which doesn't give extra votes)\npoll: The poll mode. See " + stats.prefix + "help options_polls\nsub: role for substitute players\nping: ping for gifs and deleted messages\nhost: The id of the host role\nfancy_mode: Changes info messages to fancy versions if set to true.\nicon: the version to use for icon images.\nsenior_gamemaster: The id of the senior gm role.\nsenior_gamemaster_ingame: The id of the senior gm ingame role\nrole_filter: The role filter. See " + stats.prefix + "help options_rf\nhelper: The id of the helper role\nhelper_ingame: The id of the helper ingame role\nmayor_threshold: If there are more players alive than this value, mayor2 role is used.\nhost_log: Logs host pings. Disabled if false.\nautomation_level: level of automation\nghost: ghost role id\nhaunting: true/false for if haunting is enabled\nphase: current phase\n```";
-            break;
-            case "optionsrf":
-            case "options_rf":
-            case "options_rolefilter":
-            case "options_role_filter":
-                    help += "```yaml\nSyntax\n\n" + stats.prefix + "options role_filter <New Value>\n```";
-					help += "```\nFunctionality\n\nA complicated option, so it gets a dedicated help page. Set the final value to the sum of all of the following options you want to enable:\n1: Show Default Roles\n2: Show Transformation Roles ('Transformation')\n4: Show Limited Roles ('Limited')\n8: Show Technical Roles ('Technical')\n16: Show Joke Roles ('Joke')\n32: Show Temporary Roles ('Temporary')\n64: Show Mini Wolf Roles ('Mini')\n128: Show Variant Roles ('Variant')\n\nDefault Value: 31\n\nLimited Transformation ('Limited Transformation') Roles are only included if both Limited and Transformation are enabled.\n```";
-					help += "```diff\nAliases\n\n- stat role_filter\n- stats role_filter\n- option role_filter\n```";
-            break;
-            case "optionspoll":
-            case "options_poll":
-                    help += "```yaml\nSyntax\n\n" + stats.prefix + "options poll <New Value>\n```";
-                    help += "```\nFunctionality\n\nA complicated option, so it gets a dedicated help page. Set the final value to the sum of all of the following options you want to enable:\n1: Public Abstain Option\n2: Private Abstain Option\n4: Public Cancel Option\n8: Private Cancel Option\n16: Public Random Option\n32: Private Random Option```";
-					help += "```diff\nAliases\n\n- stat poll\n- stats poll\n- option poll\n```";
-            break;
-			case "gamephase":
-				if(!isGameMaster(member)) break;
-				switch(args[1]) {
-					default:
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "gamephase [get|set]\n```";
-						help += "```\nFunctionality\n\nGroup of commands to handle the gamephase. " + stats.prefix + "help gamephase <sub-command> for detailed help. Also serves as an alias for " + stats.prefix + "gamephase get\n\nList of Gamephases:\nNothing, Signups, Setup, Ingame, Postgame```";
-						help += "```diff\nAliases\n\n- gp\n- game-phase\n- game_phase\n```";
-					break;
-					case "get":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "gamephase get\n```";
-						help += "```\nFunctionality\n\nReturns the current gamephase\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "gamephase get\n< ✅ Game Phase is INGAME (2)\n```";
-					break;
-					case "set":
-						help += "```yaml\nSyntax\n\n" + stats.prefix + "gamephase set <Value>\n```";
-						help += "```\nFunctionality\n\nSets the gamephase to <Value>, which has to be an integer between 0 and 3\n```";
-						help += "```fix\nUsage\n\n> " + stats.prefix + "gamephase set 2\n< ✅ Game Phase is now INGAME (2)!\n```";
-					break;
-				}
-			break;
-		}
-		return help;
-	}
-	
 	/* Gets a stat from the database */
 	this.cmdOptionsGet = function(channel, args, stat) {
 		// Get value
