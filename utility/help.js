@@ -192,6 +192,7 @@ module.exports = function() {
         ["impersonate", PERM.GH, "Repeats a message as a webhook pretending to be somebody.", "<User> <Message>", "Repeats a message as a webhook pretending to be a certain user.", "impersonate 242983689921888256 Does this work?", ["Does this work?"], CMDSTATE.UNK],
         /** Abilities Module **/
         ["execute", PERM.GM, "Executes an ability object.", "<Ability JSON>", "Executes a provided ability JSON as the current gm (src_ref=player:<id>, src_name=role:host).", `$execute {"type":"killing","subtype":"kill","target":"@self"}`, ["Kill successful!"], CMDSTATE.RDY],
+        ["grant", PERM.GM, "Grants an extra role.", "<Target Player> <Role>", "Grants a specified player a specified role.", `$grant 242983689921888256 corrupted`, [], CMDSTATE.RDY],
         ["emit", PERM.GM, "Emits an event or a trigger.", "<Event / Trigger>", "Emit a trigger or event. When submitting 'start', 'sday' or 'snight' the corresponding event is emitted (each of which includes a series of triggers and other actions), otherwise the input is seen as a trigger.", "emit start", [], CMDSTATE.RDY],
         /** Attributes Module **/
         ["attributes", PERM.GM, "Manages attributes.", "<Subcommand>", "Group of commands to handle attributes. $help attributes <sub-command> for detailed help.", "", [], CMDSTATE.RDY],

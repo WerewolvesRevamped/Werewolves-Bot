@@ -52,7 +52,7 @@ module.exports = function() {
 		if(players)  {
 			let playerList = players.map(el => "`" + channel.guild.members.cache.get(el).displayName + "`").join(", ");
 			// Add to killq
-			channel.send("✳ Adding " + players.length + " player" + (players.length != 1 ? "s" : "") + " (" + playerList  + ") to the kill queue!");
+			channel.send("✳️ Adding " + players.length + " player" + (players.length != 1 ? "s" : "") + " (" + playerList  + ") to the kill queue!");
 			players.forEach(el => {
                 killqAdd(el);
                 channel.send("✅ Added `" +  mainGuild.members.cache.get(el).displayName + "` to the kill queue!");
@@ -97,7 +97,7 @@ module.exports = function() {
         let playerCount = await killqKillall();
         
         // feedback
-        channel.send("✳ Killed `" + playerCount + "` player" + (playerCount != 1 ? "s" : "") + "!");
+        channel.send("✳️ Killed `" + playerCount + "` player" + (playerCount != 1 ? "s" : "") + "!");
 	}
 
 	/** PRIVATE
@@ -124,6 +124,17 @@ module.exports = function() {
         
         // kill players
         for(let i = 0; i < playersFiltered.length; i++) {
+            // for low automation level emit a hardcoded reporter message
+            if(stats.automation_level <= 1) {
+                let reporters = await queryAttribute("attr_type", "role", "val1", "reporter");
+                let src_ref = "player:" + playersFiltered[i];
+                let info = await parseInfo(`@id:${playersFiltered[i]} - @id:${playersFiltered[i]}->Role`, src_ref, {});
+                reporters.forEach(el => {
+                    announcementImmediate(src_ref, info, { type: "channel", value: el.val2 }, {}); 
+                });
+            }
+            
+            // kill player
             await killPlayer(playersFiltered[i]);
             
             // get all attacks/etc and select a random one to trigger the triggers

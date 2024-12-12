@@ -332,7 +332,7 @@ client.on("messageCreate", async message => {
 	case "ping":
 		cmdPing(message);
 	break;
-    case "drag": // probably not documented?
+    case "drag": // drags players to townsquare VC MWR
         if(checkGM(message)) {
             sql("SELECT id FROM players WHERE alive = 1 AND type='player'", result => {
                 result.forEach(p => {
@@ -344,7 +344,7 @@ client.on("messageCreate", async message => {
             member.voice.setChannel("1075234996329136138");
         }
     break;
-    case "drag_dead": // probably not documented?
+    case "drag_dead": // drags players to dead VC MWR
         if(checkGM(message)) {
             sql("SELECT id FROM players WHERE alive = 1 AND type='player'", result => {
                 result.forEach(p => {
@@ -356,13 +356,13 @@ client.on("messageCreate", async message => {
             member.voice.setChannel("1075235455123083264");
         }
     break;
-    case "image": // probably not documented? 
+    case "image": // displays an image
         cmdGetImg(message.channel, args.join(" "));
     break;
-    case "card": // probably not documented?
+    case "card": // displays a card
         cmdGetCard(message.channel, args.join(" "));
     break;
-    case "embed": // generates an embed (not documented!!)
+    case "embed": // generates an embed 
         if(checkGMHelper(message)) { 
             let embed = message.content.split(" ");
             embed.shift();
@@ -371,25 +371,31 @@ client.on("messageCreate", async message => {
             message.channel.send({embeds:[ embed ]});
         }
     break;
-    case "force_reload": // reloads db and caches (not documented!!)
+    case "force_reload": // reloads db and caches 
         if(checkGM(message)) forceReload(message.channel);
     break;
-    case "sql_reload": // reloads db and caches (not documented!!)
+    case "sql_reload": // reloads db and caches
         let aid = message.author.id;
         let admins = ["242983689921888256","458727748504911884","277156693765390337"];
         let sgm = ["331803222064758786","544125116640919557","334066065112039425","234474456624529410"];
         if(admins.includes(aid) || sgm.includes(aid) || checkGM(message)) restartSQL(message.channel);
     break;
-    case "emit": // emits a trigger (not documented!!)
+    case "emit": // emits a trigger
         if(checkGM(message)) cmdEmit(message.channel, argsX);
     break;
-    case "execute": // executes an ability (not documented!!)
+    case "execute": // executes an ability 
         if(checkGM(message)) cmdExecute(message, message.content.substr(8 + stats.prefix.length));
     break;
-    case "parse": // parses a game element (not documented!!)
+    case "grant": // execute - grant add
+        if(checkGM(message)) cmdGrant(message, args);
+    break;
+    case "whisper": // execute - whispering
+        if(checkGM(message)) cmdWhisper(message, args);
+    break;
+    case "parse": // parses a game element 
         if(checkGM(message)) cmdParse(message.channel, args);
     break;
-    case "phase": // executes an ability (not documented!!)
+    case "phase": // executes an ability 
         if(checkGM(message)) cmdPhase(message, args);
     break;
     case "edit":

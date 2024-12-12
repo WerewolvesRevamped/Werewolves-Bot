@@ -60,7 +60,7 @@ module.exports = function() {
     /** PRIVATE
     Ability: Announcement - Immediate
     **/
-     async function announcementImmediate(src_ref, info, loc, additionalTriggerData) {
+     this.announcementImmediate = async function(src_ref, info, loc, additionalTriggerData) {
         let result;
         if(!(".;!?\"'-".split("").includes(info[-1]))) info += ".";
         // get role image if applicable
@@ -109,6 +109,9 @@ module.exports = function() {
             break;
             case "group":
                 abilitySend(`group:${loc.value}`, info, EMBED_GRAY, false, false, img, "Announcement");
+            break;
+            case "channel":
+                abilitySend(`channel:${loc.value}`, info, EMBED_GRAY, false, false, img, "Announcement");
             break;
         }
         

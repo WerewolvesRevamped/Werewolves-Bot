@@ -31,7 +31,6 @@ module.exports = function() {
 			case "roles clear": cmdRolesClear(message.channel); break;
 			case "alias clear": cmdAliasClear(message.channel); break;
 			case "start": cmdStart(message.channel, false); break;
-			case "start_debug": cmdStart(message.channel, true); break;
 			case "reset": cmdReset(message.channel); break;
 			case "end": cmdEnd(message.channel); break;
 			case "killq killall": cmdKillqKillall(message.channel); break;
@@ -44,7 +43,6 @@ module.exports = function() {
 			case "players votes": cmdPlayersVotes(message.channel); break;
 			case "players roles": cmdPlayersRoleList(message.channel); break;
 			case "cc cleanup": cmdCCCleanup(message.channel); break;
-			case "roles sc_cleanup": cmdRolesScCleanup(message.channel); break;
 			case "bulkdelete": cmdBulkDelete(message.channel); break;
 			default:	messageSent ? 
 							message.edit("⛔ Syntax error. Tried to confirm unknown command!") : 
@@ -57,10 +55,9 @@ module.exports = function() {
         switch(action) {
             case "connection reset":
 			case "roles clear":
-			case "roles clear_alias": 
+			case "alias clear": 
 			case "reset":
 			case "cc cleanup":
-			case "roles sc_cleanup":
                 return " **WARNING:** This is an irreversible destructive action that deletes a large amount of data. Are you __absolutely certain__ you want to perform this action?";
             default:
                 return "";

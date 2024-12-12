@@ -8,6 +8,7 @@ require("./prompts.js")();
 require("./restrictions.js")();
 require("./scaling.js")();
 require("./visit.js")();
+require("./commands.js")();
 
 /** Ability Types **/
 require("./types/joining.js")();
@@ -225,16 +226,6 @@ module.exports = function() {
     **/
     this.abilityLog = function(msg) {
         mainGuild.channels.cache.get(config.log).send(msg);
-    }
-    
-    /**
-    Command: Execute
-    executes an ability
-    **/
-    this.cmdExecute = async function(message, ability) {
-        let feedback = await executeAbility("player:" + message.author.id, "role:host", JSON.parse(ability));
-        if(feedback.msg) message.channel.send(basicEmbed(feedback.msg, EMBED_GREEN));
-        else if(feedback.success) message.channel.send(basicEmbed(feedback.success, EMBED_GREEN));
     }
     
     /**

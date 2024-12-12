@@ -647,6 +647,8 @@ module.exports = function() {
     executes the abilities of a trigger if applicable
     **/
     async function executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerDataOriginal = {}) {
+        if(stats.automation_level === 0) return;
+        if(stats.automation_level === 1 && triggerName != "Starting") return;
         const ptype = getPromptType(triggerName);
         const promptOverwrite = trigger?.parameters?.prompt_overwrite ?? "";
         const promptPing = !(promptOverwrite.match(/^silent:.*$/)); // check if prompt should ping
@@ -719,7 +721,7 @@ module.exports = function() {
         if(secondary) prompts.push(secondary);
         
         if(choice) {
-            await choicesChoosingPrompt(src_name, src_ref, trigger.abilities[0], promptOverwrite);
+            if(stats.automation_level >= 2) await choicesChoosingPrompt(src_name, src_ref, trigger.abilities[0], promptOverwrite);
             return;
         }
         
@@ -745,6 +747,7 @@ module.exports = function() {
                     let promptMsg = getPromptMessage(trigger.abilities[0], promptOverwrite);
                     let refImg = await refToImg(src_name);
                     for(let i = 0; i < actionCount; i++) { // iterate for scaling
+                        if(stats.automation_level < 2) continue;
                         if(promptMsg[promptMsg.length - 1] === ".") promptMsg = promptMsg.substr(0, promptMsg.length - 1); // if last character is normal . remove it 
                         let message = await sendSelectionlessPrompt(src_ref, ptype[0], `${getAbilityEmoji(trigger.abilities[0].type)} ${promptMsg}${PROMPT_SPLIT}`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt");
                         abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(trigger.abilities[0].type)} {Selectionless}`);
@@ -764,6 +767,7 @@ module.exports = function() {
             break;
             // single prompt (@Selection)
             case 1: {
+                if(stats.automation_level < 2) break;
                 let type = toTitleCase(selectorGetType(prompts[0][1]));
                 let promptMsg = getPromptMessage(trigger.abilities[0], promptOverwrite, type);
                 let refImg = await refToImg(src_name);
@@ -780,6 +784,7 @@ module.exports = function() {
             } break;
             // double prompt (@Selection and @SecondarySelection)
             case 2: {
+                if(stats.automation_level < 2) break;
                 let type1 = toTitleCase(selectorGetType(prompts[0][1]));
                 let type2 = toTitleCase(selectorGetType(prompts[1][1]));
                 let promptMsg = getPromptMessage(trigger.abilities[0], promptOverwrite, type1, type2);

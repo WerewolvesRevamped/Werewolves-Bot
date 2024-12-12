@@ -288,8 +288,9 @@ module.exports = function() {
 			log("Stats > ❗❗❗ Unable to cache host log! Defaulting to `false`.")
 		});
 		sqlGetStat(44,  result => { 
-			stats.automation_level = result; 
-			if(doLog) log("Stats > Cached automation level as `" + result + "`!")
+			stats.automation_level = + result; 
+			if(doLog) log("Stats > Cached automation level as `" + result + "`!");
+            // 0->disabled, 1->minimum, 2->default, 3->full
 		}, () => {
             stats.automation_level = 0;
 			log("Stats > ❗❗❗ Unable to cache automation level! Defaulting to `0` (none).")
