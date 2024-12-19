@@ -603,6 +603,7 @@ module.exports = function() {
     const attrData1 = "\\(" + attrValue + "\\)";
     const attrData2 = "\\(" + attrValue + "," + attrValue + "\\)";
     const attrData3 = "\\(" + attrValue + "," + attrValue + "," + attrValue + "\\)";
+    const attrData4 = "\\(" + attrValue + "," + attrValue + "," + attrValue + "," + attrValue + "\\)";
     const attrIndex = num;
     const redirectSubtype = "(all|non-killing abilities)";
     const manipSubtype = "(public voting power|special public voting power|private voting power|public starting votes|lynch starting votes|election starting votes)";
@@ -1528,6 +1529,43 @@ module.exports = function() {
         fd = exp.exec(abilityLine);
         if(fd) {
             ability = { type: "emit", selector: "@self[player]", emit_value: ttpp(fd[1], "option") };
+        }
+        /** Display **/
+        // create display
+        exp = new RegExp("^Display `" + str + "`$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "displaying", subtype: "create", display: fd[1] };
+        }
+        // create display
+        exp = new RegExp("^Display `" + str + "` " + attrData1 + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "displaying", subtype: "create", display: fd[1], val1: fd[2].trim() };
+        }
+        // create display
+        exp = new RegExp("^Display `" + str + "` " + attrData2 + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "displaying", subtype: "create", display: fd[1], val1: fd[2].trim(), val2: fd[3].trim() };
+        }
+        // create display
+        exp = new RegExp("^Display `" + str + "` " + attrData3 + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "displaying", subtype: "create", display: fd[1], val1: fd[2].trim(), val2: fd[3].trim(), val3: fd[4].trim() };
+        }
+        // create display
+        exp = new RegExp("^Display `" + str + "` " + attrData4 + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "displaying", subtype: "create", display: fd[1], val1: fd[2].trim(), val2: fd[3].trim(), val3: fd[4].trim(), val4: fd[5].trim() };
+        }
+        // update display
+        exp = new RegExp("^Update `" + str + "` value `" + attrIndex + "` to `" + str + "`$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "displaying", subtype: "change", display: fd[1], display_index: +fd[2], display_value: fd[3].trim()  };
         }
 
         

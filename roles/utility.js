@@ -75,7 +75,7 @@ module.exports = function() {
     /**
     Get Role Data from Name
     **/
-    this.getRoleDataFromName = async function(roleName) {
+    this.getRoleDataFromName = async function(roleName, authorId = null) {
         let roleNameParsed = parseRole(roleName);
         if(verifyRole(roleNameParsed)) {
             let roleData = await (new Promise(res => {
@@ -83,7 +83,7 @@ module.exports = function() {
                      res(result[0]);
                  });
             })); 
-            return await getRoleData(roleData.display_name, roleData.class, roleData.category, roleData.team);
+            return await getRoleData(roleData.display_name, roleData.class, roleData.category, roleData.team, authorId);
         } else {
             return null;
         }

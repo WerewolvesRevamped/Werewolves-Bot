@@ -299,7 +299,9 @@ module.exports = function() {
                 }
             }).join("\n");
             // send poll message
-            let pollDisMsg = await abilitySendProm(`${pollLocation.type}:${pollLocation.value}`, pollMsg);
+            let channel_id = await getSrcRefChannel(`${pollLocation.type}:${pollLocation.value}`);
+            let channel = mainGuild.channels.cache.get(channel_id);
+            let pollDisMsg = await channel.send(pollMsg);
             pollMsgs.push(pollDisMsg.id);
             // do the reactions
             let emojis = optionLists[i].map(el => el.emoji);

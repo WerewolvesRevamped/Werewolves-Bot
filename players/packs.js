@@ -27,7 +27,7 @@ module.exports = function() {
     /**
     Command: $packs list
     **/
-    this.AVAILABLE_PACKS = ["glitch","negate","grayscale","edge","emboss","black","pixel","pixel2","pixel3","pixel4","scatter","red","green","blue","yellow","purple","cyan","flip","pale","bw","wire","wire2","rainbow","rainbow2","rainbow3"];
+    this.AVAILABLE_PACKS = ["glitch","negate","grayscale","edge","emboss","silhouette","pixel","pixel2","pixel3","pixel4","scatter","red","green","blue","yellow","purple","cyan","flip","pale","bw","wire","wire2","rainbow","rainbow2","rainbow3","ts","oil","wave","swirl","noise","cycle","equalize","fourier_noise","fourier_equalize","fourier_oil","fourier_modulate","fourier_wire","glitch2","eyes","thief","mask"];
     this.cmdPacksList = function(channel) {
         let i = 0;
         channel.send(`**Available Packs**\nDefault - 0\n${AVAILABLE_PACKS.map(el => { i++; return toTitleCase(el) + " - " + i }).join("\n")}`);

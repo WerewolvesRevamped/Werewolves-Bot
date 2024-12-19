@@ -357,7 +357,7 @@ client.on("messageCreate", async message => {
         }
     break;
     case "image": // displays an image
-        cmdGetImg(message.channel, args.join(" "));
+        cmdGetImg(message.channel, args.join(" "), message.author);
     break;
     case "card": // displays a card
         cmdGetCard(message.channel, args.join(" "));

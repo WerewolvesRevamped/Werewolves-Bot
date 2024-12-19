@@ -264,9 +264,9 @@ module.exports = function() {
     Command: $image
     Retrieves the image for a role
     **/
-    this.cmdGetImg = async function(channel, role) {
+    this.cmdGetImg = async function(channel, role, author) {
         let roleNameParsed = parseRole(role);
-        let roleData = await getRoleDataFromName(roleNameParsed);
+        let roleData = await getRoleDataFromName(roleNameParsed, author);
         if(!roleData || !roleData.url) channel.send("⛔ Command error. Cannot find url for `" + role + "`!"); 
         else channel.send(roleData.url);
     }
