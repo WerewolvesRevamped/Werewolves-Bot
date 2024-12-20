@@ -1542,7 +1542,7 @@ module.exports = function() {
         return text;
     }
     
-    const repoBaseUrl = "https://raw.githubusercontent.com/WerewolvesRevamped/Werewolves-Icons/main/";
+    const repoBaseUrl = "https://werewolves.me/cards/skinpack.php?pack=thief&src=";
     this.getRoleData = function(role, description) {
         // prep 
         let category = description.split(/\n|~/)[0].split(/ \| /)[1]?.trim() ?? false;
@@ -1786,19 +1786,19 @@ module.exports = function() {
                         "color": roleData.color,
                         "footer": {
                             "icon_url": `${serverIcon}`,
-                            "text": `${channel.guild.name} - ${stats.game}`
+                            "text": `${applyRemovals(channel.guild.name)} - ${applyRemovals(stats.game)}`
                         },
                         "thumbnail": {
                             "url": emUrl
                         },
                         "author": {
-                            "name": fancyRoleName,
+                            "name": applyRemovals(fancyRoleName),
                             "icon_url": emUrl
                         },
                         "fields": []
                     };
                     
-                    if(roleType) embed.title = roleType;
+                    if(roleType) embed.title = applyRemovals(roleType);
                     
                     if(stats.gamephase == 0 || (stats.gamephase > 0 && ((roleTypeID >= 0 && (stats.role_filter & (1 << roleTypeID))) || (roleTypeID == -1 && (stats.role_filter & (1 << 1)) && (stats.role_filter & (1 << 2)))))) {
                         // add text
@@ -1806,8 +1806,8 @@ module.exports = function() {
                             desc.forEach(el => {
                                 if(!el[0]) return;
                                 if(el[1].length <= 1000) {
-                                    if(!technical) embed.fields.push({"name": `__${el[0]}__`, "value": el[1]});
-                                    else embed.fields.push({"name": `__${el[0]}__`, "value": "```" + el[1] + "```"});
+                                    if(!technical) embed.fields.push({"name": `__${applyRemovals(el[0])}__`, "value": applyRemovals(el[1])});
+                                    else embed.fields.push({"name": `__${applyRemovals(el[0])}__`, "value": "```" + applyRemovals(el[1]) + "```"});
                                 } else {
                                     let descSplit = el[1].split(/\n/);
                                    descSplitElements = [];
@@ -1821,18 +1821,18 @@ module.exports = function() {
                                        }
                                        j++;
                                    }
-                                   descSplitElements.forEach(d => embed.fields.push({"name": `__${el[0]}__ (${descSplitElements.indexOf(d)+1}/${descSplitElements.length})`, "value": d}));
+                                   descSplitElements.forEach(d => embed.fields.push({"name": `__${applyRemovals(el[0])}__ (${descSplitElements.indexOf(d)+1}/${descSplitElements.length})`, "value": applyRemovals(d)}));
                                 }
                             });
-                            if(appendSection) embed.fields.push({"name": `__${appendSection[0]}__`, "value": appendSection[1]});
+                            if(appendSection) embed.fields.push({"name": `__${applyRemovals(appendSection[0])}__`, "value": applyRemovals(appendSection[1])});
                         } else {
                             let simpDesc = desc.find(el => el && el[0] === "Simplified");
                             if(simpDesc) {
-                                embed.description = simpDesc[1];
+                                embed.description = applyRemovals(simpDesc[1]);
                             }  else {
                                 simpDesc = desc.find(el => el && el[0] === "Basics");
                                 if(simpDesc) {
-                                    embed.description = simpDesc[1];
+                                    embed.description = applyRemovals(simpDesc[1]);
                                 } else {
                                     if(simp) cmdInfoFancy(channel, args, pin, noErr, false, overwriteName, appendSection, editOnto);
                                     else cmdInfo(channel, args, pin, noErr, simp, overwriteName, appendSection, editOnto);
@@ -1841,7 +1841,7 @@ module.exports = function() {
                             }
                         }
                     } else {
-                        embed.description = "**This role type is currently not in use.**";
+                        embed.description = applyRemovals("**This role type is currently not in use.**");
                     }
                     
                 } else { // apparntly not a role
@@ -1860,9 +1860,9 @@ module.exports = function() {
                         "color": 7829367,
                         "footer": {
                             "icon_url": `${serverIcon}`,
-                            "text": `${channel.guild.name} - ${stats.game}`
+                            "text": `${applyRemovals(channel.guild.name)} - ${applyRemovals(stats.game)}`
                         },
-                        "title": title
+                        "title": applyRemovals(title)
                     };
                     
                     // append section
@@ -1886,7 +1886,7 @@ module.exports = function() {
                                     if(!rEmoji) rEmoji = client.emojis.cache.find(el => el.name == (toTitleCase(roleNameParsed.split(" ")[0]) + "Placeholder"));
                                     if(!rEmoji) return relFull;
                                     if(relFull.split(" (").length > 1 && rel[0] == "*") rel += "*"; // solo team limited fixer
-                                    return `<:${rEmoji.name}:${rEmoji.id}> ${applyTheme(relFull)}`
+                                    return `<:${rEmoji.name}:${rEmoji.id}> ${applyTheme(applyRemovals(relFull))}`
                                 }
                         }
                         return relFull;
@@ -1906,12 +1906,12 @@ module.exports = function() {
                            }
                            j++;
                        }
-                       embed.description = descSplitElements.shift() + "\n" + descSplitElements.shift();
+                       embed.description = applyRemovals(descSplitElements.shift()) + "\n" + applyRemovals(descSplitElements.shift());
                        embed.fields = [];
-                       descSplitElements.forEach(el => embed.fields.push({"name": `...`, "value": el}));
+                       descSplitElements.forEach(el => embed.fields.push({"name": `...`, "value": applyRemovals(el)}));
                     } else { // not too long
                         embed.fields = [];
-                        embed.description = descSplit.join("\n");
+                        embed.description = descSplit.map(el => applyRemovals(el)).join("\n");
                     }
                     
                     
@@ -1966,10 +1966,10 @@ module.exports = function() {
     
     const fetch = require('node-fetch');
     this.cacheIconLUT = async function() {
-        const response = await fetch(repoBaseUrl + "replacements.csv");
+        const response = await fetch("https://raw.githubusercontent.com/WerewolvesRevamped/Werewolves-Icons/refs/heads/main/replacements.csv");
         const body = await response.text();
         iconLUT = {};
-        body.split("\n").filter(el => el && el.length).map(el => el.split(",")).forEach(el => iconLUT[el[0]] = el[1].trim().replace(/ /g,"%20"));
+        body.split("\n").filter(el => el && el.length).map(el => el.split(",")).forEach(el => iconLUT[el[0]] = el[1] ? el[1].trim().replace(/ /g,"%20") : "");
         console.log(iconLUT);
     }
 	

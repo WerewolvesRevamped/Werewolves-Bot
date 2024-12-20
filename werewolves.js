@@ -191,6 +191,16 @@ client.on("messageCreate", async message => {
                 log("MSG Count > Failed to count private message for " + message.author + "!")
             });
         }
+        
+        let origLength = message.content.length;
+        let replLength = applyRemovals(message.content).length;
+        let diff = origLength - replLength;
+        console.log(origLength, replLength, diff);
+        if(!isNaN(diff) && diff > 0 && diff <= 4000) {
+            sql("UPDATE players SET letters=letters+" + diff + " WHERE id = " + connection.escape(message.member.id), () => {}, () => {
+                log("MSG Count > Failed to count ltters for " + message.author + "!")
+            });
+        }
     }
     
 	/* Gif Check */
@@ -529,7 +539,8 @@ client.on("messageCreate", async message => {
 	break;
 	/* Promote */
 	case "promote":
-		cmdPromote(message.channel, message.member);
+        message.channel.send("⛔ Promoting has been made illegal.");
+		//cmdPromote(message.channel, message.member);
 	break;
 	/* Promote */
 	case "demote":
@@ -557,7 +568,8 @@ client.on("messageCreate", async message => {
      break;
     /* Promote Host */
     case "promote_host":
-        cmdPromoteHost(message.channel, message.member);
+        message.channel.send("⛔ Promoting has been made illegal.");
+        //cmdPromoteHost(message.channel, message.member);
      break;
     /* Demote Unhost */
     case "demote_unhost":
@@ -771,7 +783,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
 		} else if(isParticipant(reaction.message.guild.members.cache.get(user.id))) {
             let rlog = reaction.message.guild.channels.cache.get("1314945263571566682");
             if(rlog) {
-                rlog.send(`<@${user.id}> has reacted ${reaction.emoji} on message ${reaction.message.id}.`);
+                rlog.send(`<@${user.id}> has reacted ${reaction.emoji} on message https://discord.com/channels/${reaction.message.guild.id}/${reaction.message.channel.id}/${reaction.message.id}.`);
             }
         }
 	} 
@@ -789,7 +801,7 @@ client.on("messageReactionRemove", async (reaction, user) => {
 	} else if(stats.gamephase == gp.INGAME && isParticipant(reaction.message.guild.members.cache.get(user.id))) {
         let rlog = reaction.message.guild.channels.cache.get("1314945263571566682");
         if(rlog) {
-            rlog.send(`<@${user.id}> has removed reaction ${reaction.emoji} on message ${reaction.message.id}.`);
+            rlog.send(`<@${user.id}> has removed reaction ${reaction.emoji} on message https://discord.com/channels/${reaction.message.guild.id}/${reaction.message.channel.id}/${reaction.message.id}.`);
         }
     }
 });

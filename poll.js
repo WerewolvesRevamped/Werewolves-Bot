@@ -32,6 +32,7 @@ module.exports = function() {
 			case "dead_vote": // list of dead participants
 			case "yn": case "yna": // yes / no
 			case "a": case "ab": case "abc": case "abcd": case "abcde": case "abcdef": // live trivia
+            case "az": // a-z
 			case "dead_a": case "dead_ab": case "dead_abc": case "dead_abcd": case "dead_abcde": case "dead_abcdef": // dead trivia
             case "gm": case "host": case "admin": // gm polls
             case "all_yn": // anyone may vote
@@ -156,7 +157,22 @@ module.exports = function() {
             "h": ["🇭", "Option H"],
             "i": ["🇮", "Option I"],
             "j": ["🇯", "Option J"],
-            "k": ["🇰", "Option K"]
+            "k": ["🇰", "Option K"],
+            "l": ["🇱", "Option L"],
+            "m": ["🇲", "Option M"],
+            "n": ["🇳", "Option N"],
+            "o": ["🇴", "Option O"],
+            "p": ["🇵", "Option P"],
+            "q": ["🇶", "Option Q"],
+            "r": ["🇷", "Option R"],
+            "s": ["🇸", "Option S"],
+            "t": ["🇹", "Option T"],
+            "u": ["🇺", "Option U"],
+            "v": ["🇻", "Option V"],
+            "w": ["🇼", "Option W"],
+            "x": ["🇽", "Option X"],
+            "y": ["🇾", "Option Y"],
+            "z": ["🇿", "Option Z"]
         };
     }
 	
@@ -209,6 +225,7 @@ module.exports = function() {
 				else if(type === "abcd" || type === "dead_abcd") overwriteValues = ["a","b","c","d"];
 				else if(type === "abcde" || type === "dead_abcde") overwriteValues = ["a","b","c","d","e"];
 				else if(type === "abcdef" || type === "dead_abcdef") overwriteValues = ["a","b","c","d","e","f"];
+				else if(type === "az") overwriteValues = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"];
                 else if(type == "gm") {
                     playerList = [];
                     channel.guild.roles.cache.get(stats.gamemaster).members.each(el => {
@@ -244,6 +261,7 @@ module.exports = function() {
 				
 				// split poll into several messages if necessary
 				while(playerList.length > 0) playerLists.push(playerList.splice(0, 20));
+                console.log(playerList);
 				// Print message
 				channel.send("Poll `#" + pollName + "`");
 				// Handle each message of the poll
@@ -329,6 +347,8 @@ module.exports = function() {
                 voteValue = 1;
             break;
             case "abcd": // temp fix
+			case "az": 
+                if(member.user.bot) return 0;
                 voteValue = 1;
             break;
 			default: 
@@ -394,9 +414,9 @@ module.exports = function() {
 			if(votes <= 0 && (votersList.length > 0 || (votersList.length == 0 && duplicateList.length == 0))) return { valid: false };
 			// Get string of voters
 			let voters, invalidVoters;
-            if(pollType == "abcd") { // temp fix
-                voters = votersList.join(", ");
-                invalidVoters = duplicateList.join(", ");
+            if(pollType == "abcd" || pollType == "az") { // temp fix
+                voters = votersList.filter(el => !el.user.bot).join(", ");
+                invalidVoters = duplicateList.filter(el => !el.user.bot).join(", ");
             } else if(pollType == "gm" || pollType == "host" || pollType == "admin" || pollType == "all_yn" || pollType == "them") {
                 voters = votersList.filter(el => !el.user.bot).join(", ");
                 invalidVoters = duplicateList.filter(el => !el.user.bot).join(", ");

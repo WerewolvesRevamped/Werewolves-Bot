@@ -18,7 +18,7 @@ module.exports = function() {
 	/* Handle players command */
 	this.cmdPlayers = function(message, args) {
 		// Check subcommands
-		if(!args[0] || (!args[1] && ["list","log","log2","log3","log4","msgs","messages","votes","roles","rl","list_alive"].indexOf(args[0]) == -1)) { 
+		if(!args[0] || (!args[1] && ["list","log","log2","log3","log4","msgs","messages","votes","roles","rl","list_alive","list_letters"].indexOf(args[0]) == -1)) { 
 			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `players [get|get_clean|set|resurrect|signup|list|msgs|msgs2|log|log2|votes|rl]`!"); 
 			return; 
 		}
@@ -35,6 +35,7 @@ module.exports = function() {
 			case "substitute": cmdPlayersSubstitute(message, args); break;
 			case "switch": cmdPlayersSwitch(message, args); break;
 			case "list": cmdConfirm(message, "players list"); break;
+			case "list_letters": cmdPlayersListLetters(message.channel); break;
 			case "list_alive": cmdConfirm(message, "players list_alive"); break;
             case "rl":
 			case "roles": cmdConfirm(message, "players roles"); break;
@@ -55,7 +56,7 @@ module.exports = function() {
 	this.cmdRoll = function(message, args) {
 		// Check subcommands
 		if(!args[1] && (args[0] && args[0] == "bl" || args[0] == "wl")) { 
-			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `roll [bl|wl] <players>` or `roll`!"); 
+			message.channel.send(applyRemovals("⛔ Syntax error. Not enough parameters! Correct usage: `roll [bl|wl] <players>` or `roll`!")); 
 			return; 
 		}
 		//Find subcommand
@@ -517,7 +518,7 @@ module.exports = function() {
                 if(rName == "Merged") rName = el.role.split(",")[2];
                 let rEmoji = getRoleEmoji(rName);
                 rEmoji = (rEmoji ? `<:${rEmoji.name}:${rEmoji.id}> | ` : "❓ | ");
-                return `${channel.guild.members.cache.get(el.id) ? (el.alive ? client.emojis.cache.get(stats.yes_emoji) : client.emojis.cache.get(stats.no_emoji)) : "⚠️"} | ${rEmoji}${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"} (${el.role.split(",").map(role => toTitleCase(role)).join(" + ")})`
+                return `${channel.guild.members.cache.get(el.id) ? (el.alive ? client.emojis.cache.get(stats.yes_emoji) : client.emojis.cache.get(stats.no_emoji)) : "⚠️"} | ${rEmoji}${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"} (${el.role.split(",").map(role => toTitleCase(role)).join(" + ")}) [CCs: ${el.ccs}]`
             });
             const perMessageCount = 18;
 			let playerList = [], counter = 0;
@@ -542,6 +543,41 @@ module.exports = function() {
 		});
 	
 	}
+	/* Lists all signedup players */
+	this.cmdPlayersListLetters = function(channel) {
+		// Get a list of players
+		sql("SELECT id,emoji,letters,public_msgs,private_msgs FROM players WHERE type='player' ORDER BY letters ASC", result => {
+			let playerListArray = result.map(el => {  
+                let msgs = el.public_msgs + el.private_msgs;
+                let percent = Math.floor((el.letters / Math.max(msgs, 1)) * 10000) / 100;
+                return [`${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"} - ${el.letters} (${percent}%)`, percent];
+            });
+            playerListArray = playerListArray.sort((a,b) => b[1] - a[1]).map(el => el[0]);
+            const perMessageCount = 18;
+			let playerList = [], counter = 0;
+			for(let i = 0; i < playerListArray.length; i++) {
+				if(!playerList[Math.floor(counter/perMessageCount)]) playerList[Math.floor(counter/perMessageCount)] = [];
+				playerList[Math.floor(counter/perMessageCount)].push(playerListArray[i]);
+				counter++;
+			}
+			channel.send("**Players** | Total: " + result.length);
+			for(let i = 0; i < playerList.length; i++) {
+				// Print message
+				channel.send("✳ Listing players " + (i+1)  + "/" + (playerList.length) + "...").then(m => {
+					m.edit(playerList[i].join("\n"));
+				}).catch(err => {
+					logO(err); 
+					sendError(channel, err, "Could not list signed up players");
+				});
+			}
+		}, () => {
+			// DB error
+			channel.send("⛔ Database error. Could not list signed up players!");
+		});
+	
+	}
+    
+    
 	/* Lists all signedup players */
 	this.cmdPlayersListAlive = function(channel) {
 		// Get a list of players
@@ -841,8 +877,8 @@ module.exports = function() {
 			if(!wl) playerList = playerList.filter(el => blacklist.indexOf(el) === -1);
 			else playerList = playerList.filter(el => blacklist.indexOf(el) != -1);
 			let rID = playerList[Math.floor(Math.random() * playerList.length)];
-			channel.send(`⏺️ Randomizing out of: ${playerList.map(el => idToEmoji(el)).join(", ")}`);
-			channel.send(`✳ Selecting...`).then(m => m.edit(`▶️ Selected <@${rID}> (${idToEmoji(rID)})`));
+			channel.send(applyRemovals(`⏺️ Randomizing out of: ${playerList.map(el => idToEmoji(el)).join(", ")}`));
+			channel.send(applyRemovals(`✳ Selecting...`)).then(m => m.edit(applyRemovals(`▶️ Selected <@${rID}> (${idToEmoji(rID)})`)));
 		}, () => {
 			// DB error
 			channel.send("⛔ Database error. Could not retrieve list of participants!");
@@ -856,9 +892,9 @@ module.exports = function() {
             return;
         };
 		let val = Math.ceil(Math.random() * args[1]);
-        channel.send(`⏺️ Randomizing from \`1\` to \`${args[1]}\``);
-        channel.send(`✳ Selecting...`).then(m => {
-            m.edit(`▶️ Selected \`${val}\``);
+        channel.send(applyRemovals(`⏺️ Randomizing from \`1\` to \`${args[1]}\``));
+        channel.send(applyRemovals(`✳ Selecting...`)).then(m => {
+            m.edit(applyRemovals(`▶️ Selected \`${val}\``));
             if(repeat > 0) cmdRollNum(channel, args, --repeat);
         });
 	}
@@ -886,10 +922,10 @@ module.exports = function() {
 	this.cmdListSignedup = function(channel) {
 		// Get a list of players
 		sql("SELECT id,emoji FROM players WHERE type='player'", result => {
-			let playerList = result.map(el => `${el.emoji}  - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username.replace(/(_|\*|~)/g,"\\$1") : "*user left*"} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
+			let playerList = result.map(el => `${el.emoji}  - ${channel.guild.members.cache.get(el.id) ? applyRemovals(channel.guild.members.cache.get(el.id).user.username.replace(/(_|\*|~)/g,"\\$1")) : applyRemovals("*user left*")} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
 			// Print message
-			channel.send("✳ Listing signed up players").then(m => {
-				m.edit("**Signed Up Players** | Total: " +  result.length + "\n" + playerList)
+			channel.send(applyRemovals("✳ Listing signed up players")).then(m => {
+				m.edit(applyRemovals("**Signed Up Players** | Total: ") +  result.length + "\n" + playerList)
 			}).catch(err => {
 				logO(err); 
 				sendError(channel, err, "Could not list signed up players");
@@ -908,10 +944,10 @@ module.exports = function() {
                 let pa = channel.guild.members.cache.get(a.id);
                 let pb = channel.guild.members.cache.get(b.id);
                return (pa ? pa.user.username.toLowerCase() : "-") > (pb ? pb.user.username.toLowerCase() : "-") ? 1 : -1;
-            }).map(el => `${el.emoji} ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username.replace(/(_|\*|~)/g,"\\$1") : "*user left*"}`).join("\n");
+            }).map(el => `${el.emoji} ${channel.guild.members.cache.get(el.id) ? applyRemovals(channel.guild.members.cache.get(el.id).user.username.replace(/(_|\*|~)/g,"\\$1")) : applyRemovals("*user left*")}`).join("\n");
 			// Print message
-			channel.send("✳ Listing signed up players").then(m => {
-				m.edit("**Signed Up Players (Alphabetical)** | Total: " +  result.length + "\n" + playerList)
+			channel.send(applyRemovals("✳ Listing signed up players")).then(m => {
+				m.edit(applyRemovals("**Signed Up Players (Alphabetical)** | Total: ") +  result.length + "\n" + playerList)
 			}).catch(err => {
 				logO(err); 
 				sendError(channel, err, "Could not list signed up players");
@@ -926,10 +962,10 @@ module.exports = function() {
 	this.cmdListSubs = function(channel) {
 		// Get a list of players
 		sql("SELECT id,emoji FROM players WHERE type='substitute'", result => {
-			let playerList = result.map(el => `${el.emoji}  - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username.replace(/(_|\*|~)/g,"\\$1") : "*user left*"} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
+			let playerList = result.map(el => `${el.emoji}  - ${channel.guild.members.cache.get(el.id) ? applyRemovals(channel.guild.members.cache.get(el.id).user.username.replace(/(_|\*|~)/g,"\\$1")) : applyRemovals("*user left*")} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
 			// Print message
-			channel.send("✳ Listing substitute players").then(m => {
-				m.edit("**Substitute Players** | Total: " +  result.length + "\n" + playerList)
+			channel.send(applyRemovals("✳ Listing substitute players")).then(m => {
+				m.edit(applyRemovals("**Substitute Players** | Total: ") +  result.length + "\n" + playerList)
 			}).catch(err => {
 				logO(err); 
 				sendError(channel, err, "Could not list substitute players");
@@ -949,10 +985,10 @@ module.exports = function() {
 		}
 		// Get a list of players
 		sql("SELECT id,emoji FROM players WHERE alive = 1 AND type='player'", result => {
-			let playerList = result.map(el => `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username.replace(/(_|\*|~)/g,"\\$1") : "*user left*"} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
+			let playerList = result.map(el => `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? applyRemovals(channel.guild.members.cache.get(el.id).user.username.replace(/(_|\*|~)/g,"\\$1")) : applyRemovals("*user left*")} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
 			// Print message
-			channel.send("✳ Listing alive players").then(m => {
-				m.edit("**Alive Players** | Total: " +  result.length + "\n" + playerList)
+			channel.send(applyRemovals("✳ Listing alive players")).then(m => {
+				m.edit(applyRemovals("**Alive Players** | Total: ") +  result.length + "\n" + playerList)
 			}).catch(err => {
 				logO(err); 
 				sendError(channel, err, "Could not list alive players");

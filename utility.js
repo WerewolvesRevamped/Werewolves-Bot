@@ -9,6 +9,18 @@
 		- Handelling command permissions
 */
 module.exports = function() {
+    
+    /* Letter removals */
+    let removals = "";
+    this.applyRemovals = function(txt) {
+        removalsAr =  removals.split("");
+        for(let i = 0; i < removalsAr.length; i++) {
+            let re = new RegExp(removalsAr[i], "g");
+            txt = txt.replace(re, "");
+        }
+        return txt;
+    }
+    
 	/* Converts a string to title case */
 	this.toTitleCase = function(str) {
 		return str.replace(/[a-zA-Z0-9][^\s-_]*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
