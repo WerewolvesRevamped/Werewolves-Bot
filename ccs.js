@@ -336,7 +336,7 @@ module.exports = function() {
 				players = players.filter(el => !playerList.includes(el));
 				players.forEach(el => { 
 					channel.permissionOverwrites.create(el, { ViewChannel: true}).then(c => {
-						if(!mode) channel.send(`✅ Added ${channel.guild.members.cache.get(el)} to the CC!`);
+						if(!mode) channel.send(applyRemovals(`✅ Added ${channel.guild.members.cache.get(el)} to the CC!`));
 					}).catch(err => { 
 						logO(err); 
 						sendError(channel, err, "Could not add to CC");

@@ -550,7 +550,7 @@ module.exports = function() {
 			let playerListArray = result.map(el => {  
                 let msgs = el.public_msgs + el.private_msgs;
                 let percent = Math.floor((el.letters / Math.max(msgs, 1)) * 10000) / 100;
-                return [`${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"} - ${el.letters} (${percent}%)`, percent];
+                return [`${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"} - ${el.letters} / ${msgs} (${percent}%)`, percent];
             });
             playerListArray = playerListArray.sort((a,b) => b[1] - a[1]).map(el => el[0]);
             const perMessageCount = 18;

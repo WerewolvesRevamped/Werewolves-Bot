@@ -35,6 +35,7 @@ module.exports = function() {
             case "az": // a-z
 			case "dead_a": case "dead_ab": case "dead_abc": case "dead_abcd": case "dead_abcde": case "dead_abcdef": // dead trivia
             case "gm": case "host": case "admin": // gm polls
+            case "subs":
             case "all_yn": // anyone may vote
             case "them": // just them
 				pollCreate(channel, args, args[1]);
@@ -172,7 +173,8 @@ module.exports = function() {
             "w": ["🇼", "Option W"],
             "x": ["🇽", "Option X"],
             "y": ["🇾", "Option Y"],
-            "z": ["🇿", "Option Z"]
+            "z": ["🇿", "Option Z"],
+            "all": ["🔡","All of them"]
         };
     }
 	
@@ -225,7 +227,7 @@ module.exports = function() {
 				else if(type === "abcd" || type === "dead_abcd") overwriteValues = ["a","b","c","d"];
 				else if(type === "abcde" || type === "dead_abcde") overwriteValues = ["a","b","c","d","e"];
 				else if(type === "abcdef" || type === "dead_abcdef") overwriteValues = ["a","b","c","d","e","f"];
-				else if(type === "az") overwriteValues = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"];
+				else if(type === "az") overwriteValues = ["b","c","f","g","h","k","l","o","p","s","t","v","w","y","all"];
                 else if(type == "gm") {
                     playerList = [];
                     channel.guild.roles.cache.get(stats.gamemaster).members.each(el => {
@@ -241,6 +243,12 @@ module.exports = function() {
                 } else if(type == "admin") {
                     playerList = [];
                     channel.guild.roles.cache.get(stats.admin).members.each(el => {
+                        let em = idEmojis.filter(el2 => el2[0] == el.id);
+                        if(em[0]) playerList.push([em[0][1], el]);
+                    });
+                }  else if(type == "subs") {
+                    playerList = [];
+                    channel.guild.roles.cache.get(stats.sub).members.each(el => {
                         let em = idEmojis.filter(el2 => el2[0] == el.id);
                         if(em[0]) playerList.push([em[0][1], el]);
                     });
@@ -343,6 +351,7 @@ module.exports = function() {
             case "gm":
             case "all_yn":
             case "them":
+            case "subs":
                 if(member.user.bot) return 0;
                 voteValue = 1;
             break;
@@ -417,7 +426,7 @@ module.exports = function() {
             if(pollType == "abcd" || pollType == "az") { // temp fix
                 voters = votersList.filter(el => !el.user.bot).join(", ");
                 invalidVoters = duplicateList.filter(el => !el.user.bot).join(", ");
-            } else if(pollType == "gm" || pollType == "host" || pollType == "admin" || pollType == "all_yn" || pollType == "them") {
+            } else if(pollType == "gm" || pollType == "host" || pollType == "admin" || pollType == "all_yn" || pollType == "them" || pollType == "subs") {
                 voters = votersList.filter(el => !el.user.bot).join(", ");
                 invalidVoters = duplicateList.filter(el => !el.user.bot).join(", ");
             } else if(pollType != "dead" && pollType != "dead_vote" && pollType != "dead_list" && pollType != "dead_a" && pollType != "dead_ab" && pollType != "dead_abc" && pollType != "dead_abcd" && pollType != "dead_abcde" && pollType != "dead_abcdef") {
