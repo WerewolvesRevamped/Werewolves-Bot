@@ -279,10 +279,12 @@ module.exports = function() {
         ["force_demote_signedup", PERM.GM, "Demotes everyone that's signedup.", "", "Demotes all signedups. Also includes substitutes.", "force_demote_signedup", [], CMDSTATE.RDY],
         /** Players Module **/
         // packs
-        ["packs", PERM.GM, "Manages skinpacks.", "<Subcommand>", "Group of commands to handle skinpacks. $help packs <sub-command> for detailed help.", "", [], CMDSTATE.WIP],
-            ["packs list", PERM.GM, "Lists available skinpacks.", "", "", "packs list", [], CMDSTATE.WIP],
-            ["packs set", PERM.GM, "Sets skinpack for another player.", "<Player> <Pack ID>", "Sets the skinpack for another player. Find <Pack ID> through $packs list.", "packs set mctsts 1", [], CMDSTATE.WIP],
-            ["packs select", PERM.GM, "Selects your own skinpack.", "<Pack ID>", "Sets the skinpack for you. Find <Pack ID> through $packs list.", "packs select 1", [], CMDSTATE.WIP],
+        ["packs", PERM.GM, "Manages skinpacks.", "<Subcommand>", "Group of commands to handle skinpacks. $help packs <sub-command> for detailed help.", "", [], CMDSTATE.RDY],
+            ["packs list", PERM.AL, "Lists your available skinpacks.", "", "", "packs list", [], CMDSTATE.RDY],
+            ["packs list_all", PERM.GM, "Lists all available skinpacks.", "", "", "packs list_all", [], CMDSTATE.RDY],
+            ["packs set", PERM.GM, "Sets skinpack for another player.", "<Player> <Pack ID>", "Sets the skinpack for another player. Find <Pack ID> through $packs list.", "packs set mctsts 1", [], CMDSTATE.RDY],
+            ["packs unlock", PERM.GM, "Unlocks skinpack for another player.", "<Player> <Pack ID>", "Unlocks the skinpack for another player. Find <Pack ID> through $packs list.", "packs unlock mctsts 1", [], CMDSTATE.RDY],
+            ["packs select", PERM.AL, "Selects your own skinpack.", "<Pack ID>", "Sets the skinpack for you. Find <Pack ID> through $packs list.", "packs select 1", [], CMDSTATE.RDY],
         /** Roles Module **/
         // roles
         ["roles", PERM.GM, "Manages roles.", "<Subcommand>", "Group of commands to handle roles. $help roles <sub-command> for detailed help.", "", [], CMDSTATE.RDY],

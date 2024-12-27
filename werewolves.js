@@ -706,7 +706,7 @@ client.on("messageCreate", async message => {
     break;
     /* Host Information */
     case "packs":
-		if(checkGM(message)) cmdPacks(message.channel, message.author, args);
+		cmdPacks(message, args);
     break;
     case "temp":
         let tempUsers = ["277156693765390337","242983689921888256","544125116640919557"];

@@ -99,7 +99,8 @@ module.exports = function() {
                 "killq": ["kq"],
                 "dr": ["discord_role","drole"],
                 "host_information": ["hi","host_info"],
-                "alias": ["al","aliases"]
+                "alias": ["al","aliases"],
+                "packs": ["pack","pk"],
         };
     this.parseAlias = function(alias) {
         for(let cmd in ALIASES) {
