@@ -120,6 +120,7 @@ module.exports = function() {
     this.killqKillall = async function() {
             // get players
         let players = await sqlProm("SELECT * FROM killq");
+        players = shuffleArray(players);
         playersFiltered = removeDuplicates(players.map(el => el.id));
         
         // kill players
