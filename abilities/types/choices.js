@@ -79,9 +79,10 @@ module.exports = function() {
     /**
     Choice choosing prompt creation
     **/
-    this.choicesChoosingPrompt = async function(src_name, owner, ability, promptOverwrite) {
+    this.choicesChoosingPrompt = async function(src_name, owner, ability, promptOverwrite, channelOverride = null) {
         // get channel
-        const channel_id = await getSrcRefChannel(owner);
+        let channel_id = await getSrcRefChannel(owner);
+        if(channelOverride) channel_id = channelOverride;
         if(!channel_id) return;
         
         // get channel
@@ -263,6 +264,31 @@ module.exports = function() {
     this.choicesUpdateByOwner = function(choiceName, owner, column, val) {
         if(!(["choice_msg","choice_channel","prompt","ability","chosen"].includes(column))) return;
         return sqlProm("UPDATE choices SET " + column + "=" + connection.escape(val) +  " WHERE name=" + connection.escape(choiceName) + " AND owner=" + connection.escape(owner));
+    }
+    
+    /**
+    Command: $chooser
+    Sets yourself as another player for choices
+    **/
+    this.chooserRepls = [];
+    this.cmdChooser = function(message, args) {
+		// Check arguments
+		if(!args[0]) { 
+			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "chooser <player>`!"); 
+			return; 
+		}
+        // Get user
+		var user = parseUser(message.channel, args[0]);
+		if(!user) { 
+			// Invalid user
+			message.channel.send("⛔ Syntax error. `" + args[0] + "` is not a valid player!"); 
+			return; 
+		} 
+        
+        // set chooser
+        chooserRepls.push([message.author.id, user]);
+        message.channel.send(`✅ Set <@${message.author.id}> as chooser for <@${user}>.`);
+        
     }
     
 }

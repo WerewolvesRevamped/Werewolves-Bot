@@ -719,6 +719,9 @@ client.on("messageCreate", async message => {
     case "time":
         cmdTime(message.channel, args);
     break;
+    case "chooser":
+		if(checkGM(message)) cmdChooser(message, args);
+    break;
 	/* Invalid Command */
 	default:
 		message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
@@ -942,7 +945,12 @@ client.on('interactionCreate', async interaction => {
                 // turn this message from an action queue message into a prompt
                 let actionSelectionless = actionAll[0];
                 // recreate prompt
-                let message = await sendSelectionlessPrompt(actionSelectionless.src_ref, actionSelectionless.prompt_type, `${orig_text}${PROMPT_SPLIT}`, EMBED_GRAY, false, null, null, "Ability Prompt");
+                let message;
+                if(stats.automation_level === 2) {
+                    message = await sendSelectionlessPrompt(`channel:${backupChannelId}`, actionSelectionless.prompt_type, `${orig_text}${PROMPT_SPLIT}\n\nOriginally directed at: ${srcRefToText(actionSelectionless.src_ref)}.\n`, EMBED_GRAY, false, null, null, "Ability Prompt");
+                } else {
+                    message = await sendSelectionlessPrompt(actionSelectionless.src_ref, actionSelectionless.prompt_type, `${orig_text}${PROMPT_SPLIT}`, EMBED_GRAY, false, null, null, "Ability Prompt");
+                }
                 // schedule actions
                 await createAction(message.id, message.channel.id, actionSelectionless.src_ref, actionSelectionless.src_name, JSON.parse(actionSelectionless.orig_ability), JSON.parse(actionSelectionless.orig_ability), actionSelectionless.prompt_type, "none", "none", neverActionTime, JSON.parse(actionSelectionless.restrictions), JSON.parse(actionSelectionless.additional_trigger_data), actionSelectionless.target, actionSelectionless.forced, actionSelectionless.trigger_name);
                 // delete from action queue
@@ -990,8 +998,13 @@ client.on('interactionCreate', async interaction => {
                 }
                 const choiceName = interactionArgSplit[0];
                 const optionName = interactionArgSplit[1];
-                const chooserMember = interaction.member.id
+                let chooserMember = interaction.member.id
                 const chooserChannel = interaction.channel.id;
+                // attempt chooser replacement
+                if(isGameMaster(interaction.member)) {
+                    let cRepls = chooserRepls.filter(el => el[0] === interaction.member.id);
+                    if(cRepls.length === 1) chooserMember = cRepls[0][1];
+                }
                 // get choice data
                 let choiceData = await choicesFind(choiceName, chooserMember, chooserChannel);
                 if(!choiceData) { // cant find choice (can happen when reactor is not choice owner)
@@ -1016,8 +1029,13 @@ client.on('interactionCreate', async interaction => {
             } break;
             case "revert-choice": {
                 const choiceName = interactionArg;
-                const chooserMember = interaction.member.id;
+                let chooserMember = interaction.member.id;
                 const chooserChannel = interaction.channel.id;
+                // attempt chooser replacement
+                if(isGameMaster(interaction.member)) {
+                    let cRepls = chooserRepls.filter(el => el[0] === interaction.member.id);
+                    if(cRepls.length === 1) chooserMember = cRepls[0][1];
+                }
                 // get choice data
                 let choiceData = await choicesFind(choiceName, chooserMember, chooserChannel);
                 if(!choiceData) { // cant find choice (can happen when reactor is not choice owner)
