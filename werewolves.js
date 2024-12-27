@@ -539,8 +539,8 @@ client.on("messageCreate", async message => {
 	break;
 	/* Promote */
 	case "promote":
-        message.channel.send("⛔ Promoting has been made illegal.");
-		//cmdPromote(message.channel, message.member);
+        //message.channel.send("⛔ Promoting has been made illegal.");
+		cmdPromote(message.channel, message.member);
 	break;
 	/* Promote */
 	case "demote":
@@ -568,8 +568,8 @@ client.on("messageCreate", async message => {
      break;
     /* Promote Host */
     case "promote_host":
-        message.channel.send("⛔ Promoting has been made illegal.");
-        //cmdPromoteHost(message.channel, message.member);
+        //message.channel.send("⛔ Promoting has been made illegal.");
+        cmdPromoteHost(message.channel, message.member);
      break;
     /* Demote Unhost */
     case "demote_unhost":
