@@ -21,7 +21,7 @@ module.exports = function() {
 			case "select": cmdPacksSelect(message.channel, message.author, args); break;
 			case "list_all": if(checkGM(message)) cmdPacksListAll(message.channel); break;
 			case "set": if(checkGM(message)) cmdPacksSet(message.channel, args); break;
-			case "unlock": if(checkGM(message)) cmdPacksUnlock(message.channel, args); break;
+			case "unlock": if(checkAdmin(message)) cmdPacksUnlock(message.channel, args); break;
 			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
 		}
 	}
@@ -29,7 +29,7 @@ module.exports = function() {
     /**
     Command: $packs list_all
     **/
-    this.AVAILABLE_PACKS = ["glitch","negate","grayscale","edge","emboss","silhouette","pixel","pixel2","pixel3","pixel4","scatter","red","green","blue","yellow","purple","cyan","flip","pale","bw","wire","wire2","rainbow","rainbow2","rainbow3","ts","oil","wave","swirl","noise","cycle","equalize","fourier_noise","fourier_equalize","fourier_oil","fourier_modulate","fourier_wire","glitch2","eyes","thief","mask"];
+    this.AVAILABLE_PACKS = ["glitch","negate","grayscale","edge","emboss","silhouette","pixel","pixel2","pixel3","pixel4","scatter","red","green","blue","yellow","purple","cyan","flip","pale","bw","wire","wire2","rainbow","rainbow2","rainbow3","ts","oil","wave","swirl","noise","cycle","equalize","fourier_noise","fourier_equalize","fourier_oil","fourier_modulate","fourier_wire","glitch2","eyes","thief","mask","eye","fourier_eye","citizen_eye"];
     this.cmdPacksListAll = function(channel) {
         let packs1 = [`${getEmoji('pack_default')} Default - 0`], packs2 = [], packs3 = [];
         let third = Math.ceil(AVAILABLE_PACKS.length / 3);
@@ -148,7 +148,7 @@ module.exports = function() {
                     channel.send({ embeds: [ embed ] });
                 }
             } else {
-                let embed = { title: "Skinpack Unavailable", description: "Pack `" + args[1] + "` is not available to you", color: 16715021 };
+                let embed = { title: "Skinpack Unavailable", description: "Pack `" + args[1] + "` is not available to you.", color: 16715021 };
                 channel.send({ embeds: [ embed ] });
             }
         } else {

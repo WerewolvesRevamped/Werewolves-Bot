@@ -962,7 +962,7 @@ module.exports = function() {
 	this.cmdSignup = function(channel, member, args, checkGamephase, signupMode = "signup") {
 		// Wrong Phase 
 		if(checkGamephase && stats.gamephase != gp.SIGNUP) { 
-			channel.send("⛔ Signup error. Sign ups are not open! Sign up will open up again soon."); 
+			channel.send(`⛔ Signup error. Sign ups are not open, <@${member.id}>! Sign up will open up again soon.`); 
 			return; 
 		} else if(!args[0] && !isSignedUp(member) && signupMode == "signup") { 
 		// Failed sign out

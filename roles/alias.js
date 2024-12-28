@@ -21,7 +21,7 @@ module.exports = function() {
 		switch(args[0]) {
 			// Role Subcommand
 			case "set": cmdAliasSet(message.channel, args); break;
-			case "remove": cmdAliasRemove(message.channel); break;
+			case "remove": cmdAliasRemove(message.channel, args); break;
 			case "clear": cmdConfirm(message, "alias clear"); break;
 			case "list": cmdAliasList(message.channel); break;
 			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
@@ -40,7 +40,7 @@ module.exports = function() {
 			// Insert alias into db
 			sql("INSERT INTO roles_alias (alias, name) VALUES (" + connection.escape(args[1]) + "," + connection.escape(parseRole(args[2])) + ")", result => {
 				channel.send("✅ Alias `" + toTitleCase(args[1]) + "` set to `" + toTitleCase(parseRole(args[2])) + "`!"); 
-				getAliases();
+				cacheAliases();
 			}, () => {
 				// Couldn't set alias
 				channel.send("⛔ Database error. Could not set role alias!");
@@ -60,7 +60,7 @@ module.exports = function() {
 		}
 		sql("DELETE FROM roles_alias WHERE alias = " + connection.escape(args[1]), result => {
 			channel.send("✅ Removed `" + toTitleCase(args[1]) + "`!");
-			getAliases();
+			cacheAliases();
 		}, () => {
 			channel.send("⛔ Database error. Could not remove role alias!");
 		});
@@ -96,7 +96,7 @@ module.exports = function() {
 	this.cmdAliasClear = function(channel) {
 		sql("DELETE FROM roles_alias", result => {
 			channel.send("⛔ Database error. Could not execute `" + data.action + "`!");
-			getAliases();
+			cacheAliases();
 		}, () => {
 			channel.send("✅ Successfully executed `" + data.action + "`!");
 		});
