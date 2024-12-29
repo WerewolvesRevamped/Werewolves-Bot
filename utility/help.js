@@ -94,7 +94,8 @@ module.exports = function() {
         ["delete", PERM.GH, "Deletes a couple of messages.", "[0-5]", "Deletes the last up to five messages from a channel.", "delete 3", ["✅ Deleted 3 messages."], CMDSTATE.RDY],
         ["delay", PERM.GH, "Executes a command with delay.", "<Delay> <Command>", "Executes a command with delay in seconds.", "delay 5 ping", ["✅ Pong! Latency is 990ms. API Latency is 114ms"], CMDSTATE.RDY],
         ["temp", PERM.AL, "Converts between °C and °F.", "[f|c] <value>", "Converts into the specified unit.", "temp f 0", ["🌡️ 0 °C in Fahrenheit: 32 °F"], CMDSTATE.RDY],
-        ["time", PERM.AL, "Identifies your time zone based on your current time.", "<Your Current Time>", "Returns your UTC offset if you put your current time. Many time formats are supported as input.", "time 22:25", ["✅ Your timezone is UTC+1!"], CMDSTATE.RDY],
+        ["time", PERM.AL, "Identifies or convers timezone.", "<Your Current Time> | <Your Current Time> <Conversion Time> | <Timezone> <Conversion Time>", "Returns your UTC offset if you put your current time. Many time formats are supported as input. If you additionally submit a second time it uses the first time to identify your timezone and then convers the second time to UTC. When submitting two times you may additionally also submit just the timezone offset in place off the first time (e.g. '+1' or 'utc-1').", "time 22:25", ["✅ Your timezone is UTC+1!"], CMDSTATE.RDY],
+        ["reverseme", PERM.AL, "Reverses your nickname.", "", "Reverses your nickname.", "reverseme", ["✅ You have been reversed!"], CMDSTATE.RDY],
         /** CC Module **/
         // CC
         ["cc", PERM.AL, "Manages CCs.", "<Subcommand>", `Group of commands to handle CCs. Use $help cc <subcommand> for detailed help.`, "", [], CMDSTATE.RDY],
@@ -155,6 +156,16 @@ module.exports = function() {
         ["modrole", PERM.AL, "Adds/removes roles from users.", "<Subcommand>", "See $help modrole <subcommand>.", "", [], CMDSTATE.NOP],
             ["modrole add", PERM.AL, "Adds roles from users.", "<User ID> <Role ID>", "Adds a role to a user.", "modrole add 242983689921888256 584770967058776067", ["✅ Added Bot Developer to @McTsts (Ts)!"], CMDSTATE.NOP],
             ["modrole remove", PERM.AL, "Removes roles from users.", "<User ID> <Role ID>", "Removes a role from a user.", "modrole remove 242983689921888256 584770967058776067", ["✅ Removed Bot Developer from @McTsts (Ts)!"], CMDSTATE.NOP],
+        // Loot Commands
+        ["loot", PERM.AL, "Opens a lootbox.", "", "Run the command to purchase a lootbox for 100 coins and open it.", "loot", [], CMDSTATE.WIP],
+        ["loot_force", PERM.GM, "Forces a specific lootbox reward.", "<Reward Code>", "Opens a lootbox and finds a specified reward.", "loot_force std:x", [], CMDSTATE.WIP],
+        ["inventory", PERM.AL, "Shows your inventory.", "", "Shows your inventory which contains some lootbox rewards.", "inventory", [], CMDSTATE.WIP],
+            ["inventory see", PERM.AL, "Shows your inventory.", "", "Same as the base command", "inventory see", [], CMDSTATE.WIP],
+            ["inventory get", PERM.GM, "Shows a user's inventory.", "<User>", "Shows the inventory of a specified user.", "inventory get mctsts", [], CMDSTATE.WIP],
+        ["coins", PERM.AL, "Shows your coins.", "", "Shows how many coins you currently have.", "coins", [], CMDSTATE.WIP],
+            ["coins get", PERM.GM, "Shows a player's coins.", "", "Shows how many coins a specific player has.", "coins get mctsts", [], CMDSTATE.WIP],
+            ["coins add", PERM.GM, "Adds to a player's coins.", "", "Gives a specific player coins.", "coins add mctsts 100", [], CMDSTATE.WIP],
+            ["coins remove", PERM.GM, "Removes from a player's coins.", "", "Takes coins from a specific player.", "coins remove mctsts 100", [], CMDSTATE.WIP],
         // List Commands
         ["list_signedup", PERM.AL, "Lists signed up players.", "", "Lists all signed up players.", "list", ["Signed Up Players | Total: 3","🛠 - McTsts (@McTsts)","🏹 - venomousbirds  (@venomousbirds )","🦎 - shapechange (@shapechange)"], CMDSTATE.RDY],
         ["list_alphabetical", PERM.AL, "Alternative signed up list.", "", "Lists signed up players, alphabetically and without pinging.", "la", ["Signed Up Players (Alphabetical) | Total: 3","🎨 captain.luffy","⚒️ evilts_","👑 helene.rubycrust"], CMDSTATE.RDY],

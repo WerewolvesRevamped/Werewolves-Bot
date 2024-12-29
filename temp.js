@@ -101,6 +101,10 @@ module.exports = function() {
                 "host_information": ["hi","host_info"],
                 "alias": ["al","aliases"],
                 "packs": ["pack","pk"],
+                "coins": ["coin", "tokens", "token", "cn"],
+                "loot": ["lt"],
+                "loot_force": ["lf"],
+                "inventory": ["inv", "invent"],
         };
     this.parseAlias = function(alias) {
         for(let cmd in ALIASES) {

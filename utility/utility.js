@@ -215,5 +215,26 @@ module.exports = function() {
         d.setSeconds(0, 0);	 
         return d;
     }
+    
+    /**
+    Parses timezone
+    **/
+    this.parseTimeZone = function(tz) {
+        let utcTime = new Date();
+        let time = parseTime(tz + (tz.length === 2 ? utcTime.getMinutes() : ""));
+        let diff = (Math.round(((time - utcTime) / (60 * 60 * 1000)) * 4) - Math.round(utcTime.getTimezoneOffset() / 15)) / 4;
+        if(diff > 12) diff -= 24;
+        if(diff < -12) diff += 24;
+        if(diff > 12 || diff < -12) {
+            channel.send("⛔ Time error. Could not parse your time!"); 
+            return;
+        }
+        let plus = diff>=0 ? "+" : "";
+        diff = diff + "";
+        diff = diff.replace(".25", ":15");
+        diff = diff.replace(".5", ":30");
+        diff = diff.replace(".75", ":45");
+        return plus + diff;
+    }
 
 }

@@ -323,6 +323,14 @@ module.exports = function() {
             stats.subphase = 0;
 			log("Stats > ❗❗❗ Unable to cache subphase! Defaulting to `0`.")
 		});
+        // REWARD LOG
+		sqlGetStat(statID.REWARD_LOG,  result => { 
+			stats.reward_log = result; 
+			if(doLog) log("Stats > Cached reward log as `" + result + "`!")
+		}, () => {
+            stats.reward_log = null;
+			log("Stats > ❗❗❗ Unable to cache reward log! Defaulting to *none*.")
+		});
 	}
 	
 	/* Gets the name of a gamephase by id */
@@ -339,7 +347,8 @@ module.exports = function() {
     
     this.statID = {
         PHASE: 47,
-        SUBPHASE: 48
+        SUBPHASE: 48,
+        REWARD_LOG: 49
     }
 	
 	/* Handles option command */
@@ -395,6 +404,7 @@ module.exports = function() {
                 case "haunting": stat = 46; break;
                 case "phase": stat = statID.PHASE; break;
                 case "subphase": stat = statID.SUBPHASE; break;
+                case "reward_log": stat = statID.REWARD_LOG; break;
 				default: message.channel.send("⛔ Syntax error. Invalid parameter!"); return;
 			}
 		} else {

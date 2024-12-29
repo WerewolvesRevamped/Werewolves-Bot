@@ -28,6 +28,9 @@ require("./confirm.js")();
 /* Functionality Modules */
 require("./players.js")();
 require("./players/packs.js")();
+require("./players/loot.js")();
+require("./players/loot_commands.js")();
+require("./players/coins.js")();
 require("./ccs.js")();
 require("./whispers.js")();
 require("./theme.js")();
@@ -709,18 +712,39 @@ client.on("messageCreate", async message => {
 		cmdPacks(message, args);
     break;
     case "temp":
-        let tempUsers = ["277156693765390337","242983689921888256","544125116640919557"];
-        if(!tempUsers.includes(message.author.id)) {
-            message.channel.send("⛔ You are not authorized to use the $temp command.");
+        let tempPerms = await inventoryGetItem(message.author.id, "bot:temp");
+        if(tempPerms === 0) {
+            message.channel.send(`⛔ You are not authorized to use the ${stats.prefix}temp command.`);
             return;
         }
         cmdTemp(message, args);
     break;
+    case "reverseme":
+        cmdReverseme(message);
+    break;
+	case "newship":
+        cmdNewship(message);
+	break;
+	case "newhate":
+        cmdNewhate(message);
+	break;
     case "time":
         cmdTime(message.channel, args);
     break;
     case "chooser":
 		if(checkGM(message)) cmdChooser(message, args);
+    break;
+    case "loot":
+		cmdLoot(message);
+    break;
+    case "loot_force":
+		if(checkGM(message)) cmdLootForce(message, args);
+    break;
+    case "coins":
+		cmdCoins(message, args);
+    break;
+    case "inventory":
+		cmdInventory(message, args);
     break;
 	/* Invalid Command */
 	default:

@@ -10,27 +10,41 @@ module.exports = function() {
     this.cmdTime = function(channel, args) {
         if(!args[0]) {
             let utcTime = new Date();
-            channel.send(`✅ My time is ${utcTime.toLocaleTimeString()}!`);
+            let timezone = Math.round((new Date().getTimezoneOffset()) / 60) * -1;
+            if(timezone >= 0) timezone = "+" + timezone;
+            channel.send(`✅ My time is ${utcTime.toLocaleTimeString()} (UTC${timezone})!`);
         } else if(!args[1]) {
             try {
-                let utcTime = new Date();
-                let time = parseTime(args[0] + (args[0].length === 2 ? utcTime.getMinutes() : ""));
-                let diff = (Math.round(((time - utcTime) / (60 * 60 * 1000)) * 4) - Math.round(utcTime.getTimezoneOffset() / 15)) / 4;
-                if(diff > 12) diff -= 24;
-                if(diff < -12) diff += 24;
-                if(diff > 12 || diff < -12) {
+                let tz = parseTimeZone(args[0]);
+                channel.send(`✅ Your timezone is UTC${tz}!`);
+            } catch(err) {
+                channel.send("⛔ Time error. Could not parse your time!"); 
+                return;
+            }
+        } else {
+            let tz = args[0].replace(/[^0-9\+\-\:]*/g,"");
+            let tzOffset = 0;
+            // not direct TZ, try to parse
+            if(tz[0] != "-" && tz[0] != "+") {
+                try {
+                    tz = parseTimeZone(args[0]);
+                } catch(err) {
                     channel.send("⛔ Time error. Could not parse your time!"); 
                     return;
                 }
-                let plus = diff>=0 ? "+" : "";
-                diff = diff + "";
-                diff = diff.replace(".25", ":15");
-                diff = diff.replace(".5", ":30");
-                diff = diff.replace(".75", ":45");
-                channel.send(`✅ Your timezone is UTC${plus}${diff}!`);
-            } catch(err) {
-                channel.send("⛔ Time error. Could not parse your time!"); 
             }
+            // tz to offset
+            let spl = tz.split(":");
+            tzOffset = spl[0] * 60;
+            if(spl[1]) tzOffset += Math.sign(spl[0]) * spl[1];
+            // parse time
+            let utcTime = new Date();
+            let time = parseTime(args[1] + (args[1].length === 2 ? utcTime.getMinutes() : ""));
+            time.setYear(utcTime.getFullYear());
+            time.setMonth(utcTime.getMonth());
+            time.setDate(utcTime.getDate());
+            let timeNew = new Date(time.getTime() - tzOffset * 1000 * 60);
+            channel.send(`✅ ${time.toTimeString().split(' ')[0].split(":").splice(0, 2).join(":")} in UTC${tz} is ${timeNew.toTimeString().split(' ')[0].split(":").splice(0, 2).join(":")} in UTC! This is your: <t:${Math.floor(timeNew.getTime() / 1000 - (new Date().getTimezoneOffset() * 60))}:t>`);
         }
     }
     
