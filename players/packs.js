@@ -11,7 +11,7 @@ module.exports = function() {
 	this.cmdPacks = function(message, args) {
 		// Check subcommand
 		if(!args[0]) {
-            message.channel.send("⛔ Syntax error. Not enough parameters!");
+            cmdPacksList(message.channel, message.author);
 			return;
 		}
 
@@ -21,7 +21,7 @@ module.exports = function() {
 			case "select": cmdPacksSelect(message.channel, message.author, args); break;
 			case "list_all": if(checkGM(message)) cmdPacksListAll(message.channel); break;
 			case "set": if(checkGM(message)) cmdPacksSet(message.channel, args); break;
-			case "unlock": if(checkAdmin(message)) cmdPacksUnlock(message.channel, args); break;
+			case "unlock": if(checkGM(message)) cmdPacksUnlock(message.channel, args); break;
 			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
 		}
 	}
@@ -29,7 +29,7 @@ module.exports = function() {
     /**
     Command: $packs list_all
     **/
-    this.AVAILABLE_PACKS = ["glitch","negate","grayscale","edge","emboss","silhouette","pixel","pixel2","pixel3","pixel4","scatter","red","green","blue","yellow","purple","cyan","flip","pale","bw","wire","wire2","rainbow","rainbow2","rainbow3","ts","oil","wave","swirl","noise","cycle","equalize","fourier_noise","fourier_equalize","fourier_oil","fourier_modulate","fourier_wire","glitch2","eyes","thief","mask","eye","fourier_eye","citizen_eye","items"];
+    this.AVAILABLE_PACKS = ["glitch","negate","grayscale","edge","emboss","silhouette","pixel","pixel2","pixel3","pixel4","scatter","red","green","blue","yellow","purple","cyan","flip","pale","bw","wire","wire2","rainbow","rainbow2","rainbow3","ts","oil","wave","swirl","noise","cycle","equalize","fourier_noise","fourier_equalize","fourier_oil","fourier_modulate","fourier_wire","glitch2","eyes","thief","mask","eye","fourier_eye","citizen_eye","items","bear","wolfify","grid","light_and_shadow","duo_color","wood"];
     this.cmdPacksListAll = function(channel) {
         let packs1 = [`${getEmoji('pack_default')} Default - 0`], packs2 = [], packs3 = [];
         let third = Math.ceil(AVAILABLE_PACKS.length / 3);
@@ -37,7 +37,6 @@ module.exports = function() {
         for(let i = third ; i < third * 2; i++) packs2.push(`${getEmoji('pack_'+AVAILABLE_PACKS[i])} ${toTitleCase(AVAILABLE_PACKS[i])} - ${i+1}`);
         for(let i = (third * 2); i < AVAILABLE_PACKS.length; i++) packs3.push(`${getEmoji('pack_'+AVAILABLE_PACKS[i])} ${toTitleCase(AVAILABLE_PACKS[i])} - ${i+1}`);
         let embed = { title: "All Packs", color: 8984857, fields: [ {}, {}, {} ] };
-        //embed.thumbnail = { url: "https://werewolves.me/cards/skinpack.php?pack=default&src=Werewolf/Miscellaneous/Wolf.png" };
         embed.fields[0] = { name: "_ _", "value": packs1.join("\n"), inline: true };
         embed.fields[1] = { name: "_ _", "value": packs2.join("\n"), inline: true };
         embed.fields[2] = { name: "_ _", "value": packs3.join("\n"), inline: true };
@@ -156,6 +155,8 @@ module.exports = function() {
                     let embed = { title: "Skinpack Updated", description: `Updated <@${user}>'s skinpack to \`${num}\` (${toTitleCase(AVAILABLE_PACKS[num-1])}). You can disable the skinpack by running \`${stats.prefix}packs select 0\`.`, color: 5490704 };
                     embed.thumbnail = { url: skinpackUrl(AVAILABLE_PACKS[num-1]) + "Werewolf/Miscellaneous/Wolf.png" };
                     channel.send({ embeds: [ embed ] });
+                    // get pack lut (if necessary)
+                    cachePackLUT(AVAILABLE_PACKS[num-1]);
                 } else {
                     let embed = { title: "Skinpack Disabled", description: `Disabled skinpack for <@${user}>.`, color: 16715021 };
                     embed.thumbnail = { url: skinpackUrl("default") + "Werewolf/Miscellaneous/Wolf.png" };
@@ -190,5 +191,73 @@ module.exports = function() {
         if(!res) return 0;
         else return res[1];
     }
+    
+    /**
+    Get Icon Base Url
+    **/
+    this.iconBaseUrl = function(id) {
+        if(!id) return iconRepoBaseUrl;
+        let pack = getPack(id);
+        if(pack === 0) {
+            return iconRepoBaseUrl;
+        } else {
+            let pName = AVAILABLE_PACKS[pack - 1];
+            return skinpackUrl(pName);
+        }
+    }
+    
+    /**
+    Apply Pack LUT
+    **/
+    this.applyPackLUT = async function(txt, id) {
+        if(!id) return txt;
+        let pack = getPack(id);
+        if(pack === 0) {
+            return txt;
+        } else {
+            let pName = AVAILABLE_PACKS[pack - 1];
+            let lut = await getPackLUT(pName);
+            for(let i = 0; i < lut.length; i++) {
+                txt = txt.replace(new RegExp("(?<!\\<\\?)" + lut[i][0], 'g'), lut[i][1]);
+            }
+            return txt;
+        }
+    }
+    
+    /**
+    Cache Pack LUT
+    **/
+    this.packLUTs = {}
+    this.cachePackLUT = async function(pack) {
+        let url = `${website}cards/ThemePacks/${pack}.csv`;
+        let urlExists = await checkUrlExists(url);
+        if(urlExists) {
+            const body = await fetchBody(url);
+            if(body) {
+                packLUTs[pack] = [];
+                body.split("\n").filter(el => el && el.length).map(el => el.split(",")).forEach(el => packLUTs[pack].push([el[0] ?? "-", (el[1] ?? "").trim()]) );
+                body.split("\n").filter(el => el && el.length).map(el => el.split(",")).forEach(el => packLUTs[pack].push([(el[0] ?? "-").toLowerCase(), ((el[1] ?? "").trim()).toLowerCase()]) );
+                console.log(`Cached ${pack} pack LUT`);
+            }
+        } else {
+            packLUTs[pack] = true;
+        }
+    }
+    
+    /**
+    Returns a Pack LUT (caching it if necessary)
+    **/
+    this.getPackLUT = async function(pack) {
+        if(packLUTs[pack] && packLUTs[pack] === true) {
+            return [];
+        } else if(packLUTs[pack]) {
+            return packLUTs[pack];
+        } else {
+            await cachePackLUT(pack);
+            return await getPackLUT(pack);
+        }
+    }
+    
+
 
 }

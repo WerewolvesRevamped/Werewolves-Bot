@@ -14,7 +14,7 @@ module.exports = function() {
     appendSection: WIP ??? (appends an additional section)
     editOnto: WIP ??? (edits the message onto another one instead of sending it)
     **/
-    this.cmdInfo = async function(channel, authorId, args, pin = false, noErr = false, simp = false, overwriteName = false, appendSection = false, editOnto = false, technical = false) {
+    this.cmdInfo = async function(channel, authorId, args, pin = false, noErr = false, simp = false, overwriteName = false, appendSection = false, editOnto = false, technical = false, autoDelete = false) {
 		// fix role name if necessary
         console.log(cachedTeamNames);
         if(!args) {
@@ -89,7 +89,11 @@ module.exports = function() {
         }
         
         // send embed
-        sendEmbed(channel, infoEmbed, pin);
+        let infoMsg = await sendEmbed(channel, infoEmbed, pin);
+        
+        if(autoDelete) {
+            setTimeout(() => infoMsg.delete(), 180000);
+        }
         
     }
     
@@ -97,9 +101,9 @@ module.exports = function() {
     Info Shortcuts
     **/
     this.cmdInfoTechnical = function(channel, authorId, args) { cmdInfo(channel, authorId, args, false, false, false, false, false, false, true); } // via $info_technical
-    this.cmdInfoIndirect = function(channel, authorId, args) { cmdInfo(channel, authorId, args, false, true); } // via ;
-    this.cmdInfoIndirectSimplified = function(channel, authorId, args) { cmdInfo(channel, authorId, args, false, true, true); } // via . 
-    this.cmdInfoIndirectTechnical = function(channel, authorId, args) { cmdInfo(channel, authorId, args, false, true, false, false, false, false, true); } // via ~
+    this.cmdInfoIndirect = function(channel, authorId, args) { cmdInfo(channel, authorId, args, false, true, false, false, false, false, false, true); } // via ;
+    this.cmdInfoIndirectSimplified = function(channel, authorId, args) { cmdInfo(channel, authorId, args, false, true, true, false, false, false, false, true); } // via . 
+    this.cmdInfoIndirectTechnical = function(channel, authorId, args) { cmdInfo(channel, authorId, args, false, true, false, false, false, false, true, true); } // via ~
     this.cmdInfopin = function(channel, authorId, args) { cmdInfo(channel, authorId, args, true); } // via $infopin
     
     /**
@@ -125,10 +129,11 @@ module.exports = function() {
 
                 // split a single section into several fields if necessary
                 for(let d in desc) {
+                    let de = await applyPackLUT(desc[d][1], authorId);
                     if(desc[d][0] || desc[0][1].length > 2000 || d > 0) {
-                        embed.fields.push(...handleFields(applyETN(desc[d][1], guild), applyTheme(desc[d][0])));
+                        embed.fields.push(...handleFields(applyETN(de, guild), applyTheme(desc[d][0])));
                     } else { // untitled field0 is description
-                        embed.description = applyETN(desc[d][1], guild);
+                        embed.description = applyETN(de, guild);
                     }
                 }
                
@@ -139,12 +144,15 @@ module.exports = function() {
                     //console.log(`${iconRepoBaseUrl}${lutval}`);
                     embed.thumbnail = { "url": `${iconBaseUrl(authorId)}${lutval}.png` };
                     if(result.display_name.match(/\<\?[\w\d]*:[^>]{0,10}\>/)) { // emoji in title, use title
-                        embed.title = applyET(result.display_name);
+                        let dp = await applyPackLUT(result.display_name, authorId);
+                        embed.title = applyET(dp);
                     } else { // no emojis, use author title + icon
-                        embed.author = { "icon_url": `${iconBaseUrl(authorId)}${lutval}.png`, "name": applyTheme(result.display_name) };
+                        let dp = await applyPackLUT(result.display_name, authorId);
+                        embed.author = { "icon_url": `${iconBaseUrl(authorId)}${lutval}.png`, "name": applyTheme(dp) };
                     }
                 } else { // just set title afterwards
-                    embed.title = applyET(result.display_name);
+                    let dp = await applyPackLUT(result.display_name, authorId);
+                    embed.title = applyET(dp);
                 }
                 
                 // resolve promise, return embed
@@ -175,7 +183,8 @@ module.exports = function() {
 
                 // split a single section into several fields if necessary
                 for(let d in desc) {
-                    embed.fields.push(...handleFields(applyETN(desc[d][1], guild), applyTheme(desc[d][0])));
+                    let de = await applyPackLUT(desc[d][1], authorId);
+                    embed.fields.push(...handleFields(applyETN(de, guild), applyTheme(desc[d][0])));
                 }
                
                 // get icon if applicable
@@ -183,10 +192,12 @@ module.exports = function() {
                 if(!lutval) lutval = applyLUT(result?.display_name ?? "Unknown");
                 if(lutval) { // set icon and name
                     //console.log(`${iconRepoBaseUrl}${lutval}`);
+                    let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
                     embed.thumbnail = { "url": `${iconBaseUrl(authorId)}${lutval}.png` };
-                    embed.author = { "icon_url": `${iconBaseUrl(authorId)}${lutval}.png`, "name": applyTheme(result?.display_name ?? "Unknown") };
+                    embed.author = { "icon_url": `${iconBaseUrl(authorId)}${lutval}.png`, "name": applyTheme(dp) };
                 } else { // just set title afterwards
-                    embed.title = applyET(result?.display_name ?? "Unknown");
+                    let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
+                    embed.title = applyET(dp);
                 }
                 
                 // resolve promise, return embed
@@ -211,7 +222,8 @@ module.exports = function() {
 
                 // split a single section into several fields if necessary
                 for(let d in desc) {
-                    embed.fields.push(...handleFields(applyETN(desc[d][1], mainGuild), applyTheme(desc[d][0])));
+                    let de = await applyPackLUT(desc[d][1], authorId);
+                    embed.fields.push(...handleFields(applyETN(de, mainGuild), applyTheme(desc[d][0])));
                 }
                
                 // get icon if applicable
@@ -219,10 +231,12 @@ module.exports = function() {
                 if(!lutval) lutval = applyLUT(result?.display_name ?? "Unknown");
                 if(lutval) { // set icon and name
                     //console.log(`${iconRepoBaseUrl}${lutval}`);
+                    let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
                     embed.thumbnail = { "url": `${iconBaseUrl(authorId)}${lutval}.png` };
-                    embed.author = { "icon_url": `${iconBaseUrl(authorId)}${lutval}.png`, "name": applyTheme(result?.display_name ?? "Unknown") };
+                    embed.author = { "icon_url": `${iconBaseUrl(authorId)}${lutval}.png`, "name": applyTheme(dp) };
                 } else { // just set title afterwards
-                    embed.title = applyET(result?.display_name ?? "Unknown");
+                    let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
+                    embed.title = applyET(dp);
                 }
                 
                 // resolve promise, return embed
@@ -252,7 +266,8 @@ module.exports = function() {
 
                 // split a single section into several fields if necessary
                 for(let d in desc) {
-                    embed.fields.push(...handleFields(applyETN(desc[d][1], mainGuild), applyTheme(desc[d][0])));
+                    let de = await applyPackLUT(desc[d][1], authorId);
+                    embed.fields.push(...handleFields(applyETN(de, mainGuild), applyTheme(desc[d][0])));
                 }
                
                 // get icon if applicable
@@ -260,10 +275,12 @@ module.exports = function() {
                 if(!lutval) lutval = applyLUT(result?.display_name ?? "Unknown");
                 if(lutval) { // set icon and name
                     //console.log(`${iconRepoBaseUrl}${lutval}`);
+                    let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
                     embed.thumbnail = { "url": `${iconBaseUrl(authorId)}${lutval}.png` };
-                    embed.author = { "icon_url": `${iconBaseUrl(authorId)}${lutval}.png`, "name": applyTheme(result?.display_name ?? "Unknown") };
+                    embed.author = { "icon_url": `${iconBaseUrl(authorId)}${lutval}.png`, "name": applyTheme(dp) };
                 } else { // just set title afterwards
-                    embed.title = applyET(result?.display_name ?? "Unknown");
+                    let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
+                    embed.title = applyET(dp);
                 }
                 
                 // resolve promise, return embed
@@ -283,17 +300,20 @@ module.exports = function() {
                 var embed = await getBasicEmbed(mainGuild);
                 
                 // description
-                embed.description = result?.description ?? "No info found"
+                let desc = await applyPackLUT(result?.description ?? "No info found", authorId);
+                embed.description = desc;
                
                 // get icon if applicable
                 let lutval = applyLUT(locationName);
                 if(!lutval) lutval = applyLUT(result?.display_name ?? "Unknown");
                 if(lutval) { // set icon and name
                     //console.log(`${iconRepoBaseUrl}${lutval}`);
+                    let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
                     embed.thumbnail = { "url": `${iconBaseUrl(authorId)}${lutval}.png` };
-                    embed.author = { "icon_url": `${iconBaseUrl(authorId)}${lutval}.png`, "name": applyTheme(result?.display_name ?? "Unknown") };
+                    embed.author = { "icon_url": `${iconBaseUrl(authorId)}${lutval}.png`, "name": applyTheme(dp) };
                 } else { // just set title afterwards
-                    embed.title = applyET(result?.display_name ?? "Unknown");
+                    let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
+                    embed.title = applyET(dp);
                 }
                 
                 // resolve promise, return embed
@@ -319,13 +339,14 @@ module.exports = function() {
                 let fancyRoleName = `${result.display_name} [${toTitleCase(result.class)} ${toTitleCase(result.category)}]`; // Default: Name [Class Category]
                 if(result.class == "solo") fancyRoleName = `${result.display_name} [${toTitleCase(result.class)} ${toTitleCase(result.category)} - ${toTitleCase(result.team)} Team]`; // Solos: Name [Class Category - Team]
                 fancyRoleName = applyTheme(fancyRoleName); // apply theme replacement rules
+                fancyRoleName = await applyPackLUT(fancyRoleName, authorId);
                 embed.author.name = fancyRoleName;
 
                 // Role Type
                 const roleTypeData = getRoleTypeData(result.type); // display the role type
                 if(result.type != "default") embed.title = applyTheme(roleTypeData.name); // but dont display "Default"
-                
-                
+
+     
                 // get icon if applicable, overwrites default
                 let lutval = applyLUT(roleName);
                 if(!lutval) lutval = applyLUT(result.display_name);
@@ -351,9 +372,15 @@ module.exports = function() {
                         if(visibleSections.length == 1) {
                             embed.description = applyETN(sectionText, guild);
                         } else {
+                            sectionText = await applyPackLUT(sectionText, authorId);
                             embed.fields.push(...handleFields(applyETN(sectionText, guild), toTitleCase(applyTheme(visibleSections[sec])), !isFormalized));
                         }
                     }
+                }
+                                
+                if(!((roleTypeData.id >= 0 && (stats.role_filter & (1 << roleTypeData.id))) || (roleTypeData.id == -1 && (stats.role_filter & (1 << 1)) && (stats.role_filter & (1 << 2))))) {
+                    embed.description = "**This role type is currently not in use.**";
+                    delete embed.fields;
                 }
                 
                 // resolve promise with the embed, returning the embed
@@ -393,20 +420,6 @@ module.exports = function() {
             channel.send(url);
         } else {
             channel.send("⛔ Command error. Invalid role `" + role + "`!"); 
-        }
-    }
-    
-    /**
-    Get Icon Base Url
-    **/
-    this.iconBaseUrl = function(id) {
-        if(!id) return iconRepoBaseUrl;
-        let pack = getPack(id);
-        if(pack === 0) {
-            return iconRepoBaseUrl;
-        } else {
-            let pName = AVAILABLE_PACKS[pack - 1];
-            return skinpackUrl(pName);
         }
     }
     

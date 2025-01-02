@@ -4,12 +4,12 @@ Loot Boxes
 
 module.exports = function() {
 
-    let ALL_LOOT = [["SP:1","Glitch","Gold",1],["STD:RE","Reroll","Silver",1],["BOT:TEMP","$temp Command","Silver",1],["GM:Ts","Kill Ts","Platinum",0.5],["AL:Town","Townsfolk","Silver",1],["SP:2","Negate","Silver",2],["COIN:50","50 Coins","Bronze",1],["BOT:REV","$reverseme Command","Gold",],["GM:Eth","Demote Ethan","Gold",0.5],["AL:Wolf","Werewolves","Silver",1],["SP:3","Grayscale","Silver",2],["COIN:120","120 Coins","Silver",1],["BOT:SHIP","$newship Command","Platinum",1],["GM:Luf","Rename Luffy","Gold",0.5],["AL:UA","Unaligned","Gold",1],["SP:5","Emboss","Bronze",1],["COIN:160","160 Coins","Gold",1],["BOT:HATE","$newhate Command","Platinum",1],["GM:Krem","Turn Krem into a Little Bug","Gold",0.5],["AL:Solo","Solo","Gold",1],["SP:6","Silhouette","Silver",1],["STD:RE2","Reroll x2","Gold",0.5],["GM: Jay","Temp Jay into sinning","Platinum",0.5],["AL:Hell","Hell","Platinum",1],["SP:7","Pixel","Silver",1],["STD:BTNT","Be the next theme","Platinum",0.5],["GM:Kruth","Demote Kruthers","",],["AL:HM","Horseman","Platinum",0.5],["SP:9","Pixel #3","Silver",1],["STD:JOKE","Your own Joke Role","Platinum",0.5],["GM:Fish","Kill Mr. Fish","Silver",0.5],["AL:Pyro","Pyro","Platinum",1],["SP:12","Red","Bronze",2],["STD:X","Unlucky (Nothing)","Bronze",1],["GM:Arch","Demote Jean D. Arch","",],["AL:Flute","Flute","Platinum",1],["SP:13","Green","Bronze",2],["STD:RE3","Reroll x3","Platinum",0.5],["GM:Fed","Kill Federick","",],["AL:WWW","White Wolves","Platinum",0.5],["SP:14","Blue","Bronze",2],["GM:Ghost","Exorcise Gh0st","Silver",0.5],["AL:Plague","Plague","Platinum",0.5],["SP:15","Yellow","Bronze",2],["GM:Katy","Kill KatyHawk","",],["AL:UW","Underworld","Platinum",0.5],["SP:16","Purple","Bronze",2],["GM:Marten","Promote Marten","",],["AL:T/W","Townsfolk / Werewolves","Bronze",1],["SP:17","Cyan","Bronze",2],["GM:Turtle","Demote Mr. Turtle","",],["SP:18","Flip","Bronze",1],["GM:Stein","Take Steinator as a Hostage","Gold",0.5],["SP:20","BW","Bronze",1],["GM:Vera","Evict Vera","Platinum",0.5],["SP:21","Wire","Gold",2],["SP:24","Rainbow #2","Silver",1],["SP:25","Rainbow #3","Silver",1],["SP:26","Ts","Platinum",0.5],["SP:27","Oil","Gold",1],["SP:28","Wave","Silver",1],["SP:29","Swirl","Bronze",1],["SP:31","Cycle","Silver",0.5],["SP:32","Equalize","Bronze",1],["SP:33","Fourier Noise","Gold",1],["SP:35","Fourier Oil","Gold",1],["SP:36","Fourier Modulate","Platinum",1],["SP:37","Fourier Wire","Silver",0.5],["SP:38","Glitch #2","Gold",1],["SP:39","Eyes","Gold",1],["SP:40","Thief","",],["SP:41","Mask","Silver",1],["SP:42","Eye","Platinum",1],["SP:43","Fourier Eye","Platinum",0.5],["SP:44","Citizen Eye","Gold",0.5],["SP:45","Items","Gold",1]];
+    this.ALL_LOOT = [["SP:1","Glitch","Gold",1],["STD:RE","Reroll","Silver",1],["BOT:TEMP","$temp Command","Silver",1],["GM:Ts","Kill Ts","Platinum",0.5],["AL:Town","Townsfolk Alignment Guarantor","Silver",2],["IC:Cat","Cat Icon","Platinum",1],["SP:2","Negate","Silver",2],["COIN:50","50 Coins","Bronze",2],["BOT:REV","$reverseme Command","Gold",1],["GM:Eth","Demote Ethan","Gold",0.5],["AL:Wolf","Werewolves Alignment Guarantor","Silver",2],["IC:Devil","Devil Icon","Gold",1],["SP:3","Grayscale","Silver",2],["COIN:120","120 Coins","Silver",2],["BOT:SHIP","$newship Command","Platinum",1],["GM:Luf","Rename Luffy","Gold",0.5],["AL:UA","Unaligned Alignment Guarantor","Gold",1],["IC:Hooker","Hooker Icon","Silver",1],["SP:5","Emboss","Bronze",1],["COIN:160","160 Coins","Gold",2],["BOT:HATE","$newhate Command","Platinum",1],["GM:Krem","Turn Krem into a Little Bug","Gold",0.5],["AL:Solo","Solo Alignment Guarantor","Gold",1],["IC:Medium","Medium Icon","Gold",1],["SP:6","Silhouette","Silver",1],["STD:RE2","Reroll x2","Gold",1],["BOT:FLIP","$flip Command","Bronze",1],["GM: Jay","Temp Jay into sinning","Platinum",0.5],["AL:Hell","Hell Alignment Guarantor","Platinum",1],["IC:Executioner","Executioner Icon","Bronze",1],["SP:7","Pixel","Silver",1],["STD:BTNT","Be the next theme","Platinum",0.5],["BOT:FORTUNE","$fortune Command","Bronze",1],["GM:Kruth","Demote Kruthers","Silver",0.5],["AL:HM","Horseman Alignment Guarantor","Platinum",0.5],["IC:Witch","Witch Icon","Platinum",1],["SP:9","Pixel #3","Silver",1],["STD:JOKE","Your own Joke Role","Platinum",0.5],["GM:Fish","Kill Mr. Fish","Silver",0.5],["AL:Pyro","Pyro Alignment Guarantor","Platinum",1],["IC:Saboteur Wolf","Saboteur Wolf Icon","Bronze",1],["SP:12","Red","Bronze",2],["STD:X","Unlucky (Nothing)","Bronze",1],["GM:Arch","Demote Jean D. Arch","Silver",0.5],["AL:Flute","Flute Alignment Guarantor","Platinum",1],["IC:Archivist Fox","Archivist Fox Icon","Silver",1],["SP:13","Green","Bronze",2],["STD:RE3","Reroll x3","Platinum",0.5],["GM:Fed","Kill Federick","Bronze",0.5],["AL:WWW","White Wolves Alignment Guarantor","Platinum",0.5],["IC:Lone Wolf","Lone Wolf Icon","Gold",1],["SP:14","Blue","Bronze",2],["GM:Ghost","Exorcise Gh0st","Silver",0.5],["AL:Plague","Plague Alignment Guarantor","Platinum",0.5],["IC:Flute Player","Flute Player Icon","Silver",1],["SP:15","Yellow","Bronze",2],["GM:Katy","Kill KatyHawk","Bronze",0.5],["AL:UW","Underworld Alignment Guarantor","Platinum",0.5],["IC:Pyromancer","Pyromancer Icon","Platinum",1],["SP:16","Purple","Bronze",2],["GM:Marten","Promote Marten","Platinum",0.5],["AL:T/W","Townsfolk/Werewolves Alignment Guarantor","Bronze",2],["IC:Plague Bearer","Plague Bearer Icon","Gold",1],["SP:17","Cyan","Bronze",2],["SPEC:AnySkinpack","(SPECIAL) Any Skinpack","",],["GM:Turtle","Demote Mr. Turtle","Gold",0.5],["IC:Vampire","Vampire Icon","Gold",1],["SP:18","Flip","Bronze",1],["SPEC:AnyIcon","(SPECIAL) Any Icon","",],["GM:Stein","Take Steinator as a Hostage","Gold",0.5],["CAT:Misc","Miscellaneous Category Guarantor","Bronze",1],["IC:Angel","Angel Icon","Gold",1],["SP:20","BW","Bronze",1],["SPEC:AnyGuarantor","(SPECIAL) Any Guarantor","",],["BOT:invtransfer","$inventory transfer Command","",],["GM:Vera","Evict Vera","Platinum",0.5],["CAT:Power","Power Category Guarantor","Silver",1],["IC:Hellhound","Hellhound Icon","Silver",1],["SP:21","Wire","Gold",2],["SPEC:Any","(SPECIAL) Any Prize","",],["CAT:Invest","Investigative Category Guarantor","Gold",1],["IC:Bear","Bear Icon","Platinum",1],["SP:24","Rainbow #2","Silver",1],["CAT:Kill","Killing Category Guarantor","Platinum",1],["IC:White Werewolf","White Werewolf Icon","Silver",1],["SP:25","Rainbow #3","Silver",1],["CAT:!Misc","Not-Miscellaneous Category Guarantor","Bronze",1],["IC:Reaper","Reaper Icon","Platinum",1],["SP:26","Ts","Platinum",0.5],["IC:Herding Dog","Herding Dog Icon","Silver",1],["SP:27","Oil","Silver",1],["IC:Bard","Bard Icon","Bronze",1],["SP:28","Wave","Silver",1],["IC:Cerberus","Cebererus Icon","Bronze",1],["SP:29","Swirl","Bronze",1],["IC:Lover","Lover Icon","Bronze",1],["SP:31","Cycle","Silver",0.5],["IC:Citizen","Citizen Icon","Bronze",1],["SP:32","Equalize","Bronze",1],["IC:Devout Villager","Devout Villager Icon","Bronze",1],["SP:33","Fourier Noise","Gold",1],["IC:Baroness","Baroness Icon","Bronze",1],["SP:35","Fourier Oil","Gold",1],["SP:36","Fourier Modulate","Platinum",2],["SP:37","Fourier Wire","Silver",0.5],["SP:38","Glitch #2","Gold",1],["SP:39","Eyes","Gold",1],["SP:40","Thief","",],["SP:41","Mask","Silver",1],["SP:42","Eye","Platinum",2],["SP:43","Fourier Eye","Platinum",0.5],["SP:44","Citizen Eye","Gold",0.5],["SP:45","Items","Gold",1],["SP:46","Bear","Platinum",2],["SP:47","Wolfify","Gold",1],["SP:48","Grid","Gold",1],["SP:49","Light and Shadow","Silver",1],["SP:50","Duo Color","Gold",1],["SP:51","Wood","Bronze",1]];
 
     /**
     Command: $loot
     **/
-    let tierNames = ["Bronze", "Silver", "Gold","Platinum", "Cheated"];
+    this.tierNames = ["Bronze", "Silver", "Gold","Platinum", "Cheated"];
     let tierColors = [9785610, 13027014, 14922018, 10877429, 15469740];
     let tierIcons = ["Extras/Token%20Bronze", "Extras/Token%20Silver", "Extras/Token", "Extras/Token%20Platinum", "Extras/Bot%20Developer"];
     let tierCoins = [10, 20, 50, 100, 0];
@@ -17,7 +17,7 @@ module.exports = function() {
         // check coins
         let coinCount = await getCoins(message.member.id);
         if(coinCount < 100) {
-            let embed = { title: "Insufficient Coins", description: "You need to have at least `100` coins to open a loot box! You have: `" + coinCount + "`", color: 16715021 };
+            let embed = { title: "Insufficient Coins", description: "You need to have at least `100` coins to open a loot box!\n\nYou have: `" + coinCount + "`.", color: 16715021 };
             embed.thumbnail = { url: `${iconRepoBaseUrl}Extras/Token%20Insufficient.png` };
             message.channel.send({ embeds: [ embed ] });
             return;
@@ -61,6 +61,13 @@ module.exports = function() {
 			case "get": if(checkGM(message)) cmdInventoryGet(message.channel, args); break;
             case "remove": if(checkGM(message)) cmdInventoryRemove(message.channel, args); break;
             case "add": if(checkGM(message)) cmdInventoryAdd(message.channel, args); break;
+            case "transfer": 
+                let transferPerms = await inventoryGetItem(message.author.id, "bot:invtransfer");
+                if(transferPerms === 0) {
+                    message.channel.send(`⛔ You have not unlocked the ${stats.prefix}inventory transfer command.`);
+                    return;
+                } 
+                cmdInventoryTransfer(message.channel, message.author.id, args); break;
 			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
 		}
     }
@@ -90,7 +97,7 @@ module.exports = function() {
     this.cmdInventoryRemove = async function(channel, args) {
         // Check arguments
 		if(!args[1]) { 
-			channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "inventory get <player>`!"); 
+			channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "inventory remove <player> <item>`!"); 
 			return; 
 		}
         // Get user
@@ -122,12 +129,50 @@ module.exports = function() {
     }
     
     /**
+    Command: $inventory transfer
+    **/
+    this.cmdInventoryTransfer = async function(channel, authorid, args) {
+        // Check arguments
+		if(!args[1]) { 
+			channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "inventory transfer <player>`!"); 
+			return; 
+		}
+        // Get user
+		let user = parseUser(channel, args[1]);
+        // Invalid user
+		if(!user) { 
+			channel.send("⛔ Syntax error. Not a valid player!"); 
+			return; 
+		} 
+        // Get item
+        let item = ALL_LOOT.filter(el => el[0].toLowerCase() === args[2].toLowerCase());
+        // Invalid item
+		if(item.length != 1) { 
+			channel.send("⛔ Command error. Not a valid item! Make sure to use the item code as specified in your inventory."); 
+			return; 
+		} 
+        let code = item[0][0];
+        
+        // get item count
+        let count = await inventoryGetItem(authorid, code);
+        if(count <= 0) {
+			channel.send("⛔ Command error. Insufficient item count! Check your inventory to make sure you have this item."); 
+			return; 
+        }
+        
+        // update item count
+        await inventoryModifyItem(authorid, code, -1);
+        await inventoryModifyItem(user, code, 1);
+        channel.send(`✅ Transfered a ${item[0][1]} (${code}) from <@${authorid}> to <@${user}>!`);
+    }
+    
+    /**
     Command: $inventory add
     **/
     this.cmdInventoryAdd = async function(channel, args) {
         // Check arguments
 		if(!args[1]) { 
-			channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "inventory get <player>`!"); 
+			channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "inventory add <player> <item>`!"); 
 			return; 
 		}
         // Get user
@@ -190,17 +235,25 @@ module.exports = function() {
     /**
     Open Loot Box
     **/
-    async function openBox(channel, pid, overwrite = null) {
+    this.openBox = async function(channel, pid, overwrite = null, possibleTiers = null) {
         let tierRand = Math.random();
         let tier = 0;
         if(tierRand >= 0.95) tier = 3;
         else if(tierRand >= 0.8) tier = 2;
         else if(tierRand >= 0.5) tier = 1;
         
+        if(possibleTiers) {
+            if(!possibleTiers.includes(tier)) {
+                tier = possibleTiers[Math.floor(Math.random() * possibleTiers.length)];
+            }
+        }
+        
         // filter out tier rewards
         let filteredRewards = ALL_LOOT.filter(el => el[2] === tierNames[tier]);
         let totalWeights = filteredRewards.map(el => el[3]).reduce((a,b) => a+b, 0);
         let lootRand = Math.random() * totalWeights;
+        
+        console.log("Loot Box", tierRand, lootRand, totalWeights);
         
         // find reward
         let acc = 0;
@@ -288,7 +341,21 @@ module.exports = function() {
             break;
             // AL
             case "al":
-                return `An alignment guarantor for: ${reward[1]}. You may use this during the signup/setup phase of a game to pick your alignment. To do so DM one of the Hosts. You may __not__ let anyone know you used an alignment guarantor until after the game.`;
+                return `An alignment guarantor for: ${reward[1].split(" ")[0]}. You may use this during the signup/setup phase of a game to pick your alignment. To do so DM one of the Hosts. You may __not__ let anyone know you used an alignment guarantor until after the game is completed. Alignment guarantors may be rejected for some games (e.g. when the alignment is not present).`;
+            break;
+            // CAT
+            case "cat":
+                return `A category guarantor for: ${reward[1].split(" ")[0]}. You may use this during the signup/setup phase of a game to pick your role's category. To do so DM one of the Hosts. You may __not__ let anyone know you used a category guarantor until after the game is completed. Category guarantors may be rejected for some games (e.g. when the category is not present).`;
+            break;
+            // Special
+            case "spec":
+                return `A special reward! These are impossible to get through lootboxes, how did you do it?`;
+            break;
+            // Icon
+            case "ic":
+                let rName = reward[1].toLowerCase().replace(" icon", "");
+                let rText = rName.indexOf(" ") > 0 ? `"${rName}"` : rName;
+                return `A custom icon role for: ${toTitleCase(rName)} ${getEmoji(rName)}. You may enable this role with \`${stats.prefix}icon set ${rText}\`.`;
             break;
             // Bot
             case "bot":
@@ -297,6 +364,8 @@ module.exports = function() {
                     case "bot:rev": return `Access to the ${stats.prefix}reverseme command. Spice up your nickname... by reversing it? Give it a try!`;
                     case "bot:ship": return `Access to the ${stats.prefix}newship command. Are you having trouble in your love life? WWR Bot is here to help with useful suggestions of potential ships. Give it a try!`;
                     case "bot:hate": return `Access to the ${stats.prefix}newhate command. Are you looking to get angry but don't know who to be mad at? WWR Bot will offer useful suggestions of who to pick a fight with. Give it a try!`;
+                    case "bot:flip": return `Access to the ${stats.prefix}flip command. Bored of the good old ${stats.prefix}roll command? Try this command to flip a coin and spice things up!`;
+                    case "bot:fortune": return `Access to the ${stats.prefix}fortune command. Let me tell your fortune!`;
                     default: return `An unknown bot reward: ${reward[1]}.`;
                 }
             default:
@@ -350,13 +419,16 @@ module.exports = function() {
                 await modifyCoins(pid, id);
                 return true;
             break;
-            // GM / Alignment
+            // GM / Alignment / Category / Special
             case "gm":
             case "al":
+            case "cat":
+            case "spec":
                 await inventoryModifyItem(pid, reward[0], 1);
                 return true;
-            // BOT
+            // BOT / Icon
             case "bot":
+            case "ic":
                 let count = await inventoryModifyItem(pid, reward[0], 1);
                 return count === 1;
             break;

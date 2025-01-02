@@ -285,6 +285,9 @@ module.exports = function() {
 			return; 
 		} 
         
+        // remove set chooser if exists
+        chooserRepls = chooserRepls.filter(el => el[0] != message.author.id);
+        
         // set chooser
         chooserRepls.push([message.author.id, user]);
         message.channel.send(`✅ Set <@${message.author.id}> as chooser for <@${user}>.`);

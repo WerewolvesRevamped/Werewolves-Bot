@@ -75,10 +75,7 @@ module.exports = function() {
                 "infopin": ["ip","info_pin"],
                 "infoedit": ["ie","info_edit"],
                 "infoadd": ["ia","info_add"],
-                "info_classic": ["ic"],
-                "info_classic_simplified": ["ics"],
-                "info_fancy": ["if"],
-                "info_fancy_simplified": ["ifs"],
+                "info_technical": ["it"],
                 "roles": ["role","r"],
                 "connection": ["con","connect","whisper","whispers"],
                 "gamephase": ["gp","game_phase","game-phase"],
@@ -105,6 +102,9 @@ module.exports = function() {
                 "loot": ["lt"],
                 "loot_force": ["lf"],
                 "inventory": ["inv", "invent"],
+                "icon": ["icons"],
+                "card": ["&"],
+                "xp": ["level", "experience", "levels"],
         };
     this.parseAlias = function(alias) {
         for(let cmd in ALIASES) {

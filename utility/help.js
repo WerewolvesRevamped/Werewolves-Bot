@@ -19,7 +19,7 @@ module.exports = function() {
             else cmdNameText = toTitleCase(cmdNameText);
             if(args.length > 0) cmdNameText += " " + toTitleCase(args.join(" "));
             helpText += "**```yaml\n" + cmdNameText + " Help\n```**";
-            let cmdHelpText = getCommandHelp(cmdName);
+            let cmdHelpText = getCommandHelp(cmdName, member);
             if(cmdHelpText.length > 0) {
                 helpText += cmdHelpText;
             } else {
@@ -39,7 +39,15 @@ module.exports = function() {
             else if(isHelper(member)) commandsFiltered = COMMANDS.filter(el => el[1] <= PERM.GH);
             else commandsFiltered = COMMANDS.filter(el => el[1] <= PERM.AL);
             if(args[0] != "all") commandsFiltered = commandsFiltered.filter(el => el[0].split(" ").length === 1); // get primary commands only
-            let allCommandTexts = commandsFiltered.map(el => stats.prefix + el[0] + " - " + el[2]);
+            let allCommandTexts = commandsFiltered.map(el => {
+                let cmdPrefix = stats.prefix;
+                if(el[9]) {
+                    switch(el[9]) {
+                        case CMDARGS.NO_PREFIX: cmdPrefix = ""; break;
+                    }
+                }
+                return cmdPrefix + el[0] + " - " + el[2];
+            });
             let allCommandTextsChunked = chunkArray(allCommandTexts, 30);
             // output
             await channel.send(helpText);
@@ -55,7 +63,8 @@ module.exports = function() {
         GH: 1, // helper and higher
         GM: 2, // game masters and higher
         SG: 3, // senior game masters and higher
-        AD: 4 // admins and higher
+        AD: 4, // admins and higher
+        NO: 5 // not normally usable
     };
     this.CMDSTATE = {
        RDY: 0, // ready
@@ -63,6 +72,10 @@ module.exports = function() {
        NOP: 2, // gone
        UNK: 3, // unknown
     };
+    this.CMDARGS = {
+        NO_PREFIX: 1,
+        NO_PREFIX_SUB: 2
+    }
     /**
         0: command name
         1: permission level
@@ -77,14 +90,14 @@ module.exports = function() {
     this.CONF_TXT = "❗ Click the reaction in the next 20.0 seconds to confirm the command!";
     this.COMMANDS = [
         /** Top Level Commands **/
-        ["drag", PERM.GM, "Pulls all living players into a hardcoded townsquare VC.", "", "", "drag", [], CMDSTATE.WIP],
-        ["drag_dead", PERM.GM, "Pulls all living players into a hardcoded deadspectator VC.", "", "", "drag_dead", [], CMDSTATE.WIP],
-        ["force_reload", PERM.GM, "", "", "", "", [], CMDSTATE.WIP],
-        ["sql_reload", PERM.SG, "", "", "", "", [], CMDSTATE.WIP],
-        ["embed", PERM.AL, "", "", "", "", [], CMDSTATE.WIP],
+        ["drag", PERM.GM, "Pulls all living players into a hardcoded townsquare VC.", "", "", "drag", [], CMDSTATE.UNK],
+        ["drag_dead", PERM.GM, "Pulls all living players into a hardcoded deadspectator VC.", "", "", "drag_dead", [], CMDSTATE.UNK],
+        ["force_reload", PERM.GM, "Reloads boat.", "", "", "", [], CMDSTATE.UNK],
+        ["sql_reload", PERM.SG, "Restarts SQL.", "", "", "", [], CMDSTATE.UNK],
+        ["embed", PERM.GH, "Sends an embed.", "", "", "", [], CMDSTATE.UNK],
         /** Utility Commands **/
         ["help", PERM.AL, "Provides information about commands.", "<Command> [Sub-Command(s)]", "Provides help for a command. Use $help all to also see all subcommands.", "help help", [], CMDSTATE.RDY],
-            ["help all", PERM.AL, "Provides information about commands and subcommands.", "", "Provides help for all commands and subcommands", "help help", [], CMDSTATE.RDY],
+            ["help all", PERM.AL, "Provides information about commands and subcommands.", "", "Provides help for all commands and subcommands", "help all", [], CMDSTATE.RDY],
         ["ping", PERM.AL, "Tests the bot", "", "Gives the ping of the bot, and checks if the bot is running.", "ping", ["✅ Pong! Latency is 170ms. API Latency is 128ms"], CMDSTATE.RDY],
         ["edit", PERM.GH, "Edits a bot message.", "<id> <text>", "Updates a bot message.", "edit 28462946294 NewMsgContents", [], CMDSTATE.UNK],
         ["say", PERM.GH, "Makes the bot repeat a message.", "[input]", "Makes the bot repeat everything after say.", "say hello", ["hello"], CMDSTATE.RDY],
@@ -95,7 +108,6 @@ module.exports = function() {
         ["delay", PERM.GH, "Executes a command with delay.", "<Delay> <Command>", "Executes a command with delay in seconds.", "delay 5 ping", ["✅ Pong! Latency is 990ms. API Latency is 114ms"], CMDSTATE.RDY],
         ["temp", PERM.AL, "Converts between °C and °F.", "[f|c] <value>", "Converts into the specified unit.", "temp f 0", ["🌡️ 0 °C in Fahrenheit: 32 °F"], CMDSTATE.RDY],
         ["time", PERM.AL, "Identifies or convers timezone.", "<Your Current Time> | <Your Current Time> <Conversion Time> | <Timezone> <Conversion Time>", "Returns your UTC offset if you put your current time. Many time formats are supported as input. If you additionally submit a second time it uses the first time to identify your timezone and then convers the second time to UTC. When submitting two times you may additionally also submit just the timezone offset in place off the first time (e.g. '+1' or 'utc-1').", "time 22:25", ["✅ Your timezone is UTC+1!"], CMDSTATE.RDY],
-        ["reverseme", PERM.AL, "Reverses your nickname.", "", "Reverses your nickname.", "reverseme", ["✅ You have been reversed!"], CMDSTATE.RDY],
         /** CC Module **/
         // CC
         ["cc", PERM.AL, "Manages CCs.", "<Subcommand>", `Group of commands to handle CCs. Use $help cc <subcommand> for detailed help.`, "", [], CMDSTATE.RDY],
@@ -157,15 +169,28 @@ module.exports = function() {
             ["modrole add", PERM.AL, "Adds roles from users.", "<User ID> <Role ID>", "Adds a role to a user.", "modrole add 242983689921888256 584770967058776067", ["✅ Added Bot Developer to @McTsts (Ts)!"], CMDSTATE.NOP],
             ["modrole remove", PERM.AL, "Removes roles from users.", "<User ID> <Role ID>", "Removes a role from a user.", "modrole remove 242983689921888256 584770967058776067", ["✅ Removed Bot Developer from @McTsts (Ts)!"], CMDSTATE.NOP],
         // Loot Commands
-        ["loot", PERM.AL, "Opens a lootbox.", "", "Run the command to purchase a lootbox for 100 coins and open it.", "loot", [], CMDSTATE.WIP],
-        ["loot_force", PERM.GM, "Forces a specific lootbox reward.", "<Reward Code>", "Opens a lootbox and finds a specified reward.", "loot_force std:x", [], CMDSTATE.WIP],
-        ["inventory", PERM.AL, "Shows your inventory.", "", "Shows your inventory which contains some lootbox rewards.", "inventory", [], CMDSTATE.WIP],
-            ["inventory see", PERM.AL, "Shows your inventory.", "", "Same as the base command", "inventory see", [], CMDSTATE.WIP],
-            ["inventory get", PERM.GM, "Shows a user's inventory.", "<User>", "Shows the inventory of a specified user.", "inventory get mctsts", [], CMDSTATE.WIP],
-        ["coins", PERM.AL, "Shows your coins.", "", "Shows how many coins you currently have.", "coins", [], CMDSTATE.WIP],
-            ["coins get", PERM.GM, "Shows a player's coins.", "", "Shows how many coins a specific player has.", "coins get mctsts", [], CMDSTATE.WIP],
-            ["coins add", PERM.GM, "Adds to a player's coins.", "", "Gives a specific player coins.", "coins add mctsts 100", [], CMDSTATE.WIP],
-            ["coins remove", PERM.GM, "Removes from a player's coins.", "", "Takes coins from a specific player.", "coins remove mctsts 100", [], CMDSTATE.WIP],
+        ["loot", PERM.AL, "Opens a lootbox.", "", "Run the command to purchase a lootbox for 100 coins and open it.", "loot", [], CMDSTATE.RDY],
+        ["loot_force", PERM.GM, "Forces a specific lootbox reward.", "<Reward Code>", "Opens a lootbox and finds a specified reward.", "loot_force std:x", [], CMDSTATE.RDY],
+        ["inventory", PERM.AL, "Shows your inventory.", "", "Shows your inventory which contains some lootbox rewards.", "inventory", [], CMDSTATE.RDY],
+            ["inventory see", PERM.AL, "Shows your inventory.", "", "Same as the base command", "inventory see", [], CMDSTATE.RDY],
+            ["inventory get", PERM.GM, "Shows a user's inventory.", "<User>", "Shows the inventory of a specified user.", "inventory get mctsts", [], CMDSTATE.RDY],
+            ["inventory add", PERM.GM, "Updates a user's inventory.", "<User> <Item>", "Adds an item to a user's inventory.", "inventory add mctsts bot:temp", [], CMDSTATE.RDY],
+            ["inventory remove", PERM.GM, "Updates a user's inventory.", "<User> <Item>", "Removes an item from a user's inventory.", "inventory remove mctsts bot:temp", [], CMDSTATE.RDY],
+            ["inventory transfer", PERM.GM, "Transfers an item.", "<User> <Item>", "Transfers an item to another user. You must use the item code to transfer the item. You can find this by running $inventory", "inventory transfer mctsts bot:temp", [], CMDSTATE.RDY],
+        ["coins", PERM.AL, "Shows your coins.", "", "Shows how many coins you currently have.", "coins", [], CMDSTATE.RDY],
+            ["coins get", PERM.GM, "Shows a player's coins.", "", "Shows how many coins a specific player has.", "coins get mctsts", [], CMDSTATE.RDY],
+            ["coins add", PERM.GM, "Adds to a player's coins.", "", "Gives a specific player coins.", "coins add mctsts 100", [], CMDSTATE.RDY],
+            ["coins remove", PERM.GM, "Removes from a player's coins.", "", "Takes coins from a specific player.", "coins remove mctsts 100", [], CMDSTATE.RDY],
+            ["coins reward", PERM.NO, "Rewards a player with coins.", "", "Special variant of $coins add that is only used by WWRess and WWRdle.", "coins reward mctsts 100", [], CMDSTATE.RDY],
+        ["icon", PERM.AL, "Manages your role icon.", "", "Group of commands to manage your role icon See $help icon <subcommand>", "", [], CMDSTATE.RDY],
+            ["icon set", PERM.AL, "Sets your role icon.", "<Role Name>", "Sets your role icon.", "icon set cat", ["@Ts, your role icon has been updated to Cat."], CMDSTATE.RDY],
+            ["icon disable", PERM.AL, "Removes your role icon.", "", "Removes your role icon.", "icon disable", ["@Ts, your role icon has been disabled."], CMDSTATE.RDY],
+            ["icon list", PERM.AL, "Lists your role icons.", "", "Lists your unlocked role icons.", "icon list", [], CMDSTATE.RDY],
+        ["reverseme", PERM.AL, "Reverses your nickname.", "", "Reverses your nickname. Lootbox reward command.", "reverseme", ["✅ You have been reversed!"], CMDSTATE.RDY],
+        ["newship", PERM.AL, "Updates your nickname.", "", "Updates your nickname. Lootbox reward command.", "newship", ["✅ You love mctsts!"], CMDSTATE.RDY],
+        ["newhate", PERM.AL, "Updates your nickname.", "", "Updates your nickname. Lootbox reward command.", "newhate", ["✅ You hate mctsts!"], CMDSTATE.RDY],
+        ["flip", PERM.AL, "Flips a coin.", "", "Flips a coin, randomly returning either heads or tails. Lootbox reward command.", "flip", ["@Ts, your coin flip landed on: TAILS."], CMDSTATE.RDY],
+        ["fortune", PERM.AL, "Tells your fortune.", "", "Tells your fortune from the WWR Tarot Cards.", "fortune", [], CMDSTATE.RDY],
         // List Commands
         ["list_signedup", PERM.AL, "Lists signed up players.", "", "Lists all signed up players.", "list", ["Signed Up Players | Total: 3","🛠 - McTsts (@McTsts)","🏹 - venomousbirds  (@venomousbirds )","🦎 - shapechange (@shapechange)"], CMDSTATE.RDY],
         ["list_alphabetical", PERM.AL, "Alternative signed up list.", "", "Lists signed up players, alphabetically and without pinging.", "la", ["Signed Up Players (Alphabetical) | Total: 3","🎨 captain.luffy","⚒️ evilts_","👑 helene.rubycrust"], CMDSTATE.RDY],
@@ -182,7 +207,7 @@ module.exports = function() {
         // options
         ["options", PERM.GM, "Manages options.", "<Option Name> [New Value]", "Returns or sets (if <New Value> is set) the value of a bot option <Option Name>. A bot option can be a numeric id, or an option name.\n\nFor a list of all options run $help options_list", "options mayor", ["✅ mayor currently is set to 588125889611431946!"], CMDSTATE.RDY],
         ["options list", PERM.GM, "Help Page - Options", "", "prefix: The prefix the bot uses for commands\nparticipant: The id of the participant role\ngamemaster: The id of the gamemaster role\nspectator: The id of the spectator role\nsigned_up: The id of the signed up role\ndead_participant: The id of the dead participant role\nbot: The id of the bot role\nlog_guild: The id of the guild to use for logs\nlog_channel: The id of the channel to use for logs\nmayor: The id of the mayor role\nreporter: The id of the reporter role\nguardian: The id of the guardian role\ngame: The name of the game\ngamemaster_ingame: The id of the gamemaster ingame role\nadmin: The id of the admin role\nadmin_ingame: The id of the admin ingame role\nyes_emoji: The id of the yes emoji\nno_emoji: The id of the no emoji\nnew_game_ping: Role that gets pinged with certain commands\ngame_status: A VC that shows the status of the game\ncc_limit: Maximum amount of ccs one person can create (<-10 for none)\nmayor2: The id of the second mayor role (which doesn't give extra votes)\npoll: The poll mode. See $help options polls\nsub: role for substitute players\nping: ping for gifs and deleted messages\nhost: The id of the host role\nfancy_mode: Changes info messages to fancy versions if set to true.\nicon: the version to use for icon images.\nsenior_gamemaster: The id of the senior gm role.\nsenior_gamemaster_ingame: The id of the senior gm ingame role\nrole_filter: The role filter. See $help options role_filter\nhelper: The id of the helper role\nhelper_ingame: The id of the helper ingame role\nmayor_threshold: If there are more players alive than this value, mayor2 role is used.\nhost_log: Logs host pings. Disabled if false.\nautomation_level: level of automation\nghost: ghost role id\nhaunting: true/false for if haunting is enabled\nphase: current phase", "", [""], CMDSTATE.RDY, ["optionslist"]],
-        ["options role_filter", PERM.GM, "Help Page - Options - Role Filter", "<Role Filter>", "A complicated option, so it gets a dedicated help page. Set the final value to the sum of all of the following options you want to enable:\n1: Show Default Roles\n2: Show Transformation Roles ('Transformation')\n4: Show Limited Roles ('Limited')\n8: Show Technical Roles ('Technical')\n16: Show Joke Roles ('Joke')\n32: Show Temporary Roles ('Temporary')\n64: Show Mini Wolf Roles ('Mini')\n128: Show Variant Roles ('Variant')\n\nDefault Value: 31\n\nLimited Transformation ('Limited Transformation') Roles are only included if both Limited and Transformation are enabled.", "$options role_filter 23", [""], CMDSTATE.NOP , ["optionsrf","options_rf","options_role_filter","options rf"]],
+        ["options role_filter", PERM.GM, "Help Page - Options - Role Filter", "<Role Filter>", "A complicated option, so it gets a dedicated help page. Set the final value to the sum of all of the following options you want to enable:\n1: Show Default Roles\n2: Show Transformation Roles ('Transformation')\n4: Show Limited Roles ('Limited')\n8: Show Technical Roles ('Technical')\n16: Show Joke Roles ('Joke')\n32: Show Temporary Roles ('Temporary')\n64: Show Mini Wolf Roles ('Mini')\n128: Show Variant Roles ('Variant')\n256: Show Haunted Roles ('Haunted')\n512: Show Deleted Roles ('Archived')\n\nDefault Value: 31\n\nLimited Transformation ('Limited Transformation') Roles are only included if both Limited and Transformation are enabled.", "$options role_filter 23", [""], CMDSTATE.NOP , ["optionsrf","options_rf","options_role_filter","options rf"]],
         ["options poll", PERM.GM, "Help Page - Options - Poll", "<Poll Value>", "A complicated option, so it gets a dedicated help page. Set the final value to the sum of all of the following options you want to enable:\n1: Public Abstain Option\n2: Private Abstain Option\n4: Public Cancel Option\n8: Private Cancel Option\n16: Public Random Option\n32: Private Random Option", "$options poll 33", [""], CMDSTATE.UNK , ["optionspoll","options_poll"]],
         // gamephase
         ["gamephase", PERM.GM, "Manages gamephases.", "[Subcommand]", "Group of commands to handle the gamephase. $help gamephase <sub-command> for detailed help. Also serves as an alias for $gamephase get\n\nList of Gamephases:\nNothing (0), Signups (1), Setup (2), Ingame (3), Postgame (4)", "", [], CMDSTATE.RDY],
@@ -217,13 +242,13 @@ module.exports = function() {
         /** Game Module **/
         // dr
         ["dr", PERM.GM, "Manages saved discord roles.", "<Subcommand>", "Group of commands to handle roles. $help dr <sub-command> for detailed help.", "", [], CMDSTATE.RDY],
-            ["dr register", PERM.GM, "Registers a new role.", "<Name> <Discord ID>", "Registers a specific discord role with <Discord ID> under <Name>", "$dr register Citizen 584770967058776067", [], CMDSTATE.RDY],
+            ["dr register", PERM.GM, "Registers a new role.", "<Name> <Discord ID>", "Registers a specific discord role with <Discord ID> under <Name>", "dr register Citizen 584770967058776067", [], CMDSTATE.RDY],
             ["dr delete", PERM.GM, "Deletes a role.", "", "", "", [], CMDSTATE.RDY],
             ["dr list", PERM.GM, "Lists all registered roles.", "", "Lists all currently registered discord roles.", "dr list", [], CMDSTATE.RDY],
             // host information
         ["host_information", PERM.GM, "", "", "", "", [], CMDSTATE.RDY],
-            ["host_information add", PERM.GM, "Adds host information to a player.", "<Player ID> <HI Name> <HI Value>", "Adds host information for player with <Player ID> and name <HI Name> set to <HI Value>", "$hi add 242983689921888256 role citizen", [], CMDSTATE.RDY],
-            ["host_information remove", PERM.GM, "Removes host information from a player.", "<HI ID>", "Deletes a host information with <HI ID>. Use $hi list to identify which <HI ID> belongs to what host information.", "$hi remove 1", [], CMDSTATE.RDY],
+            ["host_information add", PERM.GM, "Adds host information to a player.", "<Player ID> <HI Name> <HI Value>", "Adds host information for player with <Player ID> and name <HI Name> set to <HI Value>", "hi add 242983689921888256 role citizen", [], CMDSTATE.RDY],
+            ["host_information remove", PERM.GM, "Removes host information from a player.", "<HI ID>", "Deletes a host information with <HI ID>. Use $hi list to identify which <HI ID> belongs to what host information.", "hi remove 1", [], CMDSTATE.RDY],
             ["host_information list", PERM.GM, "Lists all configured host information.", "", "Sends a list of all currently configured host information.", "host_information list", [], CMDSTATE.RDY],
         // killq
         ["killq", PERM.GM, "Manages killq and kills players.", "<Subcommand>", "Group of commands to handle polls. $help killq <sub-command> for detailed help.", "", [], CMDSTATE.RDY],
@@ -273,6 +298,7 @@ module.exports = function() {
             ["phase lock", PERM.GM, "Sets subphase to lock.", "", "Sets the subphase to lock - new abilities can no longer be submitted.", "phase lock", [], CMDSTATE.RDY],
         // gamestate changers
         ["start", PERM.GM, "Starts a game.", "", "Starts the game. Assigns Participant to all signed up players, and takes away the signed up role. Sends out role messages. Creates public channels. Creates Secret Channels. Sends info messages in secret channels. Sets the gamephase.", "start", [], CMDSTATE.RDY],
+        ["check_start", PERM.GM, "Checks if a game can be started.", "", "Checks if the game can be started.", "check_start", ["✅ The game is ready to start."], CMDSTATE.RDY],
         ["start_debug", PERM.GM, "Starts a game (Debug Mode).", "", "Does the same as $start, but does not send out role messages.", "start_debug", [], CMDSTATE.RDY],
         ["reset", PERM.GM, "Resets a game.", "", "Resets the game. Resets all discord roles. Clears player database. Deletes all CCs. Deletes all SCs. Deletes all Public Channels. Resets Polls. Resets Connections. Sets the gamephase.", "reset", [], CMDSTATE.RDY],
         ["reset_debug", PERM.GM, "Resets a game (Debug Mode).", "", "Does the same as $reset, but keeps all players as signed up.", "reset_debug", [], CMDSTATE.RDY],
@@ -331,12 +357,15 @@ module.exports = function() {
             ["alias list", PERM.AL, "Lists all aliases.", "", "Lists all existing aliases, sorted by their target.", "alias list", [], CMDSTATE.RDY],
         // info commands
         ["info", PERM.AL, "Returns role info (simplified).", "<Role Name>", "Shows the description of a role (simplified).", "info citizen", [], CMDSTATE.RDY],
+        [".", PERM.AL, "Returns role info (simplified/temporary).", "<Role Name>", "Shows the description of a role (simplified) and deletes it after a few minutes.", ".citizen", [], CMDSTATE.RDY, [], CMDARGS.NO_PREFIX],
         ["details", PERM.AL, "Returns role info (detailed).", "<Role Name>", "Shows the description of a role (detailed).", "details citizen", [], CMDSTATE.RDY],
+        [";", PERM.AL, "Returns role info (detailed/temporary).", "<Role Name>", "Shows the description of a role (detailed) and deletes it after a few minutes.", ";citizen", [], CMDSTATE.RDY, [], CMDARGS.NO_PREFIX],
         ["info_technical", PERM.AL, "Returns formalized role info.", "<Role Name>", "Shows the formalized description of a role.", "info_technical citizen", [], CMDSTATE.RDY],
+        ["~", PERM.AL, "Returns formalized role info (temporary).", "<Role Name>", "Shows the formalized description of a role and deletes it after a few minutes.", "~citizen", [], CMDSTATE.RDY, [], CMDARGS.NO_PREFIX],
         ["infopin", PERM.GM, "Returns role info & pins the message.", "<Role Name>", "Shows the description of a role, pins it and deletes the pinning message.", "infopin citizen", [], CMDSTATE.RDY],
         ["infoedit", PERM.GM, "Edits a bot info message.", "<Message ID> <Role Name> [Addition]", "Updates an info message in the current channel. Optionally specify contents to append to the info message.", "infoedit 14901984562573 citizen", [], CMDSTATE.NOP],
         ["infoadd", PERM.GM, "Returns role info with additional text.", "<Role Name> <Addition>", "Sends an info message with an appended addition.", "infoadd citizen EXTRATEXT", [], CMDSTATE.NOP],
-        ["card", PERM.AL, "Returns a role's card.", "<Role Name>", "Shows the role's card.", "card citizen", [], CMDSTATE.WIP],
+        ["card", PERM.AL, "Returns a role's card.", "<Role Name>", "Shows the role's card.", "card citizen", [], CMDSTATE.WIP, ["& (Special Alias - Use without Prefix)"], CMDARGS.NO_PREFIX_SUB],
         ["image", PERM.AL, "Returns a role's image.", "<Role Name>", "Shows the role's image.", "image cititen", [], CMDSTATE.RDY],
         // elect
         ["elect", PERM.GM, "Elects a player to a role.", "<Elected Role> <Player>", "Elects a player to an elected role. Elected Role available are: Mayor, Reporter, Guardian. You can use M, R and G to shorten the command.\nUse elect clear to remove all elected roles from a player.", "elect mayor ts", ["✅ Elected @Ts as @Mayor (<=15)"], CMDSTATE.UNK],
@@ -345,19 +374,38 @@ module.exports = function() {
         ["parse", PERM.GM, "Parses a specific element.", "<Element Type> <Element Name>", "Parses a specific element of type <Element Type> with name <Element Name>", "parse roles citizen", [], CMDSTATE.RDY],
     ];
     
-    this.getCommandHelp = function(cmd) {
+    this.getCommandHelp = function(cmd, member) {
         let cmdData = COMMANDS.find(el => el[0] === cmd);
+        
+        // permission check
+        if(isAdmin(member) && cmdData[1] > PERM.AD) return "```yaml\nInformation\n\nThis command can not be used.\n```";
+        else if(!isAdmin(member) && isSenior(member) && cmdData[1] > PERM.SG) return "```yaml\nInformation\n\nThis command is only available to admins or higher.\n```";
+        else if(!isAdmin(member) && !isSenior(member) && isGameMaster(member) && cmdData[1] > PERM.GM) return "```yaml\nInformation\n\nThis command is only available to senior game masters or higher.\n```";
+        else if(!isAdmin(member) && !isSenior(member) && !isGameMaster(member) && isHelper(member) && cmdData[1] > PERM.GH) return "```yaml\nInformation\n\nThis command is only available to game masters or higher.\n```";
+        else if (!isAdmin(member) && !isSenior(member) && !isGameMaster(member) && !isHelper(member) && cmdData[1] > PERM.AL) return "```yaml\nInformation\n\nThis command is only available to game masters, helpers or higher.\n```";
+        
+        // prefix check
+        let cmdPrefix = stats.prefix;
+        let cmdSubPrefix = stats.prefix;
+        let argSpace = " ";
+        if(cmdData[9]) {
+            switch(cmdData[9]) {
+                case CMDARGS.NO_PREFIX: cmdPrefix = ""; cmdSubPrefix = ""; argSpace = ""; break;
+                case CMDARGS.NO_PREFIX_SUB: cmdSubPrefix = ""; break;
+            }
+        }
+        
         if(cmdData[4].length === 0 && cmdData[2].length > 0) cmdData[4] = cmdData[2];
         let aliases = getAliases(cmd);
         if(!aliases) aliases = [];
         if(cmdData[8] && cmdData[8].length > 0) aliases.push(...cmdData[8]);
         let helpStr = "";
         // Syntax
-        helpStr += "```yaml\nSyntax\n\n" + stats.prefix + cmdData[0] + " " + cmdData[3] + "\n```";
+        helpStr += "```yaml\nSyntax\n\n" + cmdPrefix + cmdData[0] + argSpace + cmdData[3] + "\n```";
         // Functionality
-        if(cmdData[4].length > 0) helpStr += "```\nFunctionality\n\n" + cmdData[4].replace(/\$/g, stats.prefix) + "\n```";
+        if(cmdData[4].length > 0) helpStr += "```\nFunctionality\n\n" + cmdData[4].replace(/\$/g, cmdPrefix) + "\n```";
         // Usage
-        if(cmdData[5].length > 0) helpStr += "```fix\nUsage\n\n> " + stats.prefix + cmdData[5] + "\n";
+        if(cmdData[5].length > 0) helpStr += "```fix\nUsage\n\n> " + cmdPrefix + cmdData[5] + "\n";
         if(cmdData[5].length > 0 && cmdData[6].length > 0) helpStr += "< "+ cmdData[6].join("\n< ") + "```";
         else if(cmdData[5].length > 0 && !cmdData[6].length > 0) helpStr += "```";
         // Aliases
@@ -367,7 +415,12 @@ module.exports = function() {
             let elSplit = el[0].split(" ");
             return elSplit[0] === cmd && elSplit.length > 1;
         }); // get primary commands only
-        if(subCommands.length > 0) helpStr += "```diff\nSubcommands\n\n- " + subCommands.map(el => stats.prefix + el[0]).join("\n- ") + "\n```";
+        if(isAdmin(member)) subCommands = subCommands.filter(el => el[1] <= PERM.AD);
+        else if(isSenior(member)) subCommands = subCommands.filter(el => el[1] <= PERM.SG);
+        else if(isGameMaster(member)) subCommands = subCommands.filter(el => el[1] <= PERM.GM);
+        else if(isHelper(member)) subCommands = subCommands.filter(el => el[1] <= PERM.GH);
+        else subCommands = subCommands.filter(el => el[1] <= PERM.AL);
+        if(subCommands.length > 0) helpStr += "```diff\nSubcommands\n\n- " + subCommands.map(el => cmdSubPrefix + el[0]).join("\n- ") + "\n```";
         // Warnings
         if(cmdData[7] === 1) helpStr += "**```fix\nWarning\n\nThis command is currently in development and may be subject to change.\n```**";
         else if(cmdData[7] === 2) helpStr += "**__```diff\nWarning\n\n- This command is currently unavailable or broken -\n```__**";

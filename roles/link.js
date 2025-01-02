@@ -365,11 +365,12 @@ module.exports = function() {
     Runs a query for a specified game element
     **/
     const emptyDesc = "No description available.";
-    async function runQuery(clearFunc, path, callbackFunc, maxAllowedErrors = 1) {
+    async function runQuery(clearFunc, path, callbackFunc, maxAllowedErrors = 1, repo = null, branch = null) {
         // clear the relevant table
         await clearFunc();
         // get all files
-        const tree = await getTree();
+        const tree = await getTree(repo ?? roleRepo, branch ?? roleRepoBranch);
+
         // get the relevant paths file
         const paths = await getPaths(path);
         
@@ -408,6 +409,16 @@ module.exports = function() {
         return outputs;     
     }
     
+    async function runQuerySecondary(clearFunc, path, callbackFunc, maxAllowedErrors = 1) {
+        return await runQuery(clearFunc, path, function(a, b) { callbackFunc(a, b, roleRepoSecondaryBaseUrl); }, maxAllowedErrors, roleRepoSecondary, roleRepoSecondaryBranch);
+    }
+    
+    async function runQueryBoth(clearFunc, path1, path2, callbackFunc, maxAllowedErrors = 1) {
+        let outputs1 = await runQuery(clearFunc, rolepathsPath, queryRolesCallback, 10);
+        let outputs2 = await runQuerySecondary(() => {}, rolepathsPathSecondary, queryRolesCallback, 10);
+        return [...outputs1, ...outputs2];
+    }
+    
     /**
     Split Role Description Sections
     split the role descriptions, into the different types of role description
@@ -429,7 +440,9 @@ module.exports = function() {
     grabs the role name inbetween the **'s in the first line
     **/
     function getRoleDescName(roleDesc) {
-        return roleDesc.match(/^\*\*(.+?)\*\*/)[1];
+        let name = roleDesc.match(/^\*\*(.+?)\*\*/);
+        if(!name || name.length < 2) return "No Name";
+        return name[1];
     }
     
     /**
@@ -437,7 +450,9 @@ module.exports = function() {
     returns the classcat and other
     **/
     function getFullCategory(roleDesc) {
-        return roleDesc.match(/^\*\*.+?\*\* \| (.*?)(\n| \|)/)[1].split(" - ");
+        let cat = roleDesc.match(/^\*\*.+?\*\* \| (.*?)(\n| \|)/);
+        if(!cat || cat.length < 2) return ["No Category"];
+        return cat[1].split(" - ");
     }
     
     /**
@@ -453,7 +468,7 @@ module.exports = function() {
     queries all roles from github
     **/
     async function queryRoles() {
-        return await runQuery(clearRoles, rolepathsPath, queryRolesCallback, 10);
+        return await runQueryBoth(clearRoles, rolepathsPath, rolepathsPathSecondary, queryRolesCallback, 10);
     }
         
     /**
@@ -468,10 +483,10 @@ module.exports = function() {
     Query Roles - Callback
     the callback for role queries - run once for each role with the name and path passed.
     **/
-    async function queryRolesCallback(path, name) {
+    async function queryRolesCallback(path, name, baseurl = null) {
         var output = null;
         // extract values
-        const roleContents = await queryFile(path, name); // get the role contents
+        const roleContents = await queryFile(path, name, baseurl); // get the role contents
         const roleDescs = splitRoleDescSections(roleContents); // split the role descriptions, into the different types of role description
         const roleName = getRoleDescName(roleContents); // grabs the role name inbetween the **'s in the first line
         const fullCategory = getFullCategory(roleContents); // grab the other part of the first line, which contains class, category and team
@@ -936,9 +951,9 @@ module.exports = function() {
     Get Tree
     Retrieves the tree of files of the roles repository.
     **/
-    async function getTree() {
+    async function getTree(repo, branch) {
         const auth = { headers: { 'Authorization': 'token ' + config.github_token } };
-        const body = await fetchBody(`${githubAPI}repos/${roleRepo}/git/trees/${roleRepoBranch}?recursive=1`, auth);
+        const body = await fetchBody(`${githubAPI}repos/${repo}/git/trees/${branch}?recursive=1`, auth);
         return JSON.parse(body).tree;
     }
     
@@ -956,8 +971,8 @@ module.exports = function() {
     Query File
     Retrieves a single file from github
     **/
-    async function queryFile(path, name) {
-        const body = await fetchBody(`${roleRepoBaseUrl}${path}/${name}`);
+    async function queryFile(path, name, baseurl = null) {
+        const body = await fetchBody(`${baseurl ?? roleRepoBaseUrl}${path}/${name}`);
         return body;
     }  
     

@@ -18,10 +18,14 @@ module.exports = function() {
     this.roleRepo = `${wwrOrg}/Werewolves-Roles`;
     this.roleRepoBranch = "main";
     this.roleRepoBaseUrl = `${githubRaw}${roleRepo}/${roleRepoBranch}/`;
+    this.roleRepoSecondary = `${wwrOrg}/WWR-AdditionalRoles`;
+    this.roleRepoSecondaryBranch = "main";
+    this.roleRepoSecondaryBaseUrl = `${githubRaw}${roleRepoSecondary}/${roleRepoSecondaryBranch}/`;
     /** Files **/
     this.iconLUTPath = `${iconRepoBaseUrl}replacements.csv`;
     this.colorsLUTPath = `${iconRepoBaseUrl}colors.csv`;
     this.rolepathsPath = `${roleRepoBaseUrl}_paths/roles`;
+    this.rolepathsPathSecondary = `${roleRepoSecondaryBaseUrl}_paths/roles`;
     this.infopathsPath = `${roleRepoBaseUrl}_paths/info`;
     this.grouppathsPath = `${roleRepoBaseUrl}_paths/groups`;
     this.setspathsPath = `${roleRepoBaseUrl}_paths/sets`;
@@ -32,6 +36,6 @@ module.exports = function() {
     /**
     Website Paths
     **/
-    const website = "https://werewolves.me/";
+    this.website = "https://werewolves.me/";
     this.cardBaseUrl = `${website}cards/card.php?name=`;
 }

@@ -20,7 +20,8 @@ module.exports = function() {
 			user     : config.db.user,
 			password : config.db.password,
 			database : config.db.database,
-			charset: "utf8mb4"
+			charset: "utf8mb4",
+            supportBigNumbers : true
 		});
 		// Connection connection
 		connection.connect(err => {

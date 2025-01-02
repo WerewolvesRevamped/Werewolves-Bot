@@ -31,6 +31,8 @@ require("./players/packs.js")();
 require("./players/loot.js")();
 require("./players/loot_commands.js")();
 require("./players/coins.js")();
+require("./players/icons.js")();
+require("./players/xp.js")();
 require("./ccs.js")();
 require("./whispers.js")();
 require("./theme.js")();
@@ -172,6 +174,9 @@ function restartSQL(channel) {
 
 var automationBusy = false;
 
+var lastChatter = null;
+var lastChatterCharacters = 0;
+
 /* New Message */
 client.on("messageCreate", async message => {
     if(!message) return;
@@ -223,6 +228,107 @@ client.on("messageCreate", async message => {
             sql("UPDATE players SET public_msgs=public_msgs+1 WHERE id = " + connection.escape(message.member.id), () => {}, () => {
                 log("MSG Count > Failed to count private message for " + message.author + "!")
             });
+        }
+    }
+    
+    /* Counts messages, again **/
+    if(!message.author.bot && message.content.indexOf(stats.prefix) !== 0) {
+        let countActivity = false;
+        // check if treshold is hit
+        let ACTIVITY_TRESHHOLD = 40;
+        // let x = [0,10], diff = 0; for(let i = 0; i < 99; i++) x.push(x[x.length - 1] + (diff+=10)); console.log(""+x);
+        let LEVELS = [0,10,20,40,70,110,160,220,290,370,460,560,670,790,920,1060,1210,1370,1540,1720,1910,2110,2320,2540,2770,3010,3260,3520,3790,4070,4360,4660,4970,5290,5620,5960,6310,6670,7040,7420,7810,8210,8620,9040,9470,9910,10360,10820,11290,11770,12260,12760,13270,13790,14320,14860,15410,15970,16540,17120,17710,18310,18920,19540,20170,20810,21460,22120,22790,23470,24160,24860,25570,26290,27020,27760,28510,29270,30040,30820,31610,32410,33220,34040,34870,35710,36560,37420,38290,39170,40060,40960,41870,42790,43720,44660,45610,46570,47540,48520,49510];
+        if(lastChatter === message.author.id) {
+            lastChatterCharacters += message.content.toLowerCase().replace(/[^a-z]/g,"").replace(/(.)\1\1{1,}/g,"$1$1").length;
+            if(lastChatterCharacters >= ACTIVITY_TRESHHOLD) countActivity = true;
+        } else {
+            lastChatter = message.author.id;
+            lastChatterCharacters = message.content.toLowerCase().replace(/[^a-z]/g,"").replace(/(.)\1\1{1,}/g,"$1$1").length;
+            if(lastChatterCharacters >= ACTIVITY_TRESHHOLD) countActivity = true;
+        }
+        // count activity
+        if(countActivity) {
+            let curTime = xpGetTime(); // current time in 5m intervals
+            let activity = await sqlPromEsc("SELECT * FROM activity WHERE player=", lastChatter);
+            if(activity && activity.length > 0) {
+                if(activity[0].timestamp < (curTime - 1)) {
+                    await sqlPromEsc("UPDATE activity SET count=count+1,timestamp=" + curTime + " WHERE player=", lastChatter);
+                    let newLevel = (+activity[0].level) + 1;
+                    let reqXpLevelup = LEVELS[newLevel];
+                    if(reqXpLevelup && reqXpLevelup <= ((+activity[0].count) + 1)) {
+                        console.log(`Level Up for ${message.member.displayName} to Level ${newLevel}!`);
+                        await sleep(30000); // delay level up by 30s
+                        await sqlPromEsc("UPDATE activity SET level=level+1 WHERE player=", lastChatter);
+                        let coinsReward = newLevel * 5;
+                        await modifyCoins(message.author.id, coinsReward);
+                        let embed = { title: "Level up!", description: `Congratulations, <@${message.author.id}>! You have leveled up to **Level ${newLevel}**!\n\nAs a reward you have received \`${coinsReward}\` coins. Use \`${stats.prefix}coins\` to check how many coins you have.`, color: 9483375};
+                        embed.thumbnail = { url: iconRepoBaseUrl + "Extras/Ascension.png" };
+                        // Level Up Reward
+                        let newLevelString = newLevel + "";
+                        if(newLevel % 5 === 0) {
+                            let boxRewards = [null, null, null, [0], [0,1], null, [0,2], [0,1,2], [0,1,3], [0,1,2,3], null, [0,3], [0,2,3], [1], [1,2], null, [1,3], [1,2,3], [2], [2,3], [3]];
+                            let re = boxRewards[Math.floor(newLevel / 5)];
+                            // Standard Box Reward
+                            if(newLevel === 100) {
+                                embed.description += `\n\nAdditionally, you get a free loot box with a guaranteed platinum tier reward.`;
+                                embed.description += `\n\nAdditionally, you may select any lootbox prize that will be unlocked for you.`;
+                                message.channel.send({ embeds: [ embed ] });
+                                await openBox(message.channel, message.author.id, null, re);
+                                await inventoryModifyItem(message.author.id, "SPEC:Any", 1);
+                            } else if(re) {
+                                let boxName = re.map(el => tierNames[el].toLowerCase()).join(" or ");
+                                embed.description += `\n\nAdditionally, you get a free loot box with a guaranteed ${boxName} tier reward.`;
+                                message.channel.send({ embeds: [ embed ] });
+                                await openBox(message.channel, message.author.id, null, re);
+                            } else {
+                                switch(newLevel) {
+                                    case 5: 
+                                        let verified = message.guild.roles.cache.find(role => role.name == "Verified");
+                                        if(verified) {
+                                            message.member.roles.add(verified);
+                                            embed.description += `\n\nAdditionally, you got the \`Verified\` role, which grants a few additional permissions.`;    
+                                        }
+                                    break;
+                                    case 10:
+                                        embed.description += `\n\nAdditionally, you may now transfer rewards to others using \`${stats.prefix}inventory transfer\`.`;
+                                        await inventoryModifyItem(message.author.id, "BOT:invtransfer", 1);
+                                    break;
+                                    case 25:
+                                        embed.description += `\n\nAdditionally, you may select an icon (that is available as loot) that will be unlocked for you.`;
+                                        await inventoryModifyItem(message.author.id, "SPEC:AnyIcon", 1);
+                                    break;
+                                    case 50:
+                                        embed.description += `\n\nAdditionally, you may select a skinpack (that is available as loot) that will be unlocked for you.`;
+                                        await inventoryModifyItem(message.author.id, "SPEC:AnySkinpack", 1);
+                                    break;
+                                    case 75:
+                                        embed.description += `\n\nAdditionally, you may select a guarantor (that is available as loot) that will be unlocked for you.`;
+                                        await inventoryModifyItem(message.author.id, "SPEC:AnyGuarantor", 1);
+                                    break;
+                                }
+                                message.channel.send({ embeds: [ embed ] });
+                            }
+                        } else if(newLevelString.length === 2 && newLevelString[0] === newLevelString[1]) {
+                            let boxRewards = [[0], [0,1], [0,2], [0,1,3], [0,1,2,3], [1,2], [1,3], [2,3], [3]];
+                            let re = boxRewards[(+ newLevelString[0]) - 1];
+                            // Standard Box Reward
+                            if(re) {
+                                let boxName = re.map(el => tierNames[el].toLowerCase()).join(" or ");
+                                embed.description += `\n\nAdditionally, you get a free loot box with a guaranteed ${boxName} tier reward.`;
+                                message.channel.send({ embeds: [ embed ] });
+                                await openBox(message.channel, message.author.id, null, re);
+                            } else {
+                                message.channel.send({ embeds: [ embed ] });
+                            }
+                        } else {  
+                            if(newLevel === 1) embed.description += `\n\nYou can check your XP and Level using \`${stats.prefix}xp\` and see a leaderboard using \`${stats.prefix}xp list\`.`;  
+                            message.channel.send({ embeds: [ embed ] });
+                        }
+                    }
+                }
+            } else {
+                await sqlProm("INSERT INTO activity (player, count, timestamp) VALUES (" + connection.escape(lastChatter) + ", 1, " + connection.escape(curTime) +  ")");
+            }
         }
     }
     
@@ -544,6 +650,10 @@ client.on("messageCreate", async message => {
 	case "start":
 		if(checkSafe(message)) cmdConfirm(message, "start");
 	break;
+	/* Check Start */ // Checks if the game can be started
+	case "check_start":
+		if(checkSafe(message)) cmdCheckStart(message.channel);
+	break;
 	/* Start */ // Starts a debug game
 	case "start_debug":
 		if(checkSafe(message)) cmdStart(message.channel, true);
@@ -714,7 +824,7 @@ client.on("messageCreate", async message => {
     case "temp":
         let tempPerms = await inventoryGetItem(message.author.id, "bot:temp");
         if(tempPerms === 0) {
-            message.channel.send(`⛔ You are not authorized to use the ${stats.prefix}temp command.`);
+            message.channel.send(`⛔ You have not unlocked the ${stats.prefix}temp command.`);
             return;
         }
         cmdTemp(message, args);
@@ -728,6 +838,12 @@ client.on("messageCreate", async message => {
 	case "newhate":
         cmdNewhate(message);
 	break;
+	case "flip":
+        cmdFlip(message);
+	break;
+	case "fortune":
+        cmdFortune(message, args);
+	break;
     case "time":
         cmdTime(message.channel, args);
     break;
@@ -740,11 +856,17 @@ client.on("messageCreate", async message => {
     case "loot_force":
 		if(checkGM(message)) cmdLootForce(message, args);
     break;
+    case "xp":
+		cmdXP(message, args);
+    break;
     case "coins":
 		cmdCoins(message, args);
     break;
     case "inventory":
 		cmdInventory(message, args);
+    break;
+    case "icon":
+		cmdIcon(message, args);
     break;
 	/* Invalid Command */
 	default:

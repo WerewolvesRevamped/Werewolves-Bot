@@ -198,16 +198,19 @@ module.exports = function() {
     Send Embed
     sends an embed and optionally pins it (+ deletes the pin)
     **/
-    this.sendEmbed = function(channel, embed, pin = false) {
-        // send embed
-        channel.send({ embeds: [ embed ] }).then(m => {
-            if(pin) { // pin message if pin is set to true
-                m.pin().then(mp => {
-                    mp.channel.messages.fetch().then(messages => {
-                        mp.channel.bulkDelete(messages.filter(el => el.type === MessageType.ChannelPinnedMessage)); // delete pinning message
-                    });	
-                })
-            }
+    this.sendEmbed = async function(channel, embed, pin = false) {
+		return new Promise((resolve) => {
+            // send embed
+            channel.send({ embeds: [ embed ] }).then(m => {
+                if(pin) { // pin message if pin is set to true
+                    m.pin().then(mp => {
+                        mp.channel.messages.fetch().then(messages => {
+                            mp.channel.bulkDelete(messages.filter(el => el.type === MessageType.ChannelPinnedMessage)); // delete pinning message
+                        });	
+                    })
+                }
+                resolve(m);
+            });
         });
     }
     

@@ -197,7 +197,7 @@ module.exports = function() {
 				// At least one role exists
 				channel.send("✳️ Sending a list of currently existing role names:");
 				// Send message
-				chunkArray(result.map(role => `${toTitleCase(role.display_name)}`), 200).map(el => el.join(",")).forEach(el => channel.send(el));
+				chunkArray(result.map(role => `${toTitleCase(role.display_name)}`), 180).map(el => el.join(",")).forEach(el => channel.send(el));
 			} else { 
 				// No roles exist
 				channel.send("⛔ Database error. Could not find any roles!");
