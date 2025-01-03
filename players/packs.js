@@ -29,7 +29,7 @@ module.exports = function() {
     /**
     Command: $packs list_all
     **/
-    this.AVAILABLE_PACKS = ["glitch","negate","grayscale","edge","emboss","silhouette","pixel","pixel2","pixel3","pixel4","scatter","red","green","blue","yellow","purple","cyan","flip","pale","bw","wire","wire2","rainbow","rainbow2","rainbow3","ts","oil","wave","swirl","noise","cycle","equalize","fourier_noise","fourier_equalize","fourier_oil","fourier_modulate","fourier_wire","glitch2","eyes","thief","mask","eye","fourier_eye","citizen_eye","items","bear","wolfify","grid","light_and_shadow","duo_color","wood"];
+    this.AVAILABLE_PACKS = ["glitch","negate","grayscale","edge","emboss","silhouette","pixel","pixel2","pixel3","pixel4","scatter","red","green","blue","yellow","purple","cyan","flip","pale","bw","wire","wire2","rainbow","rainbow2","rainbow3","ts","oil","wave","swirl","noise","cycle","equalize","fourier_noise","fourier_equalize","fourier_oil","fourier_modulate","fourier_wire","glitch2","eyes","thief","mask","eye","fourier_eye","citizen_eye","items","bear","wolfify","grid","light_and_shadow","duo_color","wood","coin"];
     this.cmdPacksListAll = function(channel) {
         let packs1 = [`${getEmoji('pack_default')} Default - 0`], packs2 = [], packs3 = [];
         let third = Math.ceil(AVAILABLE_PACKS.length / 3);

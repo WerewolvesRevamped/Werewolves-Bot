@@ -249,16 +249,16 @@ client.on("messageCreate", async message => {
         // count activity
         if(countActivity) {
             let curTime = xpGetTime(); // current time in 5m intervals
-            let activity = await sqlPromEsc("SELECT * FROM activity WHERE player=", lastChatter);
+            let activity = await sqlPromEsc("SELECT * FROM activity WHERE player=", message.author.id);
             if(activity && activity.length > 0) {
                 if(activity[0].timestamp < (curTime - 1)) {
-                    await sqlPromEsc("UPDATE activity SET count=count+1,timestamp=" + curTime + " WHERE player=", lastChatter);
+                    await sqlPromEsc("UPDATE activity SET count=count+1,timestamp=" + curTime + " WHERE player=", message.author.id);
                     let newLevel = (+activity[0].level) + 1;
                     let reqXpLevelup = LEVELS[newLevel];
                     if(reqXpLevelup && reqXpLevelup <= ((+activity[0].count) + 1)) {
                         console.log(`Level Up for ${message.member.displayName} to Level ${newLevel}!`);
                         await sleep(30000); // delay level up by 30s
-                        await sqlPromEsc("UPDATE activity SET level=level+1 WHERE player=", lastChatter);
+                        await sqlPromEsc("UPDATE activity SET level=level+1 WHERE player=", message.author.id);
                         let coinsReward = newLevel * 5;
                         await modifyCoins(message.author.id, coinsReward);
                         let embed = { title: "Level up!", description: `Congratulations, <@${message.author.id}>! You have leveled up to **Level ${newLevel}**!\n\nAs a reward you have received \`${coinsReward}\` coins. Use \`${stats.prefix}coins\` to check how many coins you have.`, color: 9483375};
