@@ -57,7 +57,7 @@ module.exports = function() {
             let half = Math.ceil(items.length / 2);
             for(let i = 0; i < half; i++) items1.push(`• ${getEmoji(items[i][1])} ${items[i][2][1]}`);
             if(items.length > 1) for(let i = half; i < items.length; i++) items2.push(`• ${getEmoji(items[i][1])} ${items[i][2][1]}`);
-            let embed = { title: "Role Icons", description: `<@${message.member.id}>, here are your current role icons:`, color: 8984857, fields: [ {}, {} ] };
+            let embed = { title: "Role Icons", description: `Here is a list of icon roles available for you, <@${message.member.id}>. You can switch icon role by running \`${stats.prefix}icon select "<Role Name>"\`, where you replace \`<Role Name>\` with the name of the role you want to select.`, color: 8984857, fields: [ {}, {} ] };
             embed.fields[0] = { name: "_ _", "value": items1.join("\n"), inline: true };
             embed.fields[1] = { name: "_ _", "value": items2.join("\n"), inline: true };
             embed.thumbnail = { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` };
@@ -66,7 +66,7 @@ module.exports = function() {
             // format item list
             let itemsTxt = [];
             for(let i = 0; i < items.length; i++) itemsTxt.push(`• ${getEmoji(items[i][1])} ${items[i][2][1]}`);
-            let embed = { title: "Role Icons", description: `<@${message.member.id}>, here are your current role icons:\n\n` + itemsTxt.join("\n"), color: 8984857 };
+            let embed = { title: "Role Icons", description: `Here is a list of icon roles available for you, <@${message.member.id}>. You can switch icon role by running \`${stats.prefix}icon select "<Role Name>"\`, where you replace \`<Role Name>\` with the name of the role you want to select.\n\n` + itemsTxt.join("\n"), color: 8984857 };
             embed.thumbnail = { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` };
             message.channel.send({ embeds: [ embed ] });
         }

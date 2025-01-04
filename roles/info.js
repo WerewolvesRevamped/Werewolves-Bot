@@ -370,6 +370,7 @@ module.exports = function() {
                     // only add the section if it exists
                     if(sectionText) {
                         if(visibleSections.length == 1) {
+                            sectionText = await applyPackLUT(sectionText, authorId);
                             embed.description = applyETN(sectionText, guild);
                         } else {
                             sectionText = await applyPackLUT(sectionText, authorId);

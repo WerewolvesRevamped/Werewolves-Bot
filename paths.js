@@ -27,12 +27,17 @@ module.exports = function() {
     this.rolepathsPath = `${roleRepoBaseUrl}_paths/roles`;
     this.rolepathsPathSecondary = `${roleRepoSecondaryBaseUrl}_paths/roles`;
     this.infopathsPath = `${roleRepoBaseUrl}_paths/info`;
+    this.infopathsPathSecondary = `${roleRepoSecondaryBaseUrl}_paths/info`;
     this.grouppathsPath = `${roleRepoBaseUrl}_paths/groups`;
+    this.grouppathsPathSecondary = `${roleRepoSecondaryBaseUrl}_paths/groups`;
+    this.attributepathsPath = `${roleRepoBaseUrl}_paths/attributes`;
+    this.attributepathsPathSecondary = `${roleRepoSecondaryBaseUrl}_paths/attributes`;
+    this.teamspathsPath = `${roleRepoBaseUrl}_paths/teams`;
+    this.teamspathsPathSecondary = `${roleRepoSecondaryBaseUrl}_paths/teams`;
+    
     this.setspathsPath = `${roleRepoBaseUrl}_paths/sets`;
     this.locationpathsPath = `${roleRepoBaseUrl}_paths/locations`;
     this.pollpathsPath = `${roleRepoBaseUrl}_paths/polls`;
-    this.attributepathsPath = `${roleRepoBaseUrl}_paths/attributes`;
-    this.teamspathsPath = `${roleRepoBaseUrl}_paths/teams`;
     /**
     Website Paths
     **/

@@ -370,9 +370,11 @@ module.exports = function() {
         await clearFunc();
         // get all files
         const tree = await getTree(repo ?? roleRepo, branch ?? roleRepoBranch);
+        console.log(tree);
 
         // get the relevant paths file
         const paths = await getPaths(path);
+        console.log(paths);
         
         // outputs
         var outputs = [];
@@ -414,8 +416,8 @@ module.exports = function() {
     }
     
     async function runQueryBoth(clearFunc, path1, path2, callbackFunc, maxAllowedErrors = 1) {
-        let outputs1 = await runQuery(clearFunc, rolepathsPath, queryRolesCallback, 10);
-        let outputs2 = await runQuerySecondary(() => {}, rolepathsPathSecondary, queryRolesCallback, 10);
+        let outputs1 = await runQuery(clearFunc, path1, callbackFunc, maxAllowedErrors);
+        let outputs2 = await runQuerySecondary(() => {}, path2, callbackFunc, maxAllowedErrors);
         return [...outputs1, ...outputs2];
     }
     
@@ -557,7 +559,7 @@ module.exports = function() {
     queries all infos from github
     **/
     async function queryInfo() {
-        return await runQuery(clearInfo, infopathsPath, queryInfoCallback, 5);
+        return await runQueryBoth(clearInfo, infopathsPath, infopathsPathSecondary, queryInfoCallback, 5);
     }
     
     /**
@@ -572,9 +574,9 @@ module.exports = function() {
     Query Info - Callback
     queries all infos from github
     **/
-    async function queryInfoCallback(path, name) {
+    async function queryInfoCallback(path, name, baseurl = null) {
         // extract values
-        var infoContents = await queryFile(path, name); // get the role contents
+        var infoContents = await queryFile(path, name, baseurl); // get the role contents
         const dbName = getDBName(name); // get the db name
         var displayName = "";
         var matches;
@@ -607,7 +609,7 @@ module.exports = function() {
     queries all groups from github
     **/
     async function queryGroups() {
-        return await runQuery(clearGroups, grouppathsPath, queryGroupsCallback, 5);
+        return await runQueryBoth(clearGroups, grouppathsPath, grouppathsPathSecondary, queryGroupsCallback, 5);
     }
     
     /**
@@ -622,9 +624,9 @@ module.exports = function() {
     Query Groups - Callback
     queries all groups from github
     **/
-    async function queryGroupsCallback(path, name) {
+    async function queryGroupsCallback(path, name, baseurl = null) {
         // extract values
-        var groupContents = await queryFile(path, name); // get the group contents
+        var groupContents = await queryFile(path, name, baseurl); // get the group contents
         const dbName = getDBName(name); // get the db name
         const roleDescs = splitRoleDescSections(groupContents); // split the group descriptions, into the different types of group description
         const roleName = getRoleDescName(groupContents); // grabs the group name inbetween the **'s in the first line
@@ -644,7 +646,7 @@ module.exports = function() {
     queries all attributes from github
     **/
     async function queryAttributes() {
-        return await runQuery(clearAttributes, attributepathsPath, queryAttributesCallback, 5);
+        return await runQueryBoth(clearAttributes, attributepathsPath, attributepathsPathSecondary, queryAttributesCallback, 5);
     }
     
     /**
@@ -659,9 +661,9 @@ module.exports = function() {
     Query Attributes - Callback
     queries all attributes from github
     **/
-    async function queryAttributesCallback(path, name) {
+    async function queryAttributesCallback(path, name, baseurl = null) {
         // extract values
-        var attributeContents = await queryFile(path, name); // get the attribute contents
+        var attributeContents = await queryFile(path, name, baseurl); // get the attribute contents
         const dbName = getDBName(name); // get the db name
         const roleDescs = splitRoleDescSections(attributeContents); // split the attribute descriptions, into the different types of attribute description
         const roleName = getRoleDescName(attributeContents); // grabs the attribute name inbetween the **'s in the first line
@@ -678,7 +680,7 @@ module.exports = function() {
     queries all teams from github
     **/
     async function queryTeams() {
-        return await runQuery(clearTeams, teamspathsPath, queryTeamsCallback, 5);
+        return await runQueryBoth(clearTeams, teamspathsPath, teamspathsPathSecondary, queryTeamsCallback, 5);
     }
     
     /**
@@ -693,9 +695,9 @@ module.exports = function() {
     Query Teams - Callback
     queries all attributes from github
     **/
-    async function queryTeamsCallback(path, name) {
+    async function queryTeamsCallback(path, name, baseurl = null) {
         // extract values
-        var teamContents = await queryFile(path, name); // get the team contents
+        var teamContents = await queryFile(path, name, baseurl); // get the team contents
         const dbName = getDBName(name); // get the db name
         const teamDescs = splitRoleDescSections(teamContents); // split the team descriptions, into the different types of team description
         const teamName = getRoleDescName(teamContents); // grabs the team name inbetween the **'s in the first line

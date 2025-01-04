@@ -165,9 +165,9 @@ module.exports = function() {
             ["roll number", PERM.AL, "Returns a random number.", "<Number>", "Selects a random number from 1 to <Number>.", "roll number 5", ["▶️ Selected `3`"], CMDSTATE.RDY, ["roll num"]],
             ["roll ?d?", PERM.AL, "Rolls dice.", "<Amount>d<Number>", "You can use $roll <amount>d<number> where amount specifies an amount of rolls to do and number specifies the highest value. The amount argument is optional. This means that $roll d6 is equivalent to $roll number 6 and $roll 2d6 is equivalent to running it twice.", "$roll d5", ["▶️ Selected `3`"], CMDSTATE.RDY],
             // Modrole
-        ["modrole", PERM.AL, "Adds/removes roles from users.", "<Subcommand>", "See $help modrole <subcommand>.", "", [], CMDSTATE.NOP],
-            ["modrole add", PERM.AL, "Adds roles from users.", "<User ID> <Role ID>", "Adds a role to a user.", "modrole add 242983689921888256 584770967058776067", ["✅ Added Bot Developer to @McTsts (Ts)!"], CMDSTATE.NOP],
-            ["modrole remove", PERM.AL, "Removes roles from users.", "<User ID> <Role ID>", "Removes a role from a user.", "modrole remove 242983689921888256 584770967058776067", ["✅ Removed Bot Developer from @McTsts (Ts)!"], CMDSTATE.NOP],
+        ["modrole", PERM.NO, "Adds/removes roles from users.", "<Subcommand>", "See $help modrole <subcommand>.", "", [], CMDSTATE.NOP],
+            ["modrole add", PERM.NO, "Adds roles from users.", "<User ID> <Role ID>", "Adds a role to a user.", "modrole add 242983689921888256 584770967058776067", ["✅ Added Bot Developer to @McTsts (Ts)!"], CMDSTATE.NOP],
+            ["modrole remove", PERM.NO, "Removes roles from users.", "<User ID> <Role ID>", "Removes a role from a user.", "modrole remove 242983689921888256 584770967058776067", ["✅ Removed Bot Developer from @McTsts (Ts)!"], CMDSTATE.NOP],
         // Loot Commands
         ["loot", PERM.AL, "Opens a lootbox.", "", "Run the command to purchase a lootbox for 100 coins and open it.", "loot", [], CMDSTATE.RDY],
         ["loot_force", PERM.GM, "Forces a specific lootbox reward.", "<Reward Code>", "Opens a lootbox and finds a specified reward.", "loot_force std:x", [], CMDSTATE.RDY],
@@ -181,6 +181,7 @@ module.exports = function() {
             ["coins get", PERM.GM, "Shows a player's coins.", "", "Shows how many coins a specific player has.", "coins get mctsts", [], CMDSTATE.RDY],
             ["coins add", PERM.GM, "Adds to a player's coins.", "", "Gives a specific player coins.", "coins add mctsts 100", [], CMDSTATE.RDY],
             ["coins remove", PERM.GM, "Removes from a player's coins.", "", "Takes coins from a specific player.", "coins remove mctsts 100", [], CMDSTATE.RDY],
+            ["coins list", PERM.GM, "Lists player coins.", "", "Lists everyone with their coin count..", "coins list", [], CMDSTATE.RDY],
             ["coins reward", PERM.NO, "Rewards a player with coins.", "", "Special variant of $coins add that is only used by WWRess and WWRdle.", "coins reward mctsts 100", [], CMDSTATE.RDY],
         ["icon", PERM.AL, "Manages your role icon.", "", "Group of commands to manage your role icon See $help icon <subcommand>", "", [], CMDSTATE.RDY],
             ["icon set", PERM.AL, "Sets your role icon.", "<Role Name>", "Sets your role icon.", "icon set cat", ["@Ts, your role icon has been updated to Cat."], CMDSTATE.RDY],

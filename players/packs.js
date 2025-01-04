@@ -19,7 +19,7 @@ module.exports = function() {
 		switch(args[0]) {
 			case "list": cmdPacksList(message.channel, message.author); break;
 			case "select": cmdPacksSelect(message.channel, message.author, args); break;
-			case "list_all": if(checkGM(message)) cmdPacksListAll(message.channel); break;
+			case "list_all": if(checkSafe(message)) cmdPacksListAll(message.channel); break;
 			case "set": if(checkGM(message)) cmdPacksSet(message.channel, args); break;
 			case "unlock": if(checkGM(message)) cmdPacksUnlock(message.channel, args); break;
 			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
@@ -56,7 +56,7 @@ module.exports = function() {
             let half = Math.ceil(unlockedPacks.length / 2);
             for(let i = 0; i < half; i++) packs1.push(`${getEmoji('pack_'+unlockedPacks[i][1])} ${toTitleCase(unlockedPacks[i][1])} - ${unlockedPacks[i][0]}`);
             if(unlockedPacks.length > 1) for(let i = half; i < unlockedPacks.length; i++) packs2.push(`${getEmoji('pack_'+unlockedPacks[i][1])} ${toTitleCase(unlockedPacks[i][1])} - ${unlockedPacks[i][0]}`);
-            let embed = { title: "Available Packs", description: "Here is a list of skinpacks available for you. You can switch skinpack by running `" + stats.prefix + "packs select <ID>`, where you replace <ID> with the __number__ of the skinpack you want to select.", color: 8984857, fields: [ {}, {} ] };
+            let embed = { title: "Available Packs", description: "Here is a list of skinpacks available for you. You can switch skinpack by running `" + stats.prefix + "packs select <ID>`, where you replace \`<ID>\` with the __number__ of the skinpack you want to select.", color: 8984857, fields: [ {}, {} ] };
             embed.fields[0] = { name: "_ _", "value": packs1.join("\n"), inline: true };
             embed.fields[1] = { name: "_ _", "value": packs2.join("\n"), inline: true };
             channel.send({ embeds: [ embed ] });
@@ -66,7 +66,7 @@ module.exports = function() {
             for(let i = 0; i < third; i++) packs1.push(`${getEmoji('pack_'+unlockedPacks[i][1])} ${toTitleCase(unlockedPacks[i][1])} - ${unlockedPacks[i][0]}`);
             for(let i = third; i < third * 2; i++) packs2.push(`${getEmoji('pack_'+unlockedPacks[i][1])} ${toTitleCase(unlockedPacks[i][1])} - ${unlockedPacks[i][0]}`);
             for(let i = third * 2; i < unlockedPacks.length; i++) packs3.push(`${getEmoji('pack_'+unlockedPacks[i][1])} ${toTitleCase(unlockedPacks[i][1])} - ${unlockedPacks[i][0]}`);
-            let embed = { title: "Available Packs", description: "Here is a list of skinpacks available for you. You can switch skinpack by running `" + stats.prefix + "packs select <ID>`, where you replace <ID> with the __number__ of the skinpack you want to select.", color: 8984857, fields: [ {}, {}, {} ] };
+            let embed = { title: "Available Packs", description: "Here is a list of skinpacks available for you. You can switch skinpack by running `" + stats.prefix + "packs select <ID>`, where you replace \`<ID>\` with the __number__ of the skinpack you want to select.", color: 8984857, fields: [ {}, {}, {} ] };
             embed.fields[0] = { name: "_ _", "value": packs1.join("\n"), inline: true };
             embed.fields[1] = { name: "_ _", "value": packs2.join("\n"), inline: true };
             embed.fields[2] = { name: "_ _", "value": packs3.join("\n"), inline: true };
@@ -218,7 +218,7 @@ module.exports = function() {
             let pName = AVAILABLE_PACKS[pack - 1];
             let lut = await getPackLUT(pName);
             for(let i = 0; i < lut.length; i++) {
-                txt = txt.replace(new RegExp("(?<!\\<\\?)" + lut[i][0], 'g'), lut[i][1]);
+                txt = txt.replace(new RegExp("(?<!\\<\\?)" + lut[i][0] + "(?!\\:\\>)", 'g'), lut[i][1]);
             }
             return txt;
         }

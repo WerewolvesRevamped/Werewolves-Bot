@@ -18,6 +18,7 @@ module.exports = function() {
 		switch(args[0]) {
 			case "list": cmdXPList(message.channel); break;
 			case "get": cmdXPGet(message.channel, args); break;
+			case "list_actual": if(checkSafe(message)) cmdXPListActual(message.channel, args); break;
 			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
 		}
     }
@@ -35,6 +36,27 @@ module.exports = function() {
         
         let i = 1;
         let lbText = lb.map(el => `**#${i++}:** <@${''+el.player}> - ${Math.floor(el.count * XP_MULTIPLIER + (+el.player[0]))} [${el.level}]`);
+        let chunked = chunkArray(lbText, 20);
+        
+        let embed = { title: "XP Leaderboard", color: 8984857, fields: [ ] };
+        embed.fields = chunked.map(el => { return { name: "_ _", "value": el.join("\n"), inline: true }; });
+        channel.send({ embeds: [ embed ] });
+        
+    }
+    
+    /**
+    Command: $xp list_actual
+    **/
+    this.cmdXPListActual = async function(channel) {
+        
+        let curTime = xpGetTime();
+        let oneDay = 288;
+        let pastTime = curTime - oneDay * 30;
+        
+        let lb = await sqlProm("SELECT * FROM activity WHERE timestamp > " + connection.escape(pastTime) + " ORDER BY count DESC, player DESC");
+        
+        let i = 1;
+        let lbText = lb.map(el => `**#${i++}:** <@${''+el.player}> - ${el.count} [${el.level}]`);
         let chunked = chunkArray(lbText, 20);
         
         let embed = { title: "XP Leaderboard", color: 8984857, fields: [ ] };
