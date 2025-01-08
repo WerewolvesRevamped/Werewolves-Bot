@@ -556,7 +556,7 @@ module.exports = function() {
                         if(abilityType2.type === "abilityType" && additionalTriggerData.visit_subtype.length > 0) { // dont pass for subtypes when looking for a type
                             abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\` with a \`${triggerAbilityType2}\` subtype.`);
                         } else {
-                            abilityType2 = abilityType.value[0].toLowerCase().replace(/[^a-z]+/,"");
+                            abilityType2 = abilityType2.value[0].toLowerCase().replace(/[^a-z]+/,"");
                             triggerAbilityType2 = triggerAbilityType2.replace(/[^a-z]+/,"");
                             if(abilityType2 === triggerAbilityType2) {
                                  await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
