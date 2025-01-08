@@ -189,7 +189,7 @@ module.exports = function() {
     this.getEmoji = function(name) {
         name = name.replace(/ /,"").toLowerCase();
         let emoji = client.emojis.cache.find(el => el.name.toLowerCase() === name);
-        if(emoji) emoji = `<:${emoji.name}:${emoji.id}>`;
+        if(emoji) emoji = `<${emoji.animated?'a':''}:${emoji.name}:${emoji.id}>`;
         else emoji = "❓";
         return emoji;
     }

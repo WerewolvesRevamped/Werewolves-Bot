@@ -728,8 +728,8 @@ module.exports = function() {
         if(secondary) prompts.push(secondary);
         
         if(choice) {
-            if(stats.automation_level === 2) await choicesChoosingPrompt(src_name, src_ref, trigger.abilities[0], promptOverwrite, backupChannelId);
-            if(stats.automation_level > 2) await choicesChoosingPrompt(src_name, src_ref, trigger.abilities[0], promptOverwrite);
+            if(stats.automation_level === 2) await choicesChoosingPrompt(src_name, src_ref, trigger.abilities[0], promptOverwrite, promptPing, backupChannelId);
+            if(stats.automation_level > 2) await choicesChoosingPrompt(src_name, src_ref, trigger.abilities[0], promptOverwrite, promptPing);
             return;
         }
         

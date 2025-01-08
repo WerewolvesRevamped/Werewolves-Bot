@@ -403,9 +403,9 @@ module.exports = function() {
         var lutName = applyLUT(role); // get lut value if exists
         if(lutName) { // if lut value exists
             lutName = lutName.split("/").pop(); // split by /'s to extract name
-            return `${cardBaseUrl}${urlConv(lutName)}`;
+            return `${cardBaseUrl}${urlConv(lutName)}&type=hd`;
         } else if(roleNameParsed && verifyRole(roleNameParsed)) { // check if the role exists
-            return `${cardBaseUrl}${urlConv(toTitleCase(roleNameParsed))}`;
+            return `${cardBaseUrl}${urlConv(toTitleCase(roleNameParsed))}&type=hd`;
         } else {
             return false;
         }

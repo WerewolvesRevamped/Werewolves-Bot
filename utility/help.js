@@ -183,6 +183,10 @@ module.exports = function() {
             ["coins remove", PERM.GM, "Removes from a player's coins.", "", "Takes coins from a specific player.", "coins remove mctsts 100", [], CMDSTATE.RDY],
             ["coins list", PERM.GM, "Lists player coins.", "", "Lists everyone with their coin count..", "coins list", [], CMDSTATE.RDY],
             ["coins reward", PERM.NO, "Rewards a player with coins.", "", "Special variant of $coins add that is only used by WWRess and WWRdle.", "coins reward mctsts 100", [], CMDSTATE.RDY],
+        ["xp", PERM.AL, "Check your XP.", "", "Group of commands to check xp. See $help icon <subcommand>. Shows your own XP, when used without a subcommand.", "xp", ["@Ts has 100000 XP and is on Level 100"], CMDSTATE.RDY],
+            ["xp get", PERM.AL, "Shows someone's XP.", "<Player>", "Shows the XP of somebody.", "xp get mctsts", ["@Ts has 100000 XP and is on Level 100"], CMDSTATE.RDY],
+            ["xp list", PERM.AL, "Shows everyone's XP.", "", "Shows the XP of everybody.", "xp list", [], CMDSTATE.RDY],
+            ["xp list_actual", PERM.GM, "Shows everyone's XP.", "", "Shows the XP of everybody, but without modifying the display values.", "xp list_actual", [], CMDSTATE.RDY],
         ["icon", PERM.AL, "Manages your role icon.", "", "Group of commands to manage your role icon See $help icon <subcommand>", "", [], CMDSTATE.RDY],
             ["icon set", PERM.AL, "Sets your role icon.", "<Role Name>", "Sets your role icon.", "icon set cat", ["@Ts, your role icon has been updated to Cat."], CMDSTATE.RDY],
             ["icon disable", PERM.AL, "Removes your role icon.", "", "Removes your role icon.", "icon disable", ["@Ts, your role icon has been disabled."], CMDSTATE.RDY],
@@ -229,6 +233,8 @@ module.exports = function() {
         ["impersonate", PERM.GH, "Repeats a message as a webhook pretending to be somebody.", "<User> <Message>", "Repeats a message as a webhook pretending to be a certain user.", "impersonate 242983689921888256 Does this work?", ["Does this work?"], CMDSTATE.UNK],
         /** Abilities Module **/
         ["execute", PERM.GM, "Executes an ability object.", "<Ability JSON>", "Executes a provided ability JSON as the current gm (src_ref=player:<id>, src_name=role:host).", `$execute {"type":"killing","subtype":"kill","target":"@self"}`, ["Kill successful!"], CMDSTATE.RDY],
+        ["execute_as", PERM.GM, "Executes an ability object.", "<Ability JSON>", "Executes a provided ability JSON as a set executor. Save an executor with $execute_as_set.", `$execute_as {"type":"killing","subtype":"kill","target":"@self"}`, ["Kill successful!"], CMDSTATE.WIP],
+        ["execute_as_set", PERM.GM, "Sets an executor.", "<Src Ref> <Src Name>", "Sets an executor for a $execute_as command.", `$execute_as_set player:242983689921888256 role:citizen`, ["Executor set"], CMDSTATE.WIP],
         ["grant", PERM.GM, "Grants an extra role.", "<Target Player> <Role>", "Grants a specified player a specified role.", `$grant 242983689921888256 corrupted`, [], CMDSTATE.RDY],
         ["emit", PERM.GM, "Emits an event or a trigger.", "<Event / Trigger>", "Emit a trigger or event. When submitting 'start', 'sday' or 'snight' the corresponding event is emitted (each of which includes a series of triggers and other actions), otherwise the input is seen as a trigger.", "emit start", [], CMDSTATE.RDY],
         ["chooser", PERM.GM, "Allows GMs to Choice Choose", "<Player>", "Allows a GM to choice choose as the player they have specified.", "chooser mctsts", [], CMDSTATE.WIP],
@@ -319,10 +325,11 @@ module.exports = function() {
         /** Players Module **/
         // packs
         ["packs", PERM.AL, "Manages skinpacks.", "<Subcommand>", "Group of commands to handle skinpacks. $help packs <sub-command> for detailed help.", "", [], CMDSTATE.RDY],
-            ["packs list", PERM.AL, "Lists your available skinpacks.", "", "", "packs list", [], CMDSTATE.RDY],
-            ["packs list_all", PERM.GM, "Lists all available skinpacks.", "", "", "packs list_all", [], CMDSTATE.RDY],
+            ["packs list", PERM.AL, "Lists your available skinpacks.", "", "Lists the skinpacks you have currently unlocked.", "packs list", [], CMDSTATE.RDY],
+            ["packs list_all", PERM.GM, "Lists all available skinpacks.", "", "Lists all skinpacks the bot knows.", "packs list_all", [], CMDSTATE.RDY],
             ["packs set", PERM.GM, "Sets skinpack for another player.", "<Player> <Pack ID>", "Sets the skinpack for another player. Find <Pack ID> through $packs list.", "packs set mctsts 1", [], CMDSTATE.RDY],
-            ["packs unlock", PERM.AD, "Unlocks skinpack for another player.", "<Player> <Pack ID>", "Unlocks the skinpack for another player. Find <Pack ID> through $packs list.", "packs unlock mctsts 1", [], CMDSTATE.RDY],
+            ["packs unlock", PERM.GM, "Unlocks skinpack for another player.", "<Player> <Pack ID>", "Unlocks the skinpack for another player. Find <Pack ID> through $packs list_all.", "packs unlock mctsts 1", [], CMDSTATE.RDY],
+            ["packs delete", PERM.GM, "Deletes skinpack for another player.", "<Player> <Pack ID>", "Deeltes the skinpack for another player. Find <Pack ID> through $packs list_all.", "packs delete mctsts 1", [], CMDSTATE.RDY],
             ["packs select", PERM.AL, "Selects your own skinpack.", "<Pack ID>", "Sets the skinpack for you. Find <Pack ID> through $packs list.", "packs select 1", [], CMDSTATE.RDY],
         /** Roles Module **/
         // roles

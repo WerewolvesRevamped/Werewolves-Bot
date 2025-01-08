@@ -370,11 +370,9 @@ module.exports = function() {
         await clearFunc();
         // get all files
         const tree = await getTree(repo ?? roleRepo, branch ?? roleRepoBranch);
-        console.log(tree);
 
         // get the relevant paths file
         const paths = await getPaths(path);
-        console.log(paths);
         
         // outputs
         var outputs = [];

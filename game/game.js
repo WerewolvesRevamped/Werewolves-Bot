@@ -22,64 +22,6 @@ require("./host_information.js")();
 
 module.exports = function() {
     
-    this.gameCheckStart = async function(channel) {
-        // check requires and unique role values
-        let roles = await sqlProm("SELECT roles.name,roles.parsed,players.id FROM roles JOIN players WHERE players.role=roles.name");
-        let roleNames = roles.map(el => el.name.toLowerCase());
-        for(let i = 0; i < roles.length; i++) {
-            let rName = roles[i].name;
-            // parse role description
-            let parsed = JSON.parse(roles[i].parsed);
-            if(!parsed) {
-                channel.send(`⛔ List error. Cannot start game with invalid parsed role \`${rName}\`.`); 
-                return false;
-            }
-            // check requirements
-            let requires = parsed.requires ?? [];
-            for(let j = 0; j < requires.length; j++) {
-                let parsed = parseRole(requires[j]);
-                if(!roleNames.includes(parsed)) {
-                    channel.send(`⛔ List error. Cannot start game with role \`${rName}\` without having requirement \`${requires[j]}\`.`); 
-                    return false;
-                }
-            }
-            // check unique role
-            let unique = parsed.unique ?? false;
-            if(unique) {
-                let filtered = roleNames.filter(el => el === rName);
-                if(filtered.length != 1) {
-                    channel.send(`⛔ List error. Cannot start game with \`${filtered.length}\` instances of unique role \`${rName}\`.`); 
-                    return false;
-                }
-            }
-            // check host information
-            if(/%(.+?)%/.test(roles[i].parsed)) {
-                let matches = [], match = null;
-                var hostInfo = new RegExp("%(.+?)%", "g"); 
-                while(match = hostInfo.exec(roles[i].parsed)){
-                  matches.push(match[1].toLowerCase());
-                }
-                matches = removeDuplicates(matches);
-                let missingMatches = [];
-                for(let j = 0; j < matches.length; j++) {
-                    let hi = await getHostInformation(roles[i].id, matches[j]);
-                    if(hi.length != 1) missingMatches.push(matches[j]);
-                }
-                if(missingMatches.length > 0) {
-                    channel.send(`⛔ List error. Cannot start game with role \`${rName}\` on <@${roles[i].id}> without host information. The following information is missing: ${missingMatches.map(el => '\`' + el + '\`').join(", ")}.`); 
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    this.cmdCheckStart = async function(channel) {
-        let check = await gameCheckStart(channel);
-        if(!check) channel.send("⛔ The game is **not** ready to start.");
-        else channel.send("✅ The game is ready to start.");
-    }
-    
 	/* Handles start command */
 	this.cmdStart = async function(channel, debug) {
 		if(stats.gamephase == gp.SETUP || (debug && stats.gamephase == gp.NONE)) {
@@ -329,8 +271,8 @@ module.exports = function() {
     
     this.resetRoleNames = async function(channel) {
         // rename roles correctly
-        let roles = [stats.signed_up, stats.spectator, stats.mayor, stats.mayor2, stats.reporter, stats.guardian, stats.sub, stats.participant, stats.dead_participant, stats.host, stats.gamemaster, stats.ghost];
-        let names = ["Signed-up","Spectator","Mayor (<=" + stats.mayor_threshold + ")","Mayor (>" + stats.mayor_threshold + ")","Reporter","Guardian","Substitute","Participant","Dead Participant","Host", "Game Master", "Ghost"];
+        let roles = [stats.signed_up, stats.spectator, stats.sub, stats.participant, stats.dead_participant, stats.host, stats.gamemaster, stats.ghost];
+        let names = ["Signed-up","Spectator", "Substitute","Participant","Dead Participant","Host", "Game Master", "Ghost"];
         for(let i = 0; i < roles.length; i++) {
             await channel.guild.roles.cache.get(roles[i]).setName(names[i]);
         }  

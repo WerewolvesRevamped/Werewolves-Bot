@@ -79,7 +79,7 @@ module.exports = function() {
     /**
     Choice choosing prompt creation
     **/
-    this.choicesChoosingPrompt = async function(src_name, owner, ability, promptOverwrite, channelOverride = null) {
+    this.choicesChoosingPrompt = async function(src_name, owner, ability, promptOverwrite, promptPing, channelOverride = null) {
         // get channel
         let channel_id = await getSrcRefChannel(owner);
         if(channelOverride) channel_id = channelOverride;
@@ -101,7 +101,7 @@ module.exports = function() {
         // get prompt message / send choice message
         const promptMsg = getPromptMessage(ability, promptOverwrite);
         const refImg = await refToImg(src_name);
-        const message = await sendChoiceMessage(sc, `${getAbilityEmoji(ability.type)} ${promptMsg}${PROMPT_SPLIT}\nPlease select one of the choices by clicking the respective button. You may be prompted for additional selections after the choice.`, choiceName, choice.options, refImg, "Ability Prompt - Choice");
+        const message = await sendChoiceMessage(sc, `${getAbilityEmoji(ability.type)} ${promptMsg}${PROMPT_SPLIT}\nPlease select one of the choices by clicking the respective button. You may be prompted for additional selections after the choice.`, choiceName, choice.options, refImg, "Ability Prompt - Choice", promptPing);
         
         // save choice message
         let p1 = choicesUpdateByOwner(choiceName, owner, "ability", JSON.stringify(ability));
@@ -114,7 +114,7 @@ module.exports = function() {
     /**
     Sends a choice message with buttons
     **/
-    async function sendChoiceMessage(channel, txt, choiceName, options, thumbnail = null, title = null) {
+    async function sendChoiceMessage(channel, txt, choiceName, options, thumbnail = null, title = null, ping = true) {
         // choice message with buttons
         let msg = basicEmbed(`${txt}`, EMBED_BLUE);
         
@@ -127,6 +127,7 @@ module.exports = function() {
         msg.components = [ { type: 1, components: buttons } ];
 
         // extra components
+        if(ping) msg.content =  `<@&${stats.participant}>`; // add ping
         if(thumbnail) msg.embeds[0].thumbnail = { url: thumbnail }; // add thumbnail
         if(title) msg.embeds[0].title = title; // add title
         

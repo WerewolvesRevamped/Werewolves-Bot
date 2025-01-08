@@ -177,6 +177,9 @@ var automationBusy = false;
 var lastChatter = null;
 var lastChatterCharacters = 0;
 
+var srcRefSaved = null;
+var srcNameSaved = null;
+
 /* New Message */
 client.on("messageCreate", async message => {
     if(!message) return;
@@ -251,12 +254,12 @@ client.on("messageCreate", async message => {
             let curTime = xpGetTime(); // current time in 5m intervals
             let activity = await sqlPromEsc("SELECT * FROM activity WHERE player=", message.author.id);
             if(activity && activity.length > 0) {
-                if(activity[0].timestamp < (curTime - 1)) {
+                if(activity[0].timestamp < curTime) {
                     await sqlPromEsc("UPDATE activity SET count=count+1,timestamp=" + curTime + " WHERE player=", message.author.id);
                     let newLevel = (+activity[0].level) + 1;
                     let reqXpLevelup = LEVELS[newLevel];
                     let randChance = Math.random();
-                    if(reqXpLevelup && reqXpLevelup <= ((+activity[0].count) + 1) && randChance < 0.1 && !isSignedUp(message.member) && !isParticipant(message.member)) {
+                    if(reqXpLevelup && reqXpLevelup <= ((+activity[0].count) + 1) && randChance < 0.1 && !isParticipant(message.member)) {
                         console.log(`Level Up for ${message.member.displayName} to Level ${newLevel}!`);
                         await sleep(30000); // delay level up by 30s
                         await sqlPromEsc("UPDATE activity SET level=level+1 WHERE player=", message.author.id);
@@ -494,7 +497,17 @@ client.on("messageCreate", async message => {
         if(checkGM(message)) cmdEmit(message.channel, argsX);
     break;
     case "execute": // executes an ability 
-        if(checkGM(message)) cmdExecute(message, message.content.substr(8 + stats.prefix.length));
+        if(checkGM(message)) cmdExecute(message, message.content.substr(8 + stats.prefix.length), "player:" + message.author.id, "role:host");
+    break;
+    case "execute_as_set": // set an executor for execute_as
+        if(checkGM(message)) {
+            srcRefSaved = args[0];
+            srcNameSaved = args[1];
+            message.channel.send(`Executing as ${srcRefSaved} (${srcNameSaved}) for \`${stats.prefix}execute_as\``);
+        }
+    break;
+    case "execute_as": // executes an ability 
+        if(checkGM(message)) cmdExecute(message, message.content.substr(11 + stats.prefix.length), srcRefSaved, srcNameSaved);
     break;
     case "grant": // execute - grant add
         if(checkGM(message)) cmdGrant(message, args);
@@ -826,7 +839,7 @@ client.on("messageCreate", async message => {
         let tempPerms = await inventoryGetItem(message.author.id, "bot:temp");
         if(tempPerms === 0) {
             message.channel.send(`⛔ You have not unlocked the ${stats.prefix}temp command.`);
-            return;
+            break;
         }
         cmdTemp(message, args);
     break;
@@ -858,9 +871,9 @@ client.on("messageCreate", async message => {
 		if(checkGM(message)) cmdLootForce(message, args);
     break;
     case "xp":
-        if(isSignedUp(message.member) || isParticipant(message.member)) {
-            message.channel.send(`⛔ You cannot use this command while signed up or ingame.`);
-            return;
+        if(isParticipant(message.member)) {
+            message.channel.send(`⛔ You cannot use this command while ingame.`);
+            break;
         }
 		cmdXP(message, args);
     break;
@@ -870,11 +883,15 @@ client.on("messageCreate", async message => {
     case "inventory":
         if(isSignedUp(message.member) || isParticipant(message.member)) {
             message.channel.send(`⛔ You cannot use this command while signed up or ingame.`);
-            return;
+            break;
         }
 		cmdInventory(message, args);
     break;
     case "icon":
+        if(isParticipant(message.member)) {
+            message.channel.send(`⛔ You cannot use this command while ingame.`);
+            break;
+        }
 		cmdIcon(message, args);
     break;
 	/* Invalid Command */
@@ -1212,7 +1229,7 @@ client.on('interactionCreate', async interaction => {
                     await choicesUpdateByOwner(choiceName, chooser, "chosen", 0);
                     
                     // create new choice
-                    choicesChoosingPrompt(choiceData.src_name, choiceData.owner, JSON.parse(choiceData.ability), choiceData.prompt);
+                    choicesChoosingPrompt(choiceData.src_name, choiceData.owner, JSON.parse(choiceData.ability), choiceData.prompt, false);
                 } else {
                     // update message
                     embed = basicEmbed(`${orig_text}${PROMPT_SPLIT} Cannot unchose choice.`, EMBED_RED);

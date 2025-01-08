@@ -22,6 +22,7 @@ module.exports = function() {
 			case "list_all": if(checkSafe(message)) cmdPacksListAll(message.channel); break;
 			case "set": if(checkGM(message)) cmdPacksSet(message.channel, args); break;
 			case "unlock": if(checkGM(message)) cmdPacksUnlock(message.channel, args); break;
+			case "delete": if(checkGM(message)) cmdPacksDelete(message.channel, args); break;
 			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
 		}
 	}
@@ -29,7 +30,8 @@ module.exports = function() {
     /**
     Command: $packs list_all
     **/
-    this.AVAILABLE_PACKS = ["glitch","negate","grayscale","edge","emboss","silhouette","pixel","pixel2","pixel3","pixel4","scatter","red","green","blue","yellow","purple","cyan","flip","pale","bw","wire","wire2","rainbow","rainbow2","rainbow3","ts","oil","wave","swirl","noise","cycle","equalize","fourier_noise","fourier_equalize","fourier_oil","fourier_modulate","fourier_wire","glitch2","eyes","thief","mask","eye","fourier_eye","citizen_eye","items","bear","wolfify","grid","light_and_shadow","duo_color","wood","coin"];
+    this.AVAILABLE_PACKS = ["glitch","negate","grayscale","edge","emboss","silhouette","pixel","pixel2","pixel3","pixel4","scatter","red","green","blue","yellow","purple","cyan","flip","pale","bw","wire","wire2","rainbow","rainbow2","rainbow3","ts","oil","wave","swirl","noise","cycle","equalize","fourier_noise","fourier_equalize","fourier_oil","fourier_modulate","fourier_wire","glitch2","eyes","thief","mask","eye","fourier_eye","citizen_eye","items","bear","wolfify","grid","light_and_shadow","duo_color","wood","coin","coin_animated", "glitch_animated","wave_animated","spin","rainbow_animated"];
+    this.ANIMATED_PACKS = [53, 54, 55, 56, 57];
     this.cmdPacksListAll = function(channel) {
         let packs1 = [`${getEmoji('pack_default')} Default - 0`], packs2 = [], packs3 = [];
         let third = Math.ceil(AVAILABLE_PACKS.length / 3);
@@ -56,7 +58,7 @@ module.exports = function() {
             let half = Math.ceil(unlockedPacks.length / 2);
             for(let i = 0; i < half; i++) packs1.push(`${getEmoji('pack_'+unlockedPacks[i][1])} ${toTitleCase(unlockedPacks[i][1])} - ${unlockedPacks[i][0]}`);
             if(unlockedPacks.length > 1) for(let i = half; i < unlockedPacks.length; i++) packs2.push(`${getEmoji('pack_'+unlockedPacks[i][1])} ${toTitleCase(unlockedPacks[i][1])} - ${unlockedPacks[i][0]}`);
-            let embed = { title: "Available Packs", description: "Here is a list of skinpacks available for you. You can switch skinpack by running `" + stats.prefix + "packs select <ID>`, where you replace \`<ID>\` with the __number__ of the skinpack you want to select.", color: 8984857, fields: [ {}, {} ] };
+            let embed = { title: "Available Packs", description: `<@${author.id}>, here is a list of skinpacks available for you. You can switch skinpack by running \`${stats.prefix}packs select <ID>\`, where you replace \`<ID>\` with the __number__ of the skinpack you want to select.`, color: 8984857, fields: [ {}, {} ] };
             embed.fields[0] = { name: "_ _", "value": packs1.join("\n"), inline: true };
             embed.fields[1] = { name: "_ _", "value": packs2.join("\n"), inline: true };
             channel.send({ embeds: [ embed ] });
@@ -66,7 +68,7 @@ module.exports = function() {
             for(let i = 0; i < third; i++) packs1.push(`${getEmoji('pack_'+unlockedPacks[i][1])} ${toTitleCase(unlockedPacks[i][1])} - ${unlockedPacks[i][0]}`);
             for(let i = third; i < third * 2; i++) packs2.push(`${getEmoji('pack_'+unlockedPacks[i][1])} ${toTitleCase(unlockedPacks[i][1])} - ${unlockedPacks[i][0]}`);
             for(let i = third * 2; i < unlockedPacks.length; i++) packs3.push(`${getEmoji('pack_'+unlockedPacks[i][1])} ${toTitleCase(unlockedPacks[i][1])} - ${unlockedPacks[i][0]}`);
-            let embed = { title: "Available Packs", description: "Here is a list of skinpacks available for you. You can switch skinpack by running `" + stats.prefix + "packs select <ID>`, where you replace \`<ID>\` with the __number__ of the skinpack you want to select.", color: 8984857, fields: [ {}, {}, {} ] };
+            let embed = { title: "Available Packs", description: `<@${author.id}>, here is a list of skinpacks available for you. You can switch skinpack by running \`${stats.prefix}packs select <ID>\`, where you replace \`<ID>\` with the __number__ of the skinpack you want to select.`, color: 8984857, fields: [ {}, {}, {} ] };
             embed.fields[0] = { name: "_ _", "value": packs1.join("\n"), inline: true };
             embed.fields[1] = { name: "_ _", "value": packs2.join("\n"), inline: true };
             embed.fields[2] = { name: "_ _", "value": packs3.join("\n"), inline: true };
@@ -122,7 +124,34 @@ module.exports = function() {
             // set packs
             await sqlProm("INSERT INTO pack_unlocks (player, pack) VALUES (" + connection.escape(user) + "," + connection.escape(num) + ")");
             await cachePacks();
-            channel.send(`✅ Unlocked skinpack to \`${num}\` (${toTitleCase(AVAILABLE_PACKS[num-1])}) for <@${user}>.`);
+            channel.send(`✅ Unlocked skinpack \`${num}\` (${toTitleCase(AVAILABLE_PACKS[num-1])}) for <@${user}>.`);
+        } else {
+			// Invalid pack
+			channel.send("⛔ Syntax error. `" + args[2] + "` is not a valid pack!");
+			return;
+        }
+    }
+    
+    /**
+    Command: $packs delete
+    **/
+    this.cmdPacksDelete = async function(channel, args) {
+        if(!args[1] || !args[2]) {
+            channel.send("⛔ Syntax error. Not enough parameters!");
+            return;
+        }
+        let user = parseUser(channel, args[1]);
+        if(!user) {
+			// Invalid user
+			channel.send("⛔ Syntax error. `" + args[1] + "` is not a valid player!");
+			return;
+		}
+        let num = + args[2];
+        if(num > 0 && num <= AVAILABLE_PACKS.length) {
+            // set packs
+            await sqlProm("DELETE FROM pack_unlocks WHERE player=" + connection.escape(user) + " AND pack=" + connection.escape(num));
+            await cachePacks();
+            channel.send(`✅ Deleted skinpack \`${num}\` (${toTitleCase(AVAILABLE_PACKS[num-1])}) for <@${user}>.`);
         } else {
 			// Invalid pack
 			channel.send("⛔ Syntax error. `" + args[2] + "` is not a valid pack!");
@@ -200,6 +229,10 @@ module.exports = function() {
         let pack = getPack(id);
         if(pack === 0) {
             return iconRepoBaseUrl;
+        } else if(ANIMATED_PACKS.includes(pack)) {
+            let pName = AVAILABLE_PACKS[pack - 1];
+            let url = skinpackUrl(pName);
+            return url.replace(/\.php/, ".gif");
         } else {
             let pName = AVAILABLE_PACKS[pack - 1];
             return skinpackUrl(pName);

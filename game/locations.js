@@ -147,20 +147,22 @@ module.exports = function() {
             // get permissions
             const members = locations[i].members.toLowerCase().split(",");
             const viewers = locations[i].viewers.toLowerCase().split(",");
+            const displayName = locations[i].display_name;
             let permissions = [ getPerms(mainGuild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []) ];
             // add member permissions
             members.forEach(mem => {
                 let perm = getLocationPermissionsType(mem, ["write","read"], []);
                 if(perm) permissions.push(perm);
+                else console.log(`Unknown viewer ${mem} for location ${displayName}.`);
             });
             // add viewer permissions
             viewers.forEach(view => {
                 let perm = getLocationPermissionsType(view, ["read"], ["write"]);
                 if(perm) permissions.push(perm);
+                else console.log(`Unknown viewer ${view} for location ${displayName}.`);
             });
             
             // create channel
-            const displayName = locations[i].display_name;
             let newLocChannel = await mainGuild.channels.create({ name: displayName, type: ChannelType.GuildText, permissionOverwrites: permissions, parent: publicCat });
             newLocChannel.setParent(publicCat, { lockPermissions: false });
             
@@ -186,7 +188,7 @@ module.exports = function() {
             case "ghost":
                 return stats.ghost ? getPerms(stats.ghost, allow, deny) : null; 
             case "substitute":
-                return stats.substitute ? getPerms(stats.substitute, allow, deny) : null; 
+                return stats.sub ? getPerms(stats.sub, allow, deny) : null; 
             default: // check if a matching discord role exists
                 let filtered = cachedDR.filter(el => el.name === type);
                 return filtered.length === 1 ? getPerms(filtered[0].id, allow, deny) : null;

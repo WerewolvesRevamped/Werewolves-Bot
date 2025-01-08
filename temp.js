@@ -106,6 +106,7 @@ module.exports = function() {
                 "icon": ["icons"],
                 "card": ["&"],
                 "xp": ["level", "experience", "levels"],
+                "execute_as_set": ["exeas"],
         };
     this.parseAlias = function(alias) {
         for(let cmd in ALIASES) {

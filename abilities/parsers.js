@@ -1383,6 +1383,13 @@ module.exports = function() {
                     abilityLog(`❗ **Error:** Invalid alignment selector target \`${selectorTarget}\`!`);
                     return [ ];
                 }
+            case "@option":
+                if(additionalTriggerData.chosen) {
+                    return [ parseTeam(additionalTriggerData.chosen) ];
+                } else {
+                    abilityLog(`❗ **Error:** Invalid alignment selector target \`${selectorTarget}\`!`);
+                    return [ ];
+                }
             // all teams
             case "&all":
                 let allTeams = await getAllTeams();
@@ -1435,7 +1442,7 @@ module.exports = function() {
                     let contents = selectorTarget.match(ADVANCED_SELECTOR_TEAM);
                     return await parseAdvancedTeamSelector(contents[1], self, additionalTriggerData);
                 } else {
-                    abilityLog(`❗ **Error:** Invalid team selector target \`${selectorTarget}\`!`);
+                    abilityLog(`❗ **Error:** Invalid alignment selector target \`${selectorTarget}\`!`);
                     return [ ];
                 }
         }

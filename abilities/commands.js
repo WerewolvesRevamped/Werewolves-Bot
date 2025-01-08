@@ -7,10 +7,10 @@ module.exports = function() {
     Command: Execute
     executes an ability
     **/
-    this.cmdExecute = async function(message, ability) {
-        let feedback = await executeAbility("player:" + message.author.id, "role:host", JSON.parse(ability));
-        if(feedback.msg) message.channel.send(basicEmbed(feedback.msg, EMBED_GREEN));
-        else if(feedback.success) message.channel.send(basicEmbed(feedback.success, EMBED_GREEN));
+    this.cmdExecute = async function(channel, ability, src_ref, src_name) {
+        let feedback = await executeAbility(src_ref, src_name, JSON.parse(ability));
+        if(feedback.msg) channel.send(basicEmbed(feedback.msg, EMBED_GREEN));
+        else if(feedback.success) channel.send(basicEmbed(feedback.success, EMBED_GREEN));
     }
 	
 	/**

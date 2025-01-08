@@ -835,7 +835,7 @@ module.exports = function() {
     function parseRoleReply(roleName, message = null) {
         let parsedRole = parseRole(roleName);
         if(verifyRole(parsedRole)) { // direct role
-            return [`\`${toTitleCase(role)}\``, `${parsedRole}[role]`];
+            return [`\`${toTitleCase(parsedRole)}\``, `${parsedRole}[role]`];
         } else {
             let rSplit = roleName.toLowerCase().split(/[\.,\-!\?\s ]/).filter(el => !el.match(/^\d+$/));
             let parsedRoles;
