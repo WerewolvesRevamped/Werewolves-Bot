@@ -644,8 +644,8 @@ module.exports = function() {
         await sqlProm(`UPDATE active_attributes SET val4=${newIdSelector} WHERE val4=${oldIdSelector}`);
         await sqlProm(`UPDATE active_attributes SET target=${newIdSrc} WHERE target=${oldIdSrc}`);
         await sqlProm(`UPDATE active_groups SET target=${newIdSrc} WHERE target=${oldIdSrc}`);
-        await sqlProm(`UPDATE active_polls SET src_ref=${newIdSrc} WHERE src_ref=${oldIdSrc}`);
-        await sqlProm(`UPDATE active_polls SET target=${newIdSrc} WHERE target=${oldIdSrc}`);
+        await sqlProm(`UPDATE polls SET src_ref=${newIdSrc} WHERE src_ref=${oldIdSrc}`);
+        await sqlProm(`UPDATE polls SET target=${newIdSrc} WHERE target=${oldIdSrc}`);
         await sqlProm(`UPDATE choices SET src_ref=${newIdSrc} WHERE src_ref=${oldIdSrc}`);
         await sqlProm(`UPDATE choices SET owner=${newIdSrc} WHERE owner=${oldIdSrc}`);
         await sqlProm(`UPDATE connected_channels SET id=${newId} WHERE id=${oldId}`);
