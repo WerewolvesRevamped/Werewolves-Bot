@@ -24,11 +24,7 @@ module.exports = function() {
 			message.channel.send("⛔ Permission error. You cannot create spam ccs."); 
             return;
         }
-        
-        if(args[0] === "create" && message.author.id === "544125116640919557") {
-			message.channel.send("⛔ Permission error. You cannot create ccs."); 
-            return;
-        }
+
         
 		// Check Subcommand
 		switch(args[0]) {
