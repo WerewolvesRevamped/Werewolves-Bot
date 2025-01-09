@@ -51,7 +51,7 @@ module.exports = function() {
                     return { msg: "Absence failed! " + abilityError, success: false };
                 }
                 let loc = await parseLocation(ability.absence_at, src_ref, additionalTriggerData);
-                if(loc.type == null) return { msg: "Absence failed! " + abilityError, success: false }; // no location found
+                if(loc.type == null || loc.multiple) return { msg: "Absence failed! " + abilityError, success: false }; // no location found
                 loc = loc.value;
                 loc = await applyRedirection(loc, src_ref, ability.type, ability.subtype, additionalTriggerData);
                 console.log(loc);

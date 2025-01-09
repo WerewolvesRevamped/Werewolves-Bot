@@ -1529,21 +1529,21 @@ module.exports = function() {
         // check what type of location it is
         if(selectorTarget[0] === "#") { // location is a channel 
             if(verifyLocationName(selectorTarget)) {
-                return { value: parseLocationName(selectorTarget), type: "location", default: false };
+                return { value: parseLocationName(selectorTarget), type: "location", default: false, multiple: false };
             } else if(verifyGroup(selectorTarget)) {
                 let group = await parseGroup(selectorTarget, self, additionalTriggerData, true);
-                return { value: group, type: "group", default: false };   
+                return { value: group, type: "group", default: false, multiple: false };   
             } else {
                 let def = cachedLocations[0]; // default is whatever location is first
                 abilityLog(`❗ **Error:** Invalid location \`${selectorTarget}\`. Defaulted to \`${def}\`!`);
-                return { value: def, type: "location", default: true };              
+                return { value: def, type: "location", default: true, multiple: false };              
             }
         } else if(selectorTarget[0] === "`") { // location is an active extra role
             let paers = await parseActiveExtraRoleSelector(selector, self, additionalTriggerData);
-            if(paers.length === 1) return { value: paers[0], type: "player_attr", default: false };
+            if(paers.length === 1) return { value: paers[0], type: "player_attr", default: false, multiple: false };
             // else - not really an error... this should be a [] output 
             //abilityLog(`❗ **Error:** Invalid active extra role location \`${selectorTarget}\`!`);
-            return { value: null, type: null, default: true };
+            return { value: null, type: null, default: true, multiple: false };
         } else { // location is a player
             if(selectorTarget === "@self") {
                 if(!self) { // if no self is specified, @Self is invalid
@@ -1555,23 +1555,23 @@ module.exports = function() {
                 switch(type) {
                     default:
                         abilityLog(`❗ **Error:** Used \`@Self\` with invalid self type \`${type}\`!`);
-                        return { value: null, type: null, default: true };
+                        return { value: null, type: null, default: true, multiple: false };
                     case "player":
-                        return { value: val, type: "player", default: false };
+                        return { value: val, type: "player", default: false, multiple: false };
                     case "player_attr":
-                        return { value: val, type: "player_attr", default: false };
+                        return { value: val, type: "player_attr", default: false, multiple: false };
                     case "attribute":
                         let source = getCustomAttributeOwner(val);
-                        return { value: srcToValue(source), type: srcToType(source), default: false };
+                        return { value: srcToValue(source), type: srcToType(source), default: false, multiple: false };
                     case "group":
-                        return { value: val, type: "group", default: false };
+                        return { value: val, type: "group", default: false, multiple: false };
                 }
             } else if(selectorTarget === "@attacklocation") {
                 // try attacker
                 if(additionalTriggerData.attacker) { // if no self is specified, @Self is invalid
                     let val = srcToValue(additionalTriggerData.attacker);
                     let typ = srcToType(additionalTriggerData.attacker);
-                    if(typ === "player") return { value: val, type: "player", default: false};
+                    if(typ === "player") return { value: val, type: "player", default: false, multiple: false };
                 }
                 // try attack source
                 if(additionalTriggerData.attack_source) {
@@ -1579,7 +1579,7 @@ module.exports = function() {
                     let typ = srcToType(additionalTriggerData.attack_source);
                     if(typ === "group") {
                         let groupData = await groupGetData(val);
-                        return { value: groupData.channel_id, type: "group", default: false};
+                        return { value: groupData.channel_id, type: "group", default: false, multiple: false };
                     }
                 }
                 abilityLog(`❗ **Error:** Used \`@AttackLocation\` in invalid context!`);
@@ -1587,10 +1587,9 @@ module.exports = function() {
             } else {
                 let parsedPlayer = await parsePlayerSelector(selectorTarget, self, additionalTriggerData);
                 if(parsedPlayer.length != 1) {
-                    abilityLog(`❗ **Error:** Cannot use ${parsedPlayer.length} players as a location!`);
-                    return { value: null, type: null, default: true };
+                    return { value: parsedPlayer, type: "players", default: false, multiple: true };
                 }
-                return { value: parsedPlayer[0], type: "player", default: false };
+                return { value: parsedPlayer[0], type: "player", default: false, multiple: false };
             }
         }
     }

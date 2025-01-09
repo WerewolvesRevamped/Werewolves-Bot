@@ -18,6 +18,10 @@ module.exports = function() {
         
         // parse parameters
         let target = await parseLocation(ability.target, src_ref, additionalTriggerData);
+        if(target.multiple) {
+            abilityLog(`❗ **Error:** Location type \`${target.type}\` is unsupported!`);
+            return { msg: "Conversation reset failed! " + abilityError, success: false };
+        }
         if(target.type == null) return { msg: "", success: true }; // no location found
         target.value = await applyRedirection(target.value, src_ref, ability.type, "", additionalTriggerData);
         

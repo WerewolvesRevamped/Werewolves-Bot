@@ -33,6 +33,10 @@ module.exports = function() {
                 }
                 // parse parameters
                 let pollLocation = await parseLocation(ability.poll_location, src_ref, additionalTriggerData);
+                if(pollLocation.multiple) {
+                    abilityLog(`❗ **Error:** Location type \`${pollLocation.type}\` is unsupported!`);
+                    return { msg: "Poll manipulation failed! " + abilityError, success: false };
+                }
                 let pollName =  ability.poll_name ? (await parseInfo(ability.poll_name)) : pollType;
                 result = await pollCreate(src_name, src_ref, pollType, pollName, pollLocation);
                 return result;

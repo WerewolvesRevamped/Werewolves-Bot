@@ -104,6 +104,17 @@ module.exports = function() {
             
                 abilitySend(`player:${loc.value}`, info, EMBED_GRAY, false, false, img, "Announcement");
             break;
+            case "players":
+                for(let i = 0; i < loc.value.length; i++) {
+                    // handle visit
+                    if(additionalTriggerData.parameters.visitless !== true) {
+                        let result = await visit(src_ref, loc.value[i], info, "announcement", "immediate");
+                        if(result) return visitReturn(result, "Announcement failed!", "");
+                    }
+                
+                    abilitySend(`player:${loc.value[i]}`, info, EMBED_GRAY, false, false, img, "Announcement");
+                }
+            break;
             case "player_attr":
                 abilitySend(`player_attr:${loc.value}`, info, EMBED_GRAY, false, false, img, "Announcement");
             break;
