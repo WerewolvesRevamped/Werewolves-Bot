@@ -24,7 +24,7 @@ module.exports = function() {
         disguise = disguise.replace(/`/g, "");
         // parse parameters
         let target = await parseLocation(ability.target, src_ref, additionalTriggerData);
-        if(target.type == null || loc.multiple) return { msg: "Whispering failed! " + abilityError, success: false }; // no location found
+        if(target.type == null || target.multiple) return { msg: "Whispering failed! " + abilityError, success: false }; // no location found
         let dur_type = parseDuration(ability.duration ?? "permanent");
         
         // handle visit
