@@ -196,6 +196,11 @@ client.on("messageCreate", async message => {
         return;
     }
     
+    if(!message.author.bot && message.reference && message.mentions.repliedUser === null && message.type === 0) {
+		cmdWebhook(message.channel, message.member, ["**Forwarded Message**","\n*<@" + message.author.id + "> You're not allowed to forward messages during the game!*"]);
+        message.delete();
+    }
+    
     // Check if message is a prompt reply
     if(
         !message.author.bot // not from bot
@@ -259,7 +264,7 @@ client.on("messageCreate", async message => {
                     let newLevel = (+activity[0].level) + 1;
                     let reqXpLevelup = LEVELS[newLevel];
                     let randChance = Math.random();
-                    if(reqXpLevelup && reqXpLevelup <= ((+activity[0].count) + 1) && randChance < 0.1 && !isParticipant(message.member)) {
+                    if(reqXpLevelup && reqXpLevelup <= ((+activity[0].count) + 1) && randChance < 0.25 && !isParticipant(message.member) && !isHost(message.member)) {
                         console.log(`Level Up for ${message.member.displayName} to Level ${newLevel}!`);
                         await sleep(30000); // delay level up by 30s
                         await sqlPromEsc("UPDATE activity SET level=level+1 WHERE player=", message.author.id);

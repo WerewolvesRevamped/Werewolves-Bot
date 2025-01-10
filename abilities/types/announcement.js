@@ -62,7 +62,7 @@ module.exports = function() {
     **/
      this.announcementImmediate = async function(src_ref, info, loc, additionalTriggerData) {
         let result;
-        if(!(".;!?\"'-".split("").includes(info[-1]))) info += ".";
+        if(!(".;!?\"'-`".split("").includes(info[-1]))) info += ".";
         // get role image if applicable
         let spl = info.split(" ");
         let img = null;

@@ -29,6 +29,7 @@ module.exports = function() {
                 let comp = await parseNumber(scaling.compare);
                 let compTo = scaling.compare_to;
                 let quant = scaling.quantity;
+                console.log("DYNAMIC SCALING", scaling.compare, comp, compTo, quant);
                 switch(scaling.compare_type) {
                     case "equal_to":
                         if(comp == compTo) return quant;

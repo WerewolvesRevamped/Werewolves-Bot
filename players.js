@@ -621,7 +621,7 @@ module.exports = function() {
         switchRoles(newPlayerMember, message.channel, stats.sub, stats.participant, "substitute", "participant");
         
         // old player: remove particpant role, add dead participant role
-        switchRoles(originalPlayerMember, message.channel, stats.dead_participant, stats.sub, "dead participant", "substitute");
+        switchRoles(originalPlayerMember, message.channel, stats.participant, stats.dead_participant, "participant", "dead participant");
         
         // update various additional tables
         await sqlProm(`UPDATE action_data SET src_ref=${newIdSrc} WHERE src_ref=${oldIdSrc}`);
@@ -1243,6 +1243,12 @@ module.exports = function() {
 	this.isSenior = function(member) {
         if(!member) return false;
 		return member && member.roles && (member.roles.cache.get(stats.senior_gamemaster));
+	}
+    
+	/* Check if a member is a Host */
+	this.isHost = function(member) {
+        if(!member) return false;
+		return member && member.roles && (member.roles.cache.get(stats.host));
 	}
 
 	/* Check if a member is a (living) participant */
