@@ -49,10 +49,9 @@ module.exports = function() {
     Command: $packs list
     **/
     this.cmdPacksList = async function(channel, author) {
-        let unlockedPacks = await sqlPromEsc("SELECT pack FROM pack_unlocks WHERE player=", author.id);
-        unlockedPacks = unlockedPacks.map(el => [el.pack, AVAILABLE_PACKS[(+el.pack)-1]]);
+        let unlockedPacks = await sqlPromEsc("SELECT * FROM inventory WHERE player=", author.id);
+        unlockedPacks = unlockedPacks.filter(el => el.item.substr(0, 2) === "sp").map(el => [el.item.split(":")[1], AVAILABLE_PACKS[(+el.item.split(":")[1])-1]]);
         unlockedPacks = unlockedPacks.sort((a,b) => a[0] - b[0]); 
-        console.log(unlockedPacks);
         if(unlockedPacks.length < 40) {
             let packs1 = [`${getEmoji('pack_default')} Default - 0`], packs2 = [];
             let half = Math.ceil(unlockedPacks.length / 2);
@@ -122,7 +121,12 @@ module.exports = function() {
         let num = + args[2];
         if(num > 0 && num <= AVAILABLE_PACKS.length) {
             // set packs
-            await sqlProm("INSERT INTO pack_unlocks (player, pack) VALUES (" + connection.escape(user) + "," + connection.escape(num) + ")");
+            let spPerms = await inventoryGetItem(user, "sp:" + num);
+            if(spPerms != 0) {
+                channel.send("⛔ Command error. `" + args[2] + "` is already unlocked!");
+                return;
+            }
+            await sqlProm("INSERT INTO inventory (player, item, count) VALUES (" + connection.escape(user) + "," + connection.escape("sp:" + num) + ",1)");
             await cachePacks();
             channel.send(`✅ Unlocked skinpack \`${num}\` (${toTitleCase(AVAILABLE_PACKS[num-1])}) for <@${user}>.`);
         } else {
@@ -149,7 +153,7 @@ module.exports = function() {
         let num = + args[2];
         if(num > 0 && num <= AVAILABLE_PACKS.length) {
             // set packs
-            await sqlProm("DELETE FROM pack_unlocks WHERE player=" + connection.escape(user) + " AND pack=" + connection.escape(num));
+            await sqlProm("DELETE FROM inventory WHERE player=" + connection.escape(user) + " AND item=" + connection.escape("sp:" + num));
             await cachePacks();
             channel.send(`✅ Deleted skinpack \`${num}\` (${toTitleCase(AVAILABLE_PACKS[num-1])}) for <@${user}>.`);
         } else {
@@ -175,8 +179,8 @@ module.exports = function() {
 		}
         let num = + args[1];
         if(num >= 0 && num <= AVAILABLE_PACKS.length) {
-            let packUnlockStatus = await sqlPromOneEsc("SELECT * FROM pack_unlocks WHERE player=" + connection.escape(author.id) + " AND pack=", num);
-            if(num === 0 || packUnlockStatus) {
+            let spPerms = await inventoryGetItem(author.id, "sp:" + num);
+            if(num === 0 || spPerms != 0) {
                 // set packs
                 await sqlPromEsc("INSERT INTO packs (player, pack) VALUES (" + connection.escape(user) + "," + connection.escape(num) + ") ON DUPLICATE KEY UPDATE pack=", num);
                 await cachePacks();

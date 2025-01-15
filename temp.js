@@ -17,6 +17,26 @@ module.exports = function() {
         ["","🇩"], 
         ["","🇪"], 
         ["","🇫"], 
+        ["","🇬"],
+        ["","🇭"],
+        ["","🇮"],
+        ["","🇯"],
+        ["","🇰"],
+        ["","🇱"],
+        ["","🇲"],
+        ["","🇳"],
+        ["","🇴"],
+        ["","🇵"],
+        ["","🇶"],
+        ["","🇷"],
+        ["","🇸"],
+        ["","🇹"],
+        ["","🇺"],
+        ["","🇻"],
+        ["","🇼"],
+        ["","🇽"],
+        ["","🇾"],
+        ["","🇿"],
         /** Game Masters **/ 
         ["242983689921888256","🛠️"], // Ts
         ["277156693765390337","🏹"], // Vera
@@ -107,7 +127,9 @@ module.exports = function() {
                 "card": ["&"],
                 "xp": ["level", "experience", "levels"],
                 "execute_as_set": ["exeas"],
+                "death_message": ["dmsgs", "death_messages", "dmsg"],
         };
+        
     this.parseAlias = function(alias) {
         for(let cmd in ALIASES) {
             if(ALIASES[cmd].indexOf(alias) != -1) return cmd;

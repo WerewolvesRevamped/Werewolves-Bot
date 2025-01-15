@@ -1,15 +1,15 @@
 /* Discord */
 const { Client, Intents, Options, GatewayIntentBits, ChannelType, MessageType, OverwriteType, PermissionsBitField } = require('discord.js');
-    global.client = new Client({ 
-        intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildWebhooks, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessages, GatewayIntentBits.DirectMessageReactions],
-        sweepers: {
-            ...Options.DefaultSweeperSettings,
-            messages: {
-                interval: 86400, // Every 24 hours...
-                lifetime: 86400,	// Remove messages older than 24 hours.
-            }
+global.client = new Client({ 
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildWebhooks, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessages, GatewayIntentBits.DirectMessageReactions],
+    sweepers: {
+        ...Options.DefaultSweeperSettings,
+        messages: {
+            interval: 86400, // Every 24 hours...
+            lifetime: 86400,	// Remove messages older than 24 hours.
         }
-    });
+    }
+});
 require("./discord.js")();
 
 /**
@@ -19,27 +19,15 @@ const { exec } = require('node:child_process')
 
 config = require("./config.json");
 
-    
 
-
-/* Utility Modules */
+/* V1 Modules */
 require("./stats.js")();
 require("./confirm.js")();
-/* Functionality Modules */
 require("./players.js")();
-require("./players/packs.js")();
-require("./players/loot.js")();
-require("./players/loot_commands.js")();
-require("./players/coins.js")();
-require("./players/icons.js")();
-require("./players/xp.js")();
 require("./ccs.js")();
 require("./whispers.js")();
 require("./theme.js")();
-
 require("./temp.js")();
-
-
 
 // V2 Modules
 require("./paths.js")();
@@ -48,6 +36,7 @@ require("./game/game.js")();
 require("./utility/utility.js")();
 require("./abilities/abilities.js")();
 require("./attributes/attributes.js")();
+require("./players/players.js")();
 
 
 var botLoaded = false;
@@ -264,7 +253,7 @@ client.on("messageCreate", async message => {
                     let newLevel = (+activity[0].level) + 1;
                     let reqXpLevelup = LEVELS[newLevel];
                     let randChance = Math.random();
-                    if(reqXpLevelup && reqXpLevelup <= ((+activity[0].count) + 1) && randChance < 0.25 && !isParticipant(message.member) && !isHost(message.member)) {
+                    if(reqXpLevelup && reqXpLevelup <= ((+activity[0].count) + 1) && randChance < 0.25 && !((isParticipant(message.member) || isHost(message.member)) && stats.gamephase == gp.INGAME)) {
                         console.log(`Level Up for ${message.member.displayName} to Level ${newLevel}!`);
                         await sleep(30000); // delay level up by 30s
                         await sqlPromEsc("UPDATE activity SET level=level+1 WHERE player=", message.author.id);
@@ -876,7 +865,7 @@ client.on("messageCreate", async message => {
 		if(checkGM(message)) cmdLootForce(message, args);
     break;
     case "xp":
-        if(isParticipant(message.member)) {
+        if(isParticipant(message.member) && stats.gamephase != gp.POSTGAME) {
             message.channel.send(`⛔ You cannot use this command while ingame.`);
             break;
         }
@@ -886,18 +875,21 @@ client.on("messageCreate", async message => {
 		cmdCoins(message, args);
     break;
     case "inventory":
-        if(isSignedUp(message.member) || isParticipant(message.member)) {
+        if((isSignedUp(message.member) || isParticipant(message.member)) && stats.gamephase != gp.POSTGAME) {
             message.channel.send(`⛔ You cannot use this command while signed up or ingame.`);
             break;
         }
 		cmdInventory(message, args);
     break;
     case "icon":
-        if(isParticipant(message.member)) {
+        if(isParticipant(message.member) && stats.gamephase != gp.POSTGAME) {
             message.channel.send(`⛔ You cannot use this command while ingame.`);
             break;
         }
 		cmdIcon(message, args);
+    break;
+    case "death_message":
+		cmdDeathMessage(message, args);
     break;
 	/* Invalid Command */
 	default:

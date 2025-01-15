@@ -165,11 +165,11 @@ module.exports = function() {
     Get group members
     **/
     this.groupGetMembers = function(groupName) {
-        return sqlPromEsc("SELECT players.id FROM players JOIN active_attributes ON active_attributes.owner=players.id WHERE players.type='player' AND players.alive=1 AND active_attributes.attr_type='group_membership' AND active_attributes.val1=", groupName)
+        return sqlPromEsc("SELECT players.id FROM players JOIN active_attributes ON active_attributes.owner=players.id WHERE players.type='player' AND players.alive=1 AND active_attributes.attr_type='group_membership' AND active_attributes.val1=", groupName);
     }
     
     this.groupGetMembersAll = function(groupName) {
-        return sqlPromEsc("SELECT players.id FROM players JOIN active_attributes ON active_attributes.owner=players.id WHERE players.type='player' AND active_attributes.attr_type='group_membership' AND active_attributes.val1=", groupName)
+        return sqlPromEsc("SELECT players.id FROM players JOIN active_attributes ON active_attributes.owner=players.id WHERE players.type='player' AND active_attributes.attr_type='group_membership' AND active_attributes.val1=", groupName);
     }
     
     
@@ -177,9 +177,9 @@ module.exports = function() {
     group update handler
     **/
     this.updateGroups = async function() {
-        let toBeDisbanded = await sqlProm("SELECT name FROM active_groups WHERE disbanded=0 AND name NOT IN (SELECT DISTINCT val1 FROM active_attributes WHERE attr_type='group_membership' AND alive=1)");
+        let toBeDisbanded = await sqlProm("SELECT name FROM active_groups WHERE disbanded=0 AND name NOT IN (SELECT DISTINCT val1 FROM active_attributes WHERE attr_type='group_membership' AND alive=1 AND val2 <> 'visitor')");
         
-        let toBeReopened = await sqlProm("SELECT name FROM active_groups WHERE disbanded=1 AND name IN (SELECT DISTINCT val1 FROM active_attributes WHERE attr_type='group_membership' AND alive=1)");
+        let toBeReopened = await sqlProm("SELECT name FROM active_groups WHERE disbanded=1 AND name IN (SELECT DISTINCT val1 FROM active_attributes WHERE attr_type='group_membership' AND alive=1 AND val2 <> 'visitor')");
         
         for(let i = 0; i < toBeDisbanded.length; i++) {
             await groupsDisband(toBeDisbanded[i].name);

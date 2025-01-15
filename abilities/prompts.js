@@ -529,14 +529,6 @@ module.exports = function() {
             return;      
         }
         
-        // WIP: TEMPORARY ADDITION
-        if(!isGameMaster(message.member)) {
-            let embed = basicEmbed(`Please wait for a Host to approve this ability.`, EMBED_RED);
-            message.reply(embed);
-            return;
-        }
-        // TEMP END
-        
         // store parsed replies
         let parsedReplies = [];
         // store prompt applied abilities

@@ -30,7 +30,7 @@ module.exports = function() {
         
         let curTime = xpGetTime();
         let oneDay = 288;
-        let pastTime = curTime - oneDay * 30;
+        let pastTime = curTime - oneDay * 15;
         
         let lb = await sqlProm("SELECT * FROM activity WHERE timestamp > " + connection.escape(pastTime) + " ORDER BY count DESC, player DESC");
         

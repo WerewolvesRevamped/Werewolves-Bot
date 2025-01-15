@@ -236,7 +236,8 @@ module.exports = function() {
         }
         
         // add to storytime
-        if(!silent) await bufferStorytime(`<@${player_id}> has died!`);
+        let dmsg = await getDeathMessage(player_id);
+        if(!silent) await bufferStorytime(dmsg);
 	}   
     
     /** PUBLIC
