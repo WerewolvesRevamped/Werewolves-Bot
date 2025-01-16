@@ -125,7 +125,8 @@ module.exports = function() {
         Custom: 4,
         Competing: 5
     }
-    this.getDeathMessage = async function(pid) {
+    this.getDeathMessage = async function(pid, displayName = null) {
+        if(!displayName) displayName = `<@${pid}>`;
         let dmsg = await sqlPromOneEsc("SELECT message FROM death_message WHERE player=", pid);
         let dmsgText = "%s has died.";
         if(dmsg && dmsg.message) {
@@ -140,7 +141,7 @@ module.exports = function() {
                 break;
             }
         }
-        dmsgText = dmsgText.replace(/%s/g, `<@${pid}>`);
+        dmsgText = dmsgText.replace(/%s/g, displayName);
         return dmsgText;
     }
     
