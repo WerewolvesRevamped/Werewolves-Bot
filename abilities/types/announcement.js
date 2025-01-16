@@ -62,7 +62,7 @@ module.exports = function() {
     **/
      this.announcementImmediate = async function(src_ref, info, loc, additionalTriggerData) {
         let result;
-        if(!(".;!?\"'-`".split("").includes(info[-1]))) info += ".";
+        if(!(".;!?\"'-`".split("").includes(info[info.length - 1]))) info += ".";
         // get role image if applicable
         let spl = info.split(" ");
         let img = null;
@@ -80,12 +80,14 @@ module.exports = function() {
             }
             
             // one word roles
-            let parsedRole2 = parseRole(spl[i]);
-            if(verifyRole(parsedRole2)) {
-                let refImg = await refToImg(`role:${parsedRole2}`);
-                if(refImg) {
-                    img = refImg;
-                    break;
+            if(spl[i].length > 4) { // avoid really short aliases
+                let parsedRole2 = parseRole(spl[i]);
+                if(verifyRole(parsedRole2)) {
+                    let refImg = await refToImg(`role:${parsedRole2}`);
+                    if(refImg) {
+                        img = refImg;
+                        break;
+                    }
                 }
             }
         }

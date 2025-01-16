@@ -236,7 +236,7 @@ module.exports = function() {
         }
         
         // add to storytime
-        let dmsg = await getDeathMessage(player_id);
+        let dmsg = await getDeathMessage(player_id, `${idToEmoji(player_id)} <@${player_id}>`);
         if(!silent) await bufferStorytime(dmsg);
 	}   
     

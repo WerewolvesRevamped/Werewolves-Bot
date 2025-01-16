@@ -1700,7 +1700,9 @@ module.exports = function() {
                 let strs = [];
                 // iterate through selector list
                 for(let j = 0; j < parsed.value.length; j++) {
-                    let txt = srcRefToText(`${infType}:${parsed.value[j]}`, parsed.value[j]);
+                    let prefix = "";
+                    if(infType === "player") prefix = idToEmoji(parsed.value[j]) + " ";
+                    let txt = prefix + srcRefToText(`${infType}:${parsed.value[j]}`, parsed.value[j]);
                     strs.push(txt);
                 }
                 // merge selector list

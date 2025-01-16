@@ -127,6 +127,7 @@ module.exports = function() {
     }
     this.getDeathMessage = async function(pid, displayName = null) {
         if(!displayName) displayName = `<@${pid}>`;
+        let nickname = client.users.cache.get(pid).displayName;
         let dmsg = await sqlPromOneEsc("SELECT message FROM death_message WHERE player=", pid);
         let dmsgText = "%s has died.";
         if(dmsg && dmsg.message) {
@@ -137,13 +138,51 @@ module.exports = function() {
                 break;
                 case 1:
                     dmsgText =  `%s has died ${getEmoji('realsad')}, better luck next time!`;
-                    client.user.setPresence({ activities: [{ name: 'the game while crying.', type: ActivityType.Watching }], status: 'online' });
+                    setCustomStatus(`Crying about ${nickname}'s death...`);
+                break;
+                case 2:
+                    dmsgText =  `%s died, but they did their best! 🫡`;
+                break;
+                case 3:
+                    let rand = Math.floor(Math.random() * 11);
+                    dmsgText =  `%s's death receives an official WWR Bot Rating of ${rand}/10!`;
+                    setCustomStatus(`Rating ${nickname}'s death: ${rand}/10`);
+                break;
+                case 4:
+                    let ids = await getAllLivingIDs();
+                    for(let i = 0; i < ids.length; i++) {
+                        await sqlProm("INSERT INTO packs (player, pack) VALUES (" + connection.escape(ids[i]) + ",6) ON DUPLICATE KEY UPDATE pack=6");
+                    }
+                    await cachePacks();
+                    dmsgText =  `You will regret killing %s. You have been cursed.`;
+                break;
+                case 5:
+                    dmsgText =  `Why... why did %s have to die... if only they could be resurrected. No, that's nonsense. We're never getting anyone back.`;
+                    setCustomStatus(`Mourning ${nickname}...`);
+                break;
+                case 6:
+                    let randMsgs = ["%s was killed.", "%s has died.", "%s was murdered.", "%s was slaughtered.", "%s will no longer be playing.", "%s is out of the game.", "That's it for %s. Dead.", "No more %s. They're gone."];
+                    dmsgText =  randMsgs[Math.floor(Math.random() * randMsgs.length)];
+                break;
+                case 7:
+                    dmsgText =  `It's horrible, but it seems % has died.`;
+                break;
+                case 8:
+                    dmsgText =  `%s is gone! 🦀`;
+                break;
+                case 9:
+                    dmsgText =  `${getEmoji('crow')} It seems a murder of crow has murdered %s! ${getEmoji('crow')}`;
                 break;
             }
         }
         dmsgText = dmsgText.replace(/%s/g, displayName);
         return dmsgText;
     }
+    
+    this.setCustomStatus = function(message) {
+        client.user.setPresence({ activities: [{ name: "custom", type: ActivityType.Custom, state: message }], status: "online" });
+    }
+    
     
     
     
