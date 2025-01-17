@@ -38,6 +38,7 @@ module.exports = function() {
     this.setspathsPath = `${roleRepoBaseUrl}_paths/sets`;
     this.locationpathsPath = `${roleRepoBaseUrl}_paths/locations`;
     this.pollpathsPath = `${roleRepoBaseUrl}_paths/polls`;
+    this.displayspathsPath = `${roleRepoBaseUrl}_paths/displays`;
     /**
     Website Paths
     **/

@@ -63,7 +63,27 @@ module.exports = function() {
             channel.send(`⛔ Querying info failed.`);
         }
         channel.send(`✅ Querying info completed.`);
-        cacheRoleInfo();
+        cacheRo
+        leInfo();
+    }
+    /**
+    Command: $displays query
+    Runs queryDisplays to query all displays from github
+    **/
+    this.cmdDisplaysQuery = async function(channel) {
+        if(stats.gamephase != gp.NONE) {
+            channel.send("⛔ Command error. Cannot query while ingame.");
+            return;
+        }
+        
+        channel.send(`🔄 Querying displays. Please wait. This may take several minutes.`);
+        try {
+            const output = await queryDisplays();
+            output.forEach(el => channel.send(`❗ ${el}`));
+        } catch(err) {
+            channel.send(`⛔ Querying displays failed.`);
+        }
+        channel.send(`✅ Querying displays completed.`);
     }
     
     /**
@@ -347,6 +367,10 @@ module.exports = function() {
         channel.send(`🔄 Querying locations. Please wait. This may take several minutes.`);
         output = await queryLocations();
         channel.send(`❗ Querying locations completed with \`${output.length}\` errors.`);
+        // query displays
+        channel.send(`🔄 Querying displays. Please wait. This may take several minutes.`);
+        output = await queryDisplays();
+        channel.send(`❗ Querying displays completed with \`${output.length}\` errors.`);
         /** Post Update */
         // cache values
         cacheRoleInfo();
@@ -598,6 +622,48 @@ module.exports = function() {
         const simplifiedContents = splitInfoContents[1] ? splitInfoContents[1].trim() : "";
         // imsert the role into the databse
         sql("INSERT INTO info (name,display_name,contents,simplified) VALUES (" + connection.escape(dbName) + "," + connection.escape(displayName) + "," + connection.escape(mainContents) + "," + connection.escape(simplifiedContents) + ")");
+        // return nothing
+        return null;
+    }
+    
+    /** 
+    Query Displays
+    queries all displays from github
+    **/
+    async function queryDisplays() {
+        return await runQuery(clearDisplays, displayspathsPath, queryDisplayCallback, 2);
+    }
+    
+    /**
+    Clear Displays
+    deletes the entire contents of the displays database
+    **/
+     function clearDisplays() {
+		return sqlProm("DELETE FROM displays");
+	}
+    
+    /** 
+    Query Displays - Callback
+    queries all displays from github
+    **/
+    async function queryInfoCallback(path, name, baseurl = null) {
+        // extract values
+        var displayContents = await queryFile(path, name, baseurl); // get the display contents
+        const dbName = getDBName(name); // get the db name
+        var displayName = name;
+        var matches;
+        // check if a name is present in the file
+        if(matches = displayContents.match(/^\*\*([A-Za-z\- \(\)&!\?,\.']+)\*\*\s*\n/)) {
+            displayName = `${matches[1]}`;
+        }
+        // remove first line, if display name found
+        if(displayName) {
+            let temp = displayContents.split("\n");
+            temp.shift();
+            displayContents = temp.join("\n");
+        }
+        // imsert the role into the databse
+        sql("INSERT INTO info (name, display_name, contents) VALUES (" + connection.escape(dbName) + "," + connection.escape(displayName) + "," + connection.escape(displayContents) + ")");
         // return nothing
         return null;
     }
