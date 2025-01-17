@@ -356,6 +356,7 @@ module.exports = function() {
            ["displays query", PERM.GM, "Queries all displays from github.", "", "Queries all displays from github and stores them locally.", "displays query", ["🔄 Querying displays. Please wait. This may take several minutes.","✅ Querying displays completed."], CMDSTATE.RDY],
             ["displays get", PERM.GM, "Returns all data for a single display.", "<Displays Name>", "Returns all columns stored for a display.", "displays get knives", [], CMDSTATE.RDY],
             ["displays list", PERM.GM, "Lists all available displays.", "", "Lists all locally stored displays.", "displays list", ["✳️ Sending a list of currently existing displays:","Knives"], CMDSTATE.RDY],
+            ["displays active", PERM.GM, "Lists all active displays.", "", "Lists all currently active displays.", "displays active", ["✳️ Sending a list of currently active displays:","Knives"], CMDSTATE.RDY],
         // groups
         ["groups", PERM.GM, "Manages groups.", "<Subcommand>", "Group of commands to handle groups. $help groups <sub-command> for detailed help.", "", [], CMDSTATE.RDY],
             ["groups query", PERM.GM, "Queries all groups from github.", "", "Queries all groups from github and stores them locally.", "groups query", ["🔄 Querying groups. Please wait. This may take several minutes.","✅ Querying groups completed."], CMDSTATE.RDY],

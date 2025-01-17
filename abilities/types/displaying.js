@@ -32,9 +32,8 @@ module.exports = function() {
                     abilityLog(`❗ **Error:** Missing arguments for type \`${ability.type}\`!`);
                     return { msg: "Displaying failed! " + abilityError, success: false };
                 }
-                let newValue = await parseDisplayValue(ability.display_value, src_ref, additionalTriggerData);
                 let newValueIndex = + ability.display_index;
-                result = await displayingUpdate(src_ref, additionalTriggerData, display, newValueIndex, newValue);
+                result = await displayingUpdate(src_ref, additionalTriggerData, display, newValueIndex, ability.display_value);
                 return result;
             break;
         }
@@ -79,6 +78,12 @@ module.exports = function() {
          
         
         await sqlProm("UPDATE active_displays SET val1=" + connection.escape(val1) + ",val2=" + connection.escape(val2) + ",val3=" + connection.escape(val3) + ",val4=" + connection.escape(val4) + " WHERE name=" + connection.escape(display) + " AND src_ref=" + connection.escape(src_ref));
+        
+        let newValueParsed = await parseDisplayValue(newValue, src_ref, additionalTriggerData);
+         val1 = newValueIndex === 1 ? newValueParsed : displayData.val1;
+         val2 = newValueIndex === 2 ? newValueParsed : displayData.val2;
+         val3 = newValueIndex === 3 ? newValueParsed : displayData.val3;
+         val4 = newValueIndex === 4 ? newValueParsed : displayData.val4;
          
          let values = await parseDisplayValues(val1, val2, val3, val4, src_ref, additionalTriggerData);
          

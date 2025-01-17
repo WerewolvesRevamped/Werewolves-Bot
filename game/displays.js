@@ -20,6 +20,7 @@ module.exports = function() {
 			case "query": cmdDisplaysQuery(message.channel); break;
             case "get": cmdDisplaysGet(message.channel, args); break
 			case "list": cmdDisplaysList(message.channel); break;
+			case "active": cmdDisplaysActive(message.channel); break;
 			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
 		}
 	}
@@ -80,6 +81,31 @@ module.exports = function() {
                     let emoji = getLUTEmoji(dis.name, dis.display_name);
                     return `${emoji} **${toTitleCase(dis.display_name)}** (${dis.name})`;
                 }), 40).map(el => el.join(", ")).forEach(el => channel.send(el));
+			} else { 
+				// No displays exist
+				channel.send("⛔ Database error. Could not find any displays!");
+			}
+		}, () => {
+			// DB error
+			channel.send("⛔ Database error. Couldn't look for display list!");
+		});
+	}
+    
+    /**
+    Command: $displays active
+    Lists all active displays
+    **/
+	/* Lists all display names */
+	this.cmdDisplaysActive = function(channel) {
+		// Get all displays
+		sql("SELECT * FROM active_displays", result => {
+			if(result.length > 0) {
+				// At least one display exists
+				channel.send("✳️ Sending a list of currently active displays:");
+				// Send message
+				chunkArray(result.map(dis => {
+                    return `\`${dis.ai_id}\`: **${dis.name}** - ${srcRefToText(dis.src_ref)} [${dis.val1};${dis.val2};${dis.val3};${dis.val4}] ( https://discord.com/channels/${mainGuild.id}/${dis.channel_id}/${dis.message_id} )`;
+                }), 20).map(el => el.join("\n")).forEach(el => channel.send(el));
 			} else { 
 				// No displays exist
 				channel.send("⛔ Database error. Could not find any displays!");
