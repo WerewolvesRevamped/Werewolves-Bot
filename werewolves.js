@@ -291,6 +291,14 @@ client.on("messageCreate", async message => {
                                         embed.description += `\n\nAdditionally, you may now transfer rewards to others using \`${stats.prefix}inventory transfer\`.`;
                                         await inventoryModifyItem(message.author.id, "BOT:invtransfer", 1);
                                     break;
+                                    case 15:
+                                        embed.description += `\n\nAdditionally, you may now recycle rewards into coins using \`${stats.prefix}recycle\`.`;
+                                        await inventoryModifyItem(message.author.id, "BOT:recycle", 1);
+                                    break;
+                                    case 20:
+                                        embed.description += `\n\nAdditionally, you may now update your nickname while out of game \`${stats.prefix}nickname\`.`;
+                                        await inventoryModifyItem(message.author.id, "BOT:nick", 1);
+                                    break;
                                     case 25:
                                         embed.description += `\n\nAdditionally, you may select an icon (that is available as loot) that will be unlocked for you.`;
                                         await inventoryModifyItem(message.author.id, "SPEC:AnyIcon", 1);
@@ -491,7 +499,7 @@ client.on("messageCreate", async message => {
         if(checkGM(message)) cmdEmit(message.channel, argsX);
     break;
     case "execute": // executes an ability 
-        if(checkGM(message)) cmdExecute(message, message.content.substr(8 + stats.prefix.length), "player:" + message.author.id, "role:host");
+        if(checkGM(message)) cmdExecute(message.channel, message.content.substr(8 + stats.prefix.length), "player:" + message.author.id, "role:host");
     break;
     case "execute_as_set": // set an executor for execute_as
         if(checkGM(message)) {
@@ -501,7 +509,7 @@ client.on("messageCreate", async message => {
         }
     break;
     case "execute_as": // executes an ability 
-        if(checkGM(message)) cmdExecute(message, message.content.substr(11 + stats.prefix.length), srcRefSaved, srcNameSaved);
+        if(checkGM(message)) cmdExecute(message.channel, message.content.substr(11 + stats.prefix.length), srcRefSaved, srcNameSaved);
     break;
     case "grant": // execute - grant add
         if(checkGM(message)) cmdGrant(message, args);
@@ -547,6 +555,10 @@ client.on("messageCreate", async message => {
 	/* Infomanage */ // Modify info information for commands such as 'info'
 	case "infomanage":
 		if(checkGM(message)) cmdInfomanage(message, args, argsX);
+	break;
+	/* Displays */ // Manages displays
+	case "displays":
+		if(checkGM(message)) cmdDisplays(message, args, argsX);
 	break;
 	/* groups */ // Command for groups
 	case "groups":
@@ -890,6 +902,12 @@ client.on("messageCreate", async message => {
     break;
     case "death_message":
 		cmdDeathMessage(message, args);
+    break;
+    case "recycle":
+		cmdRecycle(message, args);
+    break;
+    case "nickname":
+		cmdNickname(message, argsX);
     break;
 	/* Invalid Command */
 	default:

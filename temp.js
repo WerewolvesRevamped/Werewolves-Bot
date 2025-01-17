@@ -109,6 +109,7 @@ module.exports = function() {
                 "force_demote_signedup": ["fdsn"],
                 "image": ["img"],
                 "infomanage": ["im"],
+                "displays": ["dis"],
                 "groups": ["group","grp","grps"],
                 "attributes": ["attribute","attr"],
                 "locations": ["location", "loc", "locs"],
@@ -128,6 +129,8 @@ module.exports = function() {
                 "xp": ["level", "experience", "levels"],
                 "execute_as_set": ["exeas"],
                 "death_message": ["dmsgs", "death_messages", "dmsg"],
+                "recycle": ["rec", "re"],
+                "nickname": ["nick"],
         };
         
     this.parseAlias = function(alias) {

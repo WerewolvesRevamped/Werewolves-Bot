@@ -39,6 +39,7 @@ require("./types/obstructing.js")();
 require("./types/shuffle.js")();
 require("./types/emit.js")();
 require("./types/storing.js")();
+require("./types/displaying.js")();
 
 module.exports = function() {
     
@@ -181,6 +182,9 @@ module.exports = function() {
                 break;
                 case "storing":
                     feedback = await abilityStoring(src_refAction, src_name, ability, additionalTriggerData);
+                break;
+                case "displaying":
+                    feedback = await abilityDisplaying(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "feedback":
                     let info = await parseInfo(ability.feedback, src_refAction, additionalTriggerData);

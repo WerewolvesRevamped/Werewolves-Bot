@@ -129,6 +129,7 @@ module.exports = function() {
         cacheSets();
         cacheCategories();
         cacheClasses();
+        cacheDisplays();
 	}
     
     

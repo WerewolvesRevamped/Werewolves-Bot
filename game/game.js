@@ -19,6 +19,7 @@ require("./death.js")();
 require("./channels.js")();
 require("./discord_roles.js")();
 require("./host_information.js")();
+require("./displays.js")();
 
 module.exports = function() {
     
@@ -238,6 +239,8 @@ module.exports = function() {
         killqClear();
         // reset teams
         resetTeams();
+        // reset displays
+        resetDisplays();
         // reset host information
         resetHostInformation();
         // disable action queue checker 

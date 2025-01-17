@@ -4,6 +4,26 @@
 module.exports = function() {
     
     /**
+    Command: $nickname
+    **/
+    this.cmdNickname = async function(message, argsX) {
+        let nickPerms = await inventoryGetItem(message.author.id, "bot:nick");
+        if(nickPerms === 0) {
+            message.channel.send(`⛔ You have not unlocked the ${stats.prefix}nickname command.`);
+            return;
+        } else if(!isGameInvolved(message.member)) {
+            let nick = argsX.join(" ");
+            if(nick.length < 2 || nick.length > 32) {
+                message.channel.send(`⛔ Invalid nickname.`);
+            }
+			message.member.setNickname(nick);
+			message.channel.send("✅ Updated your nickname!");
+		} else {
+            message.channel.send(`⛔ This command is not available to users involved with the current game.`);
+		}
+    }
+    
+    /**
     Command: $newship
     **/
     this.cmdNewship = async function(message) {
@@ -11,7 +31,7 @@ module.exports = function() {
         if(shipPerms === 0) {
             message.channel.send(`⛔ You have not unlocked the ${stats.prefix}newship command.`);
             return;
-        } else if(!isParticipant(message.member)) {
+        } else if(!isGameInvolved(message.member)) {
 			let newShip = message.guild.members.cache.filter(el => el.roles.cache.size >= 5).random().displayName;
             let newShipFull = newShip;
             let displayName = message.member.displayName.split(" ♡ ")[0];
@@ -24,7 +44,7 @@ module.exports = function() {
 			message.member.setNickname(newNick);
             message.channel.send(`${getEmoji('Lover')} You love ${newShipFull}!`);
 		} else {
-            message.channel.send(`⛔ This command is not available to Participants.`);
+            message.channel.send(`⛔ This command is not available to users involved with the current game.`);
 		}
     }
     
@@ -36,7 +56,7 @@ module.exports = function() {
         if(shipPerms === 0) {
             message.channel.send(`⛔ You have not unlocked the ${stats.prefix}newhate command.`);
             return;
-        } else if(!isParticipant(message.member)) {
+        } else if(!isGameInvolved(message.member)) {
 			let newShip = message.guild.members.cache.filter(el => el.roles.cache.size >= 5).random().displayName;
             let newShipFull = newShip;
             let displayName = message.member.displayName.split(" ☠ ")[0];
@@ -49,7 +69,7 @@ module.exports = function() {
 			message.member.setNickname(newNick);
             message.channel.send(`${getEmoji('Reaper')} You hate ${newShipFull}!`);
 		} else {
-            message.channel.send(`⛔ This command is not available to Participants.`);
+            message.channel.send(`⛔ This command is not available to users involved with the current game.`);
 		}
     }
     

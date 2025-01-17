@@ -1286,6 +1286,11 @@ module.exports = function() {
         if(!member) return false;
 		return member.roles.cache.get(stats.sub);
 	}
+    
+    /* Check if member is game involved */
+    this.isGameInvolved = function(member) {
+        return isParticipant(member) || isSignedUp(member) || isSub(member) || isDeadParticipant(member) || isGhost(member);
+    }
 	
 	/* Cache emojis */
 	this.getEmojis = function() {

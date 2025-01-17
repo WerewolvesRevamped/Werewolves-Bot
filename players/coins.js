@@ -19,7 +19,7 @@ module.exports = function() {
 			case "add": if(checkGM(message)) cmdCoinsModify(message.channel, args, "add", 1); break;
 			case "remove": if(checkGM(message)) cmdCoinsModify(message.channel, args, "remove", -1); break;
 			case "list": if(checkSafe(message)) cmdCoinsList(message.channel); break;
-			case "reward": if(message.author.id === "1047268746277949600" || message.author.id === "1055202099400540222") cmdCoinsModify(message.channel, args, "add", 1, true); break;
+			case "reward": if(message.author.id === "1047268746277949600" || message.author.id === "1055202099400540222") cmdCoinsModify(message.channel, args, "reward", 1, true); break;
 			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
 		}
     }
@@ -65,7 +65,7 @@ module.exports = function() {
     this.cmdCoinsGet = async function(channel, args, self = true) {
 		// Check arguments
 		if(!args[1]) { 
-			channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "coins " + type + " <player> <number>`!"); 
+			channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "coins get <player>`!"); 
 			return; 
 		}
         // Get user

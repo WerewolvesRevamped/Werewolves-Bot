@@ -59,6 +59,7 @@ module.exports = function() {
     
         // update target
         await setTarget(src_ref, `${targetType}:${target}`);
+        updateDisplayCheck(`${targetType}:${target}`, "target");
         
         abilityLog(`✅ ${srcRefToText(src_ref)} targeted ${srcRefToText(targetType+':'+target)}.`);
         
@@ -72,6 +73,7 @@ module.exports = function() {
     async function targetingUntarget(src_name, src_ref) {
         // update target
         await setTarget(src_ref, "");
+        updateDisplayCheck(`${targetType}:${target}`, "target");
         
         abilityLog(`✅ ${srcRefToText(src_ref)} untargeted.`);
         

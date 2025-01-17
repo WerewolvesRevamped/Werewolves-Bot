@@ -63,8 +63,7 @@ module.exports = function() {
             channel.send(`⛔ Querying info failed.`);
         }
         channel.send(`✅ Querying info completed.`);
-        cacheRo
-        leInfo();
+        cacheRoleInfo();
     }
     /**
     Command: $displays query
@@ -84,6 +83,7 @@ module.exports = function() {
             channel.send(`⛔ Querying displays failed.`);
         }
         channel.send(`✅ Querying displays completed.`);
+        cacheDisplays();
     }
     
     /**
@@ -631,7 +631,7 @@ module.exports = function() {
     queries all displays from github
     **/
     async function queryDisplays() {
-        return await runQuery(clearDisplays, displayspathsPath, queryDisplayCallback, 2);
+        return await runQuery(clearDisplays, displayspathsPath, queryDisplaysCallback, 2);
     }
     
     /**
@@ -646,7 +646,7 @@ module.exports = function() {
     Query Displays - Callback
     queries all displays from github
     **/
-    async function queryInfoCallback(path, name, baseurl = null) {
+    async function queryDisplaysCallback(path, name, baseurl = null) {
         // extract values
         var displayContents = await queryFile(path, name, baseurl); // get the display contents
         const dbName = getDBName(name); // get the db name
@@ -663,7 +663,7 @@ module.exports = function() {
             displayContents = temp.join("\n");
         }
         // imsert the role into the databse
-        sql("INSERT INTO info (name, display_name, contents) VALUES (" + connection.escape(dbName) + "," + connection.escape(displayName) + "," + connection.escape(displayContents) + ")");
+        sql("INSERT INTO displays (name, display_name, contents) VALUES (" + connection.escape(dbName) + "," + connection.escape(displayName) + "," + connection.escape(displayContents) + ")");
         // return nothing
         return null;
     }

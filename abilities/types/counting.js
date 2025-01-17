@@ -88,6 +88,7 @@ module.exports = function() {
         
         // update counter
         await setCounter(`${targetType}:${target}`, num);
+        updateDisplayCheck(`${targetType}:${target}`, "counter");
         
         abilityLog(`✅ ${srcRefToText(src_ref)} updated ${srcRefToText(targetType+':'+target)}'s counter to \`${num}\`.`);
         
@@ -113,6 +114,7 @@ module.exports = function() {
         
         // update counter
         await setCounter(`${targetType}:${target}`, updatedVal);
+        updateDisplayCheck(`${targetType}:${target}`, "counter");
         
         abilityLog(`✅ ${srcRefToText(src_ref)} incremented ${srcRefToText(targetType+':'+target)}'s counter by \`${num}\` to \`${updatedVal}\`.`);
         
@@ -138,6 +140,7 @@ module.exports = function() {
         
         // update counter
         await setCounter(`${targetType}:${target}`, updatedVal);
+        updateDisplayCheck(`${targetType}:${target}`, "counter");
         
         abilityLog(`✅ ${srcRefToText(src_ref)} decremented ${srcRefToText(targetType+':'+target)}'s counter by \`${num}\` to \`${updatedVal}\`.`);
         

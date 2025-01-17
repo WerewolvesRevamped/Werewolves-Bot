@@ -79,6 +79,11 @@ module.exports = function() {
             // ACTIVE ATTRIBUTE
             case "activeattribute":
                 return { value: await parseActiveAttributeSelector(selector, self, additionalTriggerData, self), type: "activeAttribute" };
+            // DISPLAY
+            case "display":
+                return { value: [ parseDisplay(selector, self, additionalTriggerData) ], type: "display" };
+            case "displayvalue":
+                return { value: [ parseDisplayValue(selector, self, additionalTriggerData) ], type: "displayValue" };
             case "category":
                 return { value: await parseCategory(selector, self, additionalTriggerData), type: "category" };
             case "killingtype":
@@ -1619,6 +1624,47 @@ module.exports = function() {
     }
     
     /**
+    Parse Display
+    parses a display
+    **/
+    this.parseDisplay = function(selector, self = null, additionalTriggerData = {}) {
+        // get target
+        let selectorTarget = selectorGetTarget(selector);
+        if(verifyDisplayName(selectorTarget)) {
+            return selectorTarget;
+        } else {
+            abilityLog(`❗ **Error:** Invalid displays \`${selectorTarget}\`.!`);
+            return null;              
+        }
+    }
+    
+    /**
+    Parse Display Value
+    parses a display value
+    **/
+    this.parseDisplayValue = async function(selector, self = null, additionalTriggerData = {}) {
+        // get target
+        let selectorTarget = selectorGetTarget(selector);
+        switch(selectorTarget) {
+            case "yes":
+                return `<:${client.emojis.cache.get(stats.yes_emoji).name}:${client.emojis.cache.get(stats.yes_emoji).id}>`;
+            case "no":
+                return `<:${client.emojis.cache.get(stats.no_emoji).name}:${client.emojis.cache.get(stats.no_emoji).id}>`;
+            case "counter":
+                let count = await getCounter(self);
+                return count;
+            case "target":
+                let target = await getTarget(self);
+                let targetText = srcRefToText(target);
+                return targetText;
+            default:
+                console.log(selectorGetTarget);
+                let txt = await parseInfo(selector, self, additionalTriggerData);
+                return txt;
+        }
+    }
+    
+    /**
     Parse Success
     bool like type. either success or failure
     **/
@@ -1718,7 +1764,7 @@ module.exports = function() {
     /**
     Parse ability type
     **/
-    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","redirecting","manipulating","whispering","joining","granting","loyalty","obstructing","poll","announcement","changing","","choices","ascend","descend","","counting","reset","","","feedback","success","failure","log","","process_evaluate","abilities","emit","storing"];
+    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","redirecting","manipulating","whispering","joining","granting","loyalty","obstructing","poll","announcement","changing","","choices","ascend","descend","","counting","reset","","","feedback","success","failure","log","","process_evaluate","abilities","emit","storing","displaying"];
     this.parseAbilityType = function(ability_type, self = null, additionalTriggerData = {}) {
         // get target
         let selectorTarget = selectorGetTarget(ability_type);
@@ -1858,6 +1904,7 @@ module.exports = function() {
         [], // abilities
         [], // emit
         [], // storing
+        ["create","change"], // displaying
         ];
     this.parseAbilitySubtype = function(ability_subtype, self = null, additionalTriggerData = {}) {
         // get target

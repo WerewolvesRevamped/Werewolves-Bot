@@ -69,6 +69,19 @@ module.exports = function() {
 	}
     
     /**
+    Cache Displays
+    caches the current state of the displays database
+    **/
+    this.cachedDisplays = [];
+    this.cacheDisplays = function() {
+		sql("SELECT name FROM displays", result => {
+				cachedDisplays = result.map(el => el.name);
+		}, () => {
+			log("Game > ❗❗❗ Unable to cache displays!");
+		});
+	}
+    
+    /**
     Cache Polls
     caches the current state of the polls database
     **/
