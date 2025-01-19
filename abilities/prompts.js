@@ -701,37 +701,50 @@ module.exports = function() {
     function parsePromptReply(text, type, message = null, reverse = false) {
         if(reverse) text = text.split(" ").reverse().join(" "); // invert so a second reply is searched for from end if necessary
         switch(type) {
-            case "player":
+            case "player": {
                 let player = parsePlayerReply(text, message);
                 if(player === false) {
                     if(message) message.reply(basicEmbed("❌ You must specify a valid player.", EMBED_RED));
                     return false;
                 }
                 return player;
-            case "role":
+            }
+            case "dead": {
+                let player = parseDeadReply(text, message);
+                if(player === false) {
+                    if(message) message.reply(basicEmbed("❌ You must specify a valid dead player.", EMBED_RED));
+                    return false;
+                }
+                return player;
+            }
+            case "role": {
                 let role = parseRoleReply(text, message);
                 if(role === false) {
                     if(message) message.reply(basicEmbed("❌ You must specify a valid role.", EMBED_RED));
                     return false;
                 }
                 return role;
-            case "boolean":
+            }
+            case "boolean": {
                 let bool = parseBooleanReply(text, message);
                 if(bool === false) {
                     if(message) message.reply(basicEmbed("❌ You must specify either yes or no.", EMBED_RED));
                     return false;
                 }
                 return bool;
-            case "number":
+            }
+            case "number": {
                 let num = parseNumberReply(text, message);
                 if(num === false) {
                     if(message) message.reply(basicEmbed("❌ You must specify a valid number.", EMBED_RED));
                     return false;
                 }
                 return num;
-            default:
-                if(message) message.reply(basicEmbed("❌ Invalid prompt.", EMBED_RED));
+            }
+            default: {
+                if(message) message.reply(basicEmbed("❌ Invalid prompt type. Contact Hosts immediately.", EMBED_RED));
                 return false;
+            }
         }
     }
     
@@ -741,27 +754,38 @@ module.exports = function() {
     **/
     async function randomPromptReply(type) {
         switch(type) {
-            case "player":
+            case "player": {
                 let ids = await getAllLivingIDs();
                 let randomId = ids[Math.floor(Math.random() * ids.length)];
                 let player = parsePlayerReply(randomId);
                 return player;
-            case "role":
+            }
+            case "dead": {
+                let ids = await getAllDeadIDs();
+                let randomId = ids[Math.floor(Math.random() * ids.length)];
+                let player = parseDeadReply(randomId);
+                return player;
+            }
+            case "role": {
                 let roles = await sqlProm("SELECT name FROM roles");
                 let randomRole = roles[Math.floor(Math.random() * roles.length)];
                 let role = parseRoleReply(randomRole.name);
                 return role;
-            case "boolean":
+            }
+            case "boolean": {
                 let boolRand = Math.floor(Math.random() * 2);
                 let bool = parseBooleanReply(["true","false"][boolRand]);
                 return bool;
-            case "number":
+            }
+            case "number": {
                 let numRand = Math.floor(Math.random() * 11) - 5;
                 let num = parseNumberReply(numRand);
                 return num;
-            default:
+            }
+            default: {
                 abilityLog(`❗ **Error:** Unknown random prompt reply type \`${type}\`!`);
                 return false;
+            }
         }
     }
     
@@ -815,6 +839,62 @@ module.exports = function() {
             }
             if(!isParticipant(member)) { // this applies in case the player is not a participant
                 if(message) message.reply(basicEmbed("❌ Player is not a participant.", EMBED_RED));
+                return false;
+            }
+            return [`${idToEmoji(parsedPlayer)} \`${playerName} (${playerName2})\``, `@id:${parsedPlayer}[player]`]; // return display name
+        }
+    }
+    
+    /**
+    Parses an argument of type dead prompt reply
+    **/
+    function parseDeadReply(playerName, message = null) {
+        // check for basic player references
+        let pSplit = playerName.toLowerCase().split(/[\.,\-!\?\s ]/);
+        let basic = pSplit.map(el => getUser(null, el)).filter(el => el);
+        console.log("BASIC", pSplit, basic);
+        if(basic.length > 0) {
+            let member = mainGuild.members.cache.get(basic[0]);
+            if(!member) { // this applies in case the player has left the server
+                if(message) message.reply(basicEmbed("❌ Player valid but cannot be found. Please contact Hosts.", EMBED_RED));
+                return false;
+            }
+            if(!isDeadParticipant(member)) { // this applies in case the player is not a participant
+                if(message) message.reply(basicEmbed("❌ Player is not a dead participant.", EMBED_RED));
+                return false;
+            }
+            let pname = member?.displayName ?? false; // get name through id
+            let pname2 = member?.user.displayName ?? false; // get name through id
+            return [`${idToEmoji(basic[0])} \`${pname} (${pname2})\``, `@id:${basic[0]}[player]`]; // return display name
+        }
+        
+        // more advanced search
+        // similiar as implementation in fixUserList()
+		let allPlayerNames = playerIDs.map(el => {
+            let mem = mainGuild.members.cache.get(el);
+            let usr = client.users.cache.get(el);
+            if(!mem || !usr) return null;
+            console.log(usr);
+            return [usr.username,usr.globalName,mem.nickname];
+        }).flat().filter(el => el).map(el => el.toLowerCase());
+        console.log(allPlayerNames);
+        // check provided player name against all player names
+		let parsed = parseList(pSplit, allPlayerNames);
+        console.log("PARSED", parsed.found, parsed.invalid);
+        if(parsed.found.length == 0) { // no player found -> false
+            return false;
+        } else { // player found -> normalize to player.displayName
+            let player = parsed.found[0];
+            let parsedPlayer = parseUser(backupChannel, player); // parse player name/id/emoji to discord id
+            let member = mainGuild.members.cache.get(parsedPlayer);
+            let playerName = member?.displayName ?? false; // get name through id
+            let playerName2 = member?.user.displayName ?? false; // get name through id
+            if(playerName === false) { // this applies in case the player has left the server
+                if(message) message.reply(basicEmbed("❌ Player valid but cannot be found. Please contact Hosts.", EMBED_RED));
+                return false;
+            }
+            if(!isDeadParticipant(member)) { // this applies in case the player is not a participant
+                if(message) message.reply(basicEmbed("❌ Player is not a dead participant.", EMBED_RED));
                 return false;
             }
             return [`${idToEmoji(parsedPlayer)} \`${playerName} (${playerName2})\``, `@id:${parsedPlayer}[player]`]; // return display name

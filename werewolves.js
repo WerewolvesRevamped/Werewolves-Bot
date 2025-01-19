@@ -1094,6 +1094,8 @@ client.on('interactionCreate', async interaction => {
         let invalidReply = basicEmbed(`${orig_text}${PROMPT_SPLIT} Invalid action. You cannot interact with this prompt anymore.`, EMBED_RED);
         invalidReply.components = [];
         
+        abilityLog(`⏺️ **Button Pressed:** <@${interaction.member.id}> interacted with \`${interaction.customId}\` at https://discord.com/channels/${mainGuild.id}/${interaction.channel.id}/${interaction.message.id}`);
+        
         // switch through interactions
         const interactionSplit = interaction.customId.split(":");
         const interactionName = interactionSplit[0];

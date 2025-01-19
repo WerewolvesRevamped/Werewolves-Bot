@@ -1859,6 +1859,7 @@ module.exports = function() {
                 case "`success`": case "`failure`":
                     return "success";
                 default:
+                    if(killingTypeNames.includes(targetType.replace(/`/g,"").toLowerCase())) return "killingType";
                     if(verifyRole(targetType)) return "role";
                     if(verifyAttribute(targetType)) return "attribute";
                     if(verifyTeam(targetType) || verifyTeamName(targetType)) return "alignment";

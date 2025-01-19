@@ -144,7 +144,7 @@ module.exports = function() {
             successes++;
         }
         // feedback
-        if(successes === 0) return { msg: "Unapplying failed! " + abilityError, success: false };
+        if(successes === 0) return { msg: "Unapplying failed!", success: false };
         else if(failures === 0) return { msg: "Unapplyings succeeded!", success: true, target: `${targets.type}:${targets.value[0]}` };
         else return { msg: `${successes} unapplyings succeeded, ${failures} unapplyings failed!`, success: true, target: `${targets.type}:${targets.value[0]}` };
     }

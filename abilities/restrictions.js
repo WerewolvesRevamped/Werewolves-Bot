@@ -113,7 +113,7 @@ module.exports = function() {
             // ATTRIBUTE
             case "attribute":
                 // cannot be evaluated pre-prompt: always true
-                if(prePrompt && (restriction.target.includes("@selection") || restriction.target.includes("@secondaryselection"))) {
+                if(prePrompt && (restriction.target.toLowerCase().includes("@selection") || restriction.target.toLowerCase().includes("@secondaryselection"))) {
                     return true;
                 } else {
                     let targets = await parseSelector(restriction.target, src_ref, additionalTriggerData);

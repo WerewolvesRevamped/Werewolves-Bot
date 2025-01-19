@@ -171,7 +171,7 @@ module.exports = function() {
                 return [...dead, ...alive];
             // target
             case "@target":
-                if(!self) { // if no self is specified, @Self is invalid
+                if(!self) { // if no self is specified, @Target is invalid
                     abilityLog(`❗ **Error:** Used \`@Target\` in invalid context!`);
                     return [ ];
                 }
@@ -184,6 +184,16 @@ module.exports = function() {
                 } else {
                     return [ target ];  
                 }
+            // targetdead
+            case "@targetdead":
+                if(!self) { // if no self is specified, @TargetDead is invalid
+                    abilityLog(`❗ **Error:** Used \`@TargetDead\` in invalid context!`);
+                    return [ ];
+                }
+                let targetdead = await getTarget(self);
+                if(!targetdead) return [ ];
+                targetdead = srcToValue(targetdead);
+                return [ targetdead ];  
             case "@members":
                 if(!self) { // if no self is specified, @Self is invalid
                     abilityLog(`❗ **Error:** Used \`@Members\` in invalid context!`);
@@ -1808,10 +1818,11 @@ module.exports = function() {
     /**
     Parse killing type
     **/
-    const killingTypeNames = ["attack","kill","lynch","true kill","banish","true banish"];
+    this.killingTypeNames = ["attack","kill","lynch","true kill","banish","true banish"];
     this.parseKillingType = function(killing_type, self = null, additionalTriggerData = {}) {
         // get target
         let selectorTarget = selectorGetTarget(killing_type);
+        selectorTarget = selectorTarget.replace(/`/g,"");
         
         switch(selectorTarget) {
             case "@deathtype":
@@ -1829,6 +1840,7 @@ module.exports = function() {
                     return [ ];
                 }
             default:      
+                console.log(killingTypeNames, selectorTarget);
                 if(killingTypeNames.includes(selectorTarget)) {
                     return selectorTarget;
                 } else {
@@ -2033,7 +2045,7 @@ module.exports = function() {
     this.applyVariables = async function(txt) {
             let players = await getAllPlayers();
             let totalCount = players.length;
-            let aliveCount = players.filter(el => el.alive === "1");
+            let aliveCount = players.filter(el => el.alive == 1).length;
             txt = txt.replace(/\$total/, totalCount);
             txt = txt.replace(/\$living/, aliveCount);
             txt = txt.replace(/\$phase/, getPhaseAsNumber());
@@ -2247,7 +2259,7 @@ module.exports = function() {
             let type = srcToType(self);
             if(type === "attribute") type = "player"; // for attributes we want @Self to be the player. @ThisAttr is attribute instead
             return type;
-        } else if(val === "@target") {
+        } else if(val === "@target" || val === "@targetdead") {
             let target = await getTarget(self);
             let targetType = srcToType(target);
             console.log(`Inferred target type as ${targetType} from ${target}`);
