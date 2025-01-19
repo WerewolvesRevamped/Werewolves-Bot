@@ -186,7 +186,7 @@ module.exports = function() {
 	
 	this.cmdEnd = function(channel) {
 		gameEnd();
-        message.channel.send("✅ Game has been ended.");
+        channel.send("✅ Game has been ended.");
 	}
     
     this.gameEnd = async function() {

@@ -34,44 +34,50 @@ module.exports = function() {
         
         // get all living ids; check if both are players and alive
         let living = await getAllLivingIDs();
-        if(!living.includes(sourcePlayer)) return null;
-        if(!living.includes(targetPlayer)) return null;
+        let dead = await getAllDeadIDs();
+        let sourceIsPlayer = true, targetIsPlayer = true, sourceIsAlive = true, targetIsAlive = true;
+        if(!living.includes(sourcePlayer)) sourceIsAlive = false;
+        if(!living.includes(targetPlayer)) targetIsAlive = false;
+        if(!sourceIsAlive && !dead.includes(sourcePlayer)) sourceIsPlayer = false;
+        if(!targetIsAlive && !dead.includes(targetPlayer)) targetIsPlayer = false;
         
         // increment visitid
         visitId++;
         let thisVisitId = visitId;
         
         // check for obstruction
-        let obstructions = await getObstructions(sourcePlayer);
-        obstruction: for(let i = 0; i < obstructions.length; i++) {
-            let matchesType = obstructions[i].val1 === "" || obstructions[i].val1 === abilityType;
-            let matchesSubtype = obstructions[i].val2 === "" || obstructions[i].val2 === abilitySubtype;
-            console.log(matchesType, matchesSubtype, abilityType, abilitySubtype, obstructions[i].val1, obstructions[i].val2);
-            // check if obstruction type matches
-            if(matchesType && matchesSubtype) {
-                // no custom feedback; return failure
-                if(obstructions[i].val3 === "") {
-                    return { msg: null, success: false };
-                } else { // custom feedback; evaluate chances
-                    let customFeedback = JSON.parse(obstructions[i].val3);
-                    let rand = Math.random();
-                    let acc = 0;
-                    // iterate through custom feedback options
-                    for(let j = 0; j < customFeedback.length; j++) {
-                        // check if this result should be used
-                        acc += customFeedback[j].chance;
-                        if(rand < acc) {
-                            if(customFeedback[j].feedback === "@Result") {
-                                abilityLog(`✅ <@${sourcePlayer}> was obstructed (${Math.round(rand*100)/100}): default result.`);
-                                break obstruction;
-                            }
-                            // overwrite with custom result
-                            abilityLog(`✅ <@${sourcePlayer}> was obstructed (${Math.round(rand*100)/100}): \`${customFeedback[j].feedback}\`.`);
-                            if(templateMessage) {
-                                let feedback = templateMessage.replace(/\%1/g, customFeedback[j].feedback);
-                                return { msg: feedback, success: true, role: customFeedback[j].feedback, class: customFeedback[j].feedback, category: customFeedback[j].feedback, alignment: customFeedback[j].feedback };
-                            } else {
-                                return { msg: customFeedback[j].feedback, success: true, class: customFeedback[j].feedback, category: customFeedback[j].feedback, alignment: customFeedback[j].feedback };
+        if(sourceIsPlayer) {
+            let obstructions = await getObstructions(sourcePlayer);
+            obstruction: for(let i = 0; i < obstructions.length; i++) {
+                let matchesType = obstructions[i].val1 === "" || obstructions[i].val1 === abilityType;
+                let matchesSubtype = obstructions[i].val2 === "" || obstructions[i].val2 === abilitySubtype;
+                console.log(matchesType, matchesSubtype, abilityType, abilitySubtype, obstructions[i].val1, obstructions[i].val2);
+                // check if obstruction type matches
+                if(matchesType && matchesSubtype) {
+                    // no custom feedback; return failure
+                    if(obstructions[i].val3 === "") {
+                        return { msg: null, success: false };
+                    } else { // custom feedback; evaluate chances
+                        let customFeedback = JSON.parse(obstructions[i].val3);
+                        let rand = Math.random();
+                        let acc = 0;
+                        // iterate through custom feedback options
+                        for(let j = 0; j < customFeedback.length; j++) {
+                            // check if this result should be used
+                            acc += customFeedback[j].chance;
+                            if(rand < acc) {
+                                if(customFeedback[j].feedback === "@Result") {
+                                    abilityLog(`✅ <@${sourcePlayer}> was obstructed (${Math.round(rand*100)/100}): default result.`);
+                                    break obstruction;
+                                }
+                                // overwrite with custom result
+                                abilityLog(`✅ <@${sourcePlayer}> was obstructed (${Math.round(rand*100)/100}): \`${customFeedback[j].feedback}\`.`);
+                                if(templateMessage) {
+                                    let feedback = templateMessage.replace(/\%1/g, customFeedback[j].feedback);
+                                    return { msg: feedback, success: true, role: customFeedback[j].feedback, class: customFeedback[j].feedback, category: customFeedback[j].feedback, alignment: customFeedback[j].feedback };
+                                } else {
+                                    return { msg: customFeedback[j].feedback, success: true, class: customFeedback[j].feedback, category: customFeedback[j].feedback, alignment: customFeedback[j].feedback };
+                                }
                             }
                         }
                     }
@@ -80,10 +86,17 @@ module.exports = function() {
         }
         
         // run triggers
-        await triggerPlayer(targetPlayer, "On Visited", { visitor: sourcePlayer, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
-        await triggerPlayer(targetPlayer, "On Visited Complex", { visitor: sourcePlayer, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: "", visit_id: visitId }); 
-        await triggerPlayer(targetPlayer, "On Visited Complex", { visitor: sourcePlayer, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
-        await triggerHandler("On Visited Target Complex", { visitor: sourcePlayer, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, this: targetPlayer, visit_id: visitId }); 
+        if(sourceIsPlayer && targetIsPlayer) {
+            await triggerPlayer(targetPlayer, "On Visited", { visitor: sourcePlayer, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
+            await triggerPlayer(targetPlayer, "On Visited Complex", { visitor: sourcePlayer, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: "", visit_id: visitId }); 
+            await triggerPlayer(targetPlayer, "On Visited Complex", { visitor: sourcePlayer, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
+            await triggerHandler("On Visited Target Complex", { visitor: sourcePlayer, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, this: targetPlayer, visit_id: visitId });
+        } else if(targetIsPlayer) {
+            await triggerPlayer(targetPlayer, "On Visited", { visitor: null, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
+            await triggerPlayer(targetPlayer, "On Visited Complex", { visitor: null, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: "", visit_id: visitId }); 
+            await triggerPlayer(targetPlayer, "On Visited Complex", { visitor: null, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
+            await triggerHandler("On Visited Target Complex", { visitor: null, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, this: targetPlayer, visit_id: visitId });    
+        }
         
         // check if is canceled
         if(cancelledVisits.includes(thisVisitId)) {

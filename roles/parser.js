@@ -420,7 +420,7 @@ module.exports = function() {
     **/
     this.isCondition = function(maybeCondition) {
         try {
-            let cond = parseCondition(maybeCondition);
+            let cond = parseCondition(maybeCondition, true);
             if(cond.type && cond.type != "error") return true;
         } catch(err) {
             console.log(err);
@@ -431,12 +431,13 @@ module.exports = function() {
     /**
     Parse Condition
     **/
-    this.parseCondition = function(condition) {
+    this.parseCondition = function(condition, noErr = false) {
         let exp, fd, cond;
         
         /** Always **/
         // doesnt have a condition
         if(!condition) {
+            if(noErr) return { type: "error" };
             throw new Error(`No Condition`);
         }
         
@@ -573,7 +574,7 @@ module.exports = function() {
         if(cond) {
             return cond;
         } else {
-            if(!debugMode) throw new Error(`Invalid Condition Type \`\`\`\n${condition}\n\`\`\``);
+            if(!debugMode && !noErr) throw new Error(`Invalid Condition Type \`\`\`\n${condition}\n\`\`\``);
             else return { type: "error" };
         }
         
@@ -1860,6 +1861,7 @@ module.exports = function() {
                     return "success";
                 default:
                     if(killingTypeNames.includes(targetType.replace(/`/g,"").toLowerCase())) return "killingType";
+                    if(["true","false"].includes(targetType.replace(/`/g,"").toLowerCase())) return "killingType";
                     if(verifyRole(targetType)) return "role";
                     if(verifyAttribute(targetType)) return "attribute";
                     if(verifyTeam(targetType) || verifyTeamName(targetType)) return "alignment";

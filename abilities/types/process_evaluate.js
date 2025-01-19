@@ -122,9 +122,14 @@ module.exports = function() {
                 }
                 
                 let first, second;
-                if(selectorGetType(condition.second) != "string") first = await parseSelector(condition.first, src_ref, additionalTriggerData);
+                let firstType = selectorGetType(condition.first);
+                let secondType = selectorGetType(condition.second);
+                
+                if(firstType === "unknown" && secondType != "unknown" && firstType != "string") first = await parseSelector(selectorChangeType(condition.first, secondType), src_ref, additionalTriggerData);
+                else if(secondType != "string") first = await parseSelector(condition.first, src_ref, additionalTriggerData);
                 else first = { value: await parseStringSelector(condition.first, src_ref, additionalTriggerData), type: "string" };
-                if(selectorGetType(condition.first) != "string") second = await parseSelector(condition.second, src_ref, additionalTriggerData);
+                if(secondType === "unknown" && firstType != "unknown" && firstType != "string") first = await parseSelector(selectorChangeType(condition.second, firstType), src_ref, additionalTriggerData);
+                else if(firstType != "string") second = await parseSelector(condition.second, src_ref, additionalTriggerData);
                 else second = { value: await parseStringSelector(condition.second, src_ref, additionalTriggerData), type: "string" };
                 
                 console.log("FIRST", condition.first, first.type, first.value[0]);

@@ -127,7 +127,7 @@ module.exports = function() {
     }
     this.getDeathMessage = async function(pid, displayName = null) {
         if(!displayName) displayName = `<@${pid}>`;
-        let nickname = client.users.cache.get(pid).displayName;
+        let nickname = client.users.cache.get(pid)?.displayName ?? pid;
         let dmsg = await sqlPromOneEsc("SELECT message FROM death_message WHERE player=", pid);
         let dmsgText = "%s has died.";
         if(dmsg && dmsg.message) {

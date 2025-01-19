@@ -4,6 +4,7 @@
     "guild": "GUILD ID",
     "channel": "CHANNEL ID",
     "log": "CHANNEL ID",
+    "action_log": "CHANNEL ID",
 	"db": {
 		"host": "localhost",
 		"user": "USER",

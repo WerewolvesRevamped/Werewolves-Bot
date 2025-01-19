@@ -229,7 +229,17 @@ module.exports = function() {
     logs a message in the ability log. WIP: dont hardcode
     **/
     this.abilityLog = function(msg) {
-        mainGuild.channels.cache.get(config.log).send(msg);
+        let ch = mainGuild.channels.cache.get(config.log);
+        if(ch) ch.send(msg);
+    }
+    
+    /**
+    Action Log
+    logs a message in the action log. WIP: dont hardcode
+    **/
+    this.actionLog = function(msg) {
+        let ch = mainGuild.channels.cache.get(config.action_log);
+        if(ch) ch.send(msg);
     }
     
     /**

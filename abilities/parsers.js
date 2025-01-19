@@ -96,6 +96,9 @@ module.exports = function() {
                 return { value: parseOptionSelector(selector, self, additionalTriggerData), type: "option" };
             case "string":
                 return { value: await parseStringSelector(selector, self, additionalTriggerData), type: "string" };
+            // NULL
+            case "null": // a null selector is returned by runtime infering if a certain value does not exist yet. in this case an empty selector is the appropriate result
+                return { value: [], type: "null" };
             // UNKNOWN
             default:
                 abilityLog(`❗ **Error:** Invalid selector type \`${selectorType}\`!`);
@@ -306,14 +309,16 @@ module.exports = function() {
                     return invalidSelector(selectorTarget);
                 }
             case "@visitor":
-                if(additionalTriggerData.visitor) {
+                if(additionalTriggerData.visitor === null) {
+                    return [ ];
+                } else if(additionalTriggerData.visitor) {
                     return [ additionalTriggerData.visitor ];
                 } else {
                     return invalidSelector(selectorTarget);
                 }
             case "@visitparameter":
-                if(additionalTriggerData.visitparameter) {
-                    return [ additionalTriggerData.visitparameter ];
+                if(additionalTriggerData.visit_parameter) {
+                    return [ additionalTriggerData.visit_parameter ];
                 } else {
                     return invalidSelector(selectorTarget);
                 }
@@ -448,6 +453,9 @@ module.exports = function() {
             break;
             case "result":
                 return parseResultPropertyAccess(result.value, property);
+            break;
+            case "null": // returned by unset runtime inferring, returns blank
+                return [ ];
             break;
             default:
                 abilityLog(`❗ **Error:** Invalid property access type \`${type}\`!`);
@@ -1093,8 +1101,8 @@ module.exports = function() {
                 abilityLog(`❗ **Error:** Failed to cast result to role!`);
                 return [ ];
             case "@visitparameter":
-                if(additionalTriggerData.visitparameter) {
-                    return [ parseRole(additionalTriggerData.visitparameter) ];
+                if(additionalTriggerData.visit_parameter) {
+                    return [ parseRole(additionalTriggerData.visit_parameter) ];
                 } else {
                     abilityLog(`❗ **Error:** Invalid role selector target \`${selectorTarget}\`!`);
                     return [ ];
@@ -1392,8 +1400,8 @@ module.exports = function() {
                 abilityLog(`❗ **Error:** Failed to cast result to alignment!`);
                 return [ ];
             case "@visitparameter":
-                if(additionalTriggerData.visitparameter) {
-                    return [ parseTeam(additionalTriggerData.visitparameter) ];
+                if(additionalTriggerData.visit_parameter) {
+                    return [ parseTeam(additionalTriggerData.visit_parameter) ];
                 } else {
                     abilityLog(`❗ **Error:** Invalid alignment selector target \`${selectorTarget}\`!`);
                     return [ ];
@@ -2125,6 +2133,15 @@ module.exports = function() {
     }
     
     /**
+    Change Selector Type
+    returns a selector with a changed type
+    **/
+    this.selectorChangeType = function(selector, type) {
+        let selec = selectorGetTarget(selector);
+        return `${selec}[${type}]`;
+    }
+    
+    /**
     Parse Duration
     parses a duration type
     defaults to phase for invalid types
@@ -2261,6 +2278,7 @@ module.exports = function() {
             return type;
         } else if(val === "@target" || val === "@targetdead") {
             let target = await getTarget(self);
+            if(!target) return "null";
             let targetType = srcToType(target);
             console.log(`Inferred target type as ${targetType} from ${target}`);
             return targetType;
