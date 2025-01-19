@@ -12,7 +12,7 @@ module.exports = function() {
     this.tierNames = ["Bronze", "Silver", "Gold","Platinum", "Cheated"];
     let tierColors = [9785610, 13027014, 14922018, 10877429, 15469740];
     let tierIcons = ["Extras/Token%20Bronze", "Extras/Token%20Silver", "Extras/Token", "Extras/Token%20Platinum", "Extras/Bot%20Developer"];
-    let tierCoins = [10, 20, 50, 100, 0];
+    let tierCoins = [30, 50, 100, 200, 0];
     this.cmdLoot = async function(message) {
         // check coins
         let coinCount = await getCoins(message.member.id);
@@ -265,8 +265,10 @@ module.exports = function() {
         // update item count
         await inventoryModifyItem(message.author.id, code, -1);
         
+        let rand = Math.floor(Math.random() * 15);
+        
         // determine coin value
-        let val = Math.floor(tierCoins[tierNames.indexOf(item[0][2])] * 1.75 * item[0][3]);
+        let val = Math.floor(( tierCoins[tierNames.indexOf(item[0][2])] * (1 / item[0][3]) ) + rand);
         // update coins
         cmdCoinsModify(message.channel, ["add", message.author.id, val], "add", 1, true);
         

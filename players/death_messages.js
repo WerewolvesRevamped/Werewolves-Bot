@@ -100,7 +100,7 @@ module.exports = function() {
         } 
         
         
-        sqlPromEsc("INSERT INTO death_message (player, message) VALUES (" + connection.escape(message.author.id) + "," + connection.escape(dmsg) + ") ON DUPLICATE KEY UPDATE message=", 0);
+        sqlPromEsc("INSERT INTO death_message (player, message) VALUES (" + connection.escape(message.author.id) + "," + connection.escape(dmsg) + ") ON DUPLICATE KEY UPDATE message=", dmsg);
         let embed = { title: "Death Message", description: `<@${message.member.id}>, your death message has been updated to ${toTitleCase(dmsgData[1])}.`, color: 5490704 };
         message.channel.send({ embeds: [ embed ] });
 
@@ -171,7 +171,7 @@ module.exports = function() {
                     dmsgText =  `%s is gone! 🦀`;
                 break;
                 case 9:
-                    dmsgText =  `${getEmoji('crow')} It seems a murder of crow has murdered %s! ${getEmoji('crow')}`;
+                    dmsgText =  `${getEmoji('crow')} It seems a murder of crows has murdered %s! ${getEmoji('crow')}`;
                 break;
             }
         }
