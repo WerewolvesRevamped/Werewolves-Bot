@@ -33,15 +33,21 @@ module.exports = function() {
     this.AVAILABLE_PACKS = ["glitch","negate","grayscale","edge","emboss","silhouette","pixel","pixel2","pixel3","pixel4","scatter","red","green","blue","yellow","purple","cyan","flip","pale","bw","wire","wire2","rainbow","rainbow2","rainbow3","ts","oil","wave","swirl","noise","cycle","equalize","fourier_noise","fourier_equalize","fourier_oil","fourier_modulate","fourier_wire","glitch2","eyes","thief","mask","eye","fourier_eye","citizen_eye","items","bear","wolfify","grid","light_and_shadow","duo_color","wood","coin","coin_animated", "glitch_animated","wave_animated","spin","rainbow_animated","fourier_merge","fourier_magnitude","fourier_phase","fourier_crop","fourier_crop2","cloud","swirl_animated"];
     this.ANIMATED_PACKS = [53, 54, 55, 56, 57];
     this.cmdPacksListAll = function(channel) {
-        let packs1 = [`${getEmoji('pack_default')} Default - 0`], packs2 = [], packs3 = [];
-        let third = Math.ceil(AVAILABLE_PACKS.length / 3);
-        for(let i = 0; i < third; i++) packs1.push(`${getEmoji('pack_'+AVAILABLE_PACKS[i])} ${toTitleCase(AVAILABLE_PACKS[i])} - ${i+1}`);
-        for(let i = third ; i < third * 2; i++) packs2.push(`${getEmoji('pack_'+AVAILABLE_PACKS[i])} ${toTitleCase(AVAILABLE_PACKS[i])} - ${i+1}`);
-        for(let i = (third * 2); i < AVAILABLE_PACKS.length; i++) packs3.push(`${getEmoji('pack_'+AVAILABLE_PACKS[i])} ${toTitleCase(AVAILABLE_PACKS[i])} - ${i+1}`);
-        let embed = { title: "All Packs", color: 8984857, fields: [ {}, {}, {} ] };
+        let packs1 = [`${getEmoji('pack_default')} Default - 0`], packs2 = [], packs3 = [], packs4 = [], packs5 = [], packs6 = [];
+        let sixth = Math.ceil(AVAILABLE_PACKS.length / 6);
+        for(let i = 0; i < sixth; i++) packs1.push(`${getEmoji('pack_'+AVAILABLE_PACKS[i])} ${toTitleCase(AVAILABLE_PACKS[i])} - ${i+1}`);
+        for(let i = sixth ; i < sixth * 2; i++) packs2.push(`${getEmoji('pack_'+AVAILABLE_PACKS[i])} ${toTitleCase(AVAILABLE_PACKS[i])} - ${i+1}`);
+        for(let i = sixth * 2; i < sixth * 3; i++) packs3.push(`${getEmoji('pack_'+AVAILABLE_PACKS[i])} ${toTitleCase(AVAILABLE_PACKS[i])} - ${i+1}`);
+        for(let i = sixth * 3; i < sixth * 4; i++) packs4.push(`${getEmoji('pack_'+AVAILABLE_PACKS[i])} ${toTitleCase(AVAILABLE_PACKS[i])} - ${i+1}`);
+        for(let i = sixth * 4; i < sixth * 5; i++) packs5.push(`${getEmoji('pack_'+AVAILABLE_PACKS[i])} ${toTitleCase(AVAILABLE_PACKS[i])} - ${i+1}`);
+        for(let i = sixth * 5; i < AVAILABLE_PACKS.length; i++) packs6.push(`${getEmoji('pack_'+AVAILABLE_PACKS[i])} ${toTitleCase(AVAILABLE_PACKS[i])} - ${i+1}`);
+        let embed = { title: "All Packs", color: 8984857, fields: [ {}, {}, {}, {}, {}, {} ] };
         embed.fields[0] = { name: "_ _", "value": packs1.join("\n"), inline: true };
         embed.fields[1] = { name: "_ _", "value": packs2.join("\n"), inline: true };
         embed.fields[2] = { name: "_ _", "value": packs3.join("\n"), inline: true };
+        embed.fields[3] = { name: "_ _", "value": packs4.join("\n"), inline: true };
+        embed.fields[4] = { name: "_ _", "value": packs5.join("\n"), inline: true };
+        embed.fields[5] = { name: "_ _", "value": packs6.join("\n"), inline: true };
         channel.send({ embeds: [ embed ] });
     }
 

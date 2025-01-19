@@ -28,7 +28,11 @@ module.exports = function() {
         // get user data
         let tr = message.member.roles.cache.find(r => r.name.substr(0, 5) === "Icon_");
         if(tr) { // role found -> remove it
-            message.member.roles.remove(tr);
+            if(tr.members.size === 1) {
+                tr.delete();
+            } else {
+                message.member.roles.remove(tr);
+            }
             let embed = { title: "Role Icon", description: `<@${message.member.id}>, your role icon has been disabled.`, color: 16715021 };
             message.channel.send({ embeds: [ embed ] });
         } else {
@@ -99,7 +103,13 @@ module.exports = function() {
         
         // revoke old role if applicable
         let trOld = message.member.roles.cache.find(r => r.name.substr(0, 5) === "Icon_");
-        if(trOld) message.member.roles.remove(trOld);
+        if(trOld) {
+            if(trOld.members.size === 1) {
+                trOld.delete();
+            } else {
+                message.member.roles.remove(trOld);
+            }
+        }
         
         // get user data
         let rName = `Icon_${toTitleCase(role).replace(/ /g,"")}`;
