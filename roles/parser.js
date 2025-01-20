@@ -1861,7 +1861,6 @@ module.exports = function() {
                     return "success";
                 default:
                     if(killingTypeNames.includes(targetType.replace(/`/g,"").toLowerCase())) return "killingType";
-                    if(["true","false"].includes(targetType.replace(/`/g,"").toLowerCase())) return "killingType";
                     if(verifyRole(targetType)) return "role";
                     if(verifyAttribute(targetType)) return "attribute";
                     if(verifyTeam(targetType) || verifyTeamName(targetType)) return "alignment";

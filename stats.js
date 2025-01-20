@@ -410,6 +410,14 @@ module.exports = function() {
 		} else {
 			stat = args[0];
 		}
+        
+        if([3,4,5,6,7,8,21,22,23,26,32,34,37,38,40,41,45].includes(stat)) {
+            if(!isAdmin(message.member)) {
+                message.channel.send("⛔ Permission error. Only admins can change roles!"); 
+                return;       
+            }
+        }
+        
 		// Find subcommand
 		if(args[1]) cmdOptionsSet(message.channel, args, stat); 
 		else cmdOptionsGet(message.channel, args, stat); 

@@ -189,6 +189,8 @@ module.exports = function() {
                 return stats.ghost ? getPerms(stats.ghost, allow, deny) : null; 
             case "substitute":
                 return stats.sub ? getPerms(stats.sub, allow, deny) : null; 
+            case "spectator":
+                return stats.spectator ? getPerms(stats.spectator, allow, deny) : null; 
             default: // check if a matching discord role exists
                 let filtered = cachedDR.filter(el => el.name === type);
                 return filtered.length === 1 ? getPerms(filtered[0].id, allow, deny) : null;
