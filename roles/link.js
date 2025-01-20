@@ -892,9 +892,9 @@ module.exports = function() {
         let viewers = formalizedParsed.find(el => el.name == "Viewers").value;
         members = members.split(", ").join(",");
         viewers = viewers.split(", ").join(",");
-        if(members === "*All*") members = "Alive,Dead,Ghost,Substitute";
+        if(members === "*All*") members = "Alive,Dead,Ghost,Substitute,Spectator";
         if(members === "*None*") members = "";
-        if(viewers === "*All*") viewers = "Alive,Dead,Ghost,Substitute";
+        if(viewers === "*All*") viewers = "Alive,Dead,Ghost,Substitute,Spectator";
         if(viewers === "*None*") viewers = "";
         // imsert the role into the databse
         sql("INSERT INTO locations (name,display_name,description,sort_index,members,viewers) VALUES (" + connection.escape(dbName) + "," + connection.escape(locName) + "," + connection.escape(description.trim()) + "," + connection.escape(sort_index) + "," + connection.escape(members) + "," + connection.escape(viewers) + ")");
