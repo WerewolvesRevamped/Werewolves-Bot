@@ -181,7 +181,7 @@ client.on("messageCreate", async message => {
     }
     
     if(!botLoaded && !message.author.bot) {
-        message.channel.send("🕐 Bot is loading. Please wait.");
+        //message.channel.send("🕐 Bot is loading. Please wait.");
         return;
     }
     
@@ -356,6 +356,32 @@ client.on("messageCreate", async message => {
     if(message.author.id === "151204089219252224") {
         let txt = message.content.toLowerCase();
         if(txt.includes("||") || txt.includes("#")) {
+            message.delete();
+            if(isPublic(message.channel)) { // public message
+                sql("UPDATE players SET public_msgs=public_msgs-5 WHERE id = " + connection.escape(message.member.id), () => {}, () => {
+                });
+                sql("UPDATE players SET private_msgs=private_msgs-5 WHERE id = " + connection.escape(message.member.id), () => {}, () => {
+                });
+            }
+        }
+    }
+
+    if(message.author.id === "151204089219252224") {
+        let txt = message.content.toLowerCase();
+        if(txt.includes("||") || txt.includes("#")) {
+            message.delete();
+            if(isPublic(message.channel)) { // public message
+                sql("UPDATE players SET public_msgs=public_msgs-5 WHERE id = " + connection.escape(message.member.id), () => {}, () => {
+                });
+                sql("UPDATE players SET private_msgs=private_msgs-5 WHERE id = " + connection.escape(message.member.id), () => {}, () => {
+                });
+            }
+        }
+    }
+    
+    if(message.author.id === "991363000885846016") {
+        let txt = message.content.toLowerCase();
+        if(txt.includes("world era") || txt.includes("borderlands")) {
             message.delete();
             if(isPublic(message.channel)) { // public message
                 sql("UPDATE players SET public_msgs=public_msgs-5 WHERE id = " + connection.escape(message.member.id), () => {}, () => {
@@ -1209,6 +1235,7 @@ client.on('interactionCreate', async interaction => {
                 interaction.update(embed);
                 // run trigger
                 abilityLog(`✅ **Choice Chose:** ${srcRefToText(chooser)} chose \`${optionName}\` for \`${choiceName}\`.`);
+                actionLog(`⏺️ ${srcRefToText(chooser)} choice chose \`${optionName}\` for \`${choiceName}\`.`);
                 await triggerPlayer(choiceCreatorId, "Choice Chosen", { chooser: `${chooser}`, chosen: parseOption(optionName), choice_data: { name: choiceName, owner: chooser } }); 
                 await triggerPlayer(choiceCreatorId, "Choice Chosen Complex", { chooser: `${chooser}`, chosen: parseOption(optionName), choice_data: { name: choiceName, owner: chooser } }); 
                 // set as chosen
@@ -1241,6 +1268,8 @@ client.on('interactionCreate', async interaction => {
                     embed = basicEmbed(`${orig_text}${PROMPT_SPLIT} Choice unchosen.`, EMBED_RED);
                     embed.components = [ ];
                     interaction.update(embed);
+                    
+                    actionLog(`⏺️ ${srcRefToText(chooser)} __unchose__ for \`${choiceName}\`.`);
                     
                     // set as unchosen
                     await choicesUpdateByOwner(choiceName, chooser, "chosen", 0);

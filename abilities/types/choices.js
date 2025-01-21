@@ -224,6 +224,7 @@ module.exports = function() {
             let choiceCreatorId = srcToValue(choices[i].src_ref);
             let chooser = choices[i].owner;
             abilityLog(`✅ **Choice Chose:** <@${chooser}> chose \`${optionName}\` for \`${choiceName}\`.`);
+            actionLog(`⏺️ <@${chooser}> choice chose \`${optionName}\` for \`${choiceName}\`.`);
             await triggerPlayer(choiceCreatorId, "Choice Chosen", { chooser: `player:${chooser}`, chosen: parseOption(optionName), choice_data: { name: choiceName, owner: chooser } }); 
             await triggerPlayer(choiceCreatorId, "Choice Chosen Complex", { chooser: `player:${chooser}`, chosen: parseOption(optionName), choice_data: { name: choiceName, owner: chooser } });
         }        
