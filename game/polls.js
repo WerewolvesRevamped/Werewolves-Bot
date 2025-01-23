@@ -524,10 +524,12 @@ module.exports = function() {
                         embed = basicEmbed(msgFull, EMBED_GREEN);
                         let pAlive = await isAlive(maxVotesData[0]);
                         doTrigger = pAlive;
+                        actionLog(`🗳️ <@${maxVotesData[0]}> won ${toTitleCase(pollName)} (${pollType}).`);
                     } else { // DISQUALIFIED
                         msgFull += `\n\n**Result:** <@${maxVotesData[0]}> is disqualified with **${maxVotes}** votes!`;
                         embed = basicEmbed(msgFull, EMBED_RED);
                         await useAttribute(disqualified[0].ai_id);
+                        actionLog(`🗳️ <@${maxVotesData[0]}> won ${toTitleCase(pollName)} (${pollType}) (disqualified).`);
                     }
                 } else if(maxVotesData[0] === "Random") { // SPECIAL RANDOM WINNER
                     // select random player
@@ -537,6 +539,7 @@ module.exports = function() {
                     if(allOptions.length === 0) {
                         msgFull += `\n\n**Winner:** Random, but no players available for randomization.`;
                         embed = basicEmbed(msgFull, EMBED_RED);
+                        actionLog(`🗳️ Random (invalid) won ${toTitleCase(pollName)} (${pollType}).`);
                     } else {
                         allOptions = shuffleArray(allOptions);
                         maxVotesData[0] = allOptions[0].id;
@@ -547,19 +550,23 @@ module.exports = function() {
                             embed = basicEmbed(msgFull, EMBED_GREEN);
                             let pAlive = await isAlive(maxVotesData[0]);
                             doTrigger = pAlive;
+                        actionLog(`🗳️ <@${maxVotesData[0]}> won ${toTitleCase(pollName)} (${pollType}).`);
                         } else { // DISQUALIFIED
                             msgFull += `\n\n**Result:** <@${maxVotesData[0]}> is disqualified with **${maxVotes}** votes!`;
                             embed = basicEmbed(msgFull, EMBED_RED);
                             await useAttribute(disqualified[0].ai_id);
+                        actionLog(`🗳️ <@${maxVotesData[0]}> won ${toTitleCase(pollName)} (${pollType}) (disqualified).`);
                         }
                     }
                 } else { // NON PLAYER WINNER
                     msgFull += `\n\n**Result:** **${maxVotesData[0]}** with **${maxVotes}** votes!`;
                     embed = basicEmbed(msgFull, EMBED_GREEN);
+                    actionLog(`🗳️ **${maxVotesData[0]}** won ${toTitleCase(pollName)} (${pollType}).`);
                 }
             } else if(maxVotesData.length === 0) { // NO WINNER
                 msgFull += `\n\n**No Winner**`;
                 embed = basicEmbed(msgFull, EMBED_RED);
+                actionLog(`🗳️ *Nobody* won ${toTitleCase(pollName)} (${pollType}).`);
             } else { // TIE
                 let winners = maxVotesData.map(el => {
                     if(el.match(/^\d+$/)) {
@@ -570,6 +577,7 @@ module.exports = function() {
                 }).join(', ');
                 msgFull += `\n\n**Tie:** ${winners} with **${maxVotes}** votes!`;
                 embed = basicEmbed(msgFull, EMBED_YELLOW);
+                actionLog(`🗳️ ${winners} tied ${toTitleCase(pollName)} (${pollType}).`);
             }
             // send embed
             embed.embeds[0].title = toTitleCase(pollName); // title
@@ -578,6 +586,7 @@ module.exports = function() {
             let embed = basicEmbed("*No Votes*", EMBED_RED);
             embed.embeds[0].title = toTitleCase(pollName); // title
             await channel.send(embed);
+            actionLog(`🗳️ *Nobody* won ${toTitleCase(pollName)} (${pollType}).`);
         }
         
         // on poll closed trigger

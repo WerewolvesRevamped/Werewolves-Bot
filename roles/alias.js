@@ -20,6 +20,7 @@ module.exports = function() {
 		// Find subcommand
 		switch(args[0]) {
 			// Role Subcommand
+			case "add": 
 			case "set": cmdAliasSet(message.channel, args); break;
 			case "remove": cmdAliasRemove(message.channel, args); break;
 			case "clear": cmdConfirm(message, "alias clear"); break;

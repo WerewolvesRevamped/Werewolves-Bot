@@ -468,8 +468,20 @@ module.exports = function() {
             await setLastTarget(curAction.src_ref, abilities[0], curAction.target);
             // action log
             let targetTxt = curAction.target;
+            let onTxt = "on ";
             if(targetTxt.substr(0, 3) === "@id") targetTxt = "<@" + targetTxt.substr(4).split("[")[0] + ">";
-            actionLog(`✅ ${srcRefToText(curAction.src_ref)} (${srcNameToText(curAction.src_name)}) used an action on ${targetTxt}.`);
+            switch(selectorGetType(targetTxt)) {
+                case "role":
+                    targetTxt = `**${toTitleCase(selectorGetTarget(targetTxt))}**`;
+                break;
+                case "unknown":
+                    if(targetTxt === "notarget") {
+                        onTxt = "";
+                        targetTxt = "";
+                    }
+                break;
+            }
+            actionLog(`✅ ${srcRefToText(curAction.src_ref)} (${srcNameToText(curAction.src_name)}) used an action ${onTxt}${targetTxt}.`);
             // execute the ability
             let feedback = [];
             let doNotRecheckRestriction = false;

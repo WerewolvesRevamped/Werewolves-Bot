@@ -985,6 +985,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
     } catch (err) {
         return; // the reaction doenst exist
     }
+    console.log(reaction.emoji.name);
 	if(user.bot) return;
 	// Handle confirmation messages
 	else if(reaction.emoji.name === "✅" && isGameMaster(reaction.message.guild.members.cache.get(user.id))) {
@@ -1013,7 +1014,13 @@ client.on("messageReactionAdd", async (reaction, user) => {
                 reaction.message.edit({ embeds: [ embed ] });
                 reaction.message.reactions.removeAll();
             }
-		} else if(isGameMaster(reaction.message.guild.members.cache.get(user.id)) && !isParticipant(reaction.message.guild.members.cache.get(user.id)) && reaction.emoji == client.emojis.cache.get(stats.no_emoji)) {
+		} else if(isGameMaster(reaction.message.guild.members.cache.get(user.id)) && !isParticipant(reaction.message.guild.members.cache.get(user.id)) && reaction.emoji.name == "❌") {
+			reaction.message.edit({ embeds: [] });
+            console.log("invalidate prompt");
+            sql("DELETE FROM prompts WHERE message_id=" + connection.escape(reaction.message.id));
+            sql("DELETE FROM action_queue WHERE message_id=" + connection.escape(reaction.message.id));
+			reaction.users.remove(user);
+		}  else if(isGameMaster(reaction.message.guild.members.cache.get(user.id)) && !isParticipant(reaction.message.guild.members.cache.get(user.id)) && reaction.emoji == client.emojis.cache.get(stats.no_emoji)) {
 			reaction.message.delete();
 		} else if(stats.gamephase == gp.INGAME && isParticipant(reaction.message.guild.members.cache.get(user.id))) {
             let poll = await getPoll(reaction.message.id);

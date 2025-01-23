@@ -362,7 +362,7 @@ module.exports = function() {
     Source Reference to Text
     Converts a source reference to text suitable for discord
     **/
-    this.srcRefToText = function(src_ref, raw = null) {
+    this.srcRefToText = function(src_ref, raw = null, allowRecursion = true) {
         let type = srcToType(src_ref);
         let val = srcToValue(src_ref);
         switch(type) {
@@ -383,8 +383,8 @@ module.exports = function() {
                     const owner = getCustomAttributeOwner(val);
                     const source = getCustomAttributeSource(val);
                     const name = getCustomAttributeName(val);
-                    const ownerText = srcRefToText(owner);
-                    const sourceText = srcRefToText(source);
+                    const ownerText = allowRecursion ? srcRefToText(owner) : owner;
+                    const sourceText = allowRecursion ? srcRefToText(source) : source;
                     return `${name} (Attr-${val}) on ${ownerText} from ${sourceText}`;
                 } else {
                     return toTitleCase(val);

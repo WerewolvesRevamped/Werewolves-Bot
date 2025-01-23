@@ -42,6 +42,7 @@ module.exports = function() {
             case "get": cmdAttributesGet(message.channel, args); break
 			case "list": cmdAttributesList(message.channel); break;
 			case "active": if(checkSafe(message)) cmdAttributesActive(message.channel); break;
+			case "search": if(checkSafe(message)) cmdAttributesSearch(message.channel, args); break;
 			case "delete": cmdAttributesDelete(message.channel, args); break;
 			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
 		}
@@ -62,7 +63,7 @@ module.exports = function() {
 				chunkArray(result.map(attribute => {
                     const ownerText = srcRefToText(`${attribute.owner_type}:${attribute.owner}`);
                     const attrList = `${attribute.val1};${attribute.val2};${attribute.val3};${attribute.val4}`;
-                    return `\`${attribute.ai_id}\`: **${toTitleCase(attribute.attr_type)}** - ${ownerText} (~${toTitleCase(attribute.duration)}) [${attrList}] {${srcNameToText(attribute.src_name)} - ${srcRefToText(attribute.src_ref)}}`;
+                    return `\`${attribute.ai_id}\`: **${toTitleCase(attribute.attr_type)}** - ${ownerText} (~${toTitleCase(attribute.duration)}) [${attrList}] {${srcNameToText(attribute.src_name)} - ${srcRefToText(attribute.src_ref, null, false)}}`;
                 }), 10).map(el => el.join("\n")).forEach(el => channel.send(el));
 			} else { 
 				// No attributes exist
@@ -72,6 +73,53 @@ module.exports = function() {
 			// DB error
 			channel.send("⛔ Database error. Couldn't look for active attribute instance list!");
 		});
+	}
+   
+    /**
+    Command: $attributes search
+    Searches active group instances
+    **/
+	/* Lists all attribute names */
+	this.cmdAttributesSearch = async function(channel, args) {
+		if(!args[1] || !args[2]) {  
+			channel.send("⛔ Syntax error. Incorrect amount of parameters!"); 
+			return; 
+        } else if(!isValidAttributeColumnName(args[1])) {
+			channel.send("⛔ Syntax error. Must specify a valid search column!"); 
+        }
+        let result;
+        args[1] = args[1].replace(/[^a-z_0-9]*/,"");
+        args[2] = args[2].replace(/[^a-z_0-9]*/,"");
+        if(args[3] && args[4] && isValidAttributeColumnName(args[3])) {
+            args[3] = args[3].replace(/[^a-z_0-9]*/,"");
+            args[4] = args[4].replace(/[^a-z_0-9]*/,"");
+            if(args[5] && args[6] && isValidAttributeColumnName(args[5])) {
+                args[5] = args[5].replace(/[^a-z_0-9]*/,"");
+                args[6] = args[6].replace(/[^a-z_0-9]*/,"");
+                result = await sqlProm("SELECT * FROM active_attributes WHERE " + args[1] + "=" + connection.escape(args[2]) + " AND " + args[3] + "=" + connection.escape(args[4]) + " AND " + args[5] + "=" + connection.escape(args[6]) + " ORDER BY attr_type ASC");
+            } else {
+                result = await sqlProm("SELECT * FROM active_attributes WHERE " + args[1] + "=" + connection.escape(args[2]) + " AND " + args[3] + "=" + connection.escape(args[4]) + " ORDER BY attr_type ASC");
+            }
+        } else {
+            result = await sqlProm("SELECT * FROM active_attributes WHERE " + args[1] + "=" + connection.escape(args[2]) + " ORDER BY attr_type ASC");
+        }
+        
+		// Get all attributes
+        if(result.length > 0) {
+            // At least one attribute exists
+            channel.send("✳️ Sending a list of currently existing active attributes instances that match your search:\nAI ID: AttrType - Owner (Duration) [Values] {Source}");
+            // Send message
+            chunkArray(result.map(attribute => {
+                const ownerText = srcRefToText(`${attribute.owner_type}:${attribute.owner}`);
+                const attrList = `${attribute.val1};${attribute.val2};${attribute.val3};${attribute.val4}`;
+                return `\`${attribute.ai_id}\`: **${toTitleCase(attribute.attr_type)}** - ${ownerText} (~${toTitleCase(attribute.duration)}) [${attrList}] {${srcNameToText(attribute.src_name)} - ${srcRefToText(attribute.src_ref, null, false)}}`;
+            }), 10).map(el => el.join("\n")).forEach(el => channel.send(el));
+            await sleep(100);
+            channel.send(`✅ Found \`${result.length}\` matches.`);
+        } else { 
+            // No attributes exist
+            channel.send("⛔ Database error. Could not find any active attribute instances!");
+        }
 	}
     
     /**

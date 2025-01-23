@@ -252,6 +252,7 @@ module.exports = function() {
             ["attributes get", PERM.GM, "Returns all data for a single attribute.", "<Attribute Name>", "Returns all columns stored for an attributes.", "attributes get wolfish", [], CMDSTATE.RDY],
             ["attributes list", PERM.GM, "Lists all available attributes.", "", "Lists all locally stored attributes.", "attributes list", ["✳️ Sending a list of currently existing attributes:","Wolfish"], CMDSTATE.RDY],
             ["attributes active", PERM.GM, "Lists all active attributes and all their data.", "", "Lists all active attribute instances and all attached data.", "attributes active", ["✳️ Sending a list of currently existing active attributes instances:","AI ID: AttrType - Owner (Duration) [Values] {Source}","1: Custom - @Evil Ts (~Permanent) [wolfish;;;] {Team: Werewolf - Werewolf}"], CMDSTATE.RDY],
+            ["attributes search", PERM.GM, "Searches for specific active attributes.", "<Search Column> <Search Value>", "Returns all active attributes and all their attached data where <Search Column> matches <Search Value>. You may also specify two columns (<Search Column> <Search Value> <Search Column #2> <Search Value #2>) or three columns (<Search Column> <Search Value> <Search Column #2> <Search Value #2> <Search Column #3> <Search Value #3>). Allowed <Search Columns> are: owner, owner_type, src_name, src_ref, attr_type, duration, val1, val2, val3, val4, applied_phase, used, target, counter, alive", "attributes search attr_type custom", ["✳️ Sending a list of currently existing active attributes instances that match your search:","AI ID: AttrType - Owner (Duration) [Values] {Source}","1: Custom - @Evil Ts (~Permanent) [wolfish;;;] {Team: Werewolf - Werewolf}"], CMDSTATE.RDY],
             ["attributes delete", PERM.GM, "Deletes an active attribute.", "<Attribute ID>", "Deletes a single active attribute by ID. Use $attributes active to view IDs.", "attributes delete 1", ["✅ Deleted active attribute instance."], CMDSTATE.RDY],
         /** Game Module **/
         // dr
@@ -372,7 +373,7 @@ module.exports = function() {
             ["infomanage list", PERM.GM, "Lists all available info messages.", "", "Lists all locally stored info messages.", "infomanage list", ["✳️ Sending a list of currently existing info messages:","Lycan"], CMDSTATE.RDY],
         // alias
         ["alias", PERM.AL, "Manages aliases.", "<Subcommand>", "Group of commands to handle alias. $help alias <sub-command> for detailed help.", "", [], CMDSTATE.UNK],
-            ["alias add", PERM.AL, "Creates a new alias.", "<Alias> <Target>", "Creates an alias that redirect <Alias> to <Target>", "alias add villager citizen", [], CMDSTATE.UNK],
+            ["alias set", PERM.AL, "Creates a new alias.", "<Alias> <Target>", "Creates an alias that redirect <Alias> to <Target>", "alias add villager citizen", [], CMDSTATE.UNK, ["alias add"]],
             ["alias remove", PERM.AL, "Deletes a alias.", "<Alias>", "Deletes a specific aliases.", "alias remove villager", [], CMDSTATE.UNK],
             ["alias clear", PERM.AL, "Deletes all aliases.", "", "Deletes all existing aliases.", "alias clear", [], CMDSTATE.UNK],
             ["alias list", PERM.AL, "Lists all aliases.", "", "Lists all existing aliases, sorted by their target.", "alias list", [], CMDSTATE.RDY],

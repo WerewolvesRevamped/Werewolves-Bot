@@ -29,6 +29,8 @@
     "granting.resign": "You may resign from your position during any phase.",
     
     "comment_4": "Role-specific Custom Prompts",
+    "witch.pod": "You may (once) use your Potion of Death to attack another player. Who would you like to attack?",
+    "witch.pol": "You may (once) use your Potion of Life to protect yourself and up to three other players. Who would you like to protect?",
     "vampire.1": "Who do you want to demonize?",
     "exorcist.1": "You may choose a player to exorcise?",
     "wager.1": "You have received the Devil's Wager. You can decide to either:\n\n1. Attack a player who still has a soul, but sell your soul in the process.\n\n2. Protect yourself or any player, but sell your soul in the process.\n\n3. Check someone's role, but the Devil will see the result and also your role.\n\n4. Ignore, and don't do anything.",

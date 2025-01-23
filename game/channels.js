@@ -30,10 +30,12 @@ module.exports = function() {
         // Check if owner
 		if(!isCCOwner(channel, member) && !mode && !isGameMaster(member, true)) {
 			channel.send("⛔ Command error. You are not an owner of this CC!");
+            return;
         }
         
         // get list of new members
         let players = parseUserList(channel, args, 1, member);
+        if(!players) players = [];
         players = players.filter(el => !isCCMember(channel, el));
         // add members if at least one exists
         if(players && players.length > 0) {
@@ -60,10 +62,12 @@ module.exports = function() {
         // Check if owner
 		if(!isCCOwner(channel, member) && !mode && !isGameMaster(member, true)) {
 			channel.send("⛔ Command error. You are not an owner of this CC!");
+            return;
         }
         
         // get list of members to remove
         let players = parseUserList(channel, args, 1, member);
+        if(!players) players = [];
         players = players.filter(el => isCCMember(channel, el) && !isCCOwner(channel, el));
         // remove members if at least one exists
         if(players && players.length > 0) {
@@ -94,6 +98,7 @@ module.exports = function() {
         
         // get list of members to promote
         let players = parseUserList(channel, args, 1, member);
+        if(!players) players = [];
         players = players.filter(el => isCCMember(channel, el) && !isCCOwner(channel, el));
         // remove members if at least one exists
         if(players && players.length > 0) {
@@ -124,6 +129,7 @@ module.exports = function() {
         
         // get list of members to demote
         let players = parseUserList(channel, args, 1, member);
+        if(!players) players = [];
         players = players.filter(el => isCCMember(channel, el) && isCCOwner(channel, el));
         // remove members if at least one exists
         if(players && players.length > 0) {
@@ -270,6 +276,7 @@ module.exports = function() {
     this.cmdSCAdd = function(channel, member, args) {
         cmdCCAdd(channel, member, args, 1);
         players = parseUserList(channel, args, 1, member);
+        if(!players) players = [];
         players.forEach(p => channel.send(`**<@${p}> has been added to <#${channel.id}>.**`));
     }
     
@@ -280,6 +287,7 @@ module.exports = function() {
     this.cmdSCRemove = function(channel, member, args) {
         cmdCCRemove(channel, member, args, 1);
         players = parseUserList(channel, args, 1, member);
+        if(!players) players = [];
         players.forEach(p => channel.send(`**<@${p}> has been removed from <#${channel.id}>.**`));
     }
     
@@ -335,8 +343,8 @@ module.exports = function() {
 		}
         args.shift();
 		channelRename(channel, args.join(" "));
-		cmdInfoEither(channel, [args.join(" ")], true, true);
-        channel.send(`**<@&${stats.participant}> Your role has changed to \`${toTitleCase(args.join(" "))}\`.**`);
+		cmdInfo(channel, null, [args.join(" ")], true, true);
+        channel.send(`**<@&${stats.participant}> Your channel has changed to \`${toTitleCase(args.join(" "))}\`.**`);
 	}
     
     /**
