@@ -131,6 +131,7 @@ module.exports = function() {
                 "death_message": ["dmsgs", "death_messages", "dmsg"],
                 "recycle": ["rec", "re"],
                 "nickname": ["nick"],
+                "booster": ["boosters", "bst"],
         };
         
     this.parseAlias = function(alias) {

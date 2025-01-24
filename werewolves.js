@@ -43,6 +43,7 @@ var botLoaded = false;
 
 /* Setup */
 client.on("ready", async () => {
+    
     setMainGuild();
     
 	sqlSetup();
@@ -249,7 +250,8 @@ client.on("messageCreate", async message => {
             let activity = await sqlPromEsc("SELECT * FROM activity WHERE player=", message.author.id);
             if(activity && activity.length > 0) {
                 if(activity[0].timestamp < curTime) {
-                    await sqlPromEsc("UPDATE activity SET count=count+1,timestamp=" + curTime + " WHERE player=", message.author.id);
+                    let multiplier = await getBoosterMultiplier();
+                    await sqlPromEsc("UPDATE activity SET count=count+" + connection.escape(multiplier) + ",timestamp=" + curTime + " WHERE player=", message.author.id);
                     let newLevel = (+activity[0].level) + 1;
                     let reqXpLevelup = LEVELS[newLevel];
                     let randChance = Math.random();
@@ -928,6 +930,9 @@ client.on("messageCreate", async message => {
     break;
     case "death_message":
 		cmdDeathMessage(message, args);
+    break;
+    case "booster":
+		cmdBooster(message, args);
     break;
     case "recycle":
 		cmdRecycle(message, args);

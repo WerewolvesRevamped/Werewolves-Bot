@@ -288,6 +288,13 @@ module.exports = function() {
 						})
 						// Channel couldn't get created
 						.catch(err => { 
+                                if(err?.rawError?.errors?.parent_id?._errors?.[0]?.code === "CHANNEL_PARENT_MAX_CHANNELS") {
+                                    sql("UPDATE stats SET value = value + 1 WHERE id = 9", result => {
+                                        channel.send("⛔ Command error. Could not create new CCs! Re-trying."); 
+                                        cmdCCCreate(channel, member, args, mode, callback, spam);
+                                        return;
+                                    });
+                                }
 							sendError(channel, err, "Could not create channel");
 							logO(err);
 						});

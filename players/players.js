@@ -9,6 +9,7 @@ require("./icons.js")();
 require("./xp.js")();
 require("./values.js")();
 require("./death_messages.js")();
+require("./boosters.js")();
 
 
 module.exports = function() {
