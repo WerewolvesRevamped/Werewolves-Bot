@@ -62,7 +62,8 @@ module.exports = function() {
                     if(hi.length != 1) missingMatches.push(matches[j]);
                 }
                 if(missingMatches.length > 0) {
-                    channel.send(`⛔ List error. Cannot start game with role \`${rName}\` on <@${roles[i].id}> without host information. The following information is missing: ${missingMatches.map(el => '\`' + el + '\`').join(", ")}.`); 
+                    let cmds = missingMatches.map(el => '`$hi add ' + roles[i].id + ' ' + el + ' "<value>"`').join(", ");
+                    channel.send(`⛔ List error. Cannot start game with role \`${rName}\` on <@${roles[i].id}> without host information. The following information is missing: ${missingMatches.map(el => '\`' + el + '\`').join(", ")}. To add this host information run this command: ${cmds}`); 
                     return false;
                 }
             }

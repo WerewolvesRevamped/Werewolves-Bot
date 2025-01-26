@@ -102,8 +102,11 @@ module.exports = function() {
     **/
     this.getHostInformation = async function(player_id, hi_name) {
         let existing = await sqlPromEsc("SELECT * FROM host_information WHERE name=" + connection.escape(hi_name.toLowerCase()) + " AND id=", player_id);
-        if(existing.length != 1) {
+        if(existing.length === 0) {
             abilityLog(`❗ **Error:** Cannot find host information \`${hi_name}\` for <@${player_id}>!`);
+			return []; 
+        } else if(existing.length > 1) {
+            abilityLog(`❗ **Error:** Found several host information \`${hi_name}\` for <@${player_id}>!`);
 			return []; 
         } else {
             return [ existing[0].value ];
