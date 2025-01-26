@@ -297,11 +297,11 @@ client.on("messageCreate", async message => {
                                         embed.description += `\n\nAdditionally, you may now access the market using \`${stats.prefix}market\`.`;
                                         await inventoryModifyItem(message.author.id, "BOT:market", 1);
                                     break;
-                                    case 15:
+                                    case 16:
                                         embed.description += `\n\nAdditionally, you may now recycle rewards into coins using \`${stats.prefix}recycle\`.`;
                                         await inventoryModifyItem(message.author.id, "BOT:recycle", 1);
                                     break;
-                                    case 20:
+                                    case 18:
                                         embed.description += `\n\nAdditionally, you may now update your nickname while out of game \`${stats.prefix}nickname\`.`;
                                         await inventoryModifyItem(message.author.id, "BOT:nick", 1);
                                     break;

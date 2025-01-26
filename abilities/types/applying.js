@@ -17,9 +17,7 @@ module.exports = function() {
         }
         // parse parameters
         let target = await parseSelector(ability.target, src_ref, additionalTriggerData);
-        console.log("APPLYING1", target);
         target = await applyRedirection(target, src_ref, ability.type, ability.subtype, additionalTriggerData);
-        console.log("APPLYING2", target);
         
         
         // select subtype
@@ -74,7 +72,6 @@ module.exports = function() {
         val3 = await applyVariables(val3);
         // iterate through targets
         for(let i = 0; i < targets.value.length; i++) {
-            console.log("APPLYING", targets.value[i]);
             // handle visit
             if(additionalTriggerData.parameters.visitless !== true) {
                 let result = await visit(src_ref, targets.value[i], attr, "applying", "add");

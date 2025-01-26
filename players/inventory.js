@@ -36,6 +36,7 @@ module.exports = function() {
     **/
     this.cmdMarket = async function(message, args) {
         if(!args[0]) { 
+            await marketClearOld(message.channel);
             cmdMarketSee(message.channel, message.member.id);
 			return; 
 		} 
@@ -44,12 +45,15 @@ module.exports = function() {
             message.channel.send(`⛔ You have not unlocked the ${stats.prefix}market command.`);
             return;
         } 
+        // check outdated market items
+        await marketClearOld(message.channel);
 		// Check Subcommand
 		switch(args[0]) {
 			case "see": cmdMarketSee(message.channel, message.member.id); break;
             case "offer": cmdMarketOffer(message.channel, message.author.id, args); break;
             case "evaluate": cmdMarketEvaluate(message.channel, args); break;
             case "buy": cmdMarketBuy(message.channel, message.author, args); break;
+            case "get": cmdMarketGet(message.channel, message.author, args); break;
             case "remove": cmdMarketRemove(message.channel, message.author, args); break;
 			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
 		}
@@ -251,7 +255,7 @@ module.exports = function() {
         let rand = Math.floor(Math.random() * 15);
         
         // determine coin value
-        let val = Math.floor(( tierCoins[tierNames.indexOf(item[0][2])] * (1 / item[0][3]) ) + rand);
+        let val = Math.floor((( (tierCoins[tierNames.indexOf(item[0][2])] ?? 500) * (1 / (item[0][3] ?? 1)) ) + rand) / 2);
         // update coins
         cmdCoinsModify(message.channel, ["add", message.author.id, val], "add", 1, true);
         
@@ -276,9 +280,9 @@ module.exports = function() {
         let code = item[0][0];
 
         // determine coin value
-        let val = Math.floor(( tierCoins[tierNames.indexOf(item[0][2])] * (1 / item[0][3]) ) + 7);
+        let val = Math.floor((( (tierCoins[tierNames.indexOf(item[0][2])] ?? 500) * (1 / (item[0][3] ?? 1)) ) + 7) / 2);
 
-        channel.send(`✅ Evaluated ${item[0][1]} (${code.toUpperCase()}) to be worth ${val} coins!`);
+        channel.send(`✅ Evaluated ${code.toUpperCase()} to be worth ${val} coins!`);
     }
     
     /**
@@ -341,7 +345,7 @@ module.exports = function() {
         }
         
         let price = + args[2];
-        if(price < 0 || price > 100000) {
+        if(price < 0 || price > 1000) {
 			channel.send("⛔ Command error. Invalid item price."); 
 			return; 
         }
@@ -476,8 +480,25 @@ module.exports = function() {
     /** Add item to market
     **/
     this.marketAddItem = async function(pid, item, price) {
-        await sqlProm("INSERT INTO market (item, price, owner) VALUES (" + connection.escape(item.toLowerCase()) + "," + connection.escape(price) + "," + connection.escape(pid) + ")");
+        let timestamp = xpGetTime();
+        let day = 1440;
+        let expiration = timestamp + (14 + (Math.floor(Math.sqrt(price)) * 5)) * day;
+        await sqlProm("INSERT INTO market (item, price, owner, timestamp) VALUES (" + connection.escape(item.toLowerCase()) + "," + connection.escape(price) + "," + connection.escape(pid) + "," + connection.escape(expiration) + ")");
     }
 
+    /**
+    Market clear old
+    **/
+    this.marketClearOld = async function(channel) {
+        let timestamp = xpGetTime();
+        let toBeRemoved = await sqlPromEsc("SELECT * FROM market WHERE timestamp<=", timestamp);
+        for(let i = 0; i < toBeRemoved.length; i++) {          
+            // readd item
+            await inventoryModifyItem(toBeRemoved[i].owner, toBeRemoved[i].item, 1);
+            // delete offer
+            await sqlPromEsc("DELETE FROM market WHERE ai_id=", toBeRemoved[i].ai_id);
+            channel.send(`⏲️ <@${toBeRemoved[i].owner}>, your ${toBeRemoved[i].item.toUpperCase()} offer has expired. It has been removed from the market!`);
+        }
+    }
     
 }
