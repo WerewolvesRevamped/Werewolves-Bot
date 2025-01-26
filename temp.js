@@ -132,6 +132,7 @@ module.exports = function() {
                 "recycle": ["rec", "re"],
                 "nickname": ["nick"],
                 "booster": ["boosters", "bst"],
+                "market": ["mk", "mkt"],
         };
         
     this.parseAlias = function(alias) {

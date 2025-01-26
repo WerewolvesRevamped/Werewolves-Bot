@@ -249,7 +249,7 @@ module.exports = function() {
                 if(additionalTriggerData.action_target) {
                     let val = srcToValue(additionalTriggerData.action_target);
                     let type = srcToType(additionalTriggerData.action_target);
-                    if(!val) return [ ];  // invalid action target
+                    if(!val || val == null || val == "undefined") return [ ];  // invalid action target
                     console.log("ACTION TARGET", additionalTriggerData.action_target, val, type);
                     switch(type) {
                         case "player":
@@ -258,7 +258,7 @@ module.exports = function() {
                             let attr = await roleAttributeGetPlayer(val);
                             return [ attr.id ];
                         default:
-                            abilityLog(`❗ **Error:** Used \`@ActionTarget\` with invalid action target type \`${type}\`!`);
+                            //abilityLog(`❗ **Error:** Used \`@ActionTarget\` with invalid action target type \`${type}\`!`);
                             return [ ];
                     }
                 } else {
@@ -309,10 +309,18 @@ module.exports = function() {
                     return invalidSelector(selectorTarget);
                 }
             case "@visitor":
-                if(additionalTriggerData.visitor === null) {
+                if(additionalTriggerData.visitor == null) {
                     return [ ];
                 } else if(additionalTriggerData.visitor) {
                     return [ additionalTriggerData.visitor ];
+                } else {
+                    return invalidSelector(selectorTarget);
+                }
+            case "@joiner":
+                if(additionalTriggerData.joiner === null) {
+                    return [ ];
+                } else if(additionalTriggerData.joiner) {
+                    return [ additionalTriggerData.joiner ];
                 } else {
                     return invalidSelector(selectorTarget);
                 }

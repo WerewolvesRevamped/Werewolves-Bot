@@ -25,9 +25,10 @@ module.exports = function() {
         
         // log ascension
         abilityLog(`🪽 **Ascension:** <@${self}> wins!`);
+        actionLog(`🪽 <@${self}> ascends and wins!`);
         
         // buffer storytime
-        await bufferStorytime(`<@${self}> has ascended and wins!`);
+        await bufferStorytime(`${idToEmoji(self)} <@${self}> has ascended and wins!`);
         
         // return
         return { msg: "Ascension succeeded!", success: false };
@@ -53,9 +54,10 @@ module.exports = function() {
         
         // log descension
         abilityLog(`☠️ **Descension:** <@${self}> loses!`);
+        actionLog(`☠️ <@${self}> descends and loses!`);
         
         // buffer storytime
-        await bufferStorytime(`<@${self}> has descended and loses!`);
+        await bufferStorytime(`${idToEmoji(self)} <@${self}> has descended and loses!`);
         
         // return
         return { msg: "Descension succeeded!", success: false };

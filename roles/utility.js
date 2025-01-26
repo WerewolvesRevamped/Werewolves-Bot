@@ -131,6 +131,7 @@ module.exports = function() {
     **/
     this.parseRole = function(input) {
 		input = input.toLowerCase(); // change role name to lower case
+        input = input.replace(/\-/g, " ");
         input = input.replace(/[^a-z\$ ]/g, ""); // remove any non a-z characters
         let alias = applyAlias(input);
 		if(alias != input) return parseRole(alias.name);

@@ -739,6 +739,7 @@ module.exports = function() {
                     if(message) message.reply(basicEmbed("❌ You must specify a valid role.", EMBED_RED));
                     return false;
                 }
+                role[1] = role[1].replace(/ /g, "-");
                 return role;
             }
             case "boolean": {
@@ -786,6 +787,7 @@ module.exports = function() {
                 let roles = await sqlProm("SELECT name FROM roles");
                 let randomRole = roles[Math.floor(Math.random() * roles.length)];
                 let role = parseRoleReply(randomRole.name);
+                role[1] = role[1].replace(/ /g, "-");
                 return role;
             }
             case "boolean": {

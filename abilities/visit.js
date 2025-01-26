@@ -13,6 +13,9 @@ module.exports = function() {
     this.cancelledVisitsFeedback = []
     this.visit = async function(sourcePlayerAny, targetPlayerAny, visitParameter, abilityType, abilitySubtype, templateMessage = null) {
         console.log("Visit", sourcePlayerAny, targetPlayerAny, visitParameter, abilityType, abilitySubtype);
+        if(targetPlayerAny == null || sourcePlayerAny == null) {
+            return null; // not really a visit if there is one of those two doesnt exist
+        }
         // allow both direct id types as well as player:<id> format
         let sourcePlayerSplit = sourcePlayerAny.split(":");
         let sourcePlayer = sourcePlayerSplit.length === 2 ? sourcePlayerSplit[1] : sourcePlayerAny;
@@ -56,6 +59,7 @@ module.exports = function() {
                 if(matchesType && matchesSubtype) {
                     // no custom feedback; return failure
                     if(obstructions[i].val3 === "") {
+                        abilityLog(`✅ <@${sourcePlayer}> was obstructed: failure.`);
                         return { msg: null, success: false };
                     } else { // custom feedback; evaluate chances
                         let customFeedback = JSON.parse(obstructions[i].val3);

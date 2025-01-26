@@ -155,6 +155,11 @@ module.exports = function() {
             // role change trigger
             await triggerPlayer(targets[i], "On Role Change", { role_changer: srcToValue(src_ref) }); 
             
+            // get alignment, alignment join trigger
+            let parsedRole = parseRole(role);
+            let roleData = await getRoleDataFromName(parsedRole);
+            await triggerTeam(roleData.team, "On Join", { joiner: targets[i] });
+            
             // passive
             await triggerHandler("Passive");
             
@@ -202,6 +207,10 @@ module.exports = function() {
             
             // alignment change info embed
             await abilitySendProm(`player:${targets[i]}`, `Your alignment has changed to \`${toTitleCase(alignment)}\`!`, EMBED_PURPLE, true, false, img, "Alignment Change");
+            
+            // join trigger
+            let team = parseTeam(alignment);
+            await triggerTeam(team, "On Join", { joiner: targets[i] });
             
             // passive
             await triggerHandler("Passive");

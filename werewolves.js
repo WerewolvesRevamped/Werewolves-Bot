@@ -289,9 +289,13 @@ client.on("messageCreate", async message => {
                                             embed.description += `\n\nAdditionally, you got the \`Verified\` role, which grants a few additional permissions.`;    
                                         }
                                     break;
-                                    case 10:
+                                    case 7:
                                         embed.description += `\n\nAdditionally, you may now transfer rewards to others using \`${stats.prefix}inventory transfer\`.`;
                                         await inventoryModifyItem(message.author.id, "BOT:invtransfer", 1);
+                                    break;
+                                    case 10:
+                                        embed.description += `\n\nAdditionally, you may now access the market using \`${stats.prefix}market\`.`;
+                                        await inventoryModifyItem(message.author.id, "BOT:market", 1);
                                     break;
                                     case 15:
                                         embed.description += `\n\nAdditionally, you may now recycle rewards into coins using \`${stats.prefix}recycle\`.`;
@@ -920,6 +924,13 @@ client.on("messageCreate", async message => {
             break;
         }
 		cmdInventory(message, args);
+    break;
+    case "market":
+        if((isSignedUp(message.member) || isParticipant(message.member)) && stats.gamephase != gp.POSTGAME) {
+            message.channel.send(`⛔ You cannot use this command while signed up or ingame.`);
+            break;
+        }
+		cmdMarket(message, args);
     break;
     case "icon":
         if(isParticipant(message.member) && stats.gamephase != gp.POSTGAME) {

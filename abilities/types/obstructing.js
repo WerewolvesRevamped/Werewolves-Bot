@@ -44,7 +44,7 @@ module.exports = function() {
                 }
             }
             
-            await createObstructionAttribute(src_name, src_ref, targets[i], duration, targetType, targetSubype, JSON.stringify(customFeedback));
+            await createObstructionAttribute(src_name, src_ref, targets[i], duration, targetType, targetSubype, customFeedback.length > 0 ? JSON.stringify(customFeedback) : "");
             abilityLog(`✅ <@${targets[i]}> was obstructed for \`${getDurationName(duration)}\`${targetType ? (' affecting \`' + (targetSubype ? targetSubype + ' ' : '') + targetType + '\`') : ''}${customFeedback.length > 0 ? ' with custom feedback \`' + JSON.stringify(customFeedback) + '\`' : ''}.`);
         }
         return { msg: "Obstructing succeeded!", success: true, target: `player:${targets[0]}` };

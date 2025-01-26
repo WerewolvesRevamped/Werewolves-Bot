@@ -4,15 +4,15 @@ Loot Boxes
 
 module.exports = function() {
 
-    this.ALL_LOOT = [["SP:1","Glitch","Gold",1],["STD:RE","Reroll","Silver",1],["BOT:TEMP","$temp Command","Silver",1],["GM:Ts","Kill Ts","Platinum",0.5],["AL:Town","Townsfolk Alignment Guarantor","Silver",2],["IC:Cat","Cat Icon","Platinum",1],["DM:1","Realsad","Silver",1],["BST:XP150","+150 XP","Bronze",2],["SP:2","Negate","Silver",2],["COIN:50","50 Coins","Bronze",2],["BOT:REV","$reverseme Command","Gold",1],["GM:Eth","Demote Ethan","Gold",0.5],["AL:Wolf","Werewolves Alignment Guarantor","Silver",2],["IC:Devil","Devil Icon","Gold",1],["DM:2","Salute","Bronze",1],["BST:XP300","+300 XP","Silver",1],["SP:3","Grayscale","Bronze",2],["COIN:120","120 Coins","Silver",2],["BOT:SHIP","$newship Command","Platinum",1],["GM:Luf","Rename Luffy","Gold",0.5],["AL:UA","Unaligned Alignment Guarantor","Gold",1],["IC:Hooker","Hooker Icon","Silver",1],["DM:3","Rating","Silver",1],["BST:XP500","+500 XP","Gold",1],["SP:5","Emboss","Bronze",1],["COIN:160","160 Coins","Gold",2],["BOT:HATE","$newhate Command","Platinum",1],["GM:Krem","Turn Krem into a Little Bug","Gold",0.5],["AL:Solo","Solo Alignment Guarantor","Gold",1],["IC:Medium","Medium Icon","Silver",1],["DM:4","Cursed","Platinum",1],["BST:GL21","Double XP (1 Hour)","Bronze",1],["SP:6","Silhouette","Bronze",1],["STD:RE2","Reroll x2","Gold",1],["BOT:FLIP","$flip Command","Bronze",1],["GM: Jay","Tempt Jay into sinning","Platinum",0.5],["AL:Hell","Hell Alignment Guarantor","Platinum",1],["IC:Executioner","Executioner Icon","Bronze",1],["DM:5","Mourner","Gold",1],["BST:GL31","Triple XP (1 Hour)","Bronze",0.5],["SP:7","Pixel","Silver",1],["STD:BTNT","Be the next theme","Platinum",0.5],["BOT:FORTUNE","$fortune Command","Bronze",1],["GM:Kruth","Demote Kruthers","Silver",0.5],["AL:HM","Horseman Alignment Guarantor","Platinum",0.5],["IC:Witch","Witch Icon","Gold",1],["DM:6","Random","Silver",1],["BST:GL41","Quadruple XP (1 Hour)","Silver",1],["SP:9","Pixel #3","Silver",1],["STD:JOKE","Your own Joke Role","Platinum",0.5],["GM:Fish","Kill Mr. Fish","Silver",0.5],["AL:Pyro","Pyro Alignment Guarantor","Platinum",1],["IC:Saboteur Wolf","Saboteur Wolf Icon","Bronze",1],["DM:7","Horrible","Bronze",1],["BST:GL23","Double XP (3 Hours)","Silver",0.5],["SP:12","Red","Bronze",2],["STD:X","Unlucky (Nothing)","Bronze",1],["GM:Arch","Demote Jean D. Arch","Silver",0.5],["AL:Flute","Flute Alignment Guarantor","Platinum",1],["IC:Archivist Fox","Archivist Fox Icon","Silver",1],["DM:8","Gone","Bronze",1],["BST:GL35","Triple XP (5 Hours)","Gold",0.5],["SP:13","Green","Bronze",2],["STD:RE3","Reroll x3","Platinum",0.5],["GM:Fed","Kill Federick","Bronze",0.5],["AL:WWW","White Wolves Alignment Guarantor","Platinum",0.5],["IC:Lone Wolf","Lone Wolf Icon","Gold",1],["DM:9","Crow","Bronze",0.5],["BST:GL43","Quadruple XP (3 Hours)","Gold",1],["SP:14","Blue","Bronze",2],["STD:Icon","Custom Icon","Platinum",1],["GM:Ghost","Exorcise Gh0st","Silver",0.5],["AL:Plague","Plague Alignment Guarantor","Platinum",0.5],["IC:Flute Player","Flute Player Icon","Silver",1],["BST:GL77","Septuple (7 Hours)","Platinum",1],["SP:15","Yellow","Bronze",2],["STD:Theme","Suggest a Theme","Gold",0.5],["GM:Katy","Kill KatyHawk","Bronze",0.5],["AL:UW","Underworld Alignment Guarantor","Platinum",0.5],["IC:Pyromancer","Pyromancer Icon","Gold",1],["BST:GLX10","Dectuple XP (10 Hours)","Platinum",0.5],["SP:16","Purple","Bronze",2],["STD:CMD","Custom Bot Command","Platinum",0.5],["GM:Marten","Promote Marten","Platinum",0.5],["AL:T/W","Townsfolk/Werewolves Alignment Guarantor","Bronze",2],["IC:Plague Bearer","Plague Bearer Icon","Gold",1],["BST:GLN1","Negative XP (1 Hour)","Silver",0.5],["SP:17","Cyan","Bronze",2],["STD:Ban","Get banned","Bronze",0.25],["GM:Turtle","Demote Mr. Turtle","Gold",0.5],["IC:Vampire","Vampire Icon","Gold",1],["SP:18","Flip","Bronze",1],["STD:SP","Suggest a Skinpack","Platinum",0.5],["GM:Stein","Take Steinator as a Hostage","Gold",0.5],["CAT:Misc","Miscellaneous Category Guarantor","Bronze",1],["IC:Angel","Angel Icon","Gold",1],["SP:20","BW","Bronze",1],["STD:OS","Suggest a Offseason Game","Gold",1],["BOT:invtransfer","$inventory transfer Command","Bronze",0.1],["GM:Vera","Evict Vera","Platinum",0.5],["CAT:Power","Power Category Guarantor","Silver",1],["IC:Hellhound","Hellhound Icon","Silver",1],["SP:21","Wire","Gold",2],["BOT:recycle","$recycle Command","Bronze",0.1],["GM:EvilTs","Be Killed by Evil Ts","Platinum",0.25],["CAT:Invest","Investigative Category Guarantor","Gold",1],["IC:Bear","Bear Icon","Platinum",1],["SP:24","Rainbow #2","Silver",1],["BOT:nick","$nickname Command","Bronze",0.1],["CAT:Kill","Killing Category Guarantor","Gold",0.5],["IC:White Werewolf","White Werewolf Icon","Silver",1],["SP:25","Rainbow #3","Silver",1],["CAT:!Misc","Not-Miscellaneous Category Guarantor","Bronze",1],["IC:Reaper","Reaper Icon","Platinum",1],["SP:26","Ts","Platinum",0.5],["IC:Herding Dog","Herding Dog Icon","Silver",1],["SP:27","Oil","Silver",1],["IC:Bard","Bard Icon","Bronze",1],["SP:28","Wave","Bronze",1],["IC:Cerberus","Cerberus Icon","Bronze",1],["SP:29","Swirl","Bronze",1],["SPEC:AnySkinpack","(SPECIAL) Any Skinpack","Platinum",0.05],["IC:Lover","Lover Icon","Bronze",1],["SP:31","Cycle","Silver",1],["SPEC:AnyIcon","(SPECIAL) Any Icon","Platinum",0.05],["IC:Citizen","Citizen Icon","Bronze",1],["SP:32","Equalize","Bronze",1],["SPEC:AnyGuarantor","(SPECIAL) Any Guarantor","Platinum",0.05],["IC:Devout Villager","Devout Villager Icon","Bronze",1],["SP:33","Fourier Noise","Gold",1],["SPEC:Any","(SPECIAL) Any Prize","Platinum",0.01],["IC:Baroness","Baroness Icon","Bronze",1],["SP:35","Fourier Oil","Gold",1],["IC:Apothecary","Apothecary Icon","Silver",1],["SP:36","Fourier Modulate","Platinum",2],["IC:Firebug","Firebug Icon","Silver",1],["SP:37","Fourier Wire","Silver",0.5],["IC:Wraith","Wraith Icon","Silver",1],["SP:38","Glitch #2","Gold",1],["IC:Dog","Dog Icon","Bronze",1],["SP:39","Eyes","Gold",1],["SP:40","Thief","",],["SP:41","Mask","Silver",0.5],["SP:42","Eye","Gold",2],["SP:43","Fourier Eye","Gold",0.5],["SP:44","Citizen Eye","Silver",0.5],["SP:45","Items","Gold",1],["SP:46","Bear","Platinum",2],["SP:47","Wolfify","Gold",1],["SP:48","Grid","Gold",1],["SP:49","Light and Shadow","Silver",1],["SP:50","Duo Color","Gold",1],["SP:51","Wood","Bronze",1],["SP:52","Coin","Gold",1],["SP:53","Coin Animated","Platinum",1],["SP:54","Glitch Animated","Platinum",1],["SP:55","Wave Animated","Silver",0.5],["SP:56","Spin","Gold",1],["SP:57","Rainbow Animated","Platinum",1],["SP:61","Fourier Crop","Bronze",0.5],["SP:62","Fourier Crop #2","Silver",0.5],["SP:63","Cloud","Gold",0.5],["SP:64","Swirl Animated","Silver",0.5]];
+    this.ALL_LOOT = [["SP:1","Glitch","Gold",1],["STD:RE","Reroll","Silver",1],["BOT:TEMP","$temp Command","Silver",1],["GM:Ts","Kill Ts","Platinum",0.5],["AL:Town","Townsfolk Alignment Guarantor","Silver",2],["IC:Cat","Cat Icon","Platinum",1],["DM:1","Realsad","Silver",1],["BST:XP150","+150 XP","Bronze",2],["SP:2","Negate","Silver",2],["COIN:50","50 Coins","Bronze",2],["BOT:REV","$reverseme Command","Gold",1],["GM:Eth","Demote Ethan","Gold",0.5],["AL:Wolf","Werewolves Alignment Guarantor","Silver",2],["IC:Devil","Devil Icon","Gold",1],["DM:2","Salute","Bronze",1],["BST:XP300","+300 XP","Silver",1],["SP:3","Grayscale","Bronze",2],["COIN:120","120 Coins","Silver",2],["BOT:SHIP","$newship Command","Platinum",1],["GM:Luf","Rename Luffy","Gold",0.5],["AL:UA","Unaligned Alignment Guarantor","Gold",1],["IC:Hooker","Hooker Icon","Silver",1],["DM:3","Rating","Silver",1],["BST:XP500","+500 XP","Gold",1],["SP:5","Emboss","Bronze",1],["COIN:160","160 Coins","Gold",2],["BOT:HATE","$newhate Command","Platinum",1],["GM:Krem","Turn Krem into a Little Bug","Gold",0.5],["AL:Solo","Solo Alignment Guarantor","Gold",1],["IC:Medium","Medium Icon","Silver",1],["DM:4","Cursed","Platinum",1],["BST:GL21","Double XP (1 Hour)","Bronze",1],["SP:6","Silhouette","Bronze",1],["STD:RE2","Reroll x2","Gold",1],["BOT:FLIP","$flip Command","Bronze",1],["GM: Jay","Tempt Jay into sinning","Platinum",0.5],["AL:Hell","Hell Alignment Guarantor","Platinum",1],["IC:Executioner","Executioner Icon","Bronze",1],["DM:5","Mourner","Gold",1],["BST:GL31","Triple XP (1 Hour)","Bronze",0.5],["SP:7","Pixel","Silver",1],["STD:BTNT","Be the next theme","Platinum",0.5],["BOT:FORTUNE","$fortune Command","Bronze",1],["GM:Kruth","Demote Kruthers","Silver",0.5],["AL:HM","Horseman Alignment Guarantor","Platinum",0.5],["IC:Witch","Witch Icon","Gold",1],["DM:6","Random","Silver",1],["BST:GL41","Quadruple XP (1 Hour)","Silver",1],["SP:9","Pixel #3","Silver",1],["STD:JOKE","Your own Joke Role","Platinum",0.5],["GM:Fish","Kill Mr. Fish","Silver",0.5],["AL:Pyro","Pyro Alignment Guarantor","Platinum",1],["IC:Saboteur Wolf","Saboteur Wolf Icon","Bronze",1],["DM:7","Horrible","Bronze",1],["BST:GL23","Double XP (3 Hours)","Silver",0.5],["SP:12","Red","Bronze",2],["STD:X","Unlucky (Nothing)","Bronze",1],["GM:Arch","Demote Jean D. Arch","Silver",0.5],["AL:Flute","Flute Alignment Guarantor","Platinum",1],["IC:Archivist Fox","Archivist Fox Icon","Silver",1],["DM:8","Gone","Bronze",1],["BST:GL35","Triple XP (5 Hours)","Gold",0.5],["SP:13","Green","Bronze",2],["STD:RE3","Reroll x3","Platinum",0.5],["GM:Fed","Kill Federick","Bronze",0.5],["AL:WWW","White Wolves Alignment Guarantor","Platinum",0.5],["IC:Lone Wolf","Lone Wolf Icon","Gold",1],["DM:9","Crow","Bronze",0.5],["BST:GL43","Quadruple XP (3 Hours)","Gold",1],["SP:14","Blue","Bronze",2],["STD:Icon","Custom Icon","Platinum",1],["GM:Ghost","Exorcise Gh0st","Silver",0.5],["AL:Plague","Plague Alignment Guarantor","Platinum",0.5],["IC:Flute Player","Flute Player Icon","Silver",1],["BST:GL77","Septuple (7 Hours)","Platinum",1],["SP:15","Yellow","Bronze",2],["STD:Theme","Suggest a Theme","Gold",0.5],["GM:Katy","Kill KatyHawk","Bronze",0.5],["AL:UW","Underworld Alignment Guarantor","Platinum",0.5],["IC:Pyromancer","Pyromancer Icon","Gold",1],["BST:GLX10","Dectuple XP (10 Hours)","Platinum",0.5],["SP:16","Purple","Bronze",2],["STD:CMD","Custom Bot Command","Platinum",0.5],["GM:Marten","Promote Marten","Platinum",0.5],["AL:T/W","Townsfolk/Werewolves Alignment Guarantor","Bronze",1],["IC:Plague Bearer","Plague Bearer Icon","Gold",1],["BST:GLN1","Negative XP (1 Hour)","Silver",0.5],["SP:17","Cyan","Bronze",2],["STD:Ban","Get banned","Bronze",0.25],["GM:Turtle","Demote Mr. Turtle","Gold",0.5],["IC:Vampire","Vampire Icon","Gold",1],["SP:18","Flip","Bronze",1],["STD:SP","Suggest a Skinpack","Platinum",0.5],["GM:Stein","Take Steinator as a Hostage","Gold",0.5],["CAT:Misc","Miscellaneous Category Guarantor","Bronze",1],["IC:Angel","Angel Icon","Gold",1],["SP:20","BW","Bronze",1],["STD:OS","Suggest a Offseason Game","Gold",1],["BOT:invtransfer","$inventory transfer Command","Bronze",0.1],["GM:Vera","Evict Vera","Platinum",0.5],["CAT:Power","Power Category Guarantor","Silver",1],["IC:Hellhound","Hellhound Icon","Silver",1],["SP:21","Wire","Gold",2],["BOT:recycle","$recycle Command","Bronze",0.1],["GM:EvilTs","Be Killed by Evil Ts","Platinum",0.25],["CAT:Invest","Investigative Category Guarantor","Gold",1],["IC:Bear","Bear Icon","Platinum",1],["SP:24","Rainbow #2","Silver",1],["BOT:nick","$nickname Command","Bronze",0.1],["CAT:Kill","Killing Category Guarantor","Gold",0.5],["IC:White Werewolf","White Werewolf Icon","Silver",1],["SP:25","Rainbow #3","Silver",1],["BOT:market","$market Command","Bronze",0.1],["CAT:!Misc","Not-Miscellaneous Category Guarantor","Bronze",1],["IC:Reaper","Reaper Icon","Platinum",1],["SP:26","Ts","Platinum",0.5],["IC:Herding Dog","Herding Dog Icon","Silver",1],["SP:27","Oil","Silver",1],["IC:Bard","Bard Icon","Bronze",1],["SP:28","Wave","Bronze",1],["IC:Cerberus","Cerberus Icon","Bronze",1],["SP:29","Swirl","Bronze",1],["SPEC:AnySkinpack","(SPECIAL) Any Skinpack","Platinum",0.05],["IC:Lover","Lover Icon","Bronze",1],["SP:31","Cycle","Silver",1],["SPEC:AnyIcon","(SPECIAL) Any Icon","Platinum",0.05],["IC:Citizen","Citizen Icon","Bronze",1],["SP:32","Equalize","Bronze",1],["SPEC:AnyGuarantor","(SPECIAL) Any Guarantor","Platinum",0.05],["IC:Devout Villager","Devout Villager Icon","Bronze",1],["SP:33","Fourier Noise","Gold",1],["SPEC:Any","(SPECIAL) Any Prize","Platinum",0.01],["IC:Baroness","Baroness Icon","Bronze",1],["SP:35","Fourier Oil","Gold",1],["IC:Apothecary","Apothecary Icon","Silver",1],["SP:36","Fourier Modulate","Platinum",2],["IC:Firebug","Firebug Icon","Silver",1],["SP:37","Fourier Wire","Silver",0.5],["IC:Wraith","Wraith Icon","Silver",1],["SP:38","Glitch #2","Gold",1],["IC:Dog","Dog Icon","Bronze",1],["SP:39","Eyes","Gold",1],["SP:40","Thief","",],["SP:41","Mask","Silver",0.5],["SP:42","Eye","Gold",2],["SP:43","Fourier Eye","Gold",0.5],["SP:44","Citizen Eye","Silver",0.5],["SP:45","Items","Gold",1],["SP:46","Bear","Platinum",2],["SP:47","Wolfify","Gold",1],["SP:48","Grid","Gold",1],["SP:49","Light and Shadow","Silver",1],["SP:50","Duo Color","Gold",1],["SP:51","Wood","Bronze",1],["SP:52","Coin","Gold",1],["SP:53","Coin Animated","Platinum",1],["SP:54","Glitch Animated","Platinum",1],["SP:55","Wave Animated","Silver",0.5],["SP:56","Spin","Gold",1],["SP:57","Rainbow Animated","Platinum",1],["SP:61","Fourier Crop","Bronze",0.5],["SP:62","Fourier Crop #2","Silver",0.5],["SP:63","Cloud","Gold",0.5],["SP:64","Swirl Animated","Silver",0.5]];
 
     /**
     Command: $loot
     **/
     this.tierNames = ["Bronze", "Silver", "Gold","Platinum", "Cheated"];
-    let tierColors = [9785610, 13027014, 14922018, 10877429, 15469740];
-    let tierIcons = ["Extras/Token%20Bronze", "Extras/Token%20Silver", "Extras/Token", "Extras/Token%20Platinum", "Extras/Bot%20Developer"];
-    let tierCoins = [30, 50, 100, 200, 0];
+    this.tierColors = [9785610, 13027014, 14922018, 10877429, 15469740];
+    this.tierIcons = ["Extras/Token%20Bronze", "Extras/Token%20Silver", "Extras/Token", "Extras/Token%20Platinum", "Extras/Bot%20Developer"];
+    this.tierCoins = [30, 50, 100, 200, 0];
     this.cmdLoot = async function(message) {
         // check coins
         let coinCount = await getCoins(message.member.id);
@@ -45,234 +45,6 @@ module.exports = function() {
         
         // open box
         openBox(message.channel, message.member.id, reward[0]);
-    }
-    
-    /**
-    Command: $inventory
-    **/
-    this.cmdInventory = async function(message, args) {
-        if(!args[0]) { 
-            cmdInventorySee(message.channel, message.member.id);
-			return; 
-		} 
-		// Check Subcommand
-		switch(args[0]) {
-			case "see": cmdInventorySee(message.channel, message.member.id); break;
-			case "get": if(checkGM(message)) cmdInventoryGet(message.channel, args); break;
-            case "remove": if(checkGM(message)) cmdInventoryRemove(message.channel, args); break;
-            case "add": if(checkGM(message)) cmdInventoryAdd(message.channel, args); break;
-            case "transfer": 
-                let transferPerms = await inventoryGetItem(message.author.id, "bot:invtransfer");
-                if(transferPerms === 0) {
-                    message.channel.send(`⛔ You have not unlocked the ${stats.prefix}inventory transfer command.`);
-                    return;
-                } 
-                cmdInventoryTransfer(message.channel, message.author.id, args); break;
-			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
-		}
-    }
-    
-    /**
-    Command: $inventory get
-    **/
-    this.cmdInventoryGet = async function(channel, args) {
-        // Check arguments
-		if(!args[1]) { 
-			channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "inventory get <player>`!"); 
-			return; 
-		}
-        // Get user
-		let user = parseUser(channel, args[1]);
-		if(!user) { 
-			// Invalid user
-			channel.send("⛔ Syntax error. `" + args[1] + "` is not a valid player!"); 
-			return; 
-		} 
-        await cmdInventorySee(channel, user);
-    }
-    
-    /**
-    Command: $inventory remove
-    **/
-    this.cmdInventoryRemove = async function(channel, args) {
-        // Check arguments
-		if(!args[1]) { 
-			channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "inventory remove <player> <item>`!"); 
-			return; 
-		}
-        // Get user
-		let user = parseUser(channel, args[1]);
-        // Invalid user
-		if(!user) { 
-			channel.send("⛔ Syntax error. `" + args[1] + "` is not a valid player!"); 
-			return; 
-		} 
-        // Get item
-        let item = ALL_LOOT.filter(el => el[0].toLowerCase() === args[2].toLowerCase());
-        // Invalid item
-		if(item.length != 1) { 
-			channel.send("⛔ Command error. `" + args[2] + "` is not a valid item!"); 
-			return; 
-		} 
-        let code = item[0][0];
-        
-        // get item count
-        let count = await inventoryGetItem(user, code);
-        if(count <= 0) {
-			channel.send("⛔ Command error. Insufficient item count!"); 
-			return; 
-        }
-        
-        // update item count
-        let updatedCount = await inventoryModifyItem(user, code, -1);
-        channel.send(`✅ Removed a ${item[0][1]} (${code}) from <@${user}>'s inventory. Count now is \`${updatedCount}\`.`);
-    }
-    
-    /**
-    Command: $inventory transfer
-    **/
-    this.cmdInventoryTransfer = async function(channel, authorid, args) {
-        // Check arguments
-		if(!args[1] || !args[2]) { 
-			channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "inventory transfer <player> <item>`!"); 
-			return; 
-		}
-        // Get user
-		let user = parseUser(channel, args[1]);
-        // Invalid user
-		if(!user) { 
-			channel.send("⛔ Syntax error. Not a valid player!"); 
-			return; 
-		} 
-        
-        // Get item
-        let item = ALL_LOOT.filter(el => el[0].toLowerCase() === args[2].toLowerCase());
-        // Invalid item
-		if(item.length != 1) { 
-			channel.send("⛔ Command error. Not a valid item! Make sure to use the item code as specified in your inventory."); 
-			return; 
-		} 
-        let code = item[0][0];
-        
-        // get item count
-        let count = await inventoryGetItem(authorid, code);
-        if(count <= 0) {
-			channel.send("⛔ Command error. Insufficient item count! Check your inventory to make sure you have this item."); 
-			return; 
-        }
-        
-        // update item count
-        await inventoryModifyItem(authorid, code, -1);
-        await inventoryModifyItem(user, code, 1);
-        channel.send(`✅ Transfered a ${item[0][1]} (${code}) from <@${authorid}> to <@${user}>!`);
-    }
-    
-    /**
-    Command: $inventory add
-    **/
-    this.cmdInventoryAdd = async function(channel, args) {
-        // Check arguments
-		if(!args[1]) { 
-			channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "inventory add <player> <item>`!"); 
-			return; 
-		}
-        // Get user
-		let user = parseUser(channel, args[1]);
-        // Invalid user
-		if(!user) { 
-			channel.send("⛔ Syntax error. `" + args[1] + "` is not a valid player!"); 
-			return; 
-		} 
-        // Get item
-        let item = ALL_LOOT.filter(el => el[0].toLowerCase() === args[2].toLowerCase());
-        // Invalid item
-		if(item.length != 1) { 
-			channel.send("⛔ Command error. `" + args[2] + "` is not a valid item!"); 
-			return; 
-		} 
-        let code = item[0][0];
-        
-        // update item count
-        let updatedCount = await inventoryModifyItem(user, code, 1);
-        channel.send(`✅ Added a ${item[0][1]} (${code}) to <@${user}>'s inventory. Count now is \`${updatedCount}\`.`);
-    }
-    
-    /**
-    Command: $inventory see
-    **/
-    this.cmdInventorySee = async function(channel, user) {
-                
-        let items = await sqlPromEsc("SELECT * FROM inventory WHERE player=", user);
-        items = items.map(el => [el.count, el.item.toUpperCase(), ALL_LOOT.filter(el2 => el2[0].toLowerCase() === el.item)[0]]);
-        
-        // no items
-        if(items.length === 0) {
-            let embed = { title: "Inventory", description: `<@${user}>, your inventory is currently empty!`, color: 8984857 };
-            channel.send({ embeds: [ embed ] });
-            return;
-        }
-        
-        if(items.length > 10) { // >10 items
-            // format item list
-            let items1 = [], items2 = [];
-            let half = Math.ceil(items.length / 2);
-            for(let i = 0; i < half; i++) items1.push(`• ${items[i][2][1]} x${items[i][0]}`);
-            if(items.length > 1) for(let i = half; i < items.length; i++) items2.push(`• ${items[i][2][1]} x${items[i][0]} (\`${items[i][1]}\`)`);
-            let embed = { title: "Inventory", description: `<@${user}>, here is your current inventory:`, color: 8984857, fields: [ {}, {} ] };
-            embed.fields[0] = { name: "_ _", "value": items1.join("\n"), inline: true };
-            embed.fields[1] = { name: "_ _", "value": items2.join("\n"), inline: true };
-            embed.thumbnail = { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` };
-            channel.send({ embeds: [ embed ] });
-        } else { // <=10 items
-            // format item list
-            let itemsTxt = [];
-            for(let i = 0; i < items.length; i++) itemsTxt.push(`• ${items[i][2][1]} x${items[i][0]} (\`${items[i][1]}\`)`);
-            let embed = { title: "Inventory", description: `<@${user}>, here is your current inventory:\n\n` + itemsTxt.join("\n"), color: 8984857 };
-            embed.thumbnail = { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` };
-            channel.send({ embeds: [ embed ] });
-        }
-    }
-    
-    /**
-    Command: $recycle
-    **/
-    this.cmdRecycle = async function(message, args) {
-        let recPerms = await inventoryGetItem(message.author.id, "bot:recycle");
-        if(recPerms === 0) {
-            message.channel.send(`⛔ You have not unlocked the ${stats.prefix}recycle command.`);
-            return;
-        }
-        if(!args[0]) {
-            message.channel.send("⛔ Syntax error. Not enough parameters!");
-            return;
-        }
-        // Get item
-        let item = ALL_LOOT.filter(el => el[0].toLowerCase() === args[0].toLowerCase());
-        // Invalid item
-		if(item.length != 1) { 
-			message.channel.send("⛔ Command error. Not a valid item! Make sure to use the item code as specified in your inventory."); 
-			return; 
-		} 
-        let code = item[0][0];
-        
-        // get item count
-        let count = await inventoryGetItem(message.author.id, code);
-        if(count <= 0) {
-			message.channel.send("⛔ Command error. Insufficient item count! Check your inventory to make sure you have this item."); 
-			return; 
-        }
-        
-        // update item count
-        await inventoryModifyItem(message.author.id, code, -1);
-        
-        let rand = Math.floor(Math.random() * 15);
-        
-        // determine coin value
-        let val = Math.floor(( tierCoins[tierNames.indexOf(item[0][2])] * (1 / item[0][3]) ) + rand);
-        // update coins
-        cmdCoinsModify(message.channel, ["add", message.author.id, val], "add", 1, true);
-        
-        message.channel.send(`✅ Recycled ${item[0][1]} (${code}) for ${val} coins!`);
     }
     
     /**
@@ -509,34 +281,5 @@ module.exports = function() {
         }
     }
     
-    /**
-    Modifies item count in inventory
-    **/
-    this.inventoryModifyItem = async function(pid, item, count) {
-        item = item.toLowerCase();
-        let itemCount = await sqlPromEsc("SELECT * FROM inventory WHERE item=" + connection.escape(item) + " AND player=", pid);
-        if(itemCount.length === 0) {
-            await sqlProm("INSERT INTO inventory (player, item, count) VALUES (" + connection.escape(pid) + "," + connection.escape(item) + "," + connection.escape(count) + ")");
-            return count;
-        } else {
-            if(itemCount[0].count + count === 0) { // delete
-                await sqlPromEsc("DELETE FROM inventory WHERE item=" + connection.escape(item) + " AND player=", pid);
-                return 0;
-            } else {
-                await sqlPromEsc("UPDATE inventory SET count=" + connection.escape(itemCount[0].count + count) + " WHERE item=" + connection.escape(item) + " AND player=", pid);
-                return itemCount[0].count + count;
-            }
-        }
-    }
-    
-    /**
-    Retrieves item count in inventory
-    **/
-    this.inventoryGetItem = async function(pid, item) {
-        item = item.toLowerCase();
-        let itemCount = await sqlPromEsc("SELECT * FROM inventory WHERE item=" + connection.escape(item) + " AND player=", pid);
-        return itemCount[0]?.count ?? 0;
-    }
-
 
 }

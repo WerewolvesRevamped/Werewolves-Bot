@@ -909,6 +909,12 @@ module.exports = function() {
         // starting
         await triggerHandler("Starting");
         
+        // team joining triggers
+        let players = await sqlProm("SELECT id,alignment FROM players WHERE type='player'");
+        for(let i =  0; i < players.length; i++) {
+            await triggerTeam(players[i].alignment, "On Join", { joiner: players[i].id });
+        }
+        
         // passive
         await triggerHandler("Passive");
         

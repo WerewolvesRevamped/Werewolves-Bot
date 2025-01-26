@@ -10,6 +10,7 @@ require("./xp.js")();
 require("./values.js")();
 require("./death_messages.js")();
 require("./boosters.js")();
+require("./inventory.js")();
 
 
 module.exports = function() {
