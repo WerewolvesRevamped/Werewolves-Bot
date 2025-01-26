@@ -4,7 +4,7 @@ Skin Packs
 
 module.exports = function() {
     
-    this.XP_MULTIPLIER = 11.4;
+    this.XP_MULTIPLIER = 9.3;
     
     /**
     Command: $xp
