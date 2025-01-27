@@ -1829,6 +1829,8 @@ module.exports = function() {
             }
         } else if(first == "&") {
             return "alignment";
+        }  else if(first == "°") {
+            return "role";
         } else if(first == "@") {
             switch(targetType) {
                 case "@actionabilitytype": return "abilityType";

@@ -850,6 +850,7 @@ module.exports = function() {
                 break;
                 // Category
                 case "cat":
+                case "category":
                     if(!compInverted) allPlayers = allPlayers.filter(el => el.category === compVal);
                     else allPlayers = allPlayers.filter(el => el.category != compVal);
                 break;
@@ -866,6 +867,7 @@ module.exports = function() {
                 break;
                 // Full Category
                 case "fullcat":
+                case "full_cat":
                     compValSplit = compVal.split("-");
                     if(!compInverted) allPlayers = allPlayers.filter(el => el.class === compValSplit[0] && el.category === compValSplit[1]);
                     else allPlayers = allPlayers.filter(el => el.class != compValSplit[0] || el.category != compValSplit[1]);
@@ -966,6 +968,61 @@ module.exports = function() {
         } else {
             return allPlayers.map(el => el.id);
         }
+    }
+    
+    /** PRIVATE
+    Parses an advanced player selector
+    **/
+    async function parseAdvancedRoleSelector(selector, self, additionalTriggerData) {
+        // split selector into its components
+        const selSplit = selector.toLowerCase().split(",").map(el => el.split(":"));
+        // get all players
+        let allRoles = await sqlProm("SELECT * FROM roles");
+        //allRoles.forEach(el => console.log(el));
+        // set flags
+        let selectAll = true;
+        // iterate through all selector components
+        for(let i = 0; i < selSplit.length; i++) {
+            const compName = selSplit[i][0];
+            let compVal = selSplit[i][1].toLowerCase().replace(/\-/g," ");
+            let compInverted = false;
+            if(compVal[0] === "!") {
+                compVal = compVal.substr(1);
+                compInverted = true;
+            }
+            //console.log("ROLES", allRoles.map(el => el.id).join(";"));
+            //console.log("AS", compName, compVal, compInverted);
+            let compValSplit;
+            switch(compName) {
+                default:
+                    abilityLog(`❗ **Error:** Unknown advanced selector component \`${compName}\`!`);
+                break;
+                // Category
+                case "category":
+                case "cat":
+                    if(!compInverted) allRoles = allRoles.filter(el => el.category === compVal);
+                    else allRoles = allRoles.filter(el => el.category != compVal);
+                break;
+                // type
+                case "type":
+                    if(!compInverted) allRoles = allRoles.filter(el => el.type === compVal);
+                    else allRoles = allRoles.filter(el => el.type != compVal);
+                break;
+                // Class
+                case "class":
+                    if(!compInverted) allRoles = allRoles.filter(el => el.class === compVal);
+                    else allRoles = allRoles.filter(el => el.class != compVal);
+                break;
+                // Alignment
+                case "team":
+                case "align":
+                case "alignment":
+                    if(!compInverted) allRoles = allRoles.filter(el => el.team === compVal);
+                    else allRoles = allRoles.filter(el => el.team != compVal);
+                break;
+            }
+        }
+        return allRoles.map(el => el.name);
     }
     
     /** PRIVATE
@@ -1076,6 +1133,7 @@ module.exports = function() {
     Parse Role Selector
     parses a role type selector
     **/
+    const ADVANCED_SELECTOR_ROLE = /^\^\((.+)\)$/;
     this.parseRoleSelector = async function(selector, self = null, additionalTriggerData = {}) {
         // get target
         let selectorTarget = selectorGetTarget(selector);
@@ -1122,10 +1180,17 @@ module.exports = function() {
                     abilityLog(`❗ **Error:** Invalid role selector target \`${selectorTarget}\`!`);
                     return [ ];
                 }
+            case "^all":
+                let allRoles = await sqlProm("SELECT name FROM roles");
+                return allRoles.map(el => el.name);
+            break;
             default:
                 let parsedRole = parseRole(selectorTarget);
                 if(verifyRole(parsedRole)) {
                     return [ parsedRole ];
+                } else if (ADVANCED_SELECTOR_ROLE.test(selectorTarget)) { // advanced selector
+                    let contents = selectorTarget.match(ADVANCED_SELECTOR_ROLE);
+                    return await parseAdvancedRoleSelector(contents[1], self, additionalTriggerData);
                 } else if (PROPERTY_ACCESS.test(selectorTarget)) { // property access
                     let contents = selectorTarget.match(PROPERTY_ACCESS); // get the selector
                     let infType = await inferTypeRuntime(`@${contents[1]}`, self, additionalTriggerData);
