@@ -300,7 +300,7 @@ module.exports = function() {
                 if(cachedGroups.indexOf(group) === -1) return false;
                 for(let i = 0; i < targets.length; i++) {
                     let attrs = await queryAttributePlayer(targets[i], "attr_type", "group_membership", "val1", group);
-                    console.log(attrs);
+                    //console.log(attrs);
                     if(attrs.length <= 0) return false;
                 }
                 return true;

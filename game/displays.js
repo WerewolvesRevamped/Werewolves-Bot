@@ -147,7 +147,7 @@ module.exports = function() {
                 // description
                 let desc = await applyPackLUT(result?.contents ?? "No info found", authorId);
                 
-                console.log(values);
+                //console.log(values);
                 for(let i = 0; i < values.length; i++) {
                     let re = new RegExp(values[i][0].replace(/\$/g,"\\$"), "g");
                     desc = desc.replace(re, "" + values[i][1]);

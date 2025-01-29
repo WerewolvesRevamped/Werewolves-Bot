@@ -836,10 +836,10 @@ module.exports = function() {
             let mem = mainGuild.members.cache.get(el);
             let usr = client.users.cache.get(el);
             if(!mem || !usr) return null;
-            console.log(usr);
+            //console.log(usr);
             return [usr.username,usr.globalName,mem.nickname];
         }).flat().filter(el => el).map(el => el.toLowerCase());
-        console.log(allPlayerNames);
+        //console.log(allPlayerNames);
         // check provided player name against all player names
 		let parsed = parseList(pSplit, allPlayerNames);
         console.log("PARSED", parsed.found, parsed.invalid);
@@ -892,10 +892,10 @@ module.exports = function() {
             let mem = mainGuild.members.cache.get(el);
             let usr = client.users.cache.get(el);
             if(!mem || !usr) return null;
-            console.log(usr);
+            //console.log(usr);
             return [usr.username,usr.globalName,mem.nickname];
         }).flat().filter(el => el).map(el => el.toLowerCase());
-        console.log(allPlayerNames);
+        //console.log(allPlayerNames);
         // check provided player name against all player names
 		let parsed = parseList(pSplit, allPlayerNames);
         console.log("PARSED", parsed.found, parsed.invalid);

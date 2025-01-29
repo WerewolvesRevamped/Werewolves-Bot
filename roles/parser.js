@@ -1829,7 +1829,7 @@ module.exports = function() {
             }
         } else if(first == "&") {
             return "alignment";
-        }  else if(first == "°") {
+        }  else if(first == "^") {
             return "role";
         } else if(first == "@") {
             switch(targetType) {

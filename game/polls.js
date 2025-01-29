@@ -359,6 +359,7 @@ module.exports = function() {
         const pollName = pollData.name;
         const pollIsPublic = isPublic(channel);
         const pollPublicType = pollIsPublic ? "public" : "private";
+        console.log("POLL PUBLIC TYPE", pollIsPublic, pollPublicType);
         
         // go through reactions
         let allReactions = [];
@@ -650,6 +651,7 @@ module.exports = function() {
                 }
             }
             // return vote total
+            console.log("PRIVATE VOTE VALUE", voteValue);
             return voteValue;
         } else if(type === "public") { // PUBLIC POLLS
             const voteManipulations = await getManipulations(player_id, "public");
@@ -671,7 +673,7 @@ module.exports = function() {
             }
             // return vote total
             let totalVotes = voteValue + ((voteValue>=0 ? 1 : -1) * specialVoteValue);
-            console.log(totalVotes, voteManipulations, specialVoteManipulations);
+            console.log("PUBLIC VOTE VALUE", totalVotes, voteManipulations.map(el => `${el.val1}${el.val2}${el.val3}`), specialVoteManipulations.map(el => `${el.val1}${el.val2}${el.val3}`));
             return totalVotes;
         } else { // UNKNOWN / OTHER POLLS
             return 1;

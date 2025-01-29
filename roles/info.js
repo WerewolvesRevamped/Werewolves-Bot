@@ -16,7 +16,6 @@ module.exports = function() {
     **/
     this.cmdInfo = async function(channel, authorId, args, pin = false, noErr = false, simp = false, overwriteName = false, appendSection = false, editOnto = false, technical = false, autoDelete = false) {
 		// fix role name if necessary
-        console.log(cachedTeamNames);
         if(!args) {
             if(!noErr) channel.send("❗ Could not find role.");
             return;

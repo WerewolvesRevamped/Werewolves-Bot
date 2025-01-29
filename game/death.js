@@ -141,7 +141,7 @@ module.exports = function() {
             // get all attacks/etc and select a random one to trigger the triggers
             let deaths = players.filter(el => el.id === playersFiltered[i]);
             let selDeath = deaths[Math.floor(Math.random() * deaths.length)];
-            console.log(playersFiltered[i], deaths, selDeath);
+            //console.log(playersFiltered[i], deaths, selDeath);
             // get the important values
             let target = playersFiltered[i];
             let attacker = srcToValue(selDeath.src_ref);

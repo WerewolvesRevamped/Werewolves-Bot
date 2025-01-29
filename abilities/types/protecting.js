@@ -54,7 +54,7 @@ module.exports = function() {
                 if(loc.type == null || loc.multiple) return { msg: "Absence failed! " + abilityError, success: false }; // no location found
                 loc = loc.value;
                 loc = await applyRedirection(loc, src_ref, ability.type, ability.subtype, additionalTriggerData);
-                console.log(loc);
+                //console.log(loc);
                 result = await protectingAbsence(src_name, src_ref, target, loc, from_type, from_selector, during_phase, dur_type, additionalTriggerData);
                 return result;
             break;

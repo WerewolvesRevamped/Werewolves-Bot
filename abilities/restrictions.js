@@ -227,8 +227,8 @@ module.exports = function() {
     **/
     this.clearLastTarget = function(src_ref, ability) {
         if(!ability || !ability.id) return;
-        console.log(src_ref, ability.id);
-        console.log(ability);
+        //console.log(src_ref, ability.id);
+        //console.log(ability);
         return sqlProm("UPDATE action_data SET last_target=NULL WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=" + connection.escape(ability.id));
     }    
       

@@ -44,7 +44,7 @@ module.exports = function() {
 				if(result.length > 0) {
 					// At least one role exists
                     result = result.map(el => "\n" + el.original + " => " + el.new);
-                    console.log(result);
+                    //console.log(result);
                     // chunk messages
                     let msg = "";
                     let msgs = [];
