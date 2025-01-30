@@ -525,6 +525,22 @@ module.exports = function() {
                             }
                         }
                     break;
+                    case "On Any Action Complex": {
+                            let abilityType = await parseSelector(param, src_ref, additionalTriggerData);
+                            let triggerAbilityType = (abilityType.type === "abilitySubtype" ? additionalTriggerData.ability_subtype : "") + additionalTriggerData.ability_type;
+                            if(abilityType.type === "abilityType" && additionalTriggerData.ability_subtype.length > 0) { // dont pass for subtypes when looking for a type
+                                abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\` with a \`${triggerAbilityType}\` subtype.`);
+                            } else { // type/subtype type match
+                                abilityType = abilityType.value[0].toLowerCase().replace(/[^a-z]+/,"");
+                                triggerAbilityType = triggerAbilityType.replace(/[^a-z]+/,"");
+                                if(abilityType === triggerAbilityType) {
+                                     await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
+                                } else {
+                                    abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\` with \`${triggerAbilityType}\`.`);
+                                }
+                            }
+                        }
+                    break;
                     case "On Action Target Complex":
                         if(additionalTriggerData.src_name != src_name) {
                             abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Src name mismatch.`);        

@@ -265,7 +265,7 @@ client.on("messageCreate", async message => {
                         embed.thumbnail = { url: iconRepoBaseUrl + "Extras/Ascension.png" };
                         // Level Up Reward
                         let newLevelString = newLevel + "";
-                        if(newLevel % 5 === 0) {
+                        if(newLevel % 5 === 0 || newLevel === 16 || newLevel === 18) {
                             let boxRewards = [null, null, null, [0], [0,1], null, [0,2], [0,1,2], [0,1,3], [0,1,2,3], null, [0,3], [0,2,3], [1], [1,2], null, [1,3], [1,2,3], [2], [2,3], [3]];
                             let re = boxRewards[Math.floor(newLevel / 5)];
                             // Standard Box Reward
@@ -275,7 +275,7 @@ client.on("messageCreate", async message => {
                                 message.channel.send({ embeds: [ embed ] });
                                 await openBox(message.channel, message.author.id, null, re);
                                 await inventoryModifyItem(message.author.id, "SPEC:Any", 1);
-                            } else if(re) {
+                            } else if(re && newLevel != 16 && newLevel != 18) {
                                 let boxName = re.map(el => tierNames[el].toLowerCase()).join(" or ");
                                 embed.description += `\n\nAdditionally, you get a free loot box with a guaranteed ${boxName} tier reward.`;
                                 message.channel.send({ embeds: [ embed ] });
@@ -926,10 +926,6 @@ client.on("messageCreate", async message => {
 		cmdInventory(message, args);
     break;
     case "market":
-        if((isSignedUp(message.member) || isParticipant(message.member)) && stats.gamephase != gp.POSTGAME) {
-            message.channel.send(`⛔ You cannot use this command while signed up or ingame.`);
-            break;
-        }
 		cmdMarket(message, args);
     break;
     case "icon":

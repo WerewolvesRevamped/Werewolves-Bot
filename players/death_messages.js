@@ -26,7 +26,7 @@ module.exports = function() {
     Command: $death_message disable
     **/
     this.cmdDeathMessageDisable = async function(message) {
-        sqlPromEsc("INSERT INTO death_message (player, message) VALUES (" + connection.escape(user) + ",0) ON DUPLICATE KEY UPDATE message=", 0);
+        sqlPromEsc("INSERT INTO death_message (player, message) VALUES (" + connection.escape(message.author.id) + ",0) ON DUPLICATE KEY UPDATE message=", 0);
         let embed = { title: "Death Message", description: `<@${message.member.id}>, your custom death message has been disabled.`, color: 16715021 };
         message.channel.send({ embeds: [ embed ] });
     }

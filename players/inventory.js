@@ -41,7 +41,7 @@ module.exports = function() {
 			return; 
 		} 
         let marketPerms = await inventoryGetItem(message.author.id, "bot:market");
-        if(marketPerms === 0 && args[0] != "see") {
+        if(marketPerms === 0 && args[0] != "see" && args[0] != "evaluate") {
             message.channel.send(`⛔ You have not unlocked the ${stats.prefix}market command.`);
             return;
         } 

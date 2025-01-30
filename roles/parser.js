@@ -1680,12 +1680,12 @@ module.exports = function() {
                         complexTrigger = "On " + fd[2] + ";" + ttpp(fd[1]);
                     }
                     /** On Visited [Ability], On Action [Ability] **/
-                    exp = new RegExp("^On (Visited|Action) \\[" + abilityType + "\\]$", "g");
+                    exp = new RegExp("^On (Visited|Action|Any Action) \\[" + abilityType + "\\]$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
                         complexTrigger = "On " + fd[1] + ";" + ttpp(fd[2], "abilityType");
                     }
-                    exp = new RegExp("^On (Visited|Action) \\[" + abilitySubtype + "\\]$", "g");
+                    exp = new RegExp("^On (Visited|Action|Any Action) \\[" + abilitySubtype + "\\]$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
                         complexTrigger = "On " + fd[1] + ";" + ttpp(fd[2], "abilitySubtype");
