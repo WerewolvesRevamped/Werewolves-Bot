@@ -255,7 +255,7 @@ module.exports = function() {
         }
         
         // run starting trigger
-        await trigger(`group:${group}`, "Starting");
+        await triggerGroup(sc.id, "Starting");
         
         // new group info embed
         // get info embed

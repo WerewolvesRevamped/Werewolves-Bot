@@ -273,7 +273,6 @@ module.exports = function() {
     
     /** Groups: Create
     creates a group, takes a group name and optional first member id
-    WIP: should probably be in groups
     **/
     this.groupsCreate = async function(group, firstMember = null) {
         return new Promise(async res => {
@@ -321,6 +320,9 @@ module.exports = function() {
                 
                 // save group in DB
                 await sqlProm("INSERT INTO active_groups (name, channel_id) VALUES (" + connection.escape(group) + "," + connection.escape(sc.id) + ")");
+                
+                // run group starting trigger
+                await triggerGroup(sc.id, "Starting");
                 
                 // end of create channel callback
                 res();
