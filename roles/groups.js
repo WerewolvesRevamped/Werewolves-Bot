@@ -141,6 +141,41 @@ module.exports = function() {
 		});
 	}
     
+    
+	this.isGroupsArgs = function(arg) {
+		let allowedArgs = ["name", "channel_id", "target", "counter", "disbanded"];
+		return allowedArgs.indexOf(arg) >= 0;
+	}
+	
+    
+    /**
+    Command: $groups set
+    Updates a value on an active group instances
+    **/
+	this.cmdGroupsSet = async function(channel, args) {
+		if(!args[1] || !args[2] || !args[3]) {  
+			channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "groups set <value name> <group> <value>`!"); 
+			return; 
+		} else if(isNaN(args[2])) {
+			channel.send("⛔ Command error. Invalid group instance id `" + args[1] + "`!"); 
+			return; 
+		} else if(!isGroupsArgs(args[1])) { 
+			// Invalid parameter
+			channel.send("⛔ Syntax error. Invalid parameter `" + args[1] + "`!"); 
+			return; 
+		}
+        // get group
+        let group = await sqlPromEsc("UPDATE active_groups SET " + args[1] + " = " + connection.escape(args[3]) + " WHERE channel_id = ", args[2]);
+        if(!group) {
+			channel.send("⛔ Command error. Could not find group!"); 
+            return;
+        }
+        // update group
+		await sqlPromEsc("UPDATE active_groups SET " + args[1] + " = " + connection.escape(args[3]) + " WHERE ai_id = ", args[2]);
+        // feedback
+        channel.send("✅ `" + group.name + "`'s " + args[1] + " value now is `" + args[3] + "`!");
+	}
+    
     /**
     Groups: Reset
     resets all active groups
