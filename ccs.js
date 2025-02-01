@@ -20,10 +20,11 @@ module.exports = function() {
 			return; 
 		}
 
+        /**
         if(args[0] === "spam" && message.author.id === "151204089219252224") {
 			message.channel.send("⛔ Permission error. You cannot create spam ccs."); 
             return;
-        }
+        }**/
 
         
 		// Check Subcommand

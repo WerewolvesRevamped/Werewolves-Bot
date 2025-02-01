@@ -1713,6 +1713,7 @@ module.exports = function() {
     parses a poll
     **/
     this.parsePoll = async function(selector, self = null, additionalTriggerData = {}) {
+        let selectorTarget = selectorGetTarget(selector);
         if(verifyPoll(selectorTarget)) {
             return selectorTarget;
         } else {

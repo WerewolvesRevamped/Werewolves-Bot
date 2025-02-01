@@ -507,6 +507,7 @@ module.exports = function() {
                         }
                     break;
                     case "On Action Complex":
+                    case "On Action Inverted Complex":
                         if(additionalTriggerData.src_name != src_name) {
                             abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Src name mismatch.`);        
                         } else {
@@ -517,7 +518,7 @@ module.exports = function() {
                             } else { // type/subtype type match
                                 abilityType = abilityType.value[0].toLowerCase().replace(/[^a-z]+/,"");
                                 triggerAbilityType = triggerAbilityType.replace(/[^a-z]+/,"");
-                                if(abilityType === triggerAbilityType) {
+                                if((abilityType === triggerAbilityType) ^ (triggerName.includes("Inverted"))) {
                                      await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
                                 } else {
                                     abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\` with \`${triggerAbilityType}\`.`);
@@ -525,7 +526,8 @@ module.exports = function() {
                             }
                         }
                     break;
-                    case "On Any Action Complex": {
+                    case "On Any Action Complex":
+                    case "On Any Action Inverted Complex": {
                             let abilityType = await parseSelector(param, src_ref, additionalTriggerData);
                             let triggerAbilityType = (abilityType.type === "abilitySubtype" ? additionalTriggerData.ability_subtype : "") + additionalTriggerData.ability_type;
                             if(abilityType.type === "abilityType" && additionalTriggerData.ability_subtype.length > 0) { // dont pass for subtypes when looking for a type
@@ -533,7 +535,7 @@ module.exports = function() {
                             } else { // type/subtype type match
                                 abilityType = abilityType.value[0].toLowerCase().replace(/[^a-z]+/,"");
                                 triggerAbilityType = triggerAbilityType.replace(/[^a-z]+/,"");
-                                if(abilityType === triggerAbilityType) {
+                                if((abilityType === triggerAbilityType) ^ (triggerName.includes("Inverted"))) {
                                      await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
                                 } else {
                                     abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\` with \`${triggerAbilityType}\`.`);
@@ -542,6 +544,7 @@ module.exports = function() {
                         }
                     break;
                     case "On Action Target Complex":
+                    case "On Action Target Inverted Complex":
                         if(additionalTriggerData.src_name != src_name) {
                             abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Src name mismatch.`);        
                         } else {
@@ -552,7 +555,7 @@ module.exports = function() {
                             }  else {
                                 abilityType = abilityType.value[0].toLowerCase().replace(/[^a-z]+/,"");
                                 triggerAbilityType = triggerAbilityType.replace(/[^a-z]+/,"");
-                                if(abilityType === triggerAbilityType) {
+                                if((abilityType === triggerAbilityType) ^ (triggerName.includes("Inverted"))) {
                                     let selector2 = await parsePlayerSelector(param, src_ref, additionalTriggerData);
                                     if(selector2.includes(additionalTriggerData.this)) {
                                         await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
@@ -567,6 +570,7 @@ module.exports = function() {
                         }
                     break;
                     case "On Visited Complex":
+                    case "On Visited Inverted Complex":
                         let abilityType2 = await parseSelector(param, src_ref, additionalTriggerData);
                         let triggerAbilityType2 = (abilityType2.type === "abilitySubtype" ? additionalTriggerData.visit_subtype : "") + additionalTriggerData.visit_type;
                         if(abilityType2.type === "abilityType" && additionalTriggerData.visit_subtype.length > 0) { // dont pass for subtypes when looking for a type
@@ -574,7 +578,7 @@ module.exports = function() {
                         } else {
                             abilityType2 = abilityType2.value[0].toLowerCase().replace(/[^a-z]+/,"");
                             triggerAbilityType2 = triggerAbilityType2.replace(/[^a-z]+/,"");
-                            if(abilityType2 === triggerAbilityType2) {
+                            if((abilityType2 === triggerAbilityType2) ^ (triggerName.includes("Inverted"))) {
                                  await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
                             } else {
                                 abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\` with \`${triggerAbilityType2}\`.`);
@@ -582,6 +586,7 @@ module.exports = function() {
                         }
                     break;
                     case "On Visited Target Complex":
+                    case "On Visited Target Inverted Complex":
                         let abilityType3 = await parseSelector(param2, src_ref, additionalTriggerData);
                         let triggerAbilityType3 = (abilityType3.type === "abilitySubtype" ? additionalTriggerData.visit_subtype : "") + additionalTriggerData.visit_type;
                         if(abilityType3.type === "abilityType" && additionalTriggerData.visit_subtype.length > 0) { // dont pass for subtypes when looking for a type
@@ -589,7 +594,7 @@ module.exports = function() {
                         }  else {
                             abilityType3 = abilityType.value[0].toLowerCase().replace(/[^a-z]+/,"");
                             triggerAbilityType3 = triggerAbilityType3.replace(/[^a-z]+/,"");
-                            if(abilityType3 === triggerAbilityType3) {
+                            if((abilityType3 === triggerAbilityType3) ^ (triggerName.includes("Inverted"))) {
                                 let selector2 = await parsePlayerSelector(param, src_ref, additionalTriggerData);
                                 if(selector2.includes(additionalTriggerData.this)) {
                                     await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);

@@ -92,14 +92,16 @@ module.exports = function() {
         // run triggers
         if(sourceIsPlayer && targetIsPlayer) {
             await triggerPlayer(targetPlayer, "On Visited", { visitor: sourcePlayer, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
-            await triggerPlayer(targetPlayer, "On Visited Complex", { visitor: sourcePlayer, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: "", visit_id: visitId }); 
             await triggerPlayer(targetPlayer, "On Visited Complex", { visitor: sourcePlayer, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
+            await triggerPlayer(targetPlayer, "On Visited Inverted Complex", { visitor: sourcePlayer, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
             await triggerHandler("On Visited Target Complex", { visitor: sourcePlayer, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, this: targetPlayer, visit_id: visitId });
+            await triggerHandler("On Visited Target Inverted Complex", { visitor: sourcePlayer, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, this: targetPlayer, visit_id: visitId });
         } else if(targetIsPlayer) {
             await triggerPlayer(targetPlayer, "On Visited", { visitor: null, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
-            await triggerPlayer(targetPlayer, "On Visited Complex", { visitor: null, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: "", visit_id: visitId }); 
             await triggerPlayer(targetPlayer, "On Visited Complex", { visitor: null, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
+            await triggerPlayer(targetPlayer, "On Visited Inverted Complex", { visitor: null, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
             await triggerHandler("On Visited Target Complex", { visitor: null, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, this: targetPlayer, visit_id: visitId });    
+            await triggerHandler("On Visited Target Inverted Complex", { visitor: null, visit_parameter: visitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, this: targetPlayer, visit_id: visitId });    
         }
         
         // check if is canceled
