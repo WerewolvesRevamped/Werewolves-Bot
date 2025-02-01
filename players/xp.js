@@ -101,7 +101,14 @@ module.exports = function() {
     XP Time
     **/
     this.xpGetTime = function() {
-        return Math.floor((new Date().getTime() / 1000) / 60 / (60 * 1/10)); // current time in 5m intervals
+        return Math.floor((new Date().getTime() / 1000) / 60 / (60 * 1/7)); // current time in 5m intervals
+    }
+    
+    /**
+    Get XP Gain
+    **/
+    this.getXPGain = function() {
+        return Math.floor(Math.random() * 3) + 1;
     }
     
 }

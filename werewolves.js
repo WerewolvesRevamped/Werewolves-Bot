@@ -233,7 +233,7 @@ client.on("messageCreate", async message => {
     if(!message.author.bot && message.content.indexOf(stats.prefix) !== 0) {
         let countActivity = false;
         // check if treshold is hit
-        let ACTIVITY_TRESHHOLD = 25;
+        let ACTIVITY_TRESHHOLD = 50;
         // let x = [0,10], diff = 0; for(let i = 0; i < 99; i++) x.push(x[x.length - 1] + (diff+=10)); console.log(""+x);
         let LEVELS = [0,10,20,40,70,110,160,220,290,370,460,560,670,790,920,1060,1210,1370,1540,1720,1910,2110,2320,2540,2770,3010,3260,3520,3790,4070,4360,4660,4970,5290,5620,5960,6310,6670,7040,7420,7810,8210,8620,9040,9470,9910,10360,10820,11290,11770,12260,12760,13270,13790,14320,14860,15410,15970,16540,17120,17710,18310,18920,19540,20170,20810,21460,22120,22790,23470,24160,24860,25570,26290,27020,27760,28510,29270,30040,30820,31610,32410,33220,34040,34870,35710,36560,37420,38290,39170,40060,40960,41870,42790,43720,44660,45610,46570,47540,48520,49510];
         if(lastChatter === message.author.id) {
@@ -250,7 +250,8 @@ client.on("messageCreate", async message => {
             let activity = await sqlPromEsc("SELECT * FROM activity WHERE player=", message.author.id);
             if(activity && activity.length > 0) {
                 if(activity[0].timestamp < curTime) {
-                    let multiplier = await getBoosterMultiplier();
+                    let multiplier = ((await getBoosterMultiplier()) * getXPGain());
+                    // increment XP by 1, except when there's a multiplier active
                     await sqlPromEsc("UPDATE activity SET count=count+" + connection.escape(multiplier) + ",timestamp=" + curTime + " WHERE player=", message.author.id);
                     let newLevel = (+activity[0].level) + 1;
                     let reqXpLevelup = LEVELS[newLevel];

@@ -21,8 +21,6 @@ module.exports = function() {
             selectorType = additionalTriggerData.selection_type;
         } else if(selectorTarget === "@secondaryselection") {
             selectorType = additionalTriggerData.secondaryselection_type;
-        } else if(selectorTarget === "@actionresult") {
-            selectorType = selectorGetType(additionalTriggerData.action_result);
         }
         // switch through types
         switch(selectorType) {
@@ -1684,7 +1682,7 @@ module.exports = function() {
                 }
             } else if(selectorTarget === "@attacklocation") {
                 // try attacker
-                if(additionalTriggerData.attacker) { // if no self is specified, @Self is invalid
+                if(additionalTriggerData.attacker) { // if no self is specified, @Attacker is invalid
                     let val = srcToValue(additionalTriggerData.attacker);
                     let typ = srcToType(additionalTriggerData.attacker);
                     if(typ === "player") return { value: val, type: "player", default: false, multiple: false };
@@ -1715,22 +1713,11 @@ module.exports = function() {
     parses a poll
     **/
     this.parsePoll = async function(selector, self = null, additionalTriggerData = {}) {
-        // get target
-        let selectorTarget = selectorGetTarget(selector);
-        if(selectorTarget === "@self") {
-            if(!self) { // if no self is specified, @Self is invalid
-                abilityLog(`❗ **Error:** Used \`@Self\` in invalid context!`);
-                return null;
-            }
-            let pself = srcToValue(self); // get poll name
-            return pself; 
+        if(verifyPoll(selectorTarget)) {
+            return selectorTarget;
         } else {
-            if(verifyPoll(selectorTarget)) {
-                return selectorTarget;
-            } else {
-                abilityLog(`❗ **Error:** Invalid poll \`${selectorTarget}\`.!`);
-                return null;              
-            }
+            abilityLog(`❗ **Error:** Invalid poll \`${selectorTarget}\`.!`);
+            return null;              
         }
     }
     

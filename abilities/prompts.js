@@ -399,7 +399,6 @@ module.exports = function() {
             // default
             return property;
         });
-        console.log(ability);
         return ability;
     }
     
