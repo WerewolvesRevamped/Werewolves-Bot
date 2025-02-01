@@ -245,6 +245,7 @@ client.on("messageCreate", async message => {
             if(lastChatterCharacters >= ACTIVITY_TRESHHOLD) countActivity = true;
         }
         // count activity
+        // check for a players longest message within a 5 minute period, then award XP based on that
         if(countActivity) {
             let curTime = xpGetTime(); // current time in 5m intervals
             let activity = await sqlPromEsc("SELECT * FROM activity WHERE player=", message.author.id);
@@ -258,7 +259,7 @@ client.on("messageCreate", async message => {
                     let randChance = Math.random();
                     if(reqXpLevelup && reqXpLevelup <= ((+activity[0].count) + 1) && randChance < 0.25 && !((isParticipant(message.member) || isHost(message.member)) && stats.gamephase == gp.INGAME)) {
                         console.log(`Level Up for ${message.member.displayName} to Level ${newLevel}!`);
-                        await sleep(30000); // delay level up by 30s
+                        await sleep(300000); // delay level up by 30s
                         await sqlPromEsc("UPDATE activity SET level=level+1 WHERE player=", message.author.id);
                         let coinsReward = newLevel * 5;
                         await modifyCoins(message.author.id, coinsReward);

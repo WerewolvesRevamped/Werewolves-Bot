@@ -1708,6 +1708,16 @@ module.exports = function() {
                     if(fd) {
                         complexTrigger = "On " + fd[1] + ";" + ttpp(fd[2], "abilitySubtype");
                     }
+                    exp = new RegExp("^On (Visited|Action|Any Action) \\[!" + abilityType + "\\]$", "g");
+                    fd = exp.exec(curTriggerName);
+                    if(fd) {
+                        complexTrigger = "On " + fd[1] + " Inverted;" + ttpp(fd[2], "abilityType");
+                    }
+                    exp = new RegExp("^On (Visited|Action|Any Action) \\[!" + abilitySubtype + "\\]$", "g");
+                    fd = exp.exec(curTriggerName);
+                    if(fd) {
+                        complexTrigger = "On " + fd[1] + " Inverted;" + ttpp(fd[2], "abilitySubtype");
+                    }
                     /** On Target Visited [Ability], On Target Action [Ability] **/
                     exp = new RegExp("^On " + targetType + " (Visited|Action) \\[" + abilityType + "\\]$", "g");
                     fd = exp.exec(curTriggerName);
@@ -1718,6 +1728,16 @@ module.exports = function() {
                     fd = exp.exec(curTriggerName);
                     if(fd) {
                         complexTrigger = "On " + fd[2] + " Target;" + ttpp(fd[1]) + ";" + ttpp(fd[3], "abilitySubtype");
+                    }
+                    exp = new RegExp("^On " + targetType + " (Visited|Action) \\[!" + abilityType + "\\]$", "g");
+                    fd = exp.exec(curTriggerName);
+                    if(fd) {
+                        complexTrigger = "On " + fd[2] + " Target Inverted;" + ttpp(fd[1]) + ";" + ttpp(fd[3], "abilityType");
+                    }
+                    exp = new RegExp("^On " + targetType + " (Visited|Action) \\[!" + abilitySubtype + "\\]$", "g");
+                    fd = exp.exec(curTriggerName);
+                    if(fd) {
+                        complexTrigger = "On " + fd[2] + " Target Inverted;" + ttpp(fd[1]) + ";" + ttpp(fd[3], "abilitySubtype");
                     }
                     /** Choice Chosen **/
                     var exp, fd, complexTrigger;
@@ -1865,7 +1885,7 @@ module.exports = function() {
                 case "@result4": case "@result5": case "@result6": case "@result7": 
                 case "@chosen": case "@option": return "option";
                 case "@attacklocation": return "location";
-                case "@selection": case "@secondaryselection": case "@target": case "@self": return "unknown";
+               case "@target": case "@self": return "unknown";
                 default: return "player";
             }
         } else if(first == "%") {

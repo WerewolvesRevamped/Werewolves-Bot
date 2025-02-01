@@ -1409,7 +1409,7 @@ module.exports = function() {
                 } else if(onElement && parsedGeneric) { // check for generic attribute
                     let srcVal = srcToValue(onElement);
                     let genericAttrs = await getGenericAttributes(srcVal);
-                    console.log(genericAttrs);
+                    console.log("generic attributes", genericAttrs);
                     let filtered;
                     switch(splitTarget.length) {
                         case 1: // just attribute name
@@ -1713,6 +1713,7 @@ module.exports = function() {
     parses a poll
     **/
     this.parsePoll = async function(selector, self = null, additionalTriggerData = {}) {
+        let selectorTarget = selectorGetTarget(selector);
         if(verifyPoll(selectorTarget)) {
             return selectorTarget;
         } else {
@@ -1840,7 +1841,7 @@ module.exports = function() {
             let infType = await inferTypeRuntime(spl[i], self, additionalTriggerData);
             if(infType != "unknown") {
                 let parsed = await parseSelector(`${spl[i]}[${infType}]`, self, additionalTriggerData);
-                //console.log(infType, spl[i], parsed.type, parsed.value);
+                console.log(infType, spl[i], parsed.type, parsed.value);
                 let strs = [];
                 // iterate through selector list
                 for(let j = 0; j < parsed.value.length; j++) {
@@ -1862,7 +1863,7 @@ module.exports = function() {
     /**
     Parse ability type
     **/
-    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","redirecting","manipulating","whispering","joining","granting","loyalty","obstructing","poll","announcement","changing","","choices","ascend","descend","","counting","reset","","","feedback","success","failure","log","","process_evaluate","abilities","emit","storing","displaying"];
+    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","redirecting","manipulating","whispering","joining","granting","loyalty","obstructing","poll","announcement","changing","","choices","ascend","descend","disband","counting","reset","cancel","","feedback","success","failure","log","process_evaluate","abilities","emit","storing","displaying"];
     this.parseAbilityType = function(ability_type, self = null, additionalTriggerData = {}) {
         // get target
         let selectorTarget = selectorGetTarget(ability_type);
