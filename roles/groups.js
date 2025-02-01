@@ -23,6 +23,8 @@ module.exports = function() {
 			case "list": cmdGroupsList(message.channel); break;
 			case "active": cmdGroupsActive(message.channel); break;
 			case "delete": cmdGroupsDelete(message.channel, args); break;
+			case "set": cmdGroupsSet(message.channel, args); break;
+			case "getprop": cmdGroupsGetProp(message.channel, args); break;
 			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
 		}
 	}
@@ -157,7 +159,7 @@ module.exports = function() {
 			channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "groups set <value name> <group> <value>`!"); 
 			return; 
 		} else if(isNaN(args[2])) {
-			channel.send("⛔ Command error. Invalid group instance id `" + args[1] + "`!"); 
+			channel.send("⛔ Command error. Invalid group instance id `" + args[2] + "`!"); 
 			return; 
 		} else if(!isGroupsArgs(args[1])) { 
 			// Invalid parameter
@@ -165,15 +167,44 @@ module.exports = function() {
 			return; 
 		}
         // get group
-        let group = await sqlPromEsc("UPDATE active_groups SET " + args[1] + " = " + connection.escape(args[3]) + " WHERE channel_id = ", args[2]);
+        let group = await sqlPromOneEsc("SELECT * FROM active_groups WHERE ai_id = ", args[2]);
         if(!group) {
 			channel.send("⛔ Command error. Could not find group!"); 
             return;
         }
         // update group
-		await sqlPromEsc("UPDATE active_groups SET " + args[1] + " = " + connection.escape(args[3]) + " WHERE ai_id = ", args[2]);
+		await sqlPromOneEsc("UPDATE active_groups SET " + args[1] + " = " + connection.escape(args[3]) + " WHERE ai_id = ", args[2]);
         // feedback
         channel.send("✅ `" + group.name + "`'s " + args[1] + " value now is `" + args[3] + "`!");
+        // update displays
+        if(args[1] === "counter") {
+            updateDisplayCheck(`group:${group.channel_id}`, "counter");
+        }
+	}
+    /**
+    Command: $groups getprop
+    Retrieves a value on an active group instances
+    **/
+	this.cmdGroupsGetProp = async function(channel, args) {
+		if(!args[1] || !args[2]) {  
+			channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "groups get <value name> <group>`!"); 
+			return; 
+		} else if(isNaN(args[2])) {
+			channel.send("⛔ Command error. Invalid group instance id `" + args[2] + "`!"); 
+			return; 
+		} else if(!isGroupsArgs(args[1])) { 
+			// Invalid parameter
+			channel.send("⛔ Syntax error. Invalid parameter `" + args[1] + "`!"); 
+			return; 
+		}
+        // get group
+        let group = await sqlPromOneEsc("SELECT * FROM active_groups WHERE ai_id = ", args[2]);
+        if(!group) {
+			channel.send("⛔ Command error. Could not find group!"); 
+            return;
+        }
+        // output value
+        channel.send("✅ `" + group.name + "`'s " + args[1] + " is `" + group[args[1]] + "`!");
 	}
     
     /**

@@ -565,7 +565,7 @@ module.exports = function() {
             cond = { type: "membership", target: ttpp(fd[1]), group: ttpp(fd[2]) };
         }
         /** Selector **/
-        exp = new RegExp("^" + targetType + " is part of " + groupType + "$", "g");
+        exp = new RegExp("^" + targetType + " is part of " + targetType + "$", "g");
         fd = exp.exec(condition);
         if(fd) {
             cond = { type: "selector", target: ttpp(fd[1]), selector: ttpp(fd[2]) };
@@ -582,7 +582,7 @@ module.exports = function() {
 
     /** REGEX - Reminder: You need double \'s here **/
     // general
-    const targetType = "(`[^`]*`|`[^`]*`\\[\\w+\\]|@\\S*|&\\S*|#\\S*|%[^%]+%|\-?\\d+|f?F?alse|t?T?rue)";
+    const targetType = "(`[^`]*`|`[^`]*`\\[\\w+\\]|@\\S*|&\\S*|\\^\\S*|#\\S*|%[^%]+%|\-?\\d+|f?F?alse|t?T?rue)";
     const attrDuration = "( \\(~[^\)]+\\))?";
     const locationType = "(`[^`]*`|@\\S*|#\\S*)"; // extended version of target type
     const groupType = "(@\\S*|#\\S*)"; // reduced version of location type
@@ -937,6 +937,24 @@ module.exports = function() {
         fd = exp.exec(abilityLine);
         if(fd) {
             ability = { type: "applying", subtype: "change", target: ttpp(fd[4]), attribute: ttpp(fd[1],"activeAttribute"), attr_index: +fd[2], attr_value: fd[3].trim()  };
+        }
+        // Change Attribute Value
+        exp = new RegExp("^Change " + attributeName + " value `" + attrIndex + "` to " + targetType + " for " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "applying", subtype: "change_parsed", target: ttpp(fd[4]), attribute: ttpp(fd[1],"activeAttribute"), attr_index: +fd[2], attr_value: ttpp(fd[3])  };
+        }
+        // Change Attribute Value
+        exp = new RegExp("^Change " + attributeName + " value `" + attrIndex + "` to `" + attrValue + "`$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "applying", subtype: "change", target: ttpp("@self"), attribute: ttpp(fd[1],"activeAttribute"), attr_index: +fd[2], attr_value: fd[3].trim()  };
+        }
+        // Change Attribute Value
+        exp = new RegExp("^Change " + attributeName + " value `" + attrIndex + "` to " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "applying", subtype: "change_parsed", target: ttpp("@self"), attribute: ttpp(fd[1],"activeAttribute"), attr_index: +fd[2], attr_value: ttpp(fd[3])  };
         }
         /** REDIRECTING **/
         // redirect from all
@@ -1825,6 +1843,7 @@ module.exports = function() {
                 case "players": return "player";
                 case "randomplayer": return "player";
                 case "mostfreqrole": return "role";
+                case "source": return "player";
                 default: return "unknown";
             }
         } else if(first == "&") {
@@ -1841,12 +1860,12 @@ module.exports = function() {
                 case "@visittype": return "abilityType";
                 case "@visitparameter": return "unknown";
                 case "@thisattr": return "activeAttribute";
-                case "@actionresult": return "info";
+                case "@actionresult": return "result";
                 case "@result": case "@result1": case "@result2": case "@result3": 
                 case "@result4": case "@result5": case "@result6": case "@result7": 
-                case "@actionResult": return "result";
                 case "@chosen": case "@option": return "option";
                 case "@attacklocation": return "location";
+                case "@selection": case "@secondaryselection": case "@target": case "@self": return "unknown";
                 default: return "player";
             }
         } else if(first == "%") {

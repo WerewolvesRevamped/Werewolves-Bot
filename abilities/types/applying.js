@@ -57,6 +57,22 @@ module.exports = function() {
                 result = await applyingChange(src_name, src_ref, target, ability.attribute, index, ability.attr_value, additionalTriggerData);
                 return result;
             break;
+            case "change_parsed":
+                // check parameters
+                if(!ability.attr_index || !ability.attr_value) {
+                    abilityLog(`❗ **Error:** Missing arguments for type \`${ability.type}\`!`);
+                    return { msg: "Applying failed! " + abilityError, success: false };
+                }
+                let valueParsed = await parseSelector(ability.attr_value, src_ref, additionalTriggerData);
+                // check index
+                let index2 = +ability.attr_index;
+                if(index2 < 1 || index2 > 3) {
+                    abilityLog(`❗ **Error:** Invalid index for change applying!`);
+                    return { msg: "Applying failed! " + abilityError, success: false };
+                }
+                result = await applyingChange(src_name, src_ref, target, ability.attribute, index2, `${valueParsed.value[0]}[${valueParsed.type}]`, additionalTriggerData);
+                return result;
+            break;
         }
     }
     

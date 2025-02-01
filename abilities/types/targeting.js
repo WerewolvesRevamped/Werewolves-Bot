@@ -102,6 +102,9 @@ module.exports = function() {
             case "poll":
                 return getPollTarget(srcVal);
             break;
+            case "attribute":
+                return getAttributeTarget(srcVal);
+            break;
             default:
                 abilityLog(`❗ **Error:** Unsupported type ${srcType} for targeting!`);  
                 return;
@@ -129,6 +132,9 @@ module.exports = function() {
             break;
             case "poll":
                 return setPollTarget(srcVal, target);
+            break;
+            case "attribute":
+                return setAttributeTarget(srcVal, target);
             break;
             default:
                 abilityLog(`❗ **Error:** Unsupported type ${srcType} for targeting!`);  

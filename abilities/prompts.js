@@ -136,13 +136,14 @@ module.exports = function() {
         switch(val) {
             case "@selection":
             case "@secondaryselection":
-                return `the selected ${type}`;
+                return type === "unknown" ? "the selected value" : `the selected ${type}`;
             case "@target":
                 return `your target`;
             case "@self":
                 return `you`;
             default:
-                val = val.replace(/[#&@]+/g, "");
+                val = val.replace(/[#&@]+\^/g, "");
+                if(val.indexOf(":") >= 0) return val;
                 return srcRefToText(`${type}:${val}`);
         }
     }
@@ -398,6 +399,7 @@ module.exports = function() {
             // default
             return property;
         });
+        console.log(ability);
         return ability;
     }
     
@@ -572,6 +574,7 @@ module.exports = function() {
                     promptAppliedAbilities.push(promptAppliedAbility);
                     // check restrictions again
                     additionalTriggerData.selection = parsedReply[1];
+                    additionalTriggerData.selection_type = type1;
                     for(let i = 0; i < restrictions.length; i++) {
                         let passed = await handleRestriction(src_ref, promptAppliedAbility[0], restrictions[i], RESTR_POST, parsedReply[1], additionalTriggerData);
                         if(!passed) {
@@ -621,7 +624,9 @@ module.exports = function() {
                     promptAppliedAbilities.push(promptAppliedAbility);
                     // check restrictions again
                     additionalTriggerData.selection = parsedReply1[1];
+                    additionalTriggerData.selection_type = type1;
                     additionalTriggerData.secondaryselection = parsedReply2[1];
+                    additionalTriggerData.secondaryselection_type = type2;
                     for(let i = 0; i < restrictions.length; i++) {
                         let passed = await handleRestriction(src_ref, promptAppliedAbility[0], restrictions[i], RESTR_POST, parsedReply1[1], additionalTriggerData);
                         if(!passed) {

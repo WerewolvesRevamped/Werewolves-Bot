@@ -17,6 +17,12 @@ module.exports = function() {
         if(selectorTarget === "@self" && self) {
             selectorType = srcToType(self);
             if(selectorType === "attribute") selectorType = "player"; // for attributes we want @Self to be the player. @ThisAttr is attribute instead
+        } else if(selectorTarget === "@selection") {
+            selectorType = additionalTriggerData.selection_type;
+        } else if(selectorTarget === "@secondaryselection") {
+            selectorType = additionalTriggerData.secondaryselection_type;
+        } else if(selectorTarget === "@actionresult") {
+            selectorType = selectorGetType(additionalTriggerData.action_result);
         }
         // switch through types
         switch(selectorType) {
@@ -120,7 +126,6 @@ module.exports = function() {
     this.INCLUDE_DEAD_PLAYERS = false;
     this.parsePlayerSelector = async function(selector, self = null, additionalTriggerData = {}, aliveOnly = true) {
         let selectorTarget = selectorGetTarget(selector);
-        /** WIP: Needs to be able to parse much more! **/
         switch(selectorTarget) {
             // base selectors
             case "@self":
@@ -399,6 +404,7 @@ module.exports = function() {
     
     function invalidSelector(sel) {
         abilityLog(`❗ **Error:** Invalid player selector target \`${sel}\`!`);
+        console.log("INVALID");
         return [ ];
     }
     
@@ -1180,6 +1186,20 @@ module.exports = function() {
                     abilityLog(`❗ **Error:** Invalid role selector target \`${selectorTarget}\`!`);
                     return [ ];
                 }
+            case "@selection":
+                if(additionalTriggerData.selection) {
+                    return [ parseRole(selectorGetTarget(additionalTriggerData.selection)) ];
+                } else {
+                    abilityLog(`❗ **Error:** Invalid role selector target \`${selectorTarget}\`!`);
+                    return [ ];
+                }
+            case "@secondaryselection":
+                if(additionalTriggerData.secondaryselection) {
+                    return [ parseRole(selectorGetTarget(additionalTriggerData.secondaryselection)) ];
+                } else {
+                    abilityLog(`❗ **Error:** Invalid role selector target \`${selectorTarget}\`!`);
+                    return [ ];
+                }
             case "^all":
                 let allRoles = await sqlProm("SELECT name FROM roles");
                 return allRoles.map(el => el.name);
@@ -1839,7 +1859,7 @@ module.exports = function() {
                 for(let j = 0; j < parsed.value.length; j++) {
                     let prefix = "";
                     if(infType === "player") prefix = idToEmoji(parsed.value[j]) + " ";
-                    let txt = prefix + srcRefToText(`${infType}:${parsed.value[j]}`, parsed.value[j]);
+                    let txt = prefix + (["string","info"].includes(infType) ? parsed.value[j] : srcRefToText(`${infType}:${parsed.value[j]}`, parsed.value[j]));
                     strs.push(txt);
                 }
                 // merge selector list
@@ -2355,6 +2375,10 @@ module.exports = function() {
             let targetType = srcToType(target);
             console.log(`Inferred target type as ${targetType} from ${target}`);
             return targetType;
+        } else if(val === "@selection") {
+            return additionalTriggerData.selection_type;
+        } else if(val === "@secondaryselection") {
+            return additionalTriggerData.secondaryselection_type;
         }
         return inferType(val);
     }

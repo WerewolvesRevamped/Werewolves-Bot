@@ -282,9 +282,12 @@ module.exports = function() {
                 }
                 let targets = await parseSelector(condition.target, src_ref, additionalTriggerData);
                 let selector = await parseSelector(condition.selector, src_ref, additionalTriggerData);
+                console.log("target", targets);
+                console.log("selector", selector);
                 if(targets.type != selector.type) return false;
                 for(let i = 0; i < targets.value.length; i++) {
                     let bool = selector.value.includes(targets.value[i]);
+                    console.log(bool, targets.value[i]);
                     if(!bool) return false;
                 }
                 return true;

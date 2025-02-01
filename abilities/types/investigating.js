@@ -202,8 +202,8 @@ module.exports = function() {
         
         // feedback
         abilityLog(`✅ ${srcRefToText(src_ref)} investigated <@${targets[0]}> for attribute \`${toTitleCase(attrName)}\` ⇒ \`${found}\` ${rdata.type?' ('+rdata.type+')':''}.`);
-        if(found) return { msg: `Investigated <@${additionalTriggerData.orig_target}> for attribute \`${toTitleCase(attrName)}\` ⇒ Attribute Found`, success: true, target: `player:${targets[0]}` };
-        else return { msg: `Investigated <@${additionalTriggerData.orig_target}> for attribute \`${toTitleCase(attrName)}\` ⇒ Attribute __Not__ Found`, success: false, target: `player:${targets[0]}` };
+        if(found) return { msg: `Investigated <@${additionalTriggerData.orig_target}> for attribute \`${toTitleCase(attrName)}\` ⇒ Attribute Found`, success: true, result: "Success[success]", target: `player:${targets[0]}` };
+        else return { msg: `Investigated <@${additionalTriggerData.orig_target}> for attribute \`${toTitleCase(attrName)}\` ⇒ Attribute __Not__ Found`, success: false, result: "Failure[success]", target: `player:${targets[0]}` };
     }
     
     /**
