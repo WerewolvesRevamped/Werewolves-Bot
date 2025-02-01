@@ -161,7 +161,7 @@ module.exports = function() {
             else if(paramAbilities.length == 1 && !deepEqual(thisTriggerAbilities[0], defaultParams)) {
                 triggers.triggers[t] = { trigger: thisTriggerName, abilities: delParam(thisTriggerAbilities), parameters: thisTriggerAbilities[0].parameters };
             } else { // parameters are used in an invalid way
-                if(!debugMode) throw new Error(`Invalid Parameters \`\`\`\n${thisTriggerName}\n\`\`\` and \`\`\`\n${thisTriggerAbilities}\n\`\`\``);
+                if(!debugMode) throw new Error(`Invalid Parameters \`\`\`\n${thisTriggerName}\n\`\`\` and \`\`\`\n${JSON.stringify(thisTriggerAbilities)}\n\`\`\``);
                 else triggers.triggers[t] = { trigger: "error_invalid_parameters", abilities: [], error_data: { trigger: thisTriggerName, abilities: thisTriggerAbilities } };
             }
             
@@ -1885,7 +1885,6 @@ module.exports = function() {
                 case "@result4": case "@result5": case "@result6": case "@result7": 
                 case "@chosen": case "@option": return "option";
                 case "@attacklocation": return "location";
-               case "@target": case "@self": return "unknown";
                 default: return "player";
             }
         } else if(first == "%") {
