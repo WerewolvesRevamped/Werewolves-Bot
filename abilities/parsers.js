@@ -1713,12 +1713,22 @@ module.exports = function() {
     parses a poll
     **/
     this.parsePoll = async function(selector, self = null, additionalTriggerData = {}) {
+        // get target
         let selectorTarget = selectorGetTarget(selector);
-        if(verifyPoll(selectorTarget)) {
-            return selectorTarget;
+        if(selectorTarget === "@self") {
+            if(!self) { // if no self is specified, @Self is invalid
+                abilityLog(`❗ **Error:** Used \`@Self\` in invalid context!`);
+                return null;
+            }
+            let pself = srcToValue(self); // get poll name
+            return pself; 
         } else {
-            abilityLog(`❗ **Error:** Invalid poll \`${selectorTarget}\`.!`);
-            return null;              
+            if(verifyPoll(selectorTarget)) {
+                return selectorTarget;
+            } else {
+                abilityLog(`❗ **Error:** Invalid poll \`${selectorTarget}\`.!`);
+                return null;              
+            }
         }
     }
     
@@ -1845,6 +1855,15 @@ module.exports = function() {
                 let strs = [];
                 // iterate through selector list
                 for(let j = 0; j < parsed.value.length; j++) {
+                    if(infType === "string" && parsed.value[j].split("[").length === 2) {
+                        let stringReparsed = await parseSelector(parsed.value[j], self, additionalTriggerData);
+                        console.log("REPARSED STRING", stringReparsed);
+                        for(let k = 0; k < stringReparsed.value.length; k++) {
+                            let txt = (["string","info"].includes(stringReparsed.type) ? stringReparsed.value[j] : srcRefToText(`${stringReparsed.type}:${stringReparsed.value[j]}`, stringReparsed.value[j]));
+                            strs.push(txt);
+                        }
+                        continue;
+                    }
                     let prefix = "";
                     if(infType === "player") prefix = idToEmoji(parsed.value[j]) + " ";
                     let txt = prefix + (["string","info"].includes(infType) ? parsed.value[j] : srcRefToText(`${infType}:${parsed.value[j]}`, parsed.value[j]));
@@ -1887,6 +1906,10 @@ module.exports = function() {
             abilityLog(`❗ **Error:** Invalid ability type \`${selectorTarget}\`. Defaulted to \`none\`!`);
             return "none";
         }
+    }
+    
+    this.verifyAbilityTypeName = function(abilityType) {
+        return abilityTypeNames.includes(abilityType);
     }
     
     /**

@@ -1880,9 +1880,9 @@ module.exports = function() {
                 case "@visittype": return "abilityType";
                 case "@visitparameter": return "unknown";
                 case "@thisattr": return "activeAttribute";
-                case "@actionresult": return "result";
                 case "@result": case "@result1": case "@result2": case "@result3": 
                 case "@result4": case "@result5": case "@result6": case "@result7": 
+                case "@actionresult": return "result";
                 case "@chosen": case "@option": return "option";
                 case "@attacklocation": return "location";
                 default: return "player";
@@ -1907,6 +1907,7 @@ module.exports = function() {
                     if(verifyClass(targetType)) return "class";
                     if(verifyCategory(targetType)) return "category";
                     if(verifyPoll(targetType)) return "poll";
+                    if(verifyAbilityTypeName(targetType)) return "abilityType";
                     return targetType.includes("@") || targetType.length > 30 ? "info" : "role";
             }
         } else {
