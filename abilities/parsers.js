@@ -1713,12 +1713,22 @@ module.exports = function() {
     parses a poll
     **/
     this.parsePoll = async function(selector, self = null, additionalTriggerData = {}) {
+        // get target
         let selectorTarget = selectorGetTarget(selector);
-        if(verifyPoll(selectorTarget)) {
-            return selectorTarget;
+        if(selectorTarget === "@self") {
+            if(!self) { // if no self is specified, @Self is invalid
+                abilityLog(`❗ **Error:** Used \`@Self\` in invalid context!`);
+                return null;
+            }
+            let pself = srcToValue(self); // get poll name
+            return pself; 
         } else {
-            abilityLog(`❗ **Error:** Invalid poll \`${selectorTarget}\`.!`);
-            return null;              
+            if(verifyPoll(selectorTarget)) {
+                return selectorTarget;
+            } else {
+                abilityLog(`❗ **Error:** Invalid poll \`${selectorTarget}\`.!`);
+                return null;              
+            }
         }
     }
     

@@ -29,6 +29,8 @@
     "granting.resign": "You may resign from your position during any phase.",
     
     "comment_4": "Role-specific Custom Prompts",
+    "ravenkeeper.1": "You may assign a raven to another player.",
+    "ravenkeeper.2": "You may recall a raven from one of the players you have assigned it to.",
     "witch.pod": "You may (once) use your Potion of Death to attack another player. Who would you like to attack?",
     "witch.pol": "You may (once) use your Potion of Life to protect yourself and up to three other players. Who would you like to protect?",
     "vampire.1": "Who do you want to demonize?",
