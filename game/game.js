@@ -259,7 +259,7 @@ module.exports = function() {
 		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.sub).members.toJSON(), 0, "substitute");
 		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.helper).members.toJSON(), 0, "helper");
 		// Remove Roles & Nicknames
-		wroles_remove(channel, [stats.signed_up, stats.spectator, stats.mayor, stats.mayor2, stats.reporter, stats.guardian, stats.sub, stats.participant, stats.dead_participant, stats.host, stats.ghost], ["signed up", "spectator", "mayor", "mayor2", "reporter", "guardian", "substitute", "participant", "dead participant", "host", "ghost"]);
+		wroles_remove(channel, [stats.signed_up, stats.spectator, stats.mayor2, stats.reporter, stats.guardian, stats.sub, stats.participant, stats.dead_participant, stats.host, stats.ghost], ["signed up", "spectator", "mayor2", "reporter", "guardian", "substitute", "participant", "dead participant", "host", "ghost"]);
         // run role removal again for critical roles because sometimes it fails even though it says it succeeds
 		wroles_remove(channel, [stats.participant, stats.dead_participant, stats.ghost], ["participant", "dead participant", "ghost"]);
 		// Cleanup channels
@@ -293,7 +293,7 @@ module.exports = function() {
 	this.wroles_remove2 = function(channel, id, name, callback) {
 		// Remove spectator role
 		if(channel.guild.roles.cache.get(id)) wroles_removeOnce(channel, id, name, channel.guild.roles.cache.get(id).members.toJSON(), 0, callback);
-		else channel.send("Invalid role with id " + id);
+		else channel.send("Invalid role with id " + id + " and name " + name);
 	}
 	
 	this.wroles_removeOnce = function(channel, id, name, members, index, callback) {

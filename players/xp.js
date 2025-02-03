@@ -4,7 +4,7 @@ Skin Packs
 
 module.exports = function() {
     
-    this.XP_MULTIPLIER = 11.43257;
+    this.XP_MULTIPLIER = 11.63257;
     
     /**
     Command: $xp
@@ -101,14 +101,14 @@ module.exports = function() {
     XP Time
     **/
     this.xpGetTime = function() {
-        return Math.floor((new Date().getTime() / 1000) / 60 / (60 * 1/10)); // current time in 5m intervals
+        return Math.floor((new Date().getTime() / 1000) / 60 / (60 * 1/5)); // current time in 5m intervals
     }
     
     /**
     Get XP Gain
     **/
     this.getXPGain = function() {
-        return Math.floor(Math.random() * 5) + 1;
+        return Math.floor(Math.random() * 10) + 1;
     }
     
 }
