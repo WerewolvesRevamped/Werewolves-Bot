@@ -16,6 +16,7 @@
     "poll.votes.1": "Which player would you like to manipulate the starting votes of?",
     "process_evaluate.role": "Please submit a role.",
     "process_evaluate.player": "Please submit a player.",
+    "protecting.active_defense.1": "Who would you like to protect?",
     
     "comment_2": "Restriction Messages",
     "succession.target": "You may not select the same target two times in a row. You may resubmit another target as a reply to the original prompt.",

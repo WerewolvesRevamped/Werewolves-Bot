@@ -1682,10 +1682,9 @@ module.exports = function() {
                 }
             } else if(selectorTarget === "@attacklocation") {
                 // try attacker
-                if(additionalTriggerData.attacker) { // if no self is specified, @Attacker is invalid
-                    let val = srcToValue(additionalTriggerData.attacker);
-                    let typ = srcToType(additionalTriggerData.attacker);
-                    if(typ === "player") return { value: val, type: "player", default: false, multiple: false };
+                console.log("ATTACK LOCATION", additionalTriggerData);
+                if(additionalTriggerData.attacker) { // if no attacker is specified, @Attacker is invalid
+                    return { value: additionalTriggerData.attacker, type: "player", default: false, multiple: false };
                 }
                 // try attack source
                 if(additionalTriggerData.attack_source) {
@@ -1855,9 +1854,9 @@ module.exports = function() {
                 let strs = [];
                 // iterate through selector list
                 for(let j = 0; j < parsed.value.length; j++) {
+                    // attribute values are string but may contain another value that can be parsed
                     if(infType === "string" && parsed.value[j].split("[").length === 2) {
                         let stringReparsed = await parseSelector(parsed.value[j], self, additionalTriggerData);
-                        console.log("REPARSED STRING", stringReparsed);
                         for(let k = 0; k < stringReparsed.value.length; k++) {
                             let txt = (["string","info"].includes(stringReparsed.type) ? stringReparsed.value[j] : srcRefToText(`${stringReparsed.type}:${stringReparsed.value[j]}`, stringReparsed.value[j]));
                             strs.push(txt);
@@ -1865,7 +1864,10 @@ module.exports = function() {
                         continue;
                     }
                     let prefix = "";
-                    if(infType === "player") prefix = idToEmoji(parsed.value[j]) + " ";
+                    if(infType === "player") {
+                        let emoji = idToEmoji(parsed.value[j]);
+                        if(emoji) prefix = emoji + " ";
+                    }
                     let txt = prefix + (["string","info"].includes(infType) ? parsed.value[j] : srcRefToText(`${infType}:${parsed.value[j]}`, parsed.value[j]));
                     strs.push(txt);
                 }
@@ -2000,7 +2002,7 @@ module.exports = function() {
         ["target","untarget"], // targeting
         ["weakly","strongly"], // disguising
         ["active","passive","partial","recruitment","absence"], // protecting
-        ["add","remove","change"], // applying
+        ["add","remove","change","change_parsed"], // applying
         [], // redirecting
         ["absolute","relative"], // vote manipulation
         [], // whispering

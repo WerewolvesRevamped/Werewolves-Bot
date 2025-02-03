@@ -46,6 +46,7 @@ module.exports = function() {
             break;
             case "remove":
                 result = await joiningRemove(src_name, src_ref, target, group_name, additionalTriggerData);
+                await sleep(50000);
                 await updateGroups();
                 return result;
             break;

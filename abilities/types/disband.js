@@ -31,7 +31,8 @@ module.exports = function() {
             sql("SELECT * FROM active_groups WHERE disbanded=0 AND name=" + connection.escape(group) + " OR channel_id=" + connection.escape(id), async result => {
                 let groupChannel = await mainGuild.channels.fetch(result[0].channel_id);
                 // update permissions
-                let groupMembers = groupChannel.permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Member);
+                let groupMembers = groupChannel.permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Member).filter(el => el.allow > 0);
+                console.log("groupMembership", groupMembers);
                 groupMembers.forEach(el => {
                     groupChannel.permissionOverwrites.create(el.id, { ViewChannel: true, SendMessages: false });
                 });

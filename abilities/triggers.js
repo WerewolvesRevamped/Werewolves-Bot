@@ -17,10 +17,9 @@ module.exports = function() {
             type = "player";
         }
         // run trigger
-        abilityLog(`🔷 **Trigger:** ${triggerName} for ${srcRefToText(src_ref)}`);  
         switch(type) {
             case "player":
-                await triggerPlayer(val, triggerName, additionalTriggerData, true);
+                await triggerPlayer(val, triggerName, additionalTriggerData);
             break;
             case "player_attr":
                 let attr = await roleAttributeGetPlayer(val);
@@ -28,22 +27,22 @@ module.exports = function() {
                     abilityLog(`❗ **Skipped Trigger:** Could not find who <#${val}> belongs to.`);
                     return;
                 }
-                await triggerPlayer(attr.id, triggerName, additionalTriggerData, true);
+                await triggerPlayer(attr.id, triggerName, additionalTriggerData);
             break;
             case "player_group":
                 // cant run triggers as player_group
             break;
             case "group":
-                await triggerGroup(val, triggerName, additionalTriggerData, true);
+                await triggerGroup(val, triggerName, additionalTriggerData);
             break;
             case "team":
-                await triggerTeam(val, triggerName, additionalTriggerData, true);
+                await triggerTeam(val, triggerName, additionalTriggerData);
             break;
             case "poll":
-                await triggerPoll(val, triggerName, additionalTriggerData, true);
+                await triggerPoll(val, triggerName, additionalTriggerData);
             break;
             case "attribute":
-                await triggerAttribute(val, triggerName, additionalTriggerData, true);
+                await triggerAttribute(val, triggerName, additionalTriggerData);
             break;
             default:
                 abilityLog(`❗ **Skipped Trigger:** Unknown type for trigger ${type}.`);
@@ -55,18 +54,16 @@ module.exports = function() {
     Trigger Player
     triggers a trigger for a specified player
     **/
-    this.triggerPlayer = async function(player_id, triggerName, additionalTriggerData = {}, fromTrigger = false) {
-        if(!fromTrigger) abilityLog(`🔷 **Trigger:** ${triggerName} for <@${player_id}>`);  
+    this.triggerPlayer = async function(player_id, triggerName, additionalTriggerData = {}) {
         // primary roles
-        await triggerPlayerRole(player_id, triggerName, additionalTriggerData, true);
+        await triggerPlayerRole(player_id, triggerName, additionalTriggerData);
         // role type attributes (additional roles)
-        await triggerPlayerAttrRole(player_id, triggerName, additionalTriggerData, true);
+        await triggerPlayerAttrRole(player_id, triggerName, additionalTriggerData);
         // custom type attributes
-        await triggerPlayerAttrCustom(player_id, triggerName, additionalTriggerData, true);
+        await triggerPlayerAttrCustom(player_id, triggerName, additionalTriggerData);
     }
     
-    this.triggerPlayerRole = async function(player_id, triggerName, additionalTriggerData = {}, fromTrigger = false) {
-        if(!fromTrigger) abilityLog(`🔷 **Trigger:** ${triggerName} for <@${player_id}> (Role)`);  
+    this.triggerPlayerRole = async function(player_id, triggerName, additionalTriggerData = {}) {
         return new Promise(res => {
             // get all players
             sql("SELECT role,id FROM players WHERE type='player' AND id=" + connection.escape(player_id), async r => {
@@ -83,8 +80,7 @@ module.exports = function() {
         });
     }
     
-    this.triggerPlayerAttrRole = async function(player_id, triggerName, additionalTriggerData = {}, fromTrigger = false) {
-        if(!fromTrigger) abilityLog(`🔷 **Trigger:** ${triggerName} for <@${player_id}> (Attr)`);  
+    this.triggerPlayerAttrRole = async function(player_id, triggerName, additionalTriggerData = {}) {
         return new Promise(res => {
             // get all players
             sql("SELECT players.id,active_attributes.ai_id,active_attributes.val1 AS role,active_attributes.val2 AS channel_id FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.attr_type='role' AND id=" + connection.escape(player_id), async r => {
@@ -105,8 +101,7 @@ module.exports = function() {
         });
     }
     
-    this.triggerPlayerAttrCustom = async function(player_id, triggerName, additionalTriggerData = {}, fromTrigger = false) {
-        if(!fromTrigger) abilityLog(`🔷 **Trigger:** ${triggerName} for <@${player_id}> (Attr)`);  
+    this.triggerPlayerAttrCustom = async function(player_id, triggerName, additionalTriggerData = {}) {
         return new Promise(res => {
             // get all players
             sql("SELECT active_attributes.ai_id FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.attr_type='custom' AND id=" + connection.escape(player_id), async r => {
@@ -118,7 +113,7 @@ module.exports = function() {
                         res();
                         return;
                     }
-                    await triggerAttribute(r[i].ai_id, triggerName, additionalTriggerData, true);
+                    await triggerAttribute(r[i].ai_id, triggerName, additionalTriggerData);
                     await useAttribute(r[i].ai_id);
                 }
                 // resolve outer promise
@@ -130,11 +125,10 @@ module.exports = function() {
     /**
     Trigger Player - Role Attribute
     **/
-    this.triggerPlayerRoleAttributeByAttr = function(ai_id, triggerName, additionalTriggerData = {}, fromTrigger = false) {
+    this.triggerPlayerRoleAttributeByAttr = function(ai_id, triggerName, additionalTriggerData = {}) {
         return new Promise(res => {
             // get all players
             sql("SELECT players.id,active_attributes.ai_id,active_attributes.val1 AS role,active_attributes.val2 AS channel_id FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.attr_type='role' AND active_attributes.ai_id=" + connection.escape(ai_id), async r => {
-                if(!fromTrigger) abilityLog(`🔷 **Trigger:** ${triggerName} for <@${r[0].id}> (Role Attribute)`);  
                 // iterate through additional roles
                 for(let i = 0; i < r.length; i++) {
                 //trigger handler
@@ -157,8 +151,7 @@ module.exports = function() {
     Trigger Group
     triggers a trigger for a specified group
     **/
-    this.triggerGroup = function(channel_id, triggerName, additionalTriggerData = {}, fromTrigger = false) {
-        if(!fromTrigger) abilityLog(`🔷 **Trigger:** ${triggerName} for <#${channel_id}>`);  
+    this.triggerGroup = function(channel_id, triggerName, additionalTriggerData = {}) {
         return new Promise(res => {
             // get all players
             sql("SELECT name,channel_id FROM active_groups WHERE disbanded=0 AND channel_id=" + connection.escape(channel_id) + " OR name=" + connection.escape(channel_id), async r => {
@@ -179,8 +172,7 @@ module.exports = function() {
     Trigger Team
     triggers a trigger for a specified team
     **/
-    this.triggerTeam = function(teamName, triggerName, additionalTriggerData = {}, fromTrigger = false) {
-        if(!fromTrigger) abilityLog(`🔷 **Trigger:** ${triggerName} for ${toTitleCase(teamName)}`);  
+    this.triggerTeam = function(teamName, triggerName, additionalTriggerData = {}) {
         return new Promise(res => {
             // get all players
             sql("SELECT * FROM teams WHERE active=1 AND name=" + connection.escape(teamName), async r => {
@@ -201,8 +193,7 @@ module.exports = function() {
     Trigger Poll
     triggers a trigger for a specified poll
     **/
-    this.triggerPoll = function(poll_name, triggerName, additionalTriggerData = {}, fromTrigger = false) {
-        if(!fromTrigger) abilityLog(`🔷 **Trigger:** ${triggerName} for \`${toTitleCase(poll_name)}\``);  
+    this.triggerPoll = function(poll_name, triggerName, additionalTriggerData = {}) {
         return new Promise(res => {
             // get all players
             sql("SELECT name,parsed FROM polls WHERE name=" + connection.escape(poll_name), async r => {
@@ -224,8 +215,7 @@ module.exports = function() {
     Trigger Attribute
     triggers a trigger for a specified attribute
     **/
-    this.triggerAttribute = function(attr_id, triggerName, additionalTriggerData = {}, fromTrigger = false) {
-        if(!fromTrigger) abilityLog(`🔷 **Trigger:** ${triggerName} for ${srcRefToText('attribute:' + attr_id)}`);  
+    this.triggerAttribute = function(attr_id, triggerName, additionalTriggerData = {}) {
         return new Promise(res => {
             // get all players
             sql("SELECT active_attributes.ai_id,attributes.name,attributes.parsed FROM attributes INNER JOIN active_attributes ON attributes.name = active_attributes.val1 WHERE active_attributes.ai_id=" + connection.escape(attr_id), async r => {
@@ -251,7 +241,6 @@ module.exports = function() {
     handle a trigger triggering (for everyone)
     **/
     this.triggerHandler = async function(triggerName, additionalTriggerData = {}) {
-        abilityLog(`🔷 **Trigger:** ${triggerName}`);  
         await triggerHandlerPlayers(triggerName, additionalTriggerData);
         await triggerHandlerPlayersRoleAttributes(triggerName, additionalTriggerData);
         await triggerHandlerGroups(triggerName, additionalTriggerData);
@@ -512,7 +501,7 @@ module.exports = function() {
                             abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Src name mismatch.`);        
                         } else {
                             let abilityType = await parseSelector(param, src_ref, additionalTriggerData);
-                            let triggerAbilityType = (abilityType.type === "abilitySubtype" ? additionalTriggerData.ability_subtype : "") + additionalTriggerData.ability_type;
+                            let triggerAbilityType = (abilityType.type === "abilitySubtype" ? (additionalTriggerData.ability_subtype ?? "") : "") + additionalTriggerData.ability_type;
                             abilityType = abilityType.value[0].toLowerCase().replace(/[^a-z]+/,"");
                             triggerAbilityType = triggerAbilityType.replace(/[^a-z]+/,"");
                             if((abilityType === triggerAbilityType) ^ (triggerName.includes("Inverted"))) {
@@ -525,7 +514,7 @@ module.exports = function() {
                     case "On Any Action Complex":
                     case "On Any Action Inverted Complex": {
                         let abilityType = await parseSelector(param, src_ref, additionalTriggerData);
-                        let triggerAbilityType = (abilityType.type === "abilitySubtype" ? additionalTriggerData.ability_subtype : "") + additionalTriggerData.ability_type;
+                        let triggerAbilityType = (abilityType.type === "abilitySubtype" ? (additionalTriggerData.ability_subtype ?? "") : "") + additionalTriggerData.ability_type;
                         abilityType = abilityType.value[0].toLowerCase().replace(/[^a-z]+/,"");
                         triggerAbilityType = triggerAbilityType.replace(/[^a-z]+/,"");
                         if((abilityType === triggerAbilityType) ^ (triggerName.includes("Inverted"))) {
@@ -541,7 +530,7 @@ module.exports = function() {
                             abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Src name mismatch.`);        
                         } else {
                             let abilityType = await parseSelector(param2, src_ref, additionalTriggerData);
-                            let triggerAbilityType = (abilityType.type === "abilitySubtype" ? additionalTriggerData.visit_subtype : "") + additionalTriggerData.visit_type;
+                            let triggerAbilityType = (abilityType.type === "abilitySubtype" ? (additionalTriggerData.ability_subtype ?? "") : "") + additionalTriggerData.visit_type;
                             abilityType = abilityType.value[0].toLowerCase().replace(/[^a-z]+/,"");
                             triggerAbilityType = triggerAbilityType.replace(/[^a-z]+/,"");
                             if((abilityType === triggerAbilityType) ^ (triggerName.includes("Inverted"))) {
@@ -551,7 +540,6 @@ module.exports = function() {
                                 } else {
                                     abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\`.`);
                                 }
-                                 await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
                             } else {
                                 abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\` with \`${triggerAbilityType}\`.`);
                             }
@@ -560,7 +548,7 @@ module.exports = function() {
                     case "On Visited Complex":
                     case "On Visited Inverted Complex": {
                         let abilityType2 = await parseSelector(param, src_ref, additionalTriggerData);
-                        let triggerAbilityType2 = (abilityType2.type === "abilitySubtype" ? additionalTriggerData.visit_subtype : "") + additionalTriggerData.visit_type;
+                        let triggerAbilityType2 = (abilityType2.type === "abilitySubtype" ? (additionalTriggerData.visit_subtype ?? "") : "") + additionalTriggerData.visit_type;
                         abilityType2 = abilityType2.value[0].toLowerCase().replace(/[^a-z]+/,"");
                         triggerAbilityType2 = triggerAbilityType2.replace(/[^a-z]+/,"");
                         if((abilityType2 === triggerAbilityType2) ^ (triggerName.includes("Inverted"))) {
@@ -573,8 +561,8 @@ module.exports = function() {
                     case "On Visited Target Complex":
                     case "On Visited Target Inverted Complex": {
                         let abilityType3 = await parseSelector(param2, src_ref, additionalTriggerData);
-                        let triggerAbilityType3 = (abilityType3.type === "abilitySubtype" ? additionalTriggerData.visit_subtype : "") + additionalTriggerData.visit_type;
-                        abilityType3 = abilityType.value[0].toLowerCase().replace(/[^a-z]+/,"");
+                        let triggerAbilityType3 = (abilityType3.type === "abilitySubtype" ? (additionalTriggerData.visit_subtype ?? "") : "") + additionalTriggerData.visit_type;
+                        abilityType3 = abilityType3.value[0].toLowerCase().replace(/[^a-z]+/,"");
                         triggerAbilityType3 = triggerAbilityType3.replace(/[^a-z]+/,"");
                         if((abilityType3 === triggerAbilityType3) ^ (triggerName.includes("Inverted"))) {
                             let selector2 = await parsePlayerSelector(param, src_ref, additionalTriggerData);
@@ -583,7 +571,6 @@ module.exports = function() {
                             } else {
                                 abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\`.`);
                             }
-                             await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
                         } else {
                             abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\` with \`${triggerAbilityType3}\`.`);
                         }
@@ -650,6 +637,7 @@ module.exports = function() {
     executes the abilities of a trigger if applicable
     **/
     async function executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerDataOriginal = {}) {
+        abilityLog(`🔷 **Trigger:** ${triggerName} for ${srcRefToText(src_ref)}`);  
         if(stats.automation_level === 0) return;
         if(stats.automation_level === 1 && triggerName != "Starting") return;
         const ptype = getPromptType(triggerName);

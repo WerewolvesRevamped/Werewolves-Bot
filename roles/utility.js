@@ -60,10 +60,15 @@ module.exports = function() {
         let urlExists = await checkUrlExists(url);
          // if the url doesnt exist, use a placeholder
         if(!urlExists) {
-            console.log("MISSING URL", url);
-            let classesWithPlaceholders = ["townsfolk","werewolf","unaligned","solo"]; // list of classes with a specific placeholder icon
-            let placeholderName = classesWithPlaceholders.includes(rClass) ? toTitleCase(rClass) : "Unaligned"; // if no specific placeholder icon exists default to UA
-            url = `${iconBaseUrl(authorId)}Placeholder/${placeholderName}.png?version=${stats.icon_version}`; // construct placeholder url
+            let lutval = applyLUT(roleName);
+            if(lutval) { // check lut
+                url = `${iconBaseUrl(authorId)}${lutval}.png`;
+            } else {
+                console.log("MISSING URL", url);
+                let classesWithPlaceholders = ["townsfolk","werewolf","unaligned","solo"]; // list of classes with a specific placeholder icon
+                let placeholderName = classesWithPlaceholders.includes(rClass) ? toTitleCase(rClass) : "Unaligned"; // if no specific placeholder icon exists default to UA
+                url = `${iconBaseUrl(authorId)}Placeholder/${placeholderName}.png?version=${stats.icon_version}`; // construct placeholder url
+            }
         }
         
         // get color

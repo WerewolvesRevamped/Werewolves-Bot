@@ -344,15 +344,6 @@ module.exports = function() {
                 // Role Type
                 const roleTypeData = getRoleTypeData(result.type); // display the role type
                 if(result.type != "default") embed.title = applyTheme(roleTypeData.name); // but dont display "Default"
-
-     
-                // get icon if applicable, overwrites default
-                let lutval = applyLUT(roleName);
-                if(!lutval) lutval = applyLUT(result.display_name);
-                if(lutval) { // set icon and name
-                    embed.thumbnail = { "url": `${iconBaseUrl(authorId)}${lutval}.png` };
-                    embed.author.icon_url = `${iconBaseUrl(authorId)}${lutval}.png`;
-                }
                 
                 let isFormalized = false;
                 // add visible sections as sections

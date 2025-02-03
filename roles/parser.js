@@ -1691,7 +1691,7 @@ module.exports = function() {
                     //   const adancedTriggerTypes = ["On <Target> Visited [<Ability Type>]"]; // trigger types containing parameters
                     // attempt to parse complex triggers
                     /** On Target Death / On Target Visited **/
-                    var exp, fd, complexTrigger;
+                    let exp, fd, complexTrigger;
                     exp = new RegExp("^On " + targetType +  " (Death|Killed|Visited|Banished|Banishment)$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
@@ -1740,21 +1740,18 @@ module.exports = function() {
                         complexTrigger = "On " + fd[2] + " Target Inverted;" + ttpp(fd[1]) + ";" + ttpp(fd[3], "abilitySubtype");
                     }
                     /** Choice Chosen **/
-                    var exp, fd, complexTrigger;
                     exp = new RegExp("^On Poll `" + str +  "` Win$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
                         complexTrigger = "On Poll Win;" + ttpp(fd[1].trim().toLowerCase().replace(/[^a-z]/g,""), "poll");
                     }
                     /** Choice Chosen **/
-                    var exp, fd, complexTrigger;
                     exp = new RegExp("^Choice `" + str +  "` Chosen$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
                         complexTrigger = "Choice Chosen;" + ttpp(fd[1].trim().toLowerCase().replace(/[^a-z]/g,""), "option");
                     }
                     /** On [Value] Emitted **/
-                    var exp, fd, complexTrigger;
                     exp = new RegExp("^On `" + str +  "` Emitted$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {

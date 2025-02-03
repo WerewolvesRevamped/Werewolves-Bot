@@ -240,6 +240,10 @@ module.exports = function() {
     }
     
     /**
+    Ability Log Buffered
+    **/
+    
+    /**
     Action Log
     logs a message in the action log. WIP: dont hardcode
     **/
