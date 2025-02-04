@@ -254,6 +254,7 @@ module.exports = function() {
         ["execute_as_set", PERM.GM, "Sets an executor.", "<Src Ref> <Src Name>", "Sets an executor for a $execute_as command.", `$execute_as_set player:242983689921888256 role:citizen`, ["Executor set"], CMDSTATE.WIP],
         ["grant", PERM.GM, "Grants an extra role.", "<Target Player> <Role>", "Grants a specified player a specified role.", `$grant 242983689921888256 corrupted`, [], CMDSTATE.RDY],
         ["emit", PERM.GM, "Emits an event or a trigger.", "<Event / Trigger>", "Emit a trigger or event. When submitting 'start', 'sday' or 'snight' the corresponding event is emitted (each of which includes a series of triggers and other actions), otherwise the input is seen as a trigger.", "emit start", [], CMDSTATE.RDY],
+        ["src_emit", PERM.GM, "Emits a trigger for a specific source.", "<Source> <Trigger>", "Emit a trigger for a specific source. Check the WWRF Guide for a list of valid sources.", "src_emit player:242983689921888256 \"End Day\"", [], CMDSTATE.RDY],
         ["chooser", PERM.GM, "Allows GMs to Choice Choose", "<Player>", "Allows a GM to choice choose as the player they have specified.", "chooser mctsts", [], CMDSTATE.WIP],
         /** Attributes Module **/
         ["attributes", PERM.GM, "Manages attributes.", "<Subcommand>", "Group of commands to handle attributes. $help attributes <sub-command> for detailed help.", "", [], CMDSTATE.RDY],

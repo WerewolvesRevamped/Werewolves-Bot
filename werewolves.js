@@ -532,6 +532,9 @@ client.on("messageCreate", async message => {
     case "emit": // emits a trigger
         if(checkGM(message)) cmdEmit(message.channel, argsX);
     break;
+    case "src_emit": // emits a trigger
+        if(checkGM(message)) cmdSrcEmit(message.channel, argsX);
+    break;
     case "execute": // executes an ability 
         if(checkGM(message)) cmdExecute(message.channel, message.content.substr(8 + stats.prefix.length), "player:" + message.author.id, "role:host");
     break;

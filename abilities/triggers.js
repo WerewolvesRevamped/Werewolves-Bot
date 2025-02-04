@@ -854,21 +854,6 @@ module.exports = function() {
     }
     
     /**
-    Command: $emit <trigger type>
-    Manually emits a certain trigger type
-    **/
-    this.cmdEmit = async function(channel, argsX) {
-        console.log(`Emitting a ${argsX[0]} event.`);
-        let evt = toTitleCase(argsX.join(" "));
-        switch(argsX[0]) {
-            default: await triggerHandler(evt); break;
-            case "start": await eventStarting(); break;
-            case "sday": await eventStartDay(); break;
-            case "snight": await eventStartNight(); break;
-        }
-    }
-    
-    /**
     Get prompt type
     returns whether to use an immediate or an end phase prompt, as well as wether the prompt is forced
     **/

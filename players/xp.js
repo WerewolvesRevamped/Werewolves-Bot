@@ -108,7 +108,8 @@ module.exports = function() {
     Get XP Gain
     **/
     this.getXPGain = function() {
-        return Math.floor(Math.random() * 10) + 1;
+        let xpgain = Math.floor(Math.random() * 10) + 1;
+        return xpgain;
     }
     
 }
