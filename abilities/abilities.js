@@ -232,11 +232,10 @@ module.exports = function() {
 
     /**
     Ability Log
-    logs a message in the ability log. WIP: dont hardcode
     **/
     this.abilityLog = function(msg) {
         let ch = mainGuild.channels.cache.get(config.log);
-        if(ch) ch.send(msg);
+        if(ch && msg && msg.length > 0) ch.send(msg);
     }
     
     /**
