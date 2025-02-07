@@ -5,6 +5,7 @@
     "channel": "CHANNEL ID",
     "log": "CHANNEL ID",
     "action_log": "CHANNEL ID",
+    "coins": true,
 	"db": {
 		"host": "localhost",
 		"user": "USER",

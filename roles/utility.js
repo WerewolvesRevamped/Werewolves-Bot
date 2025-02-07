@@ -47,30 +47,34 @@ module.exports = function() {
     this.getRoleData = async function(roleName, rClass, rCategory, rTeam, authorId = null) {
             
         // get the right folder
-        var url = iconBaseUrl(authorId);
-        if(rClass == "solo") url += `Solo/${toTitleCase(rTeam)}`;
-        else url += `${toTitleCase(rClass)}/${toTitleCase(rCategory)}`;
-        // add file name
-        url += `/${toTitleCase(roleName)}.png`;
-        // replace spaces
-        url = url.replace(/ /g, "%20")
-        url += `?version=${stats.icon_version}`;
+        var url = iconBaseUrl(authorId, roleName);
+        var urlPack = isUrlPack(authorId, roleName);
+        console.log(url);
         
-        // check if the role img exists
-        let urlExists = await checkUrlExists(url);
-         // if the url doesnt exist, use a placeholder
-        if(!urlExists) {
-            let lutval = applyLUT(roleName);
-            if(lutval) { // check lut
-                url = `${iconBaseUrl(authorId)}${lutval}.png`;
-            } else {
-                console.log("MISSING URL", url);
-                let classesWithPlaceholders = ["townsfolk","werewolf","unaligned","solo"]; // list of classes with a specific placeholder icon
-                let placeholderName = classesWithPlaceholders.includes(rClass) ? toTitleCase(rClass) : "Unaligned"; // if no specific placeholder icon exists default to UA
-                url = `${iconBaseUrl(authorId)}Placeholder/${placeholderName}.png?version=${stats.icon_version}`; // construct placeholder url
+        if(!urlPack) {
+            if(rClass == "solo") url += `Solo/${toTitleCase(rTeam)}`;
+            else url += `${toTitleCase(rClass)}/${toTitleCase(rCategory)}`;
+            // add file name
+            url += `/${toTitleCase(roleName)}.png`;
+            // replace spaces
+            url = url.replace(/ /g, "%20")
+            url += `?version=${stats.icon_version}`;
+            
+            // check if the role img exists
+            let urlExists = await checkUrlExists(url);
+             // if the url doesnt exist, use a placeholder
+            if(!urlExists) {
+                let lutval = applyLUT(roleName);
+                if(lutval) { // check lut
+                    url = `${iconBaseUrl(authorId, roleName)}${lutval}.png`;
+                } else {
+                    console.log("MISSING URL", url);
+                    let classesWithPlaceholders = ["townsfolk","werewolf","unaligned","solo"]; // list of classes with a specific placeholder icon
+                    let placeholderName = classesWithPlaceholders.includes(rClass) ? toTitleCase(rClass) : "Unaligned"; // if no specific placeholder icon exists default to UA
+                    url = `${iconBaseUrl(authorId, roleName)}Placeholder/${placeholderName}.png?version=${stats.icon_version}`; // construct placeholder url
+                }
             }
         }
-        
         // get color
         let color = getTeamColor(rTeam);
         

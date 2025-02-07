@@ -30,7 +30,7 @@ module.exports = function() {
     /**
     Command: $packs list_all
     **/
-    this.AVAILABLE_PACKS = ["glitch","negate","grayscale","edge","emboss","silhouette","pixel","pixel2","pixel3","pixel4","scatter","red","green","blue","yellow","purple","cyan","flip","pale","bw","wire","wire2","rainbow","rainbow2","rainbow3","ts","oil","wave","swirl","noise","cycle","equalize","fourier_noise","fourier_equalize","fourier_oil","fourier_modulate","fourier_wire","glitch2","eyes","thief","mask","eye","fourier_eye","citizen_eye","items","bear","wolfify","grid","light_and_shadow","duo_color","wood","coin","coin_animated", "glitch_animated","wave_animated","spin","rainbow_animated","fourier_merge","fourier_magnitude","fourier_phase","fourier_crop","fourier_crop2","cloud","swirl_animated"];
+    this.AVAILABLE_PACKS = ["glitch","negate","grayscale","edge","emboss","silhouette","pixel","pixel2","pixel3","pixel4","scatter","red","green","blue","yellow","purple","cyan","flip","pale","bw","wire","wire2","rainbow","rainbow2","rainbow3","ts","oil","wave","swirl","noise","cycle","equalize","fourier_noise","fourier_equalize","fourier_oil","fourier_modulate","fourier_wire","glitch2","eyes","thief","mask","eye","fourier_eye","citizen_eye","items","bear","wolfify","grid","light_and_shadow","duo_color","wood","coin","coin_animated", "glitch_animated","wave_animated","spin","rainbow_animated","fourier_merge","fourier_magnitude","fourier_phase","fourier_crop","fourier_crop2","cloud","swirl_animated","pokemon"];
     this.ANIMATED_PACKS = [53, 54, 55, 56, 57];
     this.cmdPacksListAll = function(channel) {
         let packs1 = [`${getEmoji('pack_default')} Default - 0`], packs2 = [], packs3 = [], packs4 = [], packs5 = [], packs6 = [];
@@ -220,6 +220,7 @@ module.exports = function() {
     this.cachePacks = async function() {
         let packs = await sqlProm("SELECT * FROM packs");
         packCache = packs.map(el => [el.player, + el.pack]);
+        packs.forEach(el => cachePackURLLUT(AVAILABLE_PACKS[(+el.pack) - 1]));
     }
 
     /**
@@ -234,18 +235,40 @@ module.exports = function() {
     /**
     Get Icon Base Url
     **/
-    this.iconBaseUrl = function(id) {
+    this.iconBaseUrl = function(id, name = false) {
         if(!id) return iconRepoBaseUrl;
         let pack = getPack(id);
+        let pName = AVAILABLE_PACKS[pack - 1];
+        let urlLUT = getPackURLLUT(pName);
         if(pack === 0) {
             return iconRepoBaseUrl;
         } else if(ANIMATED_PACKS.includes(pack)) {
-            let pName = AVAILABLE_PACKS[pack - 1];
             let url = skinpackUrl(pName);
             return url.replace(/\.php/, ".gif");
+        } else if(urlLUT && urlLUT.length > 0 && name) {
+            let filtered = urlLUT.filter(el => el[0] == name.toLowerCase());
+            if(filtered.length === 1) {
+                return filtered[0][1];
+            } else {
+                return skinpackUrl(pName);
+            }
         } else {
-            let pName = AVAILABLE_PACKS[pack - 1];
             return skinpackUrl(pName);
+        }
+    }
+    
+    this.isUrlPack = function(id, name) {
+        if(!id) return false;
+        let pack = getPack(id);
+        let pName = AVAILABLE_PACKS[pack - 1];
+        let urlLUT = getPackURLLUT(pName);
+        if(urlLUT && urlLUT.length > 0 && name) {
+            let filtered = urlLUT.filter(el => el[0] == name.toLowerCase());
+            if(filtered.length === 1) {
+                return true;
+            } else {
+                return false;
+            }
         }
     }
     
@@ -261,7 +284,7 @@ module.exports = function() {
             let pName = AVAILABLE_PACKS[pack - 1];
             let lut = await getPackLUT(pName);
             for(let i = 0; i < lut.length; i++) {
-                txt = txt.replace(new RegExp("(?<!\\<\\?)" + lut[i][0] + "(?!\\:\\>)", 'g'), lut[i][1]);
+                txt = txt.replace(new RegExp("(?<!\\<\\?|[a-zA-Z])" + lut[i][0] + "(?!\\:\\>|[a-zA-Z])", 'g'), lut[i][1]);
             }
             return txt;
         }
@@ -298,6 +321,40 @@ module.exports = function() {
         } else {
             await cachePackLUT(pack);
             return await getPackLUT(pack);
+        }
+    }
+    
+    /**
+    Cache Pack URL LUT
+    **/
+    this.packURLLUTs = {}
+    this.cachePackURLLUT = async function(pack) {
+        let url = `${website}cards/UrlPacks/${pack}.csv`;
+        let urlExists = await checkUrlExists(url);
+        if(urlExists) {
+            const body = await fetchBody(url);
+            if(body) {
+                packURLLUTs[pack] = [];
+                body.split("\n").filter(el => el && el.length).map(el => el.split(",")).forEach(el => packURLLUTs[pack].push([el[0] ?? "-", (el[1] ?? "").trim()]) );
+                body.split("\n").filter(el => el && el.length).map(el => el.split(",")).forEach(el => packURLLUTs[pack].push([(el[0] ?? "-").toLowerCase(), ((el[1] ?? "").trim())]) );
+                console.log(`Cached ${pack} pack URL LUT`);
+            }
+        } else {
+            packURLLUTs[pack] = true;
+        }
+    }
+    
+    /**
+    Returns a Pack URL LUT (caching it if necessary)
+    **/
+    this.getPackURLLUT = function(pack) {
+        if(packURLLUTs[pack] && packURLLUTs[pack] === true) {
+            return [];
+        } else if(packURLLUTs[pack]) {
+            return packURLLUTs[pack];
+        } else {
+            cachePackURLLUT(pack);
+            return [];
         }
     }
     

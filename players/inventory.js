@@ -242,6 +242,11 @@ module.exports = function() {
 		} 
         let code = item[0][0];
         
+        if(code.substr(0, 4).toLowerCase() === "spec") { 
+			message.channel.send("⛔ Command error. Cannot recycle special type items."); 
+			return;   
+        }
+        
         // get item count
         let count = await inventoryGetItem(message.author.id, code);
         if(count <= 0) {

@@ -186,7 +186,7 @@ client.on("messageCreate", async message => {
         return;
     }
     
-    if(!message.author.bot && message.reference && message.mentions.repliedUser === null && message.type === 0) {
+    if(!message.author.bot && message.reference && message.mentions.repliedUser === null && message.type === 0 && isParticipant(message.member)) {
 		cmdWebhook(message.channel, message.member, ["**Forwarded Message**","\n*<@" + message.author.id + "> You're not allowed to forward messages during the game!*"]);
         message.delete();
     }
@@ -230,7 +230,7 @@ client.on("messageCreate", async message => {
     }
     
     /* Counts messages, again **/
-    if(!message.author.bot && message.content.indexOf(stats.prefix) !== 0) {
+    if(!message.author.bot && message.content.indexOf(stats.prefix) !== 0 && config.coins) {
         let countActivity = false;
         // check if treshold is hit
         let ACTIVITY_TRESHHOLD = 50;
@@ -246,7 +246,7 @@ client.on("messageCreate", async message => {
         }
         // count activity
         // check for a players longest message within a 5 minute period, then award XP based on that
-        if(countActivity) {
+        if(countActivity && config.coins) {
             let curTime = xpGetTime(); // current time in 5m intervals
             let activity = await sqlPromEsc("SELECT * FROM activity WHERE player=", message.author.id);
             if(activity && activity.length > 0) {
@@ -259,7 +259,7 @@ client.on("messageCreate", async message => {
                     let randChance = Math.random();
                     if(reqXpLevelup && reqXpLevelup <= ((+activity[0].count) + 1) && randChance < 0.25 && !((isParticipant(message.member) || isHost(message.member)) && stats.gamephase == gp.INGAME)) {
                         console.log(`Level Up for ${message.member.displayName} to Level ${newLevel}!`);
-                        await sleep(300000); // delay level up by 30s
+                        await sleep(3000); // delay level up by 30s
                         await sqlPromEsc("UPDATE activity SET level=level+1 WHERE player=", message.author.id);
                         let coinsReward = newLevel * 5;
                         await modifyCoins(message.author.id, coinsReward);
@@ -267,7 +267,7 @@ client.on("messageCreate", async message => {
                         embed.thumbnail = { url: iconRepoBaseUrl + "Extras/Ascension.png" };
                         // Level Up Reward
                         let newLevelString = newLevel + "";
-                        if(newLevel % 5 === 0 || newLevel === 16 || newLevel === 18) {
+                        if(newLevel % 5 === 0 || newLevel === 16 || newLevel === 18 || newLevel === 7) {
                             let boxRewards = [null, null, null, [0], [0,1], null, [0,2], [0,1,2], [0,1,3], [0,1,2,3], null, [0,3], [0,2,3], [1], [1,2], null, [1,3], [1,2,3], [2], [2,3], [3]];
                             let re = boxRewards[Math.floor(newLevel / 5)];
                             // Standard Box Reward
@@ -277,7 +277,7 @@ client.on("messageCreate", async message => {
                                 message.channel.send({ embeds: [ embed ] });
                                 await openBox(message.channel, message.author.id, null, re);
                                 await inventoryModifyItem(message.author.id, "SPEC:Any", 1);
-                            } else if(re && newLevel != 16 && newLevel != 18) {
+                            } else if(re && newLevel != 16 && newLevel != 18 && newLevel != 7) {
                                 let boxName = re.map(el => tierNames[el].toLowerCase()).join(" or ");
                                 embed.description += `\n\nAdditionally, you get a free loot box with a guaranteed ${boxName} tier reward.`;
                                 message.channel.send({ embeds: [ embed ] });
@@ -871,11 +871,19 @@ client.on("messageCreate", async message => {
     case "host_information":
 		if(checkGM(message)) cmdHostInformation(message.channel, args);
     break;
-    /* Host Information */
+    /* Skinpacks */
     case "packs":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
 		cmdPacks(message, args);
     break;
     case "temp":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
         let tempPerms = await inventoryGetItem(message.author.id, "bot:temp");
         if(tempPerms === 0) {
             message.channel.send(`⛔ You have not unlocked the ${stats.prefix}temp command.`);
@@ -884,18 +892,38 @@ client.on("messageCreate", async message => {
         cmdTemp(message, args);
     break;
     case "reverseme":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
         cmdReverseme(message);
     break;
 	case "newship":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
         cmdNewship(message);
 	break;
 	case "newhate":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
         cmdNewhate(message);
 	break;
 	case "flip":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
         cmdFlip(message);
 	break;
 	case "fortune":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
         cmdFortune(message, args);
 	break;
     case "time":
@@ -905,12 +933,24 @@ client.on("messageCreate", async message => {
 		if(checkGM(message)) cmdChooser(message, args);
     break;
     case "loot":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
 		cmdLoot(message);
     break;
     case "loot_force":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
 		if(checkGM(message)) cmdLootForce(message, args);
     break;
     case "xp":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
         if(isParticipant(message.member) && stats.gamephase != gp.POSTGAME) {
             message.channel.send(`⛔ You cannot use this command while ingame.`);
             break;
@@ -918,9 +958,17 @@ client.on("messageCreate", async message => {
 		cmdXP(message, args);
     break;
     case "coins":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
 		cmdCoins(message, args);
     break;
     case "inventory":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
         if((isSignedUp(message.member) || isParticipant(message.member)) && stats.gamephase != gp.POSTGAME) {
             message.channel.send(`⛔ You cannot use this command while signed up or ingame.`);
             break;
@@ -928,9 +976,17 @@ client.on("messageCreate", async message => {
 		cmdInventory(message, args);
     break;
     case "market":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
 		cmdMarket(message, args);
     break;
     case "icon":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
         if(isParticipant(message.member) && stats.gamephase != gp.POSTGAME) {
             message.channel.send(`⛔ You cannot use this command while ingame.`);
             break;
@@ -938,15 +994,31 @@ client.on("messageCreate", async message => {
 		cmdIcon(message, args);
     break;
     case "death_message":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
 		cmdDeathMessage(message, args);
     break;
     case "booster":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
 		cmdBooster(message, args);
     break;
     case "recycle":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
 		cmdRecycle(message, args);
     break;
     case "nickname":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
 		cmdNickname(message, argsX);
     break;
 	/* Invalid Command */
