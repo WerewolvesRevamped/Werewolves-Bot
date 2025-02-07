@@ -68,6 +68,7 @@ client.on("ready", async () => {
         cacheDR();
         cachePollMessages();
         cachePacks();
+        getEmojis();
 		global.client.guilds.fetch(stats.log_guild).then(guild => {
 			guild.members.fetch().then((members) => {
                 //members.forEach(el => console.log(el.user.id));
@@ -259,7 +260,7 @@ client.on("messageCreate", async message => {
                     let randChance = Math.random();
                     if(reqXpLevelup && reqXpLevelup <= ((+activity[0].count) + 1) && randChance < 0.25 && !((isParticipant(message.member) || isHost(message.member)) && stats.gamephase == gp.INGAME)) {
                         console.log(`Level Up for ${message.member.displayName} to Level ${newLevel}!`);
-                        await sleep(300000); // delay level up by 30s
+                        await sleep(3000); // delay level up by 30s
                         await sqlPromEsc("UPDATE activity SET level=level+1 WHERE player=", message.author.id);
                         let coinsReward = newLevel * 5;
                         await modifyCoins(message.author.id, coinsReward);
@@ -267,7 +268,7 @@ client.on("messageCreate", async message => {
                         embed.thumbnail = { url: iconRepoBaseUrl + "Extras/Ascension.png" };
                         // Level Up Reward
                         let newLevelString = newLevel + "";
-                        if(newLevel % 5 === 0 || newLevel === 16 || newLevel === 18) {
+                        if(newLevel % 5 === 0 || newLevel === 16 || newLevel === 18 || newLevel === 7) {
                             let boxRewards = [null, null, null, [0], [0,1], null, [0,2], [0,1,2], [0,1,3], [0,1,2,3], null, [0,3], [0,2,3], [1], [1,2], null, [1,3], [1,2,3], [2], [2,3], [3]];
                             let re = boxRewards[Math.floor(newLevel / 5)];
                             // Standard Box Reward
@@ -277,7 +278,7 @@ client.on("messageCreate", async message => {
                                 message.channel.send({ embeds: [ embed ] });
                                 await openBox(message.channel, message.author.id, null, re);
                                 await inventoryModifyItem(message.author.id, "SPEC:Any", 1);
-                            } else if(re && newLevel != 16 && newLevel != 18) {
+                            } else if(re && newLevel != 16 && newLevel != 18 && newLevel != 7) {
                                 let boxName = re.map(el => tierNames[el].toLowerCase()).join(" or ");
                                 embed.description += `\n\nAdditionally, you get a free loot box with a guaranteed ${boxName} tier reward.`;
                                 message.channel.send({ embeds: [ embed ] });
