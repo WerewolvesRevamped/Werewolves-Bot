@@ -48,7 +48,14 @@ module.exports = function() {
     **/
     this.cmdBoosterActive = async function(message) {
         let boosters = await sqlProm("SELECT * FROM active_boosters");
-        boosters =  boosters.map(el => `x${el.multiplier} Booster - <@${el.creator}> - ${Math.floor((new Date((+el.end_time) * 1000) - new Date()) / 1000 / 60)}m left`);
+        boosters =  boosters.map(el => {
+            let name = "";
+            switch(el.type) {
+                case "XP": name = `x${el.multiplier} XP Booster`; break;
+                case "LUCK": name = `${luckBoosterNames[(+el.multiplier)-1]} Luck Booster`; break;
+            }
+            return `${name} - <@${el.creator}> - ${Math.floor((new Date((+el.end_time) * 1000) - new Date()) / 1000 / 60)}m left`
+        });
         
         // no boosters
         if(boosters.length === 0) {
@@ -66,6 +73,8 @@ module.exports = function() {
     /**
     Command: $booster use
     **/
+    this.luckBoosterNames = ["Slight", "Decent", "Significant"];
+    this.luckBoosterNames2 = ["Slightly", "Decently", "Significantly"];
     this.cmdBoosterUse = async function(message, args) {
         if(!args[1]) { 
 			message.channel.send("⛔ Syntax error. Not enough arguments!");
@@ -93,20 +102,28 @@ module.exports = function() {
 
         let cSplit = [code.substr(4,2), code.substr(6)], embed = null;
         switch(cSplit[0]) {
-            case "xp":
+            case "xp": {
                 let xpAdd = Math.ceil((+cSplit[1]) / XP_MULTIPLIER);
                 await sqlPromEsc("UPDATE activity SET count=count+" + connection.escape(xpAdd) + " WHERE player=", message.author.id);
                 embed = { title: "Boosters", description: `<@${message.member.id}>, you have used your booster to gain ${cSplit[1]} XP.`, color: 5490704 };
                 message.channel.send({ embeds: [ embed ] });
-            break;
-            case "gl":
+            } break;
+            case "gl": {
                 let multiplier = cSplit[1].substr(0, 1).replace("x","10").replace("n","-1");
                 let duration = + cSplit[1].substr(1);
                 let endTime = Math.floor((+new Date()) / 1000) + duration * 60 * 60;
-                await sqlProm("INSERT INTO active_boosters (multiplier, end_time, creator) VALUES (" + connection.escape(multiplier) + "," + connection.escape(endTime) + "," + connection.escape(message.author.id) + ")");
-                embed = { title: "Boosters", description: `<@${message.member.id}>, you have activated a booster to multiply all gained XP by \`${multiplier}\` for the next \`${duration}\` hours for everyone.`, color: 5490704 };
+                await sqlProm("INSERT INTO active_boosters (multiplier, end_time, creator, type) VALUES (" + connection.escape(multiplier) + "," + connection.escape(endTime) + "," + connection.escape(message.author.id) + ",'XP')");
+                embed = { title: "Boosters", description: `<@${message.member.id}>, you have activated a booster to multiply all gained XP by \`${multiplier}\` for the next \`${duration}\` hour(s) for everyone.`, color: 5490704 };
                 message.channel.send({ embeds: [ embed ] });
-            break;
+            } break;
+            case "lu": {
+                let multiplier = + cSplit[1].substr(0, 1);
+                let duration = + cSplit[1].substr(1);
+                let endTime = Math.floor((+new Date()) / 1000) + duration * 60 * 60;
+                await sqlProm("INSERT INTO active_boosters (multiplier, end_time, creator, type) VALUES (" + connection.escape(multiplier) + "," + connection.escape(endTime) + "," + connection.escape(message.author.id) + ",'LUCK')");
+                embed = { title: "Boosters", description: `<@${message.member.id}>, you have activated a booster to improve everyones luck \`${luckBoosterNames2[multiplier-1].toLowerCase()}\` for the next \`${duration}\` hour(s).`, color: 5490704 };
+                message.channel.send({ embeds: [ embed ] });
+            } break;
             default:
                 message.channel.send("⛔ Booster error. Unknown booster type."); 
             break;
@@ -120,12 +137,27 @@ module.exports = function() {
         let nowTime = Math.floor((+new Date()) / 1000);
         await sqlPromEsc("DELETE FROM active_boosters WHERE end_time <", nowTime);
         
-        let boosters = await sqlProm("SELECT multiplier FROM active_boosters");
+        let boosters = await sqlProm("SELECT multiplier FROM active_boosters WHERE type='XP'");
         let multiplier = 1;
         for(let i = 0; i < boosters.length; i++) {
             multiplier *= boosters[i].multiplier;
         }
         return multiplier;
+    }
+    
+    /**
+    Get booster luck
+    **/
+    this.getBoosterLuck = async function() {
+        let nowTime = Math.floor((+new Date()) / 1000);
+        await sqlPromEsc("DELETE FROM active_boosters WHERE end_time <", nowTime);
+        
+        let boosters = await sqlProm("SELECT multiplier FROM active_boosters WHERE type='LUCK'");
+        let boost = 0;
+        for(let i = 0; i < boosters.length; i++) {
+            boost += boosters[i].multiplier;
+        }
+        return boost;
     }
     
     

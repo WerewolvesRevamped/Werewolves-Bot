@@ -75,7 +75,7 @@ module.exports = function() {
 			channel.send("⛔ Syntax error. `" + args[1] + "` is not a valid player!"); 
 			return; 
 		} 
-        await cmdInventorySee(channel, user);
+        await cmdInventorySee(channel, user, null);
     }
     
     /**
@@ -187,14 +187,16 @@ module.exports = function() {
     /**
     Command: $inventory see
     **/
-    this.cmdInventorySee = async function(channel, user) {
-                
-        let items = await sqlPromEsc("SELECT * FROM inventory WHERE player=", user);
+    this.cmdInventorySee = async function(channel, user, stash = false, returnEmbed = false) {
+        let stashQ = "";
+        if(stash !== null) stashQ = "stashed=" + (stash ? "1" : "0") + " AND ";
+        let items = await sqlPromEsc("SELECT * FROM inventory WHERE " + stashQ + "player=", user);
         items = items.map(el => [el.count, el.item.toUpperCase(), ALL_LOOT.filter(el2 => el2[0].toLowerCase() === el.item)[0]]);
         
         // no items
         if(items.length === 0) {
             let embed = { title: "Inventory", description: `<@${user}>, your inventory is currently empty!`, color: 8984857 };
+            if(returnEmbed) return embed;
             channel.send({ embeds: [ embed ] });
             return;
         }
@@ -205,17 +207,19 @@ module.exports = function() {
             let half = Math.ceil(items.length / 2);
             for(let i = 0; i < half; i++) items1.push(`• ${items[i][2][1]} x${items[i][0]} (\`${items[i][1]}\`)`);
             if(items.length > 1) for(let i = half; i < items.length; i++) items2.push(`• ${items[i][2][1]} x${items[i][0]} (\`${items[i][1]}\`)`);
-            let embed = { title: "Inventory", description: `<@${user}>, here is your current inventory:`, color: 8984857, fields: [ {}, {} ] };
+            let embed = { title: "Inventory", description: `<@${user}>, here is your current ${stash===true?'stash':'inventory'}:`, color: 8984857, fields: [ {}, {} ] };
             embed.fields[0] = { name: "_ _", "value": items1.join("\n"), inline: true };
             embed.fields[1] = { name: "_ _", "value": items2.join("\n"), inline: true };
             embed.thumbnail = { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` };
+            if(returnEmbed) return embed;
             channel.send({ embeds: [ embed ] });
         } else { // <=10 items
             // format item list
             let itemsTxt = [];
             for(let i = 0; i < items.length; i++) itemsTxt.push(`• ${items[i][2][1]} x${items[i][0]} (\`${items[i][1]}\`)`);
-            let embed = { title: "Inventory", description: `<@${user}>, here is your current inventory:\n\n` + itemsTxt.join("\n"), color: 8984857 };
+            let embed = { title: "Inventory", description: `<@${user}>, here is your current ${stash===true?'stash':'inventory'}:\n\n` + itemsTxt.join("\n"), color: 8984857 };
             embed.thumbnail = { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` };
+            if(returnEmbed) return embed;
             channel.send({ embeds: [ embed ] });
         }
     }
@@ -266,6 +270,84 @@ module.exports = function() {
         cmdCoinsModify(message.channel, ["add", message.author.id, val], "add", 1, true);
         
         message.channel.send(`✅ Recycled ${item[0][1]} (${code.toUpperCase()}) for ${val} coins!`);
+    }
+    
+    /**
+    Command: $stash
+    **/
+    this.cmdStash = async function(message, args) {
+        let stashPerms = await inventoryGetItem(message.author.id, "bot:stash");
+        if(stashPerms === 0) {
+            message.channel.send(`⛔ You have not unlocked the ${stats.prefix}stash command.`);
+            return;
+        }
+        if(!args[0]) {
+            message.channel.send("⛔ Syntax error. Not enough parameters!");
+            return;
+        }
+        
+        if(args[0] === "list" || args[0] === "show") {
+            let embed = await cmdInventorySee(message.channel, message.member.id, true, true);
+            message.member.user.send({embeds: [ embed ]});
+            return;
+        }
+        
+        // Get item
+        let item = ALL_LOOT.filter(el => el[0].toLowerCase() === args[0].toLowerCase());
+        // Invalid item
+		if(item.length != 1) { 
+			message.channel.send("⛔ Command error. Not a valid item! Make sure to use the item code as specified in your inventory."); 
+			return; 
+		} 
+        let code = item[0][0];
+        
+        // get item count
+        let count = await inventoryGetItem(message.author.id, code);
+        if(count <= 0) {
+			message.channel.send("⛔ Command error. Insufficient item count! Check your inventory to make sure you have this item."); 
+			return; 
+        }
+        
+        // update item count
+        await inventoryModifyItemVisibility(message.author.id, code, 1);
+        
+        message.channel.send("✅ Stashed!").then(m => m.delete());
+    }
+    
+    /**
+    Command: $unstash
+    **/
+    this.cmdUnstash = async function(message, args) {
+        let stashPerms = await inventoryGetItem(message.author.id, "bot:stash");
+        if(stashPerms === 0) {
+            message.channel.send(`⛔ You have not unlocked the ${stats.prefix}unstash command.`);
+            return;
+        }
+        if(!args[0]) {
+            message.channel.send("⛔ Syntax error. Not enough parameters!");
+            return;
+        }
+        
+        // Get item
+        let item = ALL_LOOT.filter(el => el[0].toLowerCase() === args[0].toLowerCase());
+        // Invalid item
+		if(item.length != 1) { 
+			message.channel.send("⛔ Command error. Not a valid item! Make sure to use the item code as specified in your inventory."); 
+			return; 
+		} 
+        let code = item[0][0];
+        
+        // get item count
+        let count = await inventoryGetItem(message.author.id, code);
+        if(count <= 0) {
+			message.channel.send("⛔ Command error. Insufficient item count! Check your inventory to make sure you have this item."); 
+			return; 
+        }
+        
+        // update item count
+        await inventoryModifyItemVisibility(message.author.id, code, 0);
+        
+        message.channel.send(`✅ Unstashed ${item[0][1]} (${code.toUpperCase()})!`);
     }
     
     /**
@@ -464,6 +546,14 @@ module.exports = function() {
                 return itemCount[0].count + count;
             }
         }
+    }
+    
+    /**
+    Modifies item visibility in inventory
+    **/
+    this.inventoryModifyItemVisibility = async function(pid, item, visibility) {
+        item = item.toLowerCase();
+        await sqlPromEsc("UPDATE inventory SET stashed=" + connection.escape(visibility) + " WHERE item=" + connection.escape(item) + " AND player=", pid);
     }
     
     /**

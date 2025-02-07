@@ -284,7 +284,7 @@ module.exports = function() {
             let pName = AVAILABLE_PACKS[pack - 1];
             let lut = await getPackLUT(pName);
             for(let i = 0; i < lut.length; i++) {
-                txt = txt.replace(new RegExp("(?<!\\<\\?|[a-zA-Z])" + lut[i][0] + "(?!\\:\\>|[a-zA-Z])", 'g'), lut[i][1]);
+                txt = txt.replace(new RegExp("(?<!\\<\\?|[a-zA-Z])" + lut[i][0] + "(?!\\:\\>|[a-rt-zA-Z])", 'g'), lut[i][1]);
             }
             return txt;
         }

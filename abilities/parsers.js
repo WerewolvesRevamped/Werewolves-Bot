@@ -21,6 +21,11 @@ module.exports = function() {
             selectorType = additionalTriggerData.selection_type;
         } else if(selectorTarget === "@secondaryselection") {
             selectorType = additionalTriggerData.secondaryselection_type;
+        } else if(selectorTarget === "@target") {
+            let target = await getTarget(self);
+            if(!target) selectorType = "null";
+            selectorType = srcToType(target);
+            console.log(`Inferred target type as ${selectorType} from ${target}`);
         }
         // switch through types
         switch(selectorType) {

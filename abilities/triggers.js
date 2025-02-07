@@ -258,6 +258,7 @@ module.exports = function() {
             // get all players
             sql("SELECT role,id FROM players WHERE type='player' AND alive=1", async r => {
                 // get their role's data
+                r = shuffleArray(r);
                 for(let pr of r) {
                     await triggerHandlerPlayer(pr, triggerName, additionalTriggerData);
                 }
@@ -276,6 +277,7 @@ module.exports = function() {
             // get all players
             sql("SELECT players.id,active_attributes.ai_id,active_attributes.val1 AS role,active_attributes.val2 AS channel_id FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.alive=1 AND active_attributes.attr_type='role'", async r => {
                 // get their role's data
+                r = shuffleArray(r);
                 for(let pr of r) {
                     if(!pr || !pr.role) {
                         abilityLog(`❗ **Skipped Trigger:** Cannot find valid role for ${pr.id} #${i}.`);
@@ -300,6 +302,7 @@ module.exports = function() {
             // get all groups
             sql("SELECT name,channel_id FROM active_groups WHERE disbanded=0", async r => {
                 // get their groups's data
+                r = shuffleArray(r);
                 for(let pr of r) {
                     await triggerHandlerGroup(pr, triggerName, additionalTriggerData);
                 }
@@ -318,6 +321,7 @@ module.exports = function() {
             // get all teams
             sql("SELECT * FROM teams WHERE active=1", async r => {
                 // get their team's data
+                r = shuffleArray(r);
                 for(let pr of r) {
                     await triggerHandlerTeam(pr, triggerName, additionalTriggerData);
                 }
@@ -356,6 +360,7 @@ module.exports = function() {
             // get all players
             sql("SELECT active_attributes.ai_id,attributes.name,attributes.parsed FROM attributes INNER JOIN active_attributes ON attributes.name = active_attributes.val1 WHERE active_attributes.attr_type='custom' AND active_attributes.alive=1", async r => {
                 // no need for an extra layer for attributes due to JOIN which I forgot about previously!
+                r = shuffleArray(r);
                 for(let pr of r) {
                     if(!pr.parsed) continue;
                     let parsed = JSON.parse(pr.parsed);

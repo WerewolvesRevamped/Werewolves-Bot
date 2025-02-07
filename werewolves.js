@@ -718,7 +718,8 @@ client.on("messageCreate", async message => {
 	break;
 	/* Restart */ // Debug restart
 	case "reset_debug":
-		if(checkSafe(message)) cmdReset(message.channel, true);
+		//if(checkSafe(message)) cmdReset(message.channel, true);
+        message.channel.send("⛔ Command execution blocked. This command is currently not available.");
 	break;
 	/* Reset */ // Resets a game
 	case "reset":
@@ -1017,6 +1018,20 @@ client.on("messageCreate", async message => {
             return;
         }
 		cmdRecycle(message, args);
+    break;
+    case "stash":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
+		cmdStash(message, args);
+    break;
+    case "unstash":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
+		cmdUnstash(message, args);
     break;
     case "nickname":
         if(!config.coins) {
