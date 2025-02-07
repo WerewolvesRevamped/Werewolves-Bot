@@ -12,6 +12,29 @@ module.exports = function() {
         if(feedback.msg) channel.send(basicEmbed(feedback.msg, EMBED_GREEN));
         else if(feedback.success) channel.send(basicEmbed(feedback.success, EMBED_GREEN));
     }
+    
+    /**
+    Command: $emit <trigger type>
+    Manually emits a certain trigger type
+    **/
+    this.cmdEmit = async function(channel, argsX) {
+        console.log(`Emitting a ${argsX[0]} event.`);
+        let evt = toTitleCase(argsX.join(" "));
+        switch(argsX[0]) {
+            default: await triggerHandler(evt); break;
+            case "start": await eventStarting(); break;
+            case "sday": await eventStartDay(); break;
+            case "snight": await eventStartNight(); break;
+        }
+    }
+    
+    /**
+    Command: $src_emit <src> <trigger> <type>
+    **/
+    this.cmdSrcEmit = async function(channel, argsX) {
+        console.log(`Emitting a ${argsX[1]} event for ${argsX[0]}.`);
+        await trigger(argsX[0], argsX[1]);
+    }
 	
 	/**
     Command: $grant
@@ -51,5 +74,6 @@ module.exports = function() {
         if(feedback.msg) message.channel.send(basicEmbed(feedback.msg, EMBED_GREEN));
         else if(feedback.success) message.channel.send(basicEmbed(feedback.success, EMBED_GREEN));
 	}
+    
     
 }

@@ -272,6 +272,7 @@ module.exports = function() {
             case "cat":
             case "spec":
             case "bst":
+            case "rt":
                 await inventoryModifyItem(pid, reward[0], 1);
                 return true;
             // BOT / Icon / Death Message / Skinpack

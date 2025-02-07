@@ -260,7 +260,8 @@ module.exports = function() {
         let rand = Math.floor(Math.random() * 15);
         
         // determine coin value
-        let val = Math.floor((( (tierCoins[tierNames.indexOf(item[0][2])] ?? 500) * (1 / (item[0][3] ?? 1)) ) + rand) / 2);
+        let coinsA = (tierCoins[tierNames.indexOf(item[0][2])] ?? 500);
+        let val = Math.floor( (( coinsA * (1 / (item[0][3] ?? 1)) ) + coinsA + rand) / 4);
         // update coins
         cmdCoinsModify(message.channel, ["add", message.author.id, val], "add", 1, true);
         
@@ -285,7 +286,8 @@ module.exports = function() {
         let code = item[0][0];
 
         // determine coin value
-        let val = Math.floor((( (tierCoins[tierNames.indexOf(item[0][2])] ?? 500) * (1 / (item[0][3] ?? 1)) ) + 7) / 2);
+        let coinsA = (tierCoins[tierNames.indexOf(item[0][2])] ?? 500);
+        let val = Math.floor( (( coinsA * (1 / (item[0][3] ?? 1)) ) + coinsA + 7) / 4);
 
         channel.send(`✅ Evaluated ${code.toUpperCase()} to be worth ${val} coins!`);
     }

@@ -685,6 +685,7 @@ module.exports = function() {
 			getCCCats();
             cacheActiveCustomAttributes();
             cacheDR();
+            getEmojis();
 			message.channel.send("✅ Recached values!");
 		}, 30000);
         

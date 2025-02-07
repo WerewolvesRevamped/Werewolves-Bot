@@ -158,8 +158,11 @@ module.exports = function() {
 		if(!(isCC(channel) || isSC(channel) || isGameMaster(member, true) || isHelper(member))) {
 			channel.send("⛔ Command error. Can't use command outside a CC/SC!");
 			return;
-		} else if(!args[1] && spam == false) {
-			channel.send(helpCCs(member, ["cc", "create"]));
+		} else if(!args[2] && spam == false) {
+			channel.send(cmdHelp(channel, member, ["cc", "create"]));
+			return;
+		} else if(!args[1]) {
+			channel.send(cmdHelp(channel, member, ["cc", spam ? "spam" : "create"]));
 			return;
 		} else if(!spam && !isGameMaster(member, true) && !isHelper(member) && stats.cc_limit >= -10 && ccs.find(el => el.id == member.id).ccs >= stats.cc_limit) {
 			channel.send("⛔ You have hit the CC limit of `" + stats.cc_limit + "` CCs!");
