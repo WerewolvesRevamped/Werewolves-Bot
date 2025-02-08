@@ -296,7 +296,7 @@ module.exports = function() {
     **/
     this.packLUTs = {}
     this.cachePackLUT = async function(pack) {
-        let url = `${website}cards/ThemePacks/${pack}.csv`;
+        let url = `${themePackBase}${pack}.csv`;
         let urlExists = await checkUrlExists(url);
         if(urlExists) {
             const body = await fetchBody(url);
@@ -330,7 +330,7 @@ module.exports = function() {
     **/
     this.packURLLUTs = {}
     this.cachePackURLLUT = async function(pack) {
-        let url = `${website}cards/UrlPacks/${pack}.csv`;
+        let url = `${urlPackBase}${pack}.csv`;
         let urlExists = await checkUrlExists(url);
         if(urlExists) {
             const body = await fetchBody(url);

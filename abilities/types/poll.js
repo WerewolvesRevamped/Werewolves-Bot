@@ -59,16 +59,18 @@ module.exports = function() {
             case "manipulation":
                 duration = parseDuration(ability.duration ?? "untiluse");
                 let manipTarget = await parsePlayerSelector(ability.manip_target, src_ref, additionalTriggerData);
+                manipTarget = await applyRedirection(manipTarget, src_ref, ability.type, ability.subtype, additionalTriggerData);
                 let manipType = parseManipTypePoll(ability.manip_type);
-                result = await pollManipulation(src_name, src_ref, pollType, duration, manipTarget, manipType);
+                result = await pollManipulation(src_name, src_ref, pollType, duration, manipTarget, manipType, additionalTriggerData);
                 return result;
             break;
             case "votes":
                 duration = parseDuration(ability.duration ?? "untiluse");
                 let manipTarget2 = await parsePlayerSelector(ability.manip_target, src_ref, additionalTriggerData);
+                manipTarget2 = await applyRedirection(manipTarget2, src_ref, ability.type, ability.subtype, additionalTriggerData);
                 let manipType2 = parseManipTypeVotes(ability.manip_type);
                 let manipValue = await parseNumber(ability.manip_value, src_ref, additionalTriggerData);
-                result = await pollVotes(src_name, src_ref, pollType, duration, manipTarget2, manipType2, manipValue);
+                result = await pollVotes(src_name, src_ref, pollType, duration, manipTarget2, manipType2, manipValue, additionalTriggerData);
                 return result;
             break;
         }
@@ -95,8 +97,17 @@ module.exports = function() {
     /** PRIVATE
     Ability: Poll - Manipulation
     **/
-    async function pollManipulation(src_name, src_ref, pollType, duration, manipTarget, manipType) {
+    async function pollManipulation(src_name, src_ref, pollType, duration, manipTarget, manipType, additionalTriggerData) {
         for(let i = 0; i < manipTarget.length; i++) {
+            // handle visit
+            if(additionalTriggerData.parameters.visitless !== true) {
+                let result = await visit(src_ref, manipTarget[i], manipType, "poll", "manipulation");
+                if(result) {
+                    if(targets.length === 1) return visitReturn(result, "Poll manipulation failed!", "Poll manipulated!");
+                    continue;
+                }
+            }
+            
             await createPollDisqualificationAttribute(src_name, src_ref, pollType, duration, pollType, manipTarget[i], manipType);
             abilityLog(`✅ ${toTitleCase(pollType)} was manipulated to have <@${manipTarget[i]}> as \`${manipType}\`.`);
         }
@@ -106,8 +117,17 @@ module.exports = function() {
     /** PRIVATE
     Ability: Poll - Votes
     **/
-    async function pollVotes(src_name, src_ref, pollType, duration, manipTarget, manipType, manipValue) {
+    async function pollVotes(src_name, src_ref, pollType, duration, manipTarget, manipType, manipValue, additionalTriggerData) {
         for(let i = 0; i < manipTarget.length; i++) {
+            // handle visit
+            if(additionalTriggerData.parameters.visitless !== true) {
+                let result = await visit(src_ref, manipTarget[i], manipValue, "poll", "votes");
+                if(result) {
+                    if(targets.length === 1) return visitReturn(result, "Poll manipulation failed!", "Poll votes manipulated!");
+                    continue;
+                }
+            }
+            
             await createPollVotesAttribute(src_name, src_ref, pollType, duration, pollType, manipTarget[i], manipType, manipValue);
             abilityLog(`✅ ${toTitleCase(pollType)} was manipulated to have \`${manipValue}\` ${manipType} votes for <@${manipTarget[i]}>.`);
         }

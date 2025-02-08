@@ -44,4 +44,9 @@ module.exports = function() {
     **/
     this.website = "https://werewolves.me/";
     this.cardBaseUrl = `${website}cards/card.php?name=`;
+    /**
+    Packs
+    **/
+    this.themePackBase = `https://raw.githubusercontent.com/WerewolvesRevamped/Packs/refs/heads/main/Theme/`;
+    this.urlPackBase = `${website}cards/UrlPacks/`;
 }
