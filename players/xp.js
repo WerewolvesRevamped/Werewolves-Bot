@@ -112,4 +112,15 @@ module.exports = function() {
         return xpgain;
     }
     
+    // these words do not count towards the minimum word requirement for a message
+    let keywords = ["xp","level","levels","experience","yap","coins","leveling","lvls","lvl","coin", "levelling"] ;
+    
+    this.checkKeyword = function(msg) {
+        let spl = msg.toLowerCase().replace(/[^a-z ]/g,"").split(" ");
+        for(let i = 0; i < keywords.length; i++) {
+            if(spl.includes(keywords[i])) return true;
+        }
+        return false;
+    }
+    
 }

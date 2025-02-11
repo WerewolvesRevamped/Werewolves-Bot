@@ -245,15 +245,22 @@ client.on("messageCreate", async message => {
             lastChatterCharacters = message.content.toLowerCase().replace(/[^a-z]/g,"").replace(/(.)\1\1{1,}/g,"$1$1").length;
             if(lastChatterCharacters >= ACTIVITY_TRESHHOLD) countActivity = true;
         }
+        // current time in 5m intervals
+        let curTime = xpGetTime(); 
+        // filter out level up messages so we dont get double level ups
+        let sCheck = checkKeyword(message.content)
+        if(sCheck) {
+            await sqlPromEsc("UPDATE activity SET timestamp=timestamp+3 WHERE player=", message.author.id);
+        }
         // count activity
         // check for a players longest message within a 5 minute period, then award XP based on that
-        if(countActivity && config.coins) {
-            let curTime = xpGetTime(); // current time in 5m intervals
+        else if(countActivity && config.coins) {
             let activity = await sqlPromEsc("SELECT * FROM activity WHERE player=", message.author.id);
             if(activity && activity.length > 0) {
                 if(activity[0].timestamp < curTime) {
                     let multiplier = ((await getBoosterMultiplier()) * getXPGain());
                     // increment XP by 1, except when there's a multiplier active
+                    multiplier = checkKeyword(message.content, multiplier)
                     await sqlPromEsc("UPDATE activity SET count=count+" + connection.escape(multiplier) + ",timestamp=" + curTime + " WHERE player=", message.author.id);
                     let newLevel = (+activity[0].level) + 1;
                     let reqXpLevelup = LEVELS[newLevel];
