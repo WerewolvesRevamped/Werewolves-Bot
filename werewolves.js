@@ -259,8 +259,6 @@ client.on("messageCreate", async message => {
             if(activity && activity.length > 0) {
                 if(activity[0].timestamp < curTime) {
                     let multiplier = ((await getBoosterMultiplier()) * getXPGain());
-                    // increment XP by 1, except when there's a multiplier active
-                    multiplier = checkKeyword(message.content, multiplier)
                     await sqlPromEsc("UPDATE activity SET count=count+" + connection.escape(multiplier) + ",timestamp=" + curTime + " WHERE player=", message.author.id);
                     let newLevel = (+activity[0].level) + 1;
                     let reqXpLevelup = LEVELS[newLevel];
