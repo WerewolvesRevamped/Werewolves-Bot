@@ -1026,7 +1026,8 @@ module.exports = function() {
         if(!isSignedUp(member) && !isSub(member)) {
 			// Sign Up
 			channel.send("✳️ " + msg).then(message => {
-				message.react(args[0].replace(/<|>/g,"")).then(r => {
+                args[0] = args[0].replace(/<|>/g,"");
+				message.react(args[0]).then(r => {
 					sql("SELECT id FROM players WHERE emoji = " + connection.escape(args[0]), result => {
 						// Check if somebody is already signed up with this emoji
 						if(result.length > 0 || args[0] === "⛔" || args[0] === "❌") { 

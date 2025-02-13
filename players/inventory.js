@@ -51,9 +51,11 @@ module.exports = function() {
 		switch(args[0]) {
 			case "see": cmdMarketSee(message.channel, message.member.id); break;
             case "offer": cmdMarketOffer(message.channel, message.author.id, args); break;
+            case "eval": 
             case "evaluate": cmdMarketEvaluate(message.channel, args); break;
             case "buy": cmdMarketBuy(message.channel, message.author, args); break;
             case "get": cmdMarketGet(message.channel, message.author, args); break;
+            case "rem":
             case "remove": cmdMarketRemove(message.channel, message.author, args); break;
 			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
 		}
