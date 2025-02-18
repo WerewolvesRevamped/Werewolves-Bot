@@ -1095,7 +1095,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
     } catch (err) {
         return; // the reaction doenst exist
     }
-    console.log(reaction.emoji.name);
+    console.log(`${user.globalName ?? user.id} added ${reaction.emoji.name}`);
 	if(user.bot) return;
 	// Handle confirmation messages
 	else if(reaction.emoji.name === "✅" && isGameMaster(reaction.message.guild.members.cache.get(user.id))) {
@@ -1151,6 +1151,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
 client.on("messageReactionRemove", async (reaction, user) => {
     await reaction.fetch();
     await user.fetch();
+    console.log(`${user.globalName} removed ${reaction.emoji.name}`);
 	// reaction role
 	if(user.bot) return;
 	// Automatic unpinning

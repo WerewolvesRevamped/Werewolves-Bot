@@ -359,7 +359,7 @@ module.exports = function() {
         const pollName = pollData.name;
         const pollIsPublic = isPublic(channel);
         const pollPublicType = pollIsPublic ? "public" : "private";
-        console.log("POLL PUBLIC TYPE", pollIsPublic, pollPublicType);
+        console.log("CLOSE POLL", pollType, pollName, pollIsPublic, pollPublicType);
         
         // go through reactions
         let allReactions = [];
@@ -392,9 +392,11 @@ module.exports = function() {
             allReactions.push(...reformattedReactions);
         });
         
-        
         // await all promises
         await Promise.all(msgsProms);
+        
+        // all reactions
+        console.log("ALL REACTIONS", allReactions.map(el => `${el.emoji} ${el.count}`));
         
         // Find duplicate votes
 		let duplicateVoters = [];
@@ -426,7 +428,7 @@ module.exports = function() {
             const validVoters = voters.filter(el => duplicateVoters.indexOf(el.id) === -1);
             const invalidVoters = voters.filter(el => duplicateVoters.indexOf(el.id) != -1 && el != client.user.id);
             
-            console.log("All Voters", validVoters.map(el => el.globalName), invalidVoters.map(el => el.globalName));
+            console.log("All Voters", reac.users.map(el => el.globalName), validVoters.map(el => el.globalName), invalidVoters.map(el => el.globalName));
             
             // evaluate vote count
             let votesArray = [];
