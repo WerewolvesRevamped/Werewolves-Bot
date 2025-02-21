@@ -79,8 +79,6 @@ module.exports = function() {
         
         // create connection on other end
         connectionAdd(targetChannel.id, conName);
-        let embed2 = basicEmbed(`You are now being whispered to!`, EMBED_GREEN);
-        targetChannel.send(embed2);
         
         // create an attribute
         await createWhisperAttribute(src_name, src_ref, pid, dur_type, conName, whisperChannel.id, targetChannel.id);

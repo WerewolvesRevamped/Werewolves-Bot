@@ -983,6 +983,7 @@ module.exports = function() {
         // passive end actions
         await triggerHandler("Passive End Day");
         await triggerHandler("Passive End Phase");
+        await triggerHandler("Passive");
         
         // end of phase
         await attributeCleanup();
@@ -1014,6 +1015,9 @@ module.exports = function() {
         
         // handle killq
         await killqKillall();
+        
+        // passive
+        await triggerHandler("Passive");
         
         // immediate actions
         await triggerHandler("Immediate Night");
@@ -1083,6 +1087,7 @@ module.exports = function() {
         // passive end actions
         await triggerHandler("Passive End Night");
         await triggerHandler("Passive End Phase");
+        await triggerHandler("Passive");
         
         // end of phase
         await attributeCleanup();
@@ -1114,6 +1119,9 @@ module.exports = function() {
         
         // handle killq
         await killqKillall();
+        
+        // passive
+        await triggerHandler("Passive");
         
         // immediate actions
         await triggerHandler("Immediate Day");
