@@ -668,10 +668,13 @@ module.exports = function() {
         // handle action scaling
         const actionScaling = trigger?.parameters?.scaling ?? [];
         let actionCount = 1;
+        let actionCountChanged = false;
         let actionCountSuffix = "";
         for(const scaling of actionScaling) {
             let scalValue = await handleScaling(scaling);
             if(scalValue !== null) actionCount = scalValue;
+            if(scalValue === null && !actionCountChanged) actionCount = 0;
+            actionCountChanged = true;
         }
         let scalingMessage = "";
         if(actionCount > 1) scalingMessage = `\n\nYou may use your ability \`${actionCount}\` times. Please provide your choices for each use separated by newlines.`;

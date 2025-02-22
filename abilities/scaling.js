@@ -41,7 +41,7 @@ module.exports = function() {
                         if(comp > compTo) return quant;
                     break;
                 }
-                return 0;
+                return null;
             break;
             // DIVISION
             case "division":
