@@ -281,6 +281,7 @@ module.exports = function() {
                     return false;
                 }
                 let targets = await parseSelector(condition.target, src_ref, additionalTriggerData);
+                if(targets.value.length === 0) return false; // if no target at all, it cannot be part of anything
                 let selector = await parseSelector(condition.selector, src_ref, additionalTriggerData);
                 console.log("target", targets);
                 console.log("selector", selector);
