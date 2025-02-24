@@ -165,7 +165,7 @@ module.exports = function() {
                     dmsgText =  randMsgs[Math.floor(Math.random() * randMsgs.length)];
                 break;
                 case 7:
-                    dmsgText =  `It's horrible, but it seems % has died.`;
+                    dmsgText =  `It's horrible, but it seems %s has died.`;
                 break;
                 case 8:
                     dmsgText =  `%s is gone! 🦀`;

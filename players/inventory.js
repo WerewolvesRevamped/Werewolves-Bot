@@ -203,12 +203,26 @@ module.exports = function() {
             return;
         }
         
-        if(items.length > 10) { // >10 items
+        if(items.length > 20) { // >20 items
+            // format item list
+            let items1 = [], items2 = [], items3 = [];
+            let third = Math.ceil(items.length / 3);
+            for(let i = 0; i < third; i++) items1.push(`• ${items[i][2][1]} x${items[i][0]} (\`${items[i][1]}\`)`);
+            for(let i = third; i < third * 2; i++) items2.push(`• ${items[i][2][1]} x${items[i][0]} (\`${items[i][1]}\`)`);
+            for(let i = third * 2; i < items.length; i++) items3.push(`• ${items[i][2][1]} x${items[i][0]} (\`${items[i][1]}\`)`);
+            let embed = { title: "Inventory", description: `<@${user}>, here is your current ${stash===true?'stash':'inventory'}:`, color: 8984857, fields: [ {}, {}, {} ] };
+            embed.fields[0] = { name: "_ _", "value": items1.join("\n"), inline: true };
+            embed.fields[1] = { name: "_ _", "value": items2.join("\n"), inline: true };
+            embed.fields[2] = { name: "_ _", "value": items3.join("\n"), inline: true };
+            embed.thumbnail = { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` };
+            if(returnEmbed) return embed;
+            channel.send({ embeds: [ embed ] });
+        } else if(items.length > 10) { // >10 items
             // format item list
             let items1 = [], items2 = [];
             let half = Math.ceil(items.length / 2);
             for(let i = 0; i < half; i++) items1.push(`• ${items[i][2][1]} x${items[i][0]} (\`${items[i][1]}\`)`);
-            if(items.length > 1) for(let i = half; i < items.length; i++) items2.push(`• ${items[i][2][1]} x${items[i][0]} (\`${items[i][1]}\`)`);
+            for(let i = half; i < items.length; i++) items2.push(`• ${items[i][2][1]} x${items[i][0]} (\`${items[i][1]}\`)`);
             let embed = { title: "Inventory", description: `<@${user}>, here is your current ${stash===true?'stash':'inventory'}:`, color: 8984857, fields: [ {}, {} ] };
             embed.fields[0] = { name: "_ _", "value": items1.join("\n"), inline: true };
             embed.fields[1] = { name: "_ _", "value": items2.join("\n"), inline: true };
@@ -391,12 +405,54 @@ module.exports = function() {
             return;
         }
         
-        if(items.length > 10) { // >10 items
+        if(items.length > 40) { // >40 items
+            // format item list
+            let items1 = [], items2 = [], items3 = [], items4 = [], items5 = [];
+            let fifth = Math.ceil(items.length / 5);
+            for(let i = 0; i < fifth; i++) items1.push(`\`${items[i][0]}\` - ${items[i][4][1]} (${items[i][3]}) for ${items[i][1]} from ${items[i][2]}`);
+            for(let i = fifth; i < fifth * 2; i++) items2.push(`\`${items[i][0]}\` - ${items[i][4][1]} (${items[i][3]}) for ${items[i][1]} from ${items[i][2]}`);
+            for(let i = fifth * 2; i < fifth * 3; i++) items3.push(`\`${items[i][0]}\` - ${items[i][4][1]} (${items[i][3]}) for ${items[i][1]} from ${items[i][2]}`);
+            for(let i = fifth * 3; i < fifth * 4; i++) items4.push(`\`${items[i][0]}\` - ${items[i][4][1]} (${items[i][3]}) for ${items[i][1]} from ${items[i][2]}`);
+            for(let i = fifth * 4; i < items.length; i++) items5.push(`\`${items[i][0]}\` - ${items[i][4][1]} (${items[i][3]}) for ${items[i][1]} from ${items[i][2]}`);
+            let embed = { title: "Market", description: `Here are the current items on the market. Use '$market buy <Offer ID>' to purchase an item.`, color: 8984857, fields: [ {}, {}, {}, {}, {} ] };
+            embed.fields[0] = { name: "_ _", "value": items1.join("\n"), inline: true };
+            embed.fields[1] = { name: "_ _", "value": items2.join("\n"), inline: true };
+            embed.fields[2] = { name: "_ _", "value": items3.join("\n"), inline: true };
+            embed.fields[3] = { name: "_ _", "value": items4.join("\n"), inline: true };
+            embed.fields[4] = { name: "_ _", "value": items5.join("\n"), inline: true };
+            channel.send({ embeds: [ embed ] });
+        } else if(items.length > 30) { // >30 items
+            // format item list
+            let items1 = [], items2 = [], items3 = [], items4 = [];
+            let quarter = Math.ceil(items.length / 4);
+            for(let i = 0; i < quarter; i++) items1.push(`\`${items[i][0]}\` - ${items[i][4][1]} (${items[i][3]}) for ${items[i][1]} from ${items[i][2]}`);
+            for(let i = quarter; i < quarter * 2; i++) items2.push(`\`${items[i][0]}\` - ${items[i][4][1]} (${items[i][3]}) for ${items[i][1]} from ${items[i][2]}`);
+            for(let i = quarter * 2; i < quarter * 3; i++) items3.push(`\`${items[i][0]}\` - ${items[i][4][1]} (${items[i][3]}) for ${items[i][1]} from ${items[i][2]}`);
+            for(let i = quarter * 3; i < items.length; i++) items4.push(`\`${items[i][0]}\` - ${items[i][4][1]} (${items[i][3]}) for ${items[i][1]} from ${items[i][2]}`);
+            let embed = { title: "Market", description: `Here are the current items on the market. Use '$market buy <Offer ID>' to purchase an item.`, color: 8984857, fields: [ {}, {}, {}, {} ] };
+            embed.fields[0] = { name: "_ _", "value": items1.join("\n"), inline: true };
+            embed.fields[1] = { name: "_ _", "value": items2.join("\n"), inline: true };
+            embed.fields[2] = { name: "_ _", "value": items3.join("\n"), inline: true };
+            embed.fields[3] = { name: "_ _", "value": items4.join("\n"), inline: true };
+            channel.send({ embeds: [ embed ] });
+        } else if(items.length > 20) { // >20 items
+            // format item list
+            let items1 = [], items2 = [], items3 = [];
+            let third = Math.ceil(items.length / 3);
+            for(let i = 0; i < third; i++) items1.push(`\`${items[i][0]}\` - ${items[i][4][1]} (${items[i][3]}) for ${items[i][1]} from ${items[i][2]}`);
+            for(let i = third; i < third * 2; i++) items2.push(`\`${items[i][0]}\` - ${items[i][4][1]} (${items[i][3]}) for ${items[i][1]} from ${items[i][2]}`);
+            for(let i = third * 2; i < items.length; i++) items3.push(`\`${items[i][0]}\` - ${items[i][4][1]} (${items[i][3]}) for ${items[i][1]} from ${items[i][2]}`);
+            let embed = { title: "Market", description: `Here are the current items on the market. Use '$market buy <Offer ID>' to purchase an item.`, color: 8984857, fields: [ {}, {}, {} ] };
+            embed.fields[0] = { name: "_ _", "value": items1.join("\n"), inline: true };
+            embed.fields[1] = { name: "_ _", "value": items2.join("\n"), inline: true };
+            embed.fields[2] = { name: "_ _", "value": items3.join("\n"), inline: true };
+            channel.send({ embeds: [ embed ] });
+        } else if(items.length > 10) { // >10 items
             // format item list
             let items1 = [], items2 = [];
             let half = Math.ceil(items.length / 2);
             for(let i = 0; i < half; i++) items1.push(`\`${items[i][0]}\` - ${items[i][4][1]} (${items[i][3]}) for ${items[i][1]} from ${items[i][2]}`);
-            if(items.length > 1) for(let i = half; i < items.length; i++) items2.push(`\`${items[i][0]}\` - ${items[i][4][1]} (${items[i][3]}) for ${items[i][1]} from ${items[i][2]}`);
+            for(let i = half; i < items.length; i++) items2.push(`\`${items[i][0]}\` - ${items[i][4][1]} (${items[i][3]}) for ${items[i][1]} from ${items[i][2]}`);
             let embed = { title: "Market", description: `Here are the current items on the market. Use '$market buy <Offer ID>' to purchase an item.`, color: 8984857, fields: [ {}, {} ] };
             embed.fields[0] = { name: "_ _", "value": items1.join("\n"), inline: true };
             embed.fields[1] = { name: "_ _", "value": items2.join("\n"), inline: true };
@@ -581,7 +637,7 @@ module.exports = function() {
     this.marketAddItem = async function(pid, item, price) {
         let timestamp = xpGetTime();
         let day = 1440;
-        let expiration = timestamp + (14 + (Math.floor(Math.sqrt(price)) * 5)) * day;
+        let expiration = timestamp + (7 + (Math.floor(Math.sqrt(price)) * 3)) * day;
         await sqlProm("INSERT INTO market (item, price, owner, timestamp) VALUES (" + connection.escape(item.toLowerCase()) + "," + connection.escape(price) + "," + connection.escape(pid) + "," + connection.escape(expiration) + ")");
     }
 
