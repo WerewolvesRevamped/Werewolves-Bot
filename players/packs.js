@@ -31,7 +31,7 @@ module.exports = function() {
     Command: $packs list_all
     **/
     this.AVAILABLE_PACKS = ["glitch","negate","grayscale","edge","emboss","silhouette","pixel","pixel2","pixel3","pixel4","scatter","red","green","blue","yellow","purple","cyan","flip","pale","bw","wire","wire2","rainbow","rainbow2","rainbow3","ts","oil","wave","swirl","noise","cycle","equalize","fourier_noise","fourier_equalize","fourier_oil","fourier_modulate","fourier_wire","glitch2","eyes","thief","mask","eye","fourier_eye","citizen_eye","items","bear","wolfify","grid","light_and_shadow","duo_color","wood","coin","coin_animated", "glitch_animated","wave_animated","spin","rainbow_animated","fourier_merge","fourier_magnitude","fourier_phase","fourier_crop","fourier_crop2","cloud","swirl_animated","pokemon","minecraft"];
-    this.ANIMATED_PACKS = [53, 54, 55, 56, 57];
+    this.ANIMATED_PACKS = [53, 54, 55, 56, 57, 63, 64];
     this.cmdPacksListAll = function(channel) {
         let packs1 = [`${getEmoji('pack_default')} Default - 0`], packs2 = [], packs3 = [], packs4 = [], packs5 = [], packs6 = [];
         let sixth = Math.ceil(AVAILABLE_PACKS.length / 6);

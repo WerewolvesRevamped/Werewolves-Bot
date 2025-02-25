@@ -15,7 +15,7 @@ module.exports = function() {
 		// Find subcommand
 		switch(args[0]) {
 			// Role Subcommand
-			case "set": cmdThemeSet(message.channel, args); break;
+			case "query": cmdThemeQuery(message.channel, args); break;
 			case "remove": cmdThemeRemove(message.channel, args); break;
 			case "list": cmdThemeList(message.channel, args); break;
 			case "select": cmdThemeSelect(message.channel, args); break;
@@ -73,55 +73,49 @@ module.exports = function() {
 	
 	
 	/* Sets a themed word */
-	this.cmdThemeSet = function(channel, args) {
+	this.cmdThemeQuery = async function(channel, args) {
 		// Check arguments
-		if(!args[1] || !args[2] || !args[3]) { 
+		if(!args[1]) { 
 			channel.send("⛔ Syntax error. Not enough parameters!"); 
 			return; 
 		}
-		// Insert Entry & Preview it
-		sql("DELETE FROM theme WHERE theme = " + connection.escape(args[1]) + " AND original = " + connection.escape(args[2].toLowerCase()), result => {
-			sql("INSERT INTO theme (theme, original, new) VALUES (" + connection.escape(args[1]) + "," + connection.escape(args[2].toLowerCase()) + "," + connection.escape(args[3].toLowerCase()) + ")", result => {
-				channel.send("✅ Replaced `" + args[2] + "` with `" + args[3] + "` in `" + args[1] + "`"); 
-			}, () => {
-				// Couldn't add to database
-				channel.send("⛔ Database error. Could not set themed word!");
-			});		
-		}, () => {
-			channel.send("⛔ Database error. Could not prepare database!");
-		});
-		sql("DELETE FROM theme WHERE theme = " + connection.escape(args[1]) + " AND original = " + connection.escape(toTitleCase(args[2])), result => {
-			sql("INSERT INTO theme (theme, original, new) VALUES (" + connection.escape(args[1]) + "," + connection.escape(toTitleCase(args[2])) + "," + connection.escape(toTitleCase(args[3])) + ")", result => {
-				channel.send("✅ Replaced `" + toTitleCase(args[2]) + "` with `" + toTitleCase(args[3]) + "` in `" + toTitleCase(args[1]) + "`"); 
-			}, () => {
-				// Couldn't add to database
-				channel.send("⛔ Database error. Could not set themed word!");
-			});		
-		}, () => {
-			channel.send("⛔ Database error. Could not prepare database!");
-		});
+        let url = `${themePackBase}${args[1]}.csv`;
+        let urlExists = await checkUrlExists(url);
+        if(urlExists) {
+            const body = await fetchBody(url);
+           let themeLUT = [];
+            if(body) {
+                body.split("\n").filter(el => el && el.length).map(el => el.split(",")).forEach(el => themeLUT.push([el[0] ?? "-", (el[1] ?? "").trim()]) );
+                body.split("\n").filter(el => el && el.length).map(el => el.split(",")).forEach(el => themeLUT.push([(el[0] ?? "-").toLowerCase(), ((el[1] ?? "").trim()).toLowerCase()]) );
+            }
+            if(themeLUT.length > 0) {
+                let promises = [];
+                channel.send("✅ Storing theme. `" + (themeLUT.length/2) + "` values found.");
+               for (let i = 0; i < themeLUT.length; i++) {
+                    let prom = sqlProm("INSERT INTO theme (theme, original, new) VALUES (" + connection.escape(args[1]) + "," + connection.escape(themeLUT[i][0]) + "," + connection.escape(themeLUT[i][1]) + ")");
+                    promises.push(prom);
+                }
+                await Promise.all(promises);
+                channel.send("✅ Theme stored.");
+            } else {
+                channel.send("⛔ Syntax error. Could not find theme contents!"); 
+            }
+        } else {
+			channel.send("⛔ Syntax error. Could not find theme csv!"); 
+        }
 	}
 
 	
 	/* Removes a theme word */
 	this.cmdThemeRemove = function(channel, args) {
 		// Check arguments
-		if(!args[1] || !args[2]) { 
+		if(!args[1]) { 
 			channel.send("⛔ Syntax error. Not enough parameters!"); 
 			return; 
 		} 
 		// Delete info
-		sql("DELETE FROM theme WHERE theme = " + connection.escape(args[1]) + " AND original = " + connection.escape(args[2]), result => {
-			channel.send("✅ Removed `" + args[2] + "` from `" + toTitleCase(parseRole(args[1])) + "`!");
-			getRoles();
-		}, () => {
-			// Couldn't delete
-			channel.send("⛔ Database error. Could not remove role!");
-		});
-		// Delete info
-		sql("DELETE FROM theme WHERE theme = " + connection.escape(args[1]) + " AND original = " + connection.escape(toTitleCase(args[2])), result => {
-			channel.send("✅ Removed `" + toTitleCase(args[2]) + "` from `" + toTitleCase(parseRole(args[1])) + "`!");
-			getRoles();
+		sql("DELETE FROM theme WHERE theme = " + connection.escape(args[1]), result => {
+			channel.send("✅ Removed `" + toTitleCase(parseRole(args[1])) + "`!");
 		}, () => {
 			// Couldn't delete
 			channel.send("⛔ Database error. Could not remove role!");
@@ -137,7 +131,7 @@ module.exports = function() {
 		if(text instanceof Array) {
 			return text.map(el => applyTheme(el));
 		} else {
-			cachedTheme.forEach(el => text = text.replace(new RegExp(el.original, "g"), el.new));
+			cachedTheme.forEach(el => text = text.replace(new RegExp("(?<!\\<\\?|[a-zA-Z])" + el.original + "(?!\\:\\>|[a-rt-zA-Z])", 'g'), el.new));
 			return text;
 		}
 	}

@@ -48,5 +48,5 @@ module.exports = function() {
     Packs
     **/
     this.themePackBase = `https://raw.githubusercontent.com/WerewolvesRevamped/Packs/refs/heads/main/Theme/`;
-    this.urlPackBase = `${website}cards/UrlPacks/`;
+    this.urlPackBase = `https://raw.githubusercontent.com/WerewolvesRevamped/Packs/refs/heads/main/URL/`;
 }
