@@ -240,7 +240,7 @@ module.exports = function() {
             ["gamephase set", PERM.GM, "Sets gamephase.", "<New Gamephase>", "Sets the gamephase to <Value>, which has to be an integer from 0 to 4.", "gp set 2", ["✅ Game Phase is now INGAME (2)"], CMDSTATE.RDY],
         /** Theme Module **/
         ["theme", PERM.GH, "Manages themes.", "<Subcommand>", "Group of commands to handle renaming roles for themes. $help theme <sub-command> for detailed help.", "", [], CMDSTATE.RDY],
-            ["theme remove", PERM.GH, "Removes a theme.", "<Theme Id>", "Removes a theme.", "theme remove customTheme", ["✅ Removed 'customTheme'!"], CMDSTATE.RDY],
+            ["theme remove", PERM.GH, "Removes a theme.", "<Theme Id>", "Removes a theme, deleting all words for the theme.", "theme remove customTheme", ["✅ Removed 'customTheme'!"], CMDSTATE.RDY],
             ["theme list", PERM.GH, "Lists all themes.", "[Theme Id]", "Lists all replaced words for a specific theme, or if no <Theme Id> is set, lists all theme.", "theme list", ["✅ Current Themes: 'customTheme', 'default'!"], CMDSTATE.RDY],
             ["theme select", PERM.GH, "Selects a theme.", "<Theme Id>", "Sets the current theme to <Theme Id>, if set to an invalid theme or 'default', default words are used.", "theme select customTheme", ["✅ Selected 'customTheme' theme!"], CMDSTATE.RDY],
             ["theme query", PERM.GH, "Queries a theme.", "<Theme Id>", "Queries a theme from a theme csv.", "theme query customTheme", ["✅ Querying 'customTheme' theme!"], CMDSTATE.RDY],
