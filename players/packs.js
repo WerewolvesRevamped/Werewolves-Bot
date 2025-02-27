@@ -283,6 +283,7 @@ module.exports = function() {
             return txt;
         } else {
             let pName = AVAILABLE_PACKS[pack - 1];
+            if(pName === stats.theme) return txt; // do not apply pack theme, if it matches normal theme
             let lut = await getPackLUT(pName);
             for(let i = 0; i < lut.length; i++) {
                 txt = txt.replace(new RegExp("(?<!\\<\\?|[a-zA-Z])" + lut[i][0] + "(?!\\:\\>|[a-rt-zA-Z])", 'g'), lut[i][1]);
