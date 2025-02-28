@@ -830,7 +830,7 @@ module.exports = function() {
 	}
 	
 	this.isPlayersArgs = function(arg) {
-		let allowedArgs = ["id", "emoji", "type", "role", "orig_role", "alignment", "alive", "ccs", "public_msgs", "private_msgs", "target", "counter", "final_result"];
+		let allowedArgs = ["id", "emoji", "type", "role", "orig_role", "alignment", "alive", "ccs", "public_msgs", "private_msgs", "target", "counter", "final_result", "mentor"];
 		return allowedArgs.indexOf(arg) >= 0;
 	}
 	

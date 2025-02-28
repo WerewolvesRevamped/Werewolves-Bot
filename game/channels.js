@@ -15,6 +15,7 @@ module.exports = function() {
     const CC_PERMS_MEMBER = { ViewChannel: true };
     const CC_PERMS_OWNER = { ViewChannel: true, ReadMessageHistory: true };
     const CC_PERMS_LOCKED = { ViewChannel: true, ReadMessageHistory: null, SendMessages: false };
+    const CC_PERMS_VIEWER = { ViewChannel: true, SendMessages: false };
     const CC_PERMS_NONE = null;
 
 	/**
@@ -42,7 +43,9 @@ module.exports = function() {
             // add members
             players.forEach(async el => { 
                 let result = await channelSetPermission(channel, el, CC_PERMS_MEMBER);
-                if(result && !mode) channel.send(`✅ Added ${channel.guild.members.cache.get(el)} to the CC!`);
+                if(result && !mode) channel.send(`✅ Added ${channel.guild.members.cache.get(el)} to the CC!`); 
+                let mentor = await getMentor(el); 
+                if(mentor) channelSetPermission(channel, mentor, CC_PERMS_VIEWER);
             });
         } else {
             channel.send("⛔ Command error. No valid players, that are not part of this CC already, were provided!");
@@ -75,6 +78,8 @@ module.exports = function() {
             players.forEach(async el => { 
                 let result = await channelSetPermission(channel, el, CC_PERMS_NONE);
                 if(result && !mode) channel.send(`✅ Removed ${channel.guild.members.cache.get(el)} from the CC!`);
+                let mentor = await getMentor(el); 
+                if(mentor) channelSetPermission(channel, mentor, CC_PERMS_NONE);
             });
         } else {
             channel.send("⛔ Command error. No valid players, that are part of this CC and not an owner, were provided!");
@@ -166,6 +171,9 @@ module.exports = function() {
 		// Remove permissions
         let result = await channelSetPermission(channel, member.id, CC_PERMS_NONE);
         if(result) channel.send(`✅ ${member} left the CC!`);
+        
+        let mentor = await getMentor(el); 
+        if(mentor) channelSetPermission(channel, mentor, CC_PERMS_VIEWER);
 	}
 	
     
@@ -359,7 +367,7 @@ module.exports = function() {
     **/
     this.getChannelMembers = function(channel) {
         let members = getChannelPermissionOverwrites(channel);
-        return members.filter(el => el.allow > 0).map(el => el.id);
+        return members.filter(el => el.allow > 0 && !(el.allow == 1024 && el.deny == 2048)).map(el => el.id);
     }
     
     /**

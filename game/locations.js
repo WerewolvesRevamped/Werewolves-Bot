@@ -134,7 +134,7 @@ module.exports = function() {
     /** Create public channels **/
     this.createLocations = async function() {
 		// Create Public Channels
-		const publicCat = await mainGuild.channels.create({ name: "💬 " + toTitleCase(stats.game) + " Public Channels", type: ChannelType.GuildCategory,  permissionOverwrites: getLocationPermissions() });
+		const publicCat = await mainGuild.channels.create({ name: applyTheme("💬 " + toTitleCase(stats.game) + " Public Channels"), type: ChannelType.GuildCategory,  permissionOverwrites: getLocationPermissions() });
         
         // save public channel
         sqlSetStat(15, publicCat.id);
@@ -147,7 +147,7 @@ module.exports = function() {
             // get permissions
             const members = locations[i].members.toLowerCase().split(",");
             const viewers = locations[i].viewers.toLowerCase().split(",");
-            const displayName = locations[i].display_name;
+            const displayName = applyTheme(locations[i].display_name);
             let permissions = [ getPerms(mainGuild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []) ];
             // add member permissions
             members.forEach(mem => {

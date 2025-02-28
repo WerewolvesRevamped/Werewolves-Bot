@@ -85,7 +85,7 @@ module.exports = function() {
     This loads all the role info for each player and then starts creating the SCs
     **/
 	function createSCs_Start(channel, category, debug) {
-		sql("SELECT id,role FROM players ORDER BY role ASC", async result => {
+		sql("SELECT id,role,mentor FROM players ORDER BY role ASC", async result => {
             let nextCategory = category;
             // iterate through players
             for(let player in result) {
@@ -119,6 +119,7 @@ module.exports = function() {
                 // Create permissions
                 let scPerms = getSCCatPerms(channel.guild);
                 scPerms.push(getPerms(player.id, ["history", "read"], []));
+                if(player.mentor) scPerms.push(getPerms(player.mentor, ["history", "read", "write"], []));
                 scPerms.push(getPerms(stats.ghost, ["write"], ["read"]));
                 
                 // Determine channel name

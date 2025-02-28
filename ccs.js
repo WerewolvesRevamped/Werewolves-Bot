@@ -195,7 +195,7 @@ module.exports = function() {
 							getCCCats();
 						log(`CC > Created new CC category \`${cc.name}\`!`);
 							// Save the category id
-							sqlSetStat(10, cc.id, result => {
+							sqlSetStat(10, cc.id, async result => {
 								// Create a new channel
 								let ccPerms = getCCCatPerms(channel.guild);
                                 if(isGhost(member)) ccPerms = getCCCatPermsGhostly(channel.guild);
@@ -203,6 +203,12 @@ module.exports = function() {
 								else ccPerms.push(getPerms(member.id, ["read"], []));
 								if(players.length > 0 && mode === 0) players.forEach(el => ccPerms.push(getPerms(el, ["read"], [])));
 								if(players.length > 0 && mode === 1) players.forEach(el => ccPerms.push(getPerms(el, ["read", "history"], [])));
+                                let mentor = await getMentor(member.id); 
+                                if(mentor) ccPerms.push(getPerms(mentor, ["read"], ["write"]));
+                                for(let i = 0; i < players.length; i++) {
+                                    let mentor = await getMentor(players[i]); 
+                                    if(mentor) ccPerms.push(getPerms(mentor, ["read"], ["write"]));
+                                }
 								channel.guild.channels.create({ name: (spam?"🤖-":"") + (isGhost(member)?"👻-":"") + args[1] + "", type: ChannelType.GuildText,  permissionOverwrites: ccPerms, parent: cc.id })
 								.then(ct => {
 									// Put the channel into the correct category
@@ -245,7 +251,7 @@ module.exports = function() {
 					});
 				// Don't create new category
 				} else {	
-					sqlGetStat(10, result => {
+					sqlGetStat(10, async result => {
 						// Create a new channel
 						let ccPerms = getCCCatPerms(channel.guild);
                         if(isGhost(member)) ccPerms = getCCCatPermsGhostly(channel.guild);
@@ -253,6 +259,12 @@ module.exports = function() {
                         else ccPerms.push(getPerms(member.id, ["read"], []));
 						if(players.length > 0 && mode === 0) players.forEach(el => ccPerms.push(getPerms(el, ["read"], [])));
 						if(players.length > 0 && mode === 1) players.forEach(el => ccPerms.push(getPerms(el, ["read", "history"], [])));
+                        let mentor = await getMentor(member.id); 
+                        if(mentor) ccPerms.push(getPerms(mentor, ["read"], ["write"]));
+                        for(let i = 0; i < players.length; i++) {
+                            let mentor = await getMentor(players[i]); 
+                            if(mentor) ccPerms.push(getPerms(mentor, ["read"], ["write"]));
+                        }
                         let cc = channel.guild.channels.cache.get(result);
                         let cobj = { name: (spam?"🤖-":"") + args[1] + "", type: ChannelType.GuildText,  permissionOverwrites: ccPerms, parent: cc.id };
                         if(result % 50 === 49) delete cobj.parent;

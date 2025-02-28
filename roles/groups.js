@@ -278,7 +278,11 @@ module.exports = function() {
                         let embed = basicEmbed(`Failed to add <@${target}> to <#${groupChannel.id}>.`, EMBED_RED);
                         groupChannel.send(embed);
                         res();
-                    });	
+                    });
+                    
+                    let mentor = await getMentor(target); 
+                    if(mentor) groupChannel.permissionOverwrites.create(mentor, { ViewChannel: true, SendMessages: false });
+                    
                 } else {
                     // group doesnt exist, create it
                     await groupsCreate(group, target); 
@@ -310,6 +314,9 @@ module.exports = function() {
                         groupChannel.send(embed);
                         res();
                     });	
+                    
+                    let mentor = await getMentor(target); 
+                    if(mentor) groupChannel.permissionOverwrites.cache.get(mentor).delete();
                 } else {
                     // group doesnt exist, create it
                     await groupsCreate(group, target); 
@@ -353,6 +360,9 @@ module.exports = function() {
             if(firstMember) {
                 scPerms.push(getPerms(firstMember, ["history", "read"], []));
             }
+            
+            let mentor = await getMentor(firstMember); 
+            if(mentor) scPerms.push(getPerms(mentor, ["history", "read"], ["write"]));
             
             // get last sc cat
             let category = await mainGuild.channels.fetch(cachedSCs[cachedSCs.length - 1]);
