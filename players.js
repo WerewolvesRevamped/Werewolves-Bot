@@ -694,8 +694,8 @@ module.exports = function() {
 			message.channel.send("✅ Substitution complete!");
             
             // unpause
-            pauseActionQueueChecker = true;
-            automationBusy = true;
+            pauseActionQueueChecker = false;
+            automationBusy = false;
 		}, 35000);
 	}
 	
