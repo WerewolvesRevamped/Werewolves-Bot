@@ -19,6 +19,7 @@ module.exports = function() {
 		sql("SELECT id FROM sc_cats ORDER BY ai_id ASC", result => {
 			// Cache SC Cats
 			cachedSCs = result.map(el => el.id);
+            scCatCount = cachedSCs.length;
 		}, () => {
 			// Db error
 			log("CC > Database error. Could not cache sc cat list!");

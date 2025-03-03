@@ -85,6 +85,7 @@ module.exports = function() {
     This loads all the role info for each player and then starts creating the SCs
     **/
 	function createSCs_Start(channel, category, debug) {
+        // IMPORTANT: changing this query requires also changing a call from "createOneSC" which mirrors this query
 		sql("SELECT id,role,mentor FROM players ORDER BY role ASC", async result => {
             let nextCategory = category;
             // iterate through players
@@ -97,6 +98,11 @@ module.exports = function() {
 			channel.send("⛔ Database error. Unable to get a list of player roles."); 
 		});
 	}
+    
+    this.createOneSC = async function(channel, pid, role) {
+        let lastCat = cachedSCs[cachedSCs.length - 1];
+       return await createSCs_One(channel, lastCat, { id: pid, role: role, mentor: null }, true);
+    }
     
     /**
     Create Secret Channels - Create One
