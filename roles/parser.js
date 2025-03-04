@@ -933,28 +933,28 @@ module.exports = function() {
             ability = { type: "applying", subtype: "remove", target: ttpp(fd[2]), attribute: ttpp(fd[1],"activeAttribute") };
         }
         // Change Attribute Value
-        exp = new RegExp("^Change " + attributeName + " value `" + attrIndex + "` to `" + attrValue + "` for " + targetType + "$", "g");
-        fd = exp.exec(abilityLine);
-        if(fd) {
-            ability = { type: "applying", subtype: "change", target: ttpp(fd[4]), attribute: ttpp(fd[1],"activeAttribute"), attr_index: +fd[2], attr_value: fd[3].trim()  };
-        }
-        // Change Attribute Value
         exp = new RegExp("^Change " + attributeName + " value `" + attrIndex + "` to " + targetType + " for " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
             ability = { type: "applying", subtype: "change_parsed", target: ttpp(fd[4]), attribute: ttpp(fd[1],"activeAttribute"), attr_index: +fd[2], attr_value: ttpp(fd[3])  };
         }
         // Change Attribute Value
-        exp = new RegExp("^Change " + attributeName + " value `" + attrIndex + "` to `" + attrValue + "`$", "g");
+        exp = new RegExp("^Change " + attributeName + " value `" + attrIndex + "` to `" + attrValue + "` for " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "applying", subtype: "change", target: ttpp("@self"), attribute: ttpp(fd[1],"activeAttribute"), attr_index: +fd[2], attr_value: fd[3].trim()  };
+            ability = { type: "applying", subtype: "change", target: ttpp(fd[4]), attribute: ttpp(fd[1],"activeAttribute"), attr_index: +fd[2], attr_value: fd[3].trim()  };
         }
         // Change Attribute Value
         exp = new RegExp("^Change " + attributeName + " value `" + attrIndex + "` to " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
             ability = { type: "applying", subtype: "change_parsed", target: ttpp("@self"), attribute: ttpp(fd[1],"activeAttribute"), attr_index: +fd[2], attr_value: ttpp(fd[3])  };
+        }
+        // Change Attribute Value
+        exp = new RegExp("^Change " + attributeName + " value `" + attrIndex + "` to `" + attrValue + "`$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "applying", subtype: "change", target: ttpp("@self"), attribute: ttpp(fd[1],"activeAttribute"), attr_index: +fd[2], attr_value: fd[3].trim()  };
         }
         /** REDIRECTING **/
         // redirect from all
@@ -1183,19 +1183,19 @@ module.exports = function() {
         exp = new RegExp("^Manipulate `" + str + "` Poll \\(" + targetType + " is `" + pollManipManipSubtype + "`\\)" + attrDuration + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "poll", subtype: "manipulation", target: ttpp(fd[1], "poll"), manip_target: ttpp(fd[2]), manip_type: lc(fd[3]), duration: dd(fd[4], "untiluse") };
+            ability = { type: "poll", subtype: "manipulation", target: ttpp(fd[1], "poll"), manip_target: ttpp(fd[2]), manip_type: lc(fd[3]), duration: dd(fd[4], "nextphase") };
         }
         // Poll Votes Manipulation
         exp = new RegExp("^Manipulate `" + str + "` Poll \\(" + targetType + " has `" + num + "` votes\\)" + attrDuration + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "poll", subtype: "votes", target: ttpp(fd[1], "poll"), manip_target: ttpp(fd[2]), manip_type: "visible", manip_value: fd[3], duration: dd(fd[4], "untiluse") };
+            ability = { type: "poll", subtype: "votes", target: ttpp(fd[1], "poll"), manip_target: ttpp(fd[2]), manip_type: "visible", manip_value: fd[3], duration: dd(fd[4], "nextphase") };
         }
         // Poll Votes Manipulation
         exp = new RegExp("^Manipulate `" + str + "` Poll \\(" + targetType + " has `" + num + "` hidden votes\\)" + attrDuration + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "poll", subtype: "votes", target: ttpp(fd[1], "poll"), manip_target: ttpp(fd[2]), manip_type: "hidden", manip_value: fd[3], duration: dd(fd[4], "untiluse") };
+            ability = { type: "poll", subtype: "votes", target: ttpp(fd[1], "poll"), manip_target: ttpp(fd[2]), manip_type: "hidden", manip_value: fd[3], duration: dd(fd[4], "nextphase") };
         }
         /** ANNOUNCEMENTS **/
         // reveal
@@ -1905,7 +1905,7 @@ module.exports = function() {
                     if(verifyCategory(targetType)) return "category";
                     if(verifyPoll(targetType)) return "poll";
                     if(verifyAbilityTypeName(targetType)) return "abilityType";
-                    return targetType.includes("@") || targetType.length > 30 ? "info" : "role";
+                    return targetType.includes("@") || targetType.length > 30 ? "info" : "string";
             }
         } else {
             if(/^\d+$/.test(targetType)) {
