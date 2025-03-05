@@ -415,6 +415,8 @@ module.exports = function() {
     this.getCommandHelp = function(cmd, member) {
         let cmdData = COMMANDS.find(el => el[0] === cmd);
         
+        if(!cmdData) return "```yaml\nInformation\n\nThis command can not be found.\n```";
+        
         // permission check
         if(isAdmin(member) && cmdData[1] > PERM.AD) return "```yaml\nInformation\n\nThis command can not be used.\n```";
         else if(!isAdmin(member) && isSenior(member) && cmdData[1] > PERM.SG) return "```yaml\nInformation\n\nThis command is only available to admins or higher.\n```";
