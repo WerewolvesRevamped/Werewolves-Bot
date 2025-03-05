@@ -54,9 +54,9 @@ module.exports = function() {
             obstruction: for(let i = 0; i < obstructions.length; i++) {
                 let matchesType = obstructions[i].val1 === "" || obstructions[i].val1 === abilityType;
                 let matchesSubtype = obstructions[i].val2 === "" || obstructions[i].val2 === abilitySubtype;
-                console.log(matchesType, matchesSubtype, abilityType, abilitySubtype, obstructions[i].val1, obstructions[i].val2);
+                console.log(obstructions[i].attr_type, matchesType, matchesSubtype, abilityType, abilitySubtype, obstructions[i].val1, obstructions[i].val2);
                 // check if obstruction type matches
-                if(matchesType && matchesSubtype) {
+                if((matchesType && matchesSubtype) ^ (obstructions[i].attr_type === "obstruction_inverted")) {
                     // no custom feedback; return failure
                     if(obstructions[i].val3 === "") {
                         abilityLog(`✅ <@${sourcePlayer}> was obstructed: failure.`);

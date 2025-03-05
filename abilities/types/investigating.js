@@ -214,7 +214,7 @@ module.exports = function() {
         let selectorTarget = selector.split("[")[0];
         // feedback
         abilityLog(`✅ ${srcRefToText(src_ref)} investigated \`${selectorTarget}\`'s count as \`${count}\`.`);
-        return { msg: `Investigated \`${selectorTarget}\`'s count: \`${count}\``, success: true, result: `${count}[number]` };
+        return { msg: `Investigated \`${selectorTarget}\`'s count: \`${count}\``, success: true, result: `${count}[number]`, number: count };
     }
     
     /**
@@ -238,7 +238,7 @@ module.exports = function() {
         let count = found.length;
         // feedback
         abilityLog(`✅ ${srcRefToText(src_ref)} investigated \`${targets.join(",")}\` count as \`${count}\`.`);
-        return { msg: `Investigated \`${targets.join(",")}\` count: \`${count}\``, success: true, result: `${count}[number]` };
+        return { msg: `Investigated \`${targets.join(",")}\` count: \`${count}\``, success: true, result: `${count}[number]`, number: count };
     }
     
     /**

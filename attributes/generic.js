@@ -53,6 +53,14 @@ module.exports = function() {
     }
     
     /**
+    Create Obstruction Inverted Attribute
+    creates an obstruction attribute with specific NOT affected abilities and obstruction feedback
+    **/
+    this.createObstructionInvertedAttribute = async function(src_name, src_ref, target_player, dur, immune_type = "", immune_subtype = "", feedback = "") {
+        await createAttribute(src_name, src_ref, target_player, "player", dur, "obstruction_inverted", immune_type, immune_subtype, feedback);
+    }
+    
+    /**
     Create Role Attribute
     creates a role attribute with specific role
     **/

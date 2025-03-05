@@ -189,9 +189,9 @@ module.exports = function() {
                         if(first.type === second.type && first.type === "number") { // same type, do direct type comparison
                             return first.value[0] > second.value[0];
                         } else if(first.type === "number" && second.type === "result") {
-                            return first.value[0] > (await parseNumber(second.value[0].result, src_ref, additionalTriggerData));
+                            return first.value[0] > (await parseNumber(second.value[0].number, src_ref, additionalTriggerData));
                         } else if(first.type === "result" && second.type === "number") {
-                            return (await parseNumber(first.value[0].result, src_ref, additionalTriggerData)) > second.value[0];
+                            return (await parseNumber(first.value[0].number, src_ref, additionalTriggerData)) > second.value[0];
                         }
                         // no comparison can be made
                         return false;

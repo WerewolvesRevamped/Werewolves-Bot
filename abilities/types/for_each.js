@@ -28,7 +28,7 @@ module.exports = function() {
                 let additionalTriggerDataCopy = deepCopy(additionalTriggerData);
                 additionalTriggerDataCopy.ind = targets.value[j];
                 
-                if(abilities[i].condition) { // HAS CONDITION
+                if(abilities[i].condition) { // HAS CONDITION [WIP: can this even happen? I think it would just become an inner P/E nowadays] 
                     let condition = abilities[i].condition;
                     let condTxt = abilities[i].condition_text;
                     let condBool = await resolveCondition(condition, src_ref, src_name, additionalTriggerDataCopy);

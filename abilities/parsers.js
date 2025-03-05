@@ -2014,7 +2014,7 @@ module.exports = function() {
         ["add","remove"], // joining
         ["add","remove","transfer"], // granting
         [], // loyalty
-        [], // obstruction
+        ["standard", "inverted"], // obstruction
         ["creation","addition","deletion","cancellation","manipulation","votes"], // poll
         ["immediate","buffer"], // announcement
         ["role","alignment","group"], // changing

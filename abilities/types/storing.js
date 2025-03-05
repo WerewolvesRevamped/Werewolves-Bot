@@ -16,7 +16,7 @@ module.exports = function() {
         }
        
        // parse the selector
-        let parsed = await parseSelector(ability.selector, src_refAction, additionalTriggerData);
+        let parsed = await parseSelector(ability.selector, src_ref, additionalTriggerData);
         
         // store to the respective result field
         let res = { msg: "", success: true };
@@ -40,6 +40,9 @@ module.exports = function() {
             case "success":
                 res.success = val0;
             break;
+            case "number":
+                res.number = val0;
+            break;
             default:
                 abilityLog(`❗ **Error:** Unknow type \`${parsed.type}\` to be stored!`);
                 return { msg: "Storing failed! " + abilityError, success: false };
@@ -47,7 +50,7 @@ module.exports = function() {
         }
         
         // feedback
-        if(targets.value.length > 0) {
+        if(parsed.value.length > 0) {
             return res;
         } else {
             return { msg: "Storing failed!", success: false };

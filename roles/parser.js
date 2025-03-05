@@ -78,64 +78,7 @@ module.exports = function() {
 
             
             /** P/E Reformatting **/
-            for(let i = 0; i < thisTriggerAbilities.length; i++) {
-                // is process and next is evaluate
-                if(thisTriggerAbilities[i].ability.type === "process" && thisTriggerAbilities[i + 1] && thisTriggerAbilities[i + 1].ability.type === "evaluate") {
-                    // get p/e
-                    let process = thisTriggerAbilities[i].ability;
-                    let evaluate = thisTriggerAbilities[i + 1].ability;
-                    let storedCondition = null;
-                    // parse conditions
-                    evaluate.sub_abilities = evaluate.sub_abilities.map(el => {
-                        if(el.ability.type === "condition") storedCondition = el.condition;
-                        let ret = el;
-                        ret.condition_text = ret.condition ?? storedCondition;
-                        if(!ret.condition_text) ret.condition_text = "Always";
-                        ret.condition = parseCondition(ret.condition_text);
-                        return ret;
-                    });
-                    // reformat p/e
-                    thisTriggerAbilities[i].ability = { type: "process_evaluate", process: process, evaluate: evaluate, id: abilityCounter++ }; // replace "process" with a combined P/E ability
-                    thisTriggerAbilities[i + 1].ability = { type: "blank" }; // delete "evaluate"
-                }
-                // is process and no next / evaluate
-                if(thisTriggerAbilities[i].ability.type === "process" && !thisTriggerAbilities[i + 1]) {
-                    // get p/e
-                    let process = thisTriggerAbilities[i].ability;
-                    let evaluate = { type: "evaluate", sub_abilities: [] };
-                    // reformat p/e
-                    thisTriggerAbilities[i].ability = { type: "process_evaluate", process: process, evaluate: evaluate, id: abilityCounter++ }; // replace "process" with a combined P/E ability
-                }
-                // is evaluate and no process
-                else if((i === 0 || thisTriggerAbilities[i - 1].ability.type != "process") && thisTriggerAbilities[i].ability.type === "evaluate") {
-                    // get p/e
-                    let evaluate = thisTriggerAbilities[i].ability;
-                    let storedCondition = null;
-                    let storedConditionIndex = -1;
-                    // parse conditions
-                    for(let i = 0; i < evaluate.sub_abilities.length; i++) {
-                        if(evaluate.sub_abilities[i].ability.type === "condition") { // store a condition and create an abilities block
-                            storedCondition = true;
-                            storedConditionIndex = i;
-                            evaluate.sub_abilities[i].condition_text = evaluate.sub_abilities[i].condition;
-                            evaluate.sub_abilities[i].condition = parseCondition(evaluate.sub_abilities[i].condition);
-                            evaluate.sub_abilities[i].ability = { type: "abilities", sub_abilities: [ ], id: abilityCounter++ };
-                        } else if(storedCondition && !evaluate.sub_abilities[i].condition) { // use stored condition, pushes the ability into that conditions block
-                            evaluate.sub_abilities[storedConditionIndex].ability.sub_abilities.push(evaluate.sub_abilities[i].ability);
-                            delete evaluate.sub_abilities[i]; // we cant write to this directly as we want the object to persist in the other array we just copied it too
-                            evaluate.sub_abilities[i] = { ability: { type: "blank" } };
-                        } else { // default, parse condition
-                            storedCondition = false;
-                            evaluate.sub_abilities[i].condition_text = evaluate.sub_abilities[i].condition;
-                            evaluate.sub_abilities[i].condition = parseCondition(evaluate.sub_abilities[i].condition);
-                        }
-                    }
-                    // remove blank abilities
-                    evaluate.sub_abilities = evaluate.sub_abilities.filter(el => el.ability.type != "blank");
-                    // reformat p/e
-                    thisTriggerAbilities[i].ability = { type: "process_evaluate", process: { type: "process", sub_abilities: [ ] }, evaluate: evaluate, id: abilityCounter++ }; // replace "evaluate" with a combined P/E ability
-                }
-            }
+            peReformat(thisTriggerAbilities);
             
             /* Remove Blank */
             thisTriggerAbilities = thisTriggerAbilities.filter(el => el.ability.type != "blank"); // remove blank lines
@@ -181,6 +124,72 @@ module.exports = function() {
         
         
         return triggers;
+    }
+    
+    function peReformat(thisTriggerAbilities) {
+        for(let i = 0; i < thisTriggerAbilities.length; i++) {
+            // is process and next is evaluate
+            if(thisTriggerAbilities[i].ability.type === "process" && thisTriggerAbilities[i + 1] && thisTriggerAbilities[i + 1].ability.type === "evaluate") {
+                // get p/e
+                let process = thisTriggerAbilities[i].ability;
+                let evaluate = thisTriggerAbilities[i + 1].ability;
+                let storedCondition = null;
+                // parse conditions
+                evaluate.sub_abilities = evaluate.sub_abilities.map(el => {
+                    if(el.ability.type === "condition") storedCondition = el.condition;
+                    let ret = el;
+                    ret.condition_text = ret.condition ?? storedCondition;
+                    if(!ret.condition_text) ret.condition_text = "Always";
+                    ret.condition = parseCondition(ret.condition_text);
+                    return ret;
+                });
+                peReformat(evaluate.sub_abilities);
+                // reformat p/e
+                thisTriggerAbilities[i].ability = { type: "process_evaluate", process: process, evaluate: evaluate, id: abilityCounter++ }; // replace "process" with a combined P/E ability
+                thisTriggerAbilities[i + 1].ability = { type: "blank" }; // delete "evaluate"
+            }
+            // is process and no next / evaluate
+            if(thisTriggerAbilities[i].ability.type === "process" && !thisTriggerAbilities[i + 1]) {
+                // get p/e
+                let process = thisTriggerAbilities[i].ability;
+                let evaluate = { type: "evaluate", sub_abilities: [] };
+                // reformat p/e
+                thisTriggerAbilities[i].ability = { type: "process_evaluate", process: process, evaluate: evaluate, id: abilityCounter++ }; // replace "process" with a combined P/E ability
+            }
+            // is evaluate and no process
+            else if((i === 0 || thisTriggerAbilities[i - 1].ability.type != "process") && thisTriggerAbilities[i].ability.type === "evaluate") {
+                // get p/e
+                let evaluate = thisTriggerAbilities[i].ability;
+                let storedCondition = null;
+                let storedConditionIndex = -1;
+                // parse conditions
+                for(let i = 0; i < evaluate.sub_abilities.length; i++) {
+                    if(evaluate.sub_abilities[i].ability.type === "condition") { // store a condition and create an abilities block
+                        storedCondition = true;
+                        storedConditionIndex = i;
+                        evaluate.sub_abilities[i].condition_text = evaluate.sub_abilities[i].condition;
+                        evaluate.sub_abilities[i].condition = parseCondition(evaluate.sub_abilities[i].condition);
+                        evaluate.sub_abilities[i].ability = { type: "abilities", sub_abilities: [ ], id: abilityCounter++ };
+                    } else if(storedCondition && !evaluate.sub_abilities[i].condition) { // use stored condition, pushes the ability into that conditions block
+                        evaluate.sub_abilities[storedConditionIndex].ability.sub_abilities.push(evaluate.sub_abilities[i].ability);
+                        delete evaluate.sub_abilities[i]; // we cant write to this directly as we want the object to persist in the other array we just copied it too
+                        evaluate.sub_abilities[i] = { ability: { type: "blank" } };
+                    } else { // default, parse condition
+                        storedCondition = false;
+                        evaluate.sub_abilities[i].condition_text = evaluate.sub_abilities[i].condition;
+                        evaluate.sub_abilities[i].condition = parseCondition(evaluate.sub_abilities[i].condition);
+                    }
+                }
+                // remove blank abilities
+                evaluate.sub_abilities = evaluate.sub_abilities.filter(el => el.ability.type != "blank");
+                peReformat(evaluate.sub_abilities);
+                // reformat p/e
+                thisTriggerAbilities[i].ability = { type: "process_evaluate", process: { type: "process", sub_abilities: [ ] }, evaluate: evaluate, id: abilityCounter++ }; // replace "evaluate" with a combined P/E ability
+            }
+            else if(thisTriggerAbilities[i].ability.type === "for_each") {
+                peReformat(thisTriggerAbilities[i].ability.sub_abilities);
+            }
+        }
     }
     
     /**
@@ -312,7 +321,7 @@ module.exports = function() {
                         abilitiesParsed.push({ ability: { type: "evaluate", sub_abilities: [abilityWithCond, ...subAbilities] } });
                     }
                     // For Each (Multiline)
-                    else if(parsingType === "none" && abilityFirst && abilityFirst.ability.type === "for_each" && !hasAbility) {
+                    else if(["none","evaluate"].includes(parsingType) && abilityFirst && abilityFirst.ability.type === "for_each" && !hasAbility) {
                         // get abilities contained in the for each
                         let subAbilities = parseAbilities(abilities, i + 1, depth + 1, "none");
                         i = subAbilities.index;
@@ -323,7 +332,7 @@ module.exports = function() {
                         abilitiesParsed.push(forEach);
                     }
                     // For Each (Inline)
-                    else if(parsingType === "none" && abilityFirst && abilityFirst.ability.type === "for_each" && hasAbility) {
+                    else if(["none","evaluate"].includes(parsingType) === "none" && abilityFirst && abilityFirst.ability.type === "for_each" && hasAbility) {
                         // create for each object
                         let forEach = { ability: { type: "for_each", sub_abilities: [ { ability: ability.ability } ], target: abilityFirst.ability.target, id: abilityCounter++ } };
                         if(abilityFirst.parameters) forEach.parameters = abilityFirst.parameters;
@@ -1101,46 +1110,85 @@ module.exports = function() {
         exp = new RegExp("^Obstruct " + targetType + attrDuration + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "obstructing", target: ttpp(fd[1]), duration: dd(fd[2], "permanent"), obstructed_ability: "", obstructed_subtype: "", custom_feedback: "" };
+            ability = { type: "obstructing", subtype: "standard", target: ttpp(fd[1]), duration: dd(fd[2], "permanent"), obstructed_ability: "", obstructed_subtype: "", custom_feedback: "" };
         }
         // obstruct specific ability type
         exp = new RegExp("^Obstruct " + abilityType + " for " + targetType + attrDuration + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "obstructing", target: ttpp(fd[2]), duration: dd(fd[3], "permanent"), obstructed_ability: lc(fd[1]), obstructed_subtype: "", custom_feedback: "" };
+            ability = { type: "obstructing", subtype: "standard", target: ttpp(fd[2]), duration: dd(fd[3], "permanent"), obstructed_ability: lc(fd[1]), obstructed_subtype: "", custom_feedback: "" };
         }
         // obstruct specific ability subtype
         exp = new RegExp("^Obstruct " + abilitySubtype + " for " + targetType + attrDuration + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
             fd = fd.filter(el => el); // filter out empty capture groups
-            ability = { type: "obstructing", target: ttpp(fd[3]), duration: dd(fd[4], "permanent"), obstructed_ability: lc(fd[1].replace(fd[2], "").trim()), obstructed_subtype: lc(fd[2]), custom_feedback: "" };
+            ability = { type: "obstructing", subtype: "standard", target: ttpp(fd[3]), duration: dd(fd[4], "permanent"), obstructed_ability: lc(fd[1].replace(fd[2], "").trim()), obstructed_subtype: lc(fd[2]), custom_feedback: "" };
         }
         // obstruct specific ability type; custom feedback
         exp = new RegExp("^Obstruct " + abilityType + " for " + targetType + " ⇒ `" + str + "`" + attrDuration + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "obstructing", target: ttpp(fd[2]), duration: dd(fd[4], "permanent"), obstructed_ability: lc(fd[1]), obstructed_subtype: "", custom_feedback: [{chance: 1, feedback: fd[3]}] };
+            ability = { type: "obstructing", subtype: "standard", target: ttpp(fd[2]), duration: dd(fd[4], "permanent"), obstructed_ability: lc(fd[1]), obstructed_subtype: "", custom_feedback: [{chance: 1, feedback: fd[3]}] };
         }
         // obstruct specific ability subtype; custom feedback
         exp = new RegExp("^Obstruct " + abilitySubtype + " for " + targetType + " ⇒ `" + str + "`" + attrDuration + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
             fd = fd.filter(el => el); // filter out empty capture groups
-            ability = { type: "obstructing", target: ttpp(fd[3]), duration: dd(fd[5], "permanent"), obstructed_ability: lc(fd[1].replace(fd[2], "").trim()), obstructed_subtype: lc(fd[2]), custom_feedback: [{chance: 1, feedback: fd[4]}] };
+            ability = { type: "obstructing", subtype: "standard", target: ttpp(fd[3]), duration: dd(fd[5], "permanent"), obstructed_ability: lc(fd[1].replace(fd[2], "").trim()), obstructed_subtype: lc(fd[2]), custom_feedback: [{chance: 1, feedback: fd[4]}] };
         }
         // obstruct specific ability type; double custom feedback
         exp = new RegExp("^Obstruct " + abilityType + " for " + targetType + " ⇒ \\(" + decNum + ":`" + str + "`," + decNum + ":`" + str + "`\\)" + attrDuration + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "obstructing", target: ttpp(fd[2]), duration: dd(fd[7], "permanent"), obstructed_ability: lc(fd[1]), obstructed_subtype: "", custom_feedback: [{chance: +fd[3], feedback: fd[4]},{chance: +fd[5], feedback: fd[6] }] };
+            ability = { type: "obstructing", subtype: "standard", target: ttpp(fd[2]), duration: dd(fd[7], "permanent"), obstructed_ability: lc(fd[1]), obstructed_subtype: "", custom_feedback: [{chance: +fd[3], feedback: fd[4]},{chance: +fd[5], feedback: fd[6] }] };
         }
         // obstruct specific ability subtype; double custom feedback
         exp = new RegExp("^Obstruct " + abilitySubtype + " for " + targetType + " ⇒ \\(" + decNum + ":`" + str + "`," + decNum + ":`" + str + "`\\)" + attrDuration + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
             fd = fd.filter(el => el); // filter out empty capture groups
-            ability = { type: "obstructing", target: ttpp(fd[3]), duration: dd(fd[8], "permanent"), obstructed_ability: lc(fd[1].replace(fd[2], "").trim()), obstructed_subtype: lc(fd[2]), custom_feedback: [{chance: +fd[4], feedback: fd[5]},{chance: +fd[6], feedback: fd[7] }] };
+            ability = { type: "obstructing", subtype: "standard", target: ttpp(fd[3]), duration: dd(fd[8], "permanent"), obstructed_ability: lc(fd[1].replace(fd[2], "").trim()), obstructed_subtype: lc(fd[2]), custom_feedback: [{chance: +fd[4], feedback: fd[5]},{chance: +fd[6], feedback: fd[7] }] };
+        }
+        // obstruct specific ability type, inverted
+        exp = new RegExp("^Obstruct !" + abilityType + " for " + targetType + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "obstructing", subtype: "inverted", target: ttpp(fd[2]), duration: dd(fd[3], "permanent"), obstructed_ability: lc(fd[1]), obstructed_subtype: "", custom_feedback: "" };
+        }
+        // obstruct specific ability subtype, inverted
+        exp = new RegExp("^Obstruct !" + abilitySubtype + " for " + targetType + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            fd = fd.filter(el => el); // filter out empty capture groups
+            ability = { type: "obstructing", subtype: "inverted", target: ttpp(fd[3]), duration: dd(fd[4], "permanent"), obstructed_ability: lc(fd[1].replace(fd[2], "").trim()), obstructed_subtype: lc(fd[2]), custom_feedback: "" };
+        }
+        // obstruct specific ability type; custom feedback, inverted
+        exp = new RegExp("^Obstruct !" + abilityType + " for " + targetType + " ⇒ `" + str + "`" + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "obstructing", subtype: "inverted", target: ttpp(fd[2]), duration: dd(fd[4], "permanent"), obstructed_ability: lc(fd[1]), obstructed_subtype: "", custom_feedback: [{chance: 1, feedback: fd[3]}] };
+        }
+        // obstruct specific ability subtype; custom feedback, inverted
+        exp = new RegExp("^Obstruct !" + abilitySubtype + " for " + targetType + " ⇒ `" + str + "`" + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            fd = fd.filter(el => el); // filter out empty capture groups
+            ability = { type: "obstructing", subtype: "inverted", target: ttpp(fd[3]), duration: dd(fd[5], "permanent"), obstructed_ability: lc(fd[1].replace(fd[2], "").trim()), obstructed_subtype: lc(fd[2]), custom_feedback: [{chance: 1, feedback: fd[4]}] };
+        }
+        // obstruct specific ability type; double custom feedback, inverted
+        exp = new RegExp("^Obstruct !" + abilityType + " for " + targetType + " ⇒ \\(" + decNum + ":`" + str + "`," + decNum + ":`" + str + "`\\)" + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "obstructing", subtype: "inverted", target: ttpp(fd[2]), duration: dd(fd[7], "permanent"), obstructed_ability: lc(fd[1]), obstructed_subtype: "", custom_feedback: [{chance: +fd[3], feedback: fd[4]},{chance: +fd[5], feedback: fd[6] }] };
+        }
+        // obstruct specific ability subtype; double custom feedback, inverted
+        exp = new RegExp("^Obstruct !" + abilitySubtype + " for " + targetType + " ⇒ \\(" + decNum + ":`" + str + "`," + decNum + ":`" + str + "`\\)" + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            fd = fd.filter(el => el); // filter out empty capture groups
+            ability = { type: "obstructing", subtype: "inverted", target: ttpp(fd[3]), duration: dd(fd[8], "permanent"), obstructed_ability: lc(fd[1].replace(fd[2], "").trim()), obstructed_subtype: lc(fd[2]), custom_feedback: [{chance: +fd[4], feedback: fd[5]},{chance: +fd[6], feedback: fd[7] }] };
         }
         /** POLL MANIPULATING **/
         // Poll duplication/addtion

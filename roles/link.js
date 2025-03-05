@@ -8,7 +8,7 @@ module.exports = function() {
     Runs queryRoles to query all roles from github
     **/
     this.cmdRolesQuery = async function(channel) {
-        if(stats.gamephase === gp.INGAME) {
+        if(stats.gamephase == gp.INGAME) {
             channel.send("⛔ Command error. Cannot query while ingame.");
             return;
         }
@@ -29,7 +29,7 @@ module.exports = function() {
     Runs queryRoles to query all ability sets from github
     **/
     this.cmdSetsQuery = async function(channel) {
-        if(stats.gamephase === gp.INGAME) {
+        if(stats.gamephase == gp.INGAME) {
             channel.send("⛔ Command error. Cannot query while ingame.");
             return;
         }
@@ -50,7 +50,7 @@ module.exports = function() {
     Runs queryInfo to query all info from github
     **/
     this.cmdInfomanageQuery = async function(channel) {
-        if(stats.gamephase === gp.INGAME) {
+        if(stats.gamephase == gp.INGAME) {
             channel.send("⛔ Command error. Cannot query while ingame.");
             return;
         }
@@ -70,7 +70,7 @@ module.exports = function() {
     Runs queryDisplays to query all displays from github
     **/
     this.cmdDisplaysQuery = async function(channel) {
-        if(stats.gamephase === gp.INGAME) {
+        if(stats.gamephase == gp.INGAME) {
             channel.send("⛔ Command error. Cannot query while ingame.");
             return;
         }
@@ -91,7 +91,7 @@ module.exports = function() {
     Runs queryGroups to query all groups from github
     **/
     this.cmdGroupsQuery = async function(channel) {
-        if(stats.gamephase === gp.INGAME) {
+        if(stats.gamephase == gp.INGAME) {
             channel.send("⛔ Command error. Cannot query while ingame.");
             return;
         }
@@ -112,7 +112,7 @@ module.exports = function() {
     Runs queryLocations to query all locations from github
     **/
     this.cmdLocationsQuery = async function(channel) {
-        if(stats.gamephase === gp.INGAME) {
+        if(stats.gamephase == gp.INGAME) {
             channel.send("⛔ Command error. Cannot query while ingame.");
             return;
         }
@@ -133,7 +133,7 @@ module.exports = function() {
     Runs queryPolls to query all polls from github
     **/
     this.cmdPollsQuery = async function(channel) {
-        if(stats.gamephase === gp.INGAME) {
+        if(stats.gamephase == gp.INGAME) {
             channel.send("⛔ Command error. Cannot query while ingame.");
             return;
         }
@@ -154,7 +154,7 @@ module.exports = function() {
     Runs queryAttributes to query all attributes from github
     **/
     this.cmdAttributesQuery = async function(channel) {
-        if(stats.gamephase === gp.INGAME) {
+        if(stats.gamephase == gp.INGAME) {
             channel.send("⛔ Command error. Cannot query while ingame.");
             return;
         }
@@ -175,7 +175,7 @@ module.exports = function() {
     Runs queryTeams to query all teams from github
     **/
     this.cmdTeamsQuery = async function(channel) {
-        if(stats.gamephase === gp.INGAME) {
+        if(stats.gamephase == gp.INGAME) {
             channel.send("⛔ Command error. Cannot query while ingame.");
             return;
         }
@@ -196,7 +196,7 @@ module.exports = function() {
     Parses all roles currently stored in the DB from desc_formalized to parsed
     **/
     this.cmdRolesParse = async function(channel) {
-        if(stats.gamephase === gp.INGAME) {
+        if(stats.gamephase == gp.INGAME) {
             channel.send("⛔ Command error. Cannot parse while ingame.");
             return;
         }
@@ -218,7 +218,7 @@ module.exports = function() {
     Parses all groups currently stored in the DB from desc_formalized to parsed
     **/
     this.cmdGroupsParse = async function(channel) {
-        if(stats.gamephase === gp.INGAME) {
+        if(stats.gamephase == gp.INGAME) {
             channel.send("⛔ Command error. Cannot parse while ingame.");
             return;
         }
@@ -240,7 +240,7 @@ module.exports = function() {
     Parses all polls currently stored in the DB from desc_formalized to parsed
     **/
     this.cmdPollsParse = async function(channel) {
-        if(stats.gamephase === gp.INGAME) {
+        if(stats.gamephase == gp.INGAME) {
             channel.send("⛔ Command error. Cannot parse while ingame.");
             return;
         }
@@ -262,7 +262,7 @@ module.exports = function() {
     Parses all attributes currently stored in the DB from desc_formalized to parsed
     **/
     this.cmdAttributesParse = async function(channel) {
-        if(stats.gamephase === gp.INGAME) {
+        if(stats.gamephase == gp.INGAME) {
             channel.send("⛔ Command error. Cannot parse while ingame.");
             return;
         }
@@ -284,7 +284,7 @@ module.exports = function() {
     Parses all teams currently stored in the DB from desc_formalized to parsed
     **/
     this.cmdTeamsParse = async function(channel) {
-        if(stats.gamephase === gp.INGAME) {
+        if(stats.gamephase == gp.INGAME) {
             channel.send("⛔ Command error. Cannot parse while ingame.");
             return;
         }
@@ -306,7 +306,7 @@ module.exports = function() {
     Updates all github linked data
     **/
     this.cmdUpdate = async function(channel) {
-        if(stats.gamephase === gp.INGAME) {
+        if(stats.gamephase == gp.INGAME) {
             channel.send("⛔ Command error. Cannot query or parse while ingame");
             return;
         }
@@ -1003,7 +1003,7 @@ module.exports = function() {
     parses a single game element
     **/
     this.cmdParse = async function(channel, args) {
-        if(stats.gamephase === gp.INGAME && !(args[2] === "force" || args[2] === "f")) {
+        if(stats.gamephase == gp.INGAME && !(args[2] === "force" || args[2] === "f")) {
             channel.send("⛔ Command error. Cannot parse while ingame. To ignore this warning specify 'force' as a third argument.");
             return;
         }
