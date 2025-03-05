@@ -132,8 +132,8 @@ module.exports = function() {
                 else if(firstType != "string") second = await parseSelector(condition.second, src_ref, additionalTriggerData);
                 else second = { value: await parseStringSelector(condition.second, src_ref, additionalTriggerData), type: "string" };
                 
-                //console.log("FIRST", condition.first, first.type, first.value[0]);
-                //console.log("SECOND", condition.second, second.type, second.value[0]);
+                console.log("FIRST", condition.first, first.type, first.value[0]);
+                console.log("SECOND", condition.second, second.type, second.value[0]);
                 
                 // switch by subtype
                 switch(condition.subtype) {

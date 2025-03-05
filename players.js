@@ -623,6 +623,9 @@ module.exports = function() {
         // old player: remove particpant role, add dead participant role
         switchRoles(originalPlayerMember, message.channel, stats.participant, stats.dead_participant, "participant", "dead participant");
         
+        // delete connection to sub channel
+        await sqlProm(`DELETE FROM connected_channels WHERE id=${newId}`);
+        
         // update various additional tables
         await sqlProm(`UPDATE action_data SET src_ref=${newIdSrc} WHERE src_ref=${oldIdSrc}`);
         await sqlProm(`UPDATE action_data SET last_target=${newIdSelector} WHERE last_target=${oldIdSelector}`);
@@ -694,8 +697,8 @@ module.exports = function() {
 			message.channel.send("✅ Substitution complete!");
             
             // unpause
-            pauseActionQueueChecker = true;
-            automationBusy = true;
+            pauseActionQueueChecker = false;
+            automationBusy = false;
 		}, 35000);
 	}
 	
@@ -951,12 +954,21 @@ module.exports = function() {
         addRoleRecursive(member, channel, stats.spectator, "spectator");
 	}
 	
-	this.cmdSubstitute = function(channel, member, args) {
+	this.cmdSubstitute = async function(channel, member, args) {
 		if(isParticipant(member)) {
 			channel.send("⛔ Command error. Can't make you a substitute player while you're a participant."); 
 			return;
 		}
 		cmdSignup(channel, member, args, false, "substitute");
+        
+        if(stats.gamephase == gp.INGAME) {
+            await sleep(5000);
+            let pData = await sqlPromOneEsc("SELECT id FROM players WHERE id=", member.id);
+            let conData = await connectionGet(member.id);
+            if(pData && !conData[0]) {
+                createOneSC(channel, member.id, "substitute");
+            }
+        }
 	}
 	
 	/* Signup a player */
