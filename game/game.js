@@ -258,10 +258,11 @@ module.exports = function() {
 		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.spectator).members.toJSON(), 0, "spectator");
 		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.sub).members.toJSON(), 0, "substitute");
 		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.helper).members.toJSON(), 0, "helper");
+		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.mentor).members.toJSON(), 0, "mentor");
 		// Remove Roles & Nicknames
-		wroles_remove(channel, [stats.signed_up, stats.spectator, stats.mayor2, stats.reporter, stats.guardian, stats.sub, stats.participant, stats.dead_participant, stats.host, stats.ghost], ["signed up", "spectator", "mayor2", "reporter", "guardian", "substitute", "participant", "dead participant", "host", "ghost"]);
+		wroles_remove(channel, [stats.signed_up, stats.spectator, stats.mayor2, stats.reporter, stats.guardian, stats.sub, stats.participant, stats.dead_participant, stats.host, stats.ghost, stats.mentor], ["signed up", "spectator", "mayor2", "reporter", "guardian", "substitute", "participant", "dead participant", "host", "ghost", "mentor"]);
         // run role removal again for critical roles because sometimes it fails even though it says it succeeds
-		wroles_remove(channel, [stats.participant, stats.dead_participant, stats.ghost], ["participant", "dead participant", "ghost"]);
+		wroles_remove(channel, [stats.participant, stats.dead_participant, stats.ghost, stats.mentor], ["participant", "dead participant", "ghost", "mentor"]);
 		// Cleanup channels
 		cmdCCCleanup(channel);
 		scCleanup(channel);
@@ -275,8 +276,8 @@ module.exports = function() {
     
     this.resetRoleNames = async function(channel) {
         // rename roles correctly
-        let roles = [stats.signed_up, stats.spectator, stats.sub, stats.participant, stats.dead_participant, stats.host, stats.gamemaster, stats.ghost];
-        let names = ["Signed-up","Spectator", "Substitute","Participant","Dead Participant","Host", "Game Master", "Ghost"];
+        let roles = [stats.signed_up, stats.spectator, stats.sub, stats.participant, stats.dead_participant, stats.host, stats.gamemaster, stats.ghost, stats.mentor];
+        let names = ["Signed-up","Spectator", "Substitute","Participant","Dead Participant","Host", "Game Master", "Ghost", "Mentor"];
         for(let i = 0; i < roles.length; i++) {
             await channel.guild.roles.cache.get(roles[i]).setName(names[i]);
         }  

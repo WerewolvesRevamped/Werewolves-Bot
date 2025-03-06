@@ -331,6 +331,14 @@ module.exports = function() {
             stats.reward_log = null;
 			log("Stats > ❗❗❗ Unable to cache reward log! Defaulting to *none*.")
 		});
+        // Mentor Role
+		sqlGetStat(statID.MENTOR_ROLE,  result => { 
+			stats.mentor = result; 
+			if(doLog) log("Stats > Cached mentor role as `" + result + "`!")
+		}, () => {
+            stats.mentor = null;
+			log("Stats > ❗❗❗ Unable to cache mentor role!")
+		});
 	}
 	
 	/* Gets the name of a gamephase by id */
@@ -348,7 +356,8 @@ module.exports = function() {
     this.statID = {
         PHASE: 47,
         SUBPHASE: 48,
-        REWARD_LOG: 49
+        REWARD_LOG: 49,
+        MENTOR_ROLE: 50,
     }
 	
 	/* Handles option command */
@@ -405,13 +414,14 @@ module.exports = function() {
                 case "phase": stat = statID.PHASE; break;
                 case "subphase": stat = statID.SUBPHASE; break;
                 case "reward_log": stat = statID.REWARD_LOG; break;
+                case "mentor": stat = statID.MENTOR_ROLE; break;
 				default: message.channel.send("⛔ Syntax error. Invalid parameter!"); return;
 			}
 		} else {
 			stat = args[0];
 		}
         
-        if([3,4,5,6,7,8,21,22,23,26,32,34,37,38,40,41,45].includes(stat)) {
+        if([3,4,5,6,7,8,21,22,23,26,32,34,37,38,40,41,45,statID.MENTOR_ROLE].includes(stat)) {
             if(!isAdmin(message.member)) {
                 message.channel.send("⛔ Permission error. Only admins can change roles!"); 
                 return;       

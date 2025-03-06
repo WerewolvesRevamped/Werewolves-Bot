@@ -228,6 +228,7 @@ module.exports = function() {
         ["j", PERM.AL, "Special variant of signup command.", "<Emoji>", "Behaves like $signup command. For players with a reserved emoji, they can leave out <Emoji> and it will fill it in automatically. If used by a promoted GM they are automatically demoted upon using this command.", "j", ["✅ @McTsts signed up with emoji 🛠!"], CMDSTATE.RDY],
         ["spectate", PERM.AL, "Makes you a spectator.", "", "Makes you a spectator, if you are not a participant and a game is running.", "spectate", ["✅ Attempting to make you a spectator, McTsts!"], CMDSTATE.RDY],
         ["substitute", PERM.AL, "Makes you a substitute player.", "<Emoji>", "Signs you up as a substitute for the next game with emoji <Emoji>, which has to be a valid emoji, that is not used by another player yet. If you have already signedup, signout before using this command.", "substitute 🛠", ["✅ @McTsts is a substitute with emoji 🛠!"], CMDSTATE.RDY],
+        ["mentor", PERM.GM, "Sets a player as a mentor.", "<Mentee> <Mentor>", "Assigns a mentor to a mentee.", "substitute � 🛠", ["✅ Setting @mctsts as a mentor for @captainluffy!"], CMDSTATE.RDY],
         /** Stats Module **/
         // options
         ["options", PERM.GM, "Manages options.", "<Option Name> [New Value]", "Returns or sets (if <New Value> is set) the value of a bot option <Option Name>. A bot option can be a numeric id, or an option name.\n\nFor a list of all options run $help options_list", "options mayor", ["✅ mayor currently is set to 588125889611431946!"], CMDSTATE.RDY],

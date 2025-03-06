@@ -859,6 +859,10 @@ client.on("messageCreate", async message => {
 	case "substitute":
 		cmdSubstitute(message.channel, message.member, args);
 	break;
+	/* Substitute */
+	case "mentor":
+		if(checkGM(message)) cmdMentor(message.channel, args);
+	break;
 	/* Confirm */
 	case "confirm":
 		confirmActionExecute(args.join(" "), message, false);

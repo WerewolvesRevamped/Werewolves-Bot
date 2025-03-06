@@ -183,6 +183,8 @@ module.exports = function() {
         switch(type) {
             case "alive":
                 return stats.participant ? getPerms(stats.participant, allow, deny) : null; 
+            case "mentor":
+                return stats.mentor ? getPerms(stats.mentor, allow, deny) : null; 
             case "dead":
                 return stats.dead_participant ? getPerms(stats.dead_participant, allow, deny) : null; 
             case "ghost":
@@ -199,7 +201,7 @@ module.exports = function() {
     
 	/* Public Permissions */
 	function getLocationPermissions() {
-		return [ getPerms(mainGuild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.ghost, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.participant, ["write", "read"], []) ];
+		return [ getPerms(mainGuild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.ghost, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.participant, ["write", "read"], []), getPerms(stats.mentor, ["read"], ["write"]) ];
 	}
 	
     
