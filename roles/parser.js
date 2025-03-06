@@ -332,11 +332,27 @@ module.exports = function() {
                         abilitiesParsed.push(forEach);
                     }
                     // For Each (Inline)
-                    else if(["none","evaluate"].includes(parsingType) === "none" && abilityFirst && abilityFirst.ability.type === "for_each" && hasAbility) {
+                    else if(["none","evaluate"].includes(parsingType) && abilityFirst && abilityFirst.ability.type === "for_each" && hasAbility) {
                         // create for each object
                         let forEach = { ability: { type: "for_each", sub_abilities: [ { ability: ability.ability } ], target: abilityFirst.ability.target, id: abilityCounter++ } };
                         if(abilityFirst.parameters) forEach.parameters = abilityFirst.parameters;
                         abilitiesParsed.push(forEach);
+                    }
+                    // Inline condition within another condition
+                    else if(parsingType === "evaluate_condition" && hasCondition && hasAbility) {
+                        // create P/E object
+                        let innerPE = { ability: { type: "process_evaluate", process: { type: "process", sub_abilities: [] }, evaluate: { type: "evaluate", sub_abilities: [ { ability: ability.ability, condition: parseCondition(thisAbilitySplit[0]), condition_text: thisAbilitySplit[0] } ] } } };
+                        abilitiesParsed.push(innerPE);
+                    }
+                    // Multiline condition within another condition
+                    else if(parsingType === "evaluate_condition" && hasCondition && !hasAbility) {
+                        let subAbilities = parseAbilities(abilities, i + 1, depth + 1, "evaluate_condition");
+                        i = subAbilities.index;
+                        subAbilities = delParam(subAbilities.abilities);
+                        let condSubAbilities = { ability: { type: "abilities", sub_abilities: subAbilities, id: abilityCounter++ }, condition: parseCondition(thisAbilitySplit[0]), condition_text: thisAbilitySplit[0] };
+                        // create P/E object
+                        let innerPE = { ability: { type: "process_evaluate", process: { type: "process", sub_abilities: [] }, evaluate: { type: "evaluate", sub_abilities: [ condSubAbilities ] } } };
+                        abilitiesParsed.push(innerPE);
                     }
                     // Unknown case
                     else {
@@ -408,7 +424,7 @@ module.exports = function() {
                     // Unknown case
                     else {
                         if(debugMode) console.log("   UNKNOWN 2 DEPTH CASE", JSON.stringify(ability));    
-                        else throw new Error(`Invalid two segment ability line:\n\`\`\`${thisAbilitySplit.join(";")} \`\`\`with context ${startIndex}, ${parsingDepth}, ${parsingType}.`);
+                        else throw new Error(`Invalid two segment ability line (2):\n\`\`\`${thisAbilitySplit.join(";")} \`\`\`with context ${startIndex}, ${parsingDepth}, ${parsingType}.`);
                     }
                 } else {
                     if(debugMode) console.log("   UNKNOWN DEPTH CASE");

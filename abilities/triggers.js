@@ -989,7 +989,6 @@ module.exports = function() {
         await triggerHandler("Passive");
         
         // end of phase
-        await attributeCleanup();
         await whisperingCleanup();
         await choicesReset();
         await killqKillall();
@@ -1001,6 +1000,7 @@ module.exports = function() {
         
         // set new phase
         if(newPhase) await setPhase(newPhase);
+        await attributeCleanup();
         
         // storytime
         await postStorytime();
@@ -1093,7 +1093,6 @@ module.exports = function() {
         await triggerHandler("Passive");
         
         // end of phase
-        await attributeCleanup();
         await whisperingCleanup();
         await choicesReset();
         await killqKillall();
@@ -1105,6 +1104,7 @@ module.exports = function() {
         
         // set new phase
         if(newPhase) await setPhase(newPhase);
+        await attributeCleanup();
         
         // storytime
         await postStorytime();
