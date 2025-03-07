@@ -177,7 +177,7 @@ module.exports = function() {
             }
         }
         
-        if(gameEnds) {
+        if(gameEnds || activeTeams.length === 0) {
             // final trigger
             await triggerHandler("On End"); 
             // end game
@@ -186,16 +186,16 @@ module.exports = function() {
             // storytime
             await postStorytimeImmediate();
             // get winners & losers
-            let allLosers = await sqlProm("SELECT * FROM players WHERE final_result=0");
-            let allWinners = await sqlProm("SELECT * FROM players WHERE final_result=1");
+            let allLosers = await sqlProm("SELECT * FROM players WHERE final_result=0 AND type='player'");
+            let allWinners = await sqlProm("SELECT * FROM players WHERE final_result=1 AND type='player'");
             let allLosersText = chunkArray(allLosers.map(el => `${el.emoji} - <@${el.id}> (${el.role != el.orig_role ? toTitleCase(el.orig_role) + ' -> ' : ""}${toTitleCase(el.role)})`), 10).map(el => el.join("\n"));
             let allWinnersText = chunkArray(allWinners.map(el => `${el.emoji} - <@${el.id}> (${el.role != el.orig_role ? toTitleCase(el.orig_role) + ' -> ' : ""}${toTitleCase(el.role)})`), 10).map(el => el.join("\n"));
             for(let i = 0; i < allWinnersText.length; i++) {
-                let indexText = allWinnersText.length > 1 ? (allWinnersText + 1) + '/' + allWinnersText.length : "";
+                let indexText = allWinnersText.length > 1 ? (i + 1) + '/' + allWinnersText.length : "";
                 await locationSend("storytime", `${allWinnersText[i]}`, EMBED_GREEN, null, `Final Results - Winners ${indexText}`);
             }
             for(let i = 0; i < allLosersText.length; i++) {
-                let indexText = allLosersText.length > 1 ? (allLosersText + 1) + '/' + allLosersText.length : "";
+                let indexText = allLosersText.length > 1 ? (i + 1) + '/' + allLosersText.length : "";
                 await locationSend("storytime", `${allLosersText[i]}`, EMBED_RED, null, `Final Results - Losers ${indexText}`);
             }
         }
