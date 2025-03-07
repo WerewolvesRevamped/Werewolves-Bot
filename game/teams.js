@@ -136,7 +136,7 @@ module.exports = function() {
     **/
     this.updateActiveTeams = async function() {
         // new teams
-        let toBeActivated = await sqlProm("SELECT name,display_name FROM teams WHERE name IN (SELECT DISTINCT alignment FROM players WHERE alive=1) AND active=0");
+        let toBeActivated = await sqlProm("SELECT name,display_name FROM teams WHERE name IN (SELECT DISTINCT alignment FROM players WHERE alive=1 AND type='player') AND active=0");
         
         for(let i = 0; i < toBeActivated.length; i++) {
             await sqlPromEsc("UPDATE teams SET active=1 WHERE name=", toBeActivated[i].name);
@@ -144,7 +144,7 @@ module.exports = function() {
         }
         
         // teams that have lost
-        let toBeDeactivated = await sqlProm("SELECT name,display_name FROM teams WHERE name NOT IN (SELECT DISTINCT alignment FROM players WHERE alive=1) AND active=1");
+        let toBeDeactivated = await sqlProm("SELECT name,display_name FROM teams WHERE name NOT IN (SELECT DISTINCT alignment FROM players WHERE alive=1 AND type='player') AND active=1");
         
         for(let i = 0; i < toBeDeactivated.length; i++) {
             await sqlPromEsc("UPDATE teams SET active=0 WHERE name=", toBeDeactivated[i].name);
