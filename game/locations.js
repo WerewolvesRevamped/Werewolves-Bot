@@ -138,6 +138,7 @@ module.exports = function() {
         
         // save public channel
         sqlSetStat(15, publicCat.id);
+        cachedPublic = publicCat.id;
         
         // get all locations
 		const locations = await sqlProm("SELECT * FROM locations ORDER BY sort_index ASC");
