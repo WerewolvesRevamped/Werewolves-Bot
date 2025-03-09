@@ -56,7 +56,7 @@ module.exports = function() {
     **/
     this.cmdPacksList = async function(channel, author) {
         let unlockedPacks = await sqlPromEsc("SELECT * FROM inventory WHERE player=", author.id);
-        unlockedPacks = unlockedPacks.filter(el => el.item.substr(0, 2) === "sp").map(el => [el.item.split(":")[1], AVAILABLE_PACKS[(+el.item.split(":")[1])-1]]);
+        unlockedPacks = unlockedPacks.filter(el => el.item.substr(0, 3) === "sp:").map(el => [el.item.split(":")[1], AVAILABLE_PACKS[(+el.item.split(":")[1])-1]]);
         unlockedPacks = unlockedPacks.sort((a,b) => a[0] - b[0]); 
         if(unlockedPacks.length < 40) {
             let packs1 = [`${getEmoji('pack_default')} Default - 0`], packs2 = [];

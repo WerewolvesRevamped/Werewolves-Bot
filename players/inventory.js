@@ -492,7 +492,7 @@ module.exports = function() {
         }
         
         let price = + args[2];
-        if(price < 0 || price > 1000) {
+        if(isNaN(price) || price < 0 || price > 1000) {
 			channel.send("⛔ Command error. Invalid item price."); 
 			return; 
         }
