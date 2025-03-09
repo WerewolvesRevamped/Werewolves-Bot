@@ -636,7 +636,7 @@ module.exports = function() {
     **/
     this.marketAddItem = async function(pid, item, price) {
         let timestamp = xpGetTime();
-        let day = 1440;
+        let day = 1440 / 12;
         let expiration = timestamp + (7 + (Math.floor(Math.sqrt(price)) * 3)) * day;
         await sqlProm("INSERT INTO market (item, price, owner, timestamp) VALUES (" + connection.escape(item.toLowerCase()) + "," + connection.escape(price) + "," + connection.escape(pid) + "," + connection.escape(expiration) + ")");
     }
