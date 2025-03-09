@@ -41,7 +41,9 @@ module.exports = function() {
         let first = messages.last();
         await targetChannel.bulkDelete(messages);
         // resend first message
-        targetChannel.send({ embeds: first.embeds, content: first.content });
+        if(first.embeds.length > 0 && first.author.bot) {
+            targetChannel.send({ embeds: first.embeds, content: first.content });
+        }
         
         // feedback -> no message for conversation reset as that would often be in the reset channel
         return { msg: "", success: true, target: `${target.type}:${target.value}` };

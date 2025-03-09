@@ -160,6 +160,7 @@ module.exports = function() {
             let winCond = activeTeams[i].win_condition.split(",");
             let allowedPlayers = [];
             for(let j = 0; j < winCond.length; j++) {
+                if(winCond[j].length === 0) continue;
                 let selPlayers = await parsePlayerSelector(winCond[j], `team:${activeTeams[i].name}`);
                 allowedPlayers.push(...selPlayers);
             }
