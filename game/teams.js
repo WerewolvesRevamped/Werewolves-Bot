@@ -141,6 +141,7 @@ module.exports = function() {
         for(let i = 0; i < toBeActivated.length; i++) {
             await sqlPromEsc("UPDATE teams SET active=1 WHERE name=", toBeActivated[i].name);
             abilityLog(`❇️ **Team Created:** Team ${toBeActivated[i].display_name} was created.`);
+            actionLog(`❇️ Team ${toBeActivated[i].display_name} was created.`);
         }
         
         // teams that have lost
@@ -149,6 +150,7 @@ module.exports = function() {
         for(let i = 0; i < toBeDeactivated.length; i++) {
             await sqlPromEsc("UPDATE teams SET active=0 WHERE name=", toBeDeactivated[i].name);
             abilityLog(`❇️ **Team Loss:** Team ${toBeDeactivated[i].display_name} has lost.`);
+            actionLog(`❎ Team ${toBeDeactivated[i].display_name} has lost.`);
         }
         
         // check win conditions of all remaining teams
@@ -172,6 +174,7 @@ module.exports = function() {
             if(teamHasWon) {
                 gameEnds = true;
                 abilityLog(`❇️ **Team Victory:** Team ${activeTeams[i].display_name} has won.`);
+                actionLog(`👑 Team ${activeTeams[i].display_name} has won.`);
                 await bufferStorytime(`Team ${activeTeams[i].display_name} has won!`);
                 // set all team members as winners
                 await sqlPromEsc("UPDATE players SET final_result=1 WHERE alignment=", activeTeams[i].name);
@@ -184,6 +187,7 @@ module.exports = function() {
             // end game
             await gameEnd();
             await bufferStorytime(`**The game has ended!**`);
+            actionLog(`🏁 The game has ended.`);
             // storytime
             await postStorytimeImmediate();
             // get winners & losers
