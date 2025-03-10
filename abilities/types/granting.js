@@ -197,6 +197,17 @@ module.exports = function() {
                 res(); // Nothing to remove!
                 return;
             }
+            
+            // remove mentor permissions
+            let mentor = await getMentor(target); 
+            if(mentor) {
+                let overwrites = grantingChannel.permissionOverwrites.cache.get(mentor);
+                if(overwrites) {
+                    overwrites.delete();
+                }
+            }
+            
+            // remove normal permissions
             overwrites.delete().then(sc => {
                 let embed = basicEmbed(`<@${target}> was removed from <#${grantingChannel.id}>.`, EMBED_RED);
                 grantingChannel.send(embed);
@@ -237,6 +248,11 @@ module.exports = function() {
                 // Send info message for each role
                 let infoEmbed = await getRoleEmbed(role, ["basics","details"], mainGuild, member);
                 sendEmbed(sc, infoEmbed, true);
+                
+                // assign mentor permissions
+                let mentor = await getMentor(member); 
+                console.log("GrantCreate", member, mentor);
+                if(mentor) sc.permissionOverwrites.create(mentor, { ViewChannel: true, SendMessages: false });
 
                 // Move into sc category
                 sc.setParent(category,{ lockPermissions: false }).then(m => {

@@ -140,6 +140,11 @@ module.exports = function() {
             .then(async sc => {
                 // Create a default connection with the creator id and index
                 connectionAdd(sc.id, `whisper:${member}-${index}`, "whisper-channel");
+                
+                // assign mentor permissions
+                let mentor = await getMentor(member); 
+                console.log("WhisperCreate", member, mentor);
+                if(mentor) sc.permissionOverwrites.create(mentor, { ViewChannel: true, SendMessages: false });
 
                 // Move into sc category
                 sc.setParent(category,{ lockPermissions: false }).then(m => {

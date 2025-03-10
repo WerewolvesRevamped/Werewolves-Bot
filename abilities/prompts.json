@@ -54,6 +54,7 @@
     "pyromancer.2": "Which player would you like to powder?",
     "firebug.1": "Who would you like to ward?",
     "devil.1": "Who do you want to send the devil's wager to?",
+    "flute_player.1": "Who would you like to enchant?",
     "chef.1": "Who would you like to send food to? And, would you like to poison the food? List a player name, as well as 'yes' (poison) or 'no' (charmed), separated by `;`.",
     "dog.1": "You may choose one of these roles. You will immediately change into the role you choose."
 }

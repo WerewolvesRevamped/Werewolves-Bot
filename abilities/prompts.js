@@ -710,6 +710,10 @@ module.exports = function() {
         // send prompt
         let channel_id = await getSrcRefChannel(src_ref);
         let channel = mainGuild.channels.cache.get(channel_id);
+        if(!channel) {
+                abilityLog(`❗ **Error:** Cannot find channel for ${srcRefToText(src_ref)}!`);
+            channel = mainGuild.channels.cache.get(backupChannelId);
+        }
         let repl_msg = await channel.send(msg);
         return repl_msg;
     }
