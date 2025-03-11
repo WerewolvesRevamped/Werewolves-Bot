@@ -97,8 +97,10 @@ module.exports = function() {
         // filter
         let signedup = channel.guild.roles.cache.get(stats.signed_up).members.toJSON();
         let substitute = channel.guild.roles.cache.get(stats.sub).members.toJSON();
+        let mentor = channel.guild.roles.cache.get(stats.mentor).members.toJSON();
         let filter = signedup.map(el => el.id);
         filter.push(...substitute.map(el => el.id));
+        filter.push(...mentor.map(el => el.id));
         // list
         let processedIds = [];
         //
