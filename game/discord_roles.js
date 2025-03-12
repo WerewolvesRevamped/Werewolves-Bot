@@ -137,6 +137,26 @@ module.exports = function() {
     }
     
     /**
+    Remove all DRs from a player
+    **/
+    this.removeAllDR = async function(player_id) {
+        // get roles
+        let drs = await sqlProm("SELECT * FROM discord_roles");
+        if(drs.length === 0) { // if drs don't exist, return
+			return; 
+        }
+        
+        // get member by id
+        let member = mainGuild.members.cache.get(player_id);
+        
+        // remove roles
+        for(let i = 0; i < drs.length; i++) {
+            // add role
+            member.roles.remove(drs[i].id);
+        }
+    }
+    
+    /**
     Caches DR
     **/
     this.cacheDR = async function() {

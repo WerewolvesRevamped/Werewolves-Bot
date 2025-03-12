@@ -253,6 +253,10 @@ module.exports = function() {
 		}, () => {
 			channel.send("⛔ Database error. Could not reset poll counter!");
 		});
+        // reset DRs
+        let livingPlayers =  channel.guild.roles.cache.get(stats.participant).members.toJSON();
+        livingPlayers.forEach(el => removeAllDR(el.id));
+        // reset other roles
 		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.participant).members.toJSON(), 0, "participant");
 		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.dead_participant).members.toJSON(), 0, "dead participant");
 		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.ghost).members.toJSON(), 0, "ghost");

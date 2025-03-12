@@ -138,6 +138,16 @@ module.exports = function() {
             // kill player
             await killPlayer(playersFiltered[i]);
             
+            // set mentor as dead if applicable
+            let mentor = await getMentor(playersFiltered[i]); 
+            if(mentor) {
+                let mentorMember = mainGuild.members.cache.get(mentor);
+                // revoke mentor role
+                removeRoleRecursive(mentorMember, false, stats.mentor, "mentor");
+                // grant dead role
+                addRoleRecursive(mentorMember, false, stats.dead_participant, "dead participant");
+            }
+            
             // get all attacks/etc and select a random one to trigger the triggers
             let deaths = players.filter(el => el.id === playersFiltered[i]);
             let selDeath = deaths[Math.floor(Math.random() * deaths.length)];
@@ -215,11 +225,8 @@ module.exports = function() {
         // grant dead role depending on mode
         if(!stats.haunting) addRoleRecursive(player, false, stats.dead_participant, "dead participant");
         else addRoleRecursive(player, false, stats.ghost, "ghost");
-        // revoke elected role WIP: elected module?
-        removeRoleRecursive(player, false, stats.mayor, "mayor");
-        removeRoleRecursive(player, false, stats.mayor2, "mayor 2");
-        removeRoleRecursive(player, false, stats.reporter, "reporter");
-        removeRoleRecursive(player, false, stats.guardian, "guardian");
+        // revoke DRs
+        removeAllDR(player_id);
         
         // retrieve all attributes of the player and set to dead
         let playerAttributes =  await queryAttributePlayer(player_id, "owner", player_id);
