@@ -90,6 +90,7 @@ module.exports = function() {
                 "list_dead": ["ld","dead","dead_list","dead-list","listdead","list-dead","lg","g","ghost","ghost_list","ghost-list","listghost","list-ghost","list_ghost","list_ghosts"],
                 "list_alphabetical": ["la"],
                 "list_signedup": ["l","list","signedup","signedup_list","signedup-list","listsignedup","list-signedup"],
+                "list_mentors": ["mentors"],
                 "signup": ["join","sign-up","sign_up","unsignup","signout","participate","sign-out","sign_out","leave","unjoin","signups"],
                 "options": ["stat","stats","option"],
                 "info": ["i"],

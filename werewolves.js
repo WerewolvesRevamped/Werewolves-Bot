@@ -697,6 +697,10 @@ client.on("messageCreate", async message => {
 	case "list_substitutes":
 		cmdListSubs(message.channel);
 	break;
+	/* List Mentors */ // Lists all mentors
+	case "list_mentors":
+		cmdListMentors(message.channel);
+	break;
 	/* Bulk Delete */ // Deletes a lot of messages
 	case "bulkdelete":
 		if(checkGMHelper(message)) cmdConfirm(message, "bulkdelete");

@@ -527,6 +527,24 @@ module.exports = function() {
 			channel.send("⛔ Database error. Could not list substitute players!");
 		});
 	}
+    
+	/* Lists all mentors */
+	this.cmdListMentors = function(channel) {
+		// Get a list of players
+		sql("SELECT id,emoji,mentor FROM players WHERE mentor<>''", result => {
+			let playerList = result.map(el => `${el.emoji}  - ${channel.guild.members.cache.get(el.mentor) ? channel.guild.members.cache.get(el.mentor).user.username.replace(/(_|\*|~)/g,"\\$1") : "*user left*"}  (${channel.guild.members.cache.get(el.mentor) ? channel.guild.members.cache.get(el.mentor) : "<@" + el.mentor + ">"}) for ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username.replace(/(_|\*|~)/g,"\\$1") : "*user left*"} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
+			// Print message
+			channel.send("✳️ Listing mentors").then(m => {
+				m.edit("**Mentors** | Total: " +  result.length + "\n" + playerList)
+			}).catch(err => {
+				logO(err); 
+				sendError(channel, err, "Could not list mentors");
+			});
+		}, () => {
+			// DB error
+			channel.send("⛔ Database error. Could not list mentors!");
+		});
+	}
 	
 	/* Lists all alive players */
 	this.cmdListAlive = function(channel) {
