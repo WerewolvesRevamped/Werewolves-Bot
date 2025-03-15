@@ -677,6 +677,7 @@ module.exports = function() {
         await sqlProm(`UPDATE players SET target=${newIdSrc} WHERE target=${oldIdSrc}`);
         await sqlProm(`UPDATE prompts SET src_ref=${newIdSrc} WHERE src_ref=${oldIdSrc}`);
         await sqlProm(`UPDATE teams SET target=${newIdSrc} WHERE target=${oldIdSrc}`);
+        await sqlProm(`UPDATE active_displays SET src_ref=${newIdSrc} WHERE src_ref=${oldIdSrc}`);
         
         // update
         message.channel.send("✅ Updated basic columns in all tables!");
@@ -961,7 +962,7 @@ module.exports = function() {
 	}
 	
 	this.cmdSpectate = function(channel, member) {
-		if(isParticipant(member)) {
+		if(isParticipant(member) || isMentor(member) || isSub(member)) {
 			channel.send("⛔ Command error. Can't make you a spectator while you're a participant."); 
 			return;
 		} else if(stats.gamephase < gp.SIGNUP) {
@@ -1320,9 +1321,15 @@ module.exports = function() {
 		return member.roles.cache.get(stats.sub);
 	}
     
+	/* Check if a member is a mentor */
+	this.isMentor = function(member) {
+        if(!member) return false;
+		return member.roles.cache.get(stats.mentor);
+	}
+    
     /* Check if member is game involved */
     this.isGameInvolved = function(member) {
-        return isParticipant(member) || isSignedUp(member) || isSub(member) || isDeadParticipant(member) || isGhost(member);
+        return isParticipant(member) || isSignedUp(member) || isSub(member) || isDeadParticipant(member) || isGhost(member) || isMentor(member);
     }
 	
 	/* Cache emojis */

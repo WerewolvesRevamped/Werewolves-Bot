@@ -39,7 +39,7 @@
     "wager.1": "You have received the Devil's Wager. You can decide to either:\n\n1. Attack a player who still has a soul, but sell your soul in the process.\n\n2. Protect yourself or any player, but sell your soul in the process.\n\n3. Check someone's role, but the Devil will see the result and also your role.\n\n4. Ignore, and don't do anything.",
     "alpha_wolf.1": "If you want to overwrite the wolfpack poll, please submit a player. Additionally, please write 'yes' if you would like to reveal yourself to wolfpack and 'no' if not.",
     "corrupt_wolf.1": "Please select a player you would like to corrupt and provide a number from the following range: -1, 0, 1, 2.",
-    "crowd_seeker.1": "You may submit three player and a role each and you will learn whether that player has that role or not.",
+    "crowd_seeker.1": "You may submit three player and a role each and you will learn whether that player has that role or not. For each player, please specify a player name and a role, separated by `;`." ,
     "oracle.1": "The alignment of which two players would you like to compare? Please specify two player names, separated by `;`.",
     "archivist_fox.1": "You may choose to either join the wolfpack or to check the role list for specific roles.",
     "clairvoyant_fox.1": "You may choose to either join the wolfpack or to investigate another player.",

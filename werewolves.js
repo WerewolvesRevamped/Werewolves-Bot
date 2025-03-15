@@ -1115,7 +1115,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
 	// Handle reaction ingame
 	} else if(stats.gamephase == gp.INGAME) {
 		// Remove unallowed reactions
-		if(isSpectator(reaction.message.guild.members.cache.get(user.id)) || isDeadParticipant(reaction.message.guild.members.cache.get(user.id))) {
+		if(isSpectator(reaction.message.guild.members.cache.get(user.id)) || isDeadParticipant(reaction.message.guild.members.cache.get(user.id)) || isMentor(reaction.message.guild.members.cache.get(user.id))) {
 			if(reaction.emoji == client.emojis.cache.get(stats.no_emoji) || reaction.emoji == client.emojis.cache.get(stats.yes_emoji) || reaction.emoji.name == "🇦" || reaction.emoji.name == "🇧" || reaction.emoji.name == "🇨" || reaction.emoji.name == "🇩" || reaction.emoji.name == "🇪" || reaction.emoji.name == "🇫") return;
 			reaction.users.remove(user);
 		// Automatic pinning
