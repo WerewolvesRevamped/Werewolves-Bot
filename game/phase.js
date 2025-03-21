@@ -50,6 +50,8 @@ module.exports = function() {
         channel.send(`🕐 Locking phase and waiting for 60 seconds to change to next phase.`);
         await sleep(60 * 1000);
         cmdPhaseNext(channel);
+        await sleep(60 * 1000);
+        cmdPlayersListMsgs2(channel, ["msgs2", getPhaseNum()]);
     }
     
     /**
