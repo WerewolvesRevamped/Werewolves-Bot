@@ -204,6 +204,9 @@ module.exports = function() {
         mainGuild.roles.cache.get(stats.sub).members.forEach(el => {
             addRoleRecursive(el, backupChannelId, stats.dead_participant, "dead participant");
 		});
+        mainGuild.roles.cache.get(stats.mentor).members.forEach(el => {
+            addRoleRecursive(el, backupChannelId, stats.dead_participant, "dead participant");
+		});
     }
 	
 	/* Handles reset command */
