@@ -142,7 +142,7 @@ module.exports = function() {
         for(let i = 0; i < boosters.length; i++) {
             multiplier *= boosters[i].multiplier;
         }
-        return multiplier;
+        return Math.max(Math.min(multiplier, 50), -1);
     }
     
     /**
