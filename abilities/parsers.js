@@ -973,7 +973,7 @@ module.exports = function() {
         }
         if(!selectAll) {
             let shuffled = shuffleArray(allPlayers);
-            return [ shuffled[0].id ];
+            return shuffled[0] ? [ shuffled[0].id ] : [ ];
         } else {
             return allPlayers.map(el => el.id);
         }
@@ -1089,7 +1089,7 @@ module.exports = function() {
     Get all teams 
     **/
     function getAllTeams() {
-        return sqlProm("SELECT * FROM teams WHERE active=1");
+        return sqlProm("SELECT * FROM teams WHERE active=1 AND name<>'unaligned'");
     }
     
     /**
