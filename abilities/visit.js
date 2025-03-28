@@ -25,10 +25,12 @@ module.exports = function() {
         // convert extra role channel ids to player ids
         if(sourcePlayerSplit[0] === "player_attr") {
             let attr = await roleAttributeGetPlayer(sourcePlayer);
+            if(!attr || !attr.id) return null; // no visit if source attribute has since then been deleted
             sourcePlayer = attr.id;
         }
         if(targetPlayerSplit[0] === "player_attr") {
             let attr = await roleAttributeGetPlayer(targetPlayer);
+            if(!attr || !attr.id) return null; // no visit if target attribute has since then been deleted
             targetPlayer = attr.id;
         }
         

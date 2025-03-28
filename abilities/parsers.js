@@ -1089,7 +1089,7 @@ module.exports = function() {
     Get all teams 
     **/
     function getAllTeams() {
-        return sqlProm("SELECT * FROM teams WHERE active=1");
+        return sqlProm("SELECT * FROM teams WHERE active=1 AND name<>'unaligned'");
     }
     
     /**

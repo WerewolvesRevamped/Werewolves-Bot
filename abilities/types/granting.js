@@ -58,14 +58,8 @@ module.exports = function() {
                     abilityLog(`❗ **Error:** Tried to grant ${activeExtraRole2.length} roles!`);
                     return { msg: "Transfer failed! " + abilityError, success: false };
                 }
-                let role2 = await parseRoleSelector(ability.role, src_ref, additionalTriggerData);
-                if(role2.length != 1) {
-                    abilityLog(`❗ **Error:** Tried to grant ${role2.length} roles!`);
-                    return { msg: "Transfer failed! " + abilityError, success: false };
-                }
-                role2 = role2[0];
                 activeExtraRole2 = activeExtraRole2[0];
-                result = await grantingTransfer(src_name, src_ref, target, transferTo, activeExtraRole2, role2, additionalTriggerData);
+                result = await grantingTransfer(src_name, src_ref, target, transferTo, activeExtraRole2, additionalTriggerData);
                 return result;
             break;
         }
@@ -76,9 +70,10 @@ module.exports = function() {
     Ability: Granting - Add
     adds a role to a player
     **/
-    this.grantingAdd = async function(src_name, src_ref, targets, role, additionalTriggerData) {
+    this.grantingAdd = async function(src_name, src_ref, targets, role, additionalTriggerData, channelOverride = null) {
         // get existing channel if applicable
         let existingChannel = await connectionGet(`${role}:${src_ref}`);
+        if(channelOverride) existingChannel = [{ channel_id: channelOverride }]; // used by transfer
         // iterate through targets
         for(let i = 0; i < targets.length; i++) {
             // handle 
@@ -149,9 +144,10 @@ module.exports = function() {
     Ability: Granting - Transfer
     transfers a role from one player to another player
     **/
-    this.grantingTransfer = async function(src_name, src_ref, targets, transferTo, activeExtraRole, role, additionalTriggerData) {
+    this.grantingTransfer = async function(src_name, src_ref, targets, transferTo, activeExtraRole, additionalTriggerData) {
+        let queried = await queryAttributePlayer(targets[0], "attr_type", "role", "val2", activeExtraRole); // query old role to get role name
         let remove = await grantingRemove(src_name, src_ref, targets, activeExtraRole, additionalTriggerData);
-        let add = await grantingAdd(src_name, src_ref, transferTo, role, additionalTriggerData);
+        let add = await grantingAdd(src_name, src_ref, transferTo, queried[0].val1, additionalTriggerData, activeExtraRole);
         
         if(add.success) return { msg: "Transfer succeeded!", success: true, target: `player:${transferTo[0]}` };
         else return { msg: "Transfer failed!", success: false, target: `player:${transferTo[0]}` };

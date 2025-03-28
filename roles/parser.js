@@ -1576,6 +1576,12 @@ module.exports = function() {
             ability = { type: "for_each", target: ttpp(fd[1]) };
         }
         /** SHUFFLE **/
+        // 1
+        exp = new RegExp("^Shuffle " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "shuffle", targets: [ ttpp(fd[1]) ] };
+        }
         // 2
         exp = new RegExp("^Shuffle " + targetType + " " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
