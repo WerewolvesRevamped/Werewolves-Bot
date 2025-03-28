@@ -66,7 +66,8 @@ module.exports = function() {
 
         // format item list
         let itemsTxt = [];
-        let embed = { title: "Boosters", description: `Here is a list of currently active boosters.\n\n` + boosters.join("\n"), color: 8984857 };
+        let mult = await getBoosterMultiplier();
+        let embed = { title: "Boosters", description: `Total Multiplier: ${mult}\nHere is a list of currently active boosters.\n\n` + boosters.join("\n"), color: 8984857 };
         message.channel.send({ embeds: [ embed ] });
     }
         

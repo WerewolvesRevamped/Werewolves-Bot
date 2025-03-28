@@ -379,10 +379,14 @@ module.exports = function() {
                 let em = client.emojis.cache.get(emoji);
                 let emojiText = (emoji.match(/\d+/) && em)  ? `<:${em.name.toLowerCase()}:${em.id}>` : emoji;
                 // get users
-                await data.users.fetch();
-                let users = data.users.cache.toJSON();
-                // return data
-                reformattedReactions.push({ emoji_id: emoji, emoji: emojiText, users: users, count: data.count, messageID: data.messageID });
+                if(data.count > 1) {
+                    await data.users.fetch();
+                    let users = data.users.cache.toJSON();
+                    // return data
+                    reformattedReactions.push({ emoji_id: emoji, emoji: emojiText, users: users, count: data.count, messageID: data.messageID });
+                } else {
+                    console.log(`Discarding ${emojiText}`);
+                }
             });
             
             // await all promises
@@ -428,7 +432,7 @@ module.exports = function() {
             const validVoters = voters.filter(el => duplicateVoters.indexOf(el.id) === -1);
             const invalidVoters = voters.filter(el => duplicateVoters.indexOf(el.id) != -1 && el != client.user.id);
             
-            console.log("All Voters", reac.users.map(el => el.globalName), validVoters.map(el => el.globalName), invalidVoters.map(el => el.globalName));
+            console.log("All Voters", reac.users.map(el => el.globalName ?? el.id), validVoters.map(el => el.globalName ?? el.id), invalidVoters.map(el => el.globalName ?? el.id));
             
             // evaluate vote count
             let votesArray = [];
