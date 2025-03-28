@@ -973,7 +973,7 @@ module.exports = function() {
         }
         if(!selectAll) {
             let shuffled = shuffleArray(allPlayers);
-            return [ shuffled[0].id ];
+            return shuffled[0] ? [ shuffled[0].id ] : [ ];
         } else {
             return allPlayers.map(el => el.id);
         }
