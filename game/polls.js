@@ -392,6 +392,9 @@ module.exports = function() {
             // await all promises
             await Promise.all(reactionsProms);
             
+            // all reactions from one message
+            console.log("MSG REACTIONS", reformattedReactions.map(el => `${el.emoji} ${el.count}`));
+            
             // add to all reactions
             allReactions.push(...reformattedReactions);
         });
