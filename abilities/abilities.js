@@ -40,6 +40,7 @@ require("./types/shuffle.js")();
 require("./types/emit.js")();
 require("./types/storing.js")();
 require("./types/displaying.js")();
+require("./types/feedback.js")();
 
 module.exports = function() {
     
@@ -187,8 +188,7 @@ module.exports = function() {
                     feedback = await abilityDisplaying(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "feedback":
-                    let info = await parseInfo(ability.feedback, src_refAction, additionalTriggerData);
-                    feedback = { msg: info, success: true };
+                    feedback = await abilityFeedback(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "success":
                     feedback = { msg: "Ability succeeded!", success: true };
