@@ -99,6 +99,7 @@ module.exports = function() {
         // Check if owner
 		if(!isCCOwner(channel, member) && !mode && !isGameMaster(member, true)) {
 			channel.send("⛔ Command error. You are not an owner of this CC!");
+			return;
         }
         
         // get list of members to promote
@@ -130,6 +131,7 @@ module.exports = function() {
         // Check if owner
 		if(!isCCOwner(channel, member) && !mode && !isGameMaster(member, true)) {
 			channel.send("⛔ Command error. You are not an owner of this CC!");
+			return;
         }
         
         // get list of members to demote
@@ -190,6 +192,7 @@ module.exports = function() {
         // Check if owner
 		if(!isCCOwner(channel, member) && !mode && !isGameMaster(member, true)) {
 			channel.send("⛔ Command error. You are not an owner of this CC!");
+			return;
         }
         
         // clean cc name
@@ -211,6 +214,7 @@ module.exports = function() {
         // Check if owner
 		if(!isCCOwner(channel, member) && !mode && !isGameMaster(member, true)) {
 			channel.send("⛔ Command error. You are not an owner of this CC!");
+			return;
         }
         
         // rename channel
