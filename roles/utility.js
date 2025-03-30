@@ -105,7 +105,7 @@ module.exports = function() {
     this.getRoleTypeData = function(roleTypeIn) {
         var roleTypeID = 0;
         var roleType = "Default";
-        switch(roleTypeIn) {
+        switch(roleTypeIn.trim()) {
             case "technical": roleTypeID = 3; roleType = "Technical Role"; break;
             case "limited": roleTypeID = 2; roleType = "Limited Role"; break;
             case "transformation": roleTypeID = 1; roleType = "Transformation Role"; break;

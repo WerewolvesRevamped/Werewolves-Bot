@@ -173,6 +173,17 @@ module.exports = function() {
                 case 9:
                     dmsgText =  `${getEmoji('crow')} It seems a murder of crows has murdered %s! ${getEmoji('crow')}`;
                 break;
+                case 10:
+                    let ids2 = await getAllLivingIDs();
+                    for(let i = 0; i < ids2.length; i++) {
+                        if(Math.random() > 0.75) {
+                            await sqlProm("INSERT INTO packs (player, pack) VALUES (" + connection.escape(ids2[i]) + ",46) ON DUPLICATE KEY UPDATE pack=46");
+                        }
+                    }
+                    await cachePacks();
+                    dmsgText =  `${getEmoji('Bear')} %s couldn't *bear* it anymore! ${getEmoji('Bear')}`;
+                    setCustomStatus(`Growling in sorrow for ${nickname}.`);
+                break;
             }
         }
         dmsgText = dmsgText.replace(/%s/g, displayName);

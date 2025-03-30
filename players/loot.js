@@ -226,7 +226,7 @@ module.exports = function() {
                     case "bot:recycle": return `Access to the ${stats.prefix}recycle command. Destroy rewards you no longer need in exchange for some coins!`;
                     case "bot:invtransfer": return `Access to the ${stats.prefix}inventory transfer command. Lets you transfer items to others!`;
                     case "bot:nick": return `Access to the ${stats.prefix}nickname command. Lets you change your nickname!`;
-                    case "bot:market": return `Access to the ${stats.prefix}market command. Lets you access the nickname!`;
+                    case "bot:market": return `Access to the ${stats.prefix}market command. Lets you access the market!`;
                     case "bot:stash": return `Access to the ${stats.prefix}stash and ${stats.prefix}unstash commands. Lets you hide items from your inventory! Use  ${stats.prefix}stash list to receive a list of stashed items as a DM.`;
                     default: return `An unknown bot reward: ${reward[1]}.`;
                 }

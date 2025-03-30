@@ -250,7 +250,7 @@ client.on("messageCreate", async message => {
         // filter out level up messages so we dont get double level ups
         let sCheck = checkKeyword(message.content)
         if(sCheck) {
-            await sqlPromEsc("UPDATE activity SET timestamp=timestamp+3 WHERE player=", message.author.id);
+            await sqlPromEsc("UPDATE activity SET timestamp=" + (curTime+3) + " WHERE player=", message.author.id);
         }
         // count activity
         // check for a players longest message within a 5 minute period, then award XP based on that
@@ -344,6 +344,8 @@ client.on("messageCreate", async message => {
                             if(newLevel === 1) embed.description += `\n\nYou can check your XP and Level using \`${stats.prefix}xp\` and see a leaderboard using \`${stats.prefix}xp list\`.`;  
                             message.channel.send({ embeds: [ embed ] });
                         }
+                    } else {
+                        console.log(`Delayed Level Up for ${message.member.displayName}!`);
                     }
                 }
             } else {

@@ -324,7 +324,6 @@ module.exports = function() {
     /**
     Get Role Embed 
     Returns an info embed for a role 
-    WIP: Re-implement role filter
     **/
     this.getRoleEmbed = function(roleName, visibleSections, guild, authorId = null) {
         return new Promise(res => {

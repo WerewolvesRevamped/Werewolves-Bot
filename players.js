@@ -1044,8 +1044,8 @@ module.exports = function() {
             defRole = "substitute";
         }
         
-        if(idEmojis.map(el => el[1]).includes(args[0]) && checkGamephase) {
-            let emojiIndex = idEmojis.map(el => el[1]).indexOf(args[0]);
+        if(idEmojis.map(el => el[1].toLowerCase()).includes(args[0]) && checkGamephase) {
+            let emojiIndex = idEmojis.map(el => el[1].toLowerCase()).indexOf(args[0]);
             let playerIndex = idEmojis.map(el => el[0]).indexOf(member.id);
             if(emojiIndex != playerIndex) {
                 if(idEmojis[emojiIndex][0]) channel.send("⛔ This emoji is reserved by another player!").then(m => m.edit(`⛔ This emoji is reserved by <@${idEmojis[emojiIndex][0]}>!`));
