@@ -61,7 +61,7 @@ module.exports = function() {
         for(let i = 0; i < targets.length; i++) {
             // handle visit
             if(additionalTriggerData.parameters.visitless !== true) {
-                let result = await visit(src_ref, targets[i], group, "joining", "add");
+                let result = await visit(src_ref, targets[i], group, type, "joining", "add");
                 if(result) {
                     if(targets.length === 1) return visitReturn(result, "Joining failed!", "Joining succeeded!");
                     continue;
@@ -104,7 +104,7 @@ module.exports = function() {
         for(let i = 0; i < targets.length; i++) {
             // handle visit
             if(additionalTriggerData.parameters.visitless !== true) {
-                let result = await visit(src_ref, targets[i], group, "joining", "remove");
+                let result = await visit(src_ref, targets[i], group, NO_SND_VISIT_PARAM, "joining", "remove");
                 if(result) {
                     if(targets.length === 1) return visitReturn(result, "Joining failed!", "Joining succeeded!");
                     continue;

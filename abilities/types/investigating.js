@@ -91,7 +91,7 @@ module.exports = function() {
         
         // handle visit
         if(additionalTriggerData.parameters.visitless !== true) {
-            let result = await visit(src_ref, targets[0], "", "investigating", "role", `Investigated <@${additionalTriggerData.orig_target}>'s role: \`%1\``);
+            let result = await visit(src_ref, targets[0], NO_VISIT_PARAM, NO_SND_VISIT_PARAM, "investigating", "role", `Investigated <@${additionalTriggerData.orig_target}>'s role: \`%1\``);
             if(result) return visitReturn(result, "Investigation failed!", "Investigation succeeded!");
         }
         
@@ -113,7 +113,7 @@ module.exports = function() {
         
         // handle visit
         if(additionalTriggerData.parameters.visitless !== true) {
-            let result = await visit(src_ref, targets[0], "", "investigating", "class", `Investigated <@${additionalTriggerData.orig_target}>'s class: \`%1\``);
+            let result = await visit(src_ref, targets[0], NO_VISIT_PARAM, NO_SND_VISIT_PARAM, "investigating", "class", `Investigated <@${additionalTriggerData.orig_target}>'s class: \`%1\``);
             if(result) return visitReturn(result, "Investigation failed!", "Investigation succeeded!");
         }
         
@@ -135,7 +135,7 @@ module.exports = function() {
         
         // handle visit
         if(additionalTriggerData.parameters.visitless !== true) {
-            let result = await visit(src_ref, targets[0], "", "investigating", "category", `Investigated <@${additionalTriggerData.orig_target}>'s category: \`%1\``);
+            let result = await visit(src_ref, targets[0], NO_VISIT_PARAM, NO_SND_VISIT_PARAM, "investigating", "category", `Investigated <@${additionalTriggerData.orig_target}>'s category: \`%1\``);
             if(result) return visitReturn(result, "Investigation failed!", "Investigation succeeded!");
         }
         
@@ -157,7 +157,7 @@ module.exports = function() {
         
         // handle visit
         if(additionalTriggerData.parameters.visitless !== true) {
-            let result = await visit(src_ref, targets[0], "", "investigating", "alignment", `Investigated <@${additionalTriggerData.orig_target}>'s alignment: \`%1\``);
+            let result = await visit(src_ref, targets[0], NO_VISIT_PARAM, NO_SND_VISIT_PARAM, "investigating", "alignment", `Investigated <@${additionalTriggerData.orig_target}>'s alignment: \`%1\``);
             if(result) return visitReturn(result, "Investigation failed!", "Investigation succeeded!");
         }
         
@@ -189,7 +189,7 @@ module.exports = function() {
         
         // handle visit
         if(additionalTriggerData.parameters.visitless !== true) {
-            let result = await visit(src_ref, targets[0], attrName, "investigating", "attribute");
+            let result = await visit(src_ref, targets[0], attrName, NO_SND_VISIT_PARAM, "investigating", "attribute");
             if(result) return visitReturn(result, "Investigation failed!", "Investigation succeeded!");
         }
         

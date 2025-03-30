@@ -1941,11 +1941,11 @@ module.exports = function() {
             switch(targetType) {
                 case "@actionabilitytype": return "abilityType";
                 case "@actionfeedback": return "info";
-                case "@attacksource": return "source";
+                case "@attacksource": case "@triggersource": return "source";
                 case "@deathtype": return "killingType";
                 case "@killingtype": return "killingType";
                 case "@visittype": return "abilityType";
-                case "@visitparameter": return "unknown";
+                case "@visitparameter":  case "@secondvisitparameter": return "unknown";
                 case "@thisattr": return "activeAttribute";
                 case "@result": case "@result1": case "@result2": case "@result3": 
                 case "@result4": case "@result5": case "@result6": case "@result7": 

@@ -338,6 +338,12 @@ module.exports = function() {
                 } else {
                     return invalidSelector(selectorTarget);
                 }
+            case "@secondvisitparameter":
+                if(additionalTriggerData.second_visit_parameter) {
+                    return [ additionalTriggerData.second_visit_parameter ];
+                } else {
+                    return invalidSelector(selectorTarget);
+                }
             case "@ind":
                 if(additionalTriggerData.ind) {
                     return [ additionalTriggerData.ind ];
@@ -1182,6 +1188,13 @@ module.exports = function() {
                     abilityLog(`❗ **Error:** Invalid role selector target \`${selectorTarget}\`!`);
                     return [ ];
                 }
+            case "@secondvisitparameter":
+                if(additionalTriggerData.second_visit_parameter) {
+                    return [ parseRole(additionalTriggerData.second_visit_parameter) ];
+                } else {
+                    abilityLog(`❗ **Error:** Invalid role selector target \`${selectorTarget}\`!`);
+                    return [ ];
+                }
             case "@option":
                 if(additionalTriggerData.chosen) {
                     return [ parseRole(additionalTriggerData.chosen) ];
@@ -1256,6 +1269,13 @@ module.exports = function() {
                 } else {
                     abilityLog(`❗ **Error:** Invalid source selector target \`${selectorTarget}\`!`);
                     return [ ];
+                }            
+            case "@triggersource":
+                if(additionalTriggerData.src_name) {
+                    return [ additionalTriggerData.src_name ];
+                } else {
+                    abilityLog(`❗ **Error:** Invalid source selector target \`${selectorTarget}\`!`);
+                    return [ ];
                 }
             default:
                 if(selectorTarget.split(":").length === 2) {
@@ -1327,6 +1347,13 @@ module.exports = function() {
             case "@visitparameter":
                 if(additionalTriggerData.visit_parameter) {
                     return [ parseAttributeName(additionalTriggerData.visit_parameter) ];
+                } else {
+                    if(!noErr) abilityLog(`❗ **Error:** Invalid attribute selector target \`${selectorTarget}\`!`);
+                    return [ ];
+                }
+            case "@secondvisitparameter":
+                if(additionalTriggerData.second_visit_parameter) {
+                    return [ parseAttributeName(additionalTriggerData.second_visit_parameter) ];
                 } else {
                     if(!noErr) abilityLog(`❗ **Error:** Invalid attribute selector target \`${selectorTarget}\`!`);
                     return [ ];
@@ -1498,6 +1525,13 @@ module.exports = function() {
             case "@visitparameter":
                 if(additionalTriggerData.visit_parameter) {
                     return [ parseTeam(additionalTriggerData.visit_parameter) ];
+                } else {
+                    abilityLog(`❗ **Error:** Invalid alignment selector target \`${selectorTarget}\`!`);
+                    return [ ];
+                }
+            case "@secondvisitparameter":
+                if(additionalTriggerData.second_visit_parameter) {
+                    return [ parseTeam(additionalTriggerData.second_visit_parameter) ];
                 } else {
                     abilityLog(`❗ **Error:** Invalid alignment selector target \`${selectorTarget}\`!`);
                     return [ ];

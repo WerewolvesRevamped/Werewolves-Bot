@@ -101,7 +101,7 @@ module.exports = function() {
         for(let i = 0; i < manipTarget.length; i++) {
             // handle visit
             if(additionalTriggerData.parameters.visitless !== true) {
-                let result = await visit(src_ref, manipTarget[i], manipType, "poll", "manipulation");
+                let result = await visit(src_ref, manipTarget[i], manipType, NO_SND_VISIT_PARAM, "poll", "manipulation");
                 if(result) {
                     if(targets.length === 1) return visitReturn(result, "Poll manipulation failed!", "Poll manipulated!");
                     continue;
@@ -121,7 +121,7 @@ module.exports = function() {
         for(let i = 0; i < manipTarget.length; i++) {
             // handle visit
             if(additionalTriggerData.parameters.visitless !== true) {
-                let result = await visit(src_ref, manipTarget[i], manipValue, "poll", "votes");
+                let result = await visit(src_ref, manipTarget[i], manipValue, manipType, "poll", "votes");
                 if(result) {
                     if(targets.length === 1) return visitReturn(result, "Poll manipulation failed!", "Poll votes manipulated!");
                     continue;

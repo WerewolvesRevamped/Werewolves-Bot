@@ -82,7 +82,7 @@ module.exports = function() {
     async function countingSet(src_name, src_ref, target, targetType, num, additionalTriggerData) {
         // handle visit
         if(additionalTriggerData.parameters.visitless !== true) {
-            let result = await visit(src_ref, target, num, "counting", "set");
+            let result = await visit(src_ref, target, num, NO_SND_VISIT_PARAM, "counting", "set");
             if(result) return visitReturn(result, "Counting failed!", "Counter updated!");
         }
         
@@ -102,7 +102,7 @@ module.exports = function() {
     async function countingIncrement(src_name, src_ref, target, targetType, num, additionalTriggerData) {
         // handle visit
         if(additionalTriggerData.parameters.visitless !== true) {
-            let result = await visit(src_ref, target, num, "counting", "increment");
+            let result = await visit(src_ref, target, num, NO_SND_VISIT_PARAM, "counting", "increment");
             if(result) return visitReturn(result, "Counting failed!", "Counter incremented!");
         }
         
@@ -128,7 +128,7 @@ module.exports = function() {
     async function countingDecrement(src_name, src_ref, target, targetType, num, additionalTriggerData) {
         // handle visit
         if(additionalTriggerData.parameters.visitless !== true) {
-            let result = await visit(src_ref, target, num, "counting", "decrement");
+            let result = await visit(src_ref, target, num, NO_SND_VISIT_PARAM, "counting", "decrement");
             if(result) return visitReturn(result, "Counting failed!", "Counter decremented!");
         }
         

@@ -87,7 +87,7 @@ module.exports = function() {
         for(let i = 0; i < targets.length; i++) {
             // handle visit
             if(additionalTriggerData.parameters.visitless !== true) {
-                let result = await visit(src_ref, targets[i], role, "changing", "role");
+                let result = await visit(src_ref, targets[i], role, NO_SND_VISIT_PARAM, "changing", "role");
                 if(result) {
                     if(targets.length === 1) return visitReturn(result, "Changing failed!", "Changing succeeded!");
                     continue;
@@ -187,7 +187,7 @@ module.exports = function() {
         for(let i = 0; i < targets.length; i++) {
             // handle visit
             if(additionalTriggerData.parameters.visitless !== true) {
-                let result = await visit(src_ref, targets[i], alignment, "changing", "alignment");
+                let result = await visit(src_ref, targets[i], alignment, NO_SND_VISIT_PARAM, "changing", "alignment");
                 if(result) {
                     if(targets.length === 1) return visitReturn(result, "Changing failed!", "Changing succeeded!");
                     continue;

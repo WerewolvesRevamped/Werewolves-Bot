@@ -53,7 +53,7 @@ module.exports = function() {
         
         // handle visit
         if(additionalTriggerData.parameters.visitless !== true) {
-            let result = await visit(src_ref, target, targetType, "targeting", "target");
+            let result = await visit(src_ref, target, targetType, NO_SND_VISIT_PARAM, "targeting", "target");
             if(result) return visitReturn(result, "Targeting failed!", "Target updated!");
         }
     

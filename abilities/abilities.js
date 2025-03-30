@@ -44,6 +44,9 @@ require("./types/feedback.js")();
 
 module.exports = function() {
     
+    this.NO_VISIST_PARAM = "";
+    this.NO_SND_VISIT_PARAM = "";
+    
     this.abilityError = "This is likely caused by an error. Please contact a Host.";
     this.abilityFailure = "If you believe this to be a mistake, please contact a Host.";
     
@@ -210,9 +213,9 @@ module.exports = function() {
             await trigger(src_ref, "On Action Inverted Complex", { action_result: feedback, action_target: actionTarget, action_feedback: feedback.msg, ability_type: ability.type, ability_subtype: ability.subtype, src_name: src_name }); 
             await triggerHandler("On Action Target Complex", { action_result: feedback, action_target: actionTarget, action_feedback: feedback.msg, ability_type: ability.type, ability_subtype: ability.subtype, src_name: src_name, this: thisId }); 
              await triggerHandler("On Action Target Inverted Complex", { action_result: feedback, action_target: actionTarget, action_feedback: feedback.msg, ability_type: ability.type, ability_subtype: ability.subtype, src_name: src_name, this: thisId }); 
-            await trigger(src_ref, "On Any Action", { action_result: feedback, action_target: actionTarget, action_feedback: feedback.msg, ability_type: ability.type }); 
-            await trigger(src_ref, "On Any Action Complex", { action_result: feedback, action_target: actionTarget, action_feedback: feedback.msg, ability_type: ability.type, ability_subtype: ability.subtype }); 
-            await trigger(src_ref, "On Any Action Inverted Complex", { action_result: feedback, action_target: actionTarget, action_feedback: feedback.msg, ability_type: ability.type, ability_subtype: ability.subtype }); 
+            await trigger(src_ref, "On Any Action", { action_result: feedback, action_target: actionTarget, action_feedback: feedback.msg, ability_type: ability.type, src_name: src_name }); 
+            await trigger(src_ref, "On Any Action Complex", { action_result: feedback, action_target: actionTarget, action_feedback: feedback.msg, ability_type: ability.type, ability_subtype: ability.subtype, src_name: src_name }); 
+            await trigger(src_ref, "On Any Action Inverted Complex", { action_result: feedback, action_target: actionTarget, action_feedback: feedback.msg, ability_type: ability.type, ability_subtype: ability.subtype, src_name: src_name }); 
             
             // check choice completion (if applicable)
             if(additionalTriggerData.choice_data) {

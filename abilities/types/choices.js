@@ -64,7 +64,7 @@ module.exports = function() {
     async function choicesCreation(src_name, src_ref, target, choiceName, options, forcedSel, additionalTriggerData) {
         // handle visit
         if(additionalTriggerData.parameters.visitless !== true) {
-            let result = await visit(src_ref, target, choiceName, "choices", "creation");
+            let result = await visit(src_ref, target, choiceName, NO_SND_VISIT_PARAM, "choices", "creation");
             if(result) return visitReturn(result, "Choice creation failed!", "Choice creation succeeded!");
         }
         
