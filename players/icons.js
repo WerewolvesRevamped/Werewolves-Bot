@@ -61,7 +61,7 @@ module.exports = function() {
             let half = Math.ceil(items.length / 2);
             for(let i = 0; i < half; i++) items1.push(`• ${getEmoji(items[i][1])} ${items[i][2][1]}`);
             if(items.length > 1) for(let i = half; i < items.length; i++) items2.push(`• ${getEmoji(items[i][1])} ${items[i][2][1]}`);
-            let embed = { title: "Role Icons", description: `Here is a list of icon roles available for you, <@${message.member.id}>. You can switch icon role by running \`${stats.prefix}icon select "<Role Name>"\`, where you replace \`<Role Name>\` with the name of the role you want to select.`, color: 8984857, fields: [ {}, {} ] };
+            let embed = { title: "Role Icons", description: `Here is a list of icon roles available for you, <@${message.member.id}>. You can switch icon role by running \`${stats.prefix}icon select "<Name>"\`, where you replace \`<Name>\` with the name of the icon you want to select.`, color: 8984857, fields: [ {}, {} ] };
             embed.fields[0] = { name: "_ _", "value": items1.join("\n"), inline: true };
             embed.fields[1] = { name: "_ _", "value": items2.join("\n"), inline: true };
             embed.thumbnail = { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` };
@@ -70,7 +70,7 @@ module.exports = function() {
             // format item list
             let itemsTxt = [];
             for(let i = 0; i < items.length; i++) itemsTxt.push(`• ${getEmoji(items[i][1])} ${items[i][2][1]}`);
-            let embed = { title: "Role Icons", description: `Here is a list of icon roles available for you, <@${message.member.id}>. You can switch icon role by running \`${stats.prefix}icon select "<Role Name>"\`, where you replace \`<Role Name>\` with the name of the role you want to select.\n\n` + itemsTxt.join("\n"), color: 8984857 };
+            let embed = { title: "Role Icons", description: `Here is a list of icon roles available for you, <@${message.member.id}>. You can switch icon role by running \`${stats.prefix}icon select "<Name>"\`, where you replace \`<Name>\` with the name of the icon you want to select.\n\n` + itemsTxt.join("\n"), color: 8984857 };
             embed.thumbnail = { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` };
             message.channel.send({ embeds: [ embed ] });
         }
@@ -86,17 +86,13 @@ module.exports = function() {
 			return; 
 		} 
         
-        // parse role
-        let role = parseRole(args[1]);
-        if(!verifyRole(role)) {
-			message.channel.send("⛔ Command error. Invalid role!");
-			return;     
-        }
-        
+        // parse icon name
+        let iconName = args[1].toLowerCase().replace(/[^a-z ]*/g, "").trim();
+
         // check if has role
-        let iconPerms = await inventoryGetItem(message.member.id, "ic:" + role);
+        let iconPerms = await inventoryGetItem(message.member.id, "ic:" + iconName);
         if(iconPerms === 0) {
-            let embed = { title: "Role Icon", description: `<@${message.member.id}>, you do not have the ${toTitleCase(role)} icon unlocked.`, color: 16715021 };
+            let embed = { title: "Role Icon", description: `<@${message.member.id}>, you do not have the ${toTitleCase(iconName)} icon unlocked.`, color: 16715021 };
             message.channel.send({ embeds: [ embed ] });
             return;
         } 
@@ -112,25 +108,41 @@ module.exports = function() {
         }
         
         // get user data
-        let rName = `Icon_${toTitleCase(role).replace(/ /g,"")}`;
+        let rName = `Icon_${toTitleCase(iconName).replace(/ /g,"")}`;
         let tr = message.guild.roles.cache.find(r => r.name === rName);
         
+        let iconUrl;
         // get role url
-        let roleData = await getRoleDataFromName(role);
+        let role = parseRole(args[1]);
+        let isRole = verifyRole(role);
+        if(isRole) {
+            let roleData = await getRoleDataFromName(iconName);
+            iconUrl = roleData ? roleData.url : null;
+        }
+        // get non-role url via LUT
+        if(!iconUrl || !isRole) {
+            let lutval = applyLUT(iconName);
+            if(lutval) {
+                iconUrl = `${iconRepoBaseUrl}${lutval}.png`;
+            } else {
+                message.channel.send("⛔ Command error! Could not find icon!");
+                return; 
+            }
+        }
         
         if(tr) { // role found -> assign it
             message.member.roles.add(tr);
-            let embed = { title: "Role Icon", description: `<@${message.member.id}>, your role icon has been updated to ${toTitleCase(role)}.`, color: 5490704 };
-            embed.thumbnail = { url: roleData.url };
+            let embed = { title: "Role Icon", description: `<@${message.member.id}>, your role icon has been updated to ${toTitleCase(iconName)}.`, color: 5490704 };
+            embed.thumbnail = { url: iconUrl };
             message.channel.send({ embeds: [ embed ] });
         } else {
             let dRole = await message.guild.roles.create({ name: rName, reason: "Automatic Token Role" });
             let hr = message.guild.roles.cache.find(r => r.name === "--- Token Role ---");
             await dRole.setPosition(hr ? hr.position - 2 : 0);
-            await dRole.setIcon(roleData.url);
+            await dRole.setIcon(iconUrl);
             await message.member.roles.add(dRole);
-            let embed = { title: "Role Icon", description: `<@${message.member.id}>, your role icon has been set to ${toTitleCase(role)}.`, color: 5490704 };
-            embed.thumbnail = { url: roleData.url };
+            let embed = { title: "Role Icon", description: `<@${message.member.id}>, your role icon has been set to ${toTitleCase(iconName)}.`, color: 5490704 };
+            embed.thumbnail = { url: iconUrl };
             message.channel.send({ embeds: [ embed ] });
         }
     }
