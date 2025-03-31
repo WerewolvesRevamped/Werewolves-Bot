@@ -44,7 +44,7 @@ require("./types/feedback.js")();
 
 module.exports = function() {
     
-    this.NO_VISIST_PARAM = "";
+    this.NO_VISIT_PARAM = "";
     this.NO_SND_VISIT_PARAM = "";
     
     this.abilityError = "This is likely caused by an error. Please contact a Host.";
