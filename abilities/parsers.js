@@ -11,6 +11,23 @@ module.exports = function() {
     and returns a list of discord player ids
     **/
     this.parseSelector = async function(selector, self, additionalTriggerData = {}) {
+        // special obiect types
+        if(typeof selector === "object" && !Array.isArray(selector) && selector !== null && selector.type) {
+            switch(selector.type) {
+                case "list":
+                    let list = [];
+                    for(let i = 0; i < selector.values.length; i++) {
+                        let element = await parseSelector(selector.values[i] + "[" + selector.value_type + "]", self, additionalTriggerData);
+                        list.push(...element.value);
+                    }
+                    return { value: list, type: selector.value_type };
+                break;
+                default:
+                    abilityLog(`❗ **Error:** Invalid object selector type \`${selector.type}\`!`);
+                    return { value: [], type: "unknown" };
+            }
+        }
+        // handle normal string types
         let selectorTarget = selectorGetTarget(selector);
         let selectorType = selectorGetType(selector);
         // It is a @Self selector -> get type from self
@@ -2276,6 +2293,11 @@ module.exports = function() {
     returns the type of a selector (removing the target)
     **/
     this.selectorGetType = function(selector) {
+        // special object types
+        if(typeof selector === "object" && !Array.isArray(selector) && selector !== null && selector.type) {
+            return selector.type;
+        }
+        // normal string types
         let spl = selector.split("[");
         return spl.length >= 2 ? spl[1].split("]")[0].toLowerCase().trim() : "unknown";
     }

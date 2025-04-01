@@ -947,6 +947,7 @@ module.exports = function() {
                 sql("UPDATE " + dbName + " SET parsed = " + connection.escape(JSON.stringify(parsed)) + " WHERE name = " + connection.escape(el));
                 if(roleAttributes.length > 0) sql("UPDATE " + dbName + " SET attributes = " + connection.escape(roleAttributes) + " WHERE name = " + connection.escape(el));
             } catch (err) {
+                console.log(err.stack);
                 output.push(`**${toTitleCase(el)}:** ${err}`);
                 failureCounter++;
             }

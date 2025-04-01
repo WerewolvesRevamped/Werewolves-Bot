@@ -489,6 +489,7 @@ module.exports = function() {
         exp = new RegExp("^" + targetType + " is " + targetType + "$", "g");
         fd = exp.exec(condition);
         if(fd) {
+            console.log("COND IS", fd[1], fd[2]);
             cond = { type: "comparison", subtype: "equal", first: ttpp(fd[1]), second: ttpp(fd[2]) };
         }
         // Less Than
@@ -607,7 +608,7 @@ module.exports = function() {
 
     /** REGEX - Reminder: You need double \'s here **/
     // general
-    const targetType = "(`[^`]*`|`[^`]*`\\[\\w+\\]|@\\S*|&\\S*|\\^\\S*|#\\S*|%[^%]+%|\-?\\d+|f?F?alse|t?T?rue)";
+    const targetType = "(`[^`]*`|`[^`]*`\\[\\w+\\]|(?:`[^`]*`\\+)+(?:`[^`]*`)|(?:`[^`]*`\\+)+(?:`[^`]*`)\\[\\w+\\]|@\\S*|&\\S*|\\^\\S*|#\\S*|%[^%]+%|\-?\\d+|f?F?alse|t?T?rue)";
     const attrDuration = "( \\(~[^\)]+\\))?";
     const locationType = "(`[^`]*`|@\\S*|#\\S*)"; // extended version of target type
     const groupType = "(@\\S*|#\\S*)"; // reduced version of location type
@@ -1880,12 +1881,28 @@ module.exports = function() {
     boolean (true/false)
     **/
     function ttpp(targetType, defaultType = "infer") {
+        // list type
+        if(targetType.indexOf("+") > 0) {
+            let listItems = targetType.split("+");
+            console.log(targetType, listItems);
+            let listType;
+            // get list type from annotation
+            if(targetType.indexOf("[") > 0 && targetType.indexOf("]") > 0) {
+                listType = targetType.split("[")[1].split("]")[0];
+            } else if(defaultType === "infer") { // infer type
+                listType = inferType(listItems[0]);
+            } else {
+                listType = defaultType;
+            }
+            return { values: listItems, value_type: listType, type: "list" };
+        }
+        
         // pre-existing type annotation
         if(targetType.indexOf("[") > 0) {
             return targetType;
         }
         // type annotation needs to be infered
-        if(defaultType == "infer") {
+        if(defaultType === "infer") {
             return targetType + "[" + inferType(targetType) + "]";
         }
         // return default type
@@ -1975,6 +1992,9 @@ module.exports = function() {
                     if(verifyCategory(targetType)) return "category";
                     if(verifyPoll(targetType)) return "poll";
                     if(verifyAbilityTypeName(targetType)) return "abilityType";
+                    let spl = targetType.replace(/`/g,"").toLowerCase().split(":");
+                    console.log(spl);
+                    if(spl.length === 2 && ["role","group","attribute","poll","team"].includes(spl[0])) return "source";
                     return targetType.includes("@") || targetType.length > 30 ? "info" : "string";
             }
         } else {
