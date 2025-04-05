@@ -679,6 +679,13 @@ module.exports = function() {
                 parsedRestrictions.push({ type: "temporal", subtype: "during", phase: phaseParse(fd[1], fd[2]) });
                 restFound = true;
             }
+            // temporal, during type
+            exp = new RegExp("^Temporal: (Day|Night)$", "g");
+            fd = exp.exec(restrictions[rest]);
+            if(fd) {
+                parsedRestrictions.push({ type: "temporal", subtype: "during_type", phase: lc(fd[1]) });
+                restFound = true;
+            }
             // temporal, after
             exp = new RegExp("^Temporal: (Day|Night) (\\d+)\\+$", "g");
             fd = exp.exec(restrictions[rest]);
