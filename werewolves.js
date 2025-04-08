@@ -484,6 +484,8 @@ client.on("messageCreate", async message => {
         return;
 	}
 
+    console.log(`Command - ${message.member.displayName} - ${message.content}`);
+
 	/* Ping */ // Generic test command / returns the ping
 	switch(command) {
 	case "ping":
