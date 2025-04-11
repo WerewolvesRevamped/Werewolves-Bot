@@ -90,7 +90,7 @@ module.exports = function() {
         for(let i = 0; i < targets.value.length; i++) {
             // handle visit
             if(additionalTriggerData.parameters.visitless !== true) {
-                let result = await visit(src_ref, targets.value[i], attr, "applying", "add");
+                let result = await visit(src_ref, targets.value[i], attr, NO_SND_VISIT_PARAM, "applying", "add");
                 if(result) {
                     if(targets.value.length === 1) return visitReturn(result, "Applying failed!", "Applying succeeded!");
                     continue;
@@ -126,7 +126,7 @@ module.exports = function() {
         for(let i = 0; i < targets.value.length; i++) {
             // handle visit
             if(additionalTriggerData.parameters.visitless !== true) {
-                let result = await visit(src_ref, targets.value[i], attrName[0], "applying", "remove");
+                let result = await visit(src_ref, targets.value[i], attrName[0], NO_SND_VISIT_PARAM, "applying", "remove");
                 if(result) {
                     if(targets.value.length === 1) return visitReturn(result, "Unapplying failed!", "Unapplying succeeded!");
                     if(result.success) successes++;
@@ -177,7 +177,7 @@ module.exports = function() {
         for(let i = 0; i < targets.value.length; i++) {
             // handle visit
             if(additionalTriggerData.parameters.visitless !== true) {
-                let result = await visit(src_ref, targets.value[i], attribute, "applying", "change");
+                let result = await visit(src_ref, targets.value[i], attribute, index, "applying", "change");
                 if(result) {
                     if(targets.value.length === 1) return visitReturn(result, "Attribute changing failed!", "Attribute changing succeeded!");
                     if(result.success) successes++;

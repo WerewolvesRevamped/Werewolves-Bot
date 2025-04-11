@@ -20,9 +20,9 @@ module.exports = function() {
         target = await applyRedirection(target, src_ref, ability.type, "", additionalTriggerData);
         let duration = parseDuration(ability.duration ?? "permanent");
         let targetType = ability.obstructed_ability ? parseAbilityType(ability.obstructed_ability, src_ref, additionalTriggerData) : "";
-        let targetSubype = ability.obstructed_subtype ? parseAbilitySubtype(`${ability.obstructed_subtype} ${ability.obstructed_ability}`, src_ref, additionalTriggerData) : "";
-        if(targetSubype && targetSubype != "none none") targetSubype = ability.obstructed_subtype;
-        else targetSubype = "";
+        let targetSubtype = ability.obstructed_subtype ? parseAbilitySubtype(`${ability.obstructed_subtype} ${ability.obstructed_ability}`, src_ref, additionalTriggerData) : "";
+        if(targetSubtype && targetSubtype != "none none") targetSubtype = ability.obstructed_subtype;
+        else targetSubtype = "";
         let customFeedback = ability.custom_feedback ?? [];
         // execute ability
         switch(ability.subtype) {
@@ -31,10 +31,10 @@ module.exports = function() {
                 return { msg: "Obstructing failed! " + abilityError, success: false };
             break;
             case "standard":
-                result = await obstructing(src_name, src_ref, target, duration, targetType, targetSubype, customFeedback, additionalTriggerData);
+                result = await obstructing(src_name, src_ref, target, duration, targetType, targetSubtype, customFeedback, additionalTriggerData);
             break;
             case "inverted":
-                result = await obstructingInverted(src_name, src_ref, target, duration, targetType, targetSubype, customFeedback, additionalTriggerData);
+                result = await obstructingInverted(src_name, src_ref, target, duration, targetType, targetSubtype, customFeedback, additionalTriggerData);
             break;
         }
         return result;
@@ -44,36 +44,36 @@ module.exports = function() {
     Ability: Obstructing
     adds an obstruction to a player
     **/
-    this.obstructing = async function(src_name, src_ref, targets, duration, targetType, targetSubype, customFeedback, additionalTriggerData) {
+    this.obstructing = async function(src_name, src_ref, targets, duration, targetType, targetSubtype, customFeedback, additionalTriggerData) {
         for(let i = 0; i < targets.length; i++) {
             // handle visit
             if(additionalTriggerData.parameters.visitless !== true) {
-                let result = await visit(src_ref, targets[i], targetType, "obstructing");
+                let result = await visit(src_ref, targets[i], targetType, targetSubtype, "obstructing", "standard");
                 if(result) {
                     if(targets.length === 1) return visitReturn(result, "Obstructing failed!", "Obstructing succeeded!");
                     continue;
                 }
             }
             
-            await createObstructionAttribute(src_name, src_ref, targets[i], duration, targetType, targetSubype, customFeedback.length > 0 ? JSON.stringify(customFeedback) : "");
-            abilityLog(`✅ <@${targets[i]}> was obstructed for \`${getDurationName(duration)}\`${targetType ? (' affecting \`' + (targetSubype ? targetSubype + ' ' : '') + targetType + '\`') : ''}${customFeedback.length > 0 ? ' with custom feedback \`' + JSON.stringify(customFeedback) + '\`' : ''}.`);
+            await createObstructionAttribute(src_name, src_ref, targets[i], duration, targetType, targetSubtype, customFeedback.length > 0 ? JSON.stringify(customFeedback) : "");
+            abilityLog(`✅ <@${targets[i]}> was obstructed for \`${getDurationName(duration)}\`${targetType ? (' affecting \`' + (targetSubtype ? targetSubtype + ' ' : '') + targetType + '\`') : ''}${customFeedback.length > 0 ? ' with custom feedback \`' + JSON.stringify(customFeedback) + '\`' : ''}.`);
         }
         return { msg: "Obstructing succeeded!", success: true, target: `player:${targets[0]}` };
     }
     
-    this.obstructingInverted = async function(src_name, src_ref, targets, duration, targetType, targetSubype, customFeedback, additionalTriggerData) {
+    this.obstructingInverted = async function(src_name, src_ref, targets, duration, targetType, targetSubtype, customFeedback, additionalTriggerData) {
         for(let i = 0; i < targets.length; i++) {
             // handle visit
             if(additionalTriggerData.parameters.visitless !== true) {
-                let result = await visit(src_ref, targets[i], targetType, "obstructing");
+                let result = await visit(src_ref, targets[i], targetType, targetSubtype, "obstructing", "inverted");
                 if(result) {
                     if(targets.length === 1) return visitReturn(result, "Obstructing failed!", "Obstructing succeeded!");
                     continue;
                 }
             }
             
-            await createObstructionInvertedAttribute(src_name, src_ref, targets[i], duration, targetType, targetSubype, customFeedback.length > 0 ? JSON.stringify(customFeedback) : "");
-            abilityLog(`✅ <@${targets[i]}> was obstructed for \`${getDurationName(duration)}\`${targetType ? (' not affecting \`' + (targetSubype ? targetSubype + ' ' : '') + targetType + '\`') : ''}${customFeedback.length > 0 ? ' with custom feedback \`' + JSON.stringify(customFeedback) + '\`' : ''}.`);
+            await createObstructionInvertedAttribute(src_name, src_ref, targets[i], duration, targetType, targetSubtype, customFeedback.length > 0 ? JSON.stringify(customFeedback) : "");
+            abilityLog(`✅ <@${targets[i]}> was obstructed for \`${getDurationName(duration)}\`${targetType ? (' not affecting \`' + (targetSubtype ? targetSubtype + ' ' : '') + targetType + '\`') : ''}${customFeedback.length > 0 ? ' with custom feedback \`' + JSON.stringify(customFeedback) + '\`' : ''}.`);
         }
         return { msg: "Obstructing succeeded!", success: true, target: `player:${targets[0]}` };
     }

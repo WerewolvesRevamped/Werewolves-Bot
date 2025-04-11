@@ -29,7 +29,7 @@ module.exports = function() {
         
         // handle visit
         if(additionalTriggerData.parameters.visitless !== true) {
-            let resultV = await visit(src_ref, target.value, disguise, "whispering");
+            let resultV = await visit(src_ref, target.value, disguise, NO_SND_VISIT_PARAM, "whispering");
             if(resultV) return visitReturn(resultV, "Whispering failed!", "Whispering succeeded!");
         }
         

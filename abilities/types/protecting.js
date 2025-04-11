@@ -70,7 +70,7 @@ module.exports = function() {
         for(let i = 0; i < targets.length; i++) {
             // handle visit
             if(additionalTriggerData.parameters.visitless !== true) {
-                let result = await visit(src_ref, targets[i], from_type, "protecting", def_type);
+                let result = await visit(src_ref, targets[i], from_type, during_phase, "protecting", def_type);
                 if(result) {
                     if(targets.length === 1) return visitReturn(result, "Protecting failed!", "Protecting executed!");
                     continue;
@@ -91,7 +91,7 @@ module.exports = function() {
         for(let i = 0; i < targets.length; i++) {
             // handle visit
             if(additionalTriggerData.parameters.visitless !== true) {
-                let result = await visit(src_ref, targets[i], from_type, "protecting", "absence");
+                let result = await visit(src_ref, targets[i], from_type, during_phase, "protecting", "absence");
                 if(result) {
                     if(targets.length === 1) return visitReturn(result, "Absence failed!", "Absence registered!");
                     continue;

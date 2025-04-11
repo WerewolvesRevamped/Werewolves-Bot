@@ -62,7 +62,7 @@ module.exports = function() {
         for(let i = 0; i < targets.length; i++) {
             // handle visit
             if(additionalTriggerData.parameters.visitless !== true) {
-                let result = await visit(src_ref, targets[i], "", "killing", "attack");
+                let result = await visit(src_ref, targets[i], NO_VISIT_PARAM, NO_SND_VISIT_PARAM, "killing", "attack");
                 if(result) {
                     if(targets.length === 1) return visitReturn(result, "Attack failed!", "Attack succeeded!");
                     continue;
@@ -97,7 +97,7 @@ module.exports = function() {
         for(let i = 0; i < targets.length; i++) {
             // handle visit
             if(additionalTriggerData.parameters.visitless !== true) {
-                let result = await visit(src_ref, targets[i], "", "killing", "lynch");
+                let result = await visit(src_ref, targets[i], NO_VISIT_PARAM, NO_SND_VISIT_PARAM, "killing", "lynch");
                 if(result) {
                     if(targets.length === 1) return visitReturn(result, "Lynch failed!", "Lynch succeeded!");
                     continue;
@@ -132,7 +132,7 @@ module.exports = function() {
         for(let i = 0; i < targets.length; i++) {
             // handle visit
             if(additionalTriggerData.parameters.visitless !== true) {
-                let result = await visit(src_ref, targets[i], "", "killing", "kill");
+                let result = await visit(src_ref, targets[i], NO_VISIT_PARAM, NO_SND_VISIT_PARAM, "killing", "kill");
                 if(result) {
                     if(targets.length === 1) return visitReturn(result, "Kill failed!", "Kill succeeded!");
                     continue;
@@ -165,7 +165,7 @@ module.exports = function() {
         for(let i = 0; i < targets.length; i++) {
             // handle visit
             if(additionalTriggerData.parameters.visitless !== true) {
-                let result = await visit(src_ref, targets[i], "", "killing", "true-kill");
+                let result = await visit(src_ref, targets[i], NO_VISIT_PARAM, NO_SND_VISIT_PARAM, "killing", "true-kill");
                 if(result) {
                     if(targets.length === 1) return visitReturn(result, "True Kill failed!", "True Kill succeeded!");
                     continue;
@@ -195,7 +195,7 @@ module.exports = function() {
         for(let i = 0; i < targets.length; i++) {
             // handle visit
             if(additionalTriggerData.parameters.visitless !== true) {
-                let result = await visit(src_ref, targets[i], "", "killing", "banish");
+                let result = await visit(src_ref, targets[i], NO_VISIT_PARAM, NO_SND_VISIT_PARAM, "killing", "banish");
                 if(result) {
                     if(targets.length === 1) return visitReturn(result, "Banishment failed!", "Banishment succeeded!");
                     continue;
@@ -228,7 +228,7 @@ module.exports = function() {
         for(let i = 0; i < targets.length; i++) {
             // handle visit
             if(additionalTriggerData.parameters.visitless !== true) {
-                let result = await visit(src_ref, targets[i], "", "killing", "true-banish");
+                let result = await visit(src_ref, targets[i], NO_VISIT_PARAM, NO_SND_VISIT_PARAM, "killing", "true-banish");
                 if(result) {
                     if(targets.length === 1) return visitReturn(result, "True Banishment failed!", "True Banishment succeeded!");
                     continue;

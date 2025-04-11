@@ -51,7 +51,7 @@ module.exports = function() {
         for(let i = 0; i < targets.length; i++) {
             // handle visit
             if(additionalTriggerData.parameters.visitless !== true) {
-                let result = await visit(src_ref, targets[i], disguise, "disguising", strength);
+                let result = await visit(src_ref, targets[i], disguise, NO_SND_VISIT_PARAM, "disguising", strength);
                 if(result) {
                     if(targets.length === 1) return visitReturn(result, "Disguising failed!", "Disguising succeeded!");
                     continue;

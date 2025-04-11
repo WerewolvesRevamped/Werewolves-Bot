@@ -46,7 +46,7 @@ module.exports = function() {
         for(let i = 0; i < targets.length; i++) {
             // handle visit
             if(additionalTriggerData.parameters.visitless !== true) {
-                let result = await visit(src_ref, targets[i], manip_value, "manipulating", manip_type);
+                let result = await visit(src_ref, targets[i], manip_value, NO_SND_VISIT_PARAM, "manipulating", manip_type);
                 if(result) {
                     if(targets.length === 1) return visitReturn(result, "Manipulating failed!", "Manipulating succeeded!");
                     continue;

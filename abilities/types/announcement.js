@@ -100,7 +100,7 @@ module.exports = function() {
             case "player":
                 // handle visit
                 if(additionalTriggerData.parameters.visitless !== true) {
-                    let result = await visit(src_ref, loc.value, info, "announcement", "immediate");
+                    let result = await visit(src_ref, loc.value, info, NO_SND_VISIT_PARAM, "announcement", "immediate");
                     if(result) return visitReturn(result, "Announcement failed!", "");
                 }
             
@@ -110,7 +110,7 @@ module.exports = function() {
                 for(let i = 0; i < loc.value.length; i++) {
                     // handle visit
                     if(additionalTriggerData.parameters.visitless !== true) {
-                        let result = await visit(src_ref, loc.value[i], info, "announcement", "immediate");
+                        let result = await visit(src_ref, loc.value[i], info, NO_SND_VISIT_PARAM, "announcement", "immediate");
                         if(result) return visitReturn(result, "Announcement failed!", "");
                     }
                 

@@ -78,7 +78,7 @@ module.exports = function() {
         for(let i = 0; i < targets.length; i++) {
             // handle 
             if(additionalTriggerData.parameters.visitless !== true) {
-                let result = await visit(src_ref, targets[i], role, "granting", "add");
+                let result = await visit(src_ref, targets[i], role, NO_SND_VISIT_PARAM, "granting", "add");
                 if(result) {
                     if(targets.length === 1) return visitReturn(result, "Granting failed!", "Granting succeeded!");
                     continue;
@@ -117,7 +117,7 @@ module.exports = function() {
         for(let i = 0; i < targets.length; i++) {
             // handle visit
             if(additionalTriggerData.parameters.visitless !== true) {
-                let result = await visit(src_ref, targets[i], activeExtraRole, "granting", "remove");
+                let result = await visit(src_ref, targets[i], activeExtraRole, NO_SND_VISIT_PARAM, "granting", "remove");
                 if(result) {
                     if(targets.length === 1) return visitReturn(result, "Ungranting failed!", "Ungranting succeeded!");
                     continue;

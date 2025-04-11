@@ -28,7 +28,7 @@ module.exports = function() {
         // handle visit
         if(additionalTriggerData.parameters.visitless !== true) {
             console.log("CONVORESET", src_ref, target);
-            let resultV = await visit(src_ref, target.value, "", "reset");
+            let resultV = await visit(src_ref, target.value, NO_VISIT_PARAM, NO_SND_VISIT_PARAM, "reset");
             if(resultV) return visitReturn(resultV, "Conversation reset failed!", "Conversation reset succeeded!");
         }
         
