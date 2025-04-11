@@ -34,6 +34,7 @@ module.exports = function() {
         var embed = await getBasicEmbed(guild);
         
         embed.color = roleData.color;
+        if(result.display_name === "Easter Egg") roleData.url = "https://cdn.discordapp.com/attachments/584859995284176907/1358865318000197652/Ba1.png?ex=67f56572&is=67f413f2&hm=9a342c38c86b126a4126f15644a79e55ba2fd0e5af40355aa7311e26ac875807&";
         embed.thumbnail = { "url": roleData.url };
         embed.author = { "icon_url": roleData.url };
         
@@ -49,7 +50,7 @@ module.exports = function() {
         // get the right folder
         var url = iconBaseUrl(authorId, roleName);
         var urlPack = isUrlPack(authorId, roleName);
-        console.log(url);
+        //console.log("GRD URL", url);
         
         if(!urlPack) {
             if(rClass == "solo") url += `Solo/${toTitleCase(rTeam)}`;
@@ -77,6 +78,8 @@ module.exports = function() {
         }
         // get color
         let color = getTeamColor(rTeam);
+        
+        console.log("GRD FINAL URL", url);
         
         return { url: url, color: color, class: rClass, category: rCategory, team: rTeam };
     }

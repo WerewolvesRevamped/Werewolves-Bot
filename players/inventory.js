@@ -267,6 +267,11 @@ module.exports = function() {
 			return;   
         }
         
+        if(code.substr(0, 3).toLowerCase() === "unk") { 
+			message.channel.send("⛔ Command error. Cannot recycle unknown type items."); 
+			return;   
+        }
+        
         // get item count
         let count = await inventoryGetItem(message.author.id, code);
         if(count <= 0) {

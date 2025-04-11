@@ -483,7 +483,9 @@ client.on("messageCreate", async message => {
 	if(message.content.search("@everyone") >= 0) {
         return;
 	}
-
+    
+    console.log(`Command - ${message.member.displayName} - ${message.content}`);
+    
 	/* Ping */ // Generic test command / returns the ping
 	switch(command) {
 	case "ping":

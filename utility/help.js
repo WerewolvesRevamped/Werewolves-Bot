@@ -18,7 +18,7 @@ module.exports = function() {
             if(cmdNameText.length === 2) cmdNameText = cmdNameText.toUpperCase();
             else cmdNameText = toTitleCase(cmdNameText);
             if(args.length > 0) cmdNameText += " " + toTitleCase(args.join(" "));
-            helpText += "**```yaml\n" + cmdNameText + " Help\n```**";
+            helpText += "**```yaml\n" + cmdNameText + " Help\n```**<:osdugfois:1358890157528584396>";
             let cmdHelpText = getCommandHelp(cmdName, member);
             if(cmdHelpText.length > 0) {
                 helpText += cmdHelpText;

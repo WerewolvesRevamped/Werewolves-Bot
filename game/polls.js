@@ -430,6 +430,7 @@ module.exports = function() {
             // get candidate from emoji
             let candidate = emojiToID(reac.emoji);
             if(!candidate) candidate = pollEmojiToName(reac.emoji);
+            if(!candidate) console.log(reac.emoji);
             
             // remove invalid votes through duplication
             const validVoters = voters.filter(el => duplicateVoters.indexOf(el.id) === -1);

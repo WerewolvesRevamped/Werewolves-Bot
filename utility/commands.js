@@ -52,13 +52,24 @@ module.exports = function() {
     Command: $edit
     Edits a bot message specified in arg0 to args1+
     */
-    this.cmdEdit = function(channel, args, argsX) {
-        channel.messages.fetch(args[0])
-            .then(m => {
-                argsX.shift();
-                let text = argsX.join(" ");
-                m.edit(text.replace(/~/g,"\n"));
-            });
+    this.cmdEdit = async function(channel, args, argsX) {
+        if(args.length === 2) {
+            channel.messages.fetch(args[0])
+                .then(m => {
+                    argsX.shift();
+                    let text = argsX.join(" ");
+                    m.edit(text.replace(/~/g,"\n"));
+                });
+        } else if(args.length === 3) {
+            let ch = await channel.guild.channels.cache.get(args[0]);
+            ch.messages.fetch(args[1])
+                .then(m => {
+                    argsX.shift();
+                    argsX.shift();
+                    let text = argsX.join(" ");
+                    m.edit(text.replace(/~/g,"\n"));
+                });
+        }
     }
 	
     /**
