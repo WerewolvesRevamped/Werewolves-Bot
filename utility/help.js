@@ -18,7 +18,7 @@ module.exports = function() {
             if(cmdNameText.length === 2) cmdNameText = cmdNameText.toUpperCase();
             else cmdNameText = toTitleCase(cmdNameText);
             if(args.length > 0) cmdNameText += " " + toTitleCase(args.join(" "));
-            helpText += "**```yaml\n" + cmdNameText + " Help\n```**<:osdugfois:1358890157528584396>";
+            helpText += "**```yaml\n" + cmdNameText + " Help\n```**";
             let cmdHelpText = getCommandHelp(cmdName, member);
             if(cmdHelpText.length > 0) {
                 helpText += cmdHelpText;
@@ -99,7 +99,7 @@ module.exports = function() {
         ["help", PERM.AL, "Provides information about commands.", "<Command> [Sub-Command(s)]", "Provides help for a command. Use $help all to also see all subcommands.", "help help", [], CMDSTATE.RDY],
             ["help all", PERM.AL, "Provides information about commands and subcommands.", "", "Provides help for all commands and subcommands", "help all", [], CMDSTATE.RDY],
         ["ping", PERM.AL, "Tests the bot", "", "Gives the ping of the bot, and checks if the bot is running.", "ping", ["✅ Pong! Latency is 170ms. API Latency is 128ms"], CMDSTATE.RDY],
-        ["edit", PERM.GH, "Edits a bot message.", "<id> <text>", "Updates a bot message.", "edit 28462946294 NewMsgContents", [], CMDSTATE.UNK],
+        ["edit", PERM.GH, "Edits a bot message.", "<message id> <text>", "Updates a bot message. You may instead also specify three arguments of form: <channel id> <message id> <text>", "edit 28462946294 NewMsgContents", [], CMDSTATE.RDY],
         ["say", PERM.GH, "Makes the bot repeat a message.", "[input]", "Makes the bot repeat everything after say.", "say hello", ["hello"], CMDSTATE.RDY],
         ["modify", PERM.GH, "Modifies the bot.", "<attribute> <value>", "Updates an <attribute> of the bot to <value>. Available attributes: status, nickname, activity.", "modify status dnd", ["✅ Updated bot status!"], CMDSTATE.RDY],
         ["split", PERM.GM, "Runs a list of semicolon seperated commands.", "[command list]", "Runs a list of commands that are provided as a semicolon seperated list.", "split help;ping", [], CMDSTATE.RDY],
