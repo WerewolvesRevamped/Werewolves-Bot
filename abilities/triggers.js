@@ -154,12 +154,15 @@ module.exports = function() {
     this.triggerGroup = function(channel_id, triggerName, additionalTriggerData = {}) {
         return new Promise(res => {
             // get all players
-            sql("SELECT name,channel_id FROM active_groups WHERE disbanded=0 AND channel_id=" + connection.escape(channel_id) + " OR name=" + connection.escape(channel_id), async r => {
+            sql("SELECT name,channel_id FROM active_groups WHERE channel_id=" + connection.escape(channel_id) + " OR name=" + connection.escape(channel_id), async r => {
                 //trigger handler
                 if(!r[0]) {
                     abilityLog(`❗ **Skipped Trigger:** Cannot find matching group for ${channel_id}.`);
                     res();
                     return;
+                }
+                if(r[0].disbanded != 0) {
+                    abilityLog(`❗ **Skipped Trigger:** Group is disbanded.`);
                 }
                 await triggerHandlerGroup(r[0], triggerName, additionalTriggerData);
                 // resolve outer promise

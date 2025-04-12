@@ -235,11 +235,12 @@ module.exports = function() {
                         abilityLog(`❗ **Error:** Used \`@Members\` with invalid self type \`${type2}\`!`);
                         return [ ];
                     case "group":
+                        let gData = await getGroup(val2);
                         if(aliveOnly) {
-                            let gMembers = await groupGetMembers(val2);
+                            let gMembers = await groupGetMembers(gData.name);
                             return gMembers.map(el => el.id);
                         } else {
-                            let gMembers = await groupGetMembersAll(val2);
+                            let gMembers = await groupGetMembersAll(gData.name);
                             return gMembers.map(el => el.id);
                         }
                     case "team": 

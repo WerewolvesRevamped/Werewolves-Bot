@@ -290,7 +290,7 @@ module.exports = function() {
             ["killq remove", PERM.GM, "Removes players from killq.", "<Player List>", "Removes one or more players from the killq.", "killq remove mctsts", [], CMDSTATE.RDY],
             ["killq clear", PERM.GM, "Clears the killq.", "", "Removes all players from the killq.", "killq clear", [], CMDSTATE.RDY],
             ["killq killall", PERM.GM, "Kills all players in the killq.", "", "Kills all players in the killq and clears the killq.", "killq killall", [], CMDSTATE.RDY],
-        ["kqak", PERM.GM, "Immediately kills players.", "<Player List>", "Adds the provided players to the killq ($killq add) and then kills all players on the killq ($killq killall).", "kqak mctsts", [], CMDSTATE.UNK],
+        ["kqak", PERM.GM, "Immediately kills players.", "<Player List>", "Adds the provided players to the killq ($killq add) and then kills all players on the killq ($killq killall).", "kqak mctsts", [], CMDSTATE.RDY],
         // polls
         ["polls", PERM.GM, "Manages polls.", "<Subcommand>", "Group of commands to handle polls. $help polls <sub-command> for detailed help.", "", [], CMDSTATE.RDY],
             ["polls query", PERM.GM, "Queries all polls from github.", "", "Queries all polls from github and stores them locally.", "polls query", ["🔄 Querying polls. Please wait. This may take several minutes.","✅ Querying polls completed."], CMDSTATE.RDY],
