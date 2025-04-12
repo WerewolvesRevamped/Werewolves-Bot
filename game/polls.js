@@ -621,6 +621,21 @@ module.exports = function() {
                 break;
                 
             }
+        } else {
+            let otherVoters = maxVotesValidVoters;
+            otherVoters = otherVoters.filter(el => el != maxVotesData[0]);
+            let srcType = srcToType(pollData.src_ref);
+            switch(srcType) {
+                // default direct trigger execution
+                default:
+                    await trigger(pollData.src_ref, "On Poll Skipped", { voters: maxVotesValidVoters, other_voters: otherVoters }); 
+                break;
+                // for group polls a random executor is chosen
+                case "group":
+                    let executor = shuffleArray(maxVotesValidVoters)[0];
+                    await trigger(pollData.src_ref, "On Poll Skipped", { executor: executor, voters: maxVotesValidVoters, other_voters: otherVoters }); 
+                break;
+            }
         }
         
         // remove all reactions

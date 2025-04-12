@@ -339,6 +339,14 @@ module.exports = function() {
             stats.mentor = null;
 			log("Stats > ❗❗❗ Unable to cache mentor role!")
 		});
+        // Signed-sub 
+		sqlGetStat(statID.SIGNEDSUB_ROLE,  result => { 
+			stats.signedsub = result; 
+			if(doLog) log("Stats > Cached signed sub role as `" + result + "`!")
+		}, () => {
+            stats.signedsub = null;
+			log("Stats > ❗❗❗ Unable to cache signed sub role!")
+		});
 	}
 	
 	/* Gets the name of a gamephase by id */
@@ -358,6 +366,7 @@ module.exports = function() {
         SUBPHASE: 48,
         REWARD_LOG: 49,
         MENTOR_ROLE: 50,
+        SIGNEDSUB_ROLE: 51
     }
 	
 	/* Handles option command */

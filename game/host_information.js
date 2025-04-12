@@ -7,7 +7,7 @@ module.exports = function() {
     /**
     Command: $host_information
     **/
-	this.cmdHostInformation = function(channel, args) {
+	this.cmdHostInformation = function(channel, args, argsX) {
 		// Check subcommand
 		if(!args[0]) { 
 			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `host_information [add|list|remove]`!"); 
@@ -16,7 +16,7 @@ module.exports = function() {
         
 		// Check Subcommand
 		switch(args[0]) {
-			case "add": cmdHostInformationAdd(channel, args); break;
+			case "add": cmdHostInformationAdd(channel, args, argsX); break;
 			case "list": cmdHostInformationList(channel); break;
 			case "remove": cmdHostInformationRemove(channel, args); break;
 			default: channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
@@ -52,14 +52,20 @@ module.exports = function() {
     Command: $host_information add
     Registers a new host information
     **/
-    this.cmdHostInformationAdd = async function(channel, args) {
+    this.cmdHostInformationAdd = async function(channel, args, argsX) {
 		if(!args[1] || !args[2] || !args[3]) {  
 			channel.send("⛔ Syntax error. Incorrect amount of parameters!"); 
 			return; 
 		}
         
-        sql("INSERT INTO host_information (id, name, value) VALUES (" + connection.escape(args[1]) + "," + connection.escape(args[2]) + "," + connection.escape(args[3]) + ")", result => {
-            channel.send(`✅ Set host information \`${args[2]}\` for <@${args[1]}> as \`${args[3]}\`.`);
+        argsX.shift();
+        argsX.shift();
+        argsX.shift();
+        let hi = argsX.join(" ");
+        hi = hi.replace(/~/g,"\n")
+        
+        sql("INSERT INTO host_information (id, name, value) VALUES (" + connection.escape(args[1]) + "," + connection.escape(args[2]) + "," + connection.escape(hi) + ")", result => {
+            channel.send(`✅ Set host information \`${args[2]}\` for <@${args[1]}> as \`${hi}\`.`);
         }, () => {
 			channel.send("⛔ Database error. Couldn't register host information!");
         });

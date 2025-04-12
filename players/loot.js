@@ -179,7 +179,7 @@ module.exports = function() {
             break;
             // AL
             case "al":
-                return `An alignment guarantor for: ${reward[1].split(" ")[0]}. You may use this during the signup/setup phase of a game to affect your alignment. To do so DM one of the Hosts. You may __not__ let anyone know you used an alignment guarantor until after the game is completed. Alignment guarantors may be rejected for some games (e.g. when the alignment is not present).`;
+                return `An alignment guarantor for: ${reward[1].replace(" Alignment Guarantor", "")}. You may use this during the signup/setup phase of a game to affect your alignment. To do so DM one of the Hosts. You may __not__ let anyone know you used an alignment guarantor until after the game is completed. Alignment guarantors may be rejected for some games (e.g. when the alignment is not present).`;
             break;
             // CAT
             case "cat":

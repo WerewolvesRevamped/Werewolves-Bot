@@ -1906,6 +1906,7 @@ module.exports = function() {
         let spl = selectorTarget.split(" ");
         // convert text segments to selectors if applicable
         for(let i = 0; i < spl.length; i++) {
+            if(spl[i] === "~COLON~") continue;
             let infType = await inferTypeRuntime(spl[i], self, additionalTriggerData);
             if(infType != "unknown") {
                 let parsed = await parseSelector(`${spl[i]}[${infType}]`, self, additionalTriggerData);
@@ -1937,7 +1938,7 @@ module.exports = function() {
             }
         }
         // return
-        return spl.join(" ");
+        return spl.join(" ").replace(/ ~COLON~/g,":");
     }
     
     /**

@@ -66,6 +66,13 @@ module.exports = function() {
         // reset to d0
         setPhase("d0");
         setSubphase(SUBPHASE.MAIN);
+        // Assign roles to substitute
+        let subs = channel.guild.roles.cache.get(stats.signedsub).members.toJSON();
+        for(let i = 0; i < subs.length; i++) {
+            switchRoles(subs[i], channel, stats.signedsub, stats.sub, "signed sub", "substitute").then(r => {
+                if(r) channel.send("✅ `" + subs[i].displayName + "` is now a substitute!");
+            });
+        }
         // emit a starting event
         setTimeout(function() {
             eventStarting();

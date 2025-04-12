@@ -80,7 +80,7 @@ module.exports = function() {
                 "emojis": ["emoji","e"],
                 "help": ["h"],
                 "impersonate": ["imp"],
-                "webhook": ["bot","<"],
+                "webhook": ["<"],
                 "cc": ["c","ccs"],
                 "roll": ["rand","random","randomize"],
                 "players": ["p","player"],

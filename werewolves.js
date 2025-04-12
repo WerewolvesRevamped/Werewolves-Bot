@@ -891,7 +891,7 @@ client.on("messageCreate", async message => {
     break;
     /* Host Information */
     case "host_information":
-		if(checkGM(message)) cmdHostInformation(message.channel, args);
+		if(checkGM(message)) cmdHostInformation(message.channel, args, argsX);
     break;
     /* Skinpacks */
     case "packs":
@@ -1014,6 +1014,13 @@ client.on("messageCreate", async message => {
             break;
         }
 		cmdIcon(message, args);
+    break;
+    case "bot":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
+		cmdBot(message, args);
     break;
     case "death_message":
         if(!config.coins) {

@@ -56,13 +56,13 @@ module.exports = function() {
     **/
     this.cmdPacksList = async function(channel, author) {
         let unlockedPacks = await sqlPromEsc("SELECT * FROM inventory WHERE player=", author.id);
-        unlockedPacks = unlockedPacks.filter(el => el.item.substr(0, 3) === "sp:").map(el => [el.item.split(":")[1], AVAILABLE_PACKS[(+el.item.split(":")[1])-1]]);
+        unlockedPacks = unlockedPacks.filter(el => el.item.substr(0, 3) === "sp:").map(el => [el.item.split(":")[1], AVAILABLE_PACKS[(+el.item.split(":")[1])-1], el.count]);
         unlockedPacks = unlockedPacks.sort((a,b) => a[0] - b[0]); 
         if(unlockedPacks.length < 40) {
             let packs1 = [`${getEmoji('pack_default')} Default - 0`], packs2 = [];
             let half = Math.ceil(unlockedPacks.length / 2);
-            for(let i = 0; i < half; i++) packs1.push(`${getEmoji('pack_'+unlockedPacks[i][1])} ${toTitleCase(unlockedPacks[i][1])} - ${unlockedPacks[i][0]}`);
-            if(unlockedPacks.length > 1) for(let i = half; i < unlockedPacks.length; i++) packs2.push(`${getEmoji('pack_'+unlockedPacks[i][1])} ${toTitleCase(unlockedPacks[i][1])} - ${unlockedPacks[i][0]}`);
+            for(let i = 0; i < half; i++) packs1.push(`${getEmoji('pack_'+unlockedPacks[i][1])} ${toTitleCase(unlockedPacks[i][1])} - ${unlockedPacks[i][0]} ${unlockedPacks[i][2] > 1 ? '(x' + unlockedPacks[i][2] + ')' : ''}`);
+            if(unlockedPacks.length > 1) for(let i = half; i < unlockedPacks.length; i++) packs2.push(`${getEmoji('pack_'+unlockedPacks[i][1])} ${toTitleCase(unlockedPacks[i][1])} - ${unlockedPacks[i][0]} ${unlockedPacks[i][2] > 1 ? '(x' + unlockedPacks[i][2] + ')' : ''}`);
             let embed = { title: "Available Packs", description: `<@${author.id}>, here is a list of skinpacks available for you. You can switch skinpack by running \`${stats.prefix}packs select <ID>\`, where you replace \`<ID>\` with the __number__ of the skinpack you want to select.`, color: 8984857, fields: [ {}, {} ] };
             embed.fields[0] = { name: "_ _", "value": packs1.join("\n"), inline: true };
             embed.fields[1] = { name: "_ _", "value": packs2.join("\n"), inline: true };
@@ -70,9 +70,9 @@ module.exports = function() {
         } else {
             let packs1 = [`${getEmoji('pack_default')} Default - 0`], packs2 = [], packs3 = [];
             let third = Math.ceil(unlockedPacks.length / 3);
-            for(let i = 0; i < third; i++) packs1.push(`${getEmoji('pack_'+unlockedPacks[i][1])} ${toTitleCase(unlockedPacks[i][1])} - ${unlockedPacks[i][0]}`);
-            for(let i = third; i < third * 2; i++) packs2.push(`${getEmoji('pack_'+unlockedPacks[i][1])} ${toTitleCase(unlockedPacks[i][1])} - ${unlockedPacks[i][0]}`);
-            for(let i = third * 2; i < unlockedPacks.length; i++) packs3.push(`${getEmoji('pack_'+unlockedPacks[i][1])} ${toTitleCase(unlockedPacks[i][1])} - ${unlockedPacks[i][0]}`);
+            for(let i = 0; i < third; i++) packs1.push(`${getEmoji('pack_'+unlockedPacks[i][1])} ${toTitleCase(unlockedPacks[i][1])} - ${unlockedPacks[i][0]} ${unlockedPacks[i][2] > 1 ? '(x' + unlockedPacks[i][2] + ')' : ''}`);
+            for(let i = third; i < third * 2; i++) packs2.push(`${getEmoji('pack_'+unlockedPacks[i][1])} ${toTitleCase(unlockedPacks[i][1])} - ${unlockedPacks[i][0]} ${unlockedPacks[i][2] > 1 ? '(x' + unlockedPacks[i][2] + ')' : ''}`);
+            for(let i = third * 2; i < unlockedPacks.length; i++) packs3.push(`${getEmoji('pack_'+unlockedPacks[i][1])} ${toTitleCase(unlockedPacks[i][1])} - ${unlockedPacks[i][0]} ${unlockedPacks[i][2] > 1 ? '(x' + unlockedPacks[i][2] + ')' : ''}`);
             let embed = { title: "Available Packs", description: `<@${author.id}>, here is a list of skinpacks available for you. You can switch skinpack by running \`${stats.prefix}packs select <ID>\`, where you replace \`<ID>\` with the __number__ of the skinpack you want to select.`, color: 8984857, fields: [ {}, {}, {} ] };
             embed.fields[0] = { name: "_ _", "value": packs1.join("\n"), inline: true };
             embed.fields[1] = { name: "_ _", "value": packs2.join("\n"), inline: true };

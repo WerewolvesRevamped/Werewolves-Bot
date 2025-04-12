@@ -242,7 +242,7 @@ module.exports = function() {
                 // Create a default connection with the role and creators name
                 connectionAdd(sc.id, `${role}:${src_ref}`);
                 // Send info message for each role
-                let infoEmbed = await getRoleEmbed(role, ["basics","details"], mainGuild, member);
+                let infoEmbed = await getRoleEmbed(role, ["basics","details"], mainGuild);
                 sendEmbed(sc, infoEmbed, true);
                 
                 // assign mentor permissions

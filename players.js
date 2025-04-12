@@ -1013,7 +1013,7 @@ module.exports = function() {
                     removeRoleRecursive(member, channel, stats.signed_up, "signed up");
                 } else if(signupMode == "substitute") {
                     channel.send(`✅ Successfully signed out, ${member.user}. You will no longer substitute for the next game!`); 
-                    removeRoleRecursive(member, channel, stats.sub, "substitute");
+                    removeRoleRecursive(member, channel, stats.signedsub, "signed sub");
                 }
 			}, () => {
 				// DB error
@@ -1040,7 +1040,7 @@ module.exports = function() {
             msg = "Attempting to make you a substitute player";
             dbType = "substitute";
             msg2 = "is a substitute with emoji";
-            signupRole = stats.sub;
+            signupRole = stats.gamephase <= gp.SIGNUP ? stats.signedsub : stats.sub;
             defRole = "substitute";
         }
         
@@ -1318,7 +1318,7 @@ module.exports = function() {
 	/* Check if a member is a sub */
 	this.isSub = function(member) {
         if(!member) return false;
-		return member.roles.cache.get(stats.sub);
+		return member.roles.cache.get(stats.sub) || member.roles.cache.get(stats.signedsub);
 	}
     
 	/* Check if a member is a mentor */
