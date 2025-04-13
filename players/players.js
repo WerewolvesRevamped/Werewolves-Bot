@@ -13,6 +13,7 @@ require("./boosters.js")();
 require("./inventory.js")();
 require("./mentors.js")();
 require("./bot.js")();
+require("./permissions.js")();
 
 
 module.exports = function() {

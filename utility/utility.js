@@ -10,6 +10,7 @@ require("./discord.js")();
 require("./web.js")();
 require("./levenshtein.js")();
 require("./help.js")();
+require("./schedule.js")();
 
 module.exports = function() {
     

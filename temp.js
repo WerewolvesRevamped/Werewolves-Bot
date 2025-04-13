@@ -135,6 +135,7 @@ module.exports = function() {
                 "nickname": ["nick"],
                 "booster": ["boosters", "bst"],
                 "market": ["mk", "mkt"],
+                "schedule": ["sched", "sch"],
         };
         
     this.parseAlias = function(alias) {
