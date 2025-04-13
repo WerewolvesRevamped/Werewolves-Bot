@@ -255,11 +255,11 @@ module.exports = function() {
 	/* Lists all signedup players in final results format */
 	this.cmdPlayersLog3 = function(channel) {
 		// Get a list of players
-		sql("SELECT id,emoji,role,alive,ccs,alignment,final_result FROM players WHERE type='player'", async result => {
+		sql("SELECT id,emoji,role,orig_role,alive,ccs,alignment,final_result FROM players WHERE type='player'", async result => {
             // function to format a log3 list
             const l3Format = el => {
                 let player = channel.guild.members.cache.get(el.id);
-                return `• ${player ? player : "<@" + el.id + ">"} (${el.role.split(",").map(role => toTitleCase(role)).join(", ")})`;
+                return `• ${player ? player : "<@" + el.id + ">"} (${el.role != el.orig_role ? toTitleCase(el.orig_role) + ' → ' + toTitleCase(el.role) : toTitleCase(el.role)})`;
             };
             let winnerTeam = await sqlPromOne("SELECT display_name FROM teams WHERE active=1");
             let msg = "```**Final Results**\n" + winnerTeam.display_name + " Victory\n\n";
