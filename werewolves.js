@@ -1170,7 +1170,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
 client.on("messageReactionRemove", async (reaction, user) => {
     await reaction.fetch();
     await user.fetch();
-    console.log(`${user.globalName} removed ${reaction.emoji.name}`);
+    console.log(`${user.globalName ?? user.id} removed ${reaction.emoji.name}`);
 	// reaction role
 	if(user.bot) return;
 	// Automatic unpinning

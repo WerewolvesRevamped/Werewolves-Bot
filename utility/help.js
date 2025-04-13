@@ -154,6 +154,7 @@ module.exports = function() {
             ["players log", PERM.GM, "Returns player info in a specific format for log.", "", "Lists all players with their role and nickname in the gamelog format.", "", [], CMDSTATE.RDY],
             ["players log2", PERM.GM, "Returns player info in a specific format for log.", "", "Lists all players with their role and all roles with their player. Can be used to copy into gamelog messages.", "", [], CMDSTATE.RDY],
             ["players log3", PERM.GM, "Returns player info in a specific format for log.", "", "Lists all players with their role sorted by alive status. Can be used as a base for the final results message.", "", [], CMDSTATE.RDY],
+            ["players log4", PERM.GM, "Returns player info in a specific format for rating.", "", "Lists all players with their days dead value.", "", [], CMDSTATE.RDY],
             ["players votes", PERM.GM, "Returns the amount of votes each player has.", "", "Lists all players with and their votes if they are affected by vote manipulation.", "", [], CMDSTATE.UNK],
             ["players messages", PERM.GM, "Returns the amount of messages each player has sent.", "", "Lists all players and their public and private message count.", "", [], CMDSTATE.RDY, ["players msgs"]],
             ["players messages2", PERM.GM, "Calculates inactivity based on phase input and message count.", "<Phase>", "Lists all alive players and their public and private message count.", "", [], CMDSTATE.RDY, ["players msgs2"]],

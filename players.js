@@ -17,7 +17,7 @@ module.exports = function() {
 	/* Handle players command */
 	this.cmdPlayers = function(message, args) {
 		// Check subcommands
-		if(!args[0] || (!args[1] && ["list","log","log2","log3","msgs","messages","votes","roles","rl","list_alive"].indexOf(args[0]) == -1)) { 
+		if(!args[0] || (!args[1] && ["list","log","log2","log3","log4", "msgs","messages","votes","roles","rl","list_alive"].indexOf(args[0]) == -1)) { 
 			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `players [get|get_clean|set|resurrect|signup|list|msgs|msgs2|log|log2|votes|rl]`!"); 
 			return; 
 		}
@@ -273,6 +273,31 @@ module.exports = function() {
             if(deadLosers.length > 0) msg += "__Dead Losers:__\n" + deadLosers.join("\n") + "\n\n";
             
 			channel.send(msg + "```")
+            .catch(err => {
+					logO(err); 
+					sendError(channel, err, "Could not log players");
+				});
+		}, () => {
+			// DB error
+			channel.send("⛔ Database error. Could not log players!");
+		});
+	}
+    
+	/* Lists all signedup players with their phases dead */
+	this.cmdPlayersLog4 = function(channel) {
+		// Get a list of players
+		sql("SELECT id,role,death_phase,final_result FROM players WHERE type='player'", async result => {
+            // function to format a log3 list
+            let isN = isNight();
+            let endPhase = getPhaseAsNumber() + (isN?1:0);
+            
+            let playerList = result.map(el => {
+                let player = channel.guild.members.cache.get(el.id);
+                let daysDead = Math.floor((endPhase - el.death_phase) / 2) + 1;
+                return `${player ? player.user.globalName ?? player.displayName : "<@" + el.id + ">"}\t${daysDead}`;
+            });
+            
+			channel.send("```" + playerList.join("\n") + "```")
             .catch(err => {
 					logO(err); 
 					sendError(channel, err, "Could not log players");
