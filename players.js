@@ -17,7 +17,7 @@ module.exports = function() {
 	/* Handle players command */
 	this.cmdPlayers = function(message, args) {
 		// Check subcommands
-		if(!args[0] || (!args[1] && ["list","log","log2","log3","log4","msgs","messages","votes","roles","rl","list_alive"].indexOf(args[0]) == -1)) { 
+		if(!args[0] || (!args[1] && ["list","log","log2","log3","msgs","messages","votes","roles","rl","list_alive"].indexOf(args[0]) == -1)) { 
 			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `players [get|get_clean|set|resurrect|signup|list|msgs|msgs2|log|log2|votes|rl]`!"); 
 			return; 
 		}
@@ -255,16 +255,24 @@ module.exports = function() {
 	/* Lists all signedup players in final results format */
 	this.cmdPlayersLog3 = function(channel) {
 		// Get a list of players
-		sql("SELECT id,emoji,role,alive,ccs FROM players WHERE type='player'", result => {
-			let playerList1 = result.filter(el => el.alive == 1).map(el => {
+		sql("SELECT id,emoji,role,alive,ccs,alignment,final_result FROM players WHERE type='player'", async result => {
+            // function to format a log3 list
+            const l3Format = el => {
                 let player = channel.guild.members.cache.get(el.id);
                 return `• ${player ? player : "<@" + el.id + ">"} (${el.role.split(",").map(role => toTitleCase(role)).join(", ")})`;
-            });
-            let playerList2 = result.filter(el => el.alive == 0).map(el => {
-                let player = channel.guild.members.cache.get(el.id);
-                return `• ${player ? player : "<@" + el.id + ">"} (${el.role.split(",").map(role => toTitleCase(role)).join(", ")})`;
-            });
-			channel.send("```**Final Results**\n<Team> Victory\n\n__Live Winners:__\n" + playerList1.join("\n") + "\n\n__Dead Losers:__\n" + playerList2.join("\n") + "```")
+            };
+            let winnerTeam = await sqlPromOne("SELECT display_name FROM teams WHERE active=1");
+            let msg = "```**Final Results**\n" + winnerTeam.display_name + " Victory\n\n";
+			let liveWinner = result.filter(el => (el.alive == 1 || el.alignment == "unaligned") && el.final_result == 1).map(l3Format);
+			let deadWinners = result.filter(el => el.alive == 0 && el.alignment != "unaligned" && el.final_result == 1).map(l3Format);
+			let liveLosers = result.filter(el => el.alive == 1 && el.final_result == 0).map(l3Format);
+			let deadLosers = result.filter(el => el.alive == 0 && el.final_result == 0).map(l3Format);
+            if(liveWinner.length > 0) msg += "__Live Winners:__\n" + liveWinner.join("\n") + "\n\n";
+            if(deadWinners.length > 0) msg += "__Dead Winners:__\n" + deadWinners.join("\n") + "\n\n";
+            if(liveLosers.length > 0) msg += "__Live Losers:__\n" + liveLosers.join("\n") + "\n\n";
+            if(deadLosers.length > 0) msg += "__Dead Losers:__\n" + deadLosers.join("\n") + "\n\n";
+            
+			channel.send(msg + "```")
             .catch(err => {
 					logO(err); 
 					sendError(channel, err, "Could not log players");
@@ -273,32 +281,8 @@ module.exports = function() {
 			// DB error
 			channel.send("⛔ Database error. Could not log players!");
 		});
-	
 	}
     
-	/* Lists all signedup players in final results format */
-	this.cmdPlayersLog4 = function(channel) {
-		// Get a list of players
-		sql("SELECT id,emoji,role,alive,ccs FROM players WHERE type='player'", result => {
-			let playerList1 = result.filter(el => el.alive == 1).map(el => {
-                let player = channel.guild.members.cache.get(el.id);
-                return `• ${getRoleEmoji(el.role.split(",")[0])} ${player ? player : "<@" + el.id + ">"} (${el.role.split(",").map(role => toTitleCase(role)).join(", ")})`;
-            });
-            let playerList2 = result.filter(el => el.alive == 0).map(el => {
-                let player = channel.guild.members.cache.get(el.id);
-                return `• ${getRoleEmoji(el.role.split(",")[0])} ${player ? player : "<@" + el.id + ">"} (${el.role.split(",").map(role => toTitleCase(role)).join(", ")})`;
-            });
-			channel.send("```**Final Results**\n<Team> Victory\n\n__Live Winners:__\n" + playerList1.join("\n") + "\n\n__Dead Losers:__\n" + playerList2.join("\n") + "```")
-            .catch(err => {
-					logO(err); 
-					sendError(channel, err, "Could not log players");
-				});
-		}, () => {
-			// DB error
-			channel.send("⛔ Database error. Could not log players!");
-		});
-	
-	}
 	
     
 	/* Lists all signedup players in a different log format */

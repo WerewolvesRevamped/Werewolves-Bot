@@ -216,6 +216,8 @@ module.exports = function() {
 	this.killPlayer = async function(player_id, silent = false) {
        // set to dead
        await setLivingStatus(player_id, 0);
+       // set death phase
+       await setDeathPhase(player_id, getPhaseAsNumber());
        // send a reporter message
        reporterMessage(player_id);
         
@@ -282,6 +284,19 @@ module.exports = function() {
         return new Promise(res => {
             sql("UPDATE players SET alive=" + connection.escape(status) + " WHERE id=" + connection.escape(player_id), result => {
                 updateGameStatus(); // update game status (async)
+                res();
+            });	
+        });
+    }
+    
+    /** PUBLIC
+    Set Death Phase
+    set the death phase value for a player
+    // WIP: Maybe this should be in player module
+    **/
+    this.setDeathPhase = function(player_id, deathPhase) {
+        return new Promise(res => {
+            sql("UPDATE players SET death_phase=" + connection.escape(deathPhase) + " WHERE id=" + connection.escape(player_id), result => {
                 res();
             });	
         });

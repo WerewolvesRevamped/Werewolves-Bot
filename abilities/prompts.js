@@ -193,6 +193,16 @@ module.exports = function() {
         // clears last target on unused prompts
         for(let i = 0; i < promptsToClear.length; i++) {
             await clearLastTarget(promptsToClear[i].src_ref, JSON.parse(promptsToClear[i].abilities)[0]);
+            
+            // get prompt message
+            let promptChannel = await mainGuild.channels.fetch(promptsToClear[i].channel_id);
+            let promptMessage = await promptChannel.messages.fetch(promptsToClear[i].message_id);
+            let orig_text = promptMessage.embeds[0].description.split(PROMPT_SPLIT)[0];
+            orig_text = orig_text.replace("Please submit your choice as a reply to this message.", "");
+            // update message
+            embed = basicEmbed(`${orig_text}*You did not react to the prompt, so the ability was not executed.*`, EMBED_RED);
+            embed.components = [];
+            promptMessage.edit(embed); 
         }
         
         return sqlProm("DELETE FROM prompts");
