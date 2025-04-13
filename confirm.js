@@ -25,6 +25,7 @@ module.exports = function() {
 		});
 	}
 	
+    // WIP: CHECK which of these still exist
 	this.confirmActionExecute = function(command, message, messageSent) {
 		switch(command) {
 			case "connection reset": cmdConnectionReset(message.channel); break;

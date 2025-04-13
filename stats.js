@@ -347,6 +347,35 @@ module.exports = function() {
             stats.signedsub = null;
 			log("Stats > ❗❗❗ Unable to cache signed sub role!")
 		});
+        // Phase Automation Info
+		sqlGetStat(statID.PHASE_AUTO_INFO,  result => { 
+            let spl = result.split(";");
+            if(spl.length < 3) {
+                stats.phaseautoinfo = null;
+                log("Stats > ❗❗❗ Unable to cache phase auto info!");
+                return;
+            }
+            stats.phaseautoinfo = {
+                all: result,
+                d0: spl[0],
+                night: +spl[1],
+                day: +spl[2]
+            };
+            if(spl.length == 4) stats.phaseautoinfo.night_late = +spl[3];
+            if(spl.length == 5) stats.phaseautoinfo.day_late = +spl[4];
+			if(doLog) log("Stats > Cached phase auto info as `" + result + "`!")
+		}, () => {
+            stats.phaseautoinfo = null;
+			log("Stats > ❗❗❗ Unable to cache phase auto info!")
+		});
+        // D0 Time
+		sqlGetStat(statID.D0_TIME,  result => { 
+			stats.d0_time = + result; 
+			if(doLog) log("Stats > Cached d0 time as `" + result + "`!");
+		}, () => {
+            stats.d0_time = null;
+			log("Stats > ❗❗❗ Unable to cache d0 time!")
+		});
 	}
 	
 	/* Gets the name of a gamephase by id */
@@ -366,7 +395,9 @@ module.exports = function() {
         SUBPHASE: 48,
         REWARD_LOG: 49,
         MENTOR_ROLE: 50,
-        SIGNEDSUB_ROLE: 51
+        SIGNEDSUB_ROLE: 51,
+        PHASE_AUTO_INFO: 52,
+        D0_TIME: 53
     }
 	
 	/* Handles option command */
@@ -424,6 +455,8 @@ module.exports = function() {
                 case "subphase": stat = statID.SUBPHASE; break;
                 case "reward_log": stat = statID.REWARD_LOG; break;
                 case "mentor": stat = statID.MENTOR_ROLE; break;
+                case "signedsub": stat = statID.SIGNEDSUB_ROLE; break;
+                case "phaseautoinfo": stat = statID.PHASE_AUTO_INFO; break;
 				default: message.channel.send("⛔ Syntax error. Invalid parameter!"); return;
 			}
 		} else {

@@ -18,6 +18,7 @@ module.exports = function() {
 		switch(args[0]) {
 			case "list": cmdScheduleList(message.channel); break;
 			case "add": cmdScheduleAdd(message.channel, args, argsX); break;
+			case "recur": cmdScheduleRecur(message.channel, args, argsX); break;
 			case "remove": cmdScheduleRemove(message.channel, args); break;
 			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
 		}
@@ -28,14 +29,24 @@ module.exports = function() {
     **/
     this.cmdScheduleList = async function(channel) {
         let sched = await sqlProm("SELECT * FROM schedule ORDER BY timestamp ASC");
-        sched = sched.map(el => `\`${el.ai_id}\` **[${el.type}]:** ${el.value} (<t:${el.timestamp}:R>)`);
+        sched = sched.map(el => `\`${el.ai_id}\` **[${el.type}]:** ${el.value} (<t:${el.timestamp}:R>${el.recurrence>0 ? ' | Recurs: ' + (el.recurrence/60) + 'm' : ''})`);
         channel.send(`**Current Schedule**\n${sched.join("\n")}`);
+    }
+    
+    /**
+    Command: $schedule recur
+    **/
+    this.cmdScheduleRecur = async function(channel, args, argsX) {
+        let recur = args.splice(3, 1);
+       recur = (+recur) * 60;
+       argsX.splice(3, 1);
+       cmdScheduleAdd(channel, args, argsX, recur);
     }
     
     /**
     Command: $schedule add
     **/
-    this.cmdScheduleAdd = async function(channel, args, argsX) {
+    this.cmdScheduleAdd = async function(channel, args, argsX, recur = 0) {
         let subtype = args[1];
         let time = parseToFutureUnixTimestamp(args[2]);
         if(!time) {
@@ -47,8 +58,18 @@ module.exports = function() {
         switch(subtype) {
             case "cmd":
             case "command":
-                 await sqlProm("INSERT INTO schedule(type, value, timestamp) VALUES ('command'," + connection.escape(argsX.join(" ")) + "," + connection.escape(time) + ")");
+                await sqlProm("INSERT INTO schedule(type, value, timestamp, recurrence) VALUES ('command'," + connection.escape(argsX.join(" ")) + "," + connection.escape(time) + "," + recur + ")");
                 channel.send(`✅ Command scheduled for <t:${time}:R>!`);
+            break;
+            case "spec":
+            case "special":
+                const spec = ["late", "switch"];
+                if(!spec.includes(args[3])) {
+                    channel.send("⛔ Syntax error. Unknown special event.");
+                    return;
+                }
+                await sqlProm("INSERT INTO schedule(type, value, timestamp, recurrence) VALUES ('special'," + connection.escape(args[3]) + "," + connection.escape(time) + "," + recur + ")");
+                channel.send(`✅ **${toTitleCase(args[3])}** scheduled for <t:${time}:R>!`);
             break;
             default:
                 channel.send("⛔ Syntax error. Unknown schedule type `" + args[1] + "`!");
@@ -77,15 +98,34 @@ module.exports = function() {
         const now = new Date();
         const nowUnix = Math.floor(now.getTime() / 1000);
         let sched = await sqlPromEsc("SELECT * FROM schedule WHERE timestamp<=", nowUnix);
+        if(sched.length <= 0) return; 
         let cmdChannel = null;
-        if(sched.length > 0) cmdChannel = mainGuild.channels.cache.get(backupChannelId);
+        cmdChannel = mainGuild.channels.cache.get(backupChannelId);
         for(let i = 0; i < sched.length; i++) {
             switch(sched[i].type) {
                 case "command":
+                    log(`Running scheduled command: ${sched[i].value}`);
                     cmdChannel.send(stats.prefix + sched[i].value);
                 break;
+                case "special":
+                    log(`Running scheduled event: ${sched[i].value}`);
+                    switch(sched[i].value) {
+                        case "late":
+                            await setSubphase(SUBPHASE.LATE);
+                        break;
+                        case "switch":
+                            await setSubphase(SUBPHASE.LOCKED);
+                            await sleep(60 * 1000);
+                            await cmdPhaseNext();
+                        break;
+                    }
+                break;
             }
-            await sqlPromOneEsc("DELETE FROM schedule WHERE ai_id=", sched[i].ai_id);
+            if(sched[i].recurrence == 0) {   
+                await sqlPromOneEsc("DELETE FROM schedule WHERE ai_id=", sched[i].ai_id);
+            } else {
+                await sqlPromOneEsc("UPDATE schedule SET timestamp=timestamp+recurrence WHERE ai_id=", sched[i].ai_id);
+            }
         }
     }
     
@@ -99,14 +139,21 @@ module.exports = function() {
             isRunningSchedule = true;
             await scheduleExecute();
             isRunningSchedule = false;
-        }, 30 * 1000)
+        }, 15 * 1000)
+    }
+    
+    /**
+    Clears schedule
+    **/
+    this.clearSchedule = function() {
+        sql("DELETE FROM schedule")
     }
     
     /**
     Timestamp Input Parser
     parses a timestamp in HH:MM, N[smhd] and Unix Timestamp formats
     **/
-    function parseToFutureUnixTimestamp(input) {
+    this.parseToFutureUnixTimestamp = function(input) {
         const now = new Date();
         const nowUnix = Math.floor(now.getTime() / 1000);
 
@@ -158,6 +205,20 @@ module.exports = function() {
 
         // Invalid or not in future
         return null;
+    }
+    
+    /**
+    Save D0 Time
+    **/
+    this.saveD0Time = function(time) {
+        stats.d0_time = + time; 
+        return new Promise(res => {
+            sqlSetStat(statID.D0_TIME, time, () => {
+                res(true);
+            }, () => {
+                res(false);
+            }); 
+        }); 
     }
     
 }

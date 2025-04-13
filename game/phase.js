@@ -87,7 +87,7 @@ module.exports = function() {
     /**
     Command: $phase next
     **/
-    this.cmdPhaseNext = async function(channel) {
+    this.cmdPhaseNext = async function(channel = null) {
         // find next phase name
         let phaseName = toTitleCase(getPhase());
         let phaseNum = getPhaseNum(phaseName);
@@ -100,10 +100,12 @@ module.exports = function() {
         // update phase
         let result = await setSubphase(SUBPHASE.MAIN);
         // feedback
-        if(result) {
-            channel.send(`✅ Incrementing phase to \`${toTitleCase(newPhaseName)}\`!`);
-        } else {
-            channel.send(`⛔ Command error.  Could not increment phase.`);
+        if(channel) {
+            if(result) {
+                channel.send(`✅ Incrementing phase to \`${toTitleCase(newPhaseName)}\`!`);
+            } else {
+                channel.send(`⛔ Command error.  Could not increment phase.`);
+            }
         }
         
         // trigger start phase events

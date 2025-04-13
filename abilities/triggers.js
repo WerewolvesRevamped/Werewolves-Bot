@@ -887,7 +887,7 @@ module.exports = function() {
     Event: Starting
     triggers at the start of the game
     **/
-    this.eventStarting = async function() {
+    this.eventStarting = async function(timestamp = null) {
         // pause queue checker during event
         pauseActionQueueChecker = true;
         
@@ -909,6 +909,7 @@ module.exports = function() {
         
         // starting storytime
         await bufferStorytime("The game has started!");
+        if(timestamp)  await bufferStorytime(`\n*The day will end at <t:${timestamp}:R>.*`);
         await postStorytime();
         
         // update teams
@@ -1008,6 +1009,11 @@ module.exports = function() {
         await attributeCleanup();
         
         // storytime
+        if(stats.automation_level === 4) {
+            let phn = Math.floor(getPhaseAsNumber() / 2);
+            let time = stats.d0_time + ((stats.phaseautoinfo.day + stats.phaseautoinfo.night) * phn * 60) + (stats.phaseautoinfo.night * 60);
+            await bufferStorytime(`\n*The night will end at <t:${time}:R>.*`);
+        }
         await postStorytime();
         
         skipActionQueueChecker = true;
@@ -1112,6 +1118,11 @@ module.exports = function() {
         await attributeCleanup();
         
         // storytime
+        if(stats.automation_level === 4) {
+            let phn = Math.floor(getPhaseAsNumber() / 2);
+            let time = stats.d0_time + ((stats.phaseautoinfo.day + stats.phaseautoinfo.night) * phn * 60);
+            await bufferStorytime(`\n*The day will end at <t:${time}:R>.*`);
+        }
         await postStorytime();
         
         skipActionQueueChecker = true;
