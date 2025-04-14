@@ -820,7 +820,7 @@ module.exports = function() {
         let pollLines = pollContents.split("\n");
         pollLines.shift();
         
-        let options = "", voters = "", random = "", show_voters = 1, formalized = [];
+        let options = "", voters = "", random = "", show_voters = 1, formalized = [], hammer = 0;
         
         // find specific key value
         pollLines.forEach(el => {
@@ -830,6 +830,7 @@ module.exports = function() {
                 case "Allowed Voters": voters = spl[1]; break;
                 case "Random": random = spl[1]; break;
                 case "Show Voters": show_voters = +(spl[1] === "Yes"); break;
+                case "Hammer": hammer = +(spl[1] === "Yes"); break;
                 default: formalized.push(el); break;
             }
         });
@@ -841,7 +842,7 @@ module.exports = function() {
         if(options.includes("Random") && random == "") random = "@All";
 
         // imsert the role into the databse
-        sql("INSERT INTO polls (name,display_name,options,random,voters,show_voters,desc_formalized) VALUES (" + connection.escape(dbName) + "," + connection.escape(pollName) + "," + connection.escape(options) + "," + connection.escape(random) + "," + connection.escape(voters) + "," + show_voters + "," + connection.escape(formalized) + ")");
+        sql("INSERT INTO polls (name,display_name,options,random,voters,show_voters,desc_formalized,hammer) VALUES (" + connection.escape(dbName) + "," + connection.escape(pollName) + "," + connection.escape(options) + "," + connection.escape(random) + "," + connection.escape(voters) + "," + show_voters + "," + connection.escape(formalized) + "," + hammer + ")");
         // return nothing
         return null;
     }

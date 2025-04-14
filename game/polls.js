@@ -347,20 +347,7 @@ module.exports = function() {
         });
     }
     
-    /** PRIVATE
-    Closes a single poll
-    **/
-    async function closePoll(pollData) {
-        // get messages
-        const messages = pollData.messages.split(",");
-        const channelId = pollData.channel;
-        const channel = mainGuild.channels.cache.get(channelId);
-        const pollType = pollData.type;
-        const pollName = pollData.name;
-        const pollIsPublic = isPublic(channel);
-        const pollPublicType = pollIsPublic ? "public" : "private";
-        console.log("CLOSE POLL", pollType, pollName, pollIsPublic, pollPublicType);
-        
+    async function getVoters(messages, channel) {
         // go through reactions
         let allReactions = [];
         let msgsProms = messages.map(async m => {
@@ -411,6 +398,29 @@ module.exports = function() {
         allReactions.forEach(reac => reac.users.forEach(usr => duplicateVoters.push(usr.id)));
         // find duplicates
         duplicateVoters = duplicateVoters.filter((el, ind, arr) => arr.indexOf(el) !== ind);
+        
+        // return
+        return { allReactions: allReactions, duplicateVoters: duplicateVoters };
+    }
+    
+    /** PRIVATE
+    Closes a single poll
+    **/
+    async function closePoll(pollData) {
+        // get messages
+        const messages = pollData.messages.split(",");
+        const channelId = pollData.channel;
+        const channel = mainGuild.channels.cache.get(channelId);
+        const pollType = pollData.type;
+        const pollName = pollData.name;
+        const pollIsPublic = isPublic(channel);
+        const pollPublicType = pollIsPublic ? "public" : "private";
+        console.log("CLOSE POLL", pollType, pollName, pollIsPublic, pollPublicType);
+        
+        // get Voters
+        const votersData = await getVoters(messages, channel);
+        const allReactions = votersData.allReactions;
+        const duplicateVoters = votersData.duplicateVoters;
         
         // get poll data
         const pollTypeData = await pollGetData(pollType);
@@ -492,7 +502,7 @@ module.exports = function() {
             if(votes <= 0) return;
             
             // save votes data
-            if(candidate != "Abstain") votesData.push({ votes: votes, candidate: candidate, validVoters: validVoters });
+            if(candidate != "Abstain" && candidate != "Hammer") votesData.push({ votes: votes, candidate: candidate, validVoters: validVoters });
         });
         
         // await all promises
@@ -705,6 +715,83 @@ module.exports = function() {
         }
     }
     
+    /** PUBLIC
+    Check Hammer
+    checks if a poll should end the phase by hammer
+    **/
+    this.pollCheckHammer = async function(pollData, pollTypeData) {
+        if(stats.automation_level < 4) return;
+        console.log(`Hammer checking ${pollData.name}`);
+        // get poll messages
+        const messages = pollData.messages.split(",");
+        const channelId = pollData.channel;
+        const channel = mainGuild.channels.cache.get(channelId);
+        // get voters
+        const votersData = await getVoters(messages, channel);
+        const allReactions = votersData.allReactions;
+        const duplicateVoters = votersData.duplicateVoters;
+        // get allowed voters
+        const allowedVoters = await parsePlayerSelector(pollTypeData.voters);
+        // get total valid votes
+        let maxVoteCount = 0;
+        const allReactionsCounts = allReactions.map(aR => {
+            const reac = aR;
+            // remove invalid votes through non-allowed voters
+            const voters = reac.users.filter(el => allowedVoters.indexOf(el.id) > -1);
+            // remove invalid votes through duplication
+            const validVoters = voters.filter(el => duplicateVoters.indexOf(el.id) === -1);
+            if(validVoters.length > maxVoteCount) maxVoteCount = validVoters.length;
+            return validVoters.length;
+        });
+        // get total vote count
+        const voteCount = allReactionsCounts.reduce((a, b) => a + b, 0);
+        console.log("Current Vote Count", voteCount, "Max Vote Count", maxVoteCount);
+        // get living player count
+        let players = await getAllPlayers();
+        let aliveCount = players.filter(el => el.alive == 1).length;
+        if(maxVoteCount > Math.floor(aliveCount / 2) || voteCount === aliveCount) {
+            console.log("Execute Hammer");
+            pauseActionQueueChecker = true;
+            const now = new Date();
+            const nowUnix = Math.floor(now.getTime() / 1000);
+            // check night/day
+            if(isDay()) { // Day Hammer
+                let endDay = await sqlPromOne("SELECT * FROM schedule WHERE name='day-end'");
+                if(endDay.timestamp > (nowUnix + 15)) {
+                    await sqlProm("UPDATE schedule SET timestamp=" + connection.escape(nowUnix + 10) + " WHERE name='day-end'");
+                    await sqlProm("UPDATE schedule SET timestamp=" + connection.escape(nowUnix + (stats.phaseautoinfo.night * 60) + 10) + " WHERE name='night-end'");
+                    if(stats.phaseautoinfo.day_late) await sqlProm("UPDATE schedule SET timestamp=" + connection.escape(nowUnix - (stats.phaseautoinfo.day_late * 60) - 20) + " WHERE name='day-late'");
+                    if(stats.phaseautoinfo.night_late) await sqlProm("UPDATE schedule SET timestamp=" + connection.escape(nowUnix + (stats.phaseautoinfo.night * 60) - (stats.phaseautoinfo.night_late * 60) - 20) + " WHERE name='night-late'");
+                    // run schedule
+                    if(!isRunningSchedule) {
+                        isRunningSchedule = true;
+                        await scheduleExecute();
+                        isRunningSchedule = false;
+                    }
+                    await bufferStorytime("**🔨 Hammer 🔨**");
+                } else {
+                    console.log("Hammer too soon. Skipping...");
+                }
+            } else { // Night Hammer
+                let endNight = await sqlPromOne("SELECT * FROM schedule WHERE name='night-end'");
+                if(endNight.timestamp > (nowUnix + 15)) {
+                    await sqlProm("UPDATE schedule SET timestamp=" + connection.escape(nowUnix + 10) + " WHERE name='night-end'");
+                    await sqlProm("UPDATE schedule SET timestamp=" + connection.escape(nowUnix + (stats.phaseautoinfo.day * 60) + 10) + " WHERE name='day-end'");
+                    if(stats.phaseautoinfo.night_late) await sqlProm("UPDATE schedule SET timestamp=" + connection.escape(nowUnix - (stats.phaseautoinfo.night_late * 60) - 20) + " WHERE name='night-late'");
+                    if(stats.phaseautoinfo.day_late) await sqlProm("UPDATE schedule SET timestamp=" + connection.escape(nowUnix + (stats.phaseautoinfo.day * 60) - (stats.phaseautoinfo.day_late * 60) - 20) + " WHERE name='day-late'");
+                    // run schedule
+                    if(!isRunningSchedule) {
+                        isRunningSchedule = true;
+                        await scheduleExecute();
+                        isRunningSchedule = false;
+                    }
+                    await bufferStorytime("**🔨 Hammer 🔨**");
+                } else {
+                    console.log("Hammer too soon. Skipping...");
+                }
+            }
+        }
+    }
     
     /**
     Converts a poll name to an emoji
@@ -715,6 +802,7 @@ module.exports = function() {
             case "abstain": return "⛔";
             case "cancel": return "❌";
             case "random": return "❓";
+            case "hammer": return "🔨";
             case "yes": return client.emojis.cache.get(stats.yes_emoji);
             case "no": return client.emojis.cache.get(stats.no_emoji);
             case "a": return "🇦";
@@ -753,6 +841,7 @@ module.exports = function() {
         name = name.toLowerCase();
         switch(name) {
             case "⛔": return "Abstain";
+            case "🔨": return "Hammer";
             case "❌": return "Cancel";
             case "❓": return "Random";
             case `<:${client.emojis.cache.get(stats.yes_emoji).name}:${client.emojis.cache.get(stats.yes_emoji).id}>`: return "Yes";

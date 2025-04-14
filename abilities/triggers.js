@@ -1010,9 +1010,8 @@ module.exports = function() {
         
         // storytime
         if(stats.automation_level === 4) {
-            let phn = Math.floor(getPhaseAsNumber() / 2);
-            let time = stats.d0_time + ((stats.phaseautoinfo.day + stats.phaseautoinfo.night) * phn * 60) + (stats.phaseautoinfo.night * 60);
-            await bufferStorytime(`\n*The night will end at <t:${time}:R>.*`);
+            let endNight = await sqlPromOne("SELECT * FROM schedule WHERE name='night-end'");
+            await bufferStorytime(`\n*The night will end at <t:${(+endNight.timestamp) + 60}:R>.*`);
         }
         await postStorytime();
         
@@ -1119,9 +1118,8 @@ module.exports = function() {
         
         // storytime
         if(stats.automation_level === 4) {
-            let phn = Math.floor(getPhaseAsNumber() / 2);
-            let time = stats.d0_time + ((stats.phaseautoinfo.day + stats.phaseautoinfo.night) * phn * 60);
-            await bufferStorytime(`\n*The day will end at <t:${time}:R>.*`);
+            let endDay = await sqlPromOne("SELECT * FROM schedule WHERE name='day-end'");
+            await bufferStorytime(`\n*The day will end at <t:${(+endDay.timestamp) + 60}:R>.*`);
         }
         await postStorytime();
         
