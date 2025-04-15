@@ -17,6 +17,10 @@ module.exports = function() {
         }
         // parse parameters
         let target = await parseSelector(ability.target, src_ref, additionalTriggerData);
+        if(target.type === "activeAttribute") {
+            target.value = target.value.map(el => el.ai_id);
+            target.type = "attribute";
+        }
         target = await applyRedirection(target, src_ref, ability.type, ability.subtype, additionalTriggerData);
         
         
