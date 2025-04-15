@@ -322,7 +322,7 @@ module.exports = function() {
 		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.helper).members.toJSON(), 0, "helper");
 		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.mentor).members.toJSON(), 0, "mentor");
 		// Remove Roles & Nicknames
-		wroles_remove(channel, [stats.signed_up, stats.spectator, stats.mayor2, stats.reporter, stats.guardian, stats.sub, stats.participant, stats.dead_participant, stats.host, stats.ghost, stats.mentor], ["signed up", "spectator", "mayor2", "reporter", "guardian", "substitute", "participant", "dead participant", "host", "ghost", "mentor"]);
+		wroles_remove(channel, [stats.signed_up, stats.spectator, stats.sub, stats.participant, stats.dead_participant, stats.host, stats.ghost, stats.mentor], ["signed up", "spectator", "substitute", "participant", "dead participant", "host", "ghost", "mentor"]);
         // run role removal again for critical roles because sometimes it fails even though it says it succeeds
 		wroles_remove(channel, [stats.participant, stats.dead_participant, stats.ghost, stats.mentor], ["participant", "dead participant", "ghost", "mentor"]);
 		// Cleanup channels

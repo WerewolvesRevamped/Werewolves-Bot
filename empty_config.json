@@ -6,6 +6,10 @@
     "log": "CHANNEL ID",
     "action_log": "CHANNEL ID",
     "coins": true,
+    "cards": true,
+    "icons_repo": "Repo Name",
+    "roles_repo": "Repo Name",
+    "roles_repo_secondary": null,
 	"db": {
 		"host": "localhost",
 		"user": "USER",

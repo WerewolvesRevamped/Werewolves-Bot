@@ -439,8 +439,12 @@ module.exports = function() {
     
     async function runQueryBoth(clearFunc, path1, path2, callbackFunc, maxAllowedErrors = 1) {
         let outputs1 = await runQuery(clearFunc, path1, callbackFunc, maxAllowedErrors);
-        let outputs2 = await runQuerySecondary(() => {}, path2, callbackFunc, maxAllowedErrors);
-        return [...outputs1, ...outputs2];
+        if(path2) {
+            let outputs2 = await runQuerySecondary(() => {}, path2, callbackFunc, maxAllowedErrors);
+            return [...outputs1, ...outputs2];
+        } else {
+            return outputs1;
+        }
     }
     
     /**

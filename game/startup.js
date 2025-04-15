@@ -143,7 +143,7 @@ module.exports = function() {
                     result.forEach(async el => {
                         cmdInfo(sc, player.id, [ el.name ], true, false);
                         await sleep(5000);
-                        cmdGetCard(sc, el.name);
+                        if(config.cards) cmdGetCard(sc, el.name);
                     });
 
                     // Move into sc category
@@ -191,7 +191,7 @@ module.exports = function() {
             embed.title = "The game has started!";
             embed.description = "This message is giving you your role" + (roles.length != 1 ? "s" : "") + " for the next game of Werewolves: Revamped!\n\nYour role" + (roles.length != 1 ? "s are" : " is") + " `" + rolesList + "`.\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.\n\nIf you're confused about your role at all, then check #how-to-play on the discord, which contains a role book with information on all the roles in this game. If you have any questions about the game, ping @Host.";
             embed.color = roleData.color;
-            embed.image = { "url": getCardUrl(roles[0].name) };
+            if(config.cards) embed.image = { "url": getCardUrl(roles[0].name) };
 
             // send the embed
             guild.members.cache.get(playerID).user.send({embeds: [ embed ]}).then(m => {

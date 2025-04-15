@@ -520,6 +520,10 @@ client.on("messageCreate", async message => {
         cmdGetImg(message.channel, args.join(" "), message.author);
     break;
     case "card": // displays a card
+        if(!config.cards) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
         cmdGetCard(message.channel, args.join(" "));
     break;
     case "embed": // generates an embed 

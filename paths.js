@@ -12,28 +12,28 @@ module.exports = function() {
     Repo Paths
     **/
     const wwrOrg = "WerewolvesRevamped";
-    const iconRepo = `${wwrOrg}/Werewolves-Icons`;
+    const iconRepo = `${wwrOrg}/${config.icons_repo}`;
     const iconRepoBranch = "main"
     this.iconRepoBaseUrl = `${githubRaw}${iconRepo}/${iconRepoBranch}/`;
-    this.roleRepo = `${wwrOrg}/Werewolves-Roles`;
+    this.roleRepo = `${wwrOrg}/${config.roles_repo}`;
     this.roleRepoBranch = "main";
     this.roleRepoBaseUrl = `${githubRaw}${roleRepo}/${roleRepoBranch}/`;
-    this.roleRepoSecondary = `${wwrOrg}/WWR-AdditionalRoles`;
+    this.roleRepoSecondary = config.roles_repo_seconary ? `${wwrOrg}/${config.roles_repo_seconary}` : null;
     this.roleRepoSecondaryBranch = "main";
-    this.roleRepoSecondaryBaseUrl = `${githubRaw}${roleRepoSecondary}/${roleRepoSecondaryBranch}/`;
+    this.roleRepoSecondaryBaseUrl = config.roles_repo_seconary ? `${githubRaw}${roleRepoSecondary}/${roleRepoSecondaryBranch}/` : null;
     /** Files **/
     this.iconLUTPath = `${iconRepoBaseUrl}replacements.csv`;
     this.colorsLUTPath = `${iconRepoBaseUrl}colors.csv`;
     this.rolepathsPath = `${roleRepoBaseUrl}_paths/roles`;
-    this.rolepathsPathSecondary = `${roleRepoSecondaryBaseUrl}_paths/roles`;
+    this.rolepathsPathSecondary = config.roles_repo_seconary ? `${roleRepoSecondaryBaseUrl}_paths/roles` : null;
     this.infopathsPath = `${roleRepoBaseUrl}_paths/info`;
-    this.infopathsPathSecondary = `${roleRepoSecondaryBaseUrl}_paths/info`;
+    this.infopathsPathSecondary = config.roles_repo_seconary ? `${roleRepoSecondaryBaseUrl}_paths/info` : null;
     this.grouppathsPath = `${roleRepoBaseUrl}_paths/groups`;
-    this.grouppathsPathSecondary = `${roleRepoSecondaryBaseUrl}_paths/groups`;
+    this.grouppathsPathSecondary = config.roles_repo_seconary ? `${roleRepoSecondaryBaseUrl}_paths/groups` : null;
     this.attributepathsPath = `${roleRepoBaseUrl}_paths/attributes`;
-    this.attributepathsPathSecondary = `${roleRepoSecondaryBaseUrl}_paths/attributes`;
+    this.attributepathsPathSecondary = config.roles_repo_seconary ? `${roleRepoSecondaryBaseUrl}_paths/attributes` : null;
     this.teamspathsPath = `${roleRepoBaseUrl}_paths/teams`;
-    this.teamspathsPathSecondary = `${roleRepoSecondaryBaseUrl}_paths/teams`;
+    this.teamspathsPathSecondary = config.roles_repo_seconary ? `${roleRepoSecondaryBaseUrl}_paths/teams` : null;
     
     this.setspathsPath = `${roleRepoBaseUrl}_paths/sets`;
     this.locationpathsPath = `${roleRepoBaseUrl}_paths/locations`;
@@ -47,6 +47,6 @@ module.exports = function() {
     /**
     Packs
     **/
-    this.themePackBase = `https://raw.githubusercontent.com/WerewolvesRevamped/Packs/refs/heads/main/Theme/`;
-    this.urlPackBase = `https://raw.githubusercontent.com/WerewolvesRevamped/Packs/refs/heads/main/URL/`;
+    this.themePackBase = `https://raw.githubusercontent.com/${wwrOrg}/Packs/refs/heads/main/Theme/`;
+    this.urlPackBase = `https://raw.githubusercontent.com/${wwrOrg}/Packs/refs/heads/main/URL/`;
 }

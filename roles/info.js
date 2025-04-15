@@ -1,4 +1,4 @@
-/**
+  /**
     Roles Module - Info
     $info command, variants and similiar commands
 **/
@@ -352,7 +352,7 @@ module.exports = function() {
                     switch(visibleSections[sec]) {
                         case "basics": sectionText = result.desc_basics; break;
                         case "details": sectionText = result.desc_details; break;
-                        case "simplified": sectionText = result.desc_simplified; break;
+                        case "simplified": sectionText = result.desc_simplified === "No description available." ? result.desc_basics : result.desc_simplified; break;
                         case "formalized": sectionText = formatFormalized(result.desc_formalized); isFormalized = true; break;
                         case "card": sectionText = result.desc_card; break;
                     }
