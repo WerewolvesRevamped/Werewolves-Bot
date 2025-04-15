@@ -12,8 +12,8 @@ module.exports = function() {
     /**
     All valid duration types
     **/
-    this.attributesValidDurationTypes = ["permanent","persistent","phase", "phaseattribute", "nextphase", "nextday","nextnight","untiluse","untilseconduse","attribute","untiluseattribute"];
-    const attributesNiceNames = ["Permanent", "Persistent", "Phase", "Phase & Attribute", "Next Phase", "Next Day", "Next Night", "Until Use", "Until Second Use", "Attribute", "Until Use & Attribute"];
+    this.attributesValidDurationTypes = ["permanent","persistent","phase", "phaseattribute", "nextphase", "nextday","nextnight", "nextphaseattribute", "nextdayattribute","nextnightattribute","untiluse","untilseconduse","attribute","untiluseattribute"];
+    const attributesNiceNames = ["Permanent", "Persistent", "Phase", "Phase & Attribute", "Next Phase", "Next Day", "Next Night", "Next Phase & Attribute", "Next Day & Attribute", "Next Night & Attribute", "Until Use", "Until Second Use", "Attribute", "Until Use & Attribute"];
     
     this.getDurationName = function(attr) {
         let index = attributesValidDurationTypes.indexOf(attr);
@@ -343,7 +343,10 @@ module.exports = function() {
         await cleanupDeleteAttribute("phaseattribute", phaseNumeric); // remove phase attributes of past phase(s)
         if(isNight()) await cleanupDeleteAttribute("nextday", phaseNumeric - 1); // at the start of a night cleanup next day attributes, unless they were applied previous day
         if(isDay()) await cleanupDeleteAttribute("nextnight", phaseNumeric - 1); // at the start of a day cleanup next night attributes, unless they were applied previous night
+        if(isNight()) await cleanupDeleteAttribute("nextdayattribute", phaseNumeric - 1); // at the start of a night cleanup next day attributes, unless they were applied previous day
+        if(isDay()) await cleanupDeleteAttribute("nextnightattribute", phaseNumeric - 1); // at the start of a day cleanup next night attributes, unless they were applied previous night
         await sqlProm("UPDATE active_attributes SET duration='phase' WHERE duration='nextphase'"); // change "nextphase" attributes to "phase" attributes so that they will be cleanedup next phase
+        await sqlProm("UPDATE active_attributes SET duration='phaseattribute' WHERE duration='nextphaseattribute'"); // change "nextphaseattribute" attributes to "phaseattribute" attributes so that they will be cleanedup next phase
         await cacheActiveCustomAttributes();
     }
     
@@ -397,7 +400,7 @@ module.exports = function() {
     **/
     this.deleteAttribute = async function(id) {
         // delete owned attribute duration attributes
-        let childAttrs = await sqlProm("SELECT ai_id FROM active_attributes WHERE (duration='attribute' OR duration='untiluseattribute' OR duration='phaseattribute') AND src_ref=" + connection.escape(`attribute:${id}`));
+        let childAttrs = await sqlProm("SELECT ai_id FROM active_attributes WHERE (duration='attribute' OR duration='untiluseattribute' OR duration='phaseattribute' OR duration='nextphaseattribute' OR duration='nextdayattribute' OR duration='nextnightattribute') AND src_ref=" + connection.escape(`attribute:${id}`));
         for(let j = 0; j < childAttrs.length; j++) {
             await deleteAttribute(childAttrs[j].ai_id);
         }
