@@ -54,7 +54,7 @@ module.exports = function() {
         }
         
         // replace ":" within strings
-       inputLines = inputLines.map(el => el.replace(/`([^`]*)`/g, (_, inner) => "`" + inner.replace(/:/g, " ~COLON~") + "`"));
+       inputLines = inputLines.map(el => el.replace(/`([^`]*)`/g, (_, inner) => "`" + inner.replace(/: /g, " ~COLON~ ") + "`"));
 
         // split the role into its triggers
         if(debugMode) console.log("PARSE TRIGGERS");
@@ -742,6 +742,13 @@ module.exports = function() {
             }
             /** Quantity **/
             // quantity
+            exp = new RegExp("^Quantity: " + targetType + "$", "g");
+            fd = exp.exec(restrictions[rest]);
+            if(fd) {
+                parsedRestrictions.push({ type: "quantity", quantity: fd[1] });
+                restFound = true;
+            }
+            // quantity selector
             exp = new RegExp("^Quantity: (\\d+)$", "g");
             fd = exp.exec(restrictions[rest]);
             if(fd) {
@@ -1358,6 +1365,12 @@ module.exports = function() {
         fd = exp.exec(abilityLine);
         if(fd) {
             ability = { type: "descend" };
+        }
+        // win
+        exp = new RegExp("^Win$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "win" };
         }
         /** DISBAND **/
         // disband self

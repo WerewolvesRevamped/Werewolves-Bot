@@ -41,6 +41,7 @@ require("./types/emit.js")();
 require("./types/storing.js")();
 require("./types/displaying.js")();
 require("./types/feedback.js")();
+require("./types/win.js")();
 
 module.exports = function() {
     
@@ -177,6 +178,9 @@ module.exports = function() {
                 break;
                 case "descend":
                     feedback = await abilityDescend(src_refAction, src_name, ability, additionalTriggerData);
+                break;
+                case "win":
+                    feedback = await abilityWin(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "shuffle":
                     feedback = await abilityShuffle(src_refAction, src_name, ability, additionalTriggerData);
