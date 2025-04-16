@@ -1680,6 +1680,19 @@ module.exports = function() {
         if(fd) {
             ability = { type: "displaying", subtype: "change", display: fd[1], display_index: +fd[2], display_value: fd[3].trim()  };
         }
+        /** LOCKING **/
+        // lock
+        exp = new RegExp("^Lock " + locationType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "locking", subtype: "lock", target: ttpp(fd[1], "location") };
+        }
+        // unlock
+        exp = new RegExp("^Unlock " + locationType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "locking", subtype: "unlock", target: ttpp(fd[1], "location") };
+        }
 
         
         /** Ability Types End */

@@ -22,13 +22,15 @@ module.exports = function() {
         // check requires and unique role values
         let roles = await sqlProm("SELECT roles.name,roles.parsed,players.id FROM roles JOIN players WHERE players.role=roles.name");
         let roleNames = roles.map(el => el.name.toLowerCase());
+        var cancelStart = false;
         for(let i = 0; i < roles.length; i++) {
             let rName = roles[i].name;
             // parse role description
             let parsed = JSON.parse(roles[i].parsed);
             if(!parsed) {
                 channel.send(`⛔ List error. Cannot start game with invalid parsed role \`${rName}\`.`); 
-                return false;
+                cancelStart = true;
+                continue;
             }
             // check requirements
             let requires = parsed.requires ?? [];
@@ -36,7 +38,7 @@ module.exports = function() {
                 let parsed = parseRole(requires[j]);
                 if(!roleNames.includes(parsed)) {
                     channel.send(`⛔ List error. Cannot start game with role \`${rName}\` without having requirement \`${requires[j]}\`.`); 
-                    return false;
+                cancelStart = true;
                 }
             }
             // check unique role
@@ -45,7 +47,7 @@ module.exports = function() {
                 let filtered = roleNames.filter(el => el === rName);
                 if(filtered.length != 1) {
                     channel.send(`⛔ List error. Cannot start game with \`${filtered.length}\` instances of unique role \`${rName}\`.`); 
-                    return false;
+                cancelStart = true;
                 }
             }
             // check host information
@@ -64,10 +66,11 @@ module.exports = function() {
                 if(missingMatches.length > 0) {
                     let cmds = missingMatches.map(el => '`$hi add ' + roles[i].id + ' ' + el + ' "<value>"`').join(", ");
                     channel.send(`⛔ List error. Cannot start game with role \`${rName}\` on <@${roles[i].id}> without host information. The following information is missing: ${missingMatches.map(el => '\`' + el + '\`').join(", ")}. To add this host information run this command: ${cmds}`); 
-                    return false;
+                    cancelStart = true;
                 }
             }
         }
+        if(cancelStart) return false;
         return true;
     }
     

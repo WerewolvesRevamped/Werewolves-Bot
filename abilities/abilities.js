@@ -42,6 +42,7 @@ require("./types/storing.js")();
 require("./types/displaying.js")();
 require("./types/feedback.js")();
 require("./types/win.js")();
+require("./types/locking.js")();
 
 module.exports = function() {
     
@@ -193,6 +194,9 @@ module.exports = function() {
                 break;
                 case "displaying":
                     feedback = await abilityDisplaying(src_refAction, src_name, ability, additionalTriggerData);
+                break;
+                case "locking":
+                    feedback = await abilityLocking(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "feedback":
                     feedback = await abilityFeedback(src_refAction, src_name, ability, additionalTriggerData);
