@@ -1172,7 +1172,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
                 abilityLog(`🗳️ <@${user.id}> has added reaction ${reacText} on poll \`${poll.name}\`.`);
                 // check for hammer poll
                 let pData = await pollGetData(poll.name);
-                if(pData.hammer == 1) {
+                if(pData && pData.hammer == 1) {
                     pollCheckHammer(poll, pData);
                 }
             }
@@ -1202,7 +1202,7 @@ client.on("messageReactionRemove", async (reaction, user) => {
             abilityLog(`🗳️ <@${user.id}> has removed reaction ${reacText} on poll \`${poll.name}\`.`);
             // check for hammer poll
             let pData = await pollGetData(poll.name);
-            if(pData.hammer == 1) {
+            if(pData && pData.hammer == 1) {
                 pollCheckHammer(poll, pData);
             }
         }
