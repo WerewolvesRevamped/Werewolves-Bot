@@ -604,6 +604,7 @@ module.exports = function() {
                         }
                     break;
                     case "On Emitted Complex":
+                    case "On End Emitted Complex":
                         let emitVal = parseOption(param, src_ref, additionalTriggerData);
                         if(emitVal === additionalTriggerData.emit_value) {
                             await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
@@ -879,6 +880,7 @@ module.exports = function() {
             case "Start Night": case "Start Day": case "Start Phase":
             case "End Night": case "End Day": case "End Phase":
             case "Pre-End Night": case "Pre-End Day":
+            case "On End Emitted": case "On End Emitted Complex":
                 return [ "end", true ];
         }
     }

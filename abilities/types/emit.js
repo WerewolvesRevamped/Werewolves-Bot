@@ -21,9 +21,24 @@ module.exports = function() {
         const targets = await parseSelector(ability.selector, src_ref, additionalTriggerData);
         const option = parseOption(ability.emit_value);
         
-        for(let i = 0; i < targets.value.length; i++) {
-            emitQueue.push([`${targets.type}:${targets.value[i]}`, "On Emitted", { emit_value: option }]);
-            emitQueue.push([`${targets.type}:${targets.value[i]}`, "On Emitted Complex", { emit_value: option }]);
+        // select subtype
+        switch(ability.subtype) {
+            default:
+                abilityLog(`❗ **Error:** Unknown ability subtype \`${ability.subtype}\`!`);
+                return { msg: "Emitting failed! " + abilityError, success: false };
+            break;
+            case "immediate":        
+                for(let i = 0; i < targets.value.length; i++) {
+                    emitQueue.push([`${targets.type}:${targets.value[i]}`, "On Emitted", { emit_value: option }]);
+                    emitQueue.push([`${targets.type}:${targets.value[i]}`, "On Emitted Complex", { emit_value: option }]);
+                }
+            break;
+            case "end":
+                for(let i = 0; i < targets.value.length; i++) {
+                    emitQueue.push([`${targets.type}:${targets.value[i]}`, "On End Emitted", { emit_value: option }]);
+                    emitQueue.push([`${targets.type}:${targets.value[i]}`, "On End Emitted Complex", { emit_value: option }]);
+                }
+            break;
         }
         
         // feedback
