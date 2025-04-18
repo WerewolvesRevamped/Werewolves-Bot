@@ -58,5 +58,10 @@
     "chef.1": "Who would you like to send food to? And, would you like to poison the food? List a player name, as well as 'yes' (poison) or 'no' (charmed), separated by `;`.",
     "dog.1": "You may choose one of these roles. You will immediately change into the role you choose.",
     "monarch.1": "You must select an heir. Please specify who should be your heir.",
-    "monarch.2": "You may update your heir."
+    "monarch.2": "You may update your heir.",
+    "apocolyptic_horseman.1": "You may choose a player to attack tonight",
+    "horseman_of_death.1": "You may doom a player, they will die tomorrow night",
+    "horseman_of_war.1": "You may doom two players, they will both lose their vote and be disqualified from election tomorrow.",
+    "horseman_of_famine.1": "You may doom two players, they will both be strongly disguised as a random in play horseman role.",
+    "horseman_of_pestilence.1": "You may doom a player, they will be obstruced the following day and night"
 }

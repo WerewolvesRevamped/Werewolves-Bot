@@ -986,6 +986,10 @@ module.exports = function() {
         await actionQueueChecker();
         await executeEndQueuedAction("End Phase");
         await actionQueueChecker();
+        await executeEndQueuedAction("On End Emitted");
+        await actionQueueChecker();
+        await executeEndQueuedAction("On End Emitted Complex");
+        await actionQueueChecker();
         skipActionQueueChecker = false;
         
         // clear actions
@@ -1093,6 +1097,10 @@ module.exports = function() {
         await executeEndQueuedAction("End Night");
         await actionQueueChecker();
         await executeEndQueuedAction("End Phase");
+        await actionQueueChecker();
+        await executeEndQueuedAction("On End Emitted");
+        await actionQueueChecker();
+        await executeEndQueuedAction("On End Emitted Complex");
         await actionQueueChecker();
         skipActionQueueChecker = false;
         
