@@ -50,8 +50,8 @@ module.exports = function() {
                     case "during_type":
                         // check if current phase is equal or higher than specified phase
                         let checkForNight = restriction.phase === "night";
-                        let isNight = isNight(getPhase());
-                        if(checkForNight === isNight) {
+                        let isn = isNight();
+                        if(checkForNight === isn) {
                             return true;
                         } else {
                             return false;

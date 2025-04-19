@@ -17,6 +17,8 @@
     "process_evaluate.role": "Please submit a role.",
     "process_evaluate.player": "Please submit a player.",
     "protecting.active_defense.1": "Who would you like to protect?",
+    "role_block.1": "You may choose a player to role-block.",
+    "spy.1": "You may choose a player to spy on.",
     
     "comment_2": "Restriction Messages",
     "succession.target": "You may not select the same target two times in a row. You may resubmit another target as a reply to the original prompt.",
@@ -60,5 +62,11 @@
     "monarch.1": "You must select an heir. Please specify who should be your heir.",
     "monarch.2": "You may update your heir.",
     "framer.1": "You may choose a player to disguise as an in-play mafia role.",
-    "lawyer.1": "You may choose a player to disguise as an in-play town role."
+    "lawyer.1": "You may choose a player to disguise as an in-play town role.",
+    "veteran.1": "Would you like to stay alert tonight?",
+    "apocolyptic_horseman.1": "You may choose a player to attack tonight",
+    "horseman_of_death.1": "You may doom a player, they will die tomorrow night",
+    "horseman_of_war.1": "You may doom two players, they will both lose their vote and be disqualified from election tomorrow.",
+    "horseman_of_famine.1": "You may doom two players, they will both be strongly disguised as a random in play horseman role.",
+    "horseman_of_pestilence.1": "You may doom a player, they will be obstruced the following day and night"
 }
