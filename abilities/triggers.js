@@ -586,6 +586,16 @@ module.exports = function() {
                         }
                     }
                     break;
+                    case "On Action Target Basic Complex":
+                    case "On Visited Target Basic Complex": {
+                        let selector2 = await parsePlayerSelector(param, src_ref, additionalTriggerData);
+                        if(selector2.includes(additionalTriggerData.this)) {
+                            await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
+                        } else {
+                            abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\`.`);
+                        }
+                    }
+                    break;
                     case "On Poll Win Complex":
                         let poll = additionalTriggerData.poll_name.trim().toLowerCase().replace(/[^a-z]/g,"");
                         let paramPoll = selectorGetTarget(param);
@@ -880,6 +890,9 @@ module.exports = function() {
             case "Start Night": case "Start Day": case "Start Phase":
             case "End Night": case "End Day": case "End Phase":
             case "Pre-End Night": case "Pre-End Day":
+            case "Second Pre-End Night": case "Second Pre-End Day":
+            case "Third Pre-End Night": case "Third Pre-End Day":
+            case "Fourth Pre-End Night": case "Fourth Pre-End Day":
             case "On End Emitted": case "On End Emitted Complex":
                 return [ "end", true ];
         }
@@ -973,6 +986,12 @@ module.exports = function() {
         
         // execute pre-end actions (before polls)
         skipActionQueueChecker = true;
+        await executeEndQueuedAction("Fourth Pre-End Night");
+        await actionQueueChecker();
+        await executeEndQueuedAction("Third Pre-End Night");
+        await actionQueueChecker();
+        await executeEndQueuedAction("Second Pre-End Night");
+        await actionQueueChecker();
         await executeEndQueuedAction("Pre-End Night");
         await actionQueueChecker();
         skipActionQueueChecker = false;
@@ -1044,6 +1063,9 @@ module.exports = function() {
         
         // end actions
         await triggerHandler("Pre-End Night");
+        await triggerHandler("Second Pre-End Night");
+        await triggerHandler("Third Pre-End Night");
+        await triggerHandler("Fourth Pre-End Night");
         await triggerHandler("End Night");
         await triggerHandler("End Phase");
         await triggerHandler("Start Day");
@@ -1085,6 +1107,12 @@ module.exports = function() {
         
         // execute pre-end actions (before polls)
         skipActionQueueChecker = true;
+        await executeEndQueuedAction("Fourth Pre-End Night");
+        await actionQueueChecker();
+        await executeEndQueuedAction("Third Pre-End Night");
+        await actionQueueChecker();
+        await executeEndQueuedAction("Second Pre-End Night");
+        await actionQueueChecker();
         await executeEndQueuedAction("Pre-End Night");
         await actionQueueChecker();
         skipActionQueueChecker = false;
@@ -1156,6 +1184,9 @@ module.exports = function() {
         
         // end actions
         await triggerHandler("Pre-End Day");
+        await triggerHandler("Second Pre-End Day");
+        await triggerHandler("Third Pre-End Day");
+        await triggerHandler("Fourth Pre-End Day");
         await triggerHandler("End Day");
         await triggerHandler("End Phase");
         await triggerHandler("Start Night");

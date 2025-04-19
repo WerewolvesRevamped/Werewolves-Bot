@@ -20,7 +20,7 @@ module.exports = function() {
     Format Constants
     Constants of the input format
     **/
-    const actionTimings = ["Start Night","End Night","Start Day","End Day","Immediate Night","Immediate Day","End Phase","Start Phase","Immediate","Pre-End Night","Pre-End Day"];
+    const actionTimings = ["Start Night","End Night","Start Day","End Day","Immediate Night","Immediate Day","End Phase","Start Phase","Immediate","Pre-End Night","Pre-End Day","Second Pre-End Night","Second Pre-End Day","Third Pre-End Night","Third Pre-End Day","Fourth Pre-End Night","Fourth Pre-End Day"];
     const passiveTriggers = ["Passive", "Passive End Day", "Passive End Night", "Passive Start Day", "Passive Start Night", "Passive Start Phase", "Passive End Phase"];
     const electionTriggers = ["On Election", "On Mayor Election", "On Reporter Election", "On Guardian Election"];
     const defenseTriggers = ["On Defense", "On Passive Defense", "On Partial Defense", "On Recruitment Defense", "On Active Defense", "On Absence Defense"];
@@ -1763,7 +1763,7 @@ module.exports = function() {
         let curTriggerType = null;
         let curTrigger = [];
         let unique = false;
-        let require = [], roleAttribute = [];
+        let require = [], roleAttribute = [], identity = [];
         let triggers = [];
 
         // iterate through all the lines of the role
@@ -1806,12 +1806,14 @@ module.exports = function() {
                     require.push(curInputLineSplit.join(": "));
                 } else if(curTriggerName == "Role Attribute") { // Role Attribute special trigger
                     roleAttribute.push(curInputLineSplit.join(": "));
+                } else if(curTriggerName == "Identity") { // Identity special trigger
+                    identity.push(curInputLineSplit.join(": "));
                 } else {
                     //   const adancedTriggerTypes = ["On <Target> Visited [<Ability Type>]"]; // trigger types containing parameters
                     // attempt to parse complex triggers
                     /** On Target Death / On Target Visited **/
                     let exp, fd, complexTrigger;
-                    exp = new RegExp("^On " + targetType +  " (Death|Killed|Visited|Banished|Banishment)$", "g");
+                    exp = new RegExp("^On " + targetType +  " (Death|Killed|Banished|Banishment)$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
                         complexTrigger = "On " + fd[2] + ";" + ttpp(fd[1]);
@@ -1908,7 +1910,7 @@ module.exports = function() {
             triggers.push([curTriggerType, curTrigger]);
         }
 
-        return { triggers: triggers, unique: unique, requires: require, role_attribute: roleAttribute };
+        return { triggers: triggers, unique: unique, requires: require, role_attribute: roleAttribute, identity: identity };
 
     }
     

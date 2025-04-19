@@ -113,17 +113,23 @@ module.exports = function() {
     **/
 	 async function createSCs_One(channel, category, player, debug) {
         return new Promise(res => {
-            let roleListD = player.role.split(","); // get the players roles and split them
-            let roleList = roleListD.map(el => "name = " + connection.escape(el)).join(" OR "); // build a query to get all roles
-            sql("SELECT * FROM roles WHERE " + roleList, async result => {	
-                var rolesNameArray = result.map(el => el.display_name); // get an array of display names
+            sql("SELECT * FROM roles WHERE name=" + connection.escape(player.role), async result => {	
+                var rolesName = result[0].display_name;
+                var rolesNameBot = result[0].name;
+                var roleData = result[0];
+                if(result[0].identity) {
+                    let idRole = await sqlPromOneEsc("SELECT * FROM roles WHERE name=", result[0].identity);
+                    rolesName = idRole.display_name;
+                    rolesNameBot = idRole.name;
+                    roleData = idRole;
+                }
                 let disName = channel.guild.members.cache.get(player.id).displayName; // get the player's display name
                 
                 // Send Role DM (except if in debug mode)
-                if(!debug) await createSCs_sendDM(channel.guild, player.id, result, disName)
+                if(!debug) await createSCs_sendDM(channel.guild, player.id, roleData, disName)
                     
                 // Create INDSC
-                channel.send("✅ Creating INDSC for `" + channel.guild.members.cache.get(player.id).displayName + "` (`" + rolesNameArray.join("` + `") + "`)!");
+                channel.send("✅ Creating INDSC for `" + channel.guild.members.cache.get(player.id).displayName + "` (`" + rolesName + "`)!");
                 
                 // Create permissions
                 let scPerms = getSCCatPerms(channel.guild);
@@ -132,22 +138,20 @@ module.exports = function() {
                 scPerms.push(getPerms(stats.ghost, ["write"], ["read"]));
                 
                 // Determine channel name
-                let channelName = rolesNameArray.join("-").substr(0, 100);
+                let channelName = rolesName.substr(0, 100);
                 channelName = applyTheme(channelName);
                 
                 if(channelName.length > 100 || channelName.length <= 0) channelName = "invalid";
 
                 // Create SC channel
                 channel.guild.channels.create({ name: channelName, type: ChannelType.GuildText,  permissionOverwrites: scPerms })
-                .then(sc => {
+                .then(async sc => {
                     // Create a default connection with the player's ID
                     cmdConnectionAdd(sc, ["", player.id], true);
                     // Send info message for each role
-                    result.forEach(async el => {
-                        cmdInfo(sc, player.id, [ el.name ], true, false);
-                        await sleep(5000);
-                        if(config.cards) cmdGetCard(sc, el.name);
-                    });
+                    cmdInfo(sc, player.id, [ rolesNameBot ], true, false);
+                    await sleep(5000);
+                    if(config.cards) cmdGetCard(sc, rolesNameBot);
 
                     // Move into sc category
                     sc.setParent(category,{ lockPermissions: false }).then(m => {
@@ -178,23 +182,22 @@ module.exports = function() {
     Create Secret Channels - Send DM
     Send a game start dm to each player as part of the indsc channel creation
     **/
-    async function createSCs_sendDM(guild, playerID, roles, disName) {
+    async function createSCs_sendDM(guild, playerID, role, disName) {
         return new Promise(res => {
             // Build the role name
-            let rolesList = roles.map(el => el.display_name).join("` + `");
-            rolesList = applyTheme(rolesList);
+            let roleName = role.display_name;
             
             // Get role data for the first role
-            let roleData = getRoleData(roles[0].display_name, roles[0].class, roles[0].category, roles[0].team);
+            let roleData = getRoleData(role.display_name, role.class, role.category, role.team);
             
             // Get basic embed
             let embed = getBasicEmbed(guild);
             // Build the full embed
             delete embed.fields;
             embed.title = "The game has started!";
-            embed.description = "This message is giving you your role" + (roles.length != 1 ? "s" : "") + " for the next game of Werewolves: Revamped!\n\nYour role" + (roles.length != 1 ? "s are" : " is") + " `" + rolesList + "`.\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.\n\nIf you're confused about your role at all, then check #how-to-play on the discord, which contains a role book with information on all the roles in this game. If you have any questions about the game, ping @Host.";
+            embed.description = "This message is giving you your role for the next game of Werewolves: Revamped!\n\nYour role is `" + roleName + "`.\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.\n\nIf you're confused about your role at all, then check #how-to-play on the discord, which contains a role book with information on all the roles in this game. If you have any questions about the game, ping @Host.";
             embed.color = roleData.color;
-            if(config.cards) embed.image = { "url": getCardUrl(roles[0].name) };
+            if(config.cards) embed.image = { "url": getCardUrl(role.name) };
 
             // send the embed
             guild.members.cache.get(playerID).user.send({embeds: [ embed ]}).then(m => {

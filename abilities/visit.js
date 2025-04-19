@@ -30,12 +30,12 @@ module.exports = function() {
         }
         if(targetPlayerSplit[0] === "player_attr") {
             let attr = await roleAttributeGetPlayer(targetPlayer);
-            if(!attr || !attr.id) return null; // no visit if target attribute has since then been deleted
+            if(!attr || !attr.id) return (await visitObstructionFailureCheck(sourcePlayer, abilityType, abilitySubtype)) ? { msg: null, success: false } : null; // no visit if target attribute has since then been deleted
             targetPlayer = attr.id;
         }
         
         // no visit to self
-        if(sourcePlayer === targetPlayer) return null;
+        if(sourcePlayer === targetPlayer) return (await visitObstructionFailureCheck(sourcePlayer, abilityType, abilitySubtype)) ? { msg: null, success: false } : null;
         
         // get all living ids; check if both are players and alive
         let living = await getAllLivingIDs();
@@ -97,6 +97,7 @@ module.exports = function() {
             await triggerPlayer(targetPlayer, "On Visited Complex", { visitor: sourcePlayer, visit_parameter: visitParameter, second_visit_parameter: secondVisitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
             await triggerPlayer(targetPlayer, "On Visited Inverted Complex", { visitor: sourcePlayer, visit_parameter: visitParameter, second_visit_parameter: secondVisitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
             await triggerHandler("On Visited Target Complex", { visitor: sourcePlayer, visit_parameter: visitParameter, second_visit_parameter: secondVisitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, this: targetPlayer, visit_id: visitId });
+            await triggerHandler("On Visited Target Basic Complex", { visitor: sourcePlayer, visit_parameter: visitParameter, second_visit_parameter: secondVisitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, this: targetPlayer, visit_id: visitId });
             await triggerHandler("On Visited Target Inverted Complex", { visitor: sourcePlayer, visit_parameter: visitParameter, second_visit_parameter: secondVisitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, this: targetPlayer, visit_id: visitId });
         } else if(targetIsPlayer) {
             await triggerPlayer(targetPlayer, "On Visited", { visitor: null, visit_parameter: visitParameter, second_visit_parameter: secondVisitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
