@@ -1858,6 +1858,12 @@ module.exports = function() {
                     if(fd) {
                         complexTrigger = "On " + fd[2] + " Target Inverted;" + ttpp(fd[1]) + ";" + ttpp(fd[3], "abilitySubtype");
                     }
+                    /** On Target Visited, On Target Action**/
+                    exp = new RegExp("^On " + targetType + " (Visited|Action)$", "g");
+                    fd = exp.exec(curTriggerName);
+                    if(fd) {
+                        complexTrigger = "On " + fd[2] + " Target Basic;" + ttpp(fd[1]);
+                    }
                     /** Choice Chosen **/
                     exp = new RegExp("^On Poll `" + str +  "` Win$", "g");
                     fd = exp.exec(curTriggerName);
