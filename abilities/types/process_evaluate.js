@@ -168,6 +168,10 @@ module.exports = function() {
                             return first.value[0].alignment === second.value[0];
                         } else if(first.type === "alignment" && second.type === "result") {
                             return first.value[0] === second.value[0].alignment;
+                        } else if(first.type === "result" && second.type === "boolean") {
+                            return first.value[0].success === (second.value[0] === "true");
+                        }  else if(first.type === "boolean" && second.type === "result") {
+                            return (first.value[0] === "true") === second.value[0].success;
                         } else if(first.type === "string" || second.type === "string") {
                             return first.value[0] === second.value[0];
                         }

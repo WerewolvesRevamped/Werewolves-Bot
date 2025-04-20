@@ -107,8 +107,8 @@ module.exports = function() {
             case "quantity":
                 let quantity = await getActionQuantity(src_ref, ability);
                 let max_allowed = await parseNumber(restriction.quantity, src_ref, additionalTriggerData);
-                if(+max_allowed[0] <= 0) return true;
-                if(quantity < +max_allowed[0]) return true;
+                if(+max_allowed <= 0) return true;
+                if(quantity < +max_allowed) return true;
                 else return false;
             break;
             // CONDITION
@@ -170,8 +170,8 @@ module.exports = function() {
                 let quantity = await getActionQuantity(src_ref, ability);
                 if(quantity === -1) quantity = 0;
                 let max_allowed = await parseNumber(restriction.quantity, src_ref, { });
-                if(+max_allowed[0] <= 0) return "";
-                if(quantity < +max_allowed[0]) return `${+max_allowed[0] - quantity}/${+max_allowed[0]} uses left`;
+                if(+max_allowed <= 0) return "";
+                if(quantity < +max_allowed) return `${+max_allowed - quantity}/${+max_allowed} uses left`;
                 else return "";
             // SUCCESSION
             case "succession":

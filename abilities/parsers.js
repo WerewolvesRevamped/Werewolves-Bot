@@ -782,7 +782,7 @@ module.exports = function() {
         // iterate results
         for(let i = 0; i < selector.length; i++) {
             let resultData = selector[i];
-            console.log(resultData);
+            //console.log(resultData);
             // execute property access
             switch(property) {
                 case "class":
@@ -1896,12 +1896,12 @@ module.exports = function() {
                     return additionalTriggerData.action_feedback;
                 } else {
                     abilityLog(`❗ **Error:** Invalid info selector target \`${selectorTargetNormal}\`!`);
-                    return [ ];
+                    return "";
                 }
             case "%partialrolelist%":
                 let hi = await getHostInformation(srcToValue(self), selectorTargetNormal.replace(/%/g,""));
                 if(hi) {
-                    return hi;
+                    return hi[0];
                 } else {
                     abilityLog(`❗ **Error:** Invalid info \`${selectorTargetNormal}\`!`);
                     return "";         
@@ -2179,7 +2179,7 @@ module.exports = function() {
         } else if (HOST_INFORMATION.test(selectorTarget)) { // host information
             let hi = await getHostInformation(srcToValue(self), selectorTarget.replace(/%/g,""));
             if(hi) {
-                return hi;
+                return hi[0];
             } else {
                 abilityLog(`❗ **Error:** Invalid number \`${selectorTarget}\`!`);
                 return 0;         
