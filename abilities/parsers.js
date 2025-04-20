@@ -813,6 +813,13 @@ module.exports = function() {
                     }
                     output.push(resultData.alignment);
                 break;
+                case "number":
+                    if(!resultData.number) {    
+                        abilityLog(`❗ **Error:** Attempted to access a result property which this result does not have!`);
+                        continue;
+                    }
+                    output.push(resultData.number);
+                break;
                 case "result":
                     if(!resultData.result) {    
                         abilityLog(`❗ **Error:** Attempted to access a result property which this result does not have!`);

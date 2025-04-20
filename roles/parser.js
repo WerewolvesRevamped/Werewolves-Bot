@@ -2010,6 +2010,7 @@ module.exports = function() {
                 case "randomplayer": return "player";
                 case "mostfreqrole": return "role";
                 case "source": return "player";
+                case "number": return "number";
                 default: return "unknown";
             }
         } else if(first == "&") {
