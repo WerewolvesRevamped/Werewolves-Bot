@@ -2142,7 +2142,7 @@ module.exports = function() {
     **/
     this.parseNumber = async function(selector, self = null, additionalTriggerData = {}) {
         // get target
-        let selectorTarget = selectorGetTarget(selector);
+        let selectorTarget = selectorGetTarget("" + selector);
         selectorTarget = selectorTarget.replace(/`/g,"");
         // is number?
         if(!isNaN(selectorTarget)) { // direct number

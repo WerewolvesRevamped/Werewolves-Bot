@@ -741,18 +741,18 @@ module.exports = function() {
                 restFound = true;
             }
             /** Quantity **/
-            // quantity
-            exp = new RegExp("^Quantity: " + targetType + "$", "g");
-            fd = exp.exec(restrictions[rest]);
-            if(fd) {
-                parsedRestrictions.push({ type: "quantity", quantity: fd[1] });
-                restFound = true;
-            }
             // quantity selector
             exp = new RegExp("^Quantity: (\\d+)$", "g");
             fd = exp.exec(restrictions[rest]);
             if(fd) {
                 parsedRestrictions.push({ type: "quantity", quantity: +fd[1] });
+                restFound = true;
+            }
+            // quantity
+            exp = new RegExp("^Quantity: " + targetType + "$", "g");
+            fd = exp.exec(restrictions[rest]);
+            if(fd && !restFound) {
+                parsedRestrictions.push({ type: "quantity", quantity: fd[1] });
                 restFound = true;
             }
             /** Condition **/
