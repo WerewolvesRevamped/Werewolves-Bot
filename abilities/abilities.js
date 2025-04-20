@@ -421,6 +421,7 @@ module.exports = function() {
                 return raw.msg;
             case "info":
             case "string":
+            case "number":
                 return val;
             break;
             case "abilitytype":

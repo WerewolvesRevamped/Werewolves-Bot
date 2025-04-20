@@ -782,7 +782,7 @@ module.exports = function() {
         // iterate results
         for(let i = 0; i < selector.length; i++) {
             let resultData = selector[i];
-            //console.log(resultData);
+            console.log(resultData);
             // execute property access
             switch(property) {
                 case "class":
@@ -814,7 +814,7 @@ module.exports = function() {
                     output.push(resultData.alignment);
                 break;
                 case "number":
-                    if(!resultData.number) {    
+                    if(!resultData.number && resultData.number !== 0) {    
                         abilityLog(`❗ **Error:** Attempted to access a result property which this result does not have!`);
                         continue;
                     }
