@@ -61,6 +61,7 @@ module.exports = function() {
         ["729439643451523073","<:meeple:1312192403129499659>"], // invincitank
         ["883508604051800086", "🔫 "], // sniper
         ["1117286834838450246", "<:yeen:1355696731890651268>"], // kalimoor
+        ["400413991974862868", "🦊"], // yuki_not_cutie
     ];
 
         this.ALIASES = {
@@ -82,7 +83,8 @@ module.exports = function() {
                 "help": ["h"],
                 "impersonate": ["imp"],
                 "webhook": ["<"],
-                "cc": ["c","ccs"],
+                "cc": ["ccs"],
+                "confirm": ["c"],
                 "roll": ["rand","random","randomize"],
                 "players": ["p","player"],
                 "sheet": ["sh","game"],

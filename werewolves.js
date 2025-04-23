@@ -210,6 +210,12 @@ client.on("messageCreate", async message => {
         return; // dont do further steps for prompts
     }
     
+    // skull reaction
+    if(message.content.indexOf("💀") >= 0) {
+        let skullPerms = await inventoryGetItem(message.author.id, "bot:skull");
+        message.react("💀");
+    }
+    
     
 	/* Fetch Channel */
     if(isParticipant(message.member)) {
@@ -1259,15 +1265,17 @@ client.on("guildMemberAdd", async member => {
     await member.fetch();
     if(member.guild.id != stats.log_guild) return;
 	log(`👋 ${member.user} has joined the server!`);
-    let oog = member.guild.channels.cache.get("584793703923580965");
-    if(oog) oog.send(`Welcome ${member.user} 👋!`);
+    if(config.welcome_channel) {
+        let oog = member.guild.channels.cache.get(config.welcome_channel);
+        if(oog) oog.send(`Welcome ${member.user} 👋!`);
+    }
 });
 
 /* New Slash Command */
 client.on('interactionCreate', async interaction => {
     if(interaction.isButton()) {
         let orig_text = interaction.message.embeds[0].description.split(PROMPT_SPLIT)[0];
-        if(!isParticipant(interaction.member) && !isGameMaster(interaction.member)) {
+        if(!isParticipant(interaction.member) && !isGameMaster(interaction.member) && !isMentor(interaction.member)) {
             interaction.deferUpdate();
             return;
         }

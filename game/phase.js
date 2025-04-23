@@ -19,8 +19,8 @@ module.exports = function() {
 			// Attributea Subcommand
 			case "get": cmdPhaseGet(message.channel); break;
 			case "set": cmdPhaseSet(message.channel, args); break;
-			case "next": cmdPhaseNext(message.channel); break;
-			case "switch": cmdPhaseSwitch(message.channel); break;
+			case "next": cmdConfirm(message, "phase next"); break;
+			case "switch": cmdConfirm(message, "phase switch"); break;
 			case "main": cmdPhaseMain(message.channel); break;
 			case "late": cmdPhaseLate(message.channel); break;
 			case "lock": cmdPhaseLock(message.channel); break;
