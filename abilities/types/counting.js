@@ -17,9 +17,9 @@ module.exports = function() {
         }
         // parse parameters
         let targetParsed = await parseSelector(ability.target, src_ref, additionalTriggerData);
-        if(target.type === "activeAttribute") {
-            target.value = target.value.map(el => el.ai_id);
-            target.type = "attribute";
+        if(targetParsed.type === "activeAttribute") {
+            targetParsed.value = targetParsed.value.map(el => el.ai_id);
+            targetParsed.type = "attribute";
         }
         targetParsed.value = await applyRedirection(targetParsed.value, src_ref, ability.type, ability.subtype, additionalTriggerData);
         let num = await parseNumber(ability.counter_value, src_ref, additionalTriggerData);
