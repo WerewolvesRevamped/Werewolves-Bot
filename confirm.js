@@ -35,6 +35,7 @@ module.exports = function() {
 			case "reset": cmdReset(message.channel); break;
 			case "end": cmdEnd(message.channel); break;
 			case "killq killall": cmdKillqKillall(message.channel); break;
+			case "pl":
 			case "players list": cmdPlayersList(message.channel); break;
 			case "players list_alive": cmdPlayersListAlive(message.channel); break;
 			case "players log": cmdPlayersLog(message.channel); break;
@@ -45,6 +46,10 @@ module.exports = function() {
 			case "players roles": cmdPlayersRoleList(message.channel); break;
 			case "cc cleanup": cmdCCCleanup(message.channel); break;
 			case "bulkdelete": cmdBulkDelete(message.channel); break;
+			case "pn":
+			case "phase next": cmdPhaseNext(message.channel); break;
+			case "ps":
+			case "phase switch": cmdPhaseSwitch(message.channel); break;
 			default:	messageSent ? 
 							message.edit("⛔ Syntax error. Tried to confirm unknown command!") : 
 							message.channel.send("⛔ Syntax error. Tried to confirm unknown command!"); 

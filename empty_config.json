@@ -10,6 +10,7 @@
     "icons_repo": "Repo Name",
     "roles_repo": "Repo Name",
     "roles_repo_secondary": null,
+    "welcome_channel": null,
 	"db": {
 		"host": "localhost",
 		"user": "USER",
