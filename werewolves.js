@@ -188,7 +188,7 @@ client.on("messageCreate", async message => {
         return;
     }
     
-    if(!message.author.bot && message.reference && message.mentions.repliedUser === null && message.type === 0 && isParticipant(message.member)) {
+    if(!message.author.bot && message.reference && message.mentions.repliedUser === null && message.type === 0 && isParticipant(message.member) && !isSC(message.channel)) {
 		cmdWebhook(message.channel, message.member, ["**Forwarded Message**","\n*<@" + message.author.id + "> You're not allowed to forward messages during the game!*"]);
         message.delete();
     }
