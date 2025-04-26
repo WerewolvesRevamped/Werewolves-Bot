@@ -213,7 +213,9 @@ client.on("messageCreate", async message => {
     // skull reaction
     if(message.content.indexOf("💀") >= 0) {
         let skullPerms = await inventoryGetItem(message.author.id, "bot:skull");
-        message.react("💀");
+        if(skullPerms) {
+            message.react("💀");
+        }
     }
     
     
