@@ -24,7 +24,7 @@ module.exports = function() {
         // log ascension
         abilityLog(`❇️ **Victory:** <@${self}> has won.`);
         actionLog(`👑 <@${self}> has won.`);
-        await bufferStorytime(`<@${self}> has won!`);
+        await bufferStorytime(`${idToEmoji(self)} <@${self}> has won!`);
         
         // final trigger
         await triggerHandler("On End"); 
