@@ -104,8 +104,8 @@ module.exports = function() {
                         return cond;
                     case "and":
                     case "or":
-                        let cond1 = await resolveCondition(condition.condition1, src_ref, src_name, additionalTriggerData);
-                        let cond2 = await resolveCondition(condition.condition2, src_ref, src_name, additionalTriggerData);
+                        let cond1 = await resolveCondition(condition.condition1, src_ref, additionalTriggerData);
+                        let cond2 = await resolveCondition(condition.condition2, src_ref, additionalTriggerData);
                         let cond1Text = getPromptMessageRestrictionCondition(condition.condition1, src_ref, additionalTriggerData);
                         let cond2Text = getPromptMessageRestrictionCondition(condition.condition2, src_ref, additionalTriggerData);
                         if(!cond1 && cond2) return cond1Text

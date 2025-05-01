@@ -41,7 +41,7 @@ module.exports = function() {
         for(let i = 0; i < evaluate.length; i++) {
             let condition = evaluate[i].condition;
             let condTxt = evaluate[i].condition_text;
-            let condBool = await resolveCondition(condition, src_ref, src_name, additionalTriggerData);
+            let condBool = await resolveCondition(condition, src_ref, additionalTriggerData);
             if(condBool) { // enter final branch
                 abilityLog(`▶️ **Entering Branch:** ${condTxt}`);
                 let result = await executeAbility(src_ref, src_name, evaluate[i].ability, [], additionalTriggerData, doNotRecheckRestriction);
@@ -92,7 +92,7 @@ module.exports = function() {
     parse condition
     we pass all data as it may be necessary for selectors
     **/
-    this.resolveCondition = async function (condition, src_ref, src_name, additionalTriggerData) {
+    this.resolveCondition = async function (condition, src_ref, additionalTriggerData) {
         // check parameters
         if(!condition.type) {
             abilityLog(`❗ **Error:** Missing type for condition!`);
@@ -203,7 +203,7 @@ module.exports = function() {
                     case "not_equal":
                         let conditionCopy = deepCopy(condition); // deep clone
                         conditionCopy.subtype = "equal";
-                        let condBool = await resolveCondition(conditionCopy, src_ref, src_name, additionalTriggerData);
+                        let condBool = await resolveCondition(conditionCopy, src_ref, additionalTriggerData);
                         return !condBool;
                 }
             }
@@ -226,7 +226,7 @@ module.exports = function() {
                             abilityLog(`❗ **Error:** Missing arguments for subtype \`${condition.subtype}\`!`);
                             return false;
                         }
-                        condBool1 = await resolveCondition(condition.condition, src_ref, src_name, additionalTriggerData);
+                        condBool1 = await resolveCondition(condition.condition, src_ref, additionalTriggerData);
                         return !condBool1;
                     // LOGIC - AND
                     case "and":
@@ -234,8 +234,8 @@ module.exports = function() {
                             abilityLog(`❗ **Error:** Missing arguments for subtype \`${condition.subtype}\`!`);
                             return false;
                         }
-                        condBool1 = await resolveCondition(condition.condition1, src_ref, src_name, additionalTriggerData);
-                        condBool2 = await resolveCondition(condition.condition2, src_ref, src_name, additionalTriggerData);
+                        condBool1 = await resolveCondition(condition.condition1, src_ref, additionalTriggerData);
+                        condBool2 = await resolveCondition(condition.condition2, src_ref, additionalTriggerData);
                         console.log("AND", condBool1, condBool2, "=>", condBool1 && condBool2);
                         return condBool1 && condBool2;
                     // LOGIC - OR
@@ -244,8 +244,8 @@ module.exports = function() {
                             abilityLog(`❗ **Error:** Missing arguments for subtype \`${condition.subtype}\`!`);
                             return false;
                         }
-                        condBool1 = await resolveCondition(condition.condition1, src_ref, src_name, additionalTriggerData);
-                        condBool2 = await resolveCondition(condition.condition2, src_ref, src_name, additionalTriggerData);
+                        condBool1 = await resolveCondition(condition.condition1, src_ref, additionalTriggerData);
+                        condBool2 = await resolveCondition(condition.condition2, src_ref, additionalTriggerData);
                         console.log("OR", condBool1, condBool2, "=>", condBool1 || condBool2);
                         return condBool1 || condBool2;
                 }

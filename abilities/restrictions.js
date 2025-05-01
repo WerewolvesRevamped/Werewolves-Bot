@@ -117,12 +117,12 @@ module.exports = function() {
                 if(prePrompt) {
                     return true;
                 } else {
-                    return resolveCondition(restriction.condition, src_ref, null, additionalTriggerData);
+                    return resolveCondition(restriction.condition, src_ref, additionalTriggerData);
                 }
             break;
             // PRECONDITION
             case "precondition":
-                return resolveCondition(restriction.condition, src_ref, null, additionalTriggerData);
+                return resolveCondition(restriction.condition, src_ref, additionalTriggerData);
             break;
             // ATTRIBUTE
             case "attribute":

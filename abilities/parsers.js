@@ -1915,6 +1915,7 @@ module.exports = function() {
         // convert text segments to selectors if applicable
         for(let i = 0; i < spl.length; i++) {
             if(spl[i] === "~COLON~") continue;
+            if(spl[i] === "~colon~") continue;
             let infType = await inferTypeRuntime(spl[i], self, additionalTriggerData);
             if(infType != "unknown") {
                 let parsed = await parseSelector(`${spl[i]}[${infType}]`, self, additionalTriggerData);
@@ -1946,7 +1947,7 @@ module.exports = function() {
             }
         }
         // return
-        return spl.join(" ").replace(/ ~COLON~/g,":");
+        return spl.join(" ").replace(/ ~COLON~/g,":").replace(/ ~colon~/g,":");
     }
     
     /**

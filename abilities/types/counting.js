@@ -174,6 +174,9 @@ module.exports = function() {
             case "poll":
                 return getPollCounter(srcVal);
             break;
+            case "attribute":
+                return getAttributeCounter(srcVal);
+            break;
             default:
                 abilityLog(`❗ **Error:** Unsupported type ${srcType} for counting!`);  
                 return;
@@ -201,6 +204,9 @@ module.exports = function() {
             break;
             case "poll":
                 return setPollCounter(srcVal, num);
+            break;
+            case "attribute":
+                return setAttributeCounter(srcVal, num);
             break;
             default:
                 abilityLog(`❗ **Error:** Unsupported type ${srcType} for counting!`);  
