@@ -536,23 +536,19 @@ module.exports = function() {
                     break;
                     case "On Action Target Complex":
                     case "On Action Target Inverted Complex":
-                        if(additionalTriggerData.src_name != src_name) {
-                            abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Src name mismatch.`);        
-                        } else {
-                            let abilityType = await parseSelector(param2, src_ref, additionalTriggerData);
-                            let triggerAbilityType = (abilityType.type === "abilitySubtype" ? (additionalTriggerData.ability_subtype ?? "") : "") + additionalTriggerData.visit_type;
-                            abilityType = abilityType.value[0].toLowerCase().replace(/[^a-z]+/,"");
-                            triggerAbilityType = triggerAbilityType.replace(/[^a-z]+/,"");
-                            if((abilityType === triggerAbilityType) ^ (triggerName.includes("Inverted"))) {
-                                let selector2 = await parsePlayerSelector(param, src_ref, additionalTriggerData);
-                                if(selector2.includes(additionalTriggerData.this)) {
-                                    await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
-                                } else {
-                                    abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\`.`);
-                                }
+                        let abilityType = await parseSelector(param2, src_ref, additionalTriggerData);
+                        let triggerAbilityType = (abilityType.type === "abilitySubtype" ? (additionalTriggerData.ability_subtype ?? "") : "") + additionalTriggerData.ability_type;
+                        abilityType = abilityType.value[0].toLowerCase().replace(/[^a-z]+/,"");
+                        triggerAbilityType = triggerAbilityType.replace(/[^a-z]+/,"");
+                        if((abilityType === triggerAbilityType) ^ (triggerName.includes("Inverted"))) {
+                            let selector2 = await parsePlayerSelector(param, src_ref, additionalTriggerData);
+                            if(selector2.includes(additionalTriggerData.this)) {
+                                await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData);
                             } else {
-                                abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param2}\` with \`${triggerAbilityType}\`.`);
+                                abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\`.`);
                             }
+                        } else {
+                            abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param2}\` with \`${triggerAbilityType}\`.`);
                         }
                     break;
                     case "On Visited Complex":
