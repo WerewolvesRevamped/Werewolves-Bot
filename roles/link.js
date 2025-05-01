@@ -21,6 +21,7 @@ module.exports = function() {
             channel.send(`⛔ Querying roles failed.`);
         }
         channel.send(`✅ Querying roles completed.`);
+        await sleep(2000);
         cacheRoleInfo();
     }
     
@@ -42,6 +43,7 @@ module.exports = function() {
             channel.send(`⛔ Querying ability sets failed.`);
         }
         channel.send(`✅ Querying ability sets completed.`);
+        await sleep(2000);
         cacheRoleInfo();
     }
     
@@ -63,6 +65,7 @@ module.exports = function() {
             channel.send(`⛔ Querying info failed.`);
         }
         channel.send(`✅ Querying info completed.`);
+        await sleep(2000);
         cacheRoleInfo();
     }
     /**
@@ -83,6 +86,7 @@ module.exports = function() {
             channel.send(`⛔ Querying displays failed.`);
         }
         channel.send(`✅ Querying displays completed.`);
+        await sleep(2000);
         cacheDisplays();
     }
     
@@ -104,6 +108,7 @@ module.exports = function() {
             channel.send(`⛔ Querying groups failed.`);
         }
         channel.send(`✅ Querying groups completed.`);
+        await sleep(2000);
         cacheRoleInfo();
     }
     
@@ -125,6 +130,7 @@ module.exports = function() {
             channel.send(`⛔ Querying locations failed.`);
         }
         channel.send(`✅ Querying locations completed.`);
+        await sleep(2000);
         cacheLocations();
     }
     
@@ -146,6 +152,7 @@ module.exports = function() {
             channel.send(`⛔ Querying polls failed.`);
         }
         channel.send(`✅ Querying polls completed.`);
+        await sleep(2000);
         cachePolls();
     }
     
@@ -167,6 +174,7 @@ module.exports = function() {
             channel.send(`⛔ Querying attributes failed.`);
         }
         channel.send(`✅ Querying attributes completed.`);
+        await sleep(2000);
         cacheAttributes();
     }
     
@@ -188,6 +196,7 @@ module.exports = function() {
             channel.send(`⛔ Querying teams failed.`);
         }
         channel.send(`✅ Querying teams completed.`);
+        await sleep(2000);
         cacheTeams();
     }
     
@@ -322,38 +331,40 @@ module.exports = function() {
         channel.send(`🔄 Querying roles. Please wait. This may take several minutes.`);
         output = await queryRoles();
         channel.send(`❗ Querying roles completed with \`${output.length}\` errors.`);
-        // parse roles
-        channel.send(`🔄 Parsing roles. Please wait. This may take several minutes.`);
-        output = await parseRoles();
-        channel.send(`❗ Parsing roles completed with \`${output.output.length}\` errors.`);
         // query groups
         channel.send(`🔄 Querying groups. Please wait. This may take several minutes.`);
         output = await queryGroups();
         channel.send(`❗ Querying groups completed with \`${output.length}\` errors.`);
-        // parse groups
-        channel.send(`🔄 Parsing groups. Please wait. This may take several minutes.`);
-        output = await parseGroups();
-        channel.send(`❗ Parsing groups completed with \`${output.output.length}\` errors.`);
         // query polls
         channel.send(`🔄 Querying polls. Please wait. This may take several minutes.`);
         output = await queryPolls(); 
         channel.send(`❗ Querying polls completed with \`${output.length}\` errors.`);
-        // parse polls
-        channel.send(`🔄 Parsing polls. Please wait. This may take several minutes.`);
-        output = await parsePolls();
-        channel.send(`❗ Parsing polls completed with \`${output.output.length}\` errors.`);
         // query attributes
         channel.send(`🔄 Querying attributes. Please wait. This may take several minutes.`);
         output = await queryAttributes();
         channel.send(`❗ Querying attributes completed with \`${output.length}\` errors.`);
-        // parse attributes
-        channel.send(`🔄 Parsing attributes. Please wait. This may take several minutes.`);
-        output = await parseAttributes();
-        channel.send(`❗ Parsing attributes completed with \`${output.output.length}\` errors.`);
         // query teams
         channel.send(`🔄 Querying teams. Please wait. This may take several minutes.`);
         output = await queryTeams();
         channel.send(`❗ Querying teams completed with \`${output.length}\` errors.`);
+        /** parsing **/
+        cacheRoleInfo();
+        // parse roles
+        channel.send(`🔄 Parsing roles. Please wait. This may take several minutes.`);
+        output = await parseRoles();
+        channel.send(`❗ Parsing roles completed with \`${output.output.length}\` errors.`);
+        // parse groups
+        channel.send(`🔄 Parsing groups. Please wait. This may take several minutes.`);
+        output = await parseGroups();
+        channel.send(`❗ Parsing groups completed with \`${output.output.length}\` errors.`);
+        // parse polls
+        channel.send(`🔄 Parsing polls. Please wait. This may take several minutes.`);
+        output = await parsePolls();
+        channel.send(`❗ Parsing polls completed with \`${output.output.length}\` errors.`);
+        // parse attributes
+        channel.send(`🔄 Parsing attributes. Please wait. This may take several minutes.`);
+        output = await parseAttributes();
+        channel.send(`❗ Parsing attributes completed with \`${output.output.length}\` errors.`);
         // parse teams
         channel.send(`🔄 Parsing teams. Please wait. This may take several minutes.`);
         output = await parseTeams();
@@ -438,7 +449,6 @@ module.exports = function() {
     }
     
     async function runQueryBoth(clearFunc, path1, path2, callbackFunc, maxAllowedErrors = 1) {
-        console.log(path1, path2);
         let outputs1 = await runQuery(clearFunc, path1, callbackFunc, maxAllowedErrors);
         if(path2) {
             let outputs2 = await runQuerySecondary(() => {}, path2, callbackFunc, maxAllowedErrors);
