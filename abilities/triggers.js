@@ -869,6 +869,9 @@ module.exports = function() {
             case "emit": emojiName = ""; break;
             case "storing": emojiName = ""; break;
             case "continue": emojiName = ""; break;
+            case "displaying": emojiName = ""; break;
+            case "win": emojiName = ""; break;
+            case "locking": emojiName = ""; break;
         }
         return emojiName ? getEmoji(emojiName) : "";
     }
@@ -1036,6 +1039,9 @@ module.exports = function() {
         }
         await postStorytime();
         
+        // log new night
+        if(newPhase) actionLog(`**🌕 Night has started. [${newPhase}]**`);
+        
         skipActionQueueChecker = true;
         await executeEndQueuedAction("Start Night");
         await actionQueueChecker();
@@ -1156,6 +1162,9 @@ module.exports = function() {
             await bufferStorytime(`\n*The day will end at <t:${(+endDay.timestamp) + 60}:R>.*`);
         }
         await postStorytime();
+        
+        // log new day
+        if(newPhase) actionLog(`**☀️ Day has started. [${newPhase}]**`);
         
         skipActionQueueChecker = true;
         await executeEndQueuedAction("Start Day");

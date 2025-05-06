@@ -150,8 +150,13 @@ module.exports = function() {
                     cmdConnectionAdd(sc, ["", player.id], true);
                     // Send info message for each role
                     cmdInfo(sc, player.id, [ rolesNameBot ], true, false);
-                    await sleep(5000);
-                    if(config.cards) cmdGetCard(sc, rolesNameBot);
+                    
+                    // send card
+                    if (config.cards) {
+                        setTimeout(() => {
+                            cmdGetCard(sc, rolesNameBot);
+                        }, 5000);
+                    }
 
                     // Move into sc category
                     sc.setParent(category,{ lockPermissions: false }).then(m => {

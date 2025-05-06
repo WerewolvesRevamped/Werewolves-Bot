@@ -492,7 +492,7 @@ module.exports = function() {
                     }
                 break;
             }
-            actionLog(`✅ ${srcRefToText(curAction.src_ref)} (${srcNameToText(curAction.src_name)}) used an action${onTxt}${targetTxt}.`);
+            actionLog(`✅ ${srcRefToText(curAction.src_ref)} (${srcNameToText(curAction.src_name)}) used an ${srcRefToText('abilitytype:' + abilities[0].type)} action${onTxt}${targetTxt}.`);
             // execute the ability
             let feedback = [];
             let doNotRecheckRestriction = false;

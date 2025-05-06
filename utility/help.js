@@ -263,10 +263,10 @@ module.exports = function() {
             ["connection send", PERM.GH, "Sends a message through a connection.", "<Connection Name> <Connection Disguise> <Text>", "Send a message <Text> with disguise <Connection Disguise> over a connection <Connection Name>.", "connection send bartender fakebartender hi", [], CMDSTATE.UNK],
         ["impersonate", PERM.GH, "Repeats a message as a webhook pretending to be somebody.", "<User> <Message>", "Repeats a message as a webhook pretending to be a certain user.", "impersonate 242983689921888256 Does this work?", ["Does this work?"], CMDSTATE.UNK],
         /** Abilities Module **/
-        ["execute", PERM.GM, "Executes an ability object.", "<Ability JSON>", "Executes a provided ability JSON as the current gm (src_ref=player:<id>, src_name=role:host).", `$execute {"type":"killing","subtype":"kill","target":"@self"}`, ["Kill successful!"], CMDSTATE.RDY],
-        ["execute_as", PERM.GM, "Executes an ability object.", "<Ability JSON>", "Executes a provided ability JSON as a set executor. Save an executor with $execute_as_set.", `$execute_as {"type":"killing","subtype":"kill","target":"@self"}`, ["Kill successful!"], CMDSTATE.WIP],
-        ["execute_as_set", PERM.GM, "Sets an executor.", "<Src Ref> <Src Name>", "Sets an executor for a $execute_as command.", `$execute_as_set player:242983689921888256 role:citizen`, ["Executor set"], CMDSTATE.WIP],
-        ["grant", PERM.GM, "Grants an extra role.", "<Target Player> <Role>", "Grants a specified player a specified role.", `$grant 242983689921888256 corrupted`, [], CMDSTATE.RDY],
+        ["execute", PERM.GM, "Executes an ability object.", "<Ability JSON>", "Executes a provided ability JSON as the current gm (src_ref=player:<id>, src_name=role:host).", `execute {"type":"killing","subtype":"kill","target":"@self"}`, ["Kill successful!"], CMDSTATE.RDY],
+        ["execute_as", PERM.GM, "Executes an ability object.", "<Ability JSON>", "Executes a provided ability JSON as a set executor. Save an executor with $execute_as_set.", `execute_as {"type":"killing","subtype":"kill","target":"@self"}`, ["Kill successful!"], CMDSTATE.WIP],
+        ["execute_as_set", PERM.GM, "Sets an executor.", "<Src Ref> <Src Name>", "Sets an executor for a $execute_as command.", `execute_as_set player:242983689921888256 role:citizen`, ["Executor set"], CMDSTATE.WIP],
+        ["grant", PERM.GM, "Grants an extra role.", "<Target Player> <Role>", "Grants a specified player a specified role.", `grant 242983689921888256 corrupted`, [], CMDSTATE.RDY],
         ["emit", PERM.GM, "Emits an event or a trigger.", "<Event / Trigger>", "Emit a trigger or event. When submitting 'start', 'sday' or 'snight' the corresponding event is emitted (each of which includes a series of triggers and other actions), otherwise the input is seen as a trigger.", "emit start", [], CMDSTATE.RDY],
         ["src_emit", PERM.GM, "Emits a trigger for a specific source.", "<Source> <Trigger>", "Emit a trigger for a specific source. Check the WWRF Guide for a list of valid sources.", "src_emit player:242983689921888256 \"End Day\"", [], CMDSTATE.RDY],
         ["chooser", PERM.GM, "Allows GMs to Choice Choose", "<Player>", "Allows a GM to choice choose as the player they have specified.", "chooser mctsts", [], CMDSTATE.WIP],
@@ -343,6 +343,7 @@ module.exports = function() {
         ["reset", PERM.GM, "Resets a game.", "", "Resets the game. Resets all discord roles. Clears player database. Deletes all CCs. Deletes all SCs. Deletes all Public Channels. Resets Polls. Resets Connections. Sets the gamephase.", "reset", [], CMDSTATE.RDY],
         ["reset_debug", PERM.GM, "Resets a game (Debug Mode).", "", "Does the same as $reset, but keeps all players as signed up.", "reset_debug", [], CMDSTATE.RDY],
         ["end", PERM.GM, "Ends a game.", "", "Ends the game. Sets the gamephase, and makes all Participants Dead Participants.", "end", [], CMDSTATE.RDY],
+        ["tie", PERM.GM, "Ends a game in a tie.", "", "Ends the game in a tie. All living players are marked as winners.", "tie", [], CMDSTATE.RDY],
         ["open", PERM.GM, "Opens signups and notifies players.", "", "Opens signups, then makes New Game Ping role mentionable, pings it and then makes it unmentionable again.", "open", [], CMDSTATE.RDY],
         ["close", PERM.GM, "Closes signups.", "", "Closes signups.", "close", [], CMDSTATE.RDY],
         ["gameping", PERM.GM, "Ping New Game Ping role.", "", "Makes New Game Ping role mentionable, pings it and then makes it unmentionable again.", "gameping", [], CMDSTATE.RDY],
@@ -416,8 +417,6 @@ module.exports = function() {
         ["infoadd", PERM.GM, "Returns role info with additional text.", "<Role Name> <Addition>", "Sends an info message with an appended addition.", "infoadd citizen EXTRATEXT", [], CMDSTATE.NOP],
         ["card", PERM.AL, "Returns a role's card.", "<Role Name>", "Shows the role's card.", "card citizen", [], CMDSTATE.WIP, ["& (Special Alias - Use without Prefix)"], CMDARGS.NO_PREFIX_SUB],
         ["image", PERM.AL, "Returns a role's image.", "<Role Name>", "Shows the role's image.", "image cititen", [], CMDSTATE.RDY],
-        // elect
-        ["elect", PERM.GM, "Elects a player to a role.", "<Elected Role> <Player>", "Elects a player to an elected role. Elected Role available are: Mayor, Reporter, Guardian. You can use M, R and G to shorten the command.\nUse elect clear to remove all elected roles from a player.", "elect mayor ts", ["✅ Elected @Ts as @Mayor (<=15)"], CMDSTATE.UNK],
         // link/parse
         ["update", PERM.GM, "Syncs the bot to github.", "", "Pulls all data from github and reparses all elements.", "update", [], CMDSTATE.RDY],
         ["parse", PERM.GM, "Parses a specific element.", "<Element Type> <Element Name>", "Parses a specific element of type <Element Type> with name <Element Name>", "parse roles citizen", [], CMDSTATE.RDY],

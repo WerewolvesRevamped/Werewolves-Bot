@@ -59,6 +59,7 @@ module.exports = function() {
         //return;
         
 		channel.send("✳️ Game is called `" + stats.game + "`");
+        actionLog(`**🎲 The game has started. [${stats.game}]**`);
         createLocations();
 		// Set Gamephase
 		cmdGamephaseSet(channel, ["set", gp.INGAME]);
@@ -238,6 +239,19 @@ module.exports = function() {
 	this.cmdEnd = function(channel) {
 		gameEnd();
         channel.send("✅ Game has been ended.");
+	}
+    
+	this.cmdTie = async function(channel) {
+        // final trigger
+        await triggerHandler("On End"); 
+        // end game
+		gameEnd();
+        // set winners
+        await sqlProm("UPDATE players SET final_result=1 WHERE alive=1 AND type='player'");
+        // end message
+        await bufferStorytime(`*A tie has occured!*`);
+        await endMessage();
+        channel.send("✅ Game has been ended in a tie.");
 	}
     
     this.gameEnd = async function() {

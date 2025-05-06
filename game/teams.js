@@ -193,7 +193,7 @@ module.exports = function() {
     
     this.endMessage = async function() {
         await bufferStorytime(`**The game has ended!**`);
-        actionLog(`🏁 The game has ended.`);
+        actionLog(`**🏁 The game has ended.**`);
         // storytime
         await postStorytimeImmediate();
         // get winners & losers

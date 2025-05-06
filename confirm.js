@@ -34,6 +34,7 @@ module.exports = function() {
 			case "start": cmdStart(message.channel, false); break;
 			case "reset": cmdReset(message.channel); break;
 			case "end": cmdEnd(message.channel); break;
+			case "tie": cmdTie(message.channel); break;
 			case "killq killall": cmdKillqKillall(message.channel); break;
 			case "pl":
 			case "players list": cmdPlayersList(message.channel); break;
@@ -62,9 +63,14 @@ module.exports = function() {
             case "connection reset":
 			case "roles clear":
 			case "alias clear": 
-			case "reset":
 			case "cc cleanup":
                 return " **WARNING:** This is an irreversible destructive action that deletes a large amount of data. Are you __absolutely certain__ you want to perform this action?";
+			case "reset":
+                return " **WARNING:** This is an irreversible destructive action that deletes a large amount of data. You are deleting **__"  + stats.game + "__**. Please verify the game has been archived! Are you __absolutely certain__ you want to perform this action?";
+			case "end":
+                return " **WARNING:** This will end the game, granting Dead Participant to all still living participants. Are you __certain__ you want to perform this action?";
+			case "tie":
+                return " **WARNING:** This will end the game in a tie, granting Dead Participant to all still living participants. Are you __certain__ you want to perform this action? All living players will be marked as winners.";
             default:
                 return "";
         }

@@ -767,6 +767,10 @@ client.on("messageCreate", async message => {
         }
 		if(checkSafe(message)) cmdConfirm(message, "end");
 	break;
+	/* Tie */ // Ends the game in a tie
+	case "tie":
+		if(checkSafe(message)) cmdConfirm(message, "tie");
+	break;
 	/* Sheet */ // Simplifies game managment via sheet
 	case "sheet":
 		if(checkSafe(message)) cmdSheet(message, args);
@@ -898,10 +902,6 @@ client.on("messageCreate", async message => {
 		if(message.author.id == client.user.id || checkAdmin(message)) cmdModrole(message, args);
         **/
 	break;
-    /* Elect */
-    case "elect":
-		if(checkGM(message)) cmdElect(message.channel, args);
-    break;
     /* Discord Role */
     case "dr":
 		if(checkGM(message)) cmdDR(message.channel, args);

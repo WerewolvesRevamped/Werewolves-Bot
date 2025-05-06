@@ -8,12 +8,23 @@ module.exports = function() {
     Command: $phase
     Handle the phase command
     **/
+    this.lastRunTime = null;
 	this.cmdPhase = function(message, args) {
 		// Check subcommand
 		if(!args[0]) { 
 			cmdPhaseGet(message.channel);
 			return; 
 		}
+        
+        // check last execution
+        const now = Date.now();
+        if(lastRunTime && now - lastRunTime < 5 * 60 * 1000 && args[1] != "f" && args[1] != "force") {
+            message.channel.send("⏰ Warning! A phase command was run within the last 5 minutes. Please rerun command to confirm.");
+            lastRunTime = null;
+            return;
+        }
+        lastRunTime = now;
+        
 		// Find subcommand
 		switch(args[0]) {
 			// Attributea Subcommand
