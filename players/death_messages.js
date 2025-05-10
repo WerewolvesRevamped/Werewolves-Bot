@@ -184,6 +184,11 @@ module.exports = function() {
                     dmsgText =  `${getEmoji('Bear')} %s couldn't *bear* it anymore! ${getEmoji('Bear')}`;
                     setCustomStatus(`Growling in sorrow for ${nickname}.`);
                 break;
+                case 11:
+                    let deathLoc = ["at home", "at the Wolvespine Medical Hospital", "on the street", "in an alley", "in a river"];
+                    let deathCause = ["death", "a heart attack", "mauling and fractured bones", "blood loss", "spontaneous human combustion", "a hemorrhage", "apnea", "blood vessel rupture", "choking and loose bowels"];
+                    dmsgText =  `Name: %s; [${getFormattedUTCTime()}]\nCause of Death: Died ${deathLoc[Math.floor(Math.random() * deathLoc.length)]} due to ${deathCause[Math.floor(Math.random() * deathCause.length)]}.`;
+                break;
             }
         }
         dmsgText = dmsgText.replace(/%s/g, displayName);
@@ -192,6 +197,39 @@ module.exports = function() {
     
     this.setCustomStatus = function(message) {
         client.user.setPresence({ activities: [{ name: "custom", type: ActivityType.Custom, state: message }], status: "online" });
+    }
+    
+    // Function to get the formated date
+    this.getFormattedUTCTime = function() {
+        const now = new Date();
+        
+        // slightly randomize date so there is no ability to get info from it  
+        const offsetSeconds = Math.floor(Math.random() * 61) - 30; // (-30 to +30)
+        now.setUTCSeconds(now.getUTCSeconds() + offsetSeconds);
+
+        // days and months
+        const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        const weekday = weekdays[now.getUTCDay()];
+        const month = months[now.getUTCMonth()];
+        const day = now.getUTCDate();
+        const year = now.getUTCFullYear();
+        const hours = String(now.getUTCHours()).padStart(2, '0');
+        const minutes = String(now.getUTCMinutes()).padStart(2, '0');
+        const seconds = String(now.getUTCSeconds()).padStart(2, '0');
+        return `${weekday}, ${month} ${getOrdinal(day)} ${year} ${hours}:${minutes}:${seconds}`;
+    }
+    
+    // Function to get ordinal suffix
+    function getOrdinal(n) {
+        if (n >= 11 && n <= 13) return n + "th";
+        switch (n % 10) {
+            case 1: return n + "st";
+            case 2: return n + "nd";
+            case 3: return n + "rd";
+            default: return n + "th";
+        }
     }
     
     
