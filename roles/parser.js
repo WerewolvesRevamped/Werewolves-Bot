@@ -2038,6 +2038,7 @@ module.exports = function() {
             if(targetType.substr(1, 4) === "role") return "role";
             else if(targetType.substr(1, 6) === "player") return "player";
             else if(targetType.substr(1, 6) === "number") return "number";
+            else if(targetType.substr(1, 6) === "string") return "string";
             else if(targetType === "%partialrolelist%") return "info";
             else return "unknown";
         } else if(first == "#") {

@@ -1359,7 +1359,11 @@ module.exports = function() {
             let infType = await inferTypeRuntime(`#${contents[1]}`, self, additionalTriggerData);
             let result = await parseSelector(`#${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
             return parsePropertyAccess(result, contents[2], infType);
-        }
+        } else if (HOST_INFORMATION.test(selectorTarget)) { // host information
+            let hi = await getHostInformation(srcToValue(self), selectorTarget.replace(/%/g,""));
+            if(hi) return hi;
+            else return [ ];
+        } 
         return [ selectorTarget ];
     }
     
