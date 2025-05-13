@@ -47,7 +47,8 @@ module.exports = function() {
      Locks a channel 
      */
     async function lockChannel(channel) {
-        let permissions = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Role && el.deny == 0 && el.allow == 3072);
+        let permissions = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Role && el.deny == 0 && el.allow == 3072); // public
+        permissions.push(...channel.permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Role && el.deny == 1024 && el.allow == 2048)); // sc
         for(let i = 0; i < permissions.length; i++) {
             await channel.permissionOverwrites.edit(permissions[i].id, { SendMessages: false, EmbedLinks: true });
         }
@@ -57,7 +58,8 @@ module.exports = function() {
      Unlocks a channel
      */
     async function unlockChannel(channel) {
-        let permissions = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Role && el.deny == 2048 && el.allow == 17408);
+        let permissions = channel.permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Role && el.deny == 2048 && el.allow == 17408); // public
+        permissions.push(...channel.permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Role && el.deny == 3072 && el.allow == 16384)); // sc
         for(let i = 0; i < permissions.length; i++) {
             await channel.permissionOverwrites.edit(permissions[i].id, { SendMessages: true, EmbedLinks: null });
         }
