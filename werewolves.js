@@ -1122,6 +1122,7 @@ client.on('messageUpdate', async (oldMessage, newMessage) => {
 	}
 });
 
+
 /* Reactions Add*/
 client.on("messageReactionAdd", async (reaction, user) => {
     try {
@@ -1178,6 +1179,9 @@ client.on("messageReactionAdd", async (reaction, user) => {
                 if(emojiPlayer) reacText += ` (<@${emojiPlayer}>)`;
                 if(emojiName) reacText += ` (${emojiName})`;
                 abilityLog(`🗳️ <@${user.id}> has added reaction ${reacText} on poll \`${poll.name}\`.`);
+                tempVoteData.push(["add", user.id, emojiPlayer, reacText, +new Date(), poll.src_ref]);
+                let ind = ++tempVoteCounter;
+                setTimeout(() => processTempVoteData(ind), 15 * 1000);
                 // check for hammer poll
                 let pData = await pollGetData(poll.name);
                 if(pData && pData.hammer == 1) {
@@ -1208,6 +1212,9 @@ client.on("messageReactionRemove", async (reaction, user) => {
             if(emojiPlayer) reacText += ` (<@${emojiPlayer}>)`;
             if(emojiName) reacText += ` (${emojiName})`;
             abilityLog(`🗳️ <@${user.id}> has removed reaction ${reacText} on poll \`${poll.name}\`.`);
+            tempVoteData.push(["remove", user.id, emojiPlayer, reacText, +new Date(), poll.src_ref]);
+            let ind = ++tempVoteCounter;
+            setTimeout(() => processTempVoteData(ind), 15 * 1000);
             // check for hammer poll
             let pData = await pollGetData(poll.name);
             if(pData && pData.hammer == 1) {

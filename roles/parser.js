@@ -24,7 +24,7 @@ module.exports = function() {
     const passiveTriggers = ["Passive", "Passive End Day", "Passive End Night", "Passive Start Day", "Passive Start Night", "Passive Start Phase", "Passive End Phase"];
     const electionTriggers = ["On Election", "On Mayor Election", "On Reporter Election", "On Guardian Election"];
     const defenseTriggers = ["On Defense", "On Passive Defense", "On Partial Defense", "On Recruitment Defense", "On Active Defense", "On Absence Defense"];
-    const basicTriggerTypes = [...actionTimings, "Starting", ...passiveTriggers, "On Death", "On Killed", "On Banished", "On Banishment", "On Visited", "On Action", "On Disbandment", "On Lynch", ...electionTriggers, ...defenseTriggers, "On Betrayal", "On Poll Closed", "On Poll Win", "On Poll Skipped", "On Role Change", "On Removal", "On End", "Choice Chosen", "On Emitted", "On End Emitted", "On Redirect", "On Any Action", "On Join"]; // basic trigger types
+    const basicTriggerTypes = [...actionTimings, "Starting", ...passiveTriggers, "On Death", "On Killed", "On Banished", "On Banishment", "On Visited", "On Action", "On Disbandment", "On Lynch", ...electionTriggers, ...defenseTriggers, "On Betrayal", "On Poll Closed", "On Poll Win", "On Poll Skipped", "On Role Change", "On Removal", "On End", "Choice Chosen", "On Emitted", "On End Emitted", "On Redirect", "On Any Action", "On Join", "On Vote Add", "On Vote Remove", "On Vote Change"]; // basic trigger types
     const bullets = ["•","‣","◦","·","⁃","⹀"];
 
     /**
@@ -2032,6 +2032,7 @@ module.exports = function() {
                 case "@actionresult": return "result";
                 case "@chosen": case "@option": return "option";
                 case "@attacklocation": return "location";
+                case "@votetext": case "@oldvotetext": case "@newvotetext": return "string";
                 default: return "player";
             }
         } else if(first == "%") {

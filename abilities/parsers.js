@@ -381,6 +381,30 @@ module.exports = function() {
                 } else {
                     return invalidSelector(selectorTarget);
                 } 
+            case "@voter":
+                if(additionalTriggerData.voter) {
+                    return [ additionalTriggerData.voter ];
+                } else {
+                    return invalidSelector(selectorTarget);
+                }
+            case "@vote":
+                if(additionalTriggerData.vote) {
+                    return [ additionalTriggerData.vote ];
+                } else {
+                    return invalidSelector(selectorTarget);
+                }
+            case "@oldvote":
+                if(additionalTriggerData.old_vote) {
+                    return [ additionalTriggerData.old_vote ];
+                } else {
+                    return invalidSelector(selectorTarget);
+                }
+            case "@newvote":
+                if(additionalTriggerData.new_vote) {
+                    return [ additionalTriggerData.new_vote ];
+                } else {
+                    return invalidSelector(selectorTarget);
+                }
             case "@result":
             case "@result1":
             case "@result2":
@@ -1328,7 +1352,7 @@ module.exports = function() {
                 if(additionalTriggerData.chosen) {
                     return [ additionalTriggerData.chosen ];
                 } else {
-                    abilityLog(`❗ **Error:** Invalid chosen selector target \`${selectorTarget}\`!`);
+                    abilityLog(`❗ **Error:** Invalid option selector target \`${selectorTarget}\`!`);
                     return [ ];
                 }
             default:
@@ -1344,27 +1368,51 @@ module.exports = function() {
         // get target
         let selectorTarget = selectorGetTarget(selector); 
         selectorTarget = selectorTarget.replace(/`/g, "");
-        if (PROPERTY_ACCESS.test(selectorTarget)) { // property access
-            let contents = selectorTarget.match(PROPERTY_ACCESS); // get the selector
-            let infType = await inferTypeRuntime(`@${contents[1]}`, self, additionalTriggerData);
-            let result = await parseSelector(`@${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
-            return parsePropertyAccess(result, contents[2], infType);
-        } else if (PROPERTY_ACCESS_TEAM.test(selectorTarget)) { // property access
-            let contents = selectorTarget.match(PROPERTY_ACCESS_TEAM); // get the selector
-            let infType = await inferTypeRuntime(`&${contents[1]}`, self, additionalTriggerData);
-            let result = await parseSelector(`&${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
-            return parsePropertyAccess(result, contents[2], infType);
-        }  else if (PROPERTY_ACCESS_GROUP.test(selectorTarget)) { // property access
-            let contents = selectorTarget.match(PROPERTY_ACCESS_GROUP); // get the selector
-            let infType = await inferTypeRuntime(`#${contents[1]}`, self, additionalTriggerData);
-            let result = await parseSelector(`#${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
-            return parsePropertyAccess(result, contents[2], infType);
-        } else if (HOST_INFORMATION.test(selectorTarget)) { // host information
-            let hi = await getHostInformation(srcToValue(self), selectorTarget.replace(/%/g,""));
-            if(hi) return hi;
-            else return [ ];
-        } 
-        return [ selectorTarget ];
+        switch(selectorTarget) {
+            case "@votetext":
+                if(additionalTriggerData.vote_text) {
+                    return [ additionalTriggerData.vote_text ];
+                } else {
+                    abilityLog(`❗ **Error:** Invalid string selector target \`${selectorTarget}\`!`);
+                    return [ ];
+                }
+            case "@oldvotetext":
+                if(additionalTriggerData.old_vote_text) {
+                    return [ additionalTriggerData.old_vote_text ];
+                } else {
+                    abilityLog(`❗ **Error:** Invalid string selector target \`${selectorTarget}\`!`);
+                    return [ ];
+                }
+            case "@newvotetext":
+                if(additionalTriggerData.new_vote_text) {
+                    return [ additionalTriggerData.new_vote_text ];
+                } else {
+                    abilityLog(`❗ **Error:** Invalid string selector target \`${selectorTarget}\`!`);
+                    return [ ];
+                }
+            default:
+                if (PROPERTY_ACCESS.test(selectorTarget)) { // property access
+                    let contents = selectorTarget.match(PROPERTY_ACCESS); // get the selector
+                    let infType = await inferTypeRuntime(`@${contents[1]}`, self, additionalTriggerData);
+                    let result = await parseSelector(`@${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
+                    return parsePropertyAccess(result, contents[2], infType);
+                } else if (PROPERTY_ACCESS_TEAM.test(selectorTarget)) { // property access
+                    let contents = selectorTarget.match(PROPERTY_ACCESS_TEAM); // get the selector
+                    let infType = await inferTypeRuntime(`&${contents[1]}`, self, additionalTriggerData);
+                    let result = await parseSelector(`&${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
+                    return parsePropertyAccess(result, contents[2], infType);
+                }  else if (PROPERTY_ACCESS_GROUP.test(selectorTarget)) { // property access
+                    let contents = selectorTarget.match(PROPERTY_ACCESS_GROUP); // get the selector
+                    let infType = await inferTypeRuntime(`#${contents[1]}`, self, additionalTriggerData);
+                    let result = await parseSelector(`#${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
+                    return parsePropertyAccess(result, contents[2], infType);
+                } else if (HOST_INFORMATION.test(selectorTarget)) { // host information
+                    let hi = await getHostInformation(srcToValue(self), selectorTarget.replace(/%/g,""));
+                    if(hi) return hi;
+                    else return [ ];
+                } 
+                return [ selectorTarget ];
+        }
     }
     
     /**

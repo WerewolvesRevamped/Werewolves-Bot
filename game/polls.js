@@ -875,4 +875,39 @@ module.exports = function() {
         }
     }
     
+    /**
+    Handle vote add/remove/change triggers
+    **/
+    this.tempVoteData = [];
+    this.tempVoteCounter = 0;
+    this.processTempVoteData = async function(index) {
+        if(index != tempVoteCounter) {
+            return;
+        }
+        const toBeProcessed = [...tempVoteData.filter(el => (el[4] + 15 * 1000) <= (+new Date()))]; // clones
+        // remove processed entries
+        for(let i = 0; i < toBeProcessed.length; i++) {
+            tempVoteData = tempVoteData.filter(el => el[4] != toBeProcessed[i][4]);
+        }
+        const players = [... new Set(toBeProcessed.map(el => el[1]))]; // get all players
+        for(let i = 0; i < players.length; i++) {
+            const curPlayerData = toBeProcessed.filter(el => el[1] === players[i]);
+            // switched vote case
+            if(curPlayerData.length === 2 && curPlayerData[0][0] === "add" && curPlayerData[1][0] === "remove" && curPlayerData[0][5] === curPlayerData[1][5]) {
+                await trigger(curPlayerData[0][5], "On Vote Change", { voter: players[i], old_vote: curPlayerData[1][2], old_vote_text: curPlayerData[1][3], new_vote: curPlayerData[0][2], new_vote_text: curPlayerData[0][3] }); 
+            } else if(curPlayerData.length === 2 && curPlayerData[0][0] === "remove" && curPlayerData[1][0] === "add" && curPlayerData[0][5] === curPlayerData[1][5]) {
+                await trigger(curPlayerData[0][5], "On Vote Change", { voter: players[i], old_vote: curPlayerData[0][2], old_vote_text: curPlayerData[0][3], new_vote: curPlayerData[1][2], new_vote_text: curPlayerData[1][3] }); 
+            } else { // other case
+                let curPlayerDataAdd = curPlayerData.filter(el => el[0] === "add");
+                let curPlayerDataRemove = curPlayerData.filter(el => el[0] === "remove");
+                for(let j = 0; j < curPlayerDataAdd.length; j++) {
+                    await trigger(curPlayerDataAdd[j][5], "On Vote Add", { voter: players[i], vote: curPlayerDataAdd[j][2], vote_text: curPlayerDataAdd[j][3] }); 
+                }
+                for(let j = 0; j < curPlayerDataRemove.length; j++) {
+                    await trigger(curPlayerDataRemove[j][5], "On Vote Remove", { voter: players[i], vote: curPlayerDataRemove[j][2], vote_text: curPlayerDataRemove[j][3] }); 
+                }
+            }
+        }
+    }
+    
 }
