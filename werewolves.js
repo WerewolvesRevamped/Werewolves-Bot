@@ -1081,6 +1081,9 @@ client.on("messageCreate", async message => {
         }
 		cmdNickname(message, argsX);
     break;
+    case "parse_prompt":
+        if(checkGM(message)) cmdParsePrompt(message, args, argsX);
+    break;
 	/* Invalid Command */
 	default:
 		message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");

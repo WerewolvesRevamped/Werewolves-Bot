@@ -270,6 +270,7 @@ module.exports = function() {
         ["emit", PERM.GM, "Emits an event or a trigger.", "<Event / Trigger>", "Emit a trigger or event. When submitting 'start', 'sday' or 'snight' the corresponding event is emitted (each of which includes a series of triggers and other actions), otherwise the input is seen as a trigger.", "emit start", [], CMDSTATE.RDY],
         ["src_emit", PERM.GM, "Emits a trigger for a specific source.", "<Source> <Trigger>", "Emit a trigger for a specific source. Check the WWRF Guide for a list of valid sources.", "src_emit player:242983689921888256 \"End Day\"", [], CMDSTATE.RDY],
         ["chooser", PERM.GM, "Allows GMs to Choice Choose", "<Player>", "Allows a GM to choice choose as the player they have specified.", "chooser mctsts", [], CMDSTATE.WIP],
+        ["parse_prompt", PERM.GM, "Simulates a prompt parsing.", "<Prompt Type> <Prompt Value<", "Simulates a prompt reply for debugging.", "pp player ts", [], CMDSTATE.WIP],
         /** Attributes Module **/
         ["attributes", PERM.GM, "Manages attributes.", "<Subcommand>", "Group of commands to handle attributes. $help attributes <sub-command> for detailed help.", "", [], CMDSTATE.RDY],
             ["attributes query", PERM.GM, "Queries all attributes from github.", "", "Queries all attributes from github and stores them locally.", "attributes query", ["🔄 Querying attributes. Please wait. This may take several minutes.","✅ Querying attributes completed."], CMDSTATE.RDY],

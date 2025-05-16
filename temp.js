@@ -139,6 +139,7 @@ module.exports = function() {
                 "booster": ["boosters", "bst"],
                 "market": ["mk", "mkt"],
                 "schedule": ["sched", "sch"],
+                "parse_prompt": ["pp", "prompt_parse"],
         };
         
     this.parseAlias = function(alias) {

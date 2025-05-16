@@ -728,6 +728,12 @@ module.exports = function() {
         return repl_msg;
     }
     
+    this.cmdParsePrompt = function(message, args, argsX) {
+        let typ = argsX.shift();
+        let parsed = parsePromptReply(argsX.join(" "), typ, message);
+        message.channel.send(`✅ Parsed Prompt: ${parsed[0]}; ${parsed[1]}`);
+    }
+    
     /**
     Parses an argument of a prompt reply
     Returns an array of type [displayValue, actualValue]
