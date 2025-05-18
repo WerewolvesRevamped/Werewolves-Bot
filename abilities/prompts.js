@@ -197,12 +197,19 @@ module.exports = function() {
             // get prompt message
             let promptChannel = await mainGuild.channels.fetch(promptsToClear[i].channel_id);
             let promptMessage = await promptChannel.messages.fetch(promptsToClear[i].message_id);
-            let orig_text = promptMessage.embeds[0].description.split(PROMPT_SPLIT)[0];
-            orig_text = orig_text.replace("Please submit your choice as a reply to this message.", "");
+            
             // update message
-            embed = basicEmbed(`${orig_text}*You did not react to the prompt, so the ability was not executed.*`, EMBED_RED);
-            embed.components = [];
-            promptMessage.edit(embed); 
+            let additionalTriggerData = JSON.parse(promptsToClear[i].additional_trigger_data);
+            if(!additionalTriggerData.parameters.vanishing) {
+                let orig_text = promptMessage.embeds[0].description.split(PROMPT_SPLIT)[0];
+                orig_text = orig_text.replace("Please submit your choice as a reply to this message.", "");
+                embed = basicEmbed(`${orig_text}*You did not react to the prompt, so the ability was not executed.*`, EMBED_RED);
+                embed.components = [];
+                promptMessage.edit(embed); 
+            } else {
+                promptMessage.delete();
+            }
+            
         }
         
         return sqlProm("DELETE FROM prompts");
@@ -371,11 +378,17 @@ module.exports = function() {
             // get prompt
             let promptChannel = await mainGuild.channels.fetch(curAction.channel_id);
             let promptMessage = await promptChannel.messages.fetch(curAction.message_id);
-            let orig_text = promptMessage.embeds[0].description.split(PROMPT_SPLIT)[0];
+            
             // update message
-            embed = basicEmbed(`${orig_text}${PROMPT_SPLIT} Ability was __not__ executed.`, EMBED_RED);
-            embed.components = [];
-            promptMessage.edit(embed); 
+            let additionalTriggerData = JSON.parse(curAction.additional_trigger_data);
+            if(!additionalTriggerData.parameters.vanishing) {
+                let orig_text = promptMessage.embeds[0].description.split(PROMPT_SPLIT)[0];
+                embed = basicEmbed(`${orig_text}${PROMPT_SPLIT} Ability was __not__ executed.`, EMBED_RED);
+                embed.components = [];
+                promptMessage.edit(embed); 
+            } else {
+                promptMessage.delete();
+            }
         }
         
         // delete queued actions

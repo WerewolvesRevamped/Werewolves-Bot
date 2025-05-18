@@ -748,8 +748,7 @@ client.on("messageCreate", async message => {
 	break;
 	/* Restart */ // Debug restart
 	case "reset_debug":
-		//if(checkSafe(message)) cmdReset(message.channel, true);
-        message.channel.send("⛔ Command execution blocked. This command is currently not available.");
+		if(checkSafe(message)) cmdReset(message.channel, true);
 	break;
 	/* Reset */ // Resets a game
 	case "reset":

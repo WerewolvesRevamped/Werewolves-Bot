@@ -1255,11 +1255,14 @@ module.exports = function() {
 
 	/* Returns the id of the user who uses the given emoji, if none returns false */
 	this.emojiToID = function(emoji) {
-        // there are some emojis that weirdly have a different unicode version internally than the one you get when copying it(?)
-        // normalize to Compatibility Decomposition; Remove variant selector U+FE0F
-        emoji = emoji.normalize("NFKD").replace(/[\uFE0F]/g, '');
         // find emoji
 		var user = emojiIDs.find(el => el.emoji == emoji);
+        if(!user) {
+            // there are some emojis that weirdly have a different unicode version internally than the one you get when copying it(?)
+            // normalize to Compatibility Decomposition; Remove variant selector U+FE0F
+            emoji = emoji.normalize("NFKD").replace(/[\uFE0F]/g, '');
+            user = emojiIDs.find(el => el.emoji == emoji);
+        }
 		return user ? user.id : false;
 	}
 
