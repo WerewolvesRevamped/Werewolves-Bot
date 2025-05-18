@@ -719,8 +719,10 @@ module.exports = function() {
     Check Hammer
     checks if a poll should end the phase by hammer
     **/
+    var isHammering = false;
     this.pollCheckHammer = async function(pollData, pollTypeData) {
-        if(stats.automation_level < 4) return;
+        if(stats.automation_level < 3) return;
+        if(isHammering) return;
         console.log(`Hammer checking ${pollData.name}`);
         // get poll messages
         const messages = pollData.messages.split(",");
@@ -751,44 +753,59 @@ module.exports = function() {
         let aliveCount = players.filter(el => el.alive == 1).length;
         if(maxVoteCount > Math.floor(aliveCount / 2) || voteCount === aliveCount) {
             console.log("Execute Hammer");
+            isHammering = true;
             pauseActionQueueChecker = true;
             const now = new Date();
             const nowUnix = Math.floor(now.getTime() / 1000);
             // check night/day
-            if(isDay()) { // Day Hammer
-                let endDay = await sqlPromOne("SELECT * FROM schedule WHERE name='day-end'");
-                if(endDay.timestamp > (nowUnix + 15)) {
-                    await sqlProm("UPDATE schedule SET timestamp=" + connection.escape(nowUnix + 10) + " WHERE name='day-end'");
-                    await sqlProm("UPDATE schedule SET timestamp=" + connection.escape(nowUnix + (stats.phaseautoinfo.night * 60) + 10) + " WHERE name='night-end'");
-                    if(stats.phaseautoinfo.day_late) await sqlProm("UPDATE schedule SET timestamp=" + connection.escape(nowUnix - (stats.phaseautoinfo.day_late * 60) - 20) + " WHERE name='day-late'");
-                    if(stats.phaseautoinfo.night_late) await sqlProm("UPDATE schedule SET timestamp=" + connection.escape(nowUnix + (stats.phaseautoinfo.night * 60) - (stats.phaseautoinfo.night_late * 60) - 20) + " WHERE name='night-late'");
-                    // run schedule
-                    if(!isRunningSchedule) {
-                        isRunningSchedule = true;
-                        await scheduleExecute();
-                        isRunningSchedule = false;
+            if(stats.automation_level === 4) {
+                if(isDay()) { // Day Hammer
+                    let endDay = await sqlPromOne("SELECT * FROM schedule WHERE name='day-end'");
+                    if(endDay.timestamp > (nowUnix + 15)) {
+                        await sqlProm("UPDATE schedule SET timestamp=" + connection.escape(nowUnix + 10) + " WHERE name='day-end'");
+                        await sqlProm("UPDATE schedule SET timestamp=" + connection.escape(nowUnix + (stats.phaseautoinfo.night * 60) + 10) + " WHERE name='night-end'");
+                        if(stats.phaseautoinfo.day_late) await sqlProm("UPDATE schedule SET timestamp=" + connection.escape(nowUnix - (stats.phaseautoinfo.day_late * 60) - 20) + " WHERE name='day-late'");
+                        if(stats.phaseautoinfo.night_late) await sqlProm("UPDATE schedule SET timestamp=" + connection.escape(nowUnix + (stats.phaseautoinfo.night * 60) - (stats.phaseautoinfo.night_late * 60) - 20) + " WHERE name='night-late'");
+                        // run schedule
+                        if(!isRunningSchedule) {
+                            isRunningSchedule = true;
+                            await scheduleExecute();
+                            isRunningSchedule = false;
+                        }
+                        await bufferStorytime("**🔨 Hammer 🔨**");
+                        isHammering = false;
+                    } else {
+                        console.log("Hammer too soon. Skipping...");
+                        isHammering = false;
                     }
-                    await bufferStorytime("**🔨 Hammer 🔨**");
-                } else {
-                    console.log("Hammer too soon. Skipping...");
-                }
-            } else { // Night Hammer
-                let endNight = await sqlPromOne("SELECT * FROM schedule WHERE name='night-end'");
-                if(endNight.timestamp > (nowUnix + 15)) {
-                    await sqlProm("UPDATE schedule SET timestamp=" + connection.escape(nowUnix + 10) + " WHERE name='night-end'");
-                    await sqlProm("UPDATE schedule SET timestamp=" + connection.escape(nowUnix + (stats.phaseautoinfo.day * 60) + 10) + " WHERE name='day-end'");
-                    if(stats.phaseautoinfo.night_late) await sqlProm("UPDATE schedule SET timestamp=" + connection.escape(nowUnix - (stats.phaseautoinfo.night_late * 60) - 20) + " WHERE name='night-late'");
-                    if(stats.phaseautoinfo.day_late) await sqlProm("UPDATE schedule SET timestamp=" + connection.escape(nowUnix + (stats.phaseautoinfo.day * 60) - (stats.phaseautoinfo.day_late * 60) - 20) + " WHERE name='day-late'");
-                    // run schedule
-                    if(!isRunningSchedule) {
-                        isRunningSchedule = true;
-                        await scheduleExecute();
-                        isRunningSchedule = false;
+                } else { // Night Hammer
+                    let endNight = await sqlPromOne("SELECT * FROM schedule WHERE name='night-end'");
+                    if(endNight.timestamp > (nowUnix + 15)) {
+                        await sqlProm("UPDATE schedule SET timestamp=" + connection.escape(nowUnix + 10) + " WHERE name='night-end'");
+                        await sqlProm("UPDATE schedule SET timestamp=" + connection.escape(nowUnix + (stats.phaseautoinfo.day * 60) + 10) + " WHERE name='day-end'");
+                        if(stats.phaseautoinfo.night_late) await sqlProm("UPDATE schedule SET timestamp=" + connection.escape(nowUnix - (stats.phaseautoinfo.night_late * 60) - 20) + " WHERE name='night-late'");
+                        if(stats.phaseautoinfo.day_late) await sqlProm("UPDATE schedule SET timestamp=" + connection.escape(nowUnix + (stats.phaseautoinfo.day * 60) - (stats.phaseautoinfo.day_late * 60) - 20) + " WHERE name='day-late'");
+                        // run schedule
+                        if(!isRunningSchedule) {
+                            isRunningSchedule = true;
+                            await scheduleExecute();
+                            isRunningSchedule = false;
+                        }
+                        await bufferStorytime("**🔨 Hammer 🔨**");
+                        isHammering = false;
+                    } else {
+                        console.log("Hammer too soon. Skipping...");
+                        isHammering = false;
                     }
-                    await bufferStorytime("**🔨 Hammer 🔨**");
-                } else {
-                    console.log("Hammer too soon. Skipping...");
                 }
+            } else if(stats.automation_level === 3) {
+                await setSubphase(SUBPHASE.LATE);
+                await sleep(30 * 1000);
+                await setSubphase(SUBPHASE.LOCKED);
+                await sleep(60 * 1000);
+                await bufferStorytime("**🔨 Hammer 🔨**");
+                await cmdPhaseNext();
+                isHammering = false;
             }
         }
     }
@@ -884,7 +901,7 @@ module.exports = function() {
         if(index != tempVoteCounter) {
             return;
         }
-        const toBeProcessed = [...tempVoteData.filter(el => (el[4] + 15 * 1000) <= (+new Date()))]; // clones
+        const toBeProcessed = [...tempVoteData.filter(el => (el[4] + 14 * 1000) <= (+new Date()))]; // clones
         // remove processed entries
         for(let i = 0; i < toBeProcessed.length; i++) {
             tempVoteData = tempVoteData.filter(el => el[4] != toBeProcessed[i][4]);
