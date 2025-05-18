@@ -773,6 +773,7 @@ module.exports = function() {
                             isRunningSchedule = false;
                         }
                         await bufferStorytime("**🔨 Hammer 🔨**");
+                        await trigger(pollData.src_ref, "On Hammer"); 
                         isHammering = false;
                     } else {
                         console.log("Hammer too soon. Skipping...");
@@ -792,6 +793,7 @@ module.exports = function() {
                             isRunningSchedule = false;
                         }
                         await bufferStorytime("**🔨 Hammer 🔨**");
+                        await trigger(pollData.src_ref, "On Hammer"); 
                         isHammering = false;
                     } else {
                         console.log("Hammer too soon. Skipping...");
@@ -799,6 +801,7 @@ module.exports = function() {
                     }
                 }
             } else if(stats.automation_level === 3) {
+                await trigger(pollData.src_ref, "On Hammer"); 
                 await setSubphase(SUBPHASE.LATE);
                 await sleep(30 * 1000);
                 await setSubphase(SUBPHASE.LOCKED);
