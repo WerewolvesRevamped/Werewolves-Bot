@@ -440,7 +440,10 @@ module.exports = function() {
             // get candidate from emoji
             let candidate = emojiToID(reac.emoji);
             if(!candidate) candidate = pollEmojiToName(reac.emoji);
-            if(!candidate) console.log("Invalid Poll Candidate", reac.emoji);
+            if(!candidate) {
+                console.log("Invalid Poll Candidate", reac.emoji);
+                return;
+            }
             
             // remove invalid votes through duplication
             const validVoters = voters.filter(el => duplicateVoters.indexOf(el.id) === -1);
@@ -485,6 +488,7 @@ module.exports = function() {
             if(validVoters.length === 0) validVotersText = "*Unknown*";
             
             // candidate name
+            console.log(candidate);
             let candidateName = candidate.match(/^\d+$/) ? `<@${candidate}>` : candidate;
             
             // create message
