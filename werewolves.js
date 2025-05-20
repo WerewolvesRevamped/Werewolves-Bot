@@ -76,9 +76,13 @@ client.on("ready", async () => {
 				//console.log(members.map(el => el.user.id));
 			});
 		});
-		log("Bot > Caching completed, Bot is ready!")
+		log("Bot > Caching completed, Bot is ready!");
+        
 	}, 3000);
-    
+        
+        let serverNames = client.guilds.cache.map(el => el.name).join(", ");
+        log(`Bot > Connected to ${serverNames}`);
+        
     //logDMs();
     
     setTimeout(function() {
@@ -174,6 +178,11 @@ var srcNameSaved = null;
 
 /* New Message */
 client.on("messageCreate", async message => {
+    if(message.guild.id != mainGuild.id) {
+        console.log(`WARNING! Blocked command execution on guild ${message.guild.name}`);
+        return;
+    }
+    
     if(!message) return;
     try {
         await message.fetch();
