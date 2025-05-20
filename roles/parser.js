@@ -827,12 +827,14 @@ module.exports = function() {
         let cDirect = false;
         let cRepeating = false;
         let cVisitless = false;
+        let cVanishing = false;
         let cForced = false;
         let cForcedSelection = null;
         for(let comp in compulsion) {
             if(compulsion[comp] == "Direct") cDirect = true;
             else if(compulsion[comp] == "Repeating") cRepeating = true;
             else if(compulsion[comp] == "Visitless") cVisitless = true;
+            else if(compulsion[comp] == "Vanishing") cVanishing = true;
             else if(compulsion[comp] == "Forced") cForced = true;
             else if(compulsion[comp].substr(0, 6) == "Forced") {
                 cForced = true;
@@ -1711,10 +1713,10 @@ module.exports = function() {
         if(ability) {
             ability.id = abilityCounter++; // assign ability id
             //console.log("IDENT", ability);
-            abilityLineFull = { ability: ability, parameters: { restrictions: parsedRestrictions, scaling: parsedScaling, direct: cDirect, repeating: cRepeating, visitless: cVisitless, forced: cForced, forced_sel: cForcedSelection } };
+            abilityLineFull = { ability: ability, parameters: { restrictions: parsedRestrictions, scaling: parsedScaling, direct: cDirect, repeating: cRepeating, visitless: cVisitless, vanishing: cVanishing, forced: cForced, forced_sel: cForcedSelection } };
             if(promptOverwrite) abilityLineFull.parameters.prompt_overwrite = promptOverwrite;
         } else if(abilityLine == "") {
-            abilityLineFull = { ability: { type: "parameters", id: abilityCounter++ }, parameters: { restrictions: parsedRestrictions, scaling: parsedScaling, direct: cDirect, repeating: cRepeating, visitless: cVisitless, forced: cForced, forced_sel: cForcedSelection } };
+            abilityLineFull = { ability: { type: "parameters", id: abilityCounter++ }, parameters: { restrictions: parsedRestrictions, scaling: parsedScaling, direct: cDirect, repeating: cRepeating, visitless: cVisitless, vanishing: cVanishing, forced: cForced, forced_sel: cForcedSelection } };
             if(promptOverwrite) abilityLineFull.parameters.prompt_overwrite = promptOverwrite;
         } else {
             //console.log("UNIDENT", abilityLine);

@@ -276,14 +276,14 @@ module.exports = function() {
 	
 	/* Handles reset command */
 	this.cmdReset = function(channel, debug) {
-		if(stats.gamephase != gp.POSTGAME && stats.gamephase != gp.NONE) {
+		if(stats.gamephase != gp.POSTGAME && stats.gamephase != gp.NONE && !debug) {
             channel.send("⛔ Command error. Can only reset game while in post-game state!");
             return;
         }
 		// Set Gamephase
 		cmdGamephaseSet(channel, ["set", gp.NONE]);
 		// Reset Connection
-		cmdConnectionReset(channel);
+        if(!debug) cmdConnectionReset(channel);
 		// Reset Player Database
         if(!debug) {
             sql("DELETE FROM players", result => {
@@ -292,6 +292,8 @@ module.exports = function() {
             },() => {
                 channel.send("⛔ Database error. Could not reset player list!");
             });
+        } else {
+            sql("UPDATE players SET alive=1,ccs=0,public_msgs=0,private_msgs=0,target=NULL,counter=0,final_result=0,death_phase=-1");
         }
         // reset active groups
         groupsReset();
@@ -326,28 +328,40 @@ module.exports = function() {
         // reset DRs
         let livingPlayers =  channel.guild.roles.cache.get(stats.participant).members.toJSON();
         livingPlayers.forEach(el => removeAllDR(el.id));
-        // reset other roles
-		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.participant).members.toJSON(), 0, "participant");
-		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.dead_participant).members.toJSON(), 0, "dead participant");
-		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.ghost).members.toJSON(), 0, "ghost");
-		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.gamemaster).members.toJSON(), 0, "game master");
-		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.spectator).members.toJSON(), 0, "spectator");
-		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.sub).members.toJSON(), 0, "substitute");
-		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.helper).members.toJSON(), 0, "helper");
-		removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.mentor).members.toJSON(), 0, "mentor");
-		// Remove Roles & Nicknames
-		wroles_remove(channel, [stats.signed_up, stats.spectator, stats.sub, stats.participant, stats.dead_participant, stats.host, stats.ghost, stats.mentor], ["signed up", "spectator", "substitute", "participant", "dead participant", "host", "ghost", "mentor"]);
-        // run role removal again for critical roles because sometimes it fails even though it says it succeeds
-		wroles_remove(channel, [stats.participant, stats.dead_participant, stats.ghost, stats.mentor], ["participant", "dead participant", "ghost", "mentor"]);
-		// Cleanup channels
-		cmdCCCleanup(channel);
-		scCleanup(channel);
-		sqlGetStat(15, result => {
-			cleanupCat(channel, result, "public");
-		}, () => {
-			channel.send("⛔ Database error. Could not get public category!");
-		});
-        resetRoleNames(channel);
+        if(!debug) {
+            // reset other roles
+            removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.participant).members.toJSON(), 0, "participant");
+            removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.dead_participant).members.toJSON(), 0, "dead participant");
+            removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.ghost).members.toJSON(), 0, "ghost");
+            removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.gamemaster).members.toJSON(), 0, "game master");
+            removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.spectator).members.toJSON(), 0, "spectator");
+            removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.sub).members.toJSON(), 0, "substitute");
+            removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.helper).members.toJSON(), 0, "helper");
+            removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.mentor).members.toJSON(), 0, "mentor");
+            // Remove Roles & Nicknames
+            wroles_remove(channel, [stats.signed_up, stats.spectator, stats.sub, stats.participant, stats.dead_participant, stats.host, stats.ghost, stats.mentor], ["signed up", "spectator", "substitute", "participant", "dead participant", "host", "ghost", "mentor"]);
+            // run role removal again for critical roles because sometimes it fails even though it says it succeeds
+            wroles_remove(channel, [stats.participant, stats.dead_participant, stats.ghost, stats.mentor], ["participant", "dead participant", "ghost", "mentor"]);
+            // Cleanup channels
+            cmdCCCleanup(channel);
+            scCleanup(channel);
+            sqlGetStat(15, result => {
+                cleanupCat(channel, result, "public");
+            }, () => {
+                channel.send("⛔ Database error. Could not get public category!");
+            });
+            resetRoleNames(channel);
+        } else {
+            cmdGamephaseSet(channel, ["set", gp.INGAME]);
+            pauseActionQueueChecker = false;
+            // reset to d0
+            setPhase("d0");
+            setSubphase(SUBPHASE.MAIN);
+            // Start game
+            setTimeout(function() {
+                eventStarting();
+            }, 1000 * 5);     
+        }
 	}
     
     this.resetRoleNames = async function(channel) {
