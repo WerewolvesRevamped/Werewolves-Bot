@@ -659,8 +659,12 @@ module.exports = function() {
         }
         
         // unpin
-        let initialMsg = await channel.messages.fetch(pollData.initial_message);
-        await initialMsg.unpin();
+        try {
+            let initialMsg = await channel.messages.fetch(pollData.initial_message);
+            await initialMsg.unpin();
+        } catch(err) {
+            console.log("Error while unpinning poll. Proceeding.");
+        }
     }
     
     /** PUBLIC
