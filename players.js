@@ -613,8 +613,27 @@ module.exports = function() {
         let originalPlayerMember = message.channel.guild.members.cache.get(originalPlayer);
         let newPlayer = getUser(message.channel, args[2]);
         let newPlayerMember = message.channel.guild.members.cache.get(newPlayer);
-        if(!originalPlayer || !originalPlayerMember || !newPlayer || !newPlayerMember) {
+        if(!newPlayer || !newPlayerMember) {
 			message.channel.send("⛔ Player error. Could not find player!"); 
+			return; 
+        }
+        
+        if(!originalPlayer) {
+            if(args[3] != "force") {
+                message.channel.send("⛔ Player error. Could not find original player! To sub out a player that has left the server, specify 'force' as an additional argument. When subbing out a player that has left the server you must specify their exact discord id as no verification is performed."); 
+                return; 
+            } else {
+                originalPlayer = args[1];
+                originalPlayerMember = null;
+            }
+        }
+        
+        if(originalPlayerMember && !isParticipant(originalPlayerMember)) {
+			message.channel.send("⛔ Player error. Can not sub out a non-participant!"); 
+			return; 
+        }
+        if(!isSub(newPlayerMember)) {
+			message.channel.send("⛔ Player error. Can not sub in a non-substitute!"); 
 			return; 
         }
         
@@ -627,6 +646,11 @@ module.exports = function() {
         
         // get old player data
         let oldPlayerData = await sqlPromOneEsc("SELECT * FROM players WHERE id=", originalPlayer);
+        
+        if(!oldPlayerData) {
+			message.channel.send("⛔ Substitution error. Unable to retrieve player data of the original player!"); 
+			return; 
+        }
         
         // initialize common escaped values
         let oldId = connection.escape(originalPlayer);
@@ -649,7 +673,7 @@ module.exports = function() {
         switchRoles(newPlayerMember, message.channel, stats.sub, stats.participant, "substitute", "participant");
         
         // old player: remove particpant role, add dead participant role
-        switchRoles(originalPlayerMember, message.channel, stats.participant, stats.dead_participant, "participant", "dead participant");
+        if(originalPlayerMember) switchRoles(originalPlayerMember, message.channel, stats.participant, stats.dead_participant, "participant", "dead participant");
         
         // delete connection to sub channel
         await sqlProm(`DELETE FROM connected_channels WHERE id=${newId}`);
