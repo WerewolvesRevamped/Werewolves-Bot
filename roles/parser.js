@@ -125,6 +125,12 @@ module.exports = function() {
             
         }
         
+        // reformat 'Include' triggers
+        for(let i = 0; i < triggers.include.length; i++) {
+            let incTrigger = { trigger: "Include", trigger_parameter: ""+triggers.include[i], complex: true, abilities: [] };
+            triggers.triggers.push(incTrigger);
+        }
+        delete triggers.include;
         
         return triggers;
     }
@@ -1765,7 +1771,7 @@ module.exports = function() {
         let curTriggerType = null;
         let curTrigger = [];
         let unique = false;
-        let require = [], roleAttribute = [], identity = [];
+        let require = [], roleAttribute = [], identity = [], include = [];
         let triggers = [];
 
         // iterate through all the lines of the role
@@ -1810,6 +1816,8 @@ module.exports = function() {
                     roleAttribute.push(curInputLineSplit.join(": "));
                 } else if(curTriggerName == "Identity") { // Identity special trigger
                     identity.push(curInputLineSplit.join(": "));
+                } else if(curTriggerName == "Include") { // Include special trigger
+                    include.push(curInputLineSplit.join(": "));
                 } else {
                     //   const adancedTriggerTypes = ["On <Target> Visited [<Ability Type>]"]; // trigger types containing parameters
                     // attempt to parse complex triggers
@@ -1912,7 +1920,7 @@ module.exports = function() {
             triggers.push([curTriggerType, curTrigger]);
         }
 
-        return { triggers: triggers, unique: unique, requires: require, role_attribute: roleAttribute, identity: identity };
+        return { triggers: triggers, unique: unique, requires: require, role_attribute: roleAttribute, identity: identity, include: include };
 
     }
     

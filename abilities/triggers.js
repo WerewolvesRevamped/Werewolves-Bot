@@ -483,10 +483,30 @@ module.exports = function() {
         if(!parsed || !parsed.triggers) return;
         const triggerNameFormatted = triggerName.trim().toLowerCase().replace(/[^a-z]/g,"");
         
+        
         // grab the triggers
         let triggers = parsed.triggers;
+        
+        // expand triggers by referenced role
+        let include = triggers.filter(el => el.trigger.trim().toLowerCase().replace(/[^a-z]/g,"") === "include");
+        for(let i = 0; i < include.length; i++) {
+            let role = await parseRoleSelector(include[i].trigger_parameter, src_ref, additionalTriggerData);
+            console.log(include[i].trigger_parameter, role);
+            if(role.length != 1) continue;
+            let result = await sqlPromOneEsc("SELECT * FROM roles WHERE name=", role[0]);
+            // parse the formalized desc into an object
+            if(!result || !result.parsed) {
+                abilityLog(`🔴 **Skipped Included Role:** ${toTitleCase(role[0])}.`);
+                continue;
+            }
+            console.log("Adding triggers for " + role[0]);
+            let parsed = JSON.parse(result.parsed);
+            triggers.push(...parsed.triggers);
+        }
+        
         // filter out the relevant triggers
         triggers = triggers.filter(el => el.trigger.trim().toLowerCase().replace(/[^a-z]/g,"") == triggerNameFormatted);
+        
         // execute all relevant triggers
         for(const trigger of triggers) {
             // COMPLEX TRIGGERS
