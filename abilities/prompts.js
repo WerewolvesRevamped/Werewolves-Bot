@@ -505,7 +505,14 @@ module.exports = function() {
                     }
                 break;
             }
-            actionLog(`✅ ${srcRefToText(curAction.src_ref)} (${srcNameToText(curAction.src_name)}) used an ${srcRefToText('abilitytype:' + abilities[0].type)} action${onTxt}${targetTxt}.`);
+            let abilityType = abilities[0].type;
+            let abilityTypeText = srcRefToText('abilitytype:' + abilities[0].type);
+            if(abilityType === "process_evaluate") {
+                abilityTypeText = "**P/E**";
+                if(abilities[0].process?.sub_abilities && abilities[0].process.sub_abilities[0]) abilityTypeText += " " + srcRefToText('abilitytype:' + abilities[0].process.sub_abilities[0].ability.type);
+                if(abilities[0].evaluate?.sub_abilities && abilities[0].evaluate.sub_abilities[0]) abilityTypeText += " **=>** " + srcRefToText('abilitytype:' + abilities[0].evaluate.sub_abilities[0].ability.type);
+            }
+            actionLog(`✅ ${srcRefToText(curAction.src_ref)} (${srcNameToText(curAction.src_name)}) used a ${abilityTypeText} action${onTxt}${targetTxt}.`);
             // execute the ability
             let feedback = [];
             let doNotRecheckRestriction = false;
