@@ -779,6 +779,10 @@ client.on("messageCreate", async message => {
 	case "tie":
 		if(checkSafe(message)) cmdConfirm(message, "tie");
 	break;
+	/* Reevaluate */ // Reevaluate Win Conditions
+	case "reevaluate":
+		if(checkSafe(message)) cmdReevaluate(message.channel);
+	break;
 	/* Sheet */ // Simplifies game managment via sheet
 	case "sheet":
 		if(checkSafe(message)) cmdSheet(message, args);
