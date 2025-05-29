@@ -13,8 +13,8 @@ module.exports = function() {
     }
     
 	this.cmdMentor = function(channel, args) {
-        let mentee = parseUser(channel, args[0]);
-        let mentor = parseUser(channel, args[1]);
+        let mentee = parseUser(args[0], channel);
+        let mentor = parseUser(args[1], channel);
         let memMentee = channel.guild.members.cache.get(mentee);
         let memMentor = channel.guild.members.cache.get(mentor);
         if(!mentee) {

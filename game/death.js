@@ -48,7 +48,7 @@ module.exports = function() {
 			return; 
 		}
 		// Get users 
-		players = parseUserList(channel, args, 1);
+		players = parseUserList(args, 1, channel);
 		if(players)  {
 			let playerList = players.map(el => "`" + channel.guild.members.cache.get(el).displayName + "`").join(", ");
 			// Add to killq
@@ -71,7 +71,7 @@ module.exports = function() {
 			return; 
 		}
 		// Get users
-		players = parseUserList(channel, args, 1);
+		players = parseUserList(args, 1, channel);
 		if(players) { 
 			// Remove from killq
 			let playerList = players.map(el =>"`" + channel.guild.members.cache.get(el).displayName + "`").join(", ");

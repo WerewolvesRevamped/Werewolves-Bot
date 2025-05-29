@@ -23,7 +23,7 @@ module.exports = function() {
 	}
     
     this.cmdImpersonate = function(message, argsX) {
-        let author = parseUser(message.channel, argsX.shift());
+        let author = parseUser(argsX.shift(), message.channel);
         if(author) cmdWebhook(message.channel, message.guild.members.cache.get(author), argsX);
     }
     

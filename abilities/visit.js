@@ -12,7 +12,7 @@ module.exports = function() {
     this.cancelledVisits = [];
     this.cancelledVisitsFeedback = []
     this.visit = async function(sourcePlayerAny, targetPlayerAny, visitParameter, secondVisitParameter, abilityType, abilitySubtype, templateMessage = null) {
-        console.log("Visit", sourcePlayerAny, targetPlayerAny, visitParameter, secondVisitParameter, abilityType, abilitySubtype);
+        //console.log("Visit", sourcePlayerAny, targetPlayerAny, visitParameter, secondVisitParameter, abilityType, abilitySubtype);
         if(targetPlayerAny == null || sourcePlayerAny == null) {
             return null; // not really a visit if there is one of those two doesnt exist
         }
@@ -56,7 +56,7 @@ module.exports = function() {
             obstruction: for(let i = 0; i < obstructions.length; i++) {
                 let matchesType = obstructions[i].val1 === "" || obstructions[i].val1 === abilityType;
                 let matchesSubtype = obstructions[i].val2 === "" || obstructions[i].val2 === abilitySubtype;
-                console.log(obstructions[i].attr_type, matchesType, matchesSubtype, abilityType, abilitySubtype, obstructions[i].val1, obstructions[i].val2);
+                //console.log(obstructions[i].attr_type, matchesType, matchesSubtype, abilityType, abilitySubtype, obstructions[i].val1, obstructions[i].val2);
                 // check if obstruction type matches
                 if((matchesType && matchesSubtype) ^ (obstructions[i].attr_type === "obstruction_inverted")) {
                     // no custom feedback; return failure
@@ -135,7 +135,7 @@ module.exports = function() {
         for(let i = 0; i < obstructions.length; i++) {
             let matchesType = obstructions[i].val1 === "" || obstructions[i].val1 === abilityType;
             let matchesSubtype = obstructions[i].val2 === "" || obstructions[i].val2 === abilitySubtype;
-            console.log(obstructions[i].attr_type, matchesType, matchesSubtype, abilityType, abilitySubtype, obstructions[i].val1, obstructions[i].val2);
+            //console.log(obstructions[i].attr_type, matchesType, matchesSubtype, abilityType, abilitySubtype, obstructions[i].val1, obstructions[i].val2);
             // check if obstruction type matches
             if((matchesType && matchesSubtype) ^ (obstructions[i].attr_type === "obstruction_inverted")) {
                 // no custom feedback; return failure

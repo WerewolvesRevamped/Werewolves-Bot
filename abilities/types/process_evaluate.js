@@ -132,8 +132,8 @@ module.exports = function() {
                 else if(firstType != "string") second = await parseSelector(condition.second, src_ref, additionalTriggerData);
                 else second = { value: await parseStringSelector(condition.second, src_ref, additionalTriggerData), type: "string" };
                 
-                console.log("FIRST", condition.first, first.type, first.value[0]);
-                console.log("SECOND", condition.second, second.type, second.value[0]);
+                //console.log("FIRST", condition.first, first.type, first.value[0]);
+                //console.log("SECOND", condition.second, second.type, second.value[0]);
                 
                 // switch by subtype
                 switch(condition.subtype) {
@@ -236,7 +236,7 @@ module.exports = function() {
                         }
                         condBool1 = await resolveCondition(condition.condition1, src_ref, additionalTriggerData);
                         condBool2 = await resolveCondition(condition.condition2, src_ref, additionalTriggerData);
-                        console.log("AND", condBool1, condBool2, "=>", condBool1 && condBool2);
+                        //console.log("AND", condBool1, condBool2, "=>", condBool1 && condBool2);
                         return condBool1 && condBool2;
                     // LOGIC - OR
                     case "or":
@@ -246,7 +246,7 @@ module.exports = function() {
                         }
                         condBool1 = await resolveCondition(condition.condition1, src_ref, additionalTriggerData);
                         condBool2 = await resolveCondition(condition.condition2, src_ref, additionalTriggerData);
-                        console.log("OR", condBool1, condBool2, "=>", condBool1 || condBool2);
+                        //console.log("OR", condBool1, condBool2, "=>", condBool1 || condBool2);
                         return condBool1 || condBool2;
                 }
             }
@@ -257,7 +257,7 @@ module.exports = function() {
                     return false;
                 }
                 let targets = await parseSelector(condition.target, src_ref, additionalTriggerData);
-                console.log("EXISTENCE", condition.target, targets);
+                //console.log("EXISTENCE", condition.target, targets);
                 return (targets.value.length > 0);
             }
             // ATTRIBUTE
@@ -287,12 +287,12 @@ module.exports = function() {
                 let targets = await parseSelector(condition.target, src_ref, additionalTriggerData);
                 if(targets.value.length === 0) return false; // if no target at all, it cannot be part of anything
                 let selector = await parseSelector(condition.selector, src_ref, additionalTriggerData);
-                console.log("target", targets);
-                console.log("selector", selector);
+                //console.log("target", targets);
+               //console.log("selector", selector);
                 if(targets.type != selector.type) return false;
                 for(let i = 0; i < targets.value.length; i++) {
                     let bool = selector.value.includes(targets.value[i]);
-                    console.log(bool, targets.value[i]);
+                    //console.log(bool, targets.value[i]);
                     if(!bool) return false;
                 }
                 return true;

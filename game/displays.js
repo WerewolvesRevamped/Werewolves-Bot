@@ -176,10 +176,10 @@ module.exports = function() {
     Update displays
     **/
     this.updateDisplayCheck = async function(src_ref, type) {
-        console.log(src_ref, type);
+        //console.log(src_ref, type);
         let displays = await sqlPromEsc("SELECT * FROM active_displays WHERE src_ref=", src_ref);
         for(let i = 0; i < displays.length; i++) {
-            console.log("CHECKING", displays[i], type);
+            //console.log("CHECKING", displays[i], type);
             // check if the value that changed occurs in the display
             if(displays[i].val1.toLowerCase() === type || displays[i].val2.toLowerCase() === type || displays[i].val3.toLowerCase() === type || displays[i].val4.toLowerCase() === type) {
                 let values = await parseDisplayValues(displays[i].val1, displays[i].val2, displays[i].val3, displays[i].val4, src_ref);

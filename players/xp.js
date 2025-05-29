@@ -80,7 +80,7 @@ module.exports = function() {
 			return; 
 		}
         // Get user
-		let user = parseUser(channel, args[1]);
+		let user = parseUser(args[1], channel);
 		if(!user) { 
 			// Invalid user
 			channel.send("⛔ Syntax error. Not a valid player!"); 

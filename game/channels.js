@@ -35,7 +35,7 @@ module.exports = function() {
         }
         
         // get list of new members
-        let players = parseUserList(channel, args, 1, member);
+        let players = parseUserList(args, 1, channel, member);
         if(!players) players = [];
         players = players.filter(el => !isCCMember(channel, el));
         // add members if at least one exists
@@ -69,7 +69,7 @@ module.exports = function() {
         }
         
         // get list of members to remove
-        let players = parseUserList(channel, args, 1, member);
+        let players = parseUserList(args, 1, channel, member);
         if(!players) players = [];
         players = players.filter(el => isCCMember(channel, el) && !isCCOwner(channel, el));
         // remove members if at least one exists
@@ -103,7 +103,7 @@ module.exports = function() {
         }
         
         // get list of members to promote
-        let players = parseUserList(channel, args, 1, member);
+        let players = parseUserList(args, 1, channel, member);
         if(!players) players = [];
         players = players.filter(el => isCCMember(channel, el) && !isCCOwner(channel, el));
         // remove members if at least one exists
@@ -135,7 +135,7 @@ module.exports = function() {
         }
         
         // get list of members to demote
-        let players = parseUserList(channel, args, 1, member);
+        let players = parseUserList(args, 1, channel, member);
         if(!players) players = [];
         players = players.filter(el => isCCMember(channel, el) && isCCOwner(channel, el));
         // remove members if at least one exists
@@ -287,7 +287,7 @@ module.exports = function() {
     **/
     this.cmdSCAdd = function(channel, member, args) {
         cmdCCAdd(channel, member, args, 1);
-        players = parseUserList(channel, args, 1, member);
+        players = parseUserList(args, 1, channel, member);
         if(!players) players = [];
         players.forEach(p => channel.send(`**<@${p}> has been added to <#${channel.id}>.**`));
     }
@@ -298,7 +298,7 @@ module.exports = function() {
     **/
     this.cmdSCRemove = function(channel, member, args) {
         cmdCCRemove(channel, member, args, 1);
-        players = parseUserList(channel, args, 1, member);
+        players = parseUserList(args, 1, channel, member);
         if(!players) players = [];
         players.forEach(p => channel.send(`**<@${p}> has been removed from <#${channel.id}>.**`));
     }

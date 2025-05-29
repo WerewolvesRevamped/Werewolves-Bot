@@ -88,11 +88,11 @@ module.exports = function() {
                             return true; // restriction application not applicable without target
                         }
                         // actual evaluation
-                        console.log("SUCC START");
+                        //console.log("SUCC START");
                         let lt = await getLastTarget(src_ref, ability);
                         let lastTarget = lt ? await parseSelector(lt, src_ref, additionalTriggerData) : null;
                         let targets = await parseSelector(target, src_ref, additionalTriggerData);
-                        console.log("SUCC END");
+                        //console.log("SUCC END");
                         // check if last target is included in the target selector
                         if(!lastTarget || !lastTarget.value || !lastTarget.value[0] || !targets.value.includes(lastTarget.value[0])) {
                             return true;

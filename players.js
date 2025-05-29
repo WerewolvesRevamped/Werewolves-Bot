@@ -431,11 +431,11 @@ module.exports = function() {
 	
 	/* Randomizes */
 	this.cmdRollExe = function(channel, args, wl) {
-		let blacklist = parseUserList(channel, args, 1) || [];
+		let blacklist = parseUserList(args, 1, channels) || [];
 		console.log(blacklist);
 		// Get a list of players
 		sql("SELECT id FROM players WHERE alive=1 AND type='player'", result => {
-			let playerList = result.map(el => getUser(channel, el.id)); 
+			let playerList = result.map(el => getUser(el.id)); 
 			if(!wl) playerList = playerList.filter(el => blacklist.indexOf(el) === -1);
 			else playerList = playerList.filter(el => blacklist.indexOf(el) != -1);
 			let rID = playerList[Math.floor(Math.random() * playerList.length)];
@@ -462,7 +462,7 @@ module.exports = function() {
 	}
 	
 	this.cmdModrole = function(message, args) {
-		let aid = getUser(message.channel, args[1]);
+		let aid = getUser(args[1]);
 		if(!aid) return;
 		let author = message.guild.members.cache.get(aid);
 		if(!author) return;
@@ -609,9 +609,9 @@ module.exports = function() {
 			return; 
 		}
        
-        let originalPlayer = getUser(message.channel, args[1]);
+        let originalPlayer = getUser(args[1]);
         let originalPlayerMember = message.channel.guild.members.cache.get(originalPlayer);
-        let newPlayer = getUser(message.channel, args[2]);
+        let newPlayer = getUser(args[2]);
         let newPlayerMember = message.channel.guild.members.cache.get(newPlayer);
         if(!newPlayer || !newPlayerMember) {
 			message.channel.send("⛔ Player error. Could not find player!"); 
@@ -763,11 +763,11 @@ module.exports = function() {
 		}
 		getPRoles();
 		setTimeout(function () { // switch channels
-			cmdPlayersSet(message.channel, ["set", "role", getUser(message.channel, args[2]), pRoles.find(el => el.id === getUser(message.channel, args[1])).role]); 
-			cmdPlayersSet(message.channel, ["set", "role", getUser(message.channel, args[1]), pRoles.find(el => el.id === getUser(message.channel, args[2])).role]); 
+			cmdPlayersSet(message.channel, ["set", "role", getUser(args[2]), pRoles.find(el => el.id === getUser(args[1])).role]); 
+			cmdPlayersSet(message.channel, ["set", "role", getUser(args[1]), pRoles.find(el => el.id === getUser(args[2])).role]); 
 			let categories = cachedCCs;
 			categories.push(...cachedSCs)
-			switchChannels(message.channel, categories, 0, getUser(message.channel, args[1]), getUser(message.channel, args[2]));
+			switchChannels(message.channel, categories, 0, getUser(args[1]), getUser(args[2]));
 		}, 3000);
 		setTimeout(function() { // reload data
 			cacheRoleInfo();
@@ -898,7 +898,7 @@ module.exports = function() {
 			return; 
 		}
 		// Get user
-		var user = parseUser(channel, args[2]);
+		var user = parseUser(args[2], channel);
 		if(!user) { 
 			// Invalid user
 			channel.send("⛔ Syntax error. `" + args[2] + "` is not a valid player!"); 
@@ -927,7 +927,7 @@ module.exports = function() {
 			return; 
 		}
 		// Get user
-		var user = parseUser(channel, args[2]);
+		var user = parseUser(args[2], channel);
 		if(!user) { 
 			// Invalid user
 			channel.send("⛔ Syntax error. `" + args[2] + "` is not a valid player!"); 
@@ -951,7 +951,7 @@ module.exports = function() {
 	/* Resurrects a dead player */
 	this.cmdPlayersResurrect = async function(channel, args) {
 		// Get user
-		var user = parseUser(channel, args[1]);
+		var user = parseUser(args[1], channel);
 		if(!user) { 
 			// Invalid user
 			channel.send("⛔ Syntax error. `" + args[1] + "` is not a valid player!"); 
@@ -973,7 +973,7 @@ module.exports = function() {
 	
 	/* Signup somebody else */
 	this.cmdPlayersSignup = function(channel, args) {
-		var user = getUser(channel, args[1]);
+		var user = getUser(args[1]);
 		if(!user) { 
 			// Invalid user
 			channel.send("⛔ Syntax error. `" + args[1] + "` is not a valid player!"); 
@@ -985,7 +985,7 @@ module.exports = function() {
     
 	/* Substitutes somebody else */
 	this.cmdPlayersSignupSubstitute = function(channel, args) {
-		var user = getUser(channel, args[1]);
+		var user = getUser(args[1]);
 		if(!user) { 
 			// Invalid user
 			channel.send("⛔ Syntax error. `" + args[1] + "` is not a valid player!"); 
@@ -1179,123 +1179,6 @@ module.exports = function() {
 		}
 	}
 	
-	/* Get User from Argument */
-	this.getUser = function(channel, inUser) {
-		var user;
-        var guild;
-        if(!channel) {
-            guild = mainGuild;
-        } else {
-            guild = channel.guild;
-        }
-        inUser = inUser.toLowerCase();
-		// Get User by ID 
-		if(/^\d+$/.test(inUser)) {
-			user = client.users.cache.find(user => user.id === inUser);
-			if(user) return user.id;
-		}
-		// Get User by Discord Tag with Nickname
-		if(/^<@!\d*>$/.test(inUser)) {
-			let inUserID = inUser.substr(3, inUser.length - 4) + "";
-			user = client.users.cache.find(user => user.id === inUserID);
-			if(user) return user.id;
-		}
-		// Get User by Discord Tag without Nickname
-		if(/^<@\d*>$/.test(inUser)) {
-			let inUserID = inUser.substr(2, inUser.length - 3) + "";
-			user = client.users.cache.find(user => user.id === inUserID);
-			if(user) return user.id;
-		}
-		// Get User by Name
-		user = client.users.cache.find(user => user.username.toLowerCase() === inUser);
-		if(user) return user.id;
-		// Get User by Global Name
-		user = client.users.cache.find(user => user.globalName && user.globalName.toLowerCase() === inUser);
-		if(user) return user.id;
-		// Get User by Display Name
-		user = client.users.cache.find(user => user.displayName && user.displayName.toLowerCase() === inUser);
-		if(user) return user.id;
-		// Get User by Nickname
-		user = guild.members.cache.find(member => member.nickname && member.nickname.toLowerCase() === inUser);
-		if(user) return user.id;
-		// Get User by Display Name
-		user = guild.members.cache.find(member => member.displayName && member.displayName.toLowerCase() === inUser);
-		if(user) return user.id;
-		// Get User by Emoji 
-		user = emojiToID(inUser)
-		if(user) return user;
-		return false;
-	}
-
-	/* Convert a List of Users, Into a List of Valid User IDs; Provide executor to allow GMs to specify non-participants */
-	this.getUserList = function(channel, args, startIndex, executor = false, type = "participant") {
-		// Cut off entries at the start
-		let players = args.slice(startIndex).map(el => getUser(channel, el));
-		// Filter out non participants
-		players = players.filter((el, index) => {
-			if(el && (
-                (isParticipant(channel.guild.members.cache.get(el)) && type == "participant") || 
-                (isGhost(channel.guild.members.cache.get(el)) && type == "ghost") || 
-                (executor && isGameMaster(executor, true))
-            )) {
-				return true; 
-			}
-			else { 
-				channel.send("⛔ Syntax error. Invalid Player: `" + args.slice(startIndex)[index] + "`!"); 
-				return false; 
-			}
-		});
-		// Remove duplicates
-		players = removeDuplicates(players);
-		// Return array or if empty false
-		return players.length > 0 ? players : false;
-	}
-	
-	this.fixUserList = function(list, channel) {
-		let allPlayerNames = playerIDs.map(el => [mainGuild.members.cache.get(el)?.user.username,mainGuild.members.cache.get(el)?.user.globalName,mainGuild.members.cache.get(el)?.nickname]).flat().filter(el => el).map(el => el.toLowerCase());
-        //console.log(allPlayerNames);
-		let parsed = parseList(list.map(el => el.toLowerCase()), allPlayerNames);
-		return [...parsed.invalid, ...parsed.found];
-	}
-	
-	/* Convert a List of (badly written) Users, Into a List of Valid User IDs; Provide executor to allow GMs to specify non-participants */
-	/* Equivalent to getUserList, but auto adds quotes, fixes typos and such */
-	this.parseUserList = function(channel, args, startIndex, executor = false, type = "participant") {
-		let players = args.slice(startIndex);
-		players = fixUserList(players, channel);
-		return getUserList(channel, players, 0, executor, type);
-	}
-	
-	/* parseUserList for a single user */
-	this.parseUser = function(channel, inUser) {
-		let user = getUser(channel, inUser);
-		if(!user) {
-			user = parseUserList(channel, [inUser], 0);
-			if(user && user.length == 1) return user[0];
-			else return false;
-		}
-		return user;
-	}
-
-	/* Returns the id of the user who uses the given emoji, if none returns false */
-	this.emojiToID = function(emoji) {
-        // find emoji
-		var user = emojiIDs.find(el => el.emoji == emoji);
-        if(!user) {
-            // there are some emojis that weirdly have a different unicode version internally than the one you get when copying it(?)
-            // normalize to Compatibility Decomposition; Remove variant selector U+FE0F
-            emoji = emoji.normalize("NFKD").replace(/[\uFE0F]/g, '');
-            user = emojiIDs.find(el => el.emoji == emoji);
-        }
-		return user ? user.id : false;
-	}
-
-	/* Returns the emoji of the user who has the given id, if none returns false */
-	this.idToEmoji = function(id) {
-		var user = emojiIDs.find(el => el.id === id);
-		return user ? user.emoji : false;
-	}
-	
 	/* Cache emojis */
 	this.getEmojis = function() {
 		sql("SELECT id,emoji FROM players", result => {
@@ -1330,69 +1213,6 @@ module.exports = function() {
 		}, () => {
 			log("Players > ❗❗❗ Unable to cache player ids!");
 		});
-	}
-	
-	this.parseList = function(inputList, allPlayers) {
-	    let playerList = [];
-	    // filter out ids, emojis, unicode
-	    inputList = inputList.filter(el => {
-            let directMatch = el.match(/^(\d+|<:.+:\d+>|[^\w]{1,2})$/);
-            if(directMatch) playerList.push(el);
-            return !directMatch;
-	    });
-
-	    // handle direct names
-	    inputList = inputList.filter(el => {
-            // extract quoted name, if necessary
-            let quoted = el.match(/^(".+")$/), nameExtracted = el;
-            if(quoted) nameExtracted = el.substr(1, el.length - 2);
-            // search for a direct match
-            let apIndex = allPlayers.indexOf(p => p === nameExtracted);
-            if(apIndex >= 0) { // direct match found
-                playerList.push(el);
-                return false;
-            } else { // search for closest name
-                let bestMatch = findBestMatch(el, allPlayers);
-                console.log(bestMatch);
-                // close match found?
-                if(bestMatch.value <= ~~(nameExtracted.length/2)) { 
-                    playerList.push(bestMatch.name);
-                    return false;
-                }   
-            }
-            return quoted ? false : true; // no (close) match found
-	    });
-
-	    // try combining names in different ways
-	    for(let maxLength = 2; maxLength <= inputList.length; maxLength++) {
-            for(let i = 0; i < inputList.length; i++) {
-                let combinedName = inputList[i];
-                for(let j = i+1; j < inputList.length; j++) {
-                    if(j-i >= maxLength) { // limit length
-                        j = inputList.length
-                        continue; 
-                    }
-                    combinedName += " " + inputList[j];
-                    let bestMatch = findBestMatch(combinedName, allPlayers);
-                    //console.log(combinedName, "=>", bestMatch.name, bestMatch.value, i, j);
-                    // close match found?
-                    if(bestMatch.value <= ~~(combinedName.length/2)) {
-                        // remove all used elements
-                        for(let k = i; k <= j; k++) inputList[k] = "-".repeat(50); 
-                        playerList.push(bestMatch.name);
-                        //console.log(combinedName, "=>", bestMatch.name, bestMatch.value, i, j, inputList.map(el=>el));
-                        j = inputList.length;
-                    }
-                }
-            }
-	    }
-	    // filter out "deleted" names
-	    inputList = inputList.filter(el => el != "-".repeat(50));
-	    // remove duplicates
-	    inputList = [...new Set(inputList)];
-	    playerList = [...new Set(playerList)];
-	    // output
-	    return {found: playerList, invalid: inputList};
 	}
 	
 }

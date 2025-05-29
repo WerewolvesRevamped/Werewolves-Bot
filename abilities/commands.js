@@ -51,7 +51,7 @@ module.exports = function() {
         let ability = { type: "granting", subtype: "add" };
         
         // get target
-        let target = parseUser(backupChannel, args[0]);
+        let target = parseUser(args[0]);
         let member = mainGuild.members.cache.get(target);
         if(!member) {
             message.channel.send("⛔ Input error. Invalid player!"); 

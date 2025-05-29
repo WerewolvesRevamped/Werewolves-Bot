@@ -491,7 +491,7 @@ module.exports = function() {
         let include = triggers.filter(el => el.trigger.trim().toLowerCase().replace(/[^a-z]/g,"") === "include");
         for(let i = 0; i < include.length; i++) {
             let role = await parseRoleSelector(include[i].trigger_parameter, src_ref, additionalTriggerData);
-            console.log(include[i].trigger_parameter, role);
+            //console.log(include[i].trigger_parameter, role);
             if(role.length != 1) continue;
             let result = await sqlPromOneEsc("SELECT * FROM roles WHERE name=", role[0]);
             // parse the formalized desc into an object
@@ -499,7 +499,7 @@ module.exports = function() {
                 abilityLog(`🔴 **Skipped Included Role:** ${toTitleCase(role[0])}.`);
                 continue;
             }
-            console.log("Adding triggers for " + role[0]);
+            //console.log("Adding triggers for " + role[0]);
             let parsed = JSON.parse(result.parsed);
             triggers.push(...parsed.triggers);
         }

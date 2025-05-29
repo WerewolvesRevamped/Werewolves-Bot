@@ -171,8 +171,8 @@ module.exports = function() {
 		args[1] = args[1].replace(/🔒/,"lock");
 		args[1] = args[1].replace(/🤖/,"bot");
 		args[1] = args[1].replace(/👻/,"ghost");
-		players = parseUserList(channel, args, 2, member, isGhost(member) ? "ghost" : "participant");
-        console.log(players);
+		players = parseUserList(args, 2, channel, member, isGhost(member) ? "ghost" : "participant");
+        //console.log(players);
         if(!players || spam) players = [];
 		if(!spam && !isGameMaster(member, true) && !isHelper(member)) {
 			sql("UPDATE players SET ccs = ccs + 1 WHERE id = " + connection.escape(member.id), result => {

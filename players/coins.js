@@ -34,7 +34,7 @@ module.exports = function() {
 			return; 
 		}
         // Get user
-		let user = parseUser(channel, args[1]);
+		let user = parseUser(args[1], channel);
 		if(!user) { 
 			// Invalid user
 			if(!silent) channel.send("⛔ Syntax error. `" + args[1] + "` is not a valid player!"); 
@@ -69,7 +69,7 @@ module.exports = function() {
 			return; 
 		}
         // Get user
-		let user = parseUser(channel, args[1]);
+		let user = parseUser(args[1], channel);
 		if(!user) { 
 			// Invalid user
 			channel.send("⛔ Syntax error. `" + args[1] + "` is not a valid player!"); 

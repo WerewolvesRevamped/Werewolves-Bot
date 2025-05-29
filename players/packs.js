@@ -90,7 +90,7 @@ module.exports = function() {
             channel.send("⛔ Syntax error. Not enough parameters!");
             return;
         }
-        let user = parseUser(channel, args[1]);
+        let user = parseUser(args[1], channel);
         if(!user) {
 			// Invalid user
 			channel.send("⛔ Syntax error. `" + args[1] + "` is not a valid player!");
@@ -118,7 +118,7 @@ module.exports = function() {
             channel.send("⛔ Syntax error. Not enough parameters!");
             return;
         }
-        let user = parseUser(channel, args[1]);
+        let user = parseUser(args[1], channel);
         if(!user) {
 			// Invalid user
 			channel.send("⛔ Syntax error. `" + args[1] + "` is not a valid player!");
@@ -150,7 +150,7 @@ module.exports = function() {
             channel.send("⛔ Syntax error. Not enough parameters!");
             return;
         }
-        let user = parseUser(channel, args[1]);
+        let user = parseUser(args[1], channel);
         if(!user) {
 			// Invalid user
 			channel.send("⛔ Syntax error. `" + args[1] + "` is not a valid player!");
@@ -177,7 +177,7 @@ module.exports = function() {
             channel.send("⛔ Syntax error. Not enough parameters!");
             return;
         }
-        let user = parseUser(channel, author.id);
+        let user = parseUser(author.id, channel);
         if(!user) {
 			// Invalid user
 			channel.send("⛔ Syntax error. `" + author.id + "` is not a valid player!");

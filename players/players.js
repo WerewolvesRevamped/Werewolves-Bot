@@ -14,6 +14,7 @@ require("./inventory.js")();
 require("./mentors.js")();
 require("./bot.js")();
 require("./permissions.js")();
+require("./parsing.js")();
 
 
 module.exports = function() {

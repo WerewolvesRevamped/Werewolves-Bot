@@ -29,7 +29,7 @@ module.exports = function() {
 			let bestMatch = findBestMatch(roleName.toLowerCase(), allRoleNames.map(el => el.toLowerCase())); // find closest match
 			// check if match is close enough
 			if(bestMatch.value <= ~~(roleName.length/2)) { // auto alias if so, but send warning 
-                console.log(roleName, bestMatch.name);
+                //console.log(roleName, bestMatch.name);
 				roleName = parseRole(bestMatch.name);
                 if(roleName.toLowerCase() === bestMatch.name.toLowerCase()) {
                     if(origRoleName.toLowerCase().replace(/[^a-z]/g,"") === bestMatch.name.toLowerCase().replace(/[^a-z]/g,"")) {

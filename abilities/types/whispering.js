@@ -143,7 +143,7 @@ module.exports = function() {
                 
                 // assign mentor permissions
                 let mentor = await getMentor(member); 
-                console.log("WhisperCreate", member, mentor);
+                //console.log("WhisperCreate", member, mentor);
                 if(mentor) sc.permissionOverwrites.create(mentor, { ViewChannel: true, SendMessages: false });
 
                 // Move into sc category

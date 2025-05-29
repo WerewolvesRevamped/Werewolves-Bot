@@ -247,7 +247,7 @@ module.exports = function() {
                 
                 // assign mentor permissions
                 let mentor = await getMentor(member); 
-                console.log("GrantCreate", member, mentor);
+                //console.log("GrantCreate", member, mentor);
                 if(mentor) sc.permissionOverwrites.create(mentor, { ViewChannel: true, SendMessages: false });
 
                 // Move into sc category

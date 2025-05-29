@@ -510,7 +510,7 @@ module.exports = function() {
             if(abilityType === "process_evaluate") {
                 abilityTypeText = "**P/E**";
                 if(abilities[0].process?.sub_abilities && abilities[0].process.sub_abilities[0]) abilityTypeText += " " + srcRefToText('abilitytype:' + abilities[0].process.sub_abilities[0].ability.type);
-                if(abilities[0].evaluate?.sub_abilities && abilities[0].evaluate.sub_abilities[0]) abilityTypeText += " **=>** " + srcRefToText('abilitytype:' + abilities[0].evaluate.sub_abilities[0].ability.type);
+                if(abilities[0].evaluate?.sub_abilities && abilities[0].evaluate.sub_abilities[0]) abilityTypeText += " **⇒** " + srcRefToText('abilitytype:' + abilities[0].evaluate.sub_abilities[0].ability.type);
             }
             actionLog(`✅ ${srcRefToText(curAction.src_ref)} (${srcNameToText(curAction.src_name)}) used a ${abilityTypeText} action${onTxt}${targetTxt}.`);
             // execute the ability
@@ -857,7 +857,7 @@ module.exports = function() {
     function parsePlayerReply(playerName, message = null) {
         // check for basic player references
         let pSplit = playerName.toLowerCase().split(/[\.,\-!\?\s ]/);
-        let basic = pSplit.map(el => getUser(null, el)).filter(el => el);
+        let basic = pSplit.map(el => getUser(el)).filter(el => el);
         console.log("BASIC", pSplit, basic);
         if(basic.length > 0) {
             let member = mainGuild.members.cache.get(basic[0]);
@@ -891,7 +891,7 @@ module.exports = function() {
             return false;
         } else { // player found -> normalize to player.displayName
             let player = parsed.found[0];
-            let parsedPlayer = parseUser(backupChannel, player); // parse player name/id/emoji to discord id
+            let parsedPlayer = parseUser(player); // parse player name/id/emoji to discord id
             let member = mainGuild.members.cache.get(parsedPlayer);
             let playerName = member?.displayName ?? false; // get name through id
             let playerName2 = member?.user.displayName ?? false; // get name through id
@@ -913,7 +913,7 @@ module.exports = function() {
     function parseDeadReply(playerName, message = null) {
         // check for basic player references
         let pSplit = playerName.toLowerCase().split(/[\.,\-!\?\s ]/);
-        let basic = pSplit.map(el => getUser(null, el)).filter(el => el);
+        let basic = pSplit.map(el => getUser(el)).filter(el => el);
         console.log("BASIC", pSplit, basic);
         if(basic.length > 0) {
             let member = mainGuild.members.cache.get(basic[0]);
@@ -947,7 +947,7 @@ module.exports = function() {
             return false;
         } else { // player found -> normalize to player.displayName
             let player = parsed.found[0];
-            let parsedPlayer = parseUser(backupChannel, player); // parse player name/id/emoji to discord id
+            let parsedPlayer = parseUser(player); // parse player name/id/emoji to discord id
             let member = mainGuild.members.cache.get(parsedPlayer);
             let playerName = member?.displayName ?? false; // get name through id
             let playerName2 = member?.user.displayName ?? false; // get name through id

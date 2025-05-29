@@ -280,7 +280,7 @@ module.exports = function() {
 			return; 
 		}
         // Get user
-		var user = parseUser(message.channel, args[0]);
+		var user = parseUser(args[0], message.channel);
 		if(!user) { 
 			// Invalid user
 			message.channel.send("⛔ Syntax error. `" + args[0] + "` is not a valid player!"); 
