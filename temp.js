@@ -140,6 +140,7 @@ module.exports = function() {
                 "market": ["mk", "mkt"],
                 "schedule": ["sched", "sch"],
                 "parse_prompt": ["pp", "prompt_parse"],
+                "reevaluate": ["reeval", "reval"],
         };
         
     this.parseAlias = function(alias) {

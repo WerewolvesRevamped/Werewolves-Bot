@@ -254,6 +254,12 @@ module.exports = function() {
         channel.send("✅ Game has been ended in a tie.");
 	}
     
+	this.cmdReevaluate = async function(channel) {
+        // final trigger
+        await updateActiveTeams()
+        channel.send("✅ Reevaluated win conditions.");
+	}
+    
     this.gameEnd = async function() {
         // update gamephase
         await sqlProm("UPDATE stats SET value=" + connection.escape(gp.POSTGAME) + " WHERE id=1");
