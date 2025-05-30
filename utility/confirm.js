@@ -1,10 +1,15 @@
-/*
-	Module for confirmation of dangerous commands
-		- Confirms actions
+/**
+	Utility Module - Confirm
+    This module has the functions for the confirm command
 */
 module.exports = function() {
 	
-	/* Executes actions that require confirmation */
+	/**
+    PUBLIC
+    Confirm Action
+    Executes actions that require confirmation
+    Run from the reaction handler
+    */
 	this.confirmAction = async function(data, message) {
 		// Check if the reaction was in time
 		if(+data.time + 20 >= getTime()) {
@@ -25,11 +30,15 @@ module.exports = function() {
 		});
 	}
 	
-    // WIP: CHECK which of these still exist
+    /**
+    PUBLIC
+    Confirm Action - Execute
+    Runs when an action is confirmed and was verified to be on time
+    or via $confirm command
+    **/
 	this.confirmActionExecute = function(command, message, messageSent) {
 		switch(command) {
 			case "connection reset": cmdConnectionReset(message.channel); break;
-			case "roles clear": cmdRolesClear(message.channel); break;
 			case "alias clear": cmdAliasClear(message.channel); break;
 			case "start": cmdStart(message.channel, false); break;
 			case "reset": cmdReset(message.channel); break;
@@ -58,10 +67,14 @@ module.exports = function() {
 		}
 	}
     
-    this.getWarning = function(action) {
+    /**
+    PRIVATE 
+    Get Warning
+    retrieves a warning message depending on the command
+    **/
+    function getWarning(action) {
         switch(action) {
             case "connection reset":
-			case "roles clear":
 			case "alias clear": 
 			case "cc cleanup":
                 return " **WARNING:** This is an irreversible destructive action that deletes a large amount of data. Are you __absolutely certain__ you want to perform this action?";
@@ -76,7 +89,11 @@ module.exports = function() {
         }
     }
 
-	/* Sends a confirmation message */
+	/**
+    PUBLIC
+    Confirm Command
+    confusingly this is not what is run by $confirm, instead this is what run by other commands that need to be confirmed.
+    **/
 	this.cmdConfirm = async function(message, action) {
         let cmdSplit = message.content.split(" ");
         cmdSplit[0] = parseAlias(cmdSplit[0]);

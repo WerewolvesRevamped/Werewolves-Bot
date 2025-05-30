@@ -274,33 +274,6 @@ module.exports = function() {
         // add to storytime
         if(!silent) await bufferStorytime(`<@${player_id}> has been resurrected!`);
 	}
-    
-    /** PUBLIC
-    Set Living Status
-    set the alive value for a player
-    // WIP: Maybe this should be in player module
-    **/
-    this.setLivingStatus = function(player_id, status) {
-        return new Promise(res => {
-            sql("UPDATE players SET alive=" + connection.escape(status) + " WHERE id=" + connection.escape(player_id), result => {
-                updateGameStatus(); // update game status (async)
-                res();
-            });	
-        });
-    }
-    
-    /** PUBLIC
-    Set Death Phase
-    set the death phase value for a player
-    // WIP: Maybe this should be in player module
-    **/
-    this.setDeathPhase = function(player_id, deathPhase) {
-        return new Promise(res => {
-            sql("UPDATE players SET death_phase=" + connection.escape(deathPhase) + " WHERE id=" + connection.escape(player_id), result => {
-                res();
-            });	
-        });
-    }
 
     
 }

@@ -251,12 +251,8 @@ module.exports = function() {
     }
     
     /**
-    Ability Log Buffered
-    **/
-    
-    /**
     Action Log
-    logs a message in the action log. WIP: dont hardcode
+    logs a message in the action log.
     **/
     this.actionLog = function(msg) {
         let ch = mainGuild.channels.cache.get(config.action_log);

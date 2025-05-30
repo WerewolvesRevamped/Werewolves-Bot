@@ -11,6 +11,7 @@ require("./web.js")();
 require("./levenshtein.js")();
 require("./help.js")();
 require("./schedule.js")();
+require("./confirm.js")();
 
 module.exports = function() {
     

@@ -22,7 +22,6 @@ config = require("./config.json");
 
 /* V1 Modules */
 require("./stats.js")();
-require("./confirm.js")();
 require("./players.js")();
 require("./ccs.js")();
 require("./whispers.js")();
@@ -96,11 +95,21 @@ async function forceReload(channel) {
     try { getStats(); channel.send("✅ Loaded stats."); } catch (err) { logO(err); channel.send("⛔ Failed to load stats."); } await sleep(1000);
     try { getIDs(); channel.send("✅ Loaded ids."); } catch (err) { logO(err); channel.send("⛔ Failed to load ids."); } await sleep(1000);
     try { cacheRoleInfo(); channel.send("✅ Cached role info."); } catch (err) { logO(err); channel.send("⛔ Failed to cache role info."); } await sleep(1000);
+    try { cacheLocations(); channel.send("✅ Cached locations."); } catch (err) { logO(err); channel.send("⛔ Failed to cache locations."); } await sleep(1000);
+    try { cachePolls(); channel.send("✅ Cached polls."); } catch (err) { logO(err); channel.send("⛔ Failed to cache polls."); } await sleep(1000);
+    try { cacheTeams(); channel.send("✅ Cached teams."); } catch (err) { logO(err); channel.send("⛔ Failed to cache teams."); } await sleep(1000);
     try { getSCCats(); channel.send("✅ Cached sc cats."); } catch (err) { logO(err); channel.send("⛔ Failed to sc cats."); } await sleep(1000);
-    try { getCCs(); channel.send("✅ Cached cc cats."); } catch (err) { logO(err); channel.send("⛔ Failed to cache cc cats."); } await sleep(1000);
+    try { getCCs(); channel.send("✅ Cached player ccs."); } catch (err) { logO(err); channel.send("⛔ Failed to cache player ccs."); } await sleep(1000);
+    try { getPRoles(); channel.send("✅ Cached player roles."); } catch (err) { logO(err); channel.send("⛔ Failed to cache player roles."); } await sleep(1000);
+    try { getCCCats(); channel.send("✅ Cached cc cats."); } catch (err) { logO(err); channel.send("⛔ Failed to cache cc cates."); } await sleep(1000);
     try { getPublicCat(); channel.send("✅ Cached public cat."); } catch (err) { logO(err); channel.send("⛔ Failed to cache public cat."); } await sleep(1000);
-    try { loadPollValues(); channel.send("✅ Cached poll values."); } catch (err) { logO(err); channel.send("⛔ Failed to cache poll values."); } await sleep(1000);
     try { cacheIconLUT(); channel.send("✅ Loaded icon lut."); } catch (err) { logO(err); channel.send("⛔ Failed to load icon lut."); } await sleep(1000);
+    try { cacheColorsLUT(); channel.send("✅ Loaded color lut."); } catch (err) { logO(err); channel.send("⛔ Failed to load color lut."); } await sleep(1000);
+    try { cacheActiveCustomAttributes(); channel.send("✅ Loaded active custom attributes."); } catch (err) { logO(err); channel.send("⛔ Failed to load active custom attributes."); } await sleep(1000);
+    try { cacheDR(); channel.send("✅ Loaded discord roles (DRs)."); } catch (err) { logO(err); channel.send("⛔ Failed to load discord roles (DRs)."); } await sleep(1000);
+    try { cachePollMessages(); channel.send("✅ Loaded poll messages."); } catch (err) { logO(err); channel.send("⛔ Failed to load poll messages."); } await sleep(1000);
+    try { cachePacks(); channel.send("✅ Loaded player packs."); } catch (err) { logO(err); channel.send("⛔ Failed to load player packs."); } await sleep(1000);
+    try { getEmojis(); channel.send("✅ Loaded emojis."); } catch (err) { logO(err); channel.send("⛔ Failed to load emojis."); } await sleep(1000);
     try { global.client.guilds.fetch(stats.log_guild).then(guild => {guild.members.fetch().then((members) => {})}); channel.send("✅ Loaded users."); } catch (err) { logO(err); channel.send("⛔ Failed to load users."); } await sleep(1000);
 }
 
@@ -778,10 +787,6 @@ client.on("messageCreate", async message => {
 	/* Tie */ // Ends the game in a tie
 	case "tie":
 		if(checkSafe(message)) cmdConfirm(message, "tie");
-	break;
-	/* Reevaluate */ // Reevaluate Win Conditions
-	case "reevaluate":
-		if(checkSafe(message)) cmdReevaluate(message.channel);
 	break;
 	/* Sheet */ // Simplifies game managment via sheet
 	case "sheet":

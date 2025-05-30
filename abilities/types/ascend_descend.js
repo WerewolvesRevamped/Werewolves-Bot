@@ -63,18 +63,4 @@ module.exports = function() {
         return { msg: "Descension succeeded!", success: false };
     }
     
-    
-    /** PUBLIC
-    Set Final Result
-    set the final result for a player
-    // WIP: Maybe this should be in player module
-    **/
-    this.setFinalResult = function(player_id, status) {
-        return new Promise(res => {
-            sql("UPDATE players SET final_result=" + connection.escape(status) + " WHERE id=" + connection.escape(player_id), result => {
-                res();
-            });	
-        });
-    }
-    
 }

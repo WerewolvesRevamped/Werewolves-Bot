@@ -279,27 +279,6 @@ module.exports = function() {
             
         return { msg: "Changings succeeded!", success: true, target: `group:${group}` };
     }
-
-    /** PUBLIC
-    Set Role
-    set the role value for a player
-    // WIP: Maybe this should be in player module
-    **/
-    this.setPlayerRole = async function(player_id, role) {
-        let parsedRole = parseRole(role);
-        let roleData = await getRoleDataFromName(parsedRole);
-        return sqlProm("UPDATE players SET role=" + connection.escape(parsedRole) + ",alignment=" + connection.escape(roleData.team) + " WHERE id=" + connection.escape(player_id));
-    }
-    
-    /** PUBLIC
-    Set Alignment
-    set the alignment value for a player
-    // WIP: Maybe this should be in player module
-    **/
-    this.setPlayerAlignment = async function(player_id, alignment) {
-        let parsedAlignment = parseTeam(alignment);
-        return sqlProm("UPDATE players SET alignment=" + connection.escape(parsedAlignment) + " WHERE id=" + connection.escape(player_id));
-    }
     
     
 }
