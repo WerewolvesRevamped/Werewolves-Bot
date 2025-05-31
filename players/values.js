@@ -36,6 +36,25 @@ module.exports = function() {
     this.setDeathPhase = function(player_id, deathPhase) {
         return sqlPromEsc("UPDATE players SET death_phase=" + connection.escape(deathPhase) + " WHERE id=", player_id);
     }
+
+    /**
+    Set Role
+    set the role value for a player
+    **/
+    this.setPlayerRole = async function(player_id, role) {
+        let parsedRole = parseRole(role);
+        let roleData = await getRoleDataFromName(parsedRole);
+        return sqlProm("UPDATE players SET role=" + connection.escape(parsedRole) + ",alignment=" + connection.escape(roleData.team) + " WHERE id=" + connection.escape(player_id));
+    }
+    
+    /**
+    Set Alignment
+    set the alignment value for a player
+    **/
+    this.setPlayerAlignment = async function(player_id, alignment) {
+        let parsedAlignment = parseTeam(alignment);
+        return sqlProm("UPDATE players SET alignment=" + connection.escape(parsedAlignment) + " WHERE id=" + connection.escape(player_id));
+    }
     
     
 }

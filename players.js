@@ -1062,6 +1062,10 @@ module.exports = function() {
 			return; 
         }
         
+        if(isSpectator(member)) {
+            removeRoleRecursive(member, channel, stats.spectator, "spectator");
+        }
+        
         // proceeed to do things
         let msg = "??", dbType = "player", msg2 = "??", signupRole = null, defRole = "none";
         if(signupMode == "signup") {
