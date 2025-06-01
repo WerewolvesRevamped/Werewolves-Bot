@@ -729,7 +729,7 @@ module.exports = function() {
     **/
     var isHammering = false;
     this.pollCheckHammer = async function(pollData, pollTypeData) {
-        if(stats.automation_level < 3) return;
+        if(stats.automation_level < autoLvl.DEFAULT) return;
         if(isHammering) return;
         console.log(`Hammer checking ${pollData.name}`);
         // get poll messages
@@ -766,7 +766,7 @@ module.exports = function() {
             const now = new Date();
             const nowUnix = Math.floor(now.getTime() / 1000);
             // check night/day
-            if(stats.automation_level === 4) {
+            if(stats.automation_level === autoLvl.FULL) {
                 if(isDay()) { // Day Hammer
                     let endDay = await sqlPromOne("SELECT * FROM schedule WHERE name='day-end'");
                     if(endDay.timestamp > (nowUnix + 15)) {
@@ -808,7 +808,7 @@ module.exports = function() {
                         isHammering = false;
                     }
                 }
-            } else if(stats.automation_level === 3) {
+            } else if(stats.automation_level === autoLvl.DEFAULT) {
                 await trigger(pollData.src_ref, "On Hammer"); 
                 await setSubphase(SUBPHASE.LATE);
                 await sleep(30 * 1000);

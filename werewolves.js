@@ -1354,7 +1354,7 @@ client.on('interactionCreate', async interaction => {
                 let actionSelectionless = actionAll[0];
                 // recreate prompt
                 let message;
-                if(stats.automation_level === 2) {
+                if(stats.automation_level === autoLvl.HOST) {
                     message = await sendSelectionlessPrompt(`channel:${backupChannelId}`, actionSelectionless.prompt_type, `${orig_text}${PROMPT_SPLIT}\n\nOriginally directed at: ${srcRefToText(actionSelectionless.src_ref)}.\n`, EMBED_GRAY, false, null, null, "Ability Prompt");
                 } else {
                     message = await sendSelectionlessPrompt(actionSelectionless.src_ref, actionSelectionless.prompt_type, `${orig_text}${PROMPT_SPLIT}`, EMBED_GRAY, false, null, null, "Ability Prompt");

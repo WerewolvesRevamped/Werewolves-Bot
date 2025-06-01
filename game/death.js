@@ -126,7 +126,7 @@ module.exports = function() {
         // kill players
         for(let i = 0; i < playersFiltered.length; i++) {
             // for low automation level emit a hardcoded reporter message
-            if(stats.automation_level <= 1) {
+            if(stats.automation_level <= autoLvl.MINIMUM) {
                 let reporters = await queryAttribute("attr_type", "role", "val1", "reporter");
                 let src_ref = "player:" + playersFiltered[i];
                 let info = await parseInfo(`@id:${playersFiltered[i]} - @id:${playersFiltered[i]}->Role`, src_ref, {});

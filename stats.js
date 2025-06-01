@@ -292,7 +292,7 @@ module.exports = function() {
 			if(doLog) log("Stats > Cached automation level as `" + result + "`!");
             // 0->disabled, 1->minimum, 2->host, 3->default, 4->full
 		}, () => {
-            stats.automation_level = 0;
+            stats.automation_level = autoLvl.NONE;
 			log("Stats > ❗❗❗ Unable to cache automation level! Defaulting to `0` (none).")
 		});
 		sqlGetStat(45,  result => { 
@@ -526,6 +526,14 @@ module.exports = function() {
         MIN: 0,
         MAX: 4
     };
+    
+    this.autoLvl = {
+        NONE: 0,
+        MINIMUM: 1,
+        HOST: 2,
+        DEFAULT: 3,
+        FULL: 4
+    }
 	
 	/* Set gamephase */
 	this.cmdGamephaseSet = function(channel, args) {

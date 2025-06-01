@@ -675,8 +675,8 @@ module.exports = function() {
     **/
     async function executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerDataOriginal = {}) {
         abilityLog(`🔷 **Trigger:** ${triggerName} for ${srcRefToText(src_ref)}`);  
-        if(stats.automation_level === 0) return;
-        if(stats.automation_level === 1 && triggerName != "Starting") return;
+        if(stats.automation_level === autoLvl.NONE) return;
+        if(stats.automation_level === autoLvl.MINIMUM && triggerName != "Starting") return;
         const ptype = getPromptType(triggerName);
         const promptOverwrite = trigger?.parameters?.prompt_overwrite ?? "";
         const promptPing = !(promptOverwrite.match(/^silent:.*$/)); // check if prompt should ping

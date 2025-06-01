@@ -36,7 +36,7 @@ module.exports = function() {
         else lutval = null;
         
         // send message
-        if(stats.automation_level >= 2) await locationSend("storytime", finalMessage, EMBED_GRAY, lutval, `Story Time - ${phaseName}`);
+        if(stats.automation_level >= autoLvl.HOST) await locationSend("storytime", finalMessage, EMBED_GRAY, lutval, `Story Time - ${phaseName}`);
         
         // reset storytime
         await resetStorytime();
@@ -59,7 +59,7 @@ module.exports = function() {
         else lutval = null;
         
         // send message
-        if(stats.automation_level >= 2) await locationSend("storytime", finalMessage, EMBED_GRAY, lutval, `Story Time - ${phaseName}`);
+        if(stats.automation_level >= autoLvl.HOST) await locationSend("storytime", finalMessage, EMBED_GRAY, lutval, `Story Time - ${phaseName}`);
         
         // reset storytime
         await resetStorytime();

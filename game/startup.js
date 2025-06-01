@@ -74,6 +74,127 @@ module.exports = function() {
         return true;
     }
     
+    
+	/**
+    Command: $start
+    Starts the game
+    */
+	this.cmdStart = async function(channel, debug) {
+		if(stats.gamephase == gp.SETUP || (debug && stats.gamephase == gp.NONE)) {
+            // start
+        } else { 
+            if(stats.gamephase == gp.NONE) {
+                channel.send("⛔ Command error. Can't start if there is no game."); 
+                return; 
+            } else if(stats.gamephase >= gp.INGAME) {
+                channel.send("⛔ Command error. Can't start an already started game."); 
+                return; 
+            } else if(stats.gamephase == gp.SIGNUP) {
+                channel.send("⛔ Command error. Can't start the game while signups are open."); 
+                return; 
+            } else {
+                channel.send("⛔ Command error. Invalid gamephase."); 
+                return; 
+            }
+		}
+        
+        let check = await gameCheckStart(channel);
+        if(!check) return;
+        
+        if(stats.automation_level === autoLvl.FULL && !stats.phaseautoinfo) {
+            channel.send("⛔ Command error. Cannot start a fully automated game without phase timings."); 
+            return;
+        }
+        if(stats.automation_level === autoLvl.FULL && (!parseToFutureUnixTimestamp(stats.phaseautoinfo.d0) || isNaN(stats.phaseautoinfo.day) || isNaN(stats.phaseautoinfo.night) || stats.phaseautoinfo.day <= 2 || stats.phaseautoinfo.night <= 2)) {
+            channel.send("⛔ Command error. Invalid phase timings."); 
+            return;
+        }
+        
+        //channel.send(`⛔ Debug error. Would've started game.`); 
+        //return;
+        
+		channel.send("✳️ Game is called `" + stats.game + "`");
+        actionLog(`**🎲 The game has started. [${stats.game}]**`);
+        createLocations();
+		// Set Gamephase
+		cmdGamephaseSet(channel, ["set", gp.INGAME]);
+		// Cache emojis
+		getEmojis();	
+		getCCs();
+		cacheRoleInfo();
+        getPRoles();
+        // enable action queue checker 
+        pauseActionQueueChecker = false;
+		// Assign roles
+		startOnePlayer(channel, channel.guild.roles.cache.get(stats.signed_up).members.toJSON(), 0);
+		createSCs(channel, debug);
+        // reset to d0
+        setPhase("d0");
+        setSubphase(SUBPHASE.MAIN);
+        // Assign roles to substitute
+        let subs = channel.guild.roles.cache.get(stats.signedsub).members.toJSON();
+        for(let i = 0; i < subs.length; i++) {
+            switchRoles(subs[i], channel, stats.signedsub, stats.sub, "signed sub", "substitute").then(r => {
+                if(r) channel.send("✅ `" + subs[i].displayName + "` is now a substitute!");
+            });
+        }
+        
+        // Setup schedule
+        if(stats.automation_level === autoLvl.FULL) {
+            pauseActionQueueChecker = true;
+            let time = parseToFutureUnixTimestamp(stats.phaseautoinfo.d0);
+            let durNight = stats.phaseautoinfo.night * 60;
+            let durDay = stats.phaseautoinfo.day * 60;
+            let fullCycle = durNight + durDay;
+            // D0 End
+            await sqlProm("INSERT INTO schedule(type, value, timestamp, recurrence, name) VALUES ('special','switch'," + connection.escape(time - 60) + ",0,'d0-end')");
+            // Night End
+            await sqlProm("INSERT INTO schedule(type, value, timestamp, recurrence, name) VALUES ('special','switch'," + connection.escape(time + durNight - 60) + "," + connection.escape(fullCycle) + ",'night-end')");
+            // Day End
+            await sqlProm("INSERT INTO schedule(type, value, timestamp, recurrence, name) VALUES ('special','switch'," + connection.escape(time + fullCycle - 60) + "," + connection.escape(fullCycle) + ",'day-end')");
+            // Night Late
+            if(stats.phaseautoinfo.night_late) {
+                await sqlProm("INSERT INTO schedule(type, value, timestamp, recurrence, name) VALUES ('special','switch'," + connection.escape(time + durNight - (stats.phaseautoinfo.night_late * 60) - 30) + "," + connection.escape(fullCycle) + ",'night-late')");
+            }
+            // Day Late
+            if(stats.phaseautoinfo.day_late) {
+                await sqlProm("INSERT INTO schedule(type, value, timestamp, recurrence, name) VALUES ('special','switch'," + connection.escape(time + fullCycle - (stats.phaseautoinfo.day_late * 60) - 30) + "," + connection.escape(fullCycle) + ",'day-late')");
+            }
+            
+            // save D0 time
+            await saveD0Time(time);
+            
+            // start game with timestamp parameter
+            setTimeout(function() {
+                eventStarting(time);
+            }, 1000 * 60);
+        } else {
+            // Start game
+            setTimeout(function() {
+                eventStarting();
+            }, 1000 * 60);     
+        }
+        
+        
+	}
+    
+    /**
+    Start One player
+    switches roles for a single player
+    WIP: this probably used to do more in the past and is now overkill
+    **/
+	this.startOnePlayer = function(channel, members, index) {
+		if(index >= members.length) {
+			channel.send("✅ Prepared `" + members.length + "` players!");
+			return;
+		}
+        switchRoles(members[index], channel, stats.signed_up, stats.participant, "signed up", "participant").then(r => {
+            if(r) channel.send("✅ `" + members[index].displayName + "` is now a participant!");
+            startOnePlayer(channel, members, ++index);
+        });
+	}
+	
+    
 	/**
     Create Secret Channels
     creates the personal secret channels for every player
