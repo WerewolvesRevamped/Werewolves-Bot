@@ -187,7 +187,7 @@ var srcNameSaved = null;
 
 /* New Message */
 client.on("messageCreate", async message => {
-    if(message.guild.id != mainGuild.id) {
+    if(!message.guild || message.guild.id != mainGuild.id) {
         console.log(`WARNING! Blocked command execution on guild ${message.guild.name}`);
         return;
     }
