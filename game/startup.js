@@ -154,11 +154,11 @@ module.exports = function() {
             await sqlProm("INSERT INTO schedule(type, value, timestamp, recurrence, name) VALUES ('special','switch'," + connection.escape(time + fullCycle - 60) + "," + connection.escape(fullCycle) + ",'day-end')");
             // Night Late
             if(stats.phaseautoinfo.night_late) {
-                await sqlProm("INSERT INTO schedule(type, value, timestamp, recurrence, name) VALUES ('special','switch'," + connection.escape(time + durNight - (stats.phaseautoinfo.night_late * 60) - 30) + "," + connection.escape(fullCycle) + ",'night-late')");
+                await sqlProm("INSERT INTO schedule(type, value, timestamp, recurrence, name) VALUES ('special','late'," + connection.escape(time + durNight - (stats.phaseautoinfo.night_late * 60) - 30) + "," + connection.escape(fullCycle) + ",'night-late')");
             }
             // Day Late
             if(stats.phaseautoinfo.day_late) {
-                await sqlProm("INSERT INTO schedule(type, value, timestamp, recurrence, name) VALUES ('special','switch'," + connection.escape(time + fullCycle - (stats.phaseautoinfo.day_late * 60) - 30) + "," + connection.escape(fullCycle) + ",'day-late')");
+                await sqlProm("INSERT INTO schedule(type, value, timestamp, recurrence, name) VALUES ('special','late'," + connection.escape(time + fullCycle - (stats.phaseautoinfo.day_late * 60) - 30) + "," + connection.escape(fullCycle) + ",'day-late')");
             }
             
             // save D0 time

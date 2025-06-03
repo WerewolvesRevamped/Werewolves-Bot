@@ -361,8 +361,8 @@ module.exports = function() {
                 night: +spl[1],
                 day: +spl[2]
             };
-            if(spl.length == 4) stats.phaseautoinfo.night_late = +spl[3];
-            if(spl.length == 5) stats.phaseautoinfo.day_late = +spl[4];
+            if(spl.length >= 4) stats.phaseautoinfo.night_late = +spl[3];
+            if(spl.length >= 5) stats.phaseautoinfo.day_late = +spl[4];
 			if(doLog) log("Stats > Cached phase auto info as `" + result + "`!")
 		}, () => {
             stats.phaseautoinfo = null;
