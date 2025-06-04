@@ -25,7 +25,7 @@ module.exports = function() {
     set the alive value for a player
     **/
     this.setLivingStatus = async function(player_id, status) {
-        await sqlPromEsc("UPDATE players SET alive=" + connection.escape(status) + " WHERE id=" + player_id);
+        await sqlPromEsc("UPDATE players SET alive=" + connection.escape(status) + " WHERE id=", player_id);
         updateGameStatus(); // update game status (async)
     }
     
