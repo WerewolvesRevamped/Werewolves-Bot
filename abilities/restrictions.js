@@ -71,6 +71,7 @@ module.exports = function() {
                     case "default":
                         let lastPhase = await getLastPhase(src_ref, ability);
                         // check if current phase is at least 2 higher than the phase the ability was last used in
+                        console.log("SUCC", src_ref, ability, lastPhase);
                         if(getPhaseAsNumber() >= lastPhase+2) {
                             return true;
                         } else {
@@ -195,7 +196,7 @@ module.exports = function() {
     this.initActionData = function(src_ref, ability) {
         if(!ability || !ability.id) return;
         return new Promise(res => {
-            sql("INSERT INTO action_data (src_ref,ability_id,quantity,last_phase) VALUES (" + connection.escape(src_ref) + "," + connection.escape(ability.id) + ",0," + getPhaseAsNumber() + ")", result => {
+            sql("INSERT INTO action_data (src_ref,ability_id,quantity,last_phase) VALUES (" + connection.escape(src_ref) + "," + connection.escape(ability.id) + ",0,-2)", result => {
                  res();
             });
         });

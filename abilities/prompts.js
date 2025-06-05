@@ -486,10 +486,9 @@ module.exports = function() {
             let restrictions = JSON.parse(curAction.restrictions);
             // parse additional trigger data
             let additionalTriggerData = JSON.parse(curAction.additional_trigger_data);
-            // save last target
-            quantity = await getActionQuantity(curAction.src_ref, abilities[0]);
+            // prepare action data
+            let quantity = await getActionQuantity(curAction.src_ref, abilities[0]);
             if(quantity === -1) await initActionData(curAction.src_ref, abilities[0]);
-            await setLastTarget(curAction.src_ref, abilities[0], curAction.target);
             // action log
             let targetTxt = curAction.target;
             let onTxt = " on ";
@@ -527,6 +526,8 @@ module.exports = function() {
             });
             // confirm automatic execution
             confirmAutoExecution(curAction.src_ref, curAction.message_id);
+            // save last target (after potentially re-evaluating restrictions)
+            await setLastTarget(curAction.src_ref, abilities[0], curAction.target);
             // clear prompt
             // get prompt
             let promptChannel = await mainGuild.channels.fetch(curAction.channel_id);
