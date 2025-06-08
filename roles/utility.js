@@ -78,7 +78,7 @@ module.exports = function() {
         // get color
         let color = getTeamColor(rTeam);
         
-        console.log("GRD FINAL URL", url);
+        //console.log("GRD FINAL URL", url);
         
         return { url: url, color: color, class: rClass, category: rCategory, team: rTeam };
     }

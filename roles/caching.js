@@ -151,7 +151,7 @@ module.exports = function() {
     this.applyLUT = function(name) {
         let val = name.replace(/\<\?[\w\d]*:[^>]{0,10}\>/g,"").trim(); // remove emoji placeholders
         val = val.toLowerCase().replace(/[^a-z ]/g,"").trim();
-        if(!iconLUT[val]) console.log(`look lut, failed: "${val}"`);
+        //if(!iconLUT[val]) console.log(`look lut, failed: "${val}"`);
         return iconLUT[val] ?? false;
     }
     

@@ -165,6 +165,7 @@ module.exports = function() {
                 return getPlayerCounter(srcVal);
             break;
             case "player_attr":
+            case "activeextrarole":
                 let attr = await roleAttributeGetPlayer(srcVal);
                 return getAttributeCounter(attr.ai_id);
             break;
@@ -196,6 +197,7 @@ module.exports = function() {
                 return setPlayerCounter(srcVal, num);
             break;
             case "player_attr":
+            case "activeextrarole":
                 let attr = await roleAttributeGetPlayer(srcVal);
                 return setAttributeCounter(attr.ai_id, num);
             break;

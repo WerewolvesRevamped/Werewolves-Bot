@@ -389,6 +389,7 @@ module.exports = function() {
                 return `<@${val}> (Group Executor)`;
             case "group":
             case "player_attr":
+            case "activeextrarole":
                 return `<#${val}>`;
             case "alignment":
             case "poll":

@@ -703,7 +703,7 @@ module.exports = function() {
         let actionCountChanged = false;
         let actionCountSuffix = "";
         for(const scaling of actionScaling) {
-            let scalValue = await handleScaling(scaling);
+            let scalValue = await handleScaling(scaling, src_ref, additionalTriggerData);
             if(scalValue !== null) actionCount = scalValue;
             if(scalValue === null && !actionCountChanged) actionCount = 0;
             actionCountChanged = true;

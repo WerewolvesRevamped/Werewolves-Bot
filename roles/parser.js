@@ -617,12 +617,12 @@ module.exports = function() {
 
     /** REGEX - Reminder: You need double \'s here **/
     // general
-    const targetType = "(`[^`]*`|`[^`]*`\\[\\w+\\]|(?:`[^`]*`\\+)+(?:`[^`]*`)|(?:`[^`]*`\\+)+(?:`[^`]*`)\\[\\w+\\]|@\\S*|&\\S*|\\^\\S*|#\\S*|%[^%]+%|\-?\\d+|f?F?alse|t?T?rue)";
+    const targetType = "(`[^`]*`|`[^`]*`\\[\\w+\\]|(?:`[^`]*`\\+)+(?:`[^`]*`)|(?:`[^`]*`\\+)+(?:`[^`]*`)\\[\\w+\\]|@\\S*|&\\S*|\\^\\S*|#\\S*|%[^%]+%|\-?\\d+|f?F?alse|t?T?rue|\\$\\w+)";
     const attrDuration = "( \\(~[^\)]+\\))?";
     const locationType = "(`[^`]*`|@\\S*|#\\S*)"; // extended version of target type
     const groupType = "(@\\S*|#\\S*)"; // reduced version of location type
     const attributeName = targetType;
-    const num = "(-?\\d+|@\\S*|%Number%)";
+    const num = "(-?\\d+|-?[\\d\\.]+|@\\S*|%[^%]+%|\\$\\w+)";
     const rawStr = "[\\w\\s\\d@]+";
     const str = "(" + rawStr + ")";
     const decNum = "(-?\\d+\\.\\d+)";
@@ -809,18 +809,18 @@ module.exports = function() {
                 parsedScaling.push({ type: "division", quantity: fd[1] + "/" + fd[2] });
                 scalFound = true;
             }
-            exp = new RegExp("^(\\$total|\\$living)(\\<|\\>|≤|≥|\\=)(\\d+) ⇒ x?(\\d+)$", "g");
+            exp = new RegExp("^" + num + "(\\<|\\>|≤|≥|\\=)" + num + " ⇒ x?" + num + "$", "g");
             fd = exp.exec(scaling[scal]);
             if(fd) {
-                let ct, compTo = +fd[3];
+                let ct;
                 switch(fd[2]) {
                     case "<": ct = "less_than"; break;
                     case ">": ct = "greater_than"; break;
                     case "=": ct = "equal_to"; break;
-                    case "≤": ct = "less_than"; compTo++; break;
-                    case "≥": ct = "greater_than"; compTo--; break;
+                    case "≤": ct = "less_than_or_equal"; break;
+                    case "≥": ct = "greater_than_or_equal"; break;
                 }
-                parsedScaling.push({ type: "dynamic", compare: fd[1], compare_type: ct, compare_to: compTo, quantity: +fd[4] });
+                parsedScaling.push({ type: "dynamic", compare: fd[1], compare_type: ct, compare_to: fd[3], quantity: fd[4] });
                 scalFound = true;
             }
             /** DEFAULT **/

@@ -34,6 +34,9 @@ module.exports = function() {
         if(selectorTarget === "@self" && self) {
             selectorType = srcToType(self);
             if(selectorType === "attribute") selectorType = "player"; // for attributes we want @Self to be the player. @ThisAttr is attribute instead
+        } else if(selectorTarget === "@thisattr" && self) {
+            selectorType = srcToType(self);
+            if(selectorType === "player_attr") selectorType = "activeextrarole"; // for active extra roles @thisattr is an active extra role not an active attribute
         } else if(selectorTarget === "@selection") {
             selectorType = additionalTriggerData.selection_type;
         } else if(selectorTarget === "@secondaryselection") {
@@ -504,6 +507,13 @@ module.exports = function() {
             case "attribute":
             case "activeAttribute":
                 if(result.value[0] && result.value[0].ai_id) result.value = result.value.map(el => el.ai_id);
+                return parseAttributePropertyAccess(result.value, property);
+            break;
+            case "activeExtraRole":
+                for(let i = 0; i < result.value.length; i++) {
+                    let rAttr = await roleAttributeGetPlayer(result.value[i]);
+                    result.value[i] = rAttr.ai_id;
+                }
                 return parseAttributePropertyAccess(result.value, property);
             break;
             case "group":
@@ -2514,12 +2524,15 @@ module.exports = function() {
             let target = await getTarget(self);
             if(!target) return "null";
             let targetType = srcToType(target);
-            console.log(`Inferred target type as ${targetType} from ${target}`);
             return targetType;
         } else if(val === "@selection") {
             return additionalTriggerData.selection_type;
         } else if(val === "@secondaryselection") {
             return additionalTriggerData.secondaryselection_type;
+        } else if(val === "@thisattr") {
+            let type = srcToType(self);
+            if(type === "player_attr") return "activeExtraRole";
+            return type;
         }
         return inferType(val);
     }
