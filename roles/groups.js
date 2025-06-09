@@ -245,7 +245,20 @@ module.exports = function() {
     this.updateGroups = async function() {
         let toBeDisbanded = await sqlProm("SELECT name FROM active_groups WHERE disbanded=0 AND name NOT IN (SELECT DISTINCT val1 FROM active_attributes WHERE attr_type='group_membership' AND alive=1 AND val2 <> 'visitor')");
         
-        let toBeReopened = await sqlProm("SELECT name FROM active_groups WHERE disbanded=1 AND name IN (SELECT DISTINCT val1 FROM active_attributes WHERE attr_type='group_membership' AND alive=1 AND val2 <> 'visitor')");
+        let toBeReopened = await sqlProm(`
+            SELECT name FROM active_groups WHERE disbanded=1
+            AND (
+                (
+                    name IN (SELECT DISTINCT val1 FROM active_attributes WHERE attr_type='group_membership' AND alive=1 AND val2='member') 
+                    AND
+                    name NOT IN (SELECT DISTINCT val1 FROM active_attributes WHERE attr_type='group_membership' AND val2='owner')
+                )
+                OR
+                (
+                    name IN (SELECT DISTINCT val1 FROM active_attributes WHERE attr_type='group_membership' AND alive=1 AND val2='owner')
+                )
+            )
+        `); // reopen groups with an alive member and no owner or a living owner
         
         for(let i = 0; i < toBeDisbanded.length; i++) {
             await groupsDisband(toBeDisbanded[i].name);

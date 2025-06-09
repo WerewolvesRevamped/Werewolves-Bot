@@ -231,7 +231,7 @@ module.exports = function() {
                 abilityValues = thisAbilityFull.split(thisAbility)[1]?.trim();
             }
             // debug output
-            if(debugMode) console.log("   DEPTH", depth, "INDEX", i);
+            if(debugMode) console.log("   DEPTH", depth, "INDEX", i, "SEGMENTS", thisAbilitySplit.length);
             if(debugMode) console.log("   ABILITY", thisAbilitySplit.join(";"));
             if(debugMode) console.log("   ABILITY VALUES", abilityValues);
             // check if first ability is a depth=1
@@ -270,6 +270,7 @@ module.exports = function() {
                     } catch(err) {
                         abilityFirst = null; 
                     }
+                    console.log(ability);
                     // 
                     const hasAbility = thisAbilitySplit[1].length > 0;
                     const hasCondition = isCondition(thisAbilitySplit[0]);
@@ -291,7 +292,7 @@ module.exports = function() {
                     else if(parsingType === "none" && (thisAbilitySplit[0] === "Process" || thisAbilitySplit[0] === "Evaluate") && hasAbility) {
                         // only has a single sub ability we already have parsed
                         let type = thisAbilitySplit[0].toLowerCase();
-                        abilitiesParsed.push({ ability: { type: type, sub_abilities: [ { ability: ability.ability } ] } });    
+                        abilitiesParsed.push({ ability: { type: type, sub_abilities: [ { ability: ability.ability } ] }, parameters: ability.parameters ?? {} });    
                     }
                     // Evaluate sub-conditions
                     else if(parsingType === "evaluate" && hasCondition && hasAbility) {
@@ -327,7 +328,7 @@ module.exports = function() {
                         let subAbilities = parseAbilities(abilities, i + 1, depth, "evaluate");
                         i = subAbilities.index;
                         subAbilities = delParamInplace(subAbilities.abilities);
-                        abilitiesParsed.push({ ability: { type: "evaluate", sub_abilities: [abilityWithCond, ...subAbilities] } });
+                        abilitiesParsed.push({ ability: { type: "evaluate", sub_abilities: [abilityWithCond, ...subAbilities] }, parameters: ability.parameters ?? {} });
                     }
                     // For Each (Multiline)
                     else if(["none","evaluate"].includes(parsingType) && abilityFirst && abilityFirst.ability.type === "for_each" && !hasAbility) {
@@ -376,7 +377,7 @@ module.exports = function() {
                     const hasAbility = thisAbilitySplit[2].length > 0;
                     // Evaluate In-Line
                     if(parsingType === "none" && thisAbilitySplit[0] === "Evaluate" && isCondition(thisAbilitySplit[1]) && hasAbility) {
-                        abilitiesParsed.push({ ability: { type: "evaluate", sub_abilities: [ { ability: ability.ability, condition: thisAbilitySplit[1] } ] } }); 
+                        abilitiesParsed.push({ ability: { type: "evaluate", sub_abilities: [ { ability: ability.ability, condition: thisAbilitySplit[1] } ] }, parameters: ability.parameters ?? {} }); 
                     }
                     // Unknown case
                     else {
