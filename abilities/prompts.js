@@ -530,13 +530,17 @@ module.exports = function() {
             await setLastTarget(curAction.src_ref, abilities[0], curAction.target);
             // clear prompt
             // get prompt
-            let promptChannel = await mainGuild.channels.fetch(curAction.channel_id);
-            let promptMessage = await promptChannel.messages.fetch(curAction.message_id);
-            let orig_text = promptMessage.embeds[0].description.split(PROMPT_SPLIT)[0];
-            // update message
-            embed = basicEmbed(`${orig_text}${PROMPT_SPLIT} Ability executed.`, EMBED_GREEN);
-            embed.components = [];
-            promptMessage.edit(embed); 
+            try {
+                let promptChannel = await mainGuild.channels.fetch(curAction.channel_id);
+                let promptMessage = await promptChannel.messages.fetch(curAction.message_id);
+                let orig_text = promptMessage.embeds[0].description.split(PROMPT_SPLIT)[0];
+                // update message
+                embed = basicEmbed(`${orig_text}${PROMPT_SPLIT} Ability executed.`, EMBED_GREEN);
+                embed.components = [];
+                promptMessage.edit(embed);
+            } catch (err) {
+                console.log("Deleted prompt message.");
+            }
         }
         
         return actionsToExecute.length;

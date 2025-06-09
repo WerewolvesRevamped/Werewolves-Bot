@@ -32,6 +32,7 @@
     "granting.resign": "You may resign from your position during any phase.",
     
     "comment_4": "Role-specific Custom Prompts",
+    "amulet.1": "You must choose a player to pass the amulet too. If you do not, or if this player has previously held the amulet you die.",
     "ravenkeeper.1": "You may assign a raven to another player.",
     "ravenkeeper.2": "You may recall a raven from one of the players you have assigned it to.",
     "witch.pod": "You may (once) use your Potion of Death to attack another player. Who would you like to attack?",
