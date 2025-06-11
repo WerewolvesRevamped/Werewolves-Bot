@@ -263,6 +263,12 @@ module.exports = function() {
                 } else {
                     return invalidSelector(selectorTarget);
                 }
+            case "@attacked":
+                if(additionalTriggerData.attacked) {
+                    return [ additionalTriggerData.attacked ];
+                } else {
+                    return invalidSelector(selectorTarget);
+                }
             case "@this":
                 if(additionalTriggerData.this) {
                     return [ additionalTriggerData.this ];
@@ -1812,9 +1818,6 @@ module.exports = function() {
             } else if(selectorTarget === "@attacklocation") {
                 // try attacker
                 console.log("ATTACK LOCATION", additionalTriggerData);
-                if(additionalTriggerData.attacker) { // if no attacker is specified, @Attacker is invalid
-                    return { value: additionalTriggerData.attacker, type: "player", default: false, multiple: false };
-                }
                 // try attack source
                 if(additionalTriggerData.attack_source) {
                     let val = srcToValue(additionalTriggerData.attack_source);
@@ -1823,6 +1826,10 @@ module.exports = function() {
                         let groupData = await groupGetData(val);
                         return { value: groupData.channel_id, type: "group", default: false, multiple: false };
                     }
+                }
+                // try attacker
+                if(additionalTriggerData.attacker) { // if no attacker is specified, @Attacker is invalid
+                    return { value: additionalTriggerData.attacker, type: "player", default: false, multiple: false };
                 }
                 abilityLog(`❗ **Error:** Used \`@AttackLocation\` in invalid context!`);
                 return [ ];

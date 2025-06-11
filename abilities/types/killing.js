@@ -317,26 +317,26 @@ module.exports = function() {
             let defSrc = defense.src_ref;
             // run defense triggers
             let attacker = srcToValue(src_ref);
-            await trigger(defSrc, "On Defense", { attacker: attacker, killing_type: type, attack_source: src_name, src_name: defense.src_name }); 
+            await trigger(defSrc, "On Defense", { attacker: attacker, attacked: pid, killing_type: type, attack_source: src_name, src_name: defense.src_name }); 
             switch(defenseType) {
                 case "absence":
-                    await trigger(defSrc, "On Absence Defense", { attacker: attacker, killing_type: type, attack_source: src_name, src_name: defense.src_name }); 
+                    await trigger(defSrc, "On Absence Defense", { attacker: attacker, attacked: pid, killing_type: type, attack_source: src_name, src_name: defense.src_name }); 
                     await useAttribute(defense.ai_id);
                 break;
                 case "active":
-                    await trigger(defSrc, "On Active Defense", { attacker: attacker, killing_type: type, attack_source: src_name, src_name: defense.src_name }); 
+                    await trigger(defSrc, "On Active Defense", { attacker: attacker, attacked: pid, killing_type: type, attack_source: src_name, src_name: defense.src_name }); 
                     await useAttribute(defense.ai_id);
                 break;
                 case "passive":
-                    await trigger(defSrc, "On Passive Defense", { attacker: attacker, killing_type: type, attack_source: src_name, src_name: defense.src_name }); 
+                    await trigger(defSrc, "On Passive Defense", { attacker: attacker, attacked: pid, killing_type: type, attack_source: src_name, src_name: defense.src_name }); 
                     await useAttribute(defense.ai_id);
                 break;
                 case "partial":
-                    await trigger(defSrc, "On Partial Defense", { attacker: attacker, killing_type: type, attack_source: src_name, src_name: defense.src_name }); 
+                    await trigger(defSrc, "On Partial Defense", { attacker: attacker, attacked: pid, killing_type: type, attack_source: src_name, src_name: defense.src_name }); 
                     await useAttribute(defense.ai_id);
                 break;
                 case "recruitment":
-                    await trigger(defSrc, "On Recruitment Defense", { attacker: attacker, killing_type: type, attack_source: src_name, src_name: defense.src_name }); 
+                    await trigger(defSrc, "On Recruitment Defense", { attacker: attacker, attacked: pid, killing_type: type, attack_source: src_name, src_name: defense.src_name }); 
                     await useAttribute(defense.ai_id);
                 break;
             }
