@@ -753,10 +753,11 @@ module.exports = function() {
         return repl_msg;
     }
     
-    this.cmdParsePrompt = function(message, args, argsX) {
+    this.cmdParsePrompt = async function(message, args, argsX) {
         let typ = argsX.shift();
-        let parsed = parsePromptReply(argsX.join(" "), typ, message);
-        message.channel.send(`✅ Parsed Prompt: ${parsed[0]}; ${parsed[1]}`);
+        let m = await message.channel.send(`🔄 Parsing prompt.`);
+        let parsed = parsePromptReply(argsX.join(" "), typ, m);
+        m.edit(`✅ Parsed Prompt: ${parsed[0]}; ${parsed[1]}`);
     }
     
     /**
@@ -861,7 +862,7 @@ module.exports = function() {
     **/
     function parsePlayerReply(playerName, message = null) {
         // check for basic player references
-        let pSplit = playerName.toLowerCase().split(/[\.,\-!\?\s ]/);
+        let pSplit = playerName.toLowerCase().split(/[,\-!\?\s ]|\. /);
         let basic = pSplit.map(el => getUser(el)).filter(el => el);
         console.log("BASIC", pSplit, basic);
         if(basic.length > 0) {

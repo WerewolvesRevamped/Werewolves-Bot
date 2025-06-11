@@ -43,6 +43,7 @@ require("./types/displaying.js")();
 require("./types/feedback.js")();
 require("./types/win.js")();
 require("./types/locking.js")();
+require("./types/executing.js")();
 
 module.exports = function() {
     
@@ -200,6 +201,9 @@ module.exports = function() {
                 break;
                 case "feedback":
                     feedback = await abilityFeedback(src_refAction, src_name, ability, additionalTriggerData);
+                break;
+                case "executing":
+                    feedback = await abilityExecuting(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "success":
                     feedback = { msg: "Ability succeeded!", success: true };

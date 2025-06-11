@@ -1714,6 +1714,13 @@ module.exports = function() {
         if(fd) {
             ability = { type: "locking", subtype: "unlock", target: ttpp(fd[1], "location") };
         }
+        /** EXECUTING **/
+        // execute
+        exp = new RegExp("^Execute `(\\w+)` to " + locationType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "executing", target: ttpp(fd[2], "location"), command: fd[1] };
+        }
 
         
         /** Ability Types End */

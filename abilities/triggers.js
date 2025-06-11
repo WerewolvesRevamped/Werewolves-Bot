@@ -892,6 +892,7 @@ module.exports = function() {
             case "displaying": emojiName = "KWList"; break;
             case "win": emojiName = "Ascension"; break;
             case "locking": emojiName = ""; break;
+            case "executing": emojiName = "BotDeveloper"; break;
         }
         return emojiName ? getEmoji(emojiName) : "";
     }
