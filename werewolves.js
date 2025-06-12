@@ -185,6 +185,8 @@ var lastChatterCharacters = 0;
 var srcRefSaved = null;
 var srcNameSaved = null;
 
+var lastMessageBlocked = false;
+
 /* New Message */
 client.on("messageCreate", async message => {
     if(message.guild && message.guild.id != mainGuild.id) {
@@ -254,6 +256,51 @@ client.on("messageCreate", async message => {
             sql("UPDATE players SET public_msgs=public_msgs+1 WHERE id = " + connection.escape(message.member.id), () => {}, () => {
                 log("MSG Count > Failed to count private message for " + message.author + "!")
             });
+        }
+    }
+    
+    // Advisor Bot
+    if(stats.gamephase == gp.INGAME && message.author.id === "528311658846748688" && message.content.length > 15) {
+        // get channel to whisper to
+        let cid = await getSrcRefChannel(`player:${message.author.id}`);
+        let targetChannel = mainGuild.channels.cache.get(cid);
+        if(targetChannel && message.channel.id != cid) {
+            if(lastMessageBlocked) {
+                lastMessageBlocked = false;
+            } else {
+                let txt = message.content;
+                let mem = message.member;
+                let ch = message.channel;
+                message.delete();
+                botDeleted.push(message.id);
+                lastMessageBlocked = true;
+                
+                mem.timeout(60 * 2 * 100);
+                
+                let m = await ch.send(`❗${mem.displayName} has tried to speak, but has been given time to reconsider. Please be patient!`);
+                
+                // Get the server icon for the footer
+                let serverIcon = await getServerIcon(ch.guild);
+            
+               // Build the  embed
+                var embed = {
+                    "footer": {
+                        "icon_url": `${serverIcon}`,
+                        "text": `${ch.guild.name} - ${stats.game}`
+                    },
+                    "title": "Advisor Bot",
+                    "description": `You have tried to say: \`\`\`${txt}\`\`\` in [${ch.name}](https://discord.com/channels/${ch.guild.id}/${m.channel.id}/${m.id}). You have been given time to reconsider.`,
+                    "fields": [
+                        {
+                            "name": "Tips",
+                            "value": "• Are you sure saying this will help you / your team?\n• Are you sure the person you are talking to is talking in good faith? Are they trying to trick you into revealing information?\n• Have you formatted your message as a comprehensive sentence? If not, take this chance to rephrase your message!"
+                        }
+                    ]
+                };
+                
+                // send
+                targetChannel.send({ contents: `<@${mem.id}>`, embeds: [ embed ] });
+            }
         }
     }
     
@@ -1110,12 +1157,14 @@ client.on("messageCreate", async message => {
 	message.delete();
 });
 
+var botDeleted = [];
 client.on('messageDelete', async message => {
 	message = JSON.parse(JSON.stringify(message)); // WHY IS THIS LINE OF CODE NECESSARY????????
 	// retrieve channel and author
 	let channel = client.guilds.cache.get(message.guildId).channels.cache.get(message.channelId);
 	let log = client.guilds.cache.get(stats.log_guild).channels.cache.get(stats.log_channel);
 	let author = client.guilds.cache.get(message.guildId).members.cache.get(message.authorId);
+    if(botDeleted.includes(message.id)) return;
 	if((message.content[0] != config.prefix && message.content[0] != "§" && message.content[0] != "$" && message.content[0] != "." && message.content[0] != ";" && message.content[0] != "~") && (isParticipant(author) || isDeadParticipant(author)) && message.content.search("http") == -1) {
 		cmdWebhook(log, author, ["**Deleted Message**", "\n*Deleted message by <@" + message.authorId + "> in <#" + message.channelId + ">!*","\n> ", message.content.split("\n").join("\n> "),"\n","\n" + stats.ping ]);
 		cmdWebhook(channel, author, ["**Deleted Message**","\n*<@" + message.authorId + "> You're not allowed to delete messages during the game!*"]);
