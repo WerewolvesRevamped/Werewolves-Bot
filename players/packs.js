@@ -183,6 +183,9 @@ module.exports = function() {
 			channel.send("⛔ Syntax error. `" + author.id + "` is not a valid player!");
 			return;
 		}
+        if(AVAILABLE_PACKS.includes(args[1])) {
+            args[1] = AVAILABLE_PACKS.indexOf(args[1]) + 1;
+        }
         let num = + args[1];
         if(num >= 0 && num <= AVAILABLE_PACKS.length) {
             let spPerms = await inventoryGetItem(author.id, "sp:" + num);
