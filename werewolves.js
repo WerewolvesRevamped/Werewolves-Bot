@@ -260,7 +260,7 @@ client.on("messageCreate", async message => {
     }
     
     // Advisor Bot
-    if(stats.gamephase == gp.INGAME && message.author.id === "528311658846748688" && message.content.length > 15) {
+    if(config.advisor && stats.gamephase == gp.INGAME && message.author.id === "528311658846748688" && message.content.length > 15) {
         // get channel to whisper to
         let cid = await getSrcRefChannel(`player:${message.author.id}`);
         let targetChannel = mainGuild.channels.cache.get(cid);
