@@ -58,7 +58,7 @@ module.exports = function() {
         let unlockedPacks = await sqlPromEsc("SELECT * FROM inventory WHERE player=", author.id);
         unlockedPacks = unlockedPacks.filter(el => el.item.substr(0, 3) === "sp:").map(el => [el.item.split(":")[1], AVAILABLE_PACKS[(+el.item.split(":")[1])-1], el.count]);
         unlockedPacks = unlockedPacks.sort((a,b) => a[0] - b[0]); 
-        if(unlockedPacks.length < 40) {
+        if(unlockedPacks.length < 35) {
             let packs1 = [`${getEmoji('pack_default')} Default - 0`], packs2 = [];
             let half = Math.ceil(unlockedPacks.length / 2);
             for(let i = 0; i < half; i++) packs1.push(`${getEmoji('pack_'+unlockedPacks[i][1])} ${toTitleCase(unlockedPacks[i][1])} - ${unlockedPacks[i][0]} ${unlockedPacks[i][2] > 1 ? '(x' + unlockedPacks[i][2] + ')' : ''}`);
