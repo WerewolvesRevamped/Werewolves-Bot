@@ -308,7 +308,7 @@ module.exports = function() {
     Create Secret Channels - Send DM
     Send a game start dm to each player as part of the indsc channel creation
     **/
-    async function createSCs_sendDM(guild, playerID, role, disName) {
+    this.createSCs_sendDM = async function(guild, playerID, role, disName) {
         return new Promise(res => {
             // Build the role name
             let roleName = role.display_name;

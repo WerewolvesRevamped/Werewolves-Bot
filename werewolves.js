@@ -815,6 +815,10 @@ client.on("messageCreate", async message => {
 	case "reset_debug":
 		if(checkSafe(message)) cmdReset(message.channel, true);
 	break;
+	/* Restart */ // Debug restart
+	case "restart":
+		if(checkSafe(message)) cmdConfirm(message, "restart");
+	break;
 	/* Reset */ // Resets a game
 	case "reset":
 		if(checkSafe(message)) cmdConfirm(message, "reset");
