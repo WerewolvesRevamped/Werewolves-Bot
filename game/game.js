@@ -84,10 +84,10 @@ module.exports = function() {
         }
         
         // reset
-        cmdReset(channel, true);
+        cmdReset(channel, true, true);
         
         // update player scs
-        let players = await sqlProm("SELECT id,role FROM players ORDER BY role ASC");
+        let players = await sqlProm("SELECT id,role FROM players ORDER BY role ASC WHERE type='player'");
         
         for(let i = 0; i < players.length; i++) {
             let role = await sqlPromOne("SELECT * FROM roles WHERE name=" + connection.escape(players[i].role));
@@ -103,7 +103,7 @@ module.exports = function() {
             let disName = channel.guild.members.cache.get(players[i].id).displayName; // get the player's display name
             
             // Send Role DM (except if in debug mode)
-            await createSCs_sendDM(channel.guild, players[i].id, roleData, disName);
+            await createSCs_sendDM(channel.guild, players[i].id, roleData, disName, true);
             
             // Determine channel name
             let channelName = rolesName.substr(0, 100);
@@ -121,15 +121,15 @@ module.exports = function() {
             
             // send card
             if (config.cards) {
-                setTimeout(() => {
-                    cmdGetCard(targetChannel, rolesNameBot);
-                }, 5000);
+                // wait
+                await sleep(5 * 1000);
+                cmdGetCard(targetChannel, rolesNameBot);
             }
         }
     }
     
 	/* Handles reset command */
-	this.cmdReset = function(channel, debug) {
+	this.cmdReset = function(channel, debug, restart = false) {
 		if(stats.gamephase != gp.POSTGAME && stats.gamephase != gp.NONE && !debug) {
             channel.send("⛔ Command error. Can only reset game while in post-game state!");
             return;
@@ -212,9 +212,15 @@ module.exports = function() {
             setPhase("d0");
             setSubphase(SUBPHASE.MAIN);
             // Start game
-            setTimeout(function() {
-                eventStarting();
-            }, 1000 * 5);     
+            if(!restart) {
+                setTimeout(function() {
+                    eventStarting();
+                }, 1000 * 5);     
+            } else {
+                setTimeout(function() {
+                    eventStarting(null, true);
+                }, 1000 * 60);  
+            }
         }
 	}
     
