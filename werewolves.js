@@ -78,9 +78,9 @@ client.on("ready", async () => {
 		log("Bot > Caching completed, Bot is ready!");
         
 	}, 3000);
-        
-        let serverNames = client.guilds.cache.map(el => el.name).join(", ");
-        log(`Bot > Connected to ${serverNames}`);
+    
+    let serverNames = client.guilds.cache.map(el => el.name).join(", ");
+    log(`Bot > Connected to ${serverNames}`);
         
     //logDMs();
     
