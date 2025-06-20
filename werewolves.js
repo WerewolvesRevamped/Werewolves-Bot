@@ -186,6 +186,7 @@ var srcRefSaved = null;
 var srcNameSaved = null;
 
 var lastMessageBlocked = false;
+var advisorCounter = 0;
 
 /* New Message */
 client.on("messageCreate", async message => {
@@ -260,7 +261,7 @@ client.on("messageCreate", async message => {
     }
     
     // Advisor Bot
-    if(config.advisor && stats.gamephase == gp.INGAME && message.author.id === "528311658846748688" && message.content.length > 15) {
+    if(stats.gamephase == gp.INGAME && message.author.id === "528311658846748688" && message.content.length > 15 && ((isPublic(message.channel) && Math.random() > 0.25) || (!isPublic(message.channel) && Math.random() > 0.75)) && message.channel.name != "out-of-character" && getPhaseNum() > 0 && advisorCounter <= 0 && message.content.split(" ").length > 8) {
         // get channel to whisper to
         let cid = await getSrcRefChannel(`player:${message.author.id}`);
         let targetChannel = mainGuild.channels.cache.get(cid);
@@ -300,8 +301,11 @@ client.on("messageCreate", async message => {
                 
                 // send
                 targetChannel.send({ contents: `<@${mem.id}>`, embeds: [ embed ] });
+                advisorCounter += 50;
             }
         }
+    } else {
+        advisorCounter--;
     }
     
     /* Counts messages, again **/
@@ -814,6 +818,10 @@ client.on("messageCreate", async message => {
 	/* Restart */ // Debug restart
 	case "reset_debug":
 		if(checkSafe(message)) cmdReset(message.channel, true);
+	break;
+	/* Restart */ // Debug restart
+	case "restart":
+		if(checkSafe(message)) cmdConfirm(message, "restart");
 	break;
 	/* Reset */ // Resets a game
 	case "reset":

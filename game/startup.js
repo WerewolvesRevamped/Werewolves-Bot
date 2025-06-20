@@ -308,7 +308,7 @@ module.exports = function() {
     Create Secret Channels - Send DM
     Send a game start dm to each player as part of the indsc channel creation
     **/
-    async function createSCs_sendDM(guild, playerID, role, disName) {
+    this.createSCs_sendDM = async function(guild, playerID, role, disName, restart = false) {
         return new Promise(res => {
             // Build the role name
             let roleName = role.display_name;
@@ -321,6 +321,7 @@ module.exports = function() {
             // Build the full embed
             delete embed.fields;
             embed.title = "The game has started!";
+            if(restart) embed.title = "The game has restarted!";
             embed.description = "This message is giving you your role for the next game of Werewolves: Revamped!\n\nYour role is `" + roleName + "`.\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.\n\nIf you're confused about your role at all, then check #how-to-play on the discord, which contains a role book with information on all the roles in this game. If you have any questions about the game, ping @Host.";
             embed.color = roleData.color;
             if(config.cards) embed.image = { "url": getCardUrl(role.name) };

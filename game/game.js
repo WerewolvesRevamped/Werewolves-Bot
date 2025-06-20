@@ -69,8 +69,67 @@ module.exports = function() {
         clearSchedule();
     }
 	
+    
+    /** Handles the restart command */
+    this.cmdRestart = async function(channel) {
+        // hide old group channels
+		let groups = await sqlProm("SELECT * FROM active_groups");
+        
+        for(let i = 0; i < groups.length; i++) {
+            let grpChannel = mainGuild.channels.cache.get(groups[i].channel_id);
+            let chList = getChannelMembers(grpChannel);
+            chList.forEach(el => {
+                channelSetPermission(grpChannel, el, null);
+            });
+        }
+        
+        // reset
+        cmdReset(channel, true, true);
+        
+        // update player scs
+        let players = await sqlProm("SELECT id,role FROM players ORDER BY role ASC WHERE type='player'");
+        
+        for(let i = 0; i < players.length; i++) {
+            let role = await sqlPromOne("SELECT * FROM roles WHERE name=" + connection.escape(players[i].role));
+            var rolesName = role.display_name;
+            var rolesNameBot = role.name;
+            var roleData = role;
+            if(role.identity) {
+                let idRole = await sqlPromOneEsc("SELECT * FROM roles WHERE name=", role.identity);
+                rolesName = idRole.display_name;
+                rolesNameBot = idRole.name;
+                roleData = idRole;
+            }
+            let disName = channel.guild.members.cache.get(players[i].id).displayName; // get the player's display name
+            
+            // Send Role DM (except if in debug mode)
+            await createSCs_sendDM(channel.guild, players[i].id, roleData, disName, true);
+            
+            // Determine channel name
+            let channelName = rolesName.substr(0, 100);
+            channelName = applyTheme(channelName);
+            
+            if(channelName.length > 100 || channelName.length <= 0) channelName = "invalid";
+            
+            // set channel name
+            let cid = await getSrcRefChannel(`player:${players[i].id}`);
+            let targetChannel = mainGuild.channels.cache.get(cid);
+            targetChannel.setName(channelName);
+            
+            // Send info message for each role
+            cmdInfo(targetChannel, players[i].id, [ rolesNameBot ], true, false);
+            
+            // send card
+            if (config.cards) {
+                // wait
+                await sleep(5 * 1000);
+                cmdGetCard(targetChannel, rolesNameBot);
+            }
+        }
+    }
+    
 	/* Handles reset command */
-	this.cmdReset = function(channel, debug) {
+	this.cmdReset = function(channel, debug, restart = false) {
 		if(stats.gamephase != gp.POSTGAME && stats.gamephase != gp.NONE && !debug) {
             channel.send("⛔ Command error. Can only reset game while in post-game state!");
             return;
@@ -153,9 +212,15 @@ module.exports = function() {
             setPhase("d0");
             setSubphase(SUBPHASE.MAIN);
             // Start game
-            setTimeout(function() {
-                eventStarting();
-            }, 1000 * 5);     
+            if(!restart) {
+                setTimeout(function() {
+                    eventStarting();
+                }, 1000 * 5);     
+            } else {
+                setTimeout(function() {
+                    eventStarting(null, true);
+                }, 1000 * 60);  
+            }
         }
 	}
     

@@ -757,7 +757,9 @@ module.exports = function() {
         let typ = argsX.shift();
         let m = await message.channel.send(`🔄 Parsing prompt.`);
         let parsed = parsePromptReply(argsX.join(" "), typ, m);
+        let parsedRev = parsePromptReply(argsX.join(" "), typ, m, true);
         m.edit(`✅ Parsed Prompt: ${parsed[0]}; ${parsed[1]}`);
+        m.channel.send(`✅ Parsed Reverse: ${parsed[0]}; ${parsed[1]}`);
     }
     
     /**

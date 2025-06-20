@@ -922,7 +922,7 @@ module.exports = function() {
     Event: Starting
     triggers at the start of the game
     **/
-    this.eventStarting = async function(timestamp = null) {
+    this.eventStarting = async function(timestamp = null, restart = false) {
         // pause queue checker during event
         pauseActionQueueChecker = true;
         
@@ -943,7 +943,8 @@ module.exports = function() {
         await triggerHandler("Passive");
         
         // starting storytime
-        await bufferStorytime("The game has started!");
+        if(!restart) await bufferStorytime("The game has started!");
+        else await bufferStorytime("The game has restarted!");
         if(timestamp)  await bufferStorytime(`\n*The day will end at <t:${timestamp}:R>.*`);
         await postStorytime();
         

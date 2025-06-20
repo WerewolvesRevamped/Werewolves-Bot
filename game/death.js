@@ -118,10 +118,13 @@ module.exports = function() {
     Kills everyone in the kill queue
     **/
     this.killqKillall = async function() {
-            // get players
+        // get players
         let players = await sqlProm("SELECT * FROM killq");
         players = shuffleArray(players);
         playersFiltered = removeDuplicates(players.map(el => el.id));
+        
+        // clear killq
+        await killqClear();
         
         // kill players
         for(let i = 0; i < playersFiltered.length; i++) {
@@ -194,8 +197,12 @@ module.exports = function() {
             }
         }
         
-        // clear killq
-        await killqClear();
+        // check if new killq entries were created
+        let addPlayers = await sqlProm("SELECT * FROM killq");
+        if(addPlayers.length > 0) {
+            let addPlayerCount = await killqKillall();
+            return addPlayerCount + players.length;
+        }
         
         // return count
         return players.length;
