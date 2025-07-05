@@ -38,7 +38,7 @@ module.exports = function() {
                 let parsed = parseRole(requires[j]);
                 if(!roleNames.includes(parsed)) {
                     channel.send(`⛔ List error. Cannot start game with role \`${rName}\` without having requirement \`${requires[j]}\`.`); 
-                cancelStart = true;
+                    cancelStart = true;
                 }
             }
             // check unique role
@@ -47,7 +47,7 @@ module.exports = function() {
                 let filtered = roleNames.filter(el => el === rName);
                 if(filtered.length != 1) {
                     channel.send(`⛔ List error. Cannot start game with \`${filtered.length}\` instances of unique role \`${rName}\`.`); 
-                cancelStart = true;
+                    cancelStart = true;
                 }
             }
             // check host information
@@ -59,13 +59,19 @@ module.exports = function() {
                 }
                 matches = removeDuplicates(matches);
                 let missingMatches = [];
+                let duplicateMatches = [];
                 for(let j = 0; j < matches.length; j++) {
                     let hi = await getHostInformation(roles[i].id, matches[j]);
-                    if(hi.length != 1) missingMatches.push(matches[j]);
+                    if(hi.length === 0) missingMatches.push(matches[j]);
+                    if(hi.length > 1) duplicateMatches.push(matches[j]);
                 }
                 if(missingMatches.length > 0) {
                     let cmds = missingMatches.map(el => '`$hi add ' + roles[i].id + ' ' + el + ' "<value>"`').join(", ");
                     channel.send(`⛔ List error. Cannot start game with role \`${rName}\` on <@${roles[i].id}> without host information. The following information is missing: ${missingMatches.map(el => '\`' + el + '\`').join(", ")}. To add this host information run this command: ${cmds}`); 
+                    cancelStart = true;
+                }
+                if(duplicateMatches.length > 0) {
+                    channel.send(`⛔ List error. Cannot start game with role \`${rName}\` on <@${roles[i].id}> with duplicate host information. The following information is duplicated: ${duplicateMatches.map(el => '\`' + el + '\`').join(", ")}. To remove the duplicated host information run \`${prefix}hi list\`, identify the id of the host information you want to delete, and then run \`${prefix}hi remove <ID>\`.`); 
                     cancelStart = true;
                 }
             }
