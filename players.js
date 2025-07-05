@@ -17,8 +17,8 @@ module.exports = function() {
 	/* Handle players command */
 	this.cmdPlayers = function(message, args) {
 		// Check subcommands
-		if(!args[0] || (!args[1] && ["list","log","log2","log3","log4", "msgs","messages","votes","roles","rl","list_alive"].indexOf(args[0]) == -1)) { 
-			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `players [get|get_clean|set|resurrect|signup|list|msgs|msgs2|log|log2|votes|rl]`!"); 
+		if(!args[0] || (!args[1] && ["list","log","log2","log3","log4", "log5", "log6", "msgs","messages","votes","roles","rl","list_alive"].indexOf(args[0]) == -1)) { 
+			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `players [get|get_clean|set|resurrect|signup|list|msgs|msgs2|log|log2|log3|log4|log5|log6|votes|rl]`!"); 
 			return; 
 		}
 		//Find subcommand
@@ -41,6 +41,8 @@ module.exports = function() {
 			case "log2": cmdConfirm(message, "players log2"); break;
 			case "log3": cmdConfirm(message, "players log3"); break;
 			case "log4": cmdConfirm(message, "players log4"); break;
+			case "log5": cmdConfirm(message, "players log5"); break;
+			case "log6": cmdConfirm(message, "players log6"); break;
 			case "votes": cmdConfirm(message, "players votes"); break;
 			case "messages": 
 			case "msgs": cmdPlayersListMsgs(message.channel); break;
@@ -211,13 +213,13 @@ module.exports = function() {
 	}
     
 	/* Lists all signedup players in log format */
-	this.cmdPlayersLog = function(channel) {
+	this.cmdPlayersLog = function(channel, prefix = "•") {
 		// Get a list of players
 		sql("SELECT id,emoji,role,alive,ccs FROM players WHERE type='player'", result => {
 			let playerListArray = result.map(el => {
                 let player = channel.guild.members.cache.get(el.id);
                 let nickname = player && player.nickname ? " (as `" + player.nickname + "`)" : "";
-                return `• ${el.emoji} ${player ? player : "<@" + el.id + ">"}${nickname} is \`${el.role.split(",").map(role => toTitleCase(role)).join(" + ")}\``;
+                return `${prefix} ${el.emoji} ${player ? player : "<@" + el.id + ">"}${nickname} is \`${el.role.split(",").map(role => toTitleCase(role)).join(" + ")}\``;
             });
             
             let playerList = [], counter = 0;
@@ -253,13 +255,13 @@ module.exports = function() {
 	}
     
 	/* Lists all signedup players in final results format */
-	this.cmdPlayersLog3 = function(channel) {
+	this.cmdPlayersLog3 = function(channel, prefix = "•") {
 		// Get a list of players
 		sql("SELECT id,emoji,role,orig_role,alive,ccs,alignment,final_result FROM players WHERE type='player'", async result => {
             // function to format a log3 list
             const l3Format = el => {
                 let player = channel.guild.members.cache.get(el.id);
-                return `• ${player ? player : "<@" + el.id + ">"} (${el.role != el.orig_role ? toTitleCase(el.orig_role) + ' → ' + toTitleCase(el.role) : toTitleCase(el.role)})`;
+                return `${prefix} ${player ? player : "<@" + el.id + ">"} (${el.role != el.orig_role ? toTitleCase(el.orig_role) + ' → ' + toTitleCase(el.role) : toTitleCase(el.role)})`;
             };
             let winnerTeam = await sqlPromOne("SELECT display_name FROM teams WHERE active=1");
             let msg = "```**Final Results**\n" + winnerTeam.display_name + " Victory\n\n";
