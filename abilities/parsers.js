@@ -37,6 +37,7 @@ module.exports = function() {
         } else if(selectorTarget === "@thisattr" && self) {
             selectorType = srcToType(self);
             if(selectorType === "player_attr") selectorType = "activeextrarole"; // for active extra roles @thisattr is an active extra role not an active attribute
+            if(selectorType === "attribute") selectorType = "activeattribute"; // for active attribute @thisattr is an active attribute
         } else if(selectorTarget === "@selection") {
             selectorType = additionalTriggerData.selection_type;
         } else if(selectorTarget === "@secondaryselection") {
@@ -1902,7 +1903,6 @@ module.exports = function() {
                 let targetText = srcRefToText(target);
                 return targetText;
             default:
-                console.log(selectorGetTarget);
                 let txt = await parseInfo(selector, self, additionalTriggerData);
                 return txt;
         }
@@ -2091,8 +2091,7 @@ module.exports = function() {
                     abilityLog(`❗ **Error:** Invalid killing type selector target \`${sel}\`!`);
                     return [ ];
                 }
-            default:      
-                console.log(killingTypeNames, selectorTarget);
+            default:
                 if(killingTypeNames.includes(selectorTarget)) {
                     return selectorTarget;
                 } else {
@@ -2540,6 +2539,7 @@ module.exports = function() {
         } else if(val === "@thisattr") {
             let type = srcToType(self);
             if(type === "player_attr") return "activeExtraRole";
+            if(type === "attribute") return "activeAttribute";
             return type;
         }
         return inferType(val);
