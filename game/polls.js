@@ -926,13 +926,12 @@ module.exports = function() {
             } else if(curPlayerData.length === 2 && curPlayerData[0][0] === "remove" && curPlayerData[1][0] === "add" && curPlayerData[0][5] === curPlayerData[1][5]) {
                 await trigger(curPlayerData[0][5], "On Vote Change", { voter: players[i], old_vote: curPlayerData[0][2], old_vote_text: curPlayerData[0][3], new_vote: curPlayerData[1][2], new_vote_text: curPlayerData[1][3] }); 
             } else { // other case
-                let curPlayerDataAdd = curPlayerData.filter(el => el[0] === "add");
-                let curPlayerDataRemove = curPlayerData.filter(el => el[0] === "remove");
-                for(let j = 0; j < curPlayerDataAdd.length; j++) {
-                    await trigger(curPlayerDataAdd[j][5], "On Vote Add", { voter: players[i], vote: curPlayerDataAdd[j][2], vote_text: curPlayerDataAdd[j][3] }); 
-                }
-                for(let j = 0; j < curPlayerDataRemove.length; j++) {
-                    await trigger(curPlayerDataRemove[j][5], "On Vote Remove", { voter: players[i], vote: curPlayerDataRemove[j][2], vote_text: curPlayerDataRemove[j][3] }); 
+                for(let  j = 0; j < curPlayerData.length; j++) {
+                    if(curPlayerData[j][0] === "add") {
+                        await trigger(curPlayerData[j][5], "On Vote Add", { voter: players[i], vote: curPlayerData[j][2], vote_text: curPlayerData[j][3] }); 
+                    } else if(curPlayerData[j][0] === "remove") {
+                        await trigger(curPlayerData[j][5], "On Vote Remove", { voter: players[i], vote: curPlayerData[j][2], vote_text: curPlayerData[j][3] }); 
+                    }
                 }
             }
         }

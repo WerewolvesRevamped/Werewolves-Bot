@@ -1985,6 +1985,7 @@ module.exports = function() {
         for(let i = 0; i < spl.length; i++) {
             if(spl[i] === "~COLON~") continue;
             if(spl[i] === "~colon~") continue;
+            if(spl[i].indexOf("$") >= 0) spl[i] = await applyVariables(spl[i]);
             let infType = await inferTypeRuntime(spl[i], self, additionalTriggerData);
             if(infType != "unknown") {
                 let parsed = await parseSelector(`${spl[i]}[${infType}]`, self, additionalTriggerData);
@@ -2303,6 +2304,7 @@ module.exports = function() {
             txt = txt.replace(/\$total/, totalCount);
             txt = txt.replace(/\$living/, aliveCount);
             txt = txt.replace(/\$phase/, getPhaseAsNumber());
+            txt = txt.replace(/\$phname/, getPhaseAsText());
             return txt;
     }
     

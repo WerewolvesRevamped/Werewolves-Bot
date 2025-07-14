@@ -250,7 +250,7 @@ module.exports = function() {
         let type = "";
         let wdis, sdis;
         // get weak disguise data (if applicable)
-        if(affected_by_wd) {
+        if(affected_by_wd && !affected_by_sd) {
             wdis = await getTopWeakDisguise(player);
             if(wdis.val1) {
                 rdata = await getRoleDataFromRole(wdis.val1);
@@ -258,11 +258,25 @@ module.exports = function() {
             }
         }
         // get strong disguise data (if applicable)
-        if(affected_by_sd) {
+        if(affected_by_sd && !affected_by_wd) {
             sdis = await getTopStrongDisguise(player);
             if(sdis.val1) {
                 rdata = await getRoleDataFromRole(sdis.val1);
                 type = "SD";
+            }
+        }
+        // get any disguise data (if applicable)
+        if(affected_by_sd && affected_by_wd) {
+            let adis = await getTopAnyDisguise(player);
+            if(adis.val1) {
+                rdata = await getRoleDataFromRole(adis.val1);
+                if(adis.val2 === "strong") {
+                    type = "SD";
+                    sdis = adis;
+                } else {
+                    type = "WD";
+                    wdis = adis;
+                }
             }
         }
         // log an attribute use
