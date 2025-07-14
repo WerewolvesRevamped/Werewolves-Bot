@@ -673,6 +673,8 @@ module.exports = function() {
         
         // new player: add particpant role, remove sub role
         switchRoles(newPlayerMember, message.channel, stats.sub, stats.participant, "substitute", "participant");
+        // remove mentor role
+        removeRoleRecursive(newPlayerMember, message.channel, stats.mentor, "mentor");
         
         // old player: remove particpant role, add dead participant role
         if(originalPlayerMember) switchRoles(originalPlayerMember, message.channel, stats.participant, stats.dead_participant, "participant", "dead participant");
