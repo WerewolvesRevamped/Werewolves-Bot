@@ -738,15 +738,6 @@ client.on("messageCreate", async message => {
 	case "infopin":
 		if(checkGM(message)) cmdInfopin(message.channel, message.author.id, args);
 	break;
-	/* Role Info */ // Returns the info for a role set by the roles command
-	case "infoedit": // WIP: READD this command
-		//if(checkGM(message)) cmdInfoEdit(message.channel, args, argsX);
-	break;
-	/* Role Info (Add) */ // Returns the info for a role set by the roles command, but with additions
-	case "infoadd": // WIP: READD this command
-		//if(checkGM(message)) cmdInfoFancy(message.channel, [args[0]], false, false, false, false, ["", argsX[1].replace(/~/g, "\n").replace(/<\/>/g,"~")]);
-	break;
-	break;
 	/* Options */ // Modify options such as role ids and prefix
 	case "options": 
 		if(checkGM(message)) cmdOptions(message, argsX);

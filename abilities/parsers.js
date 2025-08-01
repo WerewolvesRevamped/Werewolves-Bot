@@ -1221,7 +1221,6 @@ module.exports = function() {
     this.parseRoleSelector = async function(selector, self = null, additionalTriggerData = {}) {
         // get target
         let selectorTarget = selectorGetTarget(selector);
-        /** WIP: Needs to be able to parse much more! **/
         switch(selectorTarget) {
             // target
             case "@target":
@@ -1771,7 +1770,6 @@ module.exports = function() {
     /**
     Parse Location
     parses a location
-    WIP: Locations can also be a group
     **/
     this.parseLocation = async function(selector, self = null, additionalTriggerData = {}) {
         // get target

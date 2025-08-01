@@ -416,8 +416,6 @@ module.exports = function() {
         ["info_technical", PERM.AL, "Returns formalized role info.", "<Role Name>", "Shows the formalized description of a role.", "info_technical citizen", [], CMDSTATE.RDY],
         ["~", PERM.AL, "Returns formalized role info (temporary).", "<Role Name>", "Shows the formalized description of a role and deletes it after a few minutes.", "~citizen", [], CMDSTATE.RDY, [], CMDARGS.NO_PREFIX],
         ["infopin", PERM.GM, "Returns role info & pins the message.", "<Role Name>", "Shows the description of a role, pins it and deletes the pinning message.", "infopin citizen", [], CMDSTATE.RDY],
-        ["infoedit", PERM.GM, "Edits a bot info message.", "<Message ID> <Role Name> [Addition]", "Updates an info message in the current channel. Optionally specify contents to append to the info message.", "infoedit 14901984562573 citizen", [], CMDSTATE.NOP],
-        ["infoadd", PERM.GM, "Returns role info with additional text.", "<Role Name> <Addition>", "Sends an info message with an appended addition.", "infoadd citizen EXTRATEXT", [], CMDSTATE.NOP],
         ["card", PERM.AL, "Returns a role's card.", "<Role Name>", "Shows the role's card.", "card citizen", [], CMDSTATE.WIP, ["& (Special Alias - Use without Prefix)"], CMDARGS.NO_PREFIX_SUB],
         ["image", PERM.AL, "Returns a role's image.", "<Role Name>", "Shows the role's image.", "image cititen", [], CMDSTATE.RDY],
         // link/parse

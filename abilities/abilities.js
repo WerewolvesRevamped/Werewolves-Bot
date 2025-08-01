@@ -501,4 +501,55 @@ module.exports = function() {
     }
     
     
+    /**
+    Get Ability Emoji
+    **/
+    this.getAbilityEmoji = function(type) {
+        let emojiName;
+        switch(type) {
+            case "killing": emojiName = "CategoryKilling"; break;
+            case "investigating": emojiName = "CategoryInvestigative"; break;
+            case "targeting": emojiName = "CategoryMiscellaneous"; break;
+            case "disguising": emojiName = "Disguise"; break;
+            case "protecting": emojiName = "Defense"; break;
+            case "applying": emojiName = "CategoryPower"; break;
+            case "redirecting": emojiName = "Redirect"; break;
+            case "manipulating": emojiName = "VoteManipulation"; break;
+            case "whispering": emojiName = "Whispering"; break;
+            case "joining": emojiName = "CategoryGroup"; break;
+            case "granting": emojiName = "Extra"; break;
+            case "loyalty": emojiName = "Loyalty"; break;
+            case "obstructing": emojiName = "Obstructions"; break;
+            case "poll": emojiName = "VotingBooth"; break;
+            case "announcement": emojiName = "Announcement"; break;
+            case "changing": emojiName = "CategoryAlign"; break;
+            case "copying": emojiName = "LookAlike"; break;
+            case "choices": emojiName = "UnalignedPlaceholder"; break;
+            case "ascend": emojiName = "Ascension"; break;
+            case "descend": emojiName = ""; break;
+            case "disband": emojiName = ""; break;
+            case "counting": emojiName = ""; break;
+            case "reset": emojiName = ""; break;
+            case "cancel": emojiName = ""; break;
+            case "switching": emojiName = ""; break;
+            case "process_evaluate": emojiName = ""; break;
+            case "feedback": emojiName = "Announcement"; break;
+            case "action": emojiName = ""; break;
+            case "failure": emojiName = "no"; break;
+            case "success": emojiName = "yes"; break;
+            case "log": emojiName = ""; break;
+            case "for_each": emojiName = ""; break;
+            case "shuffle": emojiName = ""; break;
+            case "emit": emojiName = "NewGameMaster"; break;
+            case "storing": emojiName = ""; break;
+            case "continue": emojiName = "maybe"; break;
+            case "displaying": emojiName = "KWList"; break;
+            case "win": emojiName = "Ascension"; break;
+            case "locking": emojiName = ""; break;
+            case "executing": emojiName = "BotDeveloper"; break;
+        }
+        return emojiName ? getEmoji(emojiName) : "";
+    }
+    
+    
 }
