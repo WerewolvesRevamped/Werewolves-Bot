@@ -190,12 +190,11 @@ var advisorCounter = 0;
 
 /* New Message */
 client.on("messageCreate", async message => {
+    if(!message || message.inGuild()) return;
     if(message.guild && message.guild.id != mainGuild.id) {
         console.log(`WARNING! Blocked command execution on guild ${message.guild.name}`);
         return;
     }
-    
-    if(!message) return;
     try {
         await message.fetch();
     } catch (err) {
@@ -537,7 +536,7 @@ client.on("messageCreate", async message => {
 	}
 	if(message.content.indexOf(stats.prefix) !== 0 && message.content[0] == "&") {
                 let msg = message.content.trim().substr(1).trim();
-                let msgRole = msg.match(/(".*?")|(\S+)/g) ? msg.match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "";
+                let msgRole = msg.match(/(".*?")|(\S+)/g) ? msg.match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : [""];
                 console.log(msg + " => " + msgRole);
                 if(msg.match(/^[a-zA-Z ]*$/)) cmdGetCard(message.channel, msgRole.join(" "));
                 if(msgRole && stats.fancy_mode && verifyRole(msgRole.join(" "))) message.delete();

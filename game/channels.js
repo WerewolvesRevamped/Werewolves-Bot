@@ -174,7 +174,7 @@ module.exports = function() {
         let result = await channelSetPermission(channel, member.id, CC_PERMS_NONE);
         if(result) channel.send(`✅ ${member} left the CC!`);
         
-        let mentor = await getMentor(el); 
+        let mentor = await getMentor(member.id);
         if(mentor) channelSetPermission(channel, mentor, CC_PERMS_VIEWER);
 	}
 	
