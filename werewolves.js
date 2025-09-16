@@ -190,7 +190,7 @@ var advisorCounter = 0;
 
 /* New Message */
 client.on("messageCreate", async message => {
-    if(!message || message.inGuild()) return;
+    if(!message || !message.inGuild()) return;
     if(message.guild && message.guild.id != mainGuild.id) {
         console.log(`WARNING! Blocked command execution on guild ${message.guild.name}`);
         return;
