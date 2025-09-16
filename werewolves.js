@@ -289,8 +289,12 @@ client.on("messageCreate", async message => {
                         "text": `${ch.guild.name} - ${stats.game}`
                     },
                     "title": "Advisor Bot",
-                    "description": `You have tried to say: \`\`\`${txt}\`\`\` in [${ch.name}](https://discord.com/channels/${ch.guild.id}/${m.channel.id}/${m.id}). You have been given time to reconsider.`,
+                    "description": `You have tried to send a message [${ch.name}](https://discord.com/channels/${ch.guild.id}/${m.channel.id}/${m.id}). You have been given time to reconsider.`,
                     "fields": [
+                        {
+                            "name": "Original Message",
+                            "value": `\`\`\`${txt}\`\`\``
+                        },
                         {
                             "name": "Tips",
                             "value": "• Are you sure saying this will help you / your team?\n• Are you sure the person you are talking to is talking in good faith? Are they trying to trick you into revealing information?\n• Have you formatted your message as a comprehensive sentence? If not, take this chance to rephrase your message!"
