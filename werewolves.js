@@ -190,12 +190,11 @@ var advisorCounter = 0;
 
 /* New Message */
 client.on("messageCreate", async message => {
+    if(!message || !message.inGuild()) return;
     if(message.guild && message.guild.id != mainGuild.id) {
         console.log(`WARNING! Blocked command execution on guild ${message.guild.name}`);
         return;
     }
-    
-    if(!message) return;
     try {
         await message.fetch();
     } catch (err) {
@@ -290,8 +289,12 @@ client.on("messageCreate", async message => {
                         "text": `${ch.guild.name} - ${stats.game}`
                     },
                     "title": "Advisor Bot",
-                    "description": `You have tried to say: \`\`\`${txt}\`\`\` in [${ch.name}](https://discord.com/channels/${ch.guild.id}/${m.channel.id}/${m.id}). You have been given time to reconsider.`,
+                    "description": `You have tried to send a message [${ch.name}](https://discord.com/channels/${ch.guild.id}/${m.channel.id}/${m.id}). You have been given time to reconsider.`,
                     "fields": [
+                        {
+                            "name": "Original Message",
+                            "value": `\`\`\`${txt}\`\`\``
+                        },
                         {
                             "name": "Tips",
                             "value": "• Are you sure saying this will help you / your team?\n• Are you sure the person you are talking to is talking in good faith? Are they trying to trick you into revealing information?\n• Have you formatted your message as a comprehensive sentence? If not, take this chance to rephrase your message!"
@@ -537,7 +540,7 @@ client.on("messageCreate", async message => {
 	}
 	if(message.content.indexOf(stats.prefix) !== 0 && message.content[0] == "&") {
                 let msg = message.content.trim().substr(1).trim();
-                let msgRole = msg.match(/(".*?")|(\S+)/g) ? msg.match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "";
+                let msgRole = msg.match(/(".*?")|(\S+)/g) ? msg.match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : [""];
                 console.log(msg + " => " + msgRole);
                 if(msg.match(/^[a-zA-Z ]*$/)) cmdGetCard(message.channel, msgRole.join(" "));
                 if(msgRole && stats.fancy_mode && verifyRole(msgRole.join(" "))) message.delete();

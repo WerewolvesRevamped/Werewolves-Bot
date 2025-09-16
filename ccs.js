@@ -13,7 +13,7 @@ module.exports = function() {
 	this.cmdCC = function(message, args, argsX) {
 		// Check subcommand
 		if(!args[0]) { 
-			message.channel.send(helpCCs(message.member, ["cc"]));
+			message.channel.send(cmdHelp(channel, member, ["cc"]));
 			return; 
 		} else if(stats.gamephase != gp.INGAME && args[0] != "cleanup") { 
 			message.channel.send("⛔ Command error. Can only use CCs while a game is running."); 
@@ -51,7 +51,7 @@ module.exports = function() {
 	this.cmdSC = function(message, args) {
 		// Check subcommand
 		if(!args[0]) { 
-			message.channel.send(helpCCs(message.member, ["sc"]));
+			message.channel.send(cmdHelp(channel, member, ["sc"]));
 			return; 
 		} else if(stats.gamephase != gp.INGAME && args[0] != "rename") { 
 			message.channel.send("⛔ Command error. Can only use SCs while a game is running."); 

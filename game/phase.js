@@ -117,6 +117,12 @@ module.exports = function() {
             } else {
                 channel.send(`⛔ Command error.  Could not increment phase.`);
             }
+        } else {
+            if (result) {
+                log(`✅ Incrementing phase to \`${toTitleCase(newPhaseName)}\`!`)
+            } else {
+                log(`⛔ Command error.  Could not increment phase.`)
+            }
         }
         
         // trigger start phase events

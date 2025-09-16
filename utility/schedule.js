@@ -109,15 +109,21 @@ module.exports = function() {
                 break;
                 case "special":
                     log(`Running scheduled event: ${sched[i].value}`);
-                    switch(sched[i].value) {
-                        case "late":
-                            await setSubphase(SUBPHASE.LATE);
-                        break;
-                        case "switch":
-                            await setSubphase(SUBPHASE.LOCKED);
-                            await sleep(60 * 1000);
-                            await cmdPhaseNext();
-                        break;
+                    try {
+                        switch(sched[i].value) {
+                            case "late":
+                                await setSubphase(SUBPHASE.LATE);
+                                await executeDelayedQueuedAction();
+                                break;
+                            case "switch":
+                                await setSubphase(SUBPHASE.LOCKED);
+                                await sleep(60 * 1000);
+                                await cmdPhaseNext();
+                                break;
+                        }
+                    } catch (e) {
+                        console.log(e)
+                        log(`‼️Failed to complete phase change ${sched[i].value}: ${e.message}`)
                     }
                 break;
             }
