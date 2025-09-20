@@ -3,6 +3,7 @@
 		- Simplified sql access w/ automatic error logging
 		- Simplified access to stats
 */
+require("../stats");
 module.exports = function() {
 	/* Variables */
 	this.connection = null;
@@ -87,38 +88,56 @@ module.exports = function() {
 	}
 	
 	/**
-    SQL Value
-    Does a sql query and calls one callback with result[0].value on success and logs an error and calls another callback on failure
-    Basically a wrapper for sqlQuery with mode=1
-    */
+	 * SQL Value
+	 * Does a sql query and calls one callback with result[0].value on success and logs an error and calls another callback on failure
+	 * Basically a wrapper for sqlQuery with mode=1
+	 * @param {string} q The query
+	 * @param {(string) => void} rC Results callback
+	 * @param {() => void} eC The error callback
+	 */
 	this.sqlValue = function(q, rC, eC) {
 		sqlQuery(q, rC, eC, 1)
 	}
 	
 	/**
-    SQL Set Stats
-    Sets a stat in the stat database by numeric id
-    */
+	 * SQL Set Stats
+	 * Sets a stat in the stat database by numeric id
+	 * @param {number} id The of the option to insert
+	 * @param {string} value The
+	 * @param resCallback
+	 * @param errCallback
+	 */
 	this.sqlSetStat = function(id, value, resCallback = ()=>{}, errCallback = ()=>{}) {
-		sql("UPDATE stats SET value = " + connection.escape(value) + " WHERE id = " + connection.escape(id), resCallback, errCallback);
+		const valueEsc = connection.escape(value)
+		const statName = toStatName(id)
+		const name = connection.escape(statName ? toStatName(id) : "")
+		sql(`INSERT INTO stats (id, value, name) VALUE (${id},${valueEsc},${name}) ON DUPLICATE KEY UPDATE value=${valueEsc}`)
+		// sql("UPDATE stats SET value = " + connection.escape(value) + " WHERE id = " + connection.escape(id), resCallback, errCallback);
 	}
 
 	/**
-    SQL Get Stat
-    Gets a stat from the stat database by numeric id
-    */
+	 * SQL Get Stat
+	 * Gets a stat from the stat database by numeric id
+	 * @param {number} id
+	 * @param {(string) => void} resCallback
+	 * @param {() => void} errCallback
+	 */
 	this.sqlGetStat = function(id, resCallback, errCallback) {
 		sqlValue("SELECT value,name FROM stats WHERE id = " + connection.escape(id), resCallback, errCallback);
 	}
 	
 	/**
-    SQL Query (Internal)
-    Does SQL Queries. Should only be called internally from other sql functions
-    The universal sql query function. Takes a query and two callbacks, and optionally a mode value.
-    Modes:
-    0: Default query, resolves the promise with the query's result
-    1: Either resolves with result[0].value if result[0] is set or runs the error callback
-    */
+	 * SQL Query (Internal)
+	 * Does SQL Queries. Should only be called internally from other sql functions
+	 * The universal sql query function. Takes a query and two callbacks, and optionally a mode value.
+	 * Modes:
+	 * 0: Default query, resolves the promise with the query's result
+	 * 1: Either resolves with result[0].value if result[0] is set or runs the error callback
+	 * @param {string} query The query
+	 * @param {(string) => void} resCallback
+	 * @param {() => void} errCallback
+	 * @param {0 | 1} mode
+	 */
 	this.sqlQuery = function(query, resCallback = ()=>{}, errCallback = ()=>{}, mode = 0) {
 		// Do query
 		connection.query(query, function(err, result, fields) {
