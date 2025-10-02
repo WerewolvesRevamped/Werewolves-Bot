@@ -18,6 +18,7 @@ module.exports = function() {
 	/* Check if a member is an Admin (or Bot) */
 	this.isAdmin = function(member, noAdminIngame = false) {
         if(!member) return false;
+		if (!stats.admin) return true; //fallback for before admin set
 		return member && member.roles && (member.roles.cache.get(stats.admin) || (!noAdminIngame && member.roles.cache.get(stats.admin_ingame)));
 	}
     

@@ -5,377 +5,225 @@
 		- Cacheing stats
 		- Convert gamephase id to name
 */
+
+require("./utility/sql")
+require("./utility/discord")
+require("./players")
+require("./theme")
+
+const config = require("./config.json")
+
+/** If debug logging should be running */
+const doLog = false
+
+/**
+ * Gets an option from the stats table
+ * @param {number} id The ID of this option
+ * @return The parameter or the undefined
+ */
+function getOption(id) {
+	const name = toStatName(id)
+	return new Promise((resolve) => {
+		sqlGetStat(id,  result => {
+			resolve(result)
+			if(doLog) log(`Stats > Cached ${name} as \`${result}\`!`)
+		}, () => {
+			resolve(undefined)
+			log(`Stats > ‼️ Unable to cache ${name}!`)
+		});
+	})
+}
+
+/**
+ * Gets an option from the stats table with a default fallback
+ * @param {number} id The ID of this option
+ * @param {any} def The default if the option is not set
+ * @return {Promise<unknown>} The parameter or the default fallback
+ */
+function getOptionDefault(id, def) {
+	const name = toStatName(id)
+	return new Promise((resolve) => {
+		sqlGetStat(id,  result => {
+			resolve(result)
+			if(doLog) log(`Stats > Cached ${name} as \`${result}\`!`)
+		}, () => {
+			resolve(def)
+			log(`Stats > ⚠️ Unable to cache ${name}, defaulting to \`${def}\``)
+		});
+	})
+}
+
 module.exports = function() {
-	/* Variables */
-	this.stats = {};
-	
+
+	/** The stored options/stats for the bot
+	 * @type {BotStats}
+	 */
+	this.stats = {}
+
+	/**
+	 * Converts a numeric option ID to a name
+	 * @param {number} id The numeric id of the stat
+	 * @return {string} The name of this stat
+	 */
+	this.toStatName = function(id) {
+		switch (id) {
+			case 1: return "Gamephase"
+			case 2: return "CMD Prefix"
+			case 3: return "Participant Role Id"
+			case 4: return "Game Master Role Id"
+			case 5: return "Spectator Role Id"
+			case 6: return "Signed-Up Role Id"
+			case 7: return "Dead Participant Role Id"
+			case 8: return "Bot Role"
+			case 9: return "CCs"
+			case 10: return "Last CC Cat"
+			case 11: return "Log Guild"
+			case 12: return "Log Channel"
+			case 13: return "Poll Count"
+			case 14: return "SC Category"
+			case 15: return "Public Category"
+			case 16: return "Mayor Role Id"
+			case 17: return "Reporter Role Id"
+			case 18: return "Guardian Role Id"
+			case 19: return "Game Name"
+			case 20: return "Reporter Channel"
+			case 21: return "GM Ingame Role"
+			case 22: return "Admin Role"
+			case 23: return "Admin Ingame Role"
+			case 24: return "Yes Emoji ID"
+			case 25: return "No Emoji ID"
+			case 26: return "New Game Ping Role"
+			case 27: return "Game Status VC"
+			case 28: return "CC Limit"
+			case 29: return "Current Theme"
+			case 30: return "Mayor 2"
+			case 31: return "polls"
+			case 32: return "Substitute Role"
+			case 33: return "Link Ping"
+			case 34: return "Host Role"
+			case 35: return "Fancy Mode"
+			case 36: return "Icon Version"
+			case 37: return "Senior GM Role"
+			case 38: return "Senior GM Ingame Role"
+			case 39: return "Role Filter"
+			case 40: return "Helper Role"
+			case 41: return "Helper Ingame Role"
+			case 42: return "Mayor Threshold"
+			case 43: return "Host Log"
+			case 44: return "Automation Level"
+			case 45: return "Ghost Role"
+			case 46: return "Haunting Mode"
+
+			case statID.PHASE: return "Phase"
+			case statID.SUBPHASE: return "Subphase"
+			case statID.REWARD_LOG: return "Reward Log"
+			case statID.MENTOR_ROLE: return "Mentor Role"
+			case statID.SIGNEDSUB_ROLE: return "Signed-Up Sub Role"
+			case statID.PHASE_AUTO_INFO: return "Phase Automation Info"
+			case statID.D0_TIME: return "D0 Time"
+		}
+	}
+
 	/* Caches stats everytime they are changed or the bot is (re)started */
 	this.getStats = function() {
 		var doLog = false;
 		// Get Log Channel & Guild
-		sqlGetStat(11,  result => { 
-			stats.log_guild = result;
-			if(doLog) log("Stats > Cached log guild id as `" + result + "`!")
-		}, () => {
-            stats.log_guild = false;
-            stats.guild = false;
-			log("Stats > ❗❗❗ Unable to cache log guild id!")
-		});
-		sqlGetStat(12,  result => { 
-			stats.log_channel = result; 
-			if(doLog) log("Stats > Cached log channel id as `" + result + "`!")
-		}, () => {
-            stats.log_channel = false;
-			log("Stats > ❗❗❗ Unable to cache log channel id!")
-		});
+		getOptionDefault(11, config.guild).then(r => stats.log_guild = r)
+		getOptionDefault(12, config.log).then(r => stats.log_channel = r)
 		// Get Gamephase
-		sqlGetStat(1, result => { 
-			stats.gamephase = result; 
-			getEmojis(); 
-			if(doLog) log("Stats > Cached gamephase as `" + result + "`!")
-		}, () => {
-            stats.gamephase = gp.NONE; 
-			log("Stats > ❗❗❗ Unable to cache gamephase! Defaulting to `" + gp.NONE + "`")
-		});
+		getOptionDefault(1, gp.NONE).then(r => {
+			stats.gamephase = r
+			if (r > 0) {
+				getEmojis()
+			}
+		})
 		// Get Prefix
-		sqlGetStat(2,  result => { 
-			stats.prefix = result; 
-			if(doLog) log("Stats > Cached prefix as `" + result + "`!")
-		}, () => {
-            stats.prefix = "$";
-			log("Stats > ❗❗❗ Unable to cache prefix! Defaulting to `$`.")
-		});
+		getOptionDefault(2, "$").then(r => stats.prefix = r)
 		// Get Role Ids
-		sqlGetStat(3,  result => { 
-			stats.participant = result; 
-			if(doLog) log("Stats > Cached participant role id as `" + result + "`!")
-		}, () => {
-            stats.participant = false;
-			log("Stats > ❗❗❗ Unable to cache participant role id!")
-		});
-		sqlGetStat(4,  result => { 
-			stats.gamemaster = result; 
-			if(doLog) log("Stats > Cached gamemaster role id as `" + result + "`!")
-		}, () => {
-            stats.gamemaster = false;
-			log("Stats > ❗❗❗ Unable to cache gamemaster role id!")
-		});
-		sqlGetStat(5,  result => { 
-			stats.spectator = result; 
-			if(doLog) log("Stats > Cached spectator role id as `" + result + "`!")
-		}, () => {
-            stats.spectator = false;
-			log("Stats > ❗❗❗ Unable to cache spectator role id!")
-		});
-		sqlGetStat(6,  result => { 
-			stats.signed_up = result; 
-			if(doLog) log("Stats > Cached signed up role id as `" + result + "`!")
-		}, () => {
-            stats.signed_up = false;
-			log("Stats > ❗❗❗ Unable to cache signed up role id!")
-		});
-		sqlGetStat(7,  result => { 
-			stats.dead_participant = result; 
-			if(doLog) log("Stats > Cached dead participant role id as `" + result + "`!")
-		}, () => {
-            stats.dead_participant = false;
-			log("Stats > ❗❗❗ Unable to cache dead participant role id!")
-		});
-		sqlGetStat(8,  result => { 
-			stats.bot = result; 
-			if(doLog) log("Stats > Cached bot role id as `" + result + "`!")
-		}, () => {
-            stats.bot = false;
-			log("Stats > ❗❗❗ Unable to cache bot role id!")
-		});
+		getOption(3).then(r => stats.participant = r)
+		getOption(4).then(r => stats.gamemaster = r)
+		getOption(5).then(r => stats.spectator = r)
+		getOption(6).then(r => stats.signed_up = r)
+		getOption(7).then(r => stats.dead_participant = r)
+		getOption(8).then(r => stats.bot = r)
 		// Cache Elected roles
-		sqlGetStat(16,  result => { 
-			stats.mayor = result; 
-			if(doLog) log("Stats > Cached mayor role id as `" + result + "`!")
-		}, () => {
-            stats.mayor = false;
-			log("Stats > ❗❗❗ Unable to cache mayor role id!")
-		});
-		sqlGetStat(17,  result => { 
-			stats.reporter = result; 
-			if(doLog) log("Stats > Cached reporter role id as `" + result + "`!")
-		}, () => {
-            stats.reporter = false;
-			log("Stats > ❗❗❗ Unable to cache reporter role id!")
-		});
-		sqlGetStat(18,  result => { 
-			stats.guardian = result; 
-			if(doLog) log("Stats > Cached guardian role id as `" + result + "`!")
-		}, () => {
-            stats.guardian = false;
-			log("Stats > ❗❗❗ Unable to cache guardian role id!")
-		});
-		sqlGetStat(19,  result => { 
-			stats.game = result; 
-			if(doLog) log("Stats > Cached game name as `" + result + "`!")
-		}, () => {
-            stats.game = "WWR";
-			log("Stats > ❗❗❗ Unable to cache game name! Defaulting to `WWR`.")
-		});
-		sqlGetStat(21,  result => { 
-			stats.gamemaster_ingame = result; 
-			if(doLog) log("Stats > Cached game master ingame role id as `" + result + "`!")
-		}, () => {
-            stats.gamemaster_ingame = false;
-			log("Stats > ❗❗❗ Unable to cache game master ingame role id!")
-		});
-		sqlGetStat(22,  result => { 
-			stats.admin = result; 
-			if(doLog) log("Stats > Cached admin role id as `" + result + "`!")
-		}, () => {
-            stats.admin = false;
-			log("Stats > ❗❗❗ Unable to cache admin role id!")
-		});
-		sqlGetStat(23,  result => { 
-			stats.admin_ingame = result; 
-			if(doLog) log("Stats > Cached admin ingame role id as `" + result + "`!")
-		}, () => {
-            stats.admin_ingame = false;
-			log("Stats > ❗❗❗ Unable to cache admin ingame role id!")
-		});
-		sqlGetStat(24,  result => { 
-			stats.yes_emoji = result; 
-            idEmojis.push(["",`<:${client.emojis.cache.get(stats.yes_emoji).name}:${client.emojis.cache.get(stats.yes_emoji).id}>`]);
-			if(doLog) log("Stats > Cached yes emoji as `" + result + "`!")
-		}, () => {
-            stats.yes_emoji = "false";
-			log("Stats > ❗❗❗ Unable to cache yes emoji!")
-		});
-		sqlGetStat(25,  result => { 
-			stats.no_emoji = result; 
-            idEmojis.push(["",`<:${client.emojis.cache.get(stats.no_emoji).name}:${client.emojis.cache.get(stats.no_emoji).id}>`]);
-			if(doLog) log("Stats > Cached no emoji as `" + result + "`!")
-		}, () => {
-            stats.no_emoji = false;
-			log("Stats > ❗❗❗ Unable to cache no emoji!")
-		});
-		sqlGetStat(26,  result => { 
-			stats.new_game_ping = result; 
-			if(doLog) log("Stats > Cached new game ping as `" + result + "`!")
-		}, () => {
-            stats.new_game_ping = false;
-			log("Stats > ❗❗❗ Unable to cache new game ping!")
-		});
-		sqlGetStat(27,  result => { 
-			stats.game_status = result; 
-			if(doLog) log("Stats > Cached game status vc as `" + result + "`!")
-		}, () => {
-            stats.game_status = false;
-			log("Stats > ❗❗❗ Unable to cache game status vc!")
-		});
-		sqlGetStat(28,  result => { 
-			stats.cc_limit = result; 
-			if(doLog) log("Stats > Cached cc limit as `" + result + "`!")
-		}, () => {
-            stats.cc_limit = 0;
-			log("Stats > ❗❗❗ Unable to cache game status vc!")
-		});
-		sqlGetStat(29,  result => { 
-			stats.theme = result; 
-			if(doLog) log("Stats > Cached theme as `" + result + "`!");
-			cacheTheme();
-		}, () => {
-            stats.theme = "default";
-			log("Stats > ❗❗❗ Unable to cache theme! Defaulting to `default`.")
-		});
-		// Cache Elected roles
-		sqlGetStat(30,  result => { 
-			stats.mayor2 = result; 
-			if(doLog) log("Stats > Cached mayor2 role id as `" + result + "`!")
-		}, () => {
-            stats.mayor2 = false;
-			log("Stats > ❗❗❗ Unable to cache mayor2 role id!")
-		});
-		// Cache Elected roles
-		sqlGetStat(31,  result => { 
-			stats.poll = result; 
-			if(doLog) log("Stats > Cached poll mode as `" + result + "`!")
-		}, () => {
-            stats.poll = 0;
-			log("Stats > ❗❗❗ Unable to cache poll mode! Defaulting to `0`.")
-		});
+		getOption(16).then(r => stats.mayor = r)
+		getOption(17).then(r => stats.reporter = r)
+		getOption(18).then(r => stats.guardian = r)
+		//game name
+		getOption(19).then(r => stats.game = r)
+		// Get More Role Ids
+		getOption(21).then(r => stats.gamemaster_ingame = r)
+		getOption(22).then(r => stats.admin = r)
+		getOption(21).then(r => stats.admin_ingame = r)
+		//emojis
+		getOption(24).then(r => stats.yes_emoji = r)
+		getOption(25).then(r => stats.no_emoji = r)
+		// Get More Role Ids
+		getOption(26).then(r => stats.new_game_ping = r)
+		getOption(27).then(r => stats.game_status = r)
+		getOption(28).then(r => stats.cc_limit = r)
+		getOption(29).then(r => {
+			stats.theme = r
+			if (stats.theme !== "default") {
+				cacheTheme();
+			}
+		})
+		// getOption(30).then(r => stats.mayor2 = r) //Deprecated
+		// Poll mode
+		getOptionDefault(31, 0).then(r => stats.poll = r)
 		// Sub role
-		sqlGetStat(32,  result => { 
-			stats.sub = result; 
-			if(doLog) log("Stats > Cached substitute player role as `" + result + "`!")
-		}, () => {
-            stats.sub = false;
-			log("Stats > ❗❗❗ Unable to cache substitute player role mode!")
-		});
+		getOption(32).then(r => stats.sub = r)
 		// gif ping
-		sqlGetStat(33,  result => { 
-			stats.ping = result; 
-			if(doLog) log("Stats > Cached gif ping as `" + result + "`!")
-		}, () => {
-            stats.ping = stats.gamemaster ? stats.gamemaster : false;
-			log("Stats > ❗❗❗ Unable to cache gif ping!")
-		});
-		sqlGetStat(34,  result => { 
-			stats.host = result; 
-			if(doLog) log("Stats > Cached host role id as `" + result + "`!")
-		}, () => {
-            stats.host = false;
-			log("Stats > ❗❗❗ Unable to cache host role id!")
-		});
+		getOption(33).then(r => stats.ping = r)
+		// Yet another role
+		getOption(34).then(r => stats.host = r)
 		// fancy mode
-		sqlGetStat(35,  result => { 
-			stats.fancy_mode = result === 'true'; 
-			if(doLog) log("Stats > Cached fancy mode as `" + stats.fancy_mode + "`!")
-		}, () => {
-            stats.fancy_mode = false;
-			log("Stats > ❗❗❗ Unable to cache fancy mode! Defaulting to `false`.")
-		});
+		getOptionDefault(35, false).then(r => {
+			stats.fancy_mode = r == "true"
+		})
 		// icon version
-		sqlGetStat(36,  result => { 
-			stats.icon_version = result; 
-			if(doLog) log("Stats > Cached icon version as `" + result + "`!")
-		}, () => {
-            stats.icon_version = 0;
-			log("Stats > ❗❗❗ Unable to cache icon version! Defaulting to `0`.")
-		});
-		sqlGetStat(37,  result => { 
-			stats.senior_gamemaster = result; 
-			if(doLog) log("Stats > Cached senior gamemaster role id as `" + result + "`!")
-		}, () => {
-            stats.senior_gamemaster = false;
-			log("Stats > ❗❗❗ Unable to cache senior gamemaster id!")
-		});
-		sqlGetStat(38,  result => { 
-			stats.senior_gamemaster_ingame = result; 
-			if(doLog) log("Stats > Cached senior gamemaster ingame role id as `" + result + "`!")
-		}, () => {
-            stats.senior_gamemaster_ingame = false;
-			log("Stats > ❗❗❗ Unable to cache senior gamemaster ingame id!")
-		});
-		sqlGetStat(39,  result => { 
-			stats.role_filter = result; 
-			if(doLog) log("Stats > Cached role filter as `" + result + "`!")
-		}, () => {
-            stats.role_filter = 0;
-			log("Stats > ❗❗❗ Unable to cache role filter! Defaulting to `0`.")
-		});
-		sqlGetStat(40,  result => { 
-			stats.helper = result; 
-			if(doLog) log("Stats > Cached helper as `" + result + "`!")
-		}, () => {
-            stats.helper = false;
-			log("Stats > ❗❗❗ Unable to cache helper!")
-		});
-		sqlGetStat(41,  result => { 
-			stats.helper_ingame = result; 
-			if(doLog) log("Stats > Cached helper ingame as `" + result + "`!")
-		}, () => {
-            stats.helper_ingame = false;
-			log("Stats > ❗❗❗ Unable to cache helper ingame!")
-		});
-		sqlGetStat(42,  result => { 
-			stats.mayor_threshold = result; 
-			if(doLog) log("Stats > Cached mayor threshold as `" + result + "`!")
-		}, () => {
-            stats.mayor_threshold = 15;
-			log("Stats > ❗❗❗ Unable to cache mayor threshold! Defaulting to `15`.")
-		});
-		sqlGetStat(43,  result => { 
-			stats.host_log = result; 
-			if(doLog) log("Stats > Cached host log as `" + result + "`!")
-		}, () => {
-            stats.host_log = false;
-			log("Stats > ❗❗❗ Unable to cache host log! Defaulting to `false`.")
-		});
-		sqlGetStat(44,  result => { 
-			stats.automation_level = + result; 
-			if(doLog) log("Stats > Cached automation level as `" + result + "`!");
-            // 0->disabled, 1->minimum, 2->host, 3->default, 4->full
-		}, () => {
-            stats.automation_level = autoLvl.NONE;
-			log("Stats > ❗❗❗ Unable to cache automation level! Defaulting to `0` (none).")
-		});
-		sqlGetStat(45,  result => { 
-			stats.ghost = result; 
-			if(doLog) log("Stats > Cached ghost as `" + result + "`!")
-		}, () => {
-            stats.ghost = false;
-			log("Stats > ❗❗❗ Unable to cache ghost!")
-		});
-		sqlGetStat(46,  result => { 
-			stats.haunting = (result == "true"); 
-			if(doLog) log("Stats > Cached haunting as `" + result + "`!")
-		}, () => {
-            stats.haunting = false;
-			log("Stats > ❗❗❗ Unable to cache haunting! Defaulting to `false`.")
-		});
-		sqlGetStat(statID.PHASE,  result => { 
-			stats.phase = result; 
-			if(doLog) log("Stats > Cached phase as `" + result + "`!")
-		}, () => {
-            stats.phase = "d0";
-			log("Stats > ❗❗❗ Unable to cache phase! Defaulting to `d0`.")
-		});
-		sqlGetStat(statID.SUBPHASE,  result => { 
-			stats.subphase = result; 
-			if(doLog) log("Stats > Cached subphase as `" + result + "`!")
-		}, () => {
-            stats.subphase = 0;
-			log("Stats > ❗❗❗ Unable to cache subphase! Defaulting to `0`.")
-		});
+		getOptionDefault(36, 0).then(r => stats.icon_version = r)
+		// More roles
+		getOption(37).then(r => stats.senior_gamemaster = r)
+		getOption(38).then(r => stats.senior_gamemaster_ingame = r)
+		getOptionDefault(39, 0).then(r => stats.role_filter = r)
+		getOption(40).then(r => stats.helper = r)
+		getOption(41).then(r => stats.helper_ingame = r)
+		getOptionDefault(42, 15).then(r => stats.mayor_threshold = r)
+		getOption(43).then(r => stats.host_log = r)
+		getOption(44).then(r => stats.automation_level = r)
+		getOption(45).then(r => stats.ghost = r)
+		getOption(46).then(r => stats.haunting = r)
+		//phase info
+		getOption(statID.PHASE).then(r => stats.phase = r)
+		getOption(statID.SUBPHASE).then(r => stats.subphase = r)
         // REWARD LOG
-		sqlGetStat(statID.REWARD_LOG,  result => { 
-			stats.reward_log = result; 
-			if(doLog) log("Stats > Cached reward log as `" + result + "`!")
-		}, () => {
-            stats.reward_log = null;
-			log("Stats > ❗❗❗ Unable to cache reward log! Defaulting to *none*.")
-		});
+		getOptionDefault(statID.REWARD_LOG, undefined).then(r => stats.reward_log = r)
         // Mentor Role
-		sqlGetStat(statID.MENTOR_ROLE,  result => { 
-			stats.mentor = result; 
-			if(doLog) log("Stats > Cached mentor role as `" + result + "`!")
-		}, () => {
-            stats.mentor = null;
-			log("Stats > ❗❗❗ Unable to cache mentor role!")
-		});
-        // Signed-sub 
-		sqlGetStat(statID.SIGNEDSUB_ROLE,  result => { 
-			stats.signedsub = result; 
-			if(doLog) log("Stats > Cached signed sub role as `" + result + "`!")
-		}, () => {
-            stats.signedsub = null;
-			log("Stats > ❗❗❗ Unable to cache signed sub role!")
-		});
+		getOption(statID.MENTOR_ROLE).then(r => stats.mentor = r)
+        // Signed-sub
+		getOption(statID.SIGNEDSUB_ROLE).then(r => stats.signedsub = r)
         // Phase Automation Info
-		sqlGetStat(statID.PHASE_AUTO_INFO,  result => { 
-            let spl = result.split(";");
-            if(spl.length < 3) {
-                stats.phaseautoinfo = null;
-                log("Stats > ❗❗❗ Unable to cache phase auto info!");
-                return;
-            }
-            stats.phaseautoinfo = {
-                all: result,
-                d0: spl[0],
-                night: +spl[1],
-                day: +spl[2]
-            };
-            if(spl.length >= 4) stats.phaseautoinfo.night_late = +spl[3];
-            if(spl.length >= 5) stats.phaseautoinfo.day_late = +spl[4];
+		getOption(statID.PHASE_AUTO_INFO).then(r => result => {
+			let spl = result.split(";");
+			if(spl.length < 3) {
+				stats.phaseautoinfo = null;
+				log("Stats > ❗❗❗ Unable to cache phase auto info!");
+				return;
+			}
+			stats.phaseautoinfo = {
+				all: result,
+				d0: spl[0],
+				night: +spl[1],
+				day: +spl[2]
+			};
+			if(spl.length >= 4) stats.phaseautoinfo.night_late = +spl[3];
+			if(spl.length >= 5) stats.phaseautoinfo.day_late = +spl[4];
 			if(doLog) log("Stats > Cached phase auto info as `" + result + "`!")
-		}, () => {
-            stats.phaseautoinfo = null;
-			log("Stats > ❗❗❗ Unable to cache phase auto info!")
-		});
+		})
         // D0 Time
-		sqlGetStat(statID.D0_TIME,  result => { 
-			stats.d0_time = + result; 
-			if(doLog) log("Stats > Cached d0 time as `" + result + "`!");
-		}, () => {
-            stats.d0_time = null;
-			log("Stats > ❗❗❗ Unable to cache d0 time!")
-		});
+		getOption(statID.D0_TIME).then(r => stats.d0_time = r)
 	}
 	
 	/* Gets the name of a gamephase by id */
