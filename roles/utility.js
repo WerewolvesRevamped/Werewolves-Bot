@@ -309,22 +309,47 @@ module.exports = function() {
             let queryTeam = query.filter(el => el[0] == "Team");
             let queryClass = query.filter(el => el[0] == "Class");
             let queryType = query.filter(el => el[0] == "Type");
+            let queryElement = query.filter(el => el[0] == "Element");
+            console.log(queryElement);
+            if(queryElement[0]) queryElement = queryElement[0][1].toLowerCase();
             let whereQuery = [];
             if(queryCategory[0]) whereQuery.push(`category = ${connection.escape(queryCategory[0][1])}`);
             if(queryTeam[0]) whereQuery.push(`team = ${connection.escape(queryTeam[0][1])}`);
             if(queryClass[0]) whereQuery.push(`class = ${connection.escape(queryClass[0][1])}`);
             if(queryType[0]) whereQuery.push(`type = ${connection.escape(queryType[0][1])}`);
-            // do the sql query
-            let roles = (await sqlProm("SELECT display_name,class,category,team FROM roles WHERE " + whereQuery.join(" AND ")));
-            // apply formatting
-            return roles.sort((a, b) => a.display_name.localeCompare(b.display_name)).map(el => {
-                let ret = format;
-                ret = ret.replace(/\$\.Team/g, toTitleCase(el.team));
-                ret = ret.replace(/\$\.Name/g, el.display_name);
-                ret = ret.replace(/\$\.Emoji/g, `<?${el.display_name.replace(/ /g,"")}:>`);
-                ret = ret.replace(/\$\.ClassCat/g, (el.class == "unaligned" ? "UA" : el.class[0].toUpperCase()) + el.category[0].toUpperCase());
-                return ret;
-            }).join("\n");
+            
+            if(queryElement === "attributes" || queryElement === "teams") {
+                // do the sql query
+                let attrs = (await sqlProm("SELECT display_name FROM " + queryElement));
+                // apply formatting
+                return attrs.sort((a, b) => a.display_name.localeCompare(b.display_name)).map(el => {
+                    let ret = format;
+                    ret = ret.replace(/\$\.Name/g, toTitleCase(el.display_name));
+                    return ret;
+                }).join("\n");
+            } else if(queryElement === "groups") {
+                // do the sql query
+                let groups = (await sqlProm("SELECT display_name,team FROM groups WHERE " + whereQuery.join(" AND ")));
+                // apply formatting
+                return groups.sort((a, b) => a.display_name.localeCompare(b.display_name)).map(el => {
+                    let ret = format;
+                    ret = ret.replace(/\$\.Team/g, toTitleCase(el.team));
+                    ret = ret.replace(/\$\.Name/g, toTitleCase(el.display_name));
+                    return ret;
+                }).join("\n");
+            } else {
+                // do the sql query
+                let roles = (await sqlProm("SELECT display_name,class,category,team FROM roles WHERE " + whereQuery.join(" AND ")));
+                // apply formatting
+                return roles.sort((a, b) => a.display_name.localeCompare(b.display_name)).map(el => {
+                    let ret = format;
+                    ret = ret.replace(/\$\.Team/g, toTitleCase(el.team));
+                    ret = ret.replace(/\$\.Name/g, el.display_name);
+                    ret = ret.replace(/\$\.Emoji/g, `<?${el.display_name.replace(/ /g,"")}:>`);
+                    ret = ret.replace(/\$\.ClassCat/g, (el.class == "unaligned" ? "UA" : el.class[0].toUpperCase()) + el.category[0].toUpperCase());
+                    return ret;
+                }).join("\n");
+            }
         });
         return out;
     }
