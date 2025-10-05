@@ -182,7 +182,7 @@ module.exports = function() {
 			});
 		}
         players = players.filter(el => el != member.id);
-		if(isParticipant(member) || isGhost(member) || ((isGameMaster(member, true) || isHelper(member)) && players.length > 0)) {
+		if(isParticipant(member) || isGhost(member) || ((isGameMaster(member, true) || isHelper(member)) && players.length > 0) || (isMentor(member) && spam)) {
 			sqlGetStat(9, result => {
 				// Check if a new category is needed
 				if(result % 50 === 0) {
