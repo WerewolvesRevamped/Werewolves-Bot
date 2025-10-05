@@ -3,7 +3,6 @@
 		- Simplified sql access w/ automatic error logging
 		- Simplified access to stats
 */
-require("../stats");
 module.exports = function() {
 	/* Variables */
 	this.connection = null;
@@ -102,16 +101,15 @@ module.exports = function() {
 	/**
 	 * SQL Set Stats
 	 * Sets a stat in the stat database by numeric id
-	 * @param {number} id The of the option to insert
+	 * @param {BotStatData} stat The stat to set
 	 * @param {string} value The
 	 * @param resCallback
 	 * @param errCallback
 	 */
-	this.sqlSetStat = function(id, value, resCallback = ()=>{}, errCallback = ()=>{}) {
+	this.sqlSetStat = function(stat, value, resCallback = ()=>{}, errCallback = ()=>{}) {
 		const valueEsc = connection.escape(value)
-		const statName = toStatName(id)
-		const name = connection.escape(statName ? toStatName(id) : "")
-		sql(`INSERT INTO stats (id, value, name) VALUE (${id},${valueEsc},${name}) ON DUPLICATE KEY UPDATE value=${valueEsc}`)
+		const name = connection.escape(stat.name ? stat.name : "")
+		sql(`INSERT INTO stats (id, value, name) VALUE (${stat.id},${valueEsc},${name}) ON DUPLICATE KEY UPDATE value=${valueEsc}`)
 		// sql("UPDATE stats SET value = " + connection.escape(value) + " WHERE id = " + connection.escape(id), resCallback, errCallback);
 	}
 

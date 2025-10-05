@@ -1,6 +1,18 @@
 /* A file purely used for defining types for use with JS Doc */
 
 /**
+ * A raw bot option/ stat
+ * @typedef {Object} BotStatData
+ * @property {number} id The numerical ID of this stat
+ * @property {string} name The fancy name of this option
+ * @property {string} [cmd] The command option for this option. If null it cant be edited by commands
+ * @property {any} [default] A Default value of this property
+ * @property {string} [property] The property of this stat on BotStats
+ * @property {boolean} [adminOnly=false] If this stat can only be edited by admins. Defaults to false
+ * @see BotStats
+ */
+
+/**
  * @typedef {0 | 1 | 2 | 3 | 4} AutomationLvl
  */
 

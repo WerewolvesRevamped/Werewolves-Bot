@@ -21,12 +21,12 @@ config = require("./config.json");
 
 
 /* V1 Modules */
-require("./stats.js")();
 require("./players.js")();
 require("./ccs.js")();
 require("./whispers.js")();
 require("./theme.js")();
 require("./temp.js")();
+require("./stats.js")();
 
 // V2 Modules
 require("./paths.js")();
@@ -37,6 +37,7 @@ require("./abilities/abilities.js")();
 require("./attributes/attributes.js")();
 require("./players/players.js")();
 
+require("./stats/commands.js")()
 
 var botLoaded = false;
 
