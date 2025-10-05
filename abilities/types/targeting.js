@@ -44,9 +44,15 @@ module.exports = function() {
             abilityLog(`❗ **Error:** ${srcRefToText(src_ref)} tried to target more than one target at a time!`);  
             return { msg: "Targeting failed! " + abilityError, success: false };
         }
+        
+        // untargetting (no target specified)
         if(targets.length < 1) {
-            abilityLog(`❗ **Error:** ${srcRefToText(src_ref)} tried to target nobody!`);  
-            return { msg: "Targeting failed! " + abilityError, success: false };
+            await setTarget(src_ref, "");
+            updateDisplayCheck(`${src_ref}`, "target");
+        
+            abilityLog(`✅ ${srcRefToText(src_ref)} untargeted.`);
+            
+            return { msg: "Target removed!", success: true, target: "" };
         }
         
         let target = targets[0];

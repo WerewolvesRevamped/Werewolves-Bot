@@ -54,6 +54,7 @@ module.exports = function() {
             case "player": 
             case "player_attr": 
             case "player_group": 
+            case "player_optional": 
                 return { value: await parsePlayerSelector(selector, self, additionalTriggerData), type: "player" };
             // ROLE
             case "role": 
@@ -197,6 +198,9 @@ module.exports = function() {
             // all dead players
             case "@dead":
                 return await getAllDeadIDs();
+            // nobody
+            case "@nobody":
+                return [ ];
             // all players, including dead ones
             case "@deadalive":
                 let dead = await getAllDeadIDs();

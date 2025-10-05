@@ -107,11 +107,11 @@ module.exports = function() {
 		return new Promise((resolve) => {
             if(member.roles.cache.get(initialRole)) {
                 member.roles.add(newRole).then(async r => {
-                    if(member.roles.cache.get(newRole)) {
+                    if(member.roles.cache.get(newRole) && iteration < 20) {
                         // successfully removed roles
                         await removeRoleRecursive(member, channel, initialRole, initialName);
                     } else {
-                        if(channel) channel.send(`❗ Could not add ${newName} role to ${member.displayName}. Trying again!`);
+                        if(channel) channel.send(`❗ Could not add ${newName} role to ${member.displayName}. Trying again! (#${iteration})`);
                         await sleep(500 * iteration);
                         await switchRoles(member, channel, initialRole, newRole, initialName, newName, ++iteration);
                     }
@@ -134,8 +134,8 @@ module.exports = function() {
         if(!member) { log("Cannot find member in removeRoleRecursive"); return; }
 		return new Promise((resolve) => {
             member.roles.remove(remRole).then(async r => {
-                if(member.roles.cache.get(remRole)) {
-                    if(channel) channel.send(`❗ Could not remove ${name} role from ${member.displayName}. Trying again!`);
+                if(member.roles.cache.get(remRole) && iteration < 20) {
+                    if(channel) channel.send(`❗ Could not remove ${name} role from ${member.displayName}. Trying again! (#${iteration})`);
                     await sleep(500 * iteration);
                     await removeRoleRecursive(member, channel, remRole, name, ++iteration);
                 }
@@ -157,8 +157,8 @@ module.exports = function() {
         if(!member) { log("Cannot find member in addRoleRecursive"); return; }
 		return new Promise((resolve) => {
             member.roles.add(addRole).then(async r => {
-                if(!member.roles.cache.get(addRole)) {
-                    if(channel) channel.send(`❗ Could not add ${name} role to ${member.displayName}. Trying again!`);
+                if(!member.roles.cache.get(addRole) && iteration < 20) {
+                    if(channel) channel.send(`❗ Could not add ${name} role to ${member.displayName}. Trying again! (#${iteration})`);
                     await sleep(500 * iteration);
                     await addRoleRecursive(member, channel, addRole, name, ++iteration);
                 }

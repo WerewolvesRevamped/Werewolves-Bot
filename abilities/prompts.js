@@ -777,6 +777,14 @@ module.exports = function() {
                 }
                 return player;
             }
+            case "player_optional": {
+                let player = parsePlayerOptionalReply(text, message);
+                if(player === false) {
+                    if(message) message.reply(basicEmbed("❌ You must either specify a valid player or 'nobody'.", EMBED_RED));
+                    return false;
+                }
+                return player;
+            }
             case "dead": {
                 let player = parseDeadReply(text, message);
                 if(player === false) {
@@ -823,7 +831,8 @@ module.exports = function() {
     **/
     async function randomPromptReply(type) {
         switch(type) {
-            case "player": {
+            case "player":
+            case "player_optional": {
                 let ids = await getAllLivingIDs();
                 let randomId = ids[Math.floor(Math.random() * ids.length)];
                 let player = parsePlayerReply(randomId);
@@ -858,6 +867,22 @@ module.exports = function() {
             }
         }
     }
+    
+    /**
+    Parses an argument of type player optional in a prompt reply
+    **/
+    function parsePlayerOptionalReply(playerName, message = null) {
+        // list of valid terms
+        let nobody = ["nobody","noone","no","none","untarget","nothing"];
+        let pSplit = playerName.toLowerCase().split(/[,\-!\?\s ]|\. /);
+        if(pSplit.filter(el => nobody.includes(el)).length > 0) {
+            return [`❌ Nobody`, `@nobody[player]`]; // return display name
+        } else {
+            // if not nobody, go to normal player parsing
+            return parsePlayerReply(playerName, message);
+        }
+    }
+    
     
     /**
     Parses an argument of type player in a prompt reply

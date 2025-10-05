@@ -647,7 +647,7 @@ module.exports = function() {
     const joiningSubtype = "(Member|Owner|Visitor)";
     const loyaltySubtype = "(Group|Alignment)";
     const pollManipManipSubtype = "(Unvotable|Disqualified)";
-    const targetingType = "(Player|Dead|Role|Attribute|Category|Full Category|Boolean|Option)";
+    const targetingType = "(Player|Dead|Role|Attribute|Category|Full Category|Boolean|Option|Player Optional)";
 
     /**
     Parse Abilities
@@ -898,7 +898,7 @@ module.exports = function() {
         exp = new RegExp("^Target " + targetType + " \\(" + targetingType + "\\)$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "targeting", subtype: "target", target: ttpp(fd[1], fd[2].toLowerCase()) };
+            ability = { type: "targeting", subtype: "target", target: ttpp(fd[1], fd[2].toLowerCase().replace(/ /g, "_")) };
         }
         // untarget
         exp = new RegExp("^Untarget$", "g");
