@@ -37,8 +37,6 @@ require("./abilities/abilities.js")();
 require("./attributes/attributes.js")();
 require("./players/players.js")();
 
-require("./stats/commands.js")()
-
 var botLoaded = false;
 
 /* Setup */

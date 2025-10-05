@@ -75,7 +75,7 @@ module.exports = function() {
         })
 
         //simple stats
-        avalilbleStats.filter(s => s.property).forEach(s => {
+        availableStats.filter(s => s.property).forEach(s => {
             getStat(s.id, s.name, s.default).then(r => stats[s.property] = r)
         })
 

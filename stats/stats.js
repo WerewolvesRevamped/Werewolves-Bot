@@ -7,7 +7,7 @@ module.exports = function() {
     /**
      * @type {BotStatData[]}
      */
-    this.avalilbleStats = [
+    this.availableStats = [
         {id: 1, name: "Gamephase", cmd: "null", default: 0, property: "gamephase"},
         {id: 2, name: "CMD Prefix", cmd: "prefix", default: "$", property: "prefix"},
         {id: 3, name: "Participant Role Id", cmd: "participant", property: "participant", adminOnly: true},
@@ -69,7 +69,7 @@ module.exports = function() {
      * @return {BotStatData | undefined}
      */
     this.getStatFromId = function (id) {
-        return this.avalilbleStats.find(s => s.id === id)
+        return this.availableStats.find(s => s.id === id)
     }
 
     /**
@@ -78,7 +78,7 @@ module.exports = function() {
      * @return {BotStatData | undefined}
      */
     this.getStatFromCmd = function (arg) {
-        return this.avalilbleStats.find(s => s.cmd === arg)
+        return this.availableStats.find(s => s.cmd === arg)
     }
 
     /**

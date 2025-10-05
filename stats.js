@@ -7,6 +7,7 @@
 */
 require("./stats/stats.js")()
 require("./stats/loader.js")()
+require("./stats/commands.js")()
 
 module.exports = function () {
     /** The stored options/stats for the bot
