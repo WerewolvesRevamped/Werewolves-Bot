@@ -1264,6 +1264,12 @@ module.exports = function() {
         if(fd) {
             ability = { type: "poll", subtype: "cancellation", target: ttpp(fd[1], "poll"), duration: dd(fd[2], "untiluse") };
         }
+        // Cancel polls resulting ability, silently
+        exp = new RegExp("^Silently cancel `" + str + "` Poll" + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "poll", subtype: "cancellation_silent", target: ttpp(fd[1], "poll"), duration: dd(fd[2], "untiluse") };
+        }
         // Delete a poll
         exp = new RegExp("^Delete `" + str + "` Poll" + attrDuration + "$", "g");
         fd = exp.exec(abilityLine);

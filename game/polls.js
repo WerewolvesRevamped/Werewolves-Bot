@@ -531,6 +531,7 @@ module.exports = function() {
         
         // attempt poll cancellation
         let pollCancelled = await attemptPollCancellation(pollType);
+        let pollCancelledSilent = await attemptPollCancellationSilent(pollType);
         
         // send poll results
         doTrigger = false;
@@ -539,6 +540,7 @@ module.exports = function() {
             let embed;
             if(pollCancelled) { // CANCELLED - NO WINNER
                 msgFull += `\n\n**Cancelled:** The poll was cancelled!`;
+                actionLog(`🗳️ ${toTitleCase(pollName)} (${pollType}) was cancelled.`);
                 embed = basicEmbed(msgFull, EMBED_RED);
             } else if(maxVotesData.length === 1) { // SINGLE WINNER
             
@@ -612,6 +614,11 @@ module.exports = function() {
             embed.embeds[0].title = toTitleCase(pollName); // title
             await channel.send(embed);
             actionLog(`🗳️ *Nobody* won ${toTitleCase(pollName)} (${pollType}).`);
+        }
+        
+        if(pollCancelledSilent) {
+            actionLog(`🗳️ ${toTitleCase(pollName)} (${pollType}) was silently cancelled.`);
+            doTrigger = false;
         }
         
         // on poll closed trigger

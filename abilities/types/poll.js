@@ -56,6 +56,11 @@ module.exports = function() {
                 result = await pollCancel(src_name, src_ref, pollType, duration);
                 return result;
             break;
+            case "cancellation_silent":
+                duration = parseDuration(ability.duration ?? "untiluse");
+                result = await pollCancelSilent(src_name, src_ref, pollType, duration);
+                return result;
+            break;
             case "manipulation":
                 duration = parseDuration(ability.duration ?? "untiluse");
                 let manipTarget = await parsePlayerSelector(ability.manip_target, src_ref, additionalTriggerData);
@@ -92,6 +97,15 @@ module.exports = function() {
         await createPollResultAttribute(src_name, src_ref, pollType, duration, pollType, "cancel");
         abilityLog(`✅ ${toTitleCase(pollType)} was cancelled.`);
         return { msg: "Poll cancelled!", success: true, target: `poll:${pollType}` };
+    }
+    
+    /** PRIVATE
+    Ability: Poll - Cancel Silent
+    **/
+    async function pollCancelSilent(src_name, src_ref, pollType, duration) {
+        await createPollResultAttribute(src_name, src_ref, pollType, duration, pollType, "cancel_silent");
+        abilityLog(`✅ ${toTitleCase(pollType)} was cancelled silently.`);
+        return { msg: "Poll silently cancelled!", success: true, target: `poll:${pollType}` };
     }
     
     /** PRIVATE
@@ -139,6 +153,17 @@ module.exports = function() {
     **/
     this.attemptPollCancellation = async function(pollType) {
         let allCancellations = await queryAttribute("attr_type", "poll_result", "val1", pollType, "val2", "cancel"); // get all cancellations
+        if(allCancellations <= 0) return false; // no cancellations
+        // consume attribute
+        await useAttribute(allCancellations[0].ai_id);
+        return true;
+    }
+    
+    /** PUBLIC
+    returns if a specific poll is cancelled silently and consumes the attribute
+    **/
+    this.attemptPollCancellationSilent = async function(pollType) {
+        let allCancellations = await queryAttribute("attr_type", "poll_result", "val1", pollType, "val2", "cancel_silent"); // get all silent cancellations
         if(allCancellations <= 0) return false; // no cancellations
         // consume attribute
         await useAttribute(allCancellations[0].ai_id);
