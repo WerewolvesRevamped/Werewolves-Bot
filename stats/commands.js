@@ -9,7 +9,7 @@ require("./stats.js")()
  */
 function cmdOptionsSet (channel, value, stat) {
     // Set value
-    sqlSetStat(stat, args[1], result => {
+    sqlSetStat(stat, value, result => {
         channel.send("✅ Successfully updated *" + stat.name + "* ("+stat.id+") to `" + value + "`!");
         getStats();
     }, () => {
@@ -70,7 +70,7 @@ module.exports = function () {
         }
 
         // Find subcommand
-        if(args[1]) cmdOptionsSet(message.channel, args, stat);
+        if(args[1]) cmdOptionsSet(message.channel, args[1], stat);
         else cmdOptionsGet(message.channel, stat);
     }
 

@@ -27,7 +27,7 @@ module.exports = function() {
 		connection.connect(err => {
 			if(err) logO(err);
 			else {
-				createTables()
+				if(config.setup_db) createTables()
 				getStats()
 			}
 		});

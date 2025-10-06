@@ -12,6 +12,7 @@
     "roles_repo": "Repo Name",
     "roles_repo_secondary": null,
     "welcome_channel": null,
+    "setup_db": true,
 	"db": {
 		"host": "localhost",
 		"user": "USER",

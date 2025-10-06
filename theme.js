@@ -123,7 +123,7 @@ module.exports = function() {
 	}
 	
 	this.cmdThemeSelect = function(channel, args) {
-		cmdOptionsSet(channel, args, "29"); 
+		cmdOptionsSet(channel, args[1], "29"); 
 	}
 	
 	// can apply a theme onto both strings and arrays
