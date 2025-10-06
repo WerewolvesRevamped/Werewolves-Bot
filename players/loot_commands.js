@@ -110,6 +110,26 @@ module.exports = function() {
     }
     
     /**
+    Command: $yell
+    **/
+    this.yellList = [];
+    this.cmdYell = async function(message) {
+        let yellPerms = await inventoryGetItem(message.author.id, "bot:yell");
+        if(yellPerms === 0) {
+            message.channel.send(`⛔ You have not unlocked the ${stats.prefix}yell command.`);
+            return;
+        } else {
+            if(yellList.includes(message.author.id)) {
+                yellList = yellList.filter(el => el != message.author.id);
+                message.channel.send("✅ No longer yelling!");
+            } else {
+                message.channel.send("✅ Now YELLING!");
+                yellList.push(message.author.id);
+            }
+        }
+    }
+    
+    /**
     Command: $fortune
     **/
     this.cmdFortune = async function(message, args) {
