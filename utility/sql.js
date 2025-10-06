@@ -109,7 +109,7 @@ module.exports = function() {
 	this.sqlSetStat = function(stat, value, resCallback = ()=>{}, errCallback = ()=>{}) {
 		const valueEsc = connection.escape(value)
 		const name = connection.escape(stat.name ? stat.name : "")
-		sql(`INSERT INTO stats (id, value, name) VALUE (${stat.id},${valueEsc},${name}) ON DUPLICATE KEY UPDATE value=${valueEsc}`)
+		sql(`INSERT INTO stats (id, value, name) VALUE (${stat.id},${valueEsc},${name}) ON DUPLICATE KEY UPDATE value=${valueEsc}`, resCallback, errCallback)
 		// sql("UPDATE stats SET value = " + connection.escape(value) + " WHERE id = " + connection.escape(id), resCallback, errCallback);
 	}
 
