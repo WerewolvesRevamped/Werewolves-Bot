@@ -223,6 +223,7 @@ module.exports = function() {
         ["newship", PERM.AL, "Updates your nickname.", "", "Updates your nickname. Lootbox reward command.", "newship", ["✅ You love mctsts!"], CMDSTATE.RDY],
         ["newhate", PERM.AL, "Updates your nickname.", "", "Updates your nickname. Lootbox reward command.", "newhate", ["✅ You hate mctsts!"], CMDSTATE.RDY],
         ["flip", PERM.AL, "Flips a coin.", "", "Flips a coin, randomly returning either heads or tails. Lootbox reward command.", "flip", ["@Ts, your coin flip landed on: TAILS."], CMDSTATE.RDY],
+        ["yell", PERM.AL, "Makes the bot yell info messages.", "", "Temporarily makes the bot yell info messages.", "yell", ["✅ Now YELLING!"], CMDSTATE.RDY],
         ["fortune", PERM.AL, "Tells your fortune.", "", "Tells your fortune from the WWR Tarot Cards.", "fortune", [], CMDSTATE.RDY],
         // List Commands
         ["list_signedup", PERM.AL, "Lists signed up players.", "", "Lists all signed up players.", "list", ["Signed Up Players | Total: 3","🛠 - McTsts (@McTsts)","🏹 - venomousbirds  (@venomousbirds )","🦎 - shapechange (@shapechange)"], CMDSTATE.RDY],

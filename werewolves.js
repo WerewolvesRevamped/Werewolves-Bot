@@ -1034,6 +1034,13 @@ client.on("messageCreate", async message => {
         }
         cmdFortune(message, args);
 	break;
+	case "yell":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
+        cmdYell(message, args);
+	break;
     case "time":
         cmdTime(message.channel, args);
     break;

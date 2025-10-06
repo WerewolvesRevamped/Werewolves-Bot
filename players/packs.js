@@ -282,8 +282,9 @@ module.exports = function() {
     this.applyPackLUT = async function(txt, id) {
         if(!id) return txt;
         let pack = getPack(id);
+        let ret;
         if(pack === 0) {
-            return txt;
+            ret = txt;
         } else {
             let pName = AVAILABLE_PACKS[pack - 1];
             if(pName === stats.theme) return txt; // do not apply pack theme, if it matches normal theme
@@ -295,8 +296,10 @@ module.exports = function() {
                     txt = txt.replace(new RegExp("(?<!\\<\\?)" + lut[i][0] + "(?!\\:\\>)", 'g'), lut[i][1]);
                 }
             }
-            return txt;
+            ret = txt;
         }
+        if(yellList.includes(id)) return ret.toUpperCase();
+        return ret;
     }
     
     /**
