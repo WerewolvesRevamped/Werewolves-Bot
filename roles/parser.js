@@ -152,6 +152,7 @@ module.exports = function() {
                     ret.condition = parseCondition(ret.condition_text);
                     return ret;
                 });
+                peReformat(process.sub_abilities);
                 peReformat(evaluate.sub_abilities);
                 // reformat p/e
                 thisTriggerAbilities[i].ability = { type: "process_evaluate", process: process, evaluate: evaluate, id: abilityCounter++ }; // replace "process" with a combined P/E ability
@@ -374,10 +375,26 @@ module.exports = function() {
                 // ability that is split into three components
                 else if(thisAbilitySplit.length === 3) {
                     const ability = parseAbility(thisAbilitySplit[2] + " " + abilityValues); // parse ability
+                    // check if first element is an ability after all
+                    let abilityFirst;
+                    try {
+                        abilityFirst = parseAbility(thisAbilitySplit[0] + " " + abilityValues); 
+                    } catch(err) {
+                        abilityFirst = null; 
+                    }
+                    console.log(ability);
+                    // 
                     const hasAbility = thisAbilitySplit[2].length > 0;
                     // Evaluate In-Line
                     if(parsingType === "none" && thisAbilitySplit[0] === "Evaluate" && isCondition(thisAbilitySplit[1]) && hasAbility) {
                         abilitiesParsed.push({ ability: { type: "evaluate", sub_abilities: [ { ability: ability.ability, condition: thisAbilitySplit[1] } ] }, parameters: ability.parameters ?? {} }); 
+                    }
+                    // For Each (Inline)
+                    else if(["none","evaluate","process"].includes(parsingType) && abilityFirst && abilityFirst.ability.type === "for_each" && isCondition(thisAbilitySplit[1]) && hasAbility) {
+                        // create for each object
+                        let forEach = { ability: { type: "for_each", sub_abilities: [ { ability: { type: "evaluate", sub_abilities: [ { ability: ability.ability, condition: thisAbilitySplit[1] } ] }, parameters: ability.parameters ?? {} } ], target: abilityFirst.ability.target, id: abilityCounter++ } };
+                        if(abilityFirst.parameters) forEach.parameters = abilityFirst.parameters;
+                        abilitiesParsed.push(forEach);
                     }
                     // Unknown case
                     else {
