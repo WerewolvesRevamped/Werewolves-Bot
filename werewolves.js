@@ -43,9 +43,9 @@ var botLoaded = false;
 client.on("ready", async () => {
     
     setMainGuild();
-    
-	sqlSetup();
-	getStats();
+
+	await sqlSetup(); //ensure sql is loaded before anything else
+	// getStats(); Loaded in sql setup
     
     createActionQueueChecker();
     createScheduleChecker();

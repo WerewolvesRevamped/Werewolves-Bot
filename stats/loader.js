@@ -24,36 +24,31 @@ const doLog = false;
 function getStat(id, name, def) {
     return new Promise((resolve) => {
         sqlGetStat(id,  result => {
-            resolve(result)
             if(doLog) log(`Stats > Cached ${name} as \`${result}\`!`)
+            resolve(result)
         }, () => {
-            if (def || def === null) {
-                resolve(def)
+            if (def !== undefined) {
                 log(`Stats > ⚠️ Unable to cache ${name}, defaulting to \`${def}\``)
+                resolve(def)
             } else {
-                resolve(undefined)
                 log(`Stats > ‼️ Unable to cache ${name}!`)
+                resolve(undefined)
             }
         });
     })
 }
 
 module.exports = function() {
-    this.loadStats = function() {
+    this.loadStats = async function () {
         //Complex loaded stats
         // Get Log Channel & Guild - Done due to execution order
-        getOption(11).then(r => r ? stats.log_guild = r : stats.log_guild = config.guild);
-        getOption(12).then(r => r ? stats.log_channel = r : stats.log_channel = config.log);
-
-        // fancy mode
-        getOption(35).then(r => {
-            stats.fancy_mode = r == "true"
-        });
+        await getOption(11).then(r => r ? stats.log_guild = r : stats.log_guild = config.guild);
+        await getOption(12).then(r => r ? stats.log_channel = r : stats.log_channel = config.log);
 
         // Phase Automation Info
         getOption(statID.PHASE_AUTO_INFO).then(result => {
             let spl = result.split(";");
-            if(spl.length < 3) {
+            if (spl.length < 3) {
                 stats.phaseautoinfo = null;
                 log("Stats > ❗❗❗ Unable to cache phase auto info!");
                 return;
@@ -64,15 +59,26 @@ module.exports = function() {
                 night: +spl[1],
                 day: +spl[2]
             };
-            if(spl.length >= 4) stats.phaseautoinfo.night_late = +spl[3];
-            if(spl.length >= 5) stats.phaseautoinfo.day_late = +spl[4];
-            if(doLog) log("Stats > Cached phase auto info as `" + result + "`!")
+            if (spl.length >= 4) stats.phaseautoinfo.night_late = +spl[3];
+            if (spl.length >= 5) stats.phaseautoinfo.day_late = +spl[4];
+            if (doLog) log("Stats > Cached phase auto info as `" + result + "`!")
         });
 
         //simple stats
-        availableStats.filter(s => s.property).forEach(s => {
-            getStat(s.id, s.name, s.default).then(r => stats[s.property] = r);
-        });
+        /** @type BotStatData[] */
+        const loadStats = availableStats.filter(s => s.property && s.type !== "special")
+        for (const s of loadStats) {
+            const value = await getStat(s.id, s.name, s.default)
+            stats[s.property] = toStatType(s.type, value)
+        }
+
+        //emoji handling
+        if (stats.yes_emoji) {
+            idEmojis.push(["", `<:${client.emojis.cache.get(stats.yes_emoji).name}:${client.emojis.cache.get(stats.yes_emoji).id}>`]);
+        }
+        if (stats.no_emoji) {
+            idEmojis.push(["", `<:${client.emojis.cache.get(stats.no_emoji).name}:${client.emojis.cache.get(stats.no_emoji).id}>`]);
+        }
 
         //later caching
         if (stats.gamephase > 0) {
