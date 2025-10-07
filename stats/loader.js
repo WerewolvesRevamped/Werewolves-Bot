@@ -51,7 +51,7 @@ module.exports = function() {
         });
 
         // Phase Automation Info
-        getOption(statID.PHASE_AUTO_INFO).then(r => result => {
+        getOption(statID.PHASE_AUTO_INFO).then(result => {
             let spl = result.split(";");
             if(spl.length < 3) {
                 stats.phaseautoinfo = null;
@@ -71,6 +71,7 @@ module.exports = function() {
 
         //simple stats
         availableStats.filter(s => s.property).forEach(s => {
+            console.log(s.id, s.name);
             getStat(s.id, s.name, s.default).then(r => stats[s.property] = r);
         });
 
