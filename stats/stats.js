@@ -14,7 +14,7 @@ module.exports = function() {
         {id: 4, name: "Game Master Role Id", cmd: "gamemaster", property: "gamemaster", adminOnly: true},
         {id: 5, name: "Spectator Role Id", cmd: "spectator", property: "spectator", adminOnly: true},
         {id: 6, name: "Signed-Up Role Id", cmd: "signed_up", property: "signed_up", adminOnly: true},
-        {id: 7, name: "Dead Participant Role Id", cmd: "dead_participant", property: "dead_participant, adminOnly: true"},
+        {id: 7, name: "Dead Participant Role Id", cmd: "dead_participant", property: "dead_participant", adminOnly: true},
         {id: 8, name: "Bot Role", cmd: "bot", property: "bot", adminOnly: true},
         {id: 9, name: "CCs"},
         {id: 10, name: "Last CC Cat"},

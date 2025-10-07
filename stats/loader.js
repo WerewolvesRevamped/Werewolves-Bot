@@ -1,11 +1,6 @@
 /*
 Handle loading of stats from the database
  */
-require("./stats.js");
-require("../stats");
-
-const config = require("../config.json");
-
 /**
  * Gets an option from the stats table
  * @param {number} id The ID of this option
@@ -17,7 +12,7 @@ function getOption(id) {
 }
 
 /** If debug logging should be running */
-const doLog = false
+const doLog = false;
 
 /**
  * Load a given stat
@@ -47,13 +42,13 @@ module.exports = function() {
     this.loadStats = function() {
         //Complex loaded stats
         // Get Log Channel & Guild - Done due to execution order
-        getOption(11).then(r => r ? stats.log_guild = r : stats.log_guild = config.guild)
-        getOption(12).then(r => r ? stats.log_channel = r : stats.log_channel = config.log)
+        getOption(11).then(r => r ? stats.log_guild = r : stats.log_guild = config.guild);
+        getOption(12).then(r => r ? stats.log_channel = r : stats.log_channel = config.log);
 
         // fancy mode
         getOption(35).then(r => {
             stats.fancy_mode = r == "true"
-        })
+        });
 
         // Phase Automation Info
         getOption(statID.PHASE_AUTO_INFO).then(r => result => {
@@ -72,16 +67,16 @@ module.exports = function() {
             if(spl.length >= 4) stats.phaseautoinfo.night_late = +spl[3];
             if(spl.length >= 5) stats.phaseautoinfo.day_late = +spl[4];
             if(doLog) log("Stats > Cached phase auto info as `" + result + "`!")
-        })
+        });
 
         //simple stats
         availableStats.filter(s => s.property).forEach(s => {
-            getStat(s.id, s.name, s.default).then(r => stats[s.property] = r)
-        })
+            getStat(s.id, s.name, s.default).then(r => stats[s.property] = r);
+        });
 
         //later caching
         if (stats.gamephase > 0) {
-            getEmojis()
+            getEmojis();
         }
         if (stats.theme !== "default") {
             cacheTheme();

@@ -46,7 +46,7 @@ client.on("ready", async () => {
     
 	sqlSetup();
 	getStats();
-
+    
     createActionQueueChecker();
     createScheduleChecker();
     

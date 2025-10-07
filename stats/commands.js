@@ -1,6 +1,3 @@
-
-require("./stats.js")()
-
 /**
  * Sets a stat in the database
  * @param channel The channel the command was sent in

@@ -13,9 +13,9 @@ module.exports = function () {
     /** The stored options/stats for the bot
      * @type {BotStats}
      */
-    this.stats = {}
+    this.stats = {};
 
     this.getStats = function () {
-        loadStats()
+        loadStats();
     }
 }
