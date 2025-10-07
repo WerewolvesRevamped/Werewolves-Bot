@@ -201,6 +201,7 @@ module.exports = function() {
                                 if(isGhost(member)) ccPerms = getCCCatPermsGhostly(channel.guild);
 								if(!spam) ccPerms.push(getPerms(member.id, ["history", "read"], []));
 								else ccPerms.push(getPerms(member.id, ["read"], []));
+                                if(spam) ccPerms.push(getPerms(stats.mentor, ["write"], ["read"]));
 								if(players.length > 0 && mode === 0) players.forEach(el => ccPerms.push(getPerms(el, ["read"], [])));
 								if(players.length > 0 && mode === 1) players.forEach(el => ccPerms.push(getPerms(el, ["read", "history"], [])));
                                 let mentor = await getMentor(member.id); 
@@ -257,6 +258,7 @@ module.exports = function() {
                         if(isGhost(member)) ccPerms = getCCCatPermsGhostly(channel.guild);
                         if(!spam) ccPerms.push(getPerms(member.id, ["history", "read"], []));
                         else ccPerms.push(getPerms(member.id, ["read"], []));
+                        if(spam) ccPerms.push(getPerms(stats.mentor, ["write"], ["read"]));
 						if(players.length > 0 && mode === 0) players.forEach(el => ccPerms.push(getPerms(el, ["read"], [])));
 						if(players.length > 0 && mode === 1) players.forEach(el => ccPerms.push(getPerms(el, ["read", "history"], [])));
                         let mentor = await getMentor(member.id); 
