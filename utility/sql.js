@@ -13,24 +13,27 @@ module.exports = function() {
     SQL Setup
     Creates the connection to the database and then loads all the stats afterwards
     */
-	this.sqlSetup = function() {
-		// Create connection
-		connection = mysql.createConnection({
-			host     :  config.db.host,
-			user     : config.db.user,
-			password : config.db.password,
-			database : config.db.database,
-			charset: "utf8mb4",
-            supportBigNumbers : true
-		});
-		// Connection connection
-		connection.connect(err => {
-			if(err) logO(err);
-			else {
-				if(config.setup_db) createTables()
-				getStats()
-			}
-		});
+	this.sqlSetup = async function() {
+		return new Promise((resolve) => {
+			// Create connection
+			connection = mysql.createConnection({
+				host     :  config.db.host,
+				user     : config.db.user,
+				password : config.db.password,
+				database : config.db.database,
+				charset: "utf8mb4",
+				supportBigNumbers : true
+			});
+			// Connection connection
+			connection.connect(async (err) => {
+				if(err) logO(err);
+				else {
+					if(config.setup_db) createTables()
+					await getStats()
+				}
+				resolve()
+			});
+		})
 	}
 
 	function createTables() {
@@ -101,20 +104,18 @@ module.exports = function() {
 	/**
 	 * SQL Set Stats
 	 * Sets a stat in the stat database by numeric id
-	 * @param {BotStatData} stat The stat to set
+	 * @param {BotStatData | number} stat The stat to set of its id
 	 * @param {string} value The
 	 * @param resCallback
 	 * @param errCallback
 	 */
 	this.sqlSetStat = function(stat, value, resCallback = ()=>{}, errCallback = ()=>{}) {
 		const valueEsc = connection.escape(value);
-        // WIP: these two cases exist because different parts of the bot expect to use this function differently. this should be fixed instead
-        if(stat.id) {
-            const name = connection.escape(stat.name ? stat.name : "")
-            sql(`INSERT INTO stats (id, value, name) VALUE (${stat.id},${valueEsc},${name}) ON DUPLICATE KEY UPDATE value=${valueEsc}`, resCallback, errCallback);
-        } else {
-            sql("UPDATE stats SET value = " + connection.escape(value) + " WHERE id = " + connection.escape(stat), resCallback, errCallback);
-        }
+		/** @type BotStatData */
+		const trueStat= stat.id ? stat : getStatFromId(stat)
+		if (!trueStat) throw new Error(`Unable to find a stat with from ID ${stat}`)
+		const name = connection.escape(trueStat.name ? trueStat.name : "")
+		sql(`INSERT INTO stats (id, value, name) VALUE (${trueStat.id},${valueEsc},${name}) ON DUPLICATE KEY UPDATE value=${valueEsc}`, resCallback, errCallback);
 	}
 
 	/**

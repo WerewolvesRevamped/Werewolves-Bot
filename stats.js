@@ -15,7 +15,7 @@ module.exports = function () {
      */
     this.stats = {};
 
-    this.getStats = function () {
-        loadStats();
+    this.getStats = async function () {
+        await loadStats();
     }
 }
