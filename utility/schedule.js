@@ -20,6 +20,7 @@ module.exports = function() {
 			case "add": cmdScheduleAdd(message.channel, args, argsX); break;
 			case "recur": cmdScheduleRecur(message.channel, args, argsX); break;
 			case "remove": cmdScheduleRemove(message.channel, args); break;
+			case "setup": cmdScheduleSetup(message.channel); break;
 			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
 		}
 	}
@@ -89,6 +90,41 @@ module.exports = function() {
         }
         await sqlPromOneEsc("DELETE FROM schedule WHERE ai_id=", id);
         channel.send(`✅ Deleted scheduled event \`${id}\`!`);
+    }
+    
+    /**
+    Command: $schedule setup
+    sets up the schedule for fully automated games
+    **/
+    this.cmdScheduleSetup = async function(channel) {
+        await setupSchedule();
+        channel.send(`✅ Setup schedule!`);
+        cmdScheduleList(channel);
+    }
+    
+    this.setupSchedule = async function() {
+            pauseActionQueueChecker = true;
+            let time = parseToFutureUnixTimestamp(stats.phaseautoinfo.d0);
+            let durNight = stats.phaseautoinfo.night * 60;
+            let durDay = stats.phaseautoinfo.day * 60;
+            let fullCycle = durNight + durDay;
+            // D0 End
+            await sqlProm("INSERT INTO schedule(type, value, timestamp, recurrence, name) VALUES ('special','switch'," + connection.escape(time - 60) + ",0,'d0-end')");
+            // Night End
+            await sqlProm("INSERT INTO schedule(type, value, timestamp, recurrence, name) VALUES ('special','switch'," + connection.escape(time + durNight - 60) + "," + connection.escape(fullCycle) + ",'night-end')");
+            // Day End
+            await sqlProm("INSERT INTO schedule(type, value, timestamp, recurrence, name) VALUES ('special','switch'," + connection.escape(time + fullCycle - 60) + "," + connection.escape(fullCycle) + ",'day-end')");
+            // Night Late
+            if(stats.phaseautoinfo.night_late) {
+                await sqlProm("INSERT INTO schedule(type, value, timestamp, recurrence, name) VALUES ('special','late'," + connection.escape(time + durNight - (stats.phaseautoinfo.night_late * 60) - 30) + "," + connection.escape(fullCycle) + ",'night-late')");
+            }
+            // Day Late
+            if(stats.phaseautoinfo.day_late) {
+                await sqlProm("INSERT INTO schedule(type, value, timestamp, recurrence, name) VALUES ('special','late'," + connection.escape(time + fullCycle - (stats.phaseautoinfo.day_late * 60) - 30) + "," + connection.escape(fullCycle) + ",'day-late')");
+            }
+            
+            // save D0 time
+            await saveD0Time(time);
     }
     
     /**

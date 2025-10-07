@@ -51,7 +51,7 @@ module.exports = function() {
         });
 
         // Phase Automation Info
-        getOption(statID.PHASE_AUTO_INFO).then(r => result => {
+        getOption(statID.PHASE_AUTO_INFO).then(result => {
             let spl = result.split(";");
             if(spl.length < 3) {
                 stats.phaseautoinfo = null;
