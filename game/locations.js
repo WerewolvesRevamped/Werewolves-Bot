@@ -201,7 +201,7 @@ module.exports = function() {
     }
     
 	/* Public Permissions */
-	this.getLocationPermissions = function() {
+	function getLocationPermissions() {
 		return [ getPerms(mainGuild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.ghost, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.participant, ["write", "read"], []), getPerms(stats.mentor, ["read"], ["write"]) ];
 	}
 	
