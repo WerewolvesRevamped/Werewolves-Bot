@@ -107,10 +107,14 @@ module.exports = function() {
 	 * @param errCallback
 	 */
 	this.sqlSetStat = function(stat, value, resCallback = ()=>{}, errCallback = ()=>{}) {
-		const valueEsc = connection.escape(value)
-		const name = connection.escape(stat.name ? stat.name : "")
-		sql(`INSERT INTO stats (id, value, name) VALUE (${stat.id},${valueEsc},${name}) ON DUPLICATE KEY UPDATE value=${valueEsc}`, resCallback, errCallback)
-		// sql("UPDATE stats SET value = " + connection.escape(value) + " WHERE id = " + connection.escape(id), resCallback, errCallback);
+		const valueEsc = connection.escape(value);
+        // WIP: these two cases exist because different parts of the bot expect to use this function differently. this should be fixed instead
+        if(stat.id) {
+            const name = connection.escape(stat.name ? stat.name : "")
+            sql(`INSERT INTO stats (id, value, name) VALUE (${stat.id},${valueEsc},${name}) ON DUPLICATE KEY UPDATE value=${valueEsc}`, resCallback, errCallback);
+        } else {
+            sql("UPDATE stats SET value = " + connection.escape(value) + " WHERE id = " + connection.escape(stat), resCallback, errCallback);
+        }
 	}
 
 	/**
