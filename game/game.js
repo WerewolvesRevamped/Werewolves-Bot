@@ -87,7 +87,7 @@ module.exports = function() {
         cmdReset(channel, true, true);
         
         // update player scs
-        let players = await sqlProm("SELECT id,role FROM players ORDER BY role ASC WHERE type='player'");
+        let players = await sqlProm("SELECT id,role FROM players WHERE type='player' ORDER BY role ASC");
         
         for(let i = 0; i < players.length; i++) {
             let role = await sqlPromOne("SELECT * FROM roles WHERE name=" + connection.escape(players[i].role));
