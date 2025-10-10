@@ -147,7 +147,8 @@ module.exports = function() {
         
         // Setup schedule
         if(stats.automation_level === autoLvl.FULL) {
-            await setupSchedule();
+            let time = parseToFutureUnixTimestamp(stats.phaseautoinfo.d0);
+            await setupSchedule(time);
             // start game with timestamp parameter
             setTimeout(function() {
                 eventStarting(time);

@@ -76,8 +76,14 @@ module.exports = function() {
 		return member.roles.cache.get(stats.mentor);
 	}
     
+	/* Check if a member is a ghost mentor */
+	this.isGhostMentor = function(member) {
+        if(!member) return false;
+		return member.roles.cache.get(stats.ghost_mentor);
+	}
+    
     /* Check if member is game involved */
     this.isGameInvolved = function(member) {
-        return isParticipant(member) || isSignedUp(member) || isSub(member) || isDeadParticipant(member) || isGhost(member) || isMentor(member);
+        return isParticipant(member) || isSignedUp(member) || isSub(member) || isDeadParticipant(member) || isGhost(member) || isMentor(member) || isGhostMentor(member);
     }
 }

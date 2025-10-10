@@ -102,9 +102,8 @@ module.exports = function() {
         cmdScheduleList(channel);
     }
     
-    this.setupSchedule = async function() {
+    this.setupSchedule = async function(time) {
             pauseActionQueueChecker = true;
-            let time = parseToFutureUnixTimestamp(stats.phaseautoinfo.d0);
             let durNight = stats.phaseautoinfo.night * 60;
             let durDay = stats.phaseautoinfo.day * 60;
             let fullCycle = durNight + durDay;
