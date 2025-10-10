@@ -776,6 +776,10 @@ client.on("messageCreate", async message => {
 	case "list_dead":
 		cmdListDead(message.channel);
 	break;
+	/* List Ghost */ // Lists all ghostly players
+	case "list_ghost":
+		cmdListGhost(message.channel);
+	break;
 	/* List Substitutes */ // Lists all substitute players
 	case "list_substitutes":
 		cmdListSubs(message.channel);

@@ -222,7 +222,7 @@ module.exports = function() {
     **/
 	this.killPlayer = async function(player_id, silent = false) {
        // set to dead
-       await setLivingStatus(player_id, 0);
+       await setLivingStatus(player_id, !stats.haunting ? 0 : 2);
        // set death phase
        await setDeathPhase(player_id, getPhaseAsNumber());
        // send a reporter message
