@@ -789,6 +789,14 @@ module.exports = function() {
                 parsedRestrictions.push({ type: condType, condition: parseCondition(fd[1]) });
                 restFound = true;
             }
+            /** Status **/
+            // status
+            exp = new RegExp("^Status: (Ghostly|Any|Alive)$", "g");
+            fd = exp.exec(restrictions[rest]);
+            if(fd) {
+                parsedRestrictions.push({ type: "status", status: lc(fd[1]) });
+                restFound = true;
+            }
             /** DEFAULT **/
             if(!restFound) {
                 if(!debugMode) throw new Error(`Invalid Restriction Type \`\`\`\n${restrictions[rest]}\n\`\`\``);
