@@ -151,7 +151,9 @@ module.exports = function() {
                 case 4:
                     let ids = await getAllLivingIDs();
                     for(let i = 0; i < ids.length; i++) {
-                        await sqlProm("INSERT INTO packs (player, pack) VALUES (" + connection.escape(ids[i]) + ",6) ON DUPLICATE KEY UPDATE pack=6");
+                        if(Math.random() > 0.75) {
+                            await sqlProm("INSERT INTO packs (player, pack) VALUES (" + connection.escape(ids[i]) + ",6) ON DUPLICATE KEY UPDATE pack=6");
+                        }
                     }
                     await cachePacks();
                     dmsgText =  `You will regret killing %s. You have been cursed.`;
