@@ -340,6 +340,7 @@ module.exports = function() {
             ["phase main", PERM.GM, "Sets subphase to main.", "", "Sets the subphase to main - the default phase.", "phase main", [], CMDSTATE.RDY],
             ["phase late", PERM.GM, "Sets subphase to late.", "", "Sets the subphase to late - abilities can no longer be delayed.", "phase late", [], CMDSTATE.RDY],
             ["phase lock", PERM.GM, "Sets subphase to lock.", "", "Sets the subphase to lock - new abilities can no longer be submitted.", "phase lock", [], CMDSTATE.RDY],
+        ["cpnf", PERM.GM, "$confirm phase next force", "", "Skips confirmation for $phase next and forces it through.", "cpnf", [], CMDSTATE.RDY],
         // gamestate changers
         ["start", PERM.GM, "Starts a game.", "", "Starts the game. Assigns Participant to all signed up players, and takes away the signed up role. Sends out role messages. Creates public channels. Creates Secret Channels. Sends info messages in secret channels. Sets the gamephase.", "start", [], CMDSTATE.RDY],
         ["check_start", PERM.GM, "Checks if a game can be started.", "", "Checks if the game can be started.", "check_start", ["✅ The game is ready to start."], CMDSTATE.RDY],

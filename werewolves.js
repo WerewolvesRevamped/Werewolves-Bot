@@ -654,6 +654,10 @@ client.on("messageCreate", async message => {
     case "phase": // executes an ability 
         if(checkGM(message)) cmdPhase(message, args);
     break;
+    case "cpnf": // confirm phase next Force
+        if(checkGM(message)) cmdPhaseNext(message.channel);
+    break;
+    break;
     case "edit":
         if(checkGMHelper(message)) cmdEdit(message.channel, args, argsX);
     break;

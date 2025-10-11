@@ -138,18 +138,6 @@ module.exports = function() {
                 });
             }
             
-            // kill player
-            await killPlayer(playersFiltered[i]);
-            
-            // set mentor as dead if applicable
-            let mentor = await getMentor(playersFiltered[i]); 
-            if(mentor) {
-                let mentorMember = mainGuild.members.cache.get(mentor);
-                // revoke mentor role
-                removeRoleRecursive(mentorMember, false, stats.mentor, "mentor");
-                // grant dead role
-                addRoleRecursive(mentorMember, false, stats.dead_participant, "dead participant");
-            }
             
             // get all attacks/etc and select a random one to trigger the triggers
             let deaths = players.filter(el => el.id === playersFiltered[i]);
@@ -165,6 +153,8 @@ module.exports = function() {
                 case "attack":
                 case "kill":
                 case "true kill":
+                    // kill player
+                    await killPlayer(playersFiltered[i]);
                     // normal triggers
                     await triggerPlayer(target, "On Death", { attacker: attacker, death_type: type, attack_source: src_name }); 
                     await triggerPlayer(target, "On Killed", { attacker: attacker, death_type: type, attack_source: src_name }); 
@@ -175,6 +165,8 @@ module.exports = function() {
                     await triggerHandler("Passive");
                 break;
                 case "lynch":
+                    // kill player
+                    await killPlayer(playersFiltered[i]);
                     // normal triggers
                     await triggerPlayer(target, "On Death", { attacker: attacker, death_type: "lynch", attack_source: src_name }); 
                     await triggerPlayer(target, "On Lynch", { attacker: attacker, death_type: "lynch", attack_source: src_name }); 
@@ -185,6 +177,8 @@ module.exports = function() {
                 break;
                 case "banish":
                 case "true banish":
+                    // banish player
+                    await banishPlayer(playersFiltered[i]);
                     // normal triggers
                     await triggerPlayer(target, "On Banished", { attacker: attacker, death_type: type, attack_source: src_name }); 
                     await triggerPlayer(target, "On Banishment", { attacker: attacker, death_type: type, attack_source: src_name }); 
@@ -225,8 +219,6 @@ module.exports = function() {
        await setLivingStatus(player_id, !stats.haunting ? 0 : 2);
        // set death phase
        await setDeathPhase(player_id, getPhaseAsNumber());
-       // send a reporter message
-       reporterMessage(player_id);
         
         let player = mainGuild.members.cache.get(player_id);
         // revoke participant role
@@ -236,6 +228,17 @@ module.exports = function() {
         else addRoleRecursive(player, false, stats.ghost, "ghost");
         // revoke DRs
         removeAllDR(player_id);
+        
+        // set mentor as dead if applicable
+        let mentor = await getMentor(player_id); 
+        if(mentor) {
+            let mentorMember = mainGuild.members.cache.get(mentor);
+            // revoke mentor role
+            removeRoleRecursive(mentorMember, false, stats.mentor, "mentor");
+            // grant dead role depending on mode
+            if(!stats.haunting) addRoleRecursive(mentorMember, false, stats.dead_participant, "dead participant");
+            else addRoleRecursive(mentorMember, false, stats.ghost_mentor, "ghost mentor");
+        }
         
         // retrieve all attributes of the player and set to dead
         let playerAttributes =  await queryAttributePlayer(player_id, "owner", player_id);
@@ -248,11 +251,49 @@ module.exports = function() {
                 }
             }
             // set attribute to dead
-            updateAttributeAlive(playerAttributes[i].ai_id, 0);
+            updateAttributeAlive(playerAttributes[i].ai_id, !stats.haunting ? 0 : 2);
         }
         
         // add to storytime
         let dmsg = await getDeathMessage(player_id, `${idToEmoji(player_id)} <@${player_id}>`);
+        if(!silent) await bufferStorytime(dmsg);
+	}   
+    
+    /** PUBLIC
+    Banish Player
+    banishes a player (does not consider or defenses or anything, just banishes)
+    **/
+	this.banishPlayer = async function(player_id, silent = false) {
+       // set to dead
+       await setLivingStatus(player_id, 0);
+        
+        let player = mainGuild.members.cache.get(player_id);
+        // revoke ghost role
+        removeRoleRecursive(player, false, stats.ghost, "ghost");
+        // grant dead role
+        addRoleRecursive(player, false, stats.dead_participant, "dead participant");
+        // revoke DRs
+        removeAllDR(player_id);
+        
+        // set mentor as dead if applicable
+        let mentor = await getMentor(player_id); 
+        if(mentor) {
+            let mentorMember = mainGuild.members.cache.get(mentor);
+            // revoke mentor role
+            removeRoleRecursive(mentorMember, false, stats.mentor, "mentor");
+            // grant dead role
+            addRoleRecursive(mentorMember, false, stats.dead_participant, "dead participant");
+        }
+        
+        // retrieve all attributes of the player and set to dead
+        let playerAttributes =  await queryAttributePlayer(player_id, "owner", player_id);
+        for(let i = 0; i < playerAttributes.length; i++) {
+            // set attribute to dead
+            updateAttributeAlive(playerAttributes[i].ai_id,0);
+        }
+        
+        // add to storytime
+        let dmsg = `${idToEmoji(player_id)} <@${player_id}> was banished.`;
         if(!silent) await bufferStorytime(dmsg);
 	}   
     
