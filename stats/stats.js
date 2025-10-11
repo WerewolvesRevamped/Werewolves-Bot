@@ -61,6 +61,7 @@ module.exports = function() {
         {id: 51, name: "Signed-Up Sub Role", type: "roleID", cmd: "signedsub", property: "signedsub", adminOnly: true},
         {id: 52, name: "Phase Automation Info", type: "special", cmd: "phaseautoinfo"},  //Loaded manually not by automation
         {id: 53, name: "D0 Time", type: "number", property: "d0_time"},
+        {id: 54, name: "Ghostly Mentor Role", type: "roleID", cmd: "ghost_mentor", property: "ghost_mentor", adminOnly: true},
     ]
 
     /**
@@ -114,7 +115,8 @@ module.exports = function() {
         MENTOR_ROLE: 50,
         SIGNEDSUB_ROLE: 51,
         PHASE_AUTO_INFO: 52,
-        D0_TIME: 53
+        D0_TIME: 53,
+        GHOST_MENTOR: 54
     }
 
     /** Gets the name of a gamephase by id */

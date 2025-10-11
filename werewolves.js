@@ -654,6 +654,10 @@ client.on("messageCreate", async message => {
     case "phase": // executes an ability 
         if(checkGM(message)) cmdPhase(message, args);
     break;
+    case "cpnf": // confirm phase next Force
+        if(checkGM(message)) cmdPhaseNext(message.channel);
+    break;
+    break;
     case "edit":
         if(checkGMHelper(message)) cmdEdit(message.channel, args, argsX);
     break;
@@ -775,6 +779,10 @@ client.on("messageCreate", async message => {
 	/* List Dead */ // Lists all dead players
 	case "list_dead":
 		cmdListDead(message.channel);
+	break;
+	/* List Ghost */ // Lists all ghostly players
+	case "list_ghost":
+		cmdListGhost(message.channel);
 	break;
 	/* List Substitutes */ // Lists all substitute players
 	case "list_substitutes":

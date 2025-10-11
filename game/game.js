@@ -226,8 +226,8 @@ module.exports = function() {
     
     this.resetRoleNames = async function(channel) {
         // rename roles correctly
-        let roles = [stats.signed_up, stats.spectator, stats.sub, stats.participant, stats.dead_participant, stats.host, stats.gamemaster, stats.ghost, stats.mentor];
-        let names = ["Signed-up","Spectator", "Substitute","Participant","Dead Participant","Host", "Game Master", "Ghost", "Mentor"];
+        let roles = [stats.signed_up, stats.spectator, stats.sub, stats.participant, stats.dead_participant, stats.host, stats.gamemaster, stats.ghost, stats.mentor, stats.ghost_mentor];
+        let names = ["Signed-up","Spectator", "Substitute","Participant","Dead Participant","Host", "Game Master", "Ghostly Participant", "Mentor", "Ghostly Mentor"];
         for(let i = 0; i < roles.length; i++) {
             await channel.guild.roles.cache.get(roles[i]).setName(names[i]);
         }  
