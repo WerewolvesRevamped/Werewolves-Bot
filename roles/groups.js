@@ -368,6 +368,8 @@ module.exports = function() {
             
             // get base sc permissions
             let scPerms = getSCCatPerms(mainGuild);
+            // make ghosts unable to talk
+            scPerms.push(getPerms(stats.ghost, [], ["write"]));
             
             // if a first member is specified, grant them permissions to the channel
             if(firstMember) {
