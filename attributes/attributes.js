@@ -61,7 +61,7 @@ module.exports = function() {
 				channel.send("✳️ Sending a list of currently existing active attributes instances:\nAI ID: AttrType - Owner (Duration) [Values] {Source}");
 				// Send message
 				chunkArray(result.map(attribute => {
-                    const alive = attribute.alive === 0 ? " 💀" : ""
+                    const alive = attribute.alive === 0 ? " 💀" : (attribute.alive === 2 ? " 👻" : "");
                     const ownerText = srcRefToText(`${attribute.owner_type}:${attribute.owner}`);
                     const attrList = `${attribute.val1};${attribute.val2};${attribute.val3};${attribute.val4}`;
                     return `\`${attribute.ai_id}\`: **${toTitleCase(attribute.attr_type)}** - ${ownerText} (~${toTitleCase(attribute.duration)}) [${attrList}] {${srcNameToText(attribute.src_name)} - ${srcRefToText(attribute.src_ref, null, false)}}${alive}`;

@@ -179,9 +179,7 @@ module.exports = function() {
                 if(aliveOnly) {
                     return await getAllLivingIDs();
                 } else {   
-                    let dead = await getAllDeadIDs();
-                    let alive = await getAllLivingIDs();
-                    return [...dead, ...alive];
+                    return await getAllIDs();
                 }
             // others; @all without @self
             case "@others":
@@ -190,10 +188,9 @@ module.exports = function() {
                     let pself = srcToValue(self);
                     return all.filter(el => el != pself);
                 } else {
-                    let dead = await getAllDeadIDs();
-                    let alive = await getAllLivingIDs();
+                    let all = await getAllIDs();
                     let pself = srcToValue(self);
-                    return  [...dead, ...alive].filter(el => el != pself);
+                    return  all.filter(el => el != pself);
                 }
             // all dead players
             case "@dead":
@@ -203,9 +200,7 @@ module.exports = function() {
                 return [ ];
             // all players, including dead ones
             case "@deadalive":
-                let dead = await getAllDeadIDs();
-                let alive = await getAllLivingIDs();
-                return [...dead, ...alive];
+                return await getAllIDs();
             // target
             case "@target":
                 if(!self) { // if no self is specified, @Target is invalid
@@ -479,23 +474,49 @@ module.exports = function() {
     /**
     Get all living player ids
     **/
-    this.getAllLivingIDs = function() {
+    function getPlayersFromAliveness(op, val) {
+        if(!op || op.length < 1 || op.length > 2 || !(["=","<",">","<=",">=","<>"].includes(op))) return [];
+        if(val < 0 || val > 2) return [];
         return new Promise(res => {
-            sql("SELECT id FROM players WHERE type='player' AND alive=1", result => {
+            sql("SELECT id FROM players WHERE type='player' AND alive" + op + connection.escape(val), result => {
                 res(result.map(el => el.id));
             })
         });
     }
     
     /**
+    Get all living player ids
+    **/
+    this.getAllIDs = function() {
+        return getPlayersFromAliveness(">=", 0);
+    }
+    
+    /**
+    Get all living player ids
+    **/
+    this.getAllLivingIDs = function() {
+        return getPlayersFromAliveness("=", 1);
+    }
+    
+    /**
+    Get all ghostly player ids
+    **/
+    this.getAllGhostlyIDs = function() {
+        return getPlayersFromAliveness("=", 2);
+    }
+    
+    /**
+    Get all living and ghostly player ids
+    **/
+    this.getAllLivingAndGhostlyIDs = function() {
+        return getPlayersFromAliveness(">=", 1);
+    }
+    
+    /**
     Get all dead player ids
     **/
     this.getAllDeadIDs = function() {
-        return new Promise(res => {
-            sql("SELECT id FROM players WHERE type='player' AND alive=0", result => {
-                res(result.map(el => el.id));
-            })
-        });
+        return getPlayersFromAliveness("=", 0);
     }
     
     /** PRIVATE

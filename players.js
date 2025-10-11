@@ -91,7 +91,7 @@ module.exports = function() {
                 if(rName == "Merged") rName = el.role.split(",")[2];
                 let rEmoji = getRoleEmoji(rName);
                 rEmoji = (rEmoji ? `<:${rEmoji.name}:${rEmoji.id}> | ` : "❓ | ");
-                return `${channel.guild.members.cache.get(el.id) ? (el.alive ? client.emojis.cache.get(stats.yes_emoji) : client.emojis.cache.get(stats.no_emoji)) : "⚠️"} | ${rEmoji}${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"} (${el.role.split(",").map(role => toTitleCase(role)).join(" + ")})`
+                return `${channel.guild.members.cache.get(el.id) ? (el.alive==1 ? client.emojis.cache.get(stats.yes_emoji) : (el.alive==2?"👻":client.emojis.cache.get(stats.no_emoji))) : "⚠️"} | ${rEmoji}${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"} (${el.role.split(",").map(role => toTitleCase(role)).join(" + ")})`
             });
             const perMessageCount = 18;
 			let playerList = [], counter = 0;
@@ -266,12 +266,16 @@ module.exports = function() {
             let winnerTeam = await sqlPromOne("SELECT display_name FROM teams WHERE active=1");
             let msg = "```**Final Results**\n" + winnerTeam.display_name + " Victory\n\n";
 			let liveWinner = result.filter(el => (el.alive == 1 || el.alignment == "unaligned") && el.final_result == 1).map(l3Format);
+			let ghostlyWinners = result.filter(el => el.alive == 2 && el.alignment != "unaligned" && el.final_result == 1).map(l3Format);
 			let deadWinners = result.filter(el => el.alive == 0 && el.alignment != "unaligned" && el.final_result == 1).map(l3Format);
 			let liveLosers = result.filter(el => el.alive == 1 && el.final_result == 0).map(l3Format);
+			let ghostlyLosers = result.filter(el => el.alive == 2 && el.final_result == 0).map(l3Format);
 			let deadLosers = result.filter(el => el.alive == 0 && el.final_result == 0).map(l3Format);
             if(liveWinner.length > 0) msg += "__Live Winners:__\n" + liveWinner.join("\n") + "\n\n";
+            if(ghostlyWinners.length > 0) msg += "__Ghostly Winners:__\n" + ghostlyWinners.join("\n") + "\n\n";
             if(deadWinners.length > 0) msg += "__Dead Winners:__\n" + deadWinners.join("\n") + "\n\n";
             if(liveLosers.length > 0) msg += "__Live Losers:__\n" + liveLosers.join("\n") + "\n\n";
+            if(ghostlyLosers.length > 0) msg += "__Ghostly Losers:__\n" + ghostlyLosers.join("\n") + "\n\n";
             if(deadLosers.length > 0) msg += "__Dead Losers:__\n" + deadLosers.join("\n") + "\n\n";
             
 			channel.send(msg + "```")
@@ -316,7 +320,7 @@ module.exports = function() {
 	/* Lists all signedup players in a different log format */
 	this.cmdPlayersLog2 = function(channel) {
 		// Get a list of players
-		sql("SELECT id,emoji,role,alive,ccs FROM players WHERE alive=1 AND type='player'", result => {
+		sql("SELECT id,emoji,role,alive,ccs FROM players WHERE alive>=1 AND type='player'", result => {
 			let playerList = result.map(el => {
 				let thisRoles = el.role.split(",").map(role => toTitleCase(role));
 				let thisPlayer = channel.guild.members.cache.get(el.id);
@@ -393,7 +397,7 @@ module.exports = function() {
 	/* Lists message counts for living players    */
 	this.cmdPlayersListMsgs2 = function(channel, args) {
 		// Get a list of players
-		sql("SELECT id,emoji,public_msgs,private_msgs FROM players WHERE alive=1 AND type='player'", result => {
+		sql("SELECT id,emoji,public_msgs,private_msgs FROM players WHERE alive>=1 AND type='player'", result => {
             let totalMsgs = 0;
             let totalMsgsPrivate = 0;
             let totalMsgsPublic = 0;
@@ -690,7 +694,7 @@ module.exports = function() {
         let newIdSelector = connection.escape(`@id:${newPlayer}[player]`);
         
         // update new player data
-        await sqlPromEsc("UPDATE players SET type='player',role=" + connection.escape(oldPlayerData.role) +",orig_role=" + connection.escape(oldPlayerData.orig_role) +",alignment=" + connection.escape(oldPlayerData.alignment) +",alive=1,ccs=" + connection.escape(oldPlayerData.ccs) +",target=" + connection.escape(oldPlayerData.target) +",counter=" + connection.escape(oldPlayerData.counter) +" WHERE id=", newPlayer);
+        await sqlPromEsc("UPDATE players SET type='player',role=" + connection.escape(oldPlayerData.role) +",orig_role=" + connection.escape(oldPlayerData.orig_role) +",alignment=" + connection.escape(oldPlayerData.alignment) +",alive=" + connection.escape(oldPlayerData.alive) + ",ccs=" + connection.escape(oldPlayerData.ccs) +",target=" + connection.escape(oldPlayerData.target) +",counter=" + connection.escape(oldPlayerData.counter) +" WHERE id=", newPlayer);
         
         // update old player data
         await sqlPromEsc("UPDATE players SET type='substituted',role='substituted' WHERE id=", originalPlayer);

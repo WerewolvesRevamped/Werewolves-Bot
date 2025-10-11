@@ -261,7 +261,7 @@ module.exports = function() {
     function triggerHandlerPlayers(triggerName, additionalTriggerData = {}) {
         return new Promise(res => {
             // get all players
-            sql("SELECT role,id FROM players WHERE type='player' AND alive=1", async r => {
+            sql("SELECT role,id FROM players WHERE type='player' AND alive>=1", async r => {
                 // get their role's data
                 r = shuffleArray(r);
                 for(let pr of r) {
@@ -280,7 +280,7 @@ module.exports = function() {
     function triggerHandlerPlayersRoleAttributes(triggerName, additionalTriggerData = {}) {
         return new Promise(res => {
             // get all players
-            sql("SELECT players.id,active_attributes.ai_id,active_attributes.val1 AS role,active_attributes.val2 AS channel_id FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.alive=1 AND active_attributes.attr_type='role'", async r => {
+            sql("SELECT players.id,active_attributes.ai_id,active_attributes.val1 AS role,active_attributes.val2 AS channel_id FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.alive>=1 AND active_attributes.attr_type='role'", async r => {
                 // get their role's data
                 r = shuffleArray(r);
                 for(let pr of r) {
@@ -363,7 +363,7 @@ module.exports = function() {
     function triggerHandlerAttributes(triggerName, additionalTriggerData = {}) {
         return new Promise(res => {
             // get all players
-            sql("SELECT active_attributes.ai_id,attributes.name,attributes.parsed FROM attributes INNER JOIN active_attributes ON attributes.name = active_attributes.val1 WHERE active_attributes.attr_type='custom' AND active_attributes.alive=1", async r => {
+            sql("SELECT active_attributes.ai_id,attributes.name,attributes.parsed FROM attributes INNER JOIN active_attributes ON attributes.name = active_attributes.val1 WHERE active_attributes.attr_type='custom' AND active_attributes.alive>=1", async r => {
                 // no need for an extra layer for attributes due to JOIN which I forgot about previously!
                 r = shuffleArray(r);
                 for(let pr of r) {

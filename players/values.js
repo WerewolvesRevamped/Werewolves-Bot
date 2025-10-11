@@ -12,6 +12,14 @@ module.exports = function() {
         return pData && pData.alive == 1;
     }
     
+    /**
+    Check if Player is Ghostly
+    **/
+    this.isGhostly = async function(pid) {
+        let pData = await sqlPromOneEsc("SELECT alive FROM players WHERE id=", pid);
+        return pData && pData.alive == 2;
+    }
+    
     /** 
     Set Final Result
     set the final result for a player
