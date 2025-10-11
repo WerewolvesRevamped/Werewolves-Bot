@@ -168,9 +168,7 @@ module.exports = function() {
 			channel.send("⛔ You have hit the CC limit of `" + stats.cc_limit + "` CCs!");
 			return;
 		}
-		args[1] = args[1].replace(/🔒/,"lock");
-		args[1] = args[1].replace(/🤖/,"bot");
-		args[1] = args[1].replace(/👻/,"ghost");
+        args[1] = cleanCCName(args[1]);
 		players = parseUserList(args, 2, channel, member, isGhost(member) ? "ghost" : "participant");
         //console.log(players);
         if(!players || spam) players = [];
@@ -268,7 +266,7 @@ module.exports = function() {
                             if(mentor) ccPerms.push(getPerms(mentor, ["read"], ["write"]));
                         }
                         let cc = channel.guild.channels.cache.get(result);
-                        let cobj = { name: (spam?"🤖-":"") + args[1] + "", type: ChannelType.GuildText,  permissionOverwrites: ccPerms, parent: cc.id };
+                        let cobj = { name: (spam?"🤖-":"") + (isGhost(member)?"👻-":"") + args[1] + "", type: ChannelType.GuildText,  permissionOverwrites: ccPerms, parent: cc.id };
                         if(result % 50 === 49) delete cobj.parent;
                         channel.guild.channels.create(cobj)
 						.then(ct => {

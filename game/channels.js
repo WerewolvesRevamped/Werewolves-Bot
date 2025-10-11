@@ -197,6 +197,10 @@ module.exports = function() {
         
         // clean cc name
         let name = cleanCCName(args[1]);
+        
+        // make sure to keep haunted symbol
+        if(channel.name.split("-")[0] === "👻") name = "👻-" + name;
+        
         // rename cc
         channelRename(channel, name);
     }
