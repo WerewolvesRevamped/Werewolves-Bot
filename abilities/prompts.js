@@ -793,6 +793,14 @@ module.exports = function() {
                 }
                 return player;
             }
+            case "ghost": {
+                let player = parseGhostReply(text, message);
+                if(player === false) {
+                    if(message) message.reply(basicEmbed("❌ You must specify a valid ghostly player.", EMBED_RED));
+                    return false;
+                }
+                return player;
+            }
             case "role": {
                 let role = parseRoleReply(text, message);
                 if(role === false) {
@@ -844,6 +852,12 @@ module.exports = function() {
                 let player = parseDeadReply(randomId);
                 return player;
             }
+            case "ghost": {
+                let ids = await getAllGhostlyIDs();
+                let randomId = ids[Math.floor(Math.random() * ids.length)];
+                let player = parseGhostReply(randomId);
+                return player;
+            }
             case "role": {
                 let roles = await sqlProm("SELECT name FROM roles");
                 let randomRole = roles[Math.floor(Math.random() * roles.length)];
@@ -888,6 +902,24 @@ module.exports = function() {
     Parses an argument of type player in a prompt reply
     **/
     function parsePlayerReply(playerName, message = null) {
+        return parsePlayerTypeReply(playerName, message, isParticipant, "participant");
+    }
+    
+    /**
+    Parses an argument of type dead prompt reply
+    **/
+    function parseDeadReply(playerName, message = null) {
+        return parsePlayerTypeReply(playerName, message, isDeadParticipant, "dead participant");
+    }
+    
+    /**
+    Parses an argument of type ghost prompt reply
+    **/
+    function parseGhostReply(playerName, message = null) {
+        return parsePlayerTypeReply(playerName, message, isGhost, "ghostly participant");
+    }
+    
+    function parsePlayerTypeReply(playerName, message = null, validationFunction = isParticipant, typeName = "participant") {
         // check for basic player references
         let pSplit = playerName.toLowerCase().split(/[,\-!\?\s ]|\. /);
         let basic = pSplit.map(el => getUser(el)).filter(el => el);
@@ -898,8 +930,8 @@ module.exports = function() {
                 if(message) message.reply(basicEmbed("❌ Player valid but cannot be found. Please contact Hosts.", EMBED_RED));
                 return false;
             }
-            if(!isParticipant(member)) { // this applies in case the player is not a participant
-                if(message) message.reply(basicEmbed("❌ Player is not a participant.", EMBED_RED));
+            if(!validationFunction(member)) { // this applies in case the player is not of the right type
+                if(message) message.reply(basicEmbed(`❌ Player is not a ${typeName}.`, EMBED_RED));
                 return false;
             }
             let pname = member?.displayName ?? false; // get name through id
@@ -932,64 +964,8 @@ module.exports = function() {
                 if(message) message.reply(basicEmbed("❌ Player valid but cannot be found. Please contact Hosts.", EMBED_RED));
                 return false;
             }
-            if(!isParticipant(member)) { // this applies in case the player is not a participant
-                if(message) message.reply(basicEmbed("❌ Player is not a participant.", EMBED_RED));
-                return false;
-            }
-            return [`${idToEmoji(parsedPlayer)} \`${playerName} (${playerName2})\``, `@id:${parsedPlayer}[player]`]; // return display name
-        }
-    }
-    
-    /**
-    Parses an argument of type dead prompt reply
-    **/
-    function parseDeadReply(playerName, message = null) {
-        // check for basic player references
-        let pSplit = playerName.toLowerCase().split(/[\.,\-!\?\s ]/);
-        let basic = pSplit.map(el => getUser(el)).filter(el => el);
-        console.log("BASIC", pSplit, basic);
-        if(basic.length > 0) {
-            let member = mainGuild.members.cache.get(basic[0]);
-            if(!member) { // this applies in case the player has left the server
-                if(message) message.reply(basicEmbed("❌ Player valid but cannot be found. Please contact Hosts.", EMBED_RED));
-                return false;
-            }
-            if(!isDeadParticipant(member)) { // this applies in case the player is not a participant
-                if(message) message.reply(basicEmbed("❌ Player is not a dead participant.", EMBED_RED));
-                return false;
-            }
-            let pname = member?.displayName ?? false; // get name through id
-            let pname2 = member?.user.displayName ?? false; // get name through id
-            return [`${idToEmoji(basic[0])} \`${pname} (${pname2})\``, `@id:${basic[0]}[player]`]; // return display name
-        }
-        
-        // more advanced search
-        // similiar as implementation in fixUserList()
-		let allPlayerNames = playerIDs.map(el => {
-            let mem = mainGuild.members.cache.get(el);
-            let usr = client.users.cache.get(el);
-            if(!mem || !usr) return null;
-            //console.log(usr);
-            return [usr.username,usr.globalName,mem.nickname];
-        }).flat().filter(el => el).map(el => el.toLowerCase());
-        //console.log(allPlayerNames);
-        // check provided player name against all player names
-		let parsed = parseList(pSplit, allPlayerNames);
-        console.log("PARSED", parsed.found, parsed.invalid);
-        if(parsed.found.length == 0) { // no player found -> false
-            return false;
-        } else { // player found -> normalize to player.displayName
-            let player = parsed.found[0];
-            let parsedPlayer = parseUser(player); // parse player name/id/emoji to discord id
-            let member = mainGuild.members.cache.get(parsedPlayer);
-            let playerName = member?.displayName ?? false; // get name through id
-            let playerName2 = member?.user.displayName ?? false; // get name through id
-            if(playerName === false) { // this applies in case the player has left the server
-                if(message) message.reply(basicEmbed("❌ Player valid but cannot be found. Please contact Hosts.", EMBED_RED));
-                return false;
-            }
-            if(!isDeadParticipant(member)) { // this applies in case the player is not a participant
-                if(message) message.reply(basicEmbed("❌ Player is not a dead participant.", EMBED_RED));
+            if(!validationFunction(member)) { // this applies in case the player is not of the right type
+                if(message) message.reply(basicEmbed(`❌ Player is not a ${typeName}.`, EMBED_RED));
                 return false;
             }
             return [`${idToEmoji(parsedPlayer)} \`${playerName} (${playerName2})\``, `@id:${parsedPlayer}[player]`]; // return display name

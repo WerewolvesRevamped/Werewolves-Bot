@@ -55,6 +55,8 @@ module.exports = function() {
             case "player_attr": 
             case "player_group": 
             case "player_optional": 
+            case "ghost": 
+            case "dead": 
                 return { value: await parsePlayerSelector(selector, self, additionalTriggerData), type: "player" };
             // ROLE
             case "role": 
