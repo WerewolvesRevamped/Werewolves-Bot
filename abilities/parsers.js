@@ -195,6 +195,9 @@ module.exports = function() {
             // all dead players
             case "@dead":
                 return await getAllDeadIDs();
+            // all ghostly players
+            case "@ghostly":
+                return await getAllGhostlyIDs();
             // nobody
             case "@nobody":
                 return [ ];
@@ -936,6 +939,7 @@ module.exports = function() {
         // set flags
         let aliveOnly = aliveOnlyDefault;
         let selectAll = true;
+        let ghostly = false;
         // iterate through all selector components
         for(let i = 0; i < selSplit.length; i++) {
             const compName = selSplit[i][0];
@@ -1061,6 +1065,13 @@ module.exports = function() {
                 case "aliveonly":
                     if(compVal === "false") aliveOnly = false;
                 break;
+                // AliveOnly - Allows enabling of selecting dead players
+                case "ghostly":
+                    if(compVal === "true") {
+                        ghostly = true;
+                        aliveOnly = false;
+                    }
+                break;
                 // SelectAll - Allows enabling of limiting the selector to 1 random player
                 case "selectall":
                     if(compVal === "false") selectAll = false;
@@ -1070,6 +1081,9 @@ module.exports = function() {
         // apply flags
         if(aliveOnly) {
             allPlayers = allPlayers.filter(el => el.alive == 1);
+        }
+        if(ghostly) {
+            allPlayers = allPlayers.filter(el => el.alive == 2);
         }
         if(!selectAll) {
             let shuffled = shuffleArray(allPlayers);
@@ -2311,6 +2325,8 @@ module.exports = function() {
         // is boolean?
         if(["true","false"].includes(selectorTarget)) { // direct boolean
             return selectorTarget;
+        } else if("$haunting" === selectorTarget) {
+           return "" + stats.haunting; 
         } else { // not a boolean
             abilityLog(`❗ **Error:** Invalid boolean \`${selectorTarget}\`!`);
             return "false";       
@@ -2324,8 +2340,13 @@ module.exports = function() {
             let players = await getAllPlayers();
             let totalCount = players.length;
             let aliveCount = players.filter(el => el.alive == 1).length;
+            let ghostlyCount = players.filter(el => el.alive == 2).length;
+            let deadCount = players.filter(el => el.alive == 0).length;
             txt = txt.replace(/\$total/, totalCount);
             txt = txt.replace(/\$living/, aliveCount);
+            txt = txt.replace(/\$ghostly/, ghostlyCount);
+            txt = txt.replace(/\$dead/, deadCount);
+            txt = txt.replace(/\$haunting/, "" + stats.haunting);
             txt = txt.replace(/\$phase/, getPhaseAsNumber());
             txt = txt.replace(/\$phname/, getPhaseAsText());
             return txt;

@@ -1840,6 +1840,9 @@ module.exports = function() {
                     // set unique value to true
                     unique = true;
                     continue;
+                } else if(curInputLine === "Haunted Role") { // Haunted
+                    // set haunted value to true
+                    continue;
                 }
                 
                 let curInputLineSplit = curInputLine.split(": ");
@@ -2093,6 +2096,11 @@ module.exports = function() {
             else return "unknown";
         } else if(first == "#") {
             return "location";
+        }  else if(first == "$") {
+            if(["$living","$dead","$ghostly","$total","$phases"].includes(targetType)) return "number";
+            else if(["$phname"].includes(targetType)) return "string";
+            else if(["$haunting"].includes(targetType)) return "boolean";
+            else return "unknown";
         } else if(first == "`") {
             switch(targetType) {
                 case "`success`": case "`failure`":

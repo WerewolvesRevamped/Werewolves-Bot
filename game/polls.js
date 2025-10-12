@@ -549,8 +549,7 @@ module.exports = function() {
                     if(disqualified.length === 0) { // SUCCESS
                         msgFull += `\n\n**Winner:** <@${maxVotesData[0]}> with **${maxVotes}** votes!`;
                         embed = basicEmbed(msgFull, EMBED_GREEN);
-                        let pAlive = await isAlive(maxVotesData[0]);
-                        doTrigger = pAlive;
+                        doTrigger = await isAllowedPollWinner(pollTypeData.options, maxVotesData[0]);
                         actionLog(`🗳️ <@${maxVotesData[0]}> won ${toTitleCase(pollName)} (${pollType}).`);
                     } else { // DISQUALIFIED
                         msgFull += `\n\n**Result:** <@${maxVotesData[0]}> is disqualified with **${maxVotes}** votes!`;
@@ -575,8 +574,7 @@ module.exports = function() {
                         if(disqualified.length === 0) { // SUCCESS
                             msgFull += `\n\n**Winner:** <@${maxVotesData[0]}> with **${maxVotes}** votes!`;
                             embed = basicEmbed(msgFull, EMBED_GREEN);
-                            let pAlive = await isAlive(maxVotesData[0]);
-                            doTrigger = pAlive;
+                            doTrigger = await isAllowedPollWinner(pollTypeData.options, maxVotesData[0]);
                         actionLog(`🗳️ <@${maxVotesData[0]}> won ${toTitleCase(pollName)} (${pollType}).`);
                         } else { // DISQUALIFIED
                             msgFull += `\n\n**Result:** <@${maxVotesData[0]}> is disqualified with **${maxVotes}** votes!`;
@@ -672,6 +670,16 @@ module.exports = function() {
         } catch(err) {
             console.log("Error while unpinning poll. Proceeding.");
         }
+    }
+    
+    /** PRIVATE
+    Checks if the player is still an allowed poll winner.
+    This is necessary as players may change living status mid-phase
+    */
+    async function isAllowedPollWinner(options, id) {
+        const allOptions = await optionListData(options.split(", "));
+        const allPlayerIDs = allOptions.filter(el => el.type === "player").map(el => el.id);
+        return allPlayerIDs.includes(id);
     }
     
     /** PUBLIC

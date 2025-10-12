@@ -722,31 +722,33 @@ module.exports = function() {
         let restrictions = trigger?.parameters?.restrictions ?? [];
         
         // handle ghostly triggers differently -> they only trigger if a status restriction enables them
-        let statusRestrictions = restrictions.filter(el => el.type === "status");
-        if(statusRestrictions.length != 1) {
-            if(ghostly) {
-                abilityLog(`🔴 **Skipped Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}). Ability is not ghostly.`);
-                return;
-            }
-        } else {
-            let sRest = statusRestrictions[0].status;
-            switch(sRest) {
-                case "any":
-                    // nothing
-                break;
-                default:
-                case "alive":
-                    if(ghostly) {    
-                        abilityLog(`🔴 **Skipped Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}). Ability is not ghostly.`);
-                        return;
-                    }
-                break;
-                case "ghostly":    
-                    if(!ghostly) {
-                        abilityLog(`🔴 **Skipped Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}). Ability is ghostly but element is not.`);
-                        return;
-                    }
-                break;
+        if(stats.haunting) {
+            let statusRestrictions = restrictions.filter(el => el.type === "status");
+            if(statusRestrictions.length != 1) {
+                if(ghostly) {
+                    abilityLog(`🔴 **Skipped Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}). Ability is not ghostly.`);
+                    return;
+                }
+            } else {
+                let sRest = statusRestrictions[0].status;
+                switch(sRest) {
+                    case "any":
+                        // nothing
+                    break;
+                    default:
+                    case "alive":
+                        if(ghostly) {    
+                            abilityLog(`🔴 **Skipped Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}). Ability is not ghostly.`);
+                            return;
+                        }
+                    break;
+                    case "ghostly":    
+                        if(!ghostly) {
+                            abilityLog(`🔴 **Skipped Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}). Ability is ghostly but element is not.`);
+                            return;
+                        }
+                    break;
+                }
             }
         }
         

@@ -18,7 +18,8 @@
     "process_evaluate.player": "Please submit a player.",
     "protecting.active_defense.1": "Who would you like to protect?",
     "role_block.1": "You may choose a player to role-block.",
-    "spy.1": "You may choose a player to spy on.",
+    "obstructing.standard.1": "Which player would you like to obstruct?",
+    "granting.remove": "You may remove a role.",
     
     "comment_2": "Restriction Messages",
     "succession.target": "You may not select the same target two times in a row. You may resubmit another target as a reply to the original prompt.",
@@ -30,6 +31,7 @@
     "targeting.emergency.player": "Once per game, you may change your target a second time in a phase. Reply to this prompt to do so and ignore the prompt if you do not want to use your emergency use yet.",
     "disguising.emergency": "Once per game, you may change your disguise a second time in a phase. Reply to this prompt to do so and ignore the prompt if you do not want to use your emergency use yet.",
     "granting.resign": "You may resign from your position during any phase.",
+    "spy.1": "You may choose a player to spy on.",
     
     "comment_4": "Role-specific Custom Prompts",
     "amulet.1": "You must choose a player to pass the amulet too. If you do not, or if this player has previously held the amulet you die.",

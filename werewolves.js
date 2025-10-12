@@ -860,7 +860,7 @@ client.on("messageCreate", async message => {
 	case "kqak":
 		if(checkSafe(message)) {
             cmdKillq(message, ["add" ,...args]);	
-            cmdKillq(message, ["killall" ,...args]);	
+            cmdKillqKillall(message.channel);
         }
 	break;
 	/* Players */
@@ -1223,8 +1223,9 @@ client.on("messageReactionAdd", async (reaction, user) => {
     }
     console.log(`${user.globalName ?? user.id} added ${reaction.emoji.name}`);
 	if(user.bot) return;
+    let member = reaction.message.guild.members.cache.get(user.id);
 	// Handle confirmation messages
-	else if(reaction.emoji.name === "✅" && isGameMaster(reaction.message.guild.members.cache.get(user.id))) {
+	if(reaction.emoji.name === "✅" && isGameMaster(member)) {
 		sql("SELECT time,action FROM confirm_msg WHERE id = " + connection.escape(reaction.message.id), result => {
 			if(result.length > 0) confirmAction(result[0], reaction.message);
 		}, () => {
@@ -1233,13 +1234,13 @@ client.on("messageReactionAdd", async (reaction, user) => {
 	// Handle reaction ingame
 	} else if(stats.gamephase == gp.INGAME) {
 		// Remove unallowed reactions
-		if(isSpectator(reaction.message.guild.members.cache.get(user.id)) || isDeadParticipant(reaction.message.guild.members.cache.get(user.id)) || isMentor(reaction.message.guild.members.cache.get(user.id)) || isSub(reaction.message.guild.members.cache.get(user.id)) || isGhost(reaction.message.guild.members.cache.get(user.id))) {
-			if(reaction.emoji == client.emojis.cache.get(stats.no_emoji) || reaction.emoji == client.emojis.cache.get(stats.yes_emoji) || reaction.emoji.name == "🇦" || reaction.emoji.name == "🇧" || reaction.emoji.name == "🇨" || reaction.emoji.name == "🇩" || reaction.emoji.name == "🇪" || reaction.emoji.name == "🇫") return;
+		if(isSpectator(member) || isMentor(member) || isGhostMentor(member) || isSub(member)) {
+			if(reaction.emoji.name == "🇦" || reaction.emoji.name == "🇧" || reaction.emoji.name == "🇨" || reaction.emoji.name == "🇩" || reaction.emoji.name == "🇪" || reaction.emoji.name == "🇫") return;
 			reaction.users.remove(user);
 		// Automatic pinning
-		} else if(reaction.emoji.name === "📌" && isParticipant(reaction.message.guild.members.cache.get(user.id)) && (isCC(reaction.message.channel) || isSC(reaction.message.channel))) {
+		} else if(reaction.emoji.name === "📌" && isParticipant(member) && (isCC(reaction.message.channel) || isSC(reaction.message.channel))) {
 			reaction.message.pin();
-		} else if((isGameMaster(reaction.message.guild.members.cache.get(user.id)) || reaction.message.guild.members.cache.get(user.id).roles.cache.get(stats.gamemaster_ingame)) && reaction.emoji == client.emojis.cache.get(stats.yes_emoji)) {
+		} else if((isGameMaster(member) || member.roles.cache.get(stats.gamemaster_ingame)) && reaction.emoji == client.emojis.cache.get(stats.yes_emoji)) {
             if(reaction.message.content.split("||").length == 3) { // link approval
                 reaction.message.edit(Buffer.from(reaction.message.content.split("||")[1], 'base64').toString('ascii'));
                 reaction.message.reactions.removeAll();
@@ -1250,31 +1251,41 @@ client.on("messageReactionAdd", async (reaction, user) => {
                 reaction.message.edit({ embeds: [ embed ] });
                 reaction.message.reactions.removeAll();
             }
-		} else if(isGameMaster(reaction.message.guild.members.cache.get(user.id)) && !isParticipant(reaction.message.guild.members.cache.get(user.id)) && reaction.emoji.name == "❌") {
+		} else if(isGameMaster(member) && !isParticipant(member) && reaction.emoji.name == "❌") {
 			reaction.message.edit({ embeds: [] });
             console.log("invalidate prompt");
             sql("DELETE FROM prompts WHERE message_id=" + connection.escape(reaction.message.id));
             sql("DELETE FROM action_queue WHERE message_id=" + connection.escape(reaction.message.id));
 			reaction.users.remove(user);
-		}  else if(stats.gamephase == gp.INGAME && isGameMaster(reaction.message.guild.members.cache.get(user.id)) && !isParticipant(reaction.message.guild.members.cache.get(user.id)) && reaction.emoji == client.emojis.cache.get(stats.no_emoji)) {
+		}  else if(isGameMaster(member) && !isParticipant(member) && reaction.emoji == client.emojis.cache.get(stats.no_emoji)) {
 			reaction.message.delete();
-		} else if(stats.gamephase == gp.INGAME && isParticipant(reaction.message.guild.members.cache.get(user.id))) {
-            let poll = await getPoll(reaction.message.id);
+		} else if(isParticipant(member) || isDeadParticipant(member) || isGhost(member)) {
+            const poll = await getPoll(reaction.message.id);
             if(poll) {
-                let emojiText = reaction.emoji.id ? `<:${reaction.emoji.name.toLowerCase()}:${reaction.emoji.id}>` : reaction.emoji.name;
-                let emojiPlayer = emojiToID(emojiText);
-                let emojiName = pollEmojiToName(emojiText);
-                let reacText = emojiText;
-                if(emojiPlayer) reacText += ` (<@${emojiPlayer}>)`;
-                if(emojiName) reacText += ` (${emojiName})`;
-                abilityLog(`🗳️ <@${user.id}> has added reaction ${reacText} on poll \`${poll.name}\`.`);
-                tempVoteData.push(["add", user.id, emojiPlayer, reacText, +new Date(), poll.src_ref]);
-                let ind = ++tempVoteCounter;
-                setTimeout(() => processTempVoteData(ind), 15 * 1000);
-                // check for hammer poll
-                let pData = await pollGetData(poll.name);
-                if(pData && pData.hammer == 1) {
-                    pollCheckHammer(poll, pData);
+                // get poll data
+                const pData = await pollGetData(poll.type);
+                const allowedVoters = await parsePlayerSelector(pData.voters);
+                // handle votes
+                if(!allowedVoters.includes(user.id)) { // invalid votes
+                    log(`❗<@${user.id}> attempted to add an illegal vote (${reaction.emoji.name}) to \`${poll.name}\`!`);
+                    log(`<@&${stats.host}>`);
+                    reaction.users.remove(user);
+                } else { // valid votes
+                    // handle vote addition
+                    let emojiText = reaction.emoji.id ? `<:${reaction.emoji.name.toLowerCase()}:${reaction.emoji.id}>` : reaction.emoji.name;
+                    let emojiPlayer = emojiToID(emojiText);
+                    let emojiName = pollEmojiToName(emojiText);
+                    let reacText = emojiText;
+                    if(emojiPlayer) reacText += ` (<@${emojiPlayer}>)`;
+                    if(emojiName) reacText += ` (${emojiName})`;
+                    abilityLog(`🗳️ <@${user.id}> has added reaction ${reacText} on poll \`${poll.name}\`.`);
+                    tempVoteData.push(["add", user.id, emojiPlayer, reacText, +new Date(), poll.src_ref]);
+                    let ind = ++tempVoteCounter;
+                    setTimeout(() => processTempVoteData(ind), 15 * 1000);
+                    // check for hammer poll
+                    if(pData && pData.hammer == 1) {
+                        pollCheckHammer(poll, pData);
+                    }
                 }
             }
         }
@@ -1288,10 +1299,11 @@ client.on("messageReactionRemove", async (reaction, user) => {
     console.log(`${user.globalName ?? user.id} removed ${reaction.emoji.name}`);
 	// reaction role
 	if(user.bot) return;
+    let member = reaction.message.guild.members.cache.get(user.id);
 	// Automatic unpinning
-	else if(reaction.emoji.name === "📌" && reaction.count == 0 && isParticipant(reaction.message.guild.members.cache.get(user.id))) {
+	if(reaction.emoji.name === "📌" && reaction.count == 0 && isParticipant(member)) {
 		reaction.message.unpin();
-	} else if(stats.gamephase == gp.INGAME && isParticipant(reaction.message.guild.members.cache.get(user.id))) {
+	} else if(stats.gamephase == gp.INGAME && isParticipant(member)) {
         let poll = await getPoll(reaction.message.id);
         if(poll) {
             let emojiText = reaction.emoji.id ? `<:${reaction.emoji.name.toLowerCase()}:${reaction.emoji.id}>` : reaction.emoji.name;
