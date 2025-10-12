@@ -29,6 +29,15 @@ module.exports = function() {
     }
     
     /**
+    Get Living Status
+    get the alive value for a player
+    **/
+    this.getLivingStatus = async function(player_id) {
+        let res = await sqlPromEsc("SELECT alive FROM players WHERE id=", player_id);
+        return !res ? -1 : res[0].alive;
+    }
+    
+    /**
     Set Living Status
     set the alive value for a player
     **/

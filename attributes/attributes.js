@@ -162,8 +162,25 @@ module.exports = function() {
     Create Attribute
     creates an attribute in the database
     **/
-    this.createAttribute = function(src_name, src_ref, target, targetType, dur, attr_type, val1 = "", val2 = "", val3 = "", val4 = "") {
-         return sqlProm("INSERT INTO active_attributes (owner, owner_type, src_name, src_ref, attr_type, duration, val1, val2, val3, val4, applied_phase) VALUES (" + connection.escape(target) + "," + connection.escape(targetType) + "," + connection.escape(src_name) +  "," + connection.escape(src_ref) + "," + connection.escape(attr_type) + "," + connection.escape(dur) +  "," + connection.escape(val1) +  "," + connection.escape(val2) +  "," + connection.escape(val3) +  "," + connection.escape(val4) + "," + connection.escape(getPhaseAsNumber()) + ")");
+    this.createAttribute = async function(src_name, src_ref, target, targetType, dur, attr_type, val1 = "", val2 = "", val3 = "", val4 = "") {
+        let alive = 1;
+        if(stats.haunting) {
+            switch(targetType.toLowerCase()) {
+                case "player":
+                    alive = await getLivingStatus(target);
+                break;
+                case "activeextrarole":
+                    let queried = await queryAttribute("attr_type", "role", "val2", target);
+                    alive = queried[0].alive;
+                break;
+                case "attribute":
+                    let attr = await getAttribute(target);
+                    alive = attr.alive;
+                break;
+            }
+        }
+        
+         return sqlProm("INSERT INTO active_attributes (owner, owner_type, src_name, src_ref, attr_type, duration, val1, val2, val3, val4, applied_phase, alive) VALUES (" + connection.escape(target) + "," + connection.escape(targetType) + "," + connection.escape(src_name) +  "," + connection.escape(src_ref) + "," + connection.escape(attr_type) + "," + connection.escape(dur) +  "," + connection.escape(val1) +  "," + connection.escape(val2) +  "," + connection.escape(val3) +  "," + connection.escape(val4) + "," + connection.escape(getPhaseAsNumber()) + "," + connection.escape(alive) + ")");
     }
     
     /**

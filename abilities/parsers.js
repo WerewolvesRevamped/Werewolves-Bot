@@ -2027,7 +2027,7 @@ module.exports = function() {
             if(spl[i].indexOf("$") >= 0) spl[i] = await applyVariables(spl[i]);
             let infType = await inferTypeRuntime(spl[i], self, additionalTriggerData);
             if(infType != "unknown") {
-                let parsed = await parseSelector(!spl[i][spl[i].length - 1 ] === "]" ? `${spl[i]}[${infType}]` : spl[i], self, additionalTriggerData);
+                let parsed = await parseSelector(spl[i][spl[i].length - 1 ] != "]" ? `${spl[i]}[${infType}]` : spl[i], self, additionalTriggerData);
                 console.log(infType, spl[i], parsed.type, parsed.value);
                 let strs = [];
                 // iterate through selector list

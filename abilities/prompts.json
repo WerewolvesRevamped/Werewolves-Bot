@@ -16,6 +16,7 @@
     "choices.choosing": "You may choose one of the options",
     "manipulating.absolute.2": "Which two players would you like to manipulate the vote of?",
     "poll.votes.1": "Which player would you like to manipulate the starting votes of?",
+    "poll.creation": "Would you like a poll to be created?",
     "process_evaluate.role": "Please submit a role.",
     "process_evaluate.player": "Please submit a player.",
     "role_block.1": "You may choose a player to role-block.",

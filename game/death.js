@@ -289,7 +289,7 @@ module.exports = function() {
         let playerAttributes =  await queryAttributePlayer(player_id, "owner", player_id);
         for(let i = 0; i < playerAttributes.length; i++) {
             // set attribute to dead
-            updateAttributeAlive(playerAttributes[i].ai_id,0);
+            updateAttributeAlive(playerAttributes[i].ai_id, 0);
         }
         
         // add to storytime

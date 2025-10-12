@@ -858,7 +858,7 @@ client.on("messageCreate", async message => {
 	break;
 	/* Kill Q */
 	case "kqak":
-		if(checkSafe(message)) {
+		if(checkGM(message)) {
             cmdKillq(message, ["add" ,...args]);	
             cmdKillqKillall(message.channel);
         }
