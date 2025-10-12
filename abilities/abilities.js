@@ -388,6 +388,8 @@ module.exports = function() {
         let val = srcToValue(src_ref);
         switch(type) {
             case "player":
+            case "ghost":
+            case "dead":
                 return `<@${val}>`;
             case "player_group":
                 return `<@${val}> (Group Executor)`;
