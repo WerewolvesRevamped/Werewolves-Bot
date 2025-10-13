@@ -1,9 +1,17 @@
 /*
 A store of all the available stats
-
 */
+require("./loader.js")()
+require("./commands.js")()
+require("./updater.js")()
+
 
 module.exports = function() {
+    /** The stored options/stats for the bot
+     * @type {BotStats}
+     */
+    this.stats = {};
+    
     /**
      * @type {BotStatData[]}
      */
@@ -62,6 +70,7 @@ module.exports = function() {
         {id: 52, name: "Phase Automation Info", type: "special", cmd: "phaseautoinfo"},  //Loaded manually not by automation
         {id: 53, name: "D0 Time", type: "number", property: "d0_time"},
         {id: 54, name: "Ghostly Mentor Role", type: "roleID", cmd: "ghost_mentor", property: "ghost_mentor", adminOnly: true},
+        {id: 55, name: "DB Version", type: "number", property: "db_version", default: 0 },
     ]
 
     /**
@@ -116,7 +125,8 @@ module.exports = function() {
         SIGNEDSUB_ROLE: 51,
         PHASE_AUTO_INFO: 52,
         D0_TIME: 53,
-        GHOST_MENTOR: 54
+        GHOST_MENTOR: 54,
+        DB_VERSION: 55
     }
 
     /** Gets the name of a gamephase by id */

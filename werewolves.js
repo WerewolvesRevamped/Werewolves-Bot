@@ -21,21 +21,23 @@ config = require("./config.json");
 
 
 /* V1 Modules */
-require("./players.js")();
 require("./ccs.js")();
 require("./whispers.js")();
 require("./theme.js")();
 require("./temp.js")();
-require("./stats.js")();
+
+// WIP V2 Modules
+require("./game/game.js")();
+require("./players.js")();
+require("./players/players.js")();
 
 // V2 Modules
 require("./paths.js")();
 require("./roles/roles.js")();
-require("./game/game.js")();
 require("./utility/utility.js")();
 require("./abilities/abilities.js")();
 require("./attributes/attributes.js")();
-require("./players/players.js")();
+require("./stats/stats.js")();
 
 var botLoaded = false;
 
@@ -45,7 +47,7 @@ client.on("ready", async () => {
     setMainGuild();
 
 	await sqlSetup(); //ensure sql is loaded before anything else
-	// getStats(); Loaded in sql setup
+	// loadStats(); Loaded in sql setup
     
     createActionQueueChecker();
     createScheduleChecker();

@@ -28,10 +28,12 @@ module.exports = function() {
 			connection.connect(async (err) => {
 				if(err) logO(err);
 				else {
-					if(config.setup_db) createTables()
-					await getStats()
+                    createTables();
+                    await sleep(1000); // wip: this is kinda nonsense but createTables seems to run all its creations async so its annoying to properly wait for ? can we add all queries into a single sqlQuery? should we store the promises into an array and do like Promise.all or whatever?
+					await loadStats();
+                    updateTables();
 				}
-				resolve()
+				resolve();
 			});
 		})
 	}

@@ -164,6 +164,7 @@ module.exports = function() {
     **/
     this.createAttribute = async function(src_name, src_ref, target, targetType, dur, attr_type, val1 = "", val2 = "", val3 = "", val4 = "") {
         let alive = 1;
+        // in haunting, match alive of element attribute attaches to
         if(stats.haunting) {
             switch(targetType.toLowerCase()) {
                 case "player":
