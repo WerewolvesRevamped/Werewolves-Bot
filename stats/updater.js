@@ -37,6 +37,8 @@ module.exports = function() {
         log("⤴️ Running DB Update #2");
         await sqlProm("ALTER TABLE `active_attributes` ADD COLUMN `activation` int(11) NOT NULL DEFAULT 0 AFTER `counter`");
         await sqlProm("ALTER TABLE `players` ADD COLUMN `activation` int(11) NOT NULL DEFAULT 0 AFTER `counter`");
+        await sqlProm("ALTER TABLE `roles` ADD COLUMN `activation` int(11) NOT NULL DEFAULT 0 AFTER `identity`");
+        await sqlProm("ALTER TABLE `attributes` ADD COLUMN `activation` int(11) NOT NULL DEFAULT 0 AFTER `parsed`");
     }
     
 }

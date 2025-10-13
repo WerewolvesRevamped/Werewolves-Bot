@@ -1810,6 +1810,7 @@ module.exports = function() {
         let curTriggerType = null;
         let curTrigger = [];
         let unique = false;
+        let activation = 0;
         let require = [], roleAttribute = [], identity = [], include = [];
         let triggers = [];
 
@@ -1840,8 +1841,9 @@ module.exports = function() {
                     // set unique value to true
                     unique = true;
                     continue;
-                } else if(curInputLine === "Haunted Role") { // Haunted
+                } else if(curInputLine === "Haunted Role" || curInputLine === "Haunted Attribute") { // Haunted
                     // set haunted value to true
+                    activation = 1;
                     continue;
                 }
                 
@@ -1962,7 +1964,7 @@ module.exports = function() {
             triggers.push([curTriggerType, curTrigger]);
         }
 
-        return { triggers: triggers, unique: unique, requires: require, role_attribute: roleAttribute, identity: identity, include: include };
+        return { triggers: triggers, unique: unique, activation: activation, requires: require, role_attribute: roleAttribute, identity: identity, include: include };
 
     }
     

@@ -962,6 +962,9 @@ module.exports = function() {
                     roleAttributes = parsed.role_attribute.map(el => parseAttributeName(el)).join(",");
                 }
                 delete parsed.role_attribute;
+                // remove activation
+                let activation = parsed.activation && parsed.activation > 0 ? parsed.activation : 0;
+                delete parsed.activation;
                 // remove identity
                 let identity = "";
                 if(parsed.identity && parsed.identity.length == 1) {
@@ -972,6 +975,7 @@ module.exports = function() {
                 sql("UPDATE " + dbName + " SET parsed = " + connection.escape(JSON.stringify(parsed)) + " WHERE name = " + connection.escape(el));
                 if(roleAttributes.length > 0) sql("UPDATE " + dbName + " SET attributes = " + connection.escape(roleAttributes) + " WHERE name = " + connection.escape(el));
                 if(identity.length > 0) sql("UPDATE " + dbName + " SET identity = " + connection.escape(identity) + " WHERE name = " + connection.escape(el));
+                if(activation > 0 ) sql("UPDATE " + dbName + " SET activation = " + connection.escape(activation) + " WHERE name = " + connection.escape(el));
             } catch (err) {
                 console.log(err.stack);
                 output.push(`**${toTitleCase(el)}:** ${err}`);
