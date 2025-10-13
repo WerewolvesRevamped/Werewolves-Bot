@@ -162,7 +162,7 @@ module.exports = function() {
     Create Attribute
     creates an attribute in the database
     **/
-    this.createAttribute = async function(src_name, src_ref, target, targetType, dur, attr_type, val1 = "", val2 = "", val3 = "", val4 = "") {
+    this.createAttribute = async function(src_name, src_ref, target, targetType, dur, attr_type, val1 = "", val2 = "", val3 = "", val4 = "", activation = 0) {
         let alive = 1;
         // in haunting, match alive of element attribute attaches to
         if(stats.haunting) {
@@ -181,7 +181,7 @@ module.exports = function() {
             }
         }
         
-         return sqlProm("INSERT INTO active_attributes (owner, owner_type, src_name, src_ref, attr_type, duration, val1, val2, val3, val4, applied_phase, alive) VALUES (" + connection.escape(target) + "," + connection.escape(targetType) + "," + connection.escape(src_name) +  "," + connection.escape(src_ref) + "," + connection.escape(attr_type) + "," + connection.escape(dur) +  "," + connection.escape(val1) +  "," + connection.escape(val2) +  "," + connection.escape(val3) +  "," + connection.escape(val4) + "," + connection.escape(getPhaseAsNumber()) + "," + connection.escape(alive) + ")");
+         return sqlProm("INSERT INTO active_attributes (owner, owner_type, src_name, src_ref, attr_type, duration, val1, val2, val3, val4, applied_phase, alive, activation) VALUES (" + connection.escape(target) + "," + connection.escape(targetType) + "," + connection.escape(src_name) +  "," + connection.escape(src_ref) + "," + connection.escape(attr_type) + "," + connection.escape(dur) +  "," + connection.escape(val1) +  "," + connection.escape(val2) +  "," + connection.escape(val3) +  "," + connection.escape(val4) + "," + connection.escape(getPhaseAsNumber()) + "," + connection.escape(alive) + "," + connection.escape(activation) + ")");
     }
     
     /**

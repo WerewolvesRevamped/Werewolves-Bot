@@ -367,7 +367,7 @@ module.exports = function() {
 		if(verifyRole(parsedRole)) {
 			// All roles are valid -> Set it
             let roleData = await getRoleDataFromName(parsedRole);
-			sql("UPDATE players SET role = " + connection.escape(parsedRole) + ",orig_role = " + connection.escape(parsedRole) + ",alignment=" + connection.escape(roleData.team) + " WHERE id = " + connection.escape(el[1]), result => {
+			sql("UPDATE players SET role = " + connection.escape(parsedRole) + ",orig_role = " + connection.escape(parsedRole) + ",alignment=" + connection.escape(roleData.team) + ",activation=" + connection.escape(roleData.all.activation) + " WHERE id = " + connection.escape(el[1]), result => {
 				m.edit(m.content + "\n	✅ Set role to `" + parsedRole + "`!").then(m => {
 				});
 			}, () => {

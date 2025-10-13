@@ -1841,9 +1841,13 @@ module.exports = function() {
                     // set unique value to true
                     unique = true;
                     continue;
-                } else if(curInputLine === "Haunted Role" || curInputLine === "Haunted Attribute") { // Haunted
-                    // set haunted value to true
+                } else if(curInputLine === "Haunted Role" || curInputLine === "Haunted Attribute") { // Haunted (active while ghostly)
+                    // set activation value to 1
                     activation = 1;
+                    continue;
+                } else if(curInputLine === "Spiritual Role" || curInputLine === "Spiritual Attribute") { // Spiritual (active while alive & ghostly)
+                    // set activation value to 2
+                    activation = 2;
                     continue;
                 }
                 

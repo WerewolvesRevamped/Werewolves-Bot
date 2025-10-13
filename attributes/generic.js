@@ -65,7 +65,14 @@ module.exports = function() {
     creates a role attribute with specific role
     **/
     this.createRoleAttribute = async function(src_name, src_ref, target_player, dur, role =  "", channelId = "") {
-        await createAttribute(src_name, src_ref, target_player, "player", dur, "role", role, channelId);
+        // get attribute data
+        let act = 0;
+        if(stats.haunting) { 
+            let roleData = await getRoleDataFromName(role);
+            act = roleData.all.activation;
+        }
+        // create attribute
+        await createAttribute(src_name, src_ref, target_player, "player", dur, "role", role, channelId, "", "", act);
     }
     
     /**
