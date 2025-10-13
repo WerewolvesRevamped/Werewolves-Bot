@@ -47,6 +47,23 @@ module.exports = function() {
     }
     
     /**
+    Get Activation
+    get the activation value for a player
+    **/
+    this.getActivation = async function(player_id) {
+        let res = await sqlPromEsc("SELECT activation FROM players WHERE id=", player_id);
+        return !res ? -1 : res[0].activation;
+    }
+    
+    /**
+    Set Activation
+    set the activation value for a player
+    **/
+    this.setActivation = async function(player_id, act) {
+        await sqlPromEsc("UPDATE players SET activation=" + connection.escape(act) + " WHERE id=", player_id);
+    }
+    
+    /**
     Set Death Phase
     set the death phase value for a player
     **/

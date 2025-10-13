@@ -400,11 +400,11 @@ module.exports = function() {
         }
     }
     
-    /** PRIVATE
+    /** PUBLIC
     Get Attribute
     gets an attribute by ai id
     **/
-    function getAttribute(id) {
+    this.getAttribute = function(id) {
         // get attribute
         return new Promise(res => {
              sql("SELECT * FROM active_attributes WHERE ai_id=" + connection.escape(id), result => {

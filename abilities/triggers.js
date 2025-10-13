@@ -723,10 +723,32 @@ module.exports = function() {
         
         // handle ghostly triggers differently -> they only trigger if a status restriction enables them
         if(stats.haunting) {
+            // get element activation
+            let srcType = srcToType(src_ref);
+            let srcVal =  srcToValue(src_ref);
+            let activation = 0;
+            switch(srcType) {
+                case "player":
+                    activation = await getActivation(srcVal);
+                break;
+                case "player_attr":
+                    let queried = await queryAttribute("attr_type", "role", "val2", srcVal);
+                    activation = queried[0].activation;
+                break;
+                case "attribute":
+                    let attr = await getAttribute(srcVal);
+                    activation = attr.activation;
+                break;
+            }
+            
+            // check status restriction
             let statusRestrictions = restrictions.filter(el => el.type === "status");
             if(statusRestrictions.length != 1) {
-                if(ghostly) {
+                if(ghostly && activation === 0) {
                     abilityLog(`🔴 **Skipped Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}). Ability is not ghostly.`);
+                    return;
+                } else if(!ghostly && activation === 1) {
+                    abilityLog(`🔴 **Skipped Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}). Ability is ghostly.`);
                     return;
                 }
             } else {
