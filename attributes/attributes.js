@@ -466,6 +466,14 @@ module.exports = function() {
         return updateAttributeValue(id, "alive", newVal);
     }
     
+    /** PUBLIC
+    Updates the activation column
+    **/
+    this.updateAttributeActivation = function(id, newVal) {
+        // update attribute
+        return updateAttributeValue(id, "activation", newVal);
+    }
+    
     /** PRIVATE
     Update an attribute column
     **/

@@ -44,6 +44,7 @@ require("./types/feedback.js")();
 require("./types/win.js")();
 require("./types/locking.js")();
 require("./types/executing.js")();
+require("./types/activating.js")();
 
 module.exports = function() {
     
@@ -204,6 +205,9 @@ module.exports = function() {
                 break;
                 case "executing":
                     feedback = await abilityExecuting(src_refAction, src_name, ability, additionalTriggerData);
+                break;
+                case "activating":
+                    feedback = await abilityActivating(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "success":
                     feedback = { msg: "Ability succeeded!", success: true };
@@ -549,6 +553,7 @@ module.exports = function() {
             case "win": emojiName = "Ascension"; break;
             case "locking": emojiName = ""; break;
             case "executing": emojiName = "BotDeveloper"; break;
+            case "activating": emojiName = "Ghost"; break;
         }
         return emojiName ? getEmoji(emojiName) : "";
     }

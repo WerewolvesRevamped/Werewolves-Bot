@@ -647,6 +647,9 @@ client.on("messageCreate", async message => {
     case "grant": // execute - grant add
         if(checkGM(message)) cmdGrant(message, args);
     break;
+    case "apply": // execute - apply add
+        if(checkGM(message)) cmdApply(message, args);
+    break;
     case "whisper": // execute - whispering
         if(checkGM(message)) cmdWhisper(message, args);
     break;
