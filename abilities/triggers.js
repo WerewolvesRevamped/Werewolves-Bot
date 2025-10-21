@@ -739,6 +739,10 @@ module.exports = function() {
                     let attr = await getAttribute(srcVal);
                     activation = attr.activation;
                 break;
+                case "group":
+                    let grp = await groupGetDataById(srcVal);
+                    activation = grp.activation;
+                break;
             }
             
             // check status restriction

@@ -1872,11 +1872,11 @@ module.exports = function() {
                     // set unique value to true
                     unique = true;
                     continue;
-                } else if(curInputLine === "Ghostly Role" || curInputLine === "Ghostly Attribute") { // Ghostly (active while ghostly)
+                } else if(curInputLine === "Ghostly Role" || curInputLine === "Ghostly Attribute" || curInputLine === "Ghostly Group") { // Ghostly (active while ghostly)
                     // set activation value to 1
                     activation = 1;
                     continue;
-                } else if(curInputLine === "Haunted Role" || curInputLine === "Haunted Attribute") { // Haunted (active while alive & ghostly)
+                } else if(curInputLine === "Haunted Role" || curInputLine === "Haunted Attribute" || curInputLine === "Haunted Group") { // Haunted (active while alive & ghostly)
                     // set activation value to 2
                     activation = 2;
                     continue;

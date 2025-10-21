@@ -1,7 +1,7 @@
 
 module.exports = function() {
     
-    const LATEST_DB_VERSION = 2;
+    const LATEST_DB_VERSION = 3;
     
     /** Update Tables
     Check what DB updates are necessary
@@ -15,6 +15,7 @@ module.exports = function() {
         // wip: this doesnt feel right but idk
         if(stats.db_version < 1) await update_1();
         if(stats.db_version < 2) await update_2();  
+        if(stats.db_version < 3) await update_3();  
         
         // set latest version
         sqlSetStat(statID.DB_VERSION, LATEST_DB_VERSION);
@@ -39,6 +40,16 @@ module.exports = function() {
         await sqlProm("ALTER TABLE `players` ADD COLUMN `activation` int(11) NOT NULL DEFAULT 0 AFTER `counter`");
         await sqlProm("ALTER TABLE `roles` ADD COLUMN `activation` int(11) NOT NULL DEFAULT 0 AFTER `identity`");
         await sqlProm("ALTER TABLE `attributes` ADD COLUMN `activation` int(11) NOT NULL DEFAULT 0 AFTER `parsed`");
+    }
+    
+    /**
+    Update #3
+    adds 'activation' columns to groups
+    **/
+    async function update_3() {
+        log("⤴️ Running DB Update #3");
+        await sqlProm("ALTER TABLE `groups` ADD COLUMN `activation` int(11) NOT NULL DEFAULT 0 AFTER `parsed`");
+        await sqlProm("ALTER TABLE `active_groups` ADD COLUMN `activation` int(11) NOT NULL DEFAULT 0 AFTER `counter`");
     }
     
 }

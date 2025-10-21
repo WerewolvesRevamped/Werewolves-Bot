@@ -34,7 +34,7 @@ module.exports = function() {
     **/
     this.getLivingStatus = async function(player_id) {
         let res = await sqlPromEsc("SELECT alive FROM players WHERE id=", player_id);
-        return !res ? -1 : res[0].alive;
+        return !res || !res[0] ? -1 : res[0].alive;
     }
     
     /**
@@ -52,7 +52,7 @@ module.exports = function() {
     **/
     this.getActivation = async function(player_id) {
         let res = await sqlPromEsc("SELECT activation FROM players WHERE id=", player_id);
-        return !res ? -1 : res[0].activation;
+        return !res || !res[0] ? -1 : res[0].activation;
     }
     
     /**

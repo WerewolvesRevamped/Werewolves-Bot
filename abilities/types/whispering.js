@@ -29,8 +29,8 @@ module.exports = function() {
         if(source.type == null || source.multiple) return { msg: "Whispering failed! " + abilityError, success: false }; // no source found
         
         
-        if(source.type != "player" && source.type != "location") {
-            abilityLog(`❗ **Error:** Only players and locations can use whispering!`);
+        if(!["player","location","group"].includes(source.type)) {
+            abilityLog(`❗ **Error:** \`${source.type}\` type cannot use whispering.`);
             return { msg: "Whispering failed! " + abilityError, success: false };
         }
         
@@ -42,12 +42,13 @@ module.exports = function() {
         
         // parse source data
         let srcVal = source.value;
+        let srcTyp = source.type;
         let chName;
-        if(source.type === "player") {
-            let role = await getPlayerRole(source.value);
+        if(srcTyp === "player") {
+            let role = await getPlayerRole(srcVal);
             chName = srcRefToPlainText(`role:${role}`);
         } else {
-            chName = srcRefToPlainText(`${source.type}:${source.value}`);
+            chName = srcRefToPlainText(`${srcTyp}:${srcVal}`);
         }
         
         // get channel to whisper to
@@ -78,7 +79,21 @@ module.exports = function() {
         if(existingChannel) {
             whisperChannel = mainGuild.channels.cache.get(existingChannel);
         } else {
-            whisperChannel = await whisperingCreate(chName, srcVal, index);
+            switch(srcTyp) {
+                case "player":
+                    whisperChannel = await whisperingCreate(chName, srcVal, index);
+                break;
+                case "group":
+                case "location":
+                    let cid = await getSrcRefChannel(`${srcTyp}:${srcVal}`);
+                    let targetChannel = mainGuild.channels.cache.get(cid);
+                    if(!targetChannel) {
+                        abilityLog(`❗ **Error:** Could not find channel for \`${srcTyp}:${srcVal}\`.`);
+                        return { msg: "Whispering failed! " + abilityError, success: false };
+                    }
+                    whisperChannel = targetChannel;
+                break;
+            }
         }
         
         // connection name
