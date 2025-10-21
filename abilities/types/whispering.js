@@ -11,31 +11,44 @@ module.exports = function() {
     this.abilityWhispering = async function(src_ref, src_name, ability, additionalTriggerData) {
         let result;
         // check parameters
-        if(!ability.target) {
+        if(!ability.target || !ability.source) {
             abilityLog(`❗ **Error:** Missing arguments for type \`${ability.type}\`!`);
             return { msg: "Whispering failed! " + abilityError, success: false };
         }
-        let type = srcToType(src_ref);
-        if(type != "player") {
-            abilityLog(`❗ **Error:** Only players can use whispering!`);
-            return { msg: "Whispering failed! " + abilityError, success: false };
-        }
+        // parse parameters
         let disguise = ability.disguise ?? "";
         disguise = disguise.replace(/`/g, "");
-        // parse parameters
         let target = await parseLocation(ability.target, src_ref, additionalTriggerData);
+        
+        // parse target
         if(target.type == null || target.multiple) return { msg: "Whispering failed! " + abilityError, success: false }; // no location found
         let dur_type = parseDuration(ability.duration ?? "permanent");
         
+        // parse source
+        let source = await parseLocation(ability.source, src_ref, additionalTriggerData);
+        if(source.type == null || source.multiple) return { msg: "Whispering failed! " + abilityError, success: false }; // no source found
+        
+        
+        if(source.type != "player" && source.type != "location") {
+            abilityLog(`❗ **Error:** Only players and locations can use whispering!`);
+            return { msg: "Whispering failed! " + abilityError, success: false };
+        }
+        
         // handle visit
-        if(additionalTriggerData.parameters.visitless !== true) {
+        if(source.type === "player" && additionalTriggerData.parameters.visitless !== true) {
             let resultV = await visit(src_ref, target.value, disguise, NO_SND_VISIT_PARAM, "whispering");
             if(resultV) return visitReturn(resultV, "Whispering failed!", "Whispering succeeded!");
         }
         
-        // parse player data
-        let pid = srcToValue(src_ref);
-        let role = srcToValue(src_name);
+        // parse source data
+        let srcVal = source.value;
+        let chName;
+        if(source.type === "player") {
+            let role = await getPlayerRole(source.value);
+            chName = srcRefToPlainText(`role:${role}`);
+        } else {
+            chName = srcRefToPlainText(`${source.type}:${source.value}`);
+        }
         
         // get channel to whisper to
         let cid = await getSrcRefChannel(`${target.type}:${target.value}`);
@@ -47,7 +60,7 @@ module.exports = function() {
         while(true) {
             // get channel id
             index++;
-            let con = await connectionGet(`whisper:${pid}-${index}`);
+            let con = await connectionGet(`whisper:${srcVal}-${index}`);
             // check if channel even exists
             if(con.length > 0) { // if channel exists, check if it is used
                 let cid = con[0].channel_id;
@@ -65,11 +78,11 @@ module.exports = function() {
         if(existingChannel) {
             whisperChannel = mainGuild.channels.cache.get(existingChannel);
         } else {
-            whisperChannel = await whisperingCreate(role, pid, index);
+            whisperChannel = await whisperingCreate(chName, srcVal, index);
         }
         
         // connection name
-        const conName = `${pid}-${index}`;
+        const conName = `${srcVal}-${index}`;
         
         // create connection on own end
         connectionAdd(whisperChannel.id, conName, disguise);
@@ -81,7 +94,7 @@ module.exports = function() {
         connectionAdd(targetChannel.id, conName);
         
         // create an attribute
-        await createWhisperAttribute(src_name, src_ref, pid, dur_type, conName, whisperChannel.id, targetChannel.id);
+        await createWhisperAttribute(src_name, src_ref, srcVal, dur_type, conName, whisperChannel.id, targetChannel.id);
         
         // feedback
         return { msg: "Whispering succeeded!", success: true, target: `${target.type}:${target.value}` };
@@ -111,7 +124,7 @@ module.exports = function() {
                     channel.send(embed);
                 }
                 // delete connection
-                connectionDelete(name);
+                await connectionDelete(name);
             }
         }
     }

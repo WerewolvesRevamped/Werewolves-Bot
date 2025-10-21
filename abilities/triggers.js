@@ -1104,6 +1104,7 @@ module.exports = function() {
         
         // handle killq
         await killqKillall();
+        await whisperingCleanup();
         
         // update teams
         await updateActiveTeams();
@@ -1228,6 +1229,7 @@ module.exports = function() {
         
         // handle killq
         await killqKillall();
+        await whisperingCleanup();
         
         // update teams
         await updateActiveTeams();

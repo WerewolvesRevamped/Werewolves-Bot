@@ -82,6 +82,15 @@ module.exports = function() {
     }
     
     /**
+    Get Role
+    get the role value for a player
+    **/
+    this.getPlayerRole = async function(player_id) {
+        let pData = await sqlPromOneEsc("SELECT role FROM players WHERE id=", player_id);
+        return !pData ? "none" : pData.role;
+    }
+    
+    /**
     Set Alignment
     set the alignment value for a player
     **/

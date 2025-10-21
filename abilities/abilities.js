@@ -443,6 +443,59 @@ module.exports = function() {
         }
     }
     
+    /** PUBLIC
+    Source Reference to Plain Text
+    Converts a source reference to plain text
+    **/
+    this.srcRefToPlainText = function(src_ref, raw = null, allowRecursion = true) {
+        let type = srcToType(src_ref);
+        let val = srcToValue(src_ref);
+        switch(type) {
+            case "player":
+            case "ghost":
+            case "dead":
+            case "player_group":
+                let mem = mainGuild.members.cache.find(el => el.id === val);
+                return mem.displayName;
+            case "group":
+            case "player_attr":
+            case "activeextrarole":
+                let ch = mainGuild.channels.cache.find(el => el.id === val);
+                return ch.displayName;
+            case "alignment":
+            case "poll":
+            case "role":
+            case "team":
+            case "location":
+            case "killingtype":
+            case "abilitytype":
+                return toTitleCase(val);
+            case "attribute":
+                if(!isNaN(val)) {
+                    const owner = getCustomAttributeOwner(val);
+                    const name = getCustomAttributeName(val);
+                    const ownerText = allowRecursion ? srcRefToPlainText(owner) : owner;
+                    return `${name} on ${ownerText}`;
+                } else {
+                    return toTitleCase(val);
+                }
+            break;
+            case "result":
+                return raw.msg;
+            case "info":
+            case "string":
+                return val;
+            break;
+            case "number":
+                return numToText(val);
+            break;
+            case "unknown":
+            default:
+                return `UNKNOWN ${src_ref}`;
+            break;
+        }
+    }
+    
     const numberNames = ["Zero", "One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen","Twenty","Twenty-one","Twenty-two","Twenty-three","Twenty-four","Twenty-five","Twenty-six","Twenty-seven","Twenty-eight","Twenty-nine","Thirty","Thirty-one","Thirty-two","Thirty-three","Thirty-four","Thirty-five","Thirty-six","Thirty-seven","Thirty-eight","Thirty-nine","Forty","Forty-one","Forty-two","Forty-three","Forty-four","Forty-five","Forty-six","Forty-seven","Forty-eight","Forty-nine","Fifty","Fifty-one","Fifty-two","Fifty-three","Fifty-four","Fifty-five","Fifty-six","Fifty-seven","Fifty-eight","Fifty-nine","Sixty","Sixty-one","Sixty-two","Sixty-three","Sixty-four","Sixty-five","Sixty-six","Sixty-seven","Sixty-eight","Sixty-nine","Seventy","Seventy-one","Seventy-two","Seventy-three","Seventy-four","Seventy-five","Seventy-six","Seventy-seven","Seventy-eight","Seventy-nine","Eighty","Eighty-one","Eighty-two","Eighty-three","Eighty-four","Eighty-five","Eighty-six","Eighty-seven","Eighty-eight","Eighty-nine","Ninety","Ninety-one","Ninety-two","Ninety-three","Ninety-four","Ninety-five","Ninety-six","Ninety-seven","Ninety-eight","Ninety-nine","One hundred"];
     this.numToText = function(num) {
         if(num > 100 || num < -100) return num;

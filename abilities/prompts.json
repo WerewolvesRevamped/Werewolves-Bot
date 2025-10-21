@@ -17,6 +17,7 @@
     "manipulating.absolute.2": "Which two players would you like to manipulate the vote of?",
     "poll.votes.1": "Which player would you like to manipulate the starting votes of?",
     "poll.creation": "Would you like a poll to be created?",
+    "poll.addition": "Would you like a poll to be added?",
     "process_evaluate.role": "Please submit a role.",
     "process_evaluate.player": "Please submit a player.",
     "role_block.1": "You may choose a player to role-block.",
@@ -69,9 +70,10 @@
     "framer.1": "You may choose a player to disguise as an in-play mafia role.",
     "lawyer.1": "You may choose a player to disguise as an in-play town role.",
     "veteran.1": "Would you like to stay alert tonight?",
-    "apocolyptic_horseman.1": "You may choose a player to attack tonight",
-    "horseman_of_death.1": "You may doom a player, they will die tomorrow night",
+    "apocolyptic_horseman.1": "You may choose a player to attack tonight.",
+    "horseman_of_death.1": "You may doom a player, they will die tomorrow night.",
     "horseman_of_war.1": "You may doom two players, they will both lose their vote and be disqualified from election tomorrow.",
     "horseman_of_famine.1": "You may doom two players, they will both be strongly disguised as a random in play horseman role.",
-    "horseman_of_pestilence.1": "You may doom a player, they will be obstruced the following day and night"
+    "horseman_of_pestilence.1": "You may doom a player, they will be obstruced the following day and night.",
+    "spiritualist.1": "You may choose a player to whisper to."
 }

@@ -1100,13 +1100,25 @@ module.exports = function() {
         exp = new RegExp("^Whisper to " + locationType + " as " + targetType + attrDuration + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "whispering", target: ttpp(fd[1], "location"), disguise: fd[2], duration: dd(fd[3], "permanent") };
+            ability = { type: "whispering", source: "@self[player]", target: ttpp(fd[1], "location"), disguise: fd[2], duration: dd(fd[3], "permanent") };
         }
         // whispering without disguise
         exp = new RegExp("^Whisper to " + locationType + attrDuration + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "whispering", target: ttpp(fd[1], "location"), duration: dd(fd[3], "permanent") };
+            ability = { type: "whispering", source: "@self[player]", target: ttpp(fd[1], "location"), duration: dd(fd[2], "permanent") };
+        }
+        // whispering with disguise
+        exp = new RegExp("^Whisper from " + locationType + " to " + locationType + " as " + targetType + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "whispering", source: ttpp(fd[1]), target: ttpp(fd[2], "location"), disguise: fd[3], duration: dd(fd[4], "permanent") };
+        }
+        // whispering without disguise
+        exp = new RegExp("^Whisper from " + locationType + " to " + locationType + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "whispering", source: ttpp(fd[1]), target: ttpp(fd[2], "location"), duration: dd(fd[3], "permanent") };
         }
         /** JOINING **/
         // default joining
@@ -1860,11 +1872,11 @@ module.exports = function() {
                     // set unique value to true
                     unique = true;
                     continue;
-                } else if(curInputLine === "Haunted Role" || curInputLine === "Haunted Attribute") { // Haunted (active while ghostly)
+                } else if(curInputLine === "Ghostly Role" || curInputLine === "Ghostly Attribute") { // Ghostly (active while ghostly)
                     // set activation value to 1
                     activation = 1;
                     continue;
-                } else if(curInputLine === "Spiritual Role" || curInputLine === "Spiritual Attribute") { // Spiritual (active while alive & ghostly)
+                } else if(curInputLine === "Haunted Role" || curInputLine === "Haunted Attribute") { // Haunted (active while alive & ghostly)
                     // set activation value to 2
                     activation = 2;
                     continue;
