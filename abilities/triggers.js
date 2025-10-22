@@ -772,13 +772,13 @@ module.exports = function() {
                     default:
                     case "alive":
                         if(ghostly) {    
-                            abilityLog(`🔴 **Skipped Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}). Ability is not ghostly.`);
+                            abilityLog(`🔴 **Skipped Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}). (SR) Ability is not ghostly.`);
                             return;
                         }
                     break;
                     case "ghostly":    
                         if(!ghostly) {
-                            abilityLog(`🔴 **Skipped Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}). Ability is ghostly but element is not.`);
+                            abilityLog(`🔴 **Skipped Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}). (SR) Ability is ghostly but element is not.`);
                             return;
                         }
                     break;

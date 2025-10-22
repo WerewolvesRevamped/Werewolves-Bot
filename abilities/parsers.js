@@ -2479,7 +2479,7 @@ module.exports = function() {
     parses a "defense from x" type
     defaults to "all"
     **/
-    const defenseFromTypes = ["attacks","kills","lynches","attacks_lynches","all"];
+    const defenseFromTypes = ["attacks","kills","lynches","attacks_lynches","all","banishments"];
     this.parseDefenseFromType = function(defro_type) {
         defro_type = defro_type.toLowerCase().replace(/ (& )?/g,"_").replace(/[^a-z_]/g,"");
         if(defenseFromTypes.includes(defro_type)) {
