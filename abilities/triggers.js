@@ -638,6 +638,14 @@ module.exports = function() {
                             abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\`.`);
                         }
                     break;
+                    case "On Whisper Complex":
+                        let whispVal = await parseStringSelector(param, src_ref, additionalTriggerData);
+                        if(whispVal[0] === additionalTriggerData.disguise) {
+                            await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData, ghostly);
+                        } else {
+                            abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\` with \`${additionalTriggerData.disguise}\`.`);
+                        }
+                    break;
                     default:
                         abilityLog(`❗ **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Unknown complex trigger.`);
                     break;

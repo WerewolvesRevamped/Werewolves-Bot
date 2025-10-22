@@ -24,7 +24,7 @@ module.exports = function() {
     const passiveTriggers = ["Passive", "Passive End Day", "Passive End Night", "Passive Start Day", "Passive Start Night", "Passive Start Phase", "Passive End Phase"];
     const electionTriggers = ["On Election", "On Mayor Election", "On Reporter Election", "On Guardian Election"];
     const defenseTriggers = ["On Defense", "On Passive Defense", "On Partial Defense", "On Recruitment Defense", "On Active Defense", "On Absence Defense"];
-    const basicTriggerTypes = [...actionTimings, "Starting", ...passiveTriggers, "On Death", "On Killed", "On Banished", "On Banishment", "On Visited", "On Action", "On Disbandment", "On Lynch", ...electionTriggers, ...defenseTriggers, "On Betrayal", "On Poll Closed", "On Poll Win", "On Poll Skipped", "On Role Change", "On Removal", "On End", "Choice Chosen", "On Emitted", "On End Emitted", "On Redirect", "On Any Action", "On Join", "On Vote Add", "On Vote Remove", "On Vote Change", "On Hammer"]; // basic trigger types
+    const basicTriggerTypes = [...actionTimings, "Starting", ...passiveTriggers, "On Death", "On Killed", "On Banished", "On Banishment", "On Visited", "On Action", "On Disbandment", "On Lynch", ...electionTriggers, ...defenseTriggers, "On Betrayal", "On Poll Closed", "On Poll Win", "On Poll Skipped", "On Role Change", "On Removal", "On End", "Choice Chosen", "On Emitted", "On End Emitted", "On Redirect", "On Any Action", "On Join", "On Vote Add", "On Vote Remove", "On Vote Change", "On Hammer", "On Whisper"]; // basic trigger types
     const bullets = ["•","‣","◦","·","⁃","⹀"];
 
     /**
@@ -1955,7 +1955,7 @@ module.exports = function() {
                     if(fd) {
                         complexTrigger = "On " + fd[2] + " Target Basic;" + ttpp(fd[1]);
                     }
-                    /** Choice Chosen **/
+                    /** On Poll Win **/
                     exp = new RegExp("^On Poll `" + str +  "` Win$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
@@ -1978,6 +1978,12 @@ module.exports = function() {
                     fd = exp.exec(curTriggerName);
                     if(fd) {
                         complexTrigger = "On End Emitted;" + ttpp(fd[1].trim().toLowerCase().replace(/[^a-z]/g,""), "option");
+                    }
+                    /** On [Value] End Emitted **/
+                    exp = new RegExp("^On `" + str +  "` Whisper$", "g");
+                    fd = exp.exec(curTriggerName);
+                    if(fd) {
+                        complexTrigger = "On Whisper;" + ttpp(fd[1].trim().toLowerCase().replace(/[^a-z]/g,""), "string");
                     }
                     /** Otherwise **/
                     if(!complexTrigger) { // could not find a complex trigger match
