@@ -120,7 +120,7 @@ module.exports = function() {
 							if(destination.channel_id != message.channel.id) { 	
                                 // send message
                                 if(source.name) {
-                                    triggerPlayer(message.author.id, "On Whisper Complex", { disguise: source.name.trim().toLowerCase().replace(/[^a-z]/g,"") });
+                                    if(pRoles.map(el => el.id).includes(message.author.id)) triggerPlayer(message.author.id, "On Whisper Complex", { disguise: source.name.trim().toLowerCase().replace(/[^a-z]/g,"") });
                                     sendMessageDisguise(destination.channel_id, message.content, source.name);
                                 } else {
                                     sendMessageDisguiseMember(destination.channel_id, message.content, message.member);

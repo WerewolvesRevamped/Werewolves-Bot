@@ -64,11 +64,14 @@ module.exports = function() {
             let con = await connectionGet(`whisper:${srcVal}-${index}`);
             // check if channel even exists
             if(con.length > 0) { // if channel exists, check if it is used
-                let cid = con[0].channel_id;
-                let connections = await connectionGetByChannel(cid);
-                if(connections.length === 1) { // only one connection -> unused
-                   existingChannel = cid;
-                   break; // BREAK!
+                let con2 = await connectionGet(`${srcVal}-${index}`);
+                if(con2.length <= 1) {
+                    let cid = con[0].channel_id;
+                    let connections = await connectionGetByChannel(cid);
+                    if(connections.length === 1) { // only one connection -> unused
+                       existingChannel = cid;
+                       break; // BREAK!
+                    }
                 }
             } else { // if channel doesnt exist, BREAK
                 break; // BREAK!
@@ -92,6 +95,8 @@ module.exports = function() {
                         return { msg: "Whispering failed! " + abilityError, success: false };
                     }
                     whisperChannel = targetChannel;
+                    let con = await connectionGet(`whisper:${srcVal}-${index}`);
+                    if(con.length === 0) connectionAdd(targetChannel.id, `whisper:${srcVal}-${index}`, "whisper-channel");
                 break;
             }
         }
