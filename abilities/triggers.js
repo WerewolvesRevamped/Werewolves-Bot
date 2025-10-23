@@ -730,7 +730,7 @@ module.exports = function() {
         let restrictions = trigger?.parameters?.restrictions ?? [];
         
         // handle ghostly triggers differently -> they only trigger if a status restriction enables them
-        if(stats.haunting) {
+        if(stats.haunting && !additionalTriggerData.haunted_overwrite) {
             // get element activation
             let srcType = srcToType(src_ref);
             let srcVal =  srcToValue(src_ref);

@@ -156,11 +156,11 @@ module.exports = function() {
                     // kill player
                     await killPlayer(playersFiltered[i]);
                     // normal triggers
-                    await triggerPlayer(target, "On Death", { attacker: attacker, death_type: type, attack_source: src_name }); 
-                    await triggerPlayer(target, "On Killed", { attacker: attacker, death_type: type, attack_source: src_name }); 
+                    await triggerPlayer(target, "On Death", { attacker: attacker, death_type: type, attack_source: src_name, haunted_overwrite: true }); 
+                    await triggerPlayer(target, "On Killed", { attacker: attacker, death_type: type, attack_source: src_name, haunted_overwrite: true }); 
                     // complex triggers
-                    await triggerHandler("On Death Complex", { attacker: attacker, death_type: type, attack_source: src_name, this: target }); 
-                    await triggerHandler("On Killed Complex", { attacker: attacker, death_type: type, attack_source: src_name, this: target }); 
+                    await triggerHandler("On Death Complex", { attacker: attacker, death_type: type, attack_source: src_name, this: target, haunted_overwrite: true }); 
+                    await triggerHandler("On Killed Complex", { attacker: attacker, death_type: type, attack_source: src_name, this: target, haunted_overwrite: true }); 
                     // passive
                     await triggerHandler("Passive");
                 break;
@@ -168,10 +168,10 @@ module.exports = function() {
                     // kill player
                     await killPlayer(playersFiltered[i]);
                     // normal triggers
-                    await triggerPlayer(target, "On Death", { attacker: attacker, death_type: "lynch", attack_source: src_name }); 
-                    await triggerPlayer(target, "On Lynch", { attacker: attacker, death_type: "lynch", attack_source: src_name }); 
+                    await triggerPlayer(target, "On Death", { attacker: attacker, death_type: "lynch", attack_source: src_name, haunted_overwrite: true }); 
+                    await triggerPlayer(target, "On Lynch", { attacker: attacker, death_type: "lynch", attack_source: src_name, haunted_overwrite: true }); 
                     // complex triggers
-                    await triggerHandler("On Death Complex", { attacker: attacker, death_type: "lynch", attack_source: src_name, this: target }); 
+                    await triggerHandler("On Death Complex", { attacker: attacker, death_type: "lynch", attack_source: src_name, this: target, haunted_overwrite: true }); 
                     // passive
                     await triggerHandler("Passive");
                 break;
