@@ -408,7 +408,9 @@ module.exports = function() {
     this.channelSetPermission = async function(channel, member, permission = null) {
         return new Promise(res => {
             if(!permission) { // if no permissions, then revoke
-                channel.permissionOverwrites.cache.get(member).delete()
+                let ow = channel.permissionOverwrites.cache.get(member);
+                if(!ow) res(true);
+                ow.delete()
                 .then(() => {
                     res(true);
                 })

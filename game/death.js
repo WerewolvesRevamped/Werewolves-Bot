@@ -119,9 +119,12 @@ module.exports = function() {
     **/
     this.killqKillall = async function() {
         // get players
-        let players = await sqlProm("SELECT * FROM killq");
-        players = shuffleArray(players);
-        playersFiltered = removeDuplicates(players.map(el => el.id));
+        let playersKilled = await sqlProm("SELECT * FROM killq WHERE type='true kill' OR type='kill' OR type='lynch' OR type='attack'");
+        let playersBanished = await sqlProm("SELECT * FROM killq WHERE type='true banish' OR type='banish'");
+        playersKilled = shuffleArray(playersKilled);
+        playersBanished = shuffleArray(playersBanished);
+        playersFiltered = removeDuplicates(playersKilled.map(el => el.id));
+        playersFilteredBanish = removeDuplicates(playersBanished.map(el => el.id));
         
         // clear killq
         await killqClear();
@@ -138,9 +141,8 @@ module.exports = function() {
                 });
             }
             
-            
             // get all attacks/etc and select a random one to trigger the triggers
-            let deaths = players.filter(el => el.id === playersFiltered[i]);
+            let deaths = playersKilled.filter(el => el.id === playersFiltered[i]);
             let selDeath = deaths[Math.floor(Math.random() * deaths.length)];
             //console.log(playersFiltered[i], deaths, selDeath);
             // get the important values
@@ -175,20 +177,31 @@ module.exports = function() {
                     // passive
                     await triggerHandler("Passive");
                 break;
-                case "banish":
-                case "true banish":
-                    // banish player
-                    await banishPlayer(playersFiltered[i]);
-                    // normal triggers
-                    await triggerPlayer(target, "On Banished", { attacker: attacker, death_type: type, attack_source: src_name }); 
-                    await triggerPlayer(target, "On Banishment", { attacker: attacker, death_type: type, attack_source: src_name }); 
-                    // complex triggers
-                    await triggerHandler("On Banished Complex", { attacker: attacker, death_type: type, attack_source: src_name, this: target }); 
-                    await triggerHandler("On Banishment Complex", { attacker: attacker, death_type: type, attack_source: src_name, this: target }); 
-                    // passive
-                    await triggerHandler("Passive");
-                break;
             }
+        }
+        
+        // banish players
+        for(let i = 0; i < playersFilteredBanish.length; i++) {
+            // get all attacks/etc and select a random one to trigger the triggers
+            let deaths = playersBanished.filter(el => el.id === playersFilteredBanish[i]);
+            let selDeath = deaths[Math.floor(Math.random() * deaths.length)];
+            //console.log(playersFilteredBanish[i], deaths, selDeath);
+            // get the important values
+            let target = playersFilteredBanish[i];
+            let attacker = srcToValue(selDeath.src_ref);
+            let src_name = selDeath.src_name;
+            let type = selDeath.type;
+
+            // banish player
+            await banishPlayer(playersFilteredBanish[i]);
+            // normal triggers
+            await triggerPlayer(target, "On Banished", { attacker: attacker, death_type: type, attack_source: src_name }); 
+            await triggerPlayer(target, "On Banishment", { attacker: attacker, death_type: type, attack_source: src_name }); 
+            // complex triggers
+            await triggerHandler("On Banished Complex", { attacker: attacker, death_type: type, attack_source: src_name, this: target }); 
+            await triggerHandler("On Banishment Complex", { attacker: attacker, death_type: type, attack_source: src_name, this: target }); 
+            // passive
+            await triggerHandler("Passive");
         }
         
         // check if new killq entries were created
@@ -250,8 +263,15 @@ module.exports = function() {
                     await groupsDisband(playerAttributes[i].val1);
                 }
             }
-            // set attribute to dead
-            updateAttributeAlive(playerAttributes[i].ai_id, !stats.haunting ? 0 : 2);
+            // revoke extra role entirely
+            if(playerAttributes[i].attr_type === "role") {
+                let sc = mainGuild.channels.cache.get(playerAttributes[i].val2);
+                if(sc) channelSetPermission(sc, player_id, null);
+                await deleteAttribute(playerAttributes[i].ai_id)
+            } else {
+                // set attribute to dead
+                await updateAttributeAlive(playerAttributes[i].ai_id,  !stats.haunting ? 0 : 2);
+            }
         }
         
         // add to storytime
@@ -288,8 +308,15 @@ module.exports = function() {
         // retrieve all attributes of the player and set to dead
         let playerAttributes =  await queryAttributePlayer(player_id, "owner", player_id);
         for(let i = 0; i < playerAttributes.length; i++) {
-            // set attribute to dead
-            updateAttributeAlive(playerAttributes[i].ai_id, 0);
+            // revoke extra role entirely
+            if(playerAttributes[i].attr_type === "role") {
+                let sc = mainGuild.channels.cache.get(playerAttributes[i].val2);
+                if(sc) channelSetPermission(sc, player_id, null);
+                await deleteAttribute(playerAttributes[i].ai_id)
+            } else {
+                // set attribute to dead
+                await updateAttributeAlive(playerAttributes[i].ai_id, 0);
+            }
         }
         
         // add to storytime
@@ -328,8 +355,15 @@ module.exports = function() {
         // retrieve all attributes of the player and set to alive
         let playerAttributes =  await queryAttributePlayer(player_id, "owner", player_id);
         for(let i = 0; i < playerAttributes.length; i++) {
-            // set attribute to alive
-            updateAttributeAlive(playerAttributes[i].ai_id, 1);
+            // revoke extra role entirely
+            if(playerAttributes[i].attr_type === "role") {
+                let sc = mainGuild.channels.cache.get(playerAttributes[i].val2);
+                if(sc) channelSetPermission(sc, player_id, null);
+                await deleteAttribute(playerAttributes[i].ai_id)
+            } else {
+                // set attribute to dead
+                await updateAttributeAlive(playerAttributes[i].ai_id, 1);
+            }
         }
         
         // add to storytime
