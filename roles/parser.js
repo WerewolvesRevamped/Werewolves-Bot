@@ -644,8 +644,8 @@ module.exports = function() {
     const rawStr = "[\\w\\s\\d@]+";
     const str = "(" + rawStr + ")";
     const decNum = "(-?\\d+\\.\\d+)";
-    const abilityType = "(Killing|Investigating|Targeting|Disguising|Protecting|Applying|Redirecting|Vote Manipulating|Whispering|Joining|Granting|Loyalty|Obstructing|Poll Manipulating|Announcements|Changing|Copying|Choices|Ascend|Descend|Disband|Counting|Conversation Reset|Cancel|Switching|Process|Evaluate|Action|Feedback|Action|Success|Failure|Emit|Storing|Displaying|Win|Shuffle|Locking|Executing|Activating)";
-    const abilitySubtype = "((Kill|Attack|Lynch|True|Banish|True Banish) Killing|(Role|Alignment|Category|Class|Count|Attribute) Investigating|(Target|Untarget) Targeting|() Disguising|(Absence|Active|Passive|Partial|Recruitment) Protecting|(Add|Remove|Change) Applying|() Redirecting|(Absolute|Relative) Vote Manipulating|() Whispering|(Add|Remove) Joining|(Add|Remove|Transfer) Granting|() Loyalty|() Obstructing|(Addition|Creation|Cancelling|Deletion|Manipulation) Poll Manipulating|() Announcements|(Role|Alignment|Group) Changing|(Ability|Full) Copying|(Creating|Choosing) Choices|() Ascend|() Descend|() Disband|(Increment|Decrement|Set) Counting|() Conversation Reset|() Cancel|() Switching|() Process|() Evaluate|() Action|() Feedback|() Action|() Success|() Failure|() Emit|() Storing|(Create|Change) Displaying|() Win|() Shuffle|(Lock|Unlock) Locking|() Executing|() Activating)";
+    const abilityType = "(Killing|Investigating|Targeting|Disguising|Protecting|Applying|Redirecting|Vote Manipulating|Whispering|Joining|Granting|Loyalty|Obstructing|Poll Manipulating|Announcements|Changing|Copying|Choices|Ascend|Descend|Disband|Counting|Conversation Reset|Cancel|Switching|Process|Evaluate|Action|Feedback|Action|Success|Failure|Emit|Storing|Displaying|Win|Shuffle|Locking|Executing|Activating|Resurrecting)";
+    const abilitySubtype = "((Kill|Attack|Lynch|True|Banish|True Banish) Killing|(Role|Alignment|Category|Class|Count|Attribute) Investigating|(Target|Untarget) Targeting|() Disguising|(Absence|Active|Passive|Partial|Recruitment) Protecting|(Add|Remove|Change) Applying|() Redirecting|(Absolute|Relative) Vote Manipulating|() Whispering|(Add|Remove) Joining|(Add|Remove|Transfer) Granting|() Loyalty|() Obstructing|(Addition|Creation|Cancelling|Deletion|Manipulation) Poll Manipulating|() Announcements|(Role|Alignment|Group) Changing|(Ability|Full) Copying|(Creating|Choosing) Choices|() Ascend|() Descend|() Disband|(Increment|Decrement|Set) Counting|() Conversation Reset|() Cancel|() Switching|() Process|() Evaluate|() Action|() Feedback|() Action|() Success|() Failure|() Emit|() Storing|(Create|Change) Displaying|() Win|() Shuffle|(Lock|Unlock) Locking|() Executing|() Activating|() Resurrecting)";
     const bulletsRegex = /(•|‣|◦|·|⁃|⹀)/;
 
     // specific
@@ -1684,28 +1684,28 @@ module.exports = function() {
         }
         /** EMIT **/
         // emit for somebody else
-        exp = new RegExp("^Emit `" + str + "` for " + targetType + "$", "g");
+        exp = new RegExp("^Emit " + targetType + " for " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "emit", subtype: "immediate", selector: ttpp(fd[2]), emit_value: ttpp(fd[1], "option") };
+            ability = { type: "emit", subtype: "immediate", selector: ttpp(fd[2]), emit_value: ttpp(fd[1], "string") };
         }
         // emit self
-        exp = new RegExp("^Emit `" + str + "`$", "g");
+        exp = new RegExp("^Emit " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "emit", subtype: "immediate", selector: "@self[player]", emit_value: ttpp(fd[1], "option") };
+            ability = { type: "emit", subtype: "immediate", selector: "@self[player]", emit_value: ttpp(fd[1], "string") };
         }
         // emit for somebody else, end effect
-        exp = new RegExp("^End Emit `" + str + "` for " + targetType + "$", "g");
+        exp = new RegExp("^End Emit " + targetType + " for " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "emit", subtype: "end", selector: ttpp(fd[2]), emit_value: ttpp(fd[1], "option") };
+            ability = { type: "emit", subtype: "end", selector: ttpp(fd[2]), emit_value: ttpp(fd[1], "string") };
         }
         // emit self, end effect
-        exp = new RegExp("^End Emit `" + str + "`$", "g");
+        exp = new RegExp("^End Emit " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "emit", subtype: "end", selector: "@self[player]", emit_value: ttpp(fd[1], "option") };
+            ability = { type: "emit", subtype: "end", selector: "@self[player]", emit_value: ttpp(fd[1], "string") };
         }
         /** Display **/
         // create display
@@ -1782,6 +1782,13 @@ module.exports = function() {
         fd = exp.exec(abilityLine);
         if(fd) {
             ability = { type: "activating", target: ttpp(fd[1]), state: 2 };
+        }
+        /** RESURRECTING **/
+        // resurrection
+        exp = new RegExp("^Resurrect " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "resurrecting", target: ttpp(fd[1]) };
         }
 
         

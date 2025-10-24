@@ -290,11 +290,16 @@ module.exports = function() {
             ["dr register", PERM.GM, "Registers a new role.", "<Name> <Discord ID>", "Registers a specific discord role with <Discord ID> under <Name>", "dr register Citizen 584770967058776067", [], CMDSTATE.RDY],
             ["dr delete", PERM.GM, "Deletes a role.", "", "", "", [], CMDSTATE.RDY],
             ["dr list", PERM.GM, "Lists all registered roles.", "", "Lists all currently registered discord roles.", "dr list", [], CMDSTATE.RDY],
-            // host information
+        // host information
         ["host_information", PERM.GM, "", "", "", "", [], CMDSTATE.RDY],
             ["host_information add", PERM.GM, "Adds host information to a player.", "<Player ID> <HI Name> <HI Value>", "Adds host information for player with <Player ID> and name <HI Name> set to <HI Value>", "hi add 242983689921888256 role citizen", [], CMDSTATE.RDY],
             ["host_information remove", PERM.GM, "Removes host information from a player.", "<HI ID>", "Deletes a host information with <HI ID>. Use $hi list to identify which <HI ID> belongs to what host information.", "hi remove 1", [], CMDSTATE.RDY],
             ["host_information list", PERM.GM, "Lists all configured host information.", "", "Sends a list of all currently configured host information.", "host_information list", [], CMDSTATE.RDY],
+        // modifiers
+        ["modifiers", PERM.GM, "", "", "", "", [], CMDSTATE.RDY],
+            ["modifiers add", PERM.GM, "Adds a modifier to a player.", "<Player ID> <Modifier Name>", "Adds a modifier for player with <Player ID> and attribute <Modifier Name>.", "modifiers add 242983689921888256 haunted", [], CMDSTATE.RDY],
+            ["modifiers remove", PERM.GM, "Removes a modifier from a player.", "<Modifier ID>", "Deletes a modifier with <Modifier ID>. Use $ms list to identify which <Modifier ID> belongs to what modifier.", "modifiers remove 1", [], CMDSTATE.RDY],
+            ["modifiers list", PERM.GM, "Lists all configured modifiers.", "", "Sends a list of all currently configured modifiers.", "modifiers list", [], CMDSTATE.RDY],
         // killq
         ["killq", PERM.GM, "Manages killq and kills players.", "<Subcommand>", "Group of commands to handle polls. $help killq <sub-command> for detailed help.", "", [], CMDSTATE.RDY],
             ["killq list", PERM.GM, "Displays killq.", "", "Shows the players currently in the killq as well as their roles.", "killq list", [], CMDSTATE.RDY],

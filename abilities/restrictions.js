@@ -142,6 +142,7 @@ module.exports = function() {
                         case "has":
                             for(let i = 0; i < targets.value.length; i++) {
                                 let res = hasCustomAttribute(`${targets.type}:${targets.value[i]}`, attribute[0]);
+                                console.log("has", targets.value[i], attribute[0], res);
                                 if(!res) return false;
                             }
                             return true;
@@ -149,6 +150,7 @@ module.exports = function() {
                         case "lacks":
                             for(let i = 0; i < targets.value.length; i++) {
                                 let res = hasCustomAttribute(`${targets.type}:${targets.value[i]}`, attribute[0]);
+                                console.log("lacks", targets.value[i], attribute[0], res);
                                 if(res) return false;
                             }
                             return true;

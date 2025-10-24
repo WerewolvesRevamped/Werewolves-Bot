@@ -311,6 +311,19 @@ module.exports = function() {
         removeRoleRecursive(player, false, stats.ghost, "ghost");
         // grant participant role
         addRoleRecursive(player, false, stats.participant, "participant");
+        // revoke DRs
+        removeAllDR(player_id);
+        
+        // set mentor as dead if applicable
+        let mentor = await getMentor(player_id); 
+        if(mentor) {
+            let mentorMember = mainGuild.members.cache.get(mentor);
+            // revoke mentor role
+            removeRoleRecursive(mentorMember, false, stats.dead_participant, "dead participant");
+            removeRoleRecursive(mentorMember, false, stats.ghost_mentor, "ghost mentor");
+            // grant dead role
+            addRoleRecursive(mentorMember, false, stats.mentor, "mentor");
+        }
         
         // retrieve all attributes of the player and set to alive
         let playerAttributes =  await queryAttributePlayer(player_id, "owner", player_id);

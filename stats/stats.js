@@ -70,7 +70,7 @@ module.exports = function() {
         {id: 52, name: "Phase Automation Info", type: "special", cmd: "phaseautoinfo"},  //Loaded manually not by automation
         {id: 53, name: "D0 Time", type: "number", property: "d0_time"},
         {id: 54, name: "Ghostly Mentor Role", type: "roleID", cmd: "ghost_mentor", property: "ghost_mentor", adminOnly: true},
-        {id: 55, name: "DB Version", type: "number", property: "db_version", default: 0 },
+        {id: 55, name: "DB Version", type: "number", cmd: "db_version", property: "db_version", default: 0 },
     ]
 
     /**

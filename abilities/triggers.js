@@ -22,6 +22,7 @@ module.exports = function() {
                 await triggerPlayer(val, triggerName, additionalTriggerData);
             break;
             case "player_attr":
+            case "activeextrarole":
                 let attr = await roleAttributeGetPlayer(val);
                 if(!attr) { // after a remove granting we wont be able to find the owner anymore
                     abilityLog(`❗ **Skipped Trigger:** Could not find who <#${val}> belongs to.`);
@@ -631,7 +632,7 @@ module.exports = function() {
                     break;
                     case "On Emitted Complex":
                     case "On End Emitted Complex":
-                        let emitVal = parseOption(param, src_ref, additionalTriggerData);
+                        let emitVal = (await parseStringSelector(param, src_ref, additionalTriggerData))[0];
                         if(emitVal === additionalTriggerData.emit_value) {
                             await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData, ghostly);
                         } else {

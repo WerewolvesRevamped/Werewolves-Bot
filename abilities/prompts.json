@@ -76,5 +76,9 @@
     "horseman_of_famine.1": "You may doom two players, they will both be strongly disguised as a random in play horseman role.",
     "horseman_of_pestilence.1": "You may doom a player, they will be obstruced the following day and night.",
     "spiritualist.1": "You may choose a player to whisper to.",
-    "poltergeist.1": "You may confirm to haunt the tavern for the night."
+    "poltergeist.1": "You may confirm to haunt the tavern for the night.",
+    "prophet.1": "You may choose one miracle to perform.",
+    "prophet.2": "You may choose a ghostly player to resurrect with the **Miracle of Resurrection**.",
+    "prophet.3": "You may choose a player to protect with the **Miracle of Protection**.",
+    "gravekeeper.1": "You may choose a ghostly player whose role you will learn."
 }

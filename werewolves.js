@@ -992,6 +992,10 @@ client.on("messageCreate", async message => {
     case "host_information":
 		if(checkGM(message)) cmdHostInformation(message.channel, args, argsX);
     break;
+    /* Modifiers */
+    case "modifiers":
+		if(checkGM(message)) cmdModifiers(message.channel, args);
+    break;
     /* Skinpacks */
     case "packs":
         if(!config.coins) {
@@ -1506,7 +1510,6 @@ client.on('interactionCreate', async interaction => {
                     return;
                 }
                 let chooser = choiceData.owner;
-                let choiceCreatorId = srcToValue(choiceData.src_ref);
                 // update message
                 embed = basicEmbed(`${orig_text}${PROMPT_SPLIT} Choice chosen.`, EMBED_GREEN);
                 let unchooseButton = { type: 2, label: "Revert Choice", style: 4, custom_id: `revert-choice:${choiceName}` };
@@ -1515,8 +1518,8 @@ client.on('interactionCreate', async interaction => {
                 // run trigger
                 abilityLog(`✅ **Choice Chose:** ${srcRefToText(chooser)} chose \`${optionName}\` for \`${choiceName}\`.`);
                 actionLog(`⏺️ ${srcRefToText(chooser)} choice chose \`${optionName}\` for \`${choiceName}\`.`);
-                await triggerPlayer(choiceCreatorId, "Choice Chosen", { chooser: `${chooser}`, chosen: parseOption(optionName), choice_data: { name: choiceName, owner: chooser } }); 
-                await triggerPlayer(choiceCreatorId, "Choice Chosen Complex", { chooser: `${chooser}`, chosen: parseOption(optionName), choice_data: { name: choiceName, owner: chooser } }); 
+                await trigger(choiceData.src_ref, "Choice Chosen", { chooser: `${chooser}`, chosen: parseOption(optionName), choice_data: { name: choiceName, owner: chooser } }); 
+                await trigger(choiceData.src_ref, "Choice Chosen Complex", { chooser: `${chooser}`, chosen: parseOption(optionName), choice_data: { name: choiceName, owner: chooser } }); 
                 // set as chosen
                 await choicesUpdateByOwner(choiceName, chooser, "chosen", 1);
                 // check choice completion

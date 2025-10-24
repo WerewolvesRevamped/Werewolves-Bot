@@ -45,6 +45,7 @@ require("./types/win.js")();
 require("./types/locking.js")();
 require("./types/executing.js")();
 require("./types/activating.js")();
+require("./types/resurrecting.js")();
 
 module.exports = function() {
     
@@ -208,6 +209,9 @@ module.exports = function() {
                 break;
                 case "activating":
                     feedback = await abilityActivating(src_refAction, src_name, ability, additionalTriggerData);
+                break;
+                case "resurrecting":
+                    feedback = await abilityResurrecting(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "success":
                     feedback = { msg: "Ability succeeded!", success: true };

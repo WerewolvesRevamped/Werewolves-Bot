@@ -108,6 +108,7 @@ module.exports = function() {
                 "connection": ["con","connect","whisper","whispers"],
                 "gamephase": ["gp","game_phase","game-phase"],
                 "modify": ["mod"],
+                "modifiers": ["ms", "md", "modifier"],
                 "say": [">"],
                 "ping": ["?"],
                 "elect": ["el", "elected"],

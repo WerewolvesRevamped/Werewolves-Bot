@@ -19,6 +19,7 @@ require("./death.js")();
 require("./channels.js")();
 require("./discord_roles.js")();
 require("./host_information.js")();
+require("./modifiers.js")();
 require("./displays.js")();
 require("./transition.js")();
 
@@ -169,10 +170,14 @@ module.exports = function() {
         resetDisplays();
         // reset host information
         resetHostInformation();
+        // reset modifiers
+        resetModifiers();
         // reset schedule
         clearSchedule();
         // disable action queue checker 
         pauseActionQueueChecker = true;
+        // reset cached sc count
+        scCatCount = 0;
 		// Reset Poll Count
 		sqlSetStat(13, 1, result => {
 			channel.send("✅ Successfully reset poll counter!");

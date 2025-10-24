@@ -1447,6 +1447,13 @@ module.exports = function() {
                     abilityLog(`❗ **Error:** Invalid string selector target \`${selectorTarget}\`!`);
                     return [ ];
                 }
+            case "@option":
+                if(additionalTriggerData.chosen) {
+                    return [ additionalTriggerData.chosen ];
+                } else {
+                    abilityLog(`❗ **Error:** Invalid option selector target \`${selectorTarget}\`!`);
+                    return [ ];
+                }
             default:
                 if (PROPERTY_ACCESS.test(selectorTarget)) { // property access
                     let contents = selectorTarget.match(PROPERTY_ACCESS); // get the selector
@@ -2062,7 +2069,7 @@ module.exports = function() {
     /**
     Parse ability type
     **/
-    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","redirecting","manipulating","whispering","joining","granting","loyalty","obstructing","poll","announcement","changing","","choices","ascend","descend","disband","counting","reset","cancel","","feedback","success","failure","log","process_evaluate","abilities","emit","storing","displaying", "win","shuffle","locking","executing","activating"];
+    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","redirecting","manipulating","whispering","joining","granting","loyalty","obstructing","poll","announcement","changing","","choices","ascend","descend","disband","counting","reset","cancel","","feedback","success","failure","log","process_evaluate","abilities","emit","storing","displaying", "win","shuffle","locking","executing","activating","resurrecting"];
     this.parseAbilityType = function(ability_type, self = null, additionalTriggerData = {}) {
         // get target
         let selectorTarget = selectorGetTarget(ability_type);
@@ -2213,6 +2220,7 @@ module.exports = function() {
         ["lock","unlock"], // locking
         [], // executing
         [], // activating
+        [], // resurrecting
         ];
     this.parseAbilitySubtype = function(ability_subtype, self = null, additionalTriggerData = {}) {
         // get target
