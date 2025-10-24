@@ -641,7 +641,7 @@ module.exports = function() {
     const groupType = "(@\\S*|#\\S*)"; // reduced version of location type
     const attributeName = targetType;
     const num = "(-?\\d+|-?[\\d\\.]+|@\\S*|%[^%]+%|\\$\\w+)";
-    const rawStr = "[\\w\\s\\d@]+";
+    const rawStr = "[\\w\\s\\d@\-]+";
     const str = "(" + rawStr + ")";
     const decNum = "(-?\\d+\\.\\d+)";
     const abilityType = "(Killing|Investigating|Targeting|Disguising|Protecting|Applying|Redirecting|Vote Manipulating|Whispering|Joining|Granting|Loyalty|Obstructing|Poll Manipulating|Announcements|Changing|Copying|Choices|Ascend|Descend|Disband|Counting|Conversation Reset|Cancel|Switching|Process|Evaluate|Action|Feedback|Action|Success|Failure|Emit|Storing|Displaying|Win|Shuffle|Locking|Executing|Activating|Resurrecting)";
@@ -1282,6 +1282,12 @@ module.exports = function() {
         fd = exp.exec(abilityLine);
         if(fd) {
             ability = { type: "poll", subtype: "creation", target: ttpp(fd[1], "poll"), poll_location: ttpp(fd[2], "location") };
+        }
+        // Creates a new poll named
+        exp = new RegExp("^Create `" + str + "` Poll in " + locationType + " as " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "poll", subtype: "creation", target: ttpp(fd[1], "poll"), poll_location: ttpp(fd[2], "location"), poll_name: ttpp(fd[3], "string") };
         }
         // poll creates itself
         exp = new RegExp("^Create Poll in " + locationType + "$", "g");

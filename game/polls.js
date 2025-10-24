@@ -580,7 +580,7 @@ module.exports = function() {
                             msgFull += `\n\n**Result:** <@${maxVotesData[0]}> is disqualified with **${maxVotes}** votes!`;
                             embed = basicEmbed(msgFull, EMBED_RED);
                             await useAttribute(disqualified[0].ai_id);
-                        actionLog(`🗳️ <@${maxVotesData[0]}> won ${toTitleCase(pollName)} (${pollType}) (disqualified).`);
+                            actionLog(`🗳️ <@${maxVotesData[0]}> won ${toTitleCase(pollName)} (${pollType}) (disqualified).`);
                         }
                     }
                 } else { // NON PLAYER WINNER
@@ -647,12 +647,12 @@ module.exports = function() {
             switch(srcType) {
                 // default direct trigger execution
                 default:
-                    await trigger(pollData.src_ref, "On Poll Skipped", { voters: maxVotesValidVoters, other_voters: otherVoters }); 
+                    await trigger(pollData.src_ref, "On Poll Skipped", { winner: maxVotesData[0], voters: maxVotesValidVoters, other_voters: otherVoters }); 
                 break;
                 // for group polls a random executor is chosen
                 case "group":
                     let executor = shuffleArray(maxVotesValidVoters)[0];
-                    await trigger(pollData.src_ref, "On Poll Skipped", { executor: executor, voters: maxVotesValidVoters, other_voters: otherVoters }); 
+                    await trigger(pollData.src_ref, "On Poll Skipped", { winner: maxVotesData[0], executor: executor, voters: maxVotesValidVoters, other_voters: otherVoters }); 
                 break;
             }
         }

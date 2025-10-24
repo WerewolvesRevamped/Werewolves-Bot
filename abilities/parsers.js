@@ -1451,7 +1451,14 @@ module.exports = function() {
                 if(additionalTriggerData.chosen) {
                     return [ additionalTriggerData.chosen ];
                 } else {
-                    abilityLog(`❗ **Error:** Invalid option selector target \`${selectorTarget}\`!`);
+                    abilityLog(`❗ **Error:** Invalid string selector target \`${selectorTarget}\`!`);
+                    return [ ];
+                }
+            case "@winner":
+                if(additionalTriggerData.winner) {
+                    return [ additionalTriggerData.winner ];
+                } else {
+                    abilityLog(`❗ **Error:** Invalid string selector target \`${selectorTarget}\`!`);
                     return [ ];
                 }
             default:
