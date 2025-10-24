@@ -26,8 +26,6 @@
     
     "comment_2": "Restriction Messages",
     "succession.target": "You may not select the same target two times in a row. You may resubmit another target as a reply to the original prompt.",
-    "attribute.lacks": "You may only use this ability on targets __without__ a certain attribute.",
-    "attribute.has": "You may only use this ability on targets __with__ a certain attribute.",
     "condition": "Invalid submission. You likely submitted an invalid value. If necessary, please ask Hosts for clarification!",
     
     "comment_3": "Generic Custom Prompts",
@@ -80,5 +78,7 @@
     "prophet.1": "You may choose one miracle to perform.",
     "prophet.2": "You may choose a ghostly player to resurrect with the **Miracle of Resurrection**.",
     "prophet.3": "You may choose a player to protect with the **Miracle of Protection**.",
-    "gravekeeper.1": "You may choose a ghostly player whose role you will learn."
+    "gravekeeper.1": "You may choose a ghostly player whose role you will learn.",
+    "hexed_wolf.1": "You may choose a *hexed* player to investigate - the result will be sent to you.",
+    "hexed_wolf.2": "You may choose a *hexed* player to investigate - the result will be sent to the wolfpack."
 }

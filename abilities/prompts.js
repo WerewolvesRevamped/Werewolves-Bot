@@ -71,6 +71,11 @@ module.exports = function() {
             txt = txt.replace(/you is/g, "you are");
             txt = txt.replace(/you does/g, "you do");
             return `${txt}.`;
+        } else if(restriction.type === "attribute") {
+            let txt = await getPromptMessageRestrictionCondition({ type: "attribute", target: restriction.target, attribute: restriction.attribute }, src_ref, additionalTriggerData, restriction.subtype === "lacks");
+            txt = txt.replace(/you is/g, "you are");
+            txt = txt.replace(/you does/g, "you do");
+            return `${txt}.`;
         } else {
             return getPromptMessage(restriction);
         }
