@@ -28,10 +28,12 @@ module.exports = function() {
 			connection.connect(async (err) => {
 				if(err) logO(err);
 				else {
-					if(config.setup_db) createTables()
-					await getStats()
+                    createTables();
+                    await sleep(1000); // wip: this is kinda nonsense but createTables seems to run all its creations async so its annoying to properly wait for ? can we add all queries into a single sqlQuery? should we store the promises into an array and do like Promise.all or whatever?
+					await loadStats();
+                    updateTables();
 				}
-				resolve()
+				resolve();
 			});
 		})
 	}
@@ -62,7 +64,7 @@ module.exports = function() {
 		sqlQuery("CREATE TABLE IF NOT EXISTS `info` ( `ai_id` int(11) NOT NULL AUTO_INCREMENT, `name` text NOT NULL, `display_name` text NOT NULL, `contents` text NOT NULL, `simplified` text NOT NULL, PRIMARY KEY (`ai_id`))")
 		sqlQuery("CREATE TABLE IF NOT EXISTS `inventory` ( `ai_id` int(11) NOT NULL AUTO_INCREMENT, `player` text NOT NULL, `item` text NOT NULL, `count` int(11) NOT NULL, `stashed` int(11) NOT NULL DEFAULT 0, PRIMARY KEY (`ai_id`))")
 		sqlQuery("CREATE TABLE IF NOT EXISTS `killq` ( `ai_id` int(11) NOT NULL AUTO_INCREMENT, `id` text NOT NULL, `src_ref` text DEFAULT NULL, `src_name` text DEFAULT NULL, `type` text DEFAULT NULL, PRIMARY KEY (`ai_id`))")
-		sqlQuery("CREATE TABLE IF NOT EXISTS `locations` ( `ai_id` int(11) NOT NULL AUTO_INCREMENT, `name` text NOT NULL, `display_name` text NOT NULL, `description` text NOT NULL, `sort_index` int(11) NOT NULL, `members` text NOT NULL, `viewers` text NOT NULL, `channel_id` text DEFAULT NULL, PRIMARY KEY (`ai_id`))")
+		sqlQuery("CREATE TABLE IF NOT EXISTS `locations` ( `ai_id` int(11) NOT NULL AUTO_INCREMENT, `name` text NOT NULL, `display_name` text NOT NULL, `description` text NOT NULL, `sort_index` int(11) NOT NULL, `haunting` int(11) NOT NULL DEFAULT 0, `members` text NOT NULL, `viewers` text NOT NULL, `channel_id` text DEFAULT NULL, PRIMARY KEY (`ai_id`))")
 		sqlQuery("CREATE TABLE IF NOT EXISTS `market` ( `ai_id` int(11) NOT NULL AUTO_INCREMENT, `item` text NOT NULL, `price` int(11) NOT NULL, `owner` text NOT NULL, `timestamp` int(11) NOT NULL, PRIMARY KEY (`ai_id`))")
 		sqlQuery("CREATE TABLE IF NOT EXISTS `packs` ( `player` bigint(64) NOT NULL, `pack` int(11) NOT NULL, PRIMARY KEY (`player`))")
 		sqlQuery("CREATE TABLE IF NOT EXISTS `players` ( `ai_id` int(11) NOT NULL AUTO_INCREMENT, `id` text NOT NULL, `emoji` text NOT NULL, `type` text NOT NULL, `role` text NOT NULL, `orig_role` text NOT NULL, `alignment` text NOT NULL, `alive` tinyint(1) NOT NULL DEFAULT 1, `ccs` int(11) NOT NULL DEFAULT 0, `public_msgs` int(11) NOT NULL DEFAULT 0, `private_msgs` int(11) NOT NULL DEFAULT 0, `target` text DEFAULT NULL, `counter` int(11) NOT NULL DEFAULT 0, `final_result` int(11) NOT NULL DEFAULT 0, `mentor` text DEFAULT NULL, `death_phase` int(11) NOT NULL DEFAULT -1, PRIMARY KEY (`ai_id`))")

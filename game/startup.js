@@ -147,7 +147,8 @@ module.exports = function() {
         
         // Setup schedule
         if(stats.automation_level === autoLvl.FULL) {
-            await setupSchedule();
+            let time = parseToFutureUnixTimestamp(stats.phaseautoinfo.d0);
+            await setupSchedule(time);
             // start game with timestamp parameter
             setTimeout(function() {
                 eventStarting(time);
@@ -230,8 +231,30 @@ module.exports = function() {
                 }
                 let disName = channel.guild.members.cache.get(player.id).displayName; // get the player's display name
                 
+                // check for modifiers
+                let modifiers = await sqlPromEsc("SELECT * FROM modifiers WHERE id=", player.id);
+                let modEmbedFields = [];
+                if(modifiers.length > 0) {
+                    let modDescs = [];
+                    for(let i = 0; i < modifiers.length; i++) {
+                        // get data
+                        let modData = await sqlPromOneEsc("SELECT * FROM attributes WHERE name=", modifiers[i].name);
+                        // format for channel/info
+                        rolesName = modData.display_name + " " + rolesName;
+                        modDescs.push([`Modifier - ${modData?.display_name ?? "??"}`, getEmoji(modData.name, false) + " " + modData?.desc_basics ?? "No info found"]);
+                        // apply attribute
+                        await createCustomAttribute(`role:${result[0].name}`, `player:${player.id}`, player.id, "player", "permanent", modData.name);
+                        abilityLog(`✅ ${srcRefToText('player:' + player.id)} had ${modData.name} applied as a modifier.`);
+                    }
+                    // split a single section into several fields if necessary
+                    for(let d in modDescs) {
+                        let de = await applyPackLUT(modDescs[d][1], player.id);
+                        modEmbedFields.push(...handleFields(applyETN(de, mainGuild), applyTheme(modDescs[d][0])));
+                    }
+                }
+                
                 // Send Role DM (except if in debug mode)
-                if(!debug) await createSCs_sendDM(channel.guild, player.id, roleData, disName)
+                if(!debug) await createSCs_sendDM(channel.guild, player.id, roleData, disName, false, modEmbedFields.length > 0 ?  rolesName : false)
                     
                 // Create INDSC
                 channel.send("✅ Creating INDSC for `" + channel.guild.members.cache.get(player.id).displayName + "` (`" + rolesName + "`)!");
@@ -254,7 +277,7 @@ module.exports = function() {
                     // Create a default connection with the player's ID
                     cmdConnectionAdd(sc, ["", player.id], true);
                     // Send info message for each role
-                    cmdInfo(sc, player.id, [ rolesNameBot ], true, false);
+                    cmdInfo(sc, player.id, [ rolesNameBot ], true, false, false, modEmbedFields.length > 0 ? rolesName : false, modEmbedFields);
                     
                     // send card
                     if (config.cards) {
@@ -292,10 +315,11 @@ module.exports = function() {
     Create Secret Channels - Send DM
     Send a game start dm to each player as part of the indsc channel creation
     **/
-    this.createSCs_sendDM = async function(guild, playerID, role, disName, restart = false) {
+    this.createSCs_sendDM = async function(guild, playerID, role, disName, restart = false, overwriteRoleName = false) {
         return new Promise(res => {
             // Build the role name
             let roleName = role.display_name;
+            if(overwriteRoleName) roleName = overwriteRoleName;
             
             // Get role data for the first role
             let roleData = getRoleData(role.display_name, role.class, role.category, role.team);

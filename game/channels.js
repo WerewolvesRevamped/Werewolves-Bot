@@ -35,7 +35,7 @@ module.exports = function() {
         }
         
         // get list of new members
-        let players = parseUserList(args, 1, channel, member);
+		let players = parseUserList(args, 1, channel, member, isGhost(member) ? "ghost" : "participant");
         if(!players) players = [];
         players = players.filter(el => !isCCMember(channel, el));
         // add members if at least one exists
@@ -69,7 +69,7 @@ module.exports = function() {
         }
         
         // get list of members to remove
-        let players = parseUserList(args, 1, channel, member);
+		let players = parseUserList(args, 1, channel, member, isGhost(member) ? "ghost" : "participant");
         if(!players) players = [];
         players = players.filter(el => isCCMember(channel, el) && !isCCOwner(channel, el));
         // remove members if at least one exists
@@ -103,7 +103,7 @@ module.exports = function() {
         }
         
         // get list of members to promote
-        let players = parseUserList(args, 1, channel, member);
+		let players = parseUserList(args, 1, channel, member, isGhost(member) ? "ghost" : "participant");
         if(!players) players = [];
         players = players.filter(el => isCCMember(channel, el) && !isCCOwner(channel, el));
         // remove members if at least one exists
@@ -135,7 +135,7 @@ module.exports = function() {
         }
         
         // get list of members to demote
-        let players = parseUserList(args, 1, channel, member);
+		let players = parseUserList(args, 1, channel, member, isGhost(member) ? "ghost" : "participant");
         if(!players) players = [];
         players = players.filter(el => isCCMember(channel, el) && isCCOwner(channel, el));
         // remove members if at least one exists
@@ -197,6 +197,10 @@ module.exports = function() {
         
         // clean cc name
         let name = cleanCCName(args[1]);
+        
+        // make sure to keep haunted symbol
+        if(channel.name.split("-")[0] === "👻") name = "👻-" + name;
+        
         // rename cc
         channelRename(channel, name);
     }
@@ -404,7 +408,9 @@ module.exports = function() {
     this.channelSetPermission = async function(channel, member, permission = null) {
         return new Promise(res => {
             if(!permission) { // if no permissions, then revoke
-                channel.permissionOverwrites.cache.get(member).delete()
+                let ow = channel.permissionOverwrites.cache.get(member);
+                if(!ow) res(true);
+                ow.delete()
                 .then(() => {
                     res(true);
                 })

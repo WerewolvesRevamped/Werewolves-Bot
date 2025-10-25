@@ -44,7 +44,7 @@ module.exports = function() {
     /**
     Get Role Data
     **/
-    this.getRoleData = async function(roleName, rClass, rCategory, rTeam, authorId = null) {
+    this.getRoleData = async function(roleName, rClass, rCategory, rTeam, authorId = null, roleDataFull = {}) {
             
         // get the right folder
         var url = iconBaseUrl(authorId, roleName);
@@ -80,7 +80,7 @@ module.exports = function() {
         
         //console.log("GRD FINAL URL", url);
         
-        return { url: url, color: color, class: rClass, category: rCategory, team: rTeam };
+        return { url: url, color: color, class: rClass, category: rCategory, team: rTeam, all: roleDataFull };
     }
     
     /**
@@ -94,7 +94,7 @@ module.exports = function() {
                      res(result[0]);
                  });
             })); 
-            return await getRoleData(roleData.display_name, roleData.class, roleData.category, roleData.team, authorId);
+            return await getRoleData(roleData.display_name, roleData.class, roleData.category, roleData.team, authorId, roleData);
         } else {
             return null;
         }

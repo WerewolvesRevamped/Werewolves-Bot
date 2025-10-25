@@ -37,6 +37,7 @@ module.exports = function() {
     this.cmdDeathMessageList = async function(message) {
         let items = await sqlPromEsc("SELECT * FROM inventory WHERE player=", message.member.id);
         items = items.filter(el => el.item.substr(0, 2) === "dm").map(el => [el.item.split(":")[1], ALL_LOOT.filter(el2 => el2[0].toLowerCase() === el.item)[0], el.count]);
+        items = items.sort((a,b) => a[0] - b[0]); 
         
         // no icons
         if(items.length === 0) {
@@ -151,7 +152,9 @@ module.exports = function() {
                 case 4:
                     let ids = await getAllLivingIDs();
                     for(let i = 0; i < ids.length; i++) {
-                        await sqlProm("INSERT INTO packs (player, pack) VALUES (" + connection.escape(ids[i]) + ",6) ON DUPLICATE KEY UPDATE pack=6");
+                        if(Math.random() > 0.75) {
+                            await sqlProm("INSERT INTO packs (player, pack) VALUES (" + connection.escape(ids[i]) + ",6) ON DUPLICATE KEY UPDATE pack=6");
+                        }
                     }
                     await cachePacks();
                     dmsgText =  `You will regret killing %s. You have been cursed.`;

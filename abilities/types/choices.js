@@ -32,7 +32,7 @@ module.exports = function() {
                 // parse parameters
                 let target;
                 let type;
-                if(ability.target[0] === "`") {
+                if(ability.target[0] === "`" || ability.target.toLowerCase().substr(0, 9) === "@thisattr") {
                     target = await parseActiveExtraRoleSelector(ability.target, src_ref, additionalTriggerData);
                     type = "player_attr";
                 } else {

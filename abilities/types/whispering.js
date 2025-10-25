@@ -11,31 +11,45 @@ module.exports = function() {
     this.abilityWhispering = async function(src_ref, src_name, ability, additionalTriggerData) {
         let result;
         // check parameters
-        if(!ability.target) {
+        if(!ability.target || !ability.source) {
             abilityLog(`❗ **Error:** Missing arguments for type \`${ability.type}\`!`);
             return { msg: "Whispering failed! " + abilityError, success: false };
         }
-        let type = srcToType(src_ref);
-        if(type != "player") {
-            abilityLog(`❗ **Error:** Only players can use whispering!`);
-            return { msg: "Whispering failed! " + abilityError, success: false };
-        }
+        // parse parameters
         let disguise = ability.disguise ?? "";
         disguise = disguise.replace(/`/g, "");
-        // parse parameters
         let target = await parseLocation(ability.target, src_ref, additionalTriggerData);
+        
+        // parse target
         if(target.type == null || target.multiple) return { msg: "Whispering failed! " + abilityError, success: false }; // no location found
         let dur_type = parseDuration(ability.duration ?? "permanent");
         
+        // parse source
+        let source = await parseLocation(ability.source, src_ref, additionalTriggerData);
+        if(source.type == null || source.multiple) return { msg: "Whispering failed! " + abilityError, success: false }; // no source found
+        
+        
+        if(!["player","location","group"].includes(source.type)) {
+            abilityLog(`❗ **Error:** \`${source.type}\` type cannot use whispering.`);
+            return { msg: "Whispering failed! " + abilityError, success: false };
+        }
+        
         // handle visit
-        if(additionalTriggerData.parameters.visitless !== true) {
+        if(source.type === "player" && additionalTriggerData.parameters.visitless !== true) {
             let resultV = await visit(src_ref, target.value, disguise, NO_SND_VISIT_PARAM, "whispering");
             if(resultV) return visitReturn(resultV, "Whispering failed!", "Whispering succeeded!");
         }
         
-        // parse player data
-        let pid = srcToValue(src_ref);
-        let role = srcToValue(src_name);
+        // parse source data
+        let srcVal = source.value;
+        let srcTyp = source.type;
+        let chName;
+        if(srcTyp === "player") {
+            let role = await getPlayerRole(srcVal);
+            chName = srcRefToPlainText(`role:${role}`);
+        } else {
+            chName = srcRefToPlainText(`${srcTyp}:${srcVal}`);
+        }
         
         // get channel to whisper to
         let cid = await getSrcRefChannel(`${target.type}:${target.value}`);
@@ -47,14 +61,17 @@ module.exports = function() {
         while(true) {
             // get channel id
             index++;
-            let con = await connectionGet(`whisper:${pid}-${index}`);
+            let con = await connectionGet(`whisper:${srcVal}-${index}`);
             // check if channel even exists
             if(con.length > 0) { // if channel exists, check if it is used
-                let cid = con[0].channel_id;
-                let connections = await connectionGetByChannel(cid);
-                if(connections.length === 1) { // only one connection -> unused
-                   existingChannel = cid;
-                   break; // BREAK!
+                let con2 = await connectionGet(`${srcVal}-${index}`);
+                if(con2.length <= 1) {
+                    let cid = con[0].channel_id;
+                    let connections = await connectionGetByChannel(cid);
+                    if(connections.length === 1) { // only one connection -> unused
+                       existingChannel = cid;
+                       break; // BREAK!
+                    }
                 }
             } else { // if channel doesnt exist, BREAK
                 break; // BREAK!
@@ -65,11 +82,27 @@ module.exports = function() {
         if(existingChannel) {
             whisperChannel = mainGuild.channels.cache.get(existingChannel);
         } else {
-            whisperChannel = await whisperingCreate(role, pid, index);
+            switch(srcTyp) {
+                case "player":
+                    whisperChannel = await whisperingCreate(chName, srcVal, index);
+                break;
+                case "group":
+                case "location":
+                    let cid = await getSrcRefChannel(`${srcTyp}:${srcVal}`);
+                    let targetChannel = mainGuild.channels.cache.get(cid);
+                    if(!targetChannel) {
+                        abilityLog(`❗ **Error:** Could not find channel for \`${srcTyp}:${srcVal}\`.`);
+                        return { msg: "Whispering failed! " + abilityError, success: false };
+                    }
+                    whisperChannel = targetChannel;
+                    let con = await connectionGet(`whisper:${srcVal}-${index}`);
+                    if(con.length === 0) connectionAdd(targetChannel.id, `whisper:${srcVal}-${index}`, "whisper-channel");
+                break;
+            }
         }
         
         // connection name
-        const conName = `${pid}-${index}`;
+        const conName = `${srcVal}-${index}`;
         
         // create connection on own end
         connectionAdd(whisperChannel.id, conName, disguise);
@@ -81,7 +114,7 @@ module.exports = function() {
         connectionAdd(targetChannel.id, conName);
         
         // create an attribute
-        await createWhisperAttribute(src_name, src_ref, pid, dur_type, conName, whisperChannel.id, targetChannel.id);
+        await createWhisperAttribute(src_name, src_ref, srcVal, dur_type, conName, whisperChannel.id, targetChannel.id);
         
         // feedback
         return { msg: "Whispering succeeded!", success: true, target: `${target.type}:${target.value}` };
@@ -111,7 +144,7 @@ module.exports = function() {
                     channel.send(embed);
                 }
                 // delete connection
-                connectionDelete(name);
+                await connectionDelete(name);
             }
         }
     }
@@ -131,6 +164,7 @@ module.exports = function() {
             
             // grant permissions to the channel to member
             scPerms.push(getPerms(member, ["history", "read"], []));
+            scPerms.push(getPerms(stats.ghost, ["write"], ["read"]));
             
             // get last sc cat
             let category = await mainGuild.channels.fetch(cachedSCs[cachedSCs.length - 1]);

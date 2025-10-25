@@ -7,7 +7,6 @@ require("./caching.js")();
 require("./link.js")();
 require("./info.js")();
 require("./utility.js")();
-require("./elected.js")();
 require("./groups.js")();
 require("./alias.js")();
 

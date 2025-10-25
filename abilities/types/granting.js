@@ -99,6 +99,10 @@ module.exports = function() {
             if(existingChannel.length === 0) { 
                 let latestRoleAttr = await queryAttribute("attr_type", "role");
                 await triggerPlayerRoleAttributeByAttr(latestRoleAttr[latestRoleAttr.length - 1].ai_id, "Starting");
+                await triggerPlayerRoleAttributeByAttr(latestRoleAttr[latestRoleAttr.length - 1].ai_id, "On Assigned");
+            } else { // run on assigned
+                let assignedRoleAttr = await queryAttribute("attr_type", "role", "val2", channelId);
+                await triggerPlayerRoleAttributeByAttr(assignedRoleAttr[assignedRoleAttr.length - 1].ai_id, "On Assigned");
             }
             // return result
             if(targets.length === 1) return { msg: "Granting succeeded!", success: true, target: `player:${targets[0]}` };
@@ -232,6 +236,7 @@ module.exports = function() {
             
             // grant permissions to the channel to member
             scPerms.push(getPerms(member, ["history", "read"], []));
+            scPerms.push(getPerms(stats.ghost, ["write"], ["read"]));
             
             // get last sc cat
             let category = await mainGuild.channels.fetch(cachedSCs[cachedSCs.length - 1]);

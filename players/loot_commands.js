@@ -11,7 +11,7 @@ module.exports = function() {
         if(nickPerms === 0) {
             message.channel.send(`⛔ You have not unlocked the ${stats.prefix}nickname command.`);
             return;
-        } else if(!isGameInvolved(message.member)) {
+        } else if(!isGameInvolved(message.member) && stats.gamephase != gp.SIGNUP) {
             let nick = argsX.join(" ");
             if(nick.length < 2 || nick.length > 32) {
                 message.channel.send(`⛔ Invalid nickname.`);
@@ -31,7 +31,7 @@ module.exports = function() {
         if(shipPerms === 0) {
             message.channel.send(`⛔ You have not unlocked the ${stats.prefix}newship command.`);
             return;
-        } else if(!isGameInvolved(message.member)) {
+        } else if(!isGameInvolved(message.member) && stats.gamephase != gp.SIGNUP) {
 			let newShip = message.guild.members.cache.filter(el => el.roles.cache.size >= 5).random().displayName;
             let newShipFull = newShip;
             let displayName = message.member.displayName.split(" ♡ ")[0];
@@ -56,7 +56,7 @@ module.exports = function() {
         if(shipPerms === 0) {
             message.channel.send(`⛔ You have not unlocked the ${stats.prefix}newhate command.`);
             return;
-        } else if(!isGameInvolved(message.member)) {
+        } else if(!isGameInvolved(message.member) && stats.gamephase != gp.SIGNUP) {
 			let newShip = message.guild.members.cache.filter(el => el.roles.cache.size >= 5).random().displayName;
             let newShipFull = newShip;
             let displayName = message.member.displayName.split(" ☠ ")[0];
