@@ -572,7 +572,7 @@ module.exports = function() {
         switch(type) {
             case "killing": emojiName = "CategoryKilling"; break;
             case "investigating": emojiName = "CategoryInvestigative"; break;
-            case "targeting": emojiName = "CategoryMiscellaneous"; break;
+            case "targeting": emojiName = "Targeting"; break;
             case "disguising": emojiName = "Disguise"; break;
             case "protecting": emojiName = "Defense"; break;
             case "applying": emojiName = "CategoryPower"; break;
@@ -585,14 +585,14 @@ module.exports = function() {
             case "obstructing": emojiName = "Obstructions"; break;
             case "poll": emojiName = "VotingBooth"; break;
             case "announcement": emojiName = "Announcement"; break;
-            case "changing": emojiName = "CategoryAlign"; break;
-            case "copying": emojiName = "LookAlike"; break;
+            case "changing": emojiName = "RoleChange"; break;
+            case "copying": emojiName = "Copying"; break;
             case "choices": emojiName = "UnalignedPlaceholder"; break;
             case "ascend": emojiName = "Ascension"; break;
             case "descend": emojiName = ""; break;
             case "disband": emojiName = ""; break;
             case "counting": emojiName = ""; break;
-            case "reset": emojiName = ""; break;
+            case "reset": emojiName = "Whispering"; break;
             case "cancel": emojiName = ""; break;
             case "switching": emojiName = ""; break;
             case "process_evaluate": emojiName = ""; break;
@@ -611,6 +611,7 @@ module.exports = function() {
             case "locking": emojiName = ""; break;
             case "executing": emojiName = "BotDeveloper"; break;
             case "activating": emojiName = "Ghost"; break;
+            case "resurrecting": emojiName = "Resurrecting"; break;
         }
         return emojiName ? getEmoji(emojiName) : "";
     }

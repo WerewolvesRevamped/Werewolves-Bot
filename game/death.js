@@ -208,11 +208,11 @@ module.exports = function() {
         let addPlayers = await sqlProm("SELECT * FROM killq");
         if(addPlayers.length > 0) {
             let addPlayerCount = await killqKillall();
-            return addPlayerCount + players.length;
+            return addPlayerCount + playersKilled.length + playersBanished.length;
         }
         
         // return count
-        return players.length;
+        return playersKilled.length + playersBanished.length;
     }
         
     

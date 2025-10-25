@@ -259,7 +259,7 @@ module.exports = function() {
                 var embed = await getBasicEmbed(mainGuild);
                 
                 // create members list
-                var members = await applyQuery(`@Query;Team=${result.name},Type=default;$.Emoji $.Name@\n\n@Query;Team=${result.name},Type=limited;$.Emoji *$.Name*@\n\n@Query;Team=${result.name},Type=transformation;$.Emoji $.Name (T)@`);
+                var members = await applyQuery(`@Query;Team=${result.name},Type=default;$.Emoji $.Name@\n\n@Query;Team=${result.name},Type=limited;$.Emoji *$.Name*@\n\n@Query;Team=${result.name},Type=transformation;$.Emoji $.Name (T)@\n\n@Query;Team=${result.name},Type=haunted;$.Emoji $.Name (H)@`);
                 members = members.replace("\n\n\n","\n"); // remove extra newline for when a section is empty
                 
                 var desc = [];

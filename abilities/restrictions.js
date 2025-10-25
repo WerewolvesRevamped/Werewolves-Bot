@@ -70,9 +70,10 @@ module.exports = function() {
                     // SUCCESSION - DEFAULT
                     case "default":
                         let lastPhase = await getLastPhase(src_ref, ability);
+                        let now = getPhaseAsNumber();
                         // check if current phase is at least 2 higher than the phase the ability was last used in
-                        console.log("SUCC", src_ref, ability, lastPhase);
-                        if(getPhaseAsNumber() >= lastPhase+2) {
+                        console.log("SUCC", src_ref, "last", lastPhase, "now", now);
+                        if(now >= lastPhase+4) {
                             return true;
                         } else {
                             return false;
@@ -271,7 +272,7 @@ module.exports = function() {
     this.getLastPhase = function(src_ref, ability) {
         return new Promise(res => {
             sql("SELECT * FROM action_data WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=" + connection.escape(ability.id), result => {
-                if(!result[0]) res(-2);
+                if(!result[0]) res(-10);
                 else res(+result[0].last_phase);
             });
         });

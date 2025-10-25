@@ -35,7 +35,7 @@ module.exports = function() {
         }
         
         // get list of new members
-        let players = parseUserList(args, 1, channel, member);
+		let players = parseUserList(args, 1, channel, member, isGhost(member) ? "ghost" : "participant");
         if(!players) players = [];
         players = players.filter(el => !isCCMember(channel, el));
         // add members if at least one exists
@@ -69,7 +69,7 @@ module.exports = function() {
         }
         
         // get list of members to remove
-        let players = parseUserList(args, 1, channel, member);
+		let players = parseUserList(args, 1, channel, member, isGhost(member) ? "ghost" : "participant");
         if(!players) players = [];
         players = players.filter(el => isCCMember(channel, el) && !isCCOwner(channel, el));
         // remove members if at least one exists
@@ -103,7 +103,7 @@ module.exports = function() {
         }
         
         // get list of members to promote
-        let players = parseUserList(args, 1, channel, member);
+		let players = parseUserList(args, 1, channel, member, isGhost(member) ? "ghost" : "participant");
         if(!players) players = [];
         players = players.filter(el => isCCMember(channel, el) && !isCCOwner(channel, el));
         // remove members if at least one exists
@@ -135,7 +135,7 @@ module.exports = function() {
         }
         
         // get list of members to demote
-        let players = parseUserList(args, 1, channel, member);
+		let players = parseUserList(args, 1, channel, member, isGhost(member) ? "ghost" : "participant");
         if(!players) players = [];
         players = players.filter(el => isCCMember(channel, el) && isCCOwner(channel, el));
         // remove members if at least one exists

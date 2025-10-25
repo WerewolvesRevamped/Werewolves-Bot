@@ -630,6 +630,7 @@ module.exports = function() {
                     await trigger(pollData.src_ref, "On Poll Closed", { winner: maxVotesData[0], voters: maxVotesValidVoters, other_voters: otherVoters }); 
                     await triggerPlayer(maxVotesData[0], "On Poll Win", { voters: maxVotesValidVoters, other_voters: otherVoters }); 
                     await triggerPlayer(maxVotesData[0], "On Poll Win Complex", { poll_name: pollName, voters: maxVotesValidVoters, other_voters: otherVoters }); 
+                    await triggerPlayer(maxVotesData[0], "On Poll Win Complex", { poll_name: pollType, voters: maxVotesValidVoters, other_voters: otherVoters }); 
                 break;
                 // for group polls a random executor is chosen
                 case "group":
@@ -637,6 +638,7 @@ module.exports = function() {
                     await trigger(pollData.src_ref, "On Poll Closed", { winner: maxVotesData[0], executor: executor, voters: maxVotesValidVoters, other_voters: otherVoters }); 
                     await triggerPlayer(maxVotesData[0], "On Poll Win", { voters: maxVotesValidVoters, other_voters: otherVoters }); 
                     await triggerPlayer(maxVotesData[0], "On Poll Win Complex", { poll_name: pollName, voters: maxVotesValidVoters, other_voters: otherVoters }); 
+                    await triggerPlayer(maxVotesData[0], "On Poll Win Complex", { poll_name: pollType, voters: maxVotesValidVoters, other_voters: otherVoters }); 
                 break;
                 
             }

@@ -420,12 +420,24 @@ module.exports = function() {
             
             // get base sc permissions
             let scPerms = getSCCatPerms(mainGuild);
-            // make ghosts unable to talk
-            scPerms.push(getPerms(stats.ghost, [], ["write"]));
+            let groupIsGhostly = false;
             
             // if a first member is specified, grant them permissions to the channel
             if(firstMember) {
                 scPerms.push(getPerms(firstMember, ["history", "read"], []));
+                
+                // if group creator is a ghost, the group is ghostly
+                let mem = mainGuild.members.cache.get(firstMember);
+                if(isGhost(mem)) groupIsGhostly = true;
+            }
+            
+            // ghost permissions based on creator
+            if(groupIsGhostly) {
+                // make ghosts able to talk
+                scPerms.push(getPerms(stats.ghost, ["write"], ["read"]));
+            } else {      
+                // make ghosts unable to talk
+                scPerms.push(getPerms(stats.ghost, [], ["write"]));
             }
             
             let mentor = await getMentor(firstMember); 

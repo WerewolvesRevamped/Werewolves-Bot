@@ -661,7 +661,7 @@ module.exports = function() {
             }
         }
         
-        if(originalPlayerMember && !isParticipant(originalPlayerMember)) {
+        if(originalPlayerMember && !isParticipant(originalPlayerMember) && !isGhost(originalPlayerMember)) {
 			message.channel.send("⛔ Player error. Can not sub out a non-participant!"); 
 			return; 
         }
@@ -1043,7 +1043,7 @@ module.exports = function() {
 	}
 	
 	this.cmdSubstitute = async function(channel, member, args) {
-		if(isParticipant(member)) {
+		if(isParticipant(member) || isMentor(member) || isSub(member) || isGhost(member)) {
 			channel.send("⛔ Command error. Can't make you a substitute player while you're a participant."); 
 			return;
 		}

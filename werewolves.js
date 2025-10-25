@@ -152,7 +152,7 @@ function timeConverter(UNIX_timestamp){
 }
 
 function uncacheMessage(message) {
-    if(!isParticipant(message.member)) {
+    if(!isParticipant(message.member) && !isGhost(message.member)) {
         message.channel.messages.cache.delete(message.id);
     }
 }
@@ -209,7 +209,7 @@ client.on("messageCreate", async message => {
         return;
     }
     
-    if(!message.author.bot && message.reference && message.mentions.repliedUser === null && message.type === 0 && isParticipant(message.member) && !isSC(message.channel)) {
+    if(!message.author.bot && message.reference && message.mentions.repliedUser === null && message.type === 0 && (isParticipant(message.member) || isGhost(message.member)) && !isSC(message.channel)) {
 		cmdWebhook(message.channel, message.member, ["**Forwarded Message**","\n*<@" + message.author.id + "> You're not allowed to forward messages during the game!*"]);
         message.delete();
     }
@@ -241,14 +241,14 @@ client.on("messageCreate", async message => {
     
     
 	/* Fetch Channel */
-    if(isParticipant(message.member)) {
+    if(isParticipant(message.member) || isGhost(message.member)) {
         message.channel.messages.fetch({ limit: 50 });
     }
 	/* Connected Channels */ // Copies messages from one channel to another and applies disguises if one is set
 	connectionExecute(message);
     
     /* Counts messages */
-    if(stats.gamephase == gp.INGAME && message.content.slice(stats.prefix.length).indexOf(stats.prefix) !== 0 && !message.author.bot && isParticipant(message.member)) {
+    if(stats.gamephase == gp.INGAME && message.content.slice(stats.prefix.length).indexOf(stats.prefix) !== 0 && !message.author.bot && (isParticipant(message.member) || isGhost(message.member))) {
         if(isCC(message.channel) || isSC(message.channel)) { // private message
             sql("UPDATE players SET private_msgs=private_msgs+1 WHERE id = " + connection.escape(message.member.id), () => {}, () => {
                 log("MSG Count > Failed to count private message for " + message.author + "!")
@@ -258,58 +258,6 @@ client.on("messageCreate", async message => {
                 log("MSG Count > Failed to count private message for " + message.author + "!")
             });
         }
-    }
-    
-    // Advisor Bot
-    if(stats.gamephase == gp.INGAME && message.author.id === "528311658846748688" && message.content.length > 15 && ((isPublic(message.channel) && Math.random() > 0.25) || (!isPublic(message.channel) && Math.random() > 0.75)) && message.channel.name != "out-of-character" && getPhaseNum() > 0 && advisorCounter <= 0 && message.content.split(" ").length > 8 && isParticipant(message.member)) {
-        // get channel to whisper to
-        let cid = await getSrcRefChannel(`player:${message.author.id}`);
-        let targetChannel = mainGuild.channels.cache.get(cid);
-        if(targetChannel && message.channel.id != cid) {
-            if(lastMessageBlocked) {
-                lastMessageBlocked = false;
-            } else {
-                let txt = message.content;
-                let mem = message.member;
-                let ch = message.channel;
-                message.delete();
-                botDeleted.push(message.id);
-                lastMessageBlocked = true;
-                
-                mem.timeout(60 * 2 * 100);
-                
-                let m = await ch.send(`❗${mem.displayName} has tried to speak, but has been given time to reconsider. Please be patient!`);
-                
-                // Get the server icon for the footer
-                let serverIcon = await getServerIcon(ch.guild);
-            
-               // Build the  embed
-                var embed = {
-                    "footer": {
-                        "icon_url": `${serverIcon}`,
-                        "text": `${ch.guild.name} - ${stats.game}`
-                    },
-                    "title": "Advisor Bot",
-                    "description": `You have tried to send a message [${ch.name}](https://discord.com/channels/${ch.guild.id}/${m.channel.id}/${m.id}). You have been given time to reconsider.`,
-                    "fields": [
-                        {
-                            "name": "Original Message",
-                            "value": `\`\`\`${txt}\`\`\``
-                        },
-                        {
-                            "name": "Tips",
-                            "value": "• Are you sure saying this will help you / your team?\n• Are you sure the person you are talking to is talking in good faith? Are they trying to trick you into revealing information?\n• Have you formatted your message as a comprehensive sentence? If not, take this chance to rephrase your message!"
-                        }
-                    ]
-                };
-                
-                // send
-                targetChannel.send({ contents: `<@${mem.id}>`, embeds: [ embed ] });
-                advisorCounter += 50;
-            }
-        }
-    } else {
-        advisorCounter--;
     }
     
     /* Counts messages, again **/
@@ -345,7 +293,7 @@ client.on("messageCreate", async message => {
                     let newLevel = (+activity[0].level) + 1;
                     let reqXpLevelup = LEVELS[newLevel];
                     let randChance = Math.random();
-                    if(reqXpLevelup && reqXpLevelup <= ((+activity[0].count) + 1) && randChance < 0.25 && !((isParticipant(message.member) || isHost(message.member)) && stats.gamephase == gp.INGAME)) {
+                    if(reqXpLevelup && reqXpLevelup <= ((+activity[0].count) + 1) && randChance < 0.25 && !((isParticipant(message.member) || isGhost(message.member) || isHost(message.member)) && stats.gamephase == gp.INGAME)) {
                         console.log(`Level Up for ${message.member.displayName} to Level ${newLevel}!`);
                         await sleep(3000); // delay level up by 30s
                         await sqlPromEsc("UPDATE activity SET level=level+1 WHERE player=", message.author.id);
@@ -491,7 +439,7 @@ client.on("messageCreate", async message => {
     }
     
 	/* Gif Check */
-	if(!message.author.bot && isParticipant(message.member) && message.content.search("http") >= 0 && stats.ping.length > 0 && stats.gamephase == gp.INGAME) {
+	if(!message.author.bot && (isParticipant(message.member) || isGhost(message.member)) && message.content.search("http") >= 0 && stats.ping.length > 0 && stats.gamephase == gp.INGAME) {
         urlHandle(message, !!message.member.roles.cache.get(stats.gamemaster_ingame));
 	}
     
@@ -1083,7 +1031,7 @@ client.on("messageCreate", async message => {
             message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
             return;
         }
-        if(isParticipant(message.member) && stats.gamephase != gp.POSTGAME && stats.gamephase != gp.SIGNUP) {
+        if((isParticipant(message.member) || isGhost(message.member)) && stats.gamephase != gp.POSTGAME && stats.gamephase != gp.SIGNUP) {
             message.channel.send(`⛔ You cannot use this command while ingame.`);
             break;
         }
@@ -1101,7 +1049,7 @@ client.on("messageCreate", async message => {
             message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
             return;
         }
-        if((isSignedUp(message.member) || isParticipant(message.member)) && stats.gamephase != gp.POSTGAME && stats.gamephase != gp.SIGNUP) {
+        if((isSignedUp(message.member) || isParticipant(message.member) || isGhost(message.member)) && stats.gamephase != gp.POSTGAME && stats.gamephase != gp.SIGNUP) {
             message.channel.send(`⛔ You cannot use this command while signed up or ingame.`);
             break;
         }
@@ -1119,7 +1067,7 @@ client.on("messageCreate", async message => {
             message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
             return;
         }
-        if(isParticipant(message.member) && stats.gamephase != gp.POSTGAME && stats.gamephase != gp.SIGNUP) {
+        if((isParticipant(message.member) || isGhost(message.member)) && stats.gamephase != gp.POSTGAME && stats.gamephase != gp.SIGNUP) {
             message.channel.send(`⛔ You cannot use this command while ingame.`);
             break;
         }
@@ -1194,7 +1142,7 @@ client.on('messageDelete', async message => {
 	let log = client.guilds.cache.get(stats.log_guild).channels.cache.get(stats.log_channel);
 	let author = client.guilds.cache.get(message.guildId).members.cache.get(message.authorId);
     if(botDeleted.includes(message.id)) return;
-	if((message.content[0] != config.prefix && message.content[0] != "§" && message.content[0] != "$" && message.content[0] != "." && message.content[0] != ";" && message.content[0] != "~") && (isParticipant(author) || isDeadParticipant(author)) && message.content.search("http") == -1) {
+	if((message.content[0] != config.prefix && message.content[0] != "§" && message.content[0] != "$" && message.content[0] != "." && message.content[0] != ";" && message.content[0] != "~") && (isParticipant(author) || isGhost(author) || isDeadParticipant(author)) && message.content.search("http") == -1) {
 		cmdWebhook(log, author, ["**Deleted Message**", "\n*Deleted message by <@" + message.authorId + "> in <#" + message.channelId + ">!*","\n> ", message.content.split("\n").join("\n> "),"\n","\n" + stats.ping ]);
 		cmdWebhook(channel, author, ["**Deleted Message**","\n*<@" + message.authorId + "> You're not allowed to delete messages during the game!*"]);
 	}
@@ -1214,7 +1162,7 @@ client.on('messageUpdate', async (oldMessage, newMessage) => {
 	let channel = msgGuild.channels.cache.get(oldMessage.channelId);
 	let log = client.guilds.cache.get(stats.log_guild).channels.cache.get(stats.log_channel);
 	let author = msgGuild.members.cache.get(oldMessage.authorId);
-	if(isParticipant(author) && (Math.abs(oldMessage.content.length - newMessage.content.length) > (oldMessage.content.length/5))) {
+	if((isParticipant(author) || isGhost(author)) && (Math.abs(oldMessage.content.length - newMessage.content.length) > (oldMessage.content.length/5))) {
 		//cmdWebhook(log, author, ["**Updated Message**", "\n*Updated message by <@" + oldMessage.authorId + "> in <#" + oldMessage.channelId + ">!*","\n__Old:__\n> ", oldMessage.content.split("\n").join("\n> "),"\n","\n__New:__\n> ", newMessage.content.split("\n").join("\n> "),"\n","\n" + stats.ping ]);
 		cmdWebhook(log, author, ["**Updated Message**", "\n*Updated message by <@" + oldMessage.authorId + "> in <#" + oldMessage.channelId + ">!*","\n__Old:__\n> ", oldMessage.content.split("\n").join("\n> "),"\n","\n__New:__\n> ", newMessage.content.split("\n").join("\n> "),"\n","\n" ]);
 	}
@@ -1260,13 +1208,13 @@ client.on("messageReactionAdd", async (reaction, user) => {
                 reaction.message.edit({ embeds: [ embed ] });
                 reaction.message.reactions.removeAll();
             }
-		} else if(isGameMaster(member) && !isParticipant(member) && reaction.emoji.name == "❌") {
+		} else if(isGameMaster(member) && !isParticipant(member) && !isGhost(member) && reaction.emoji.name == "❌") {
 			reaction.message.edit({ embeds: [] });
             console.log("invalidate prompt");
             sql("DELETE FROM prompts WHERE message_id=" + connection.escape(reaction.message.id));
             sql("DELETE FROM action_queue WHERE message_id=" + connection.escape(reaction.message.id));
 			reaction.users.remove(user);
-		}  else if(isGameMaster(member) && !isParticipant(member) && reaction.emoji == client.emojis.cache.get(stats.no_emoji)) {
+		} else if(isGameMaster(member) && !isParticipant(member) && !isGhost(member) && reaction.emoji == client.emojis.cache.get(stats.no_emoji)) {
 			reaction.message.delete();
 		} else if(isParticipant(member) || isDeadParticipant(member) || isGhost(member)) {
             const poll = await getPoll(reaction.message.id);
@@ -1296,6 +1244,13 @@ client.on("messageReactionAdd", async (reaction, user) => {
                         pollCheckHammer(poll, pData);
                     }
                 }
+            } else {
+                // dead participants and ghosts cannot react besides polls
+                if(isDeadParticipant(member) || isGhost(member)) {
+                    log(`❗<@${user.id}> attempted to react (${reaction.emoji.name}) to https://discord.com/channels/${mainGuild.id}/${reaction.message.channel.id}/${reaction.message.id} while not alive!`);
+                    log(`<@&${stats.host}>`);
+                    reaction.users.remove(user);
+                }
             }
         }
 	} 
@@ -1312,9 +1267,17 @@ client.on("messageReactionRemove", async (reaction, user) => {
 	// Automatic unpinning
 	if(reaction.emoji.name === "📌" && reaction.count == 0 && isParticipant(member)) {
 		reaction.message.unpin();
-	} else if(stats.gamephase == gp.INGAME && isParticipant(member)) {
+	} else if(stats.gamephase == gp.INGAME && (isParticipant(member) || isGhost(member))) {
         let poll = await getPoll(reaction.message.id);
         if(poll) {
+            // get poll data
+            const pData = await pollGetData(poll.type);
+            const allowedVoters = await parsePlayerSelector(pData.voters);
+            // handle votes
+            if(!allowedVoters.includes(user.id)) { // invalid votes
+                return; // ignore removal of invalid votes
+            }
+            
             let emojiText = reaction.emoji.id ? `<:${reaction.emoji.name.toLowerCase()}:${reaction.emoji.id}>` : reaction.emoji.name;
             let emojiPlayer = emojiToID(emojiText);
             let emojiName = pollEmojiToName(emojiText);
@@ -1326,7 +1289,6 @@ client.on("messageReactionRemove", async (reaction, user) => {
             let ind = ++tempVoteCounter;
             setTimeout(() => processTempVoteData(ind), 15 * 1000);
             // check for hammer poll
-            let pData = await pollGetData(poll.name);
             if(pData && pData.hammer == 1) {
                 pollCheckHammer(poll, pData);
             }
@@ -1394,7 +1356,7 @@ client.on("guildMemberAdd", async member => {
 client.on('interactionCreate', async interaction => {
     if(interaction.isButton()) {
         let orig_text = interaction.message.embeds[0].description.split(PROMPT_SPLIT)[0];
-        if(!isParticipant(interaction.member) && !isGameMaster(interaction.member) && !isMentor(interaction.member)) {
+        if(!isParticipant(interaction.member) && !isGhost(interaction.member) && !isGameMaster(interaction.member) && !isMentor(interaction.member)) {
             interaction.deferUpdate();
             return;
         }

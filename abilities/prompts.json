@@ -81,5 +81,6 @@
     "prophet.3": "You may choose a player to protect with the **Miracle of Protection**.",
     "gravekeeper.1": "You may choose a ghostly player whose role you will learn.",
     "hexed_wolf.1": "You may choose a *hexed* player to investigate - the result will be sent to you.",
-    "hexed_wolf.2": "You may choose a *hexed* player to investigate - the result will be sent to the wolfpack."
+    "hexed_wolf.2": "You may choose a *hexed* player to investigate - the result will be sent to the wolfpack.",
+    "immortal.1": "You may choose your vote count for the next day (1-3). If you do not submit, your vote defaults to 1."
 }

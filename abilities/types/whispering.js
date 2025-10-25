@@ -164,6 +164,7 @@ module.exports = function() {
             
             // grant permissions to the channel to member
             scPerms.push(getPerms(member, ["history", "read"], []));
+            scPerms.push(getPerms(stats.ghost, ["write"], ["read"]));
             
             // get last sc cat
             let category = await mainGuild.channels.fetch(cachedSCs[cachedSCs.length - 1]);
