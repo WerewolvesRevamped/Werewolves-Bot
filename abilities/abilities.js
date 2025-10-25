@@ -44,6 +44,8 @@ require("./types/feedback.js")();
 require("./types/win.js")();
 require("./types/locking.js")();
 require("./types/executing.js")();
+require("./types/activating.js")();
+require("./types/resurrecting.js")();
 
 module.exports = function() {
     
@@ -204,6 +206,12 @@ module.exports = function() {
                 break;
                 case "executing":
                     feedback = await abilityExecuting(src_refAction, src_name, ability, additionalTriggerData);
+                break;
+                case "activating":
+                    feedback = await abilityActivating(src_refAction, src_name, ability, additionalTriggerData);
+                break;
+                case "resurrecting":
+                    feedback = await abilityResurrecting(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "success":
                     feedback = { msg: "Ability succeeded!", success: true };
@@ -388,6 +396,8 @@ module.exports = function() {
         let val = srcToValue(src_ref);
         switch(type) {
             case "player":
+            case "ghost":
+            case "dead":
                 return `<@${val}>`;
             case "player_group":
                 return `<@${val}> (Group Executor)`;
@@ -433,6 +443,59 @@ module.exports = function() {
             case "unknown":
             default:
                 return `UNKNOWN \`${src_ref}\``;
+            break;
+        }
+    }
+    
+    /** PUBLIC
+    Source Reference to Plain Text
+    Converts a source reference to plain text
+    **/
+    this.srcRefToPlainText = function(src_ref, raw = null, allowRecursion = true) {
+        let type = srcToType(src_ref);
+        let val = srcToValue(src_ref);
+        switch(type) {
+            case "player":
+            case "ghost":
+            case "dead":
+            case "player_group":
+                let mem = mainGuild.members.cache.find(el => el.id === val);
+                return mem.displayName;
+            case "group":
+            case "player_attr":
+            case "activeextrarole":
+                let ch = mainGuild.channels.cache.find(el => el.id === val);
+                return ch.displayName;
+            case "alignment":
+            case "poll":
+            case "role":
+            case "team":
+            case "location":
+            case "killingtype":
+            case "abilitytype":
+                return toTitleCase(val);
+            case "attribute":
+                if(!isNaN(val)) {
+                    const owner = getCustomAttributeOwner(val);
+                    const name = getCustomAttributeName(val);
+                    const ownerText = allowRecursion ? srcRefToPlainText(owner) : owner;
+                    return `${name} on ${ownerText}`;
+                } else {
+                    return toTitleCase(val);
+                }
+            break;
+            case "result":
+                return raw.msg;
+            case "info":
+            case "string":
+                return val;
+            break;
+            case "number":
+                return numToText(val);
+            break;
+            case "unknown":
+            default:
+                return `UNKNOWN ${src_ref}`;
             break;
         }
     }
@@ -547,6 +610,7 @@ module.exports = function() {
             case "win": emojiName = "Ascension"; break;
             case "locking": emojiName = ""; break;
             case "executing": emojiName = "BotDeveloper"; break;
+            case "activating": emojiName = "Ghost"; break;
         }
         return emojiName ? getEmoji(emojiName) : "";
     }

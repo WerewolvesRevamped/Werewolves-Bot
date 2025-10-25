@@ -23,6 +23,11 @@ module.exports = function() {
         let cid = await getSrcRefChannel(`${target.type}:${target.value}`);
         let targetChannel = mainGuild.channels.cache.get(cid);
         
+        if(!targetChannel) {
+            abilityLog(`❗ **Error:** Could not find channel \`${target.type}:${target.value}\`!`);
+            return { msg: "Locking failed! " + abilityError, success: false };
+        }
+        
         // select subtype
         switch(ability.subtype) {
             default:

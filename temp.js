@@ -51,6 +51,7 @@ module.exports = function() {
         ["334136126745083907","🐓"], // Jean D. Arch
         ["161551993704284171","🐼"], // kruthers
         ["394312008062861313", "🐟"], // fish
+        ["559747107368730624", "🦐 "], // chimi
         /** LEGACY **/
         ["152875086213283841","🐘"],  // Dennis
         ["633338331220148225","🌌"], // Sharl Eclair
@@ -91,7 +92,8 @@ module.exports = function() {
                 "delete": ["d"],
                 "bulkdelete": ["bd"],
                 "list_alive": ["a","alive","alive_list","alive-list","listalive","list-alive"],
-                "list_dead": ["ld","dead","dead_list","dead-list","listdead","list-dead","lg","g","ghost","ghost_list","ghost-list","listghost","list-ghost","list_ghost","list_ghosts"],
+                "list_dead": ["ld","dead","dead_list","dead-list","listdead","list-dead"],
+                "list_ghost": ["lg","g","ghost","ghost_list","ghost-list","listghost","list-ghost","list_ghost","list_ghosts"],
                 "list_alphabetical": ["la"],
                 "list_signedup": ["l","list","signedup","signedup_list","signedup-list","listsignedup","list-signedup"],
                 "list_mentors": ["mentors"],
@@ -106,6 +108,7 @@ module.exports = function() {
                 "connection": ["con","connect","whisper","whispers"],
                 "gamephase": ["gp","game_phase","game-phase"],
                 "modify": ["mod"],
+                "modifiers": ["ms", "md", "modifier"],
                 "say": [">"],
                 "ping": ["?"],
                 "elect": ["el", "elected"],
@@ -141,6 +144,7 @@ module.exports = function() {
                 "schedule": ["sched", "sch"],
                 "parse_prompt": ["pp", "prompt_parse"],
                 "reevaluate": ["reeval", "reval"],
+                "bot": ["cmds", "command", "commands", "cmd"]
         };
         
     this.parseAlias = function(alias) {

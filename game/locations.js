@@ -78,7 +78,7 @@ module.exports = function() {
 				// Send message
 				chunkArray(result.map(loc => {
                     let emoji = getLUTEmoji(loc.name, loc.display_name);
-                    return `**${emoji} ${toTitleCase(loc.display_name)}** (${toTitleCase(loc.members.split(",").join(", "))} / ${toTitleCase(loc.viewers.split(",").join(", "))}) [${loc.sort_index}]`;
+                    return `**${emoji} ${toTitleCase(loc.display_name)}** (${toTitleCase(loc.members.split(",").join(", "))} / ${toTitleCase(loc.viewers.split(",").join(", "))}) [${loc.sort_index}] ${loc.haunting==1?'👻':''}`;
                 }), 20).map(el => el.join("\n")).forEach(el => channel.send(el));
 			} else { 
 				// No locations exist
@@ -186,6 +186,8 @@ module.exports = function() {
                 return stats.participant ? getPerms(stats.participant, allow, deny) : null; 
             case "mentor":
                 return stats.mentor ? getPerms(stats.mentor, allow, deny) : null; 
+            case "ghost mentor":
+                return stats.ghost_mentor ? getPerms(stats.ghost_mentor, allow, deny) : null; 
             case "dead":
                 return stats.dead_participant ? getPerms(stats.dead_participant, allow, deny) : null; 
             case "ghost":

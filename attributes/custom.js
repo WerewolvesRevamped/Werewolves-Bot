@@ -128,7 +128,18 @@ module.exports = function() {
     creates a custom attribute
     **/
     this.createCustomAttribute = async function(src_name, src_ref, target, targetType, dur, attrType, val1 = "", val2 = "", val3 = "") {
-        await createAttribute(src_name, src_ref, target, targetType, dur, "custom", attrType, val1, val2, val3);
+        // get attribute data
+        let act = 0;
+        if(stats.haunting) { 
+            let attrData = await (new Promise(res => {
+                 sql("SELECT * FROM attributes WHERE name = " + connection.escape(attrType), result => {
+                     res(result[0]);
+                 });
+            })); 
+            act = attrData.activation;
+        }
+        // create attribute
+        await createAttribute(src_name, src_ref, target, targetType, dur, "custom", attrType, val1, val2, val3, act);
         await cacheActiveCustomAttributes();
     }
     

@@ -55,6 +55,8 @@ module.exports = function() {
             case "player_attr": 
             case "player_group": 
             case "player_optional": 
+            case "ghost": 
+            case "dead": 
                 return { value: await parsePlayerSelector(selector, self, additionalTriggerData), type: "player" };
             // ROLE
             case "role": 
@@ -179,9 +181,7 @@ module.exports = function() {
                 if(aliveOnly) {
                     return await getAllLivingIDs();
                 } else {   
-                    let dead = await getAllDeadIDs();
-                    let alive = await getAllLivingIDs();
-                    return [...dead, ...alive];
+                    return await getAllIDs();
                 }
             // others; @all without @self
             case "@others":
@@ -190,22 +190,22 @@ module.exports = function() {
                     let pself = srcToValue(self);
                     return all.filter(el => el != pself);
                 } else {
-                    let dead = await getAllDeadIDs();
-                    let alive = await getAllLivingIDs();
+                    let all = await getAllIDs();
                     let pself = srcToValue(self);
-                    return  [...dead, ...alive].filter(el => el != pself);
+                    return  all.filter(el => el != pself);
                 }
             // all dead players
             case "@dead":
                 return await getAllDeadIDs();
+            // all ghostly players
+            case "@ghostly":
+                return await getAllGhostlyIDs();
             // nobody
             case "@nobody":
                 return [ ];
             // all players, including dead ones
             case "@deadalive":
-                let dead = await getAllDeadIDs();
-                let alive = await getAllLivingIDs();
-                return [...dead, ...alive];
+                return await getAllIDs();
             // target
             case "@target":
                 if(!self) { // if no self is specified, @Target is invalid
@@ -479,23 +479,49 @@ module.exports = function() {
     /**
     Get all living player ids
     **/
-    this.getAllLivingIDs = function() {
+    function getPlayersFromAliveness(op, val) {
+        if(!op || op.length < 1 || op.length > 2 || !(["=","<",">","<=",">=","<>"].includes(op))) return [];
+        if(val < 0 || val > 2) return [];
         return new Promise(res => {
-            sql("SELECT id FROM players WHERE type='player' AND alive=1", result => {
+            sql("SELECT id FROM players WHERE type='player' AND alive" + op + connection.escape(val), result => {
                 res(result.map(el => el.id));
             })
         });
     }
     
     /**
+    Get all living player ids
+    **/
+    this.getAllIDs = function() {
+        return getPlayersFromAliveness(">=", 0);
+    }
+    
+    /**
+    Get all living player ids
+    **/
+    this.getAllLivingIDs = function() {
+        return getPlayersFromAliveness("=", 1);
+    }
+    
+    /**
+    Get all ghostly player ids
+    **/
+    this.getAllGhostlyIDs = function() {
+        return getPlayersFromAliveness("=", 2);
+    }
+    
+    /**
+    Get all living and ghostly player ids
+    **/
+    this.getAllLivingAndGhostlyIDs = function() {
+        return getPlayersFromAliveness(">=", 1);
+    }
+    
+    /**
     Get all dead player ids
     **/
     this.getAllDeadIDs = function() {
-        return new Promise(res => {
-            sql("SELECT id FROM players WHERE type='player' AND alive=0", result => {
-                res(result.map(el => el.id));
-            })
-        });
+        return getPlayersFromAliveness("=", 0);
     }
     
     /** PRIVATE
@@ -915,6 +941,7 @@ module.exports = function() {
         // set flags
         let aliveOnly = aliveOnlyDefault;
         let selectAll = true;
+        let ghostly = false;
         // iterate through all selector components
         for(let i = 0; i < selSplit.length; i++) {
             const compName = selSplit[i][0];
@@ -1040,6 +1067,13 @@ module.exports = function() {
                 case "aliveonly":
                     if(compVal === "false") aliveOnly = false;
                 break;
+                // AliveOnly - Allows enabling of selecting dead players
+                case "ghostly":
+                    if(compVal === "true") {
+                        ghostly = true;
+                        aliveOnly = false;
+                    }
+                break;
                 // SelectAll - Allows enabling of limiting the selector to 1 random player
                 case "selectall":
                     if(compVal === "false") selectAll = false;
@@ -1049,6 +1083,9 @@ module.exports = function() {
         // apply flags
         if(aliveOnly) {
             allPlayers = allPlayers.filter(el => el.alive == 1);
+        }
+        if(ghostly) {
+            allPlayers = allPlayers.filter(el => el.alive == 2);
         }
         if(!selectAll) {
             let shuffled = shuffleArray(allPlayers);
@@ -1406,6 +1443,20 @@ module.exports = function() {
             case "@newvotetext":
                 if(additionalTriggerData.new_vote_text) {
                     return [ additionalTriggerData.new_vote_text ];
+                } else {
+                    abilityLog(`❗ **Error:** Invalid string selector target \`${selectorTarget}\`!`);
+                    return [ ];
+                }
+            case "@option":
+                if(additionalTriggerData.chosen) {
+                    return [ additionalTriggerData.chosen ];
+                } else {
+                    abilityLog(`❗ **Error:** Invalid string selector target \`${selectorTarget}\`!`);
+                    return [ ];
+                }
+            case "@winner":
+                if(additionalTriggerData.winner) {
+                    return [ additionalTriggerData.winner ];
                 } else {
                     abilityLog(`❗ **Error:** Invalid string selector target \`${selectorTarget}\`!`);
                     return [ ];
@@ -1990,7 +2041,7 @@ module.exports = function() {
             if(spl[i].indexOf("$") >= 0) spl[i] = await applyVariables(spl[i]);
             let infType = await inferTypeRuntime(spl[i], self, additionalTriggerData);
             if(infType != "unknown") {
-                let parsed = await parseSelector(`${spl[i]}[${infType}]`, self, additionalTriggerData);
+                let parsed = await parseSelector(spl[i][spl[i].length - 1 ] != "]" ? `${spl[i]}[${infType}]` : spl[i], self, additionalTriggerData);
                 console.log(infType, spl[i], parsed.type, parsed.value);
                 let strs = [];
                 // iterate through selector list
@@ -2025,7 +2076,7 @@ module.exports = function() {
     /**
     Parse ability type
     **/
-    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","redirecting","manipulating","whispering","joining","granting","loyalty","obstructing","poll","announcement","changing","","choices","ascend","descend","disband","counting","reset","cancel","","feedback","success","failure","log","process_evaluate","abilities","emit","storing","displaying", "win","locking","executing"];
+    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","redirecting","manipulating","whispering","joining","granting","loyalty","obstructing","poll","announcement","changing","","choices","ascend","descend","disband","counting","reset","cancel","","feedback","success","failure","log","process_evaluate","abilities","emit","storing","displaying", "win","shuffle","locking","executing","activating","resurrecting"];
     this.parseAbilityType = function(ability_type, self = null, additionalTriggerData = {}) {
         // get target
         let selectorTarget = selectorGetTarget(ability_type);
@@ -2172,8 +2223,11 @@ module.exports = function() {
         [], // storing
         ["create","change"], // displaying
         [], // win
+        [], // shuffle
         ["lock","unlock"], // locking
         [], // executing
+        [], // activating
+        [], // resurrecting
         ];
     this.parseAbilitySubtype = function(ability_subtype, self = null, additionalTriggerData = {}) {
         // get target
@@ -2290,6 +2344,8 @@ module.exports = function() {
         // is boolean?
         if(["true","false"].includes(selectorTarget)) { // direct boolean
             return selectorTarget;
+        } else if("$haunting" === selectorTarget) {
+           return "" + stats.haunting; 
         } else { // not a boolean
             abilityLog(`❗ **Error:** Invalid boolean \`${selectorTarget}\`!`);
             return "false";       
@@ -2303,8 +2359,13 @@ module.exports = function() {
             let players = await getAllPlayers();
             let totalCount = players.length;
             let aliveCount = players.filter(el => el.alive == 1).length;
+            let ghostlyCount = players.filter(el => el.alive == 2).length;
+            let deadCount = players.filter(el => el.alive == 0).length;
             txt = txt.replace(/\$total/, totalCount);
             txt = txt.replace(/\$living/, aliveCount);
+            txt = txt.replace(/\$ghostly/, ghostlyCount);
+            txt = txt.replace(/\$dead/, deadCount);
+            txt = txt.replace(/\$haunting/, "" + stats.haunting);
             txt = txt.replace(/\$phase/, getPhaseAsNumber());
             txt = txt.replace(/\$phname/, getPhaseAsText());
             return txt;
@@ -2433,7 +2494,7 @@ module.exports = function() {
     parses a "defense from x" type
     defaults to "all"
     **/
-    const defenseFromTypes = ["attacks","kills","lynches","attacks_lynches","all"];
+    const defenseFromTypes = ["attacks","kills","lynches","attacks_lynches","all","banishments"];
     this.parseDefenseFromType = function(defro_type) {
         defro_type = defro_type.toLowerCase().replace(/ (& )?/g,"_").replace(/[^a-z_]/g,"");
         if(defenseFromTypes.includes(defro_type)) {

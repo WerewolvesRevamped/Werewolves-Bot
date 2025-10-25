@@ -11,7 +11,7 @@ module.exports = function() {
     simp: if the info message should be simplified
     technical: if the formalized desc should be shown instead
     overwriteName: overwrites the name with a specified value
-    appendSection: WIP ??? (appends an additional section)
+    appendSection: appends additional sections
     editOnto: WIP ??? (edits the message onto another one instead of sending it)
     **/
     this.cmdInfo = async function(channel, authorId, args, pin = false, noErr = false, simp = false, overwriteName = false, appendSection = false, editOnto = false, technical = false, autoDelete = false) {
@@ -85,6 +85,10 @@ module.exports = function() {
         // overwrite name
         if(overwriteName) {
             infoEmbed.author.name = overwriteName;
+        }
+        
+        if(appendSection && appendSection.length > 0) {
+            infoEmbed.fields.push(...appendSection);
         }
         
         // send embed

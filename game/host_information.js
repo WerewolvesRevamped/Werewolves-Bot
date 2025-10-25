@@ -58,14 +58,22 @@ module.exports = function() {
 			return; 
 		}
         
+        // Get user
+		var user = parseUser(args[1], channel);
+		if(!user) { 
+			// Invalid user
+			channel.send("⛔ Syntax error. `" + args[1] + "` is not a valid player!"); 
+			return; 
+		} 
+        
         argsX.shift();
         argsX.shift();
         argsX.shift();
         let hi = argsX.join(" ");
         hi = hi.replace(/~/g,"\n")
         
-        sql("INSERT INTO host_information (id, name, value) VALUES (" + connection.escape(args[1]) + "," + connection.escape(args[2]) + "," + connection.escape(hi) + ")", result => {
-            channel.send(`✅ Set host information \`${args[2]}\` for <@${args[1]}> as \`${hi}\`.`);
+        sql("INSERT INTO host_information (id, name, value) VALUES (" + connection.escape(user) + "," + connection.escape(args[2]) + "," + connection.escape(hi) + ")", result => {
+            channel.send(`✅ Set host information \`${args[2]}\` for <@${user}> as \`${hi}\`.`);
         }, () => {
 			channel.send("⛔ Database error. Couldn't register host information!");
         });

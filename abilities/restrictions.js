@@ -154,6 +154,11 @@ module.exports = function() {
                             return true;
                     }
                 }
+            break;
+            // STATUS 
+            case "status": // status has a special handler
+                return true;
+            break;
         }
     }
     

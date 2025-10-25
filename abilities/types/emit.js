@@ -19,7 +19,7 @@ module.exports = function() {
         
         // get target
         const targets = await parseSelector(ability.selector, src_ref, additionalTriggerData);
-        const option = parseOption(ability.emit_value);
+        const option = (await parseStringSelector(ability.emit_value, src_ref, additionalTriggerData))[0];
         
         // select subtype
         switch(ability.subtype) {
