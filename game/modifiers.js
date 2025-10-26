@@ -10,7 +10,7 @@ module.exports = function() {
 	this.cmdModifiers = function(channel, args) {
 		// Check subcommand
 		if(!args[0]) { 
-			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `modifiers [add|list|remove]`!"); 
+			channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `modifiers [add|list|remove]`!"); 
 			return; 
 		}
         
