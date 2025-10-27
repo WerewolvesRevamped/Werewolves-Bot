@@ -13,19 +13,12 @@ module.exports = function() {
 	this.cmdCC = function(message, args, argsX) {
 		// Check subcommand
 		if(!args[0]) { 
-			message.channel.send(cmdHelp(channel, member, ["cc"]));
+			message.channel.send(cmdHelp(message.channel, member, ["cc"]));
 			return; 
 		} else if(stats.gamephase != gp.INGAME && args[0] != "cleanup") { 
 			message.channel.send("⛔ Command error. Can only use CCs while a game is running."); 
 			return; 
 		}
-
-        /**
-        if(args[0] === "spam" && message.author.id === "151204089219252224") {
-			message.channel.send("⛔ Permission error. You cannot create spam ccs."); 
-            return;
-        }**/
-
         
 		// Check Subcommand
 		switch(args[0]) {
