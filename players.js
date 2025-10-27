@@ -847,11 +847,11 @@ module.exports = function() {
 			let channelMembers = channel.guild.channels.cache.get(channels[channelIndex].id).permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Member).map(el => el.id);
 			let channelOwners = channel.guild.channels.cache.get(channels[channelIndex].id).permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Member).filter(el => el.allow == 66560).map(el => el.id);
 			if(channelMembers.includes(subPlayerFrom)) {
-				cmdCCAdd(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["add", subPlayerTo], 1);
+				cmdCCAdd(channel.guild.channels.cache.get(channels[channelIndex].id), channel.guild.members.cache.get(subPlayerFrom), ["add", subPlayerTo], 1);
 			}
 			if(channelOwners.includes(subPlayerFrom)) {
 				setTimeout(function() {
-					cmdCCPromote(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["promote", subPlayerTo], 1);
+					cmdCCPromote(channel.guild.channels.cache.get(channels[channelIndex].id), channel.guild.members.cache.get(subPlayerFrom), ["promote", subPlayerTo], 1);
 					substituteOneChannel(channel, ccCats, index, channels, ++channelIndex, subPlayerFrom, subPlayerTo);
 				}, 1000);
 			} else {
