@@ -35,6 +35,7 @@ module.exports = function() {
 			case "list": cmdCCList(message.channel, 2); break;
 			case "owners": cmdCCList(message.channel, 3); break;
 			case "cleanup": if(checkGM(message)) cmdConfirm(message, "cc cleanup"); break;
+			case "ghostify": if(checkGM(message)) cmdCCGhostify(message.channel, message.member, 0); break;
 			case "create_multi": cmdCCCreateMulti(message.channel, message.member, argsX, 0); break;
 			case "create_multi_hidden": cmdCCCreateMulti(message.channel, message.member, argsX, 1); break;
 			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;

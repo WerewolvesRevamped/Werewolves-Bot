@@ -126,6 +126,7 @@ module.exports = function() {
             ["cc remove", PERM.AL, "Removes members from a CC.", "<Player List>", "Removes all players in the <Player List> from the current CC. Only works in CCs, in which you are an owner.", "cc remove mctsts", ["✅ Removed @mctsts from the CC!"], CMDSTATE.RDY],
             ["cc rename", PERM.AL, "Renames a CC.", "<Name>", "Renames the current cc into <name>.", "cc rename newName", ["✅ Renamed channel to newName!"], CMDSTATE.RDY],
             ["cc archive", PERM.AL, "Archives a CC.", "", "Renames a CC to 🔒-<oldName> and locks it.", "cc archive", ["✅ Archived channel!"], CMDSTATE.RDY],
+            ["cc ghostify", PERM.GM, "Ghostifies a CC.", "", "Changes a normal cc into a ghost cc.", "cc ghostify", ["✅ Archived channel!"], CMDSTATE.RDY],
             ["cc promote", PERM.AL, "Promotes members of a CC to owners.", "<Player List>", "Promotes all players in the <Player List> in the current CC to owner. Only works in CCs, in which you are an owner.", "cc promote captainluffy", ["✅ Promoted @captainluffy!"], CMDSTATE.RDY],
             ["cc demote", PERM.AL, "Demotes owners of a CC to members.", "<Player List>", "Demotes all players in the <Player List> in the current CC to non-owner. Only works in CCs, in which you are an owner.", "cc demote captainluffy", ["✅ Demoted @captainluffy!"], CMDSTATE.RDY],
             ["cc leave", PERM.AL, "Makes you leave a CC.", "", "Removes you from the current CC.", "cc leave", ["✅ @mister.turtle left the CC!"], CMDSTATE.RDY],

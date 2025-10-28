@@ -17,6 +17,8 @@ module.exports = function() {
     const CC_PERMS_LOCKED = { ViewChannel: true, ReadMessageHistory: null, SendMessages: false };
     const CC_PERMS_VIEWER = { ViewChannel: true, SendMessages: false };
     const CC_PERMS_NONE = null;
+    const CC_PERMS_MEMBER_ROLE = { ViewChannel: false, SendMessages: true };
+    const CC_PERMS_MEMBER_NONE= { };
 
 	/**
     Command: $cc add
@@ -229,6 +231,31 @@ module.exports = function() {
             channelSetPermission(channel, el, CC_PERMS_LOCKED);
         });
         if(!mode) channel.send("✅ Archived channel!");
+	}
+    
+    
+	/**
+    Command: $cc ghostify
+    Ghostifies a cc
+    **/
+	this.cmdCCGhostify = function(channel, member, mode) {
+		// Check if CC
+		if(!mode && !isCC(channel)) {
+			channel.send("⛔ Command error. Can't use command outside a CC!");
+			return;
+		}
+        // Check if owner
+		if(!isCCOwner(channel, member) && !mode && !isGameMaster(member, true)) {
+			channel.send("⛔ Command error. You are not an owner of this CC!");
+			return;
+        }
+        
+        // rename channel
+        channelRename(channel, `👻-${channel.name}`, true);
+        // set permissions
+        channelSetPermission(channel, channel.guild.roles.cache.get(stats.ghost), CC_PERMS_MEMBER_ROLE);
+        channelSetPermission(channel, channel.guild.roles.cache.get(stats.participant), CC_PERMS_MEMBER_NONE);
+        if(!mode) channel.send("👻 Ghostified channel!");
 	}
     
     /**
