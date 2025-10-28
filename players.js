@@ -54,7 +54,7 @@ module.exports = function() {
 	
 	this.cmdRoll = function(message, args) {
 		// Check subcommands
-		if(!args[1] && (args[0] && args[0] == "bl" || args[0] == "wl")) { 
+		if(!args[1] && (args[0] && args[0] == "bl" || args[0] == "wl" || args[0] == "gbl" || args[0] == "gwl")) { 
 			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `roll [bl|wl] <players>` or `roll`!"); 
 			return; 
 		}
@@ -62,6 +62,9 @@ module.exports = function() {
 		switch(args[0]) {
 			case "bl": case "blacklist": cmdRollExe(message.channel, args, false); break;
 			case "wl": case "whitelist": cmdRollExe(message.channel, args, true); break;
+			case "gbl": case "ghost_blacklist": cmdRollExe(message.channel, args, false, 2); break;
+			case "gwl": case "ghost_whitelist": cmdRollExe(message.channel, args, true, 2); break;
+			case "g": case "ghost": cmdRollExe(message.channel, [], false, 2); break;
             case "num": case "number": case "n": case "d": cmdRollNum(message.channel, args); break;
             default:
                 if(args[0] && args[0].match(/\d*d\d+/)) {
@@ -436,11 +439,11 @@ module.exports = function() {
 	}
 	
 	/* Randomizes */
-	this.cmdRollExe = function(channel, args, wl) {
-		let blacklist = parseUserList(args, 1, channel) || [];
+	this.cmdRollExe = function(channel, args, wl, alive = 1) {
+		let blacklist = parseUserList(args, 1, channel, null, alive === 2 ? "ghost" : "participant") || [];
 		console.log(blacklist);
 		// Get a list of players
-		sql("SELECT id FROM players WHERE alive=1 AND type='player'", result => {
+		sql("SELECT id FROM players WHERE alive=" + alive + " AND type='player'", result => {
 			let playerList = result.map(el => getUser(el.id)); 
 			if(!wl) playerList = playerList.filter(el => blacklist.indexOf(el) === -1);
 			else playerList = playerList.filter(el => blacklist.indexOf(el) != -1);

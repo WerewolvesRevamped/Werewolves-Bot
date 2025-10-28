@@ -168,8 +168,11 @@ module.exports = function() {
             ["players messages2", PERM.GM, "Calculates inactivity based on phase input and message count.", "<Phase>", "Lists all alive players and their public and private message count.", "", [], CMDSTATE.RDY, ["players msgs2"]],
             // Role
         ["roll", PERM.AL, "Randomizes", "<Subcommand>", "Commands to randomize a list of players. $help roll <sub-command> for detailed help.\n\nIf used without a subcommand randomizes from the full player list.", "roll", ["️ Selected @McTsts (🛠)"], CMDSTATE.RDY],
+            ["roll ghost", PERM.AL, "Randomizes a ghost.", "", "Randomizes from the full ghostly player list.", "roll ghost", ["️ Selected @McTsts (🛠)"], CMDSTATE.RDY, ["roll g"]],
             ["roll whitelist", PERM.AL, "Randomizes from a whitelist.", "<Whitelist>", "Selects a random player from the <Player List>.", "roll whitelist McTsts Vera", ["▶️ Selected @McTsts (🛠)"], CMDSTATE.RDY, ["roll wl"]],
             ["roll blacklist", PERM.AL, "Randomizes with a blacklist.", "<Blacklist>", "Selects a random player from the game that is not on the <Player List>.", "roll blacklist Vera", ["▶️ Selected @McTsts (🛠)"], CMDSTATE.RDY, ["roll bl"]],
+            ["roll ghost_whitelist", PERM.AL, "Randomizes from a ghostly whitelist.", "<Whitelist>", "Selects a random ghostly player from the <Player List>.", "roll ghost_whitelist McTsts Vera", ["▶️ Selected @McTsts (🛠)"], CMDSTATE.RDY, ["roll gwl"]],
+            ["roll ghost_blacklist", PERM.AL, "Randomizes with a ghostly blacklist.", "<Blacklist>", "Selects a random ghostly player from the game that is not on the <Player List>.", "roll ghost_blacklist Vera", ["▶️ Selected @McTsts (🛠)"], CMDSTATE.RDY, ["roll gbl"]],
             ["roll number", PERM.AL, "Returns a random number.", "<Number>", "Selects a random number from 1 to <Number>.", "roll number 5", ["▶️ Selected `3`"], CMDSTATE.RDY, ["roll num"]],
             ["roll ?d?", PERM.AL, "Rolls dice.", "<Amount>d<Number>", "You can use $roll <amount>d<number> where amount specifies an amount of rolls to do and number specifies the highest value. The amount argument is optional. This means that $roll d6 is equivalent to $roll number 6 and $roll 2d6 is equivalent to running it twice.", "roll d5", ["▶️ Selected `3`"], CMDSTATE.RDY],
             // Modrole
