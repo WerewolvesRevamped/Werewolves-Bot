@@ -697,7 +697,8 @@ client.on("messageCreate", async message => {
 	break;
 	/* Delete */ // Deletes a couple of messages
 	case "delete":
-		if(checkGMHelper(message)) cmdDelete(message.channel, args);
+		if(isGameMaster(message.member) || isHelper(message.member)) cmdDelete(message.channel, args);
+        else cmdListDead(message.channel);
 	break;
 	/* Delay */ // Executes a command with delay
 	case "delay":
