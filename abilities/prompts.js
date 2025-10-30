@@ -92,13 +92,13 @@ module.exports = function() {
                     default:
                         return "";
                     case "equal":
-                        return !inverted ? `${first} is __not__ the same as ${second}, but should be.` : `${first} is the same as ${second}, but should __not__ be`;
+                        return !inverted ? `${first} is __not__ the same as ${second}, but should be` : `${first} is the same as ${second}, but should __not__ be`;
                     case "less_than":
-                        return !inverted ? `${first} is __not__ less than ${second}, but should be.` : `${first} is less than ${second}, but should __not__ be`;
+                        return !inverted ? `${first} is __not__ less than ${second}, but should be` : `${first} is less than ${second}, but should __not__ be`;
                     case "greater_than":
-                        return !inverted ? `${first} is __not__ greater than ${second}, but should be.` : `${first} is greater than ${second}, but should __not__ be`;
+                        return !inverted ? `${first} is __not__ greater than ${second}, but should be` : `${first} is greater than ${second}, but should __not__ be`;
                     case "not_equal":
-                        return !inverted ? `${first} is the same as ${second}, but should __not__ be.` : `${first} is __not__ the same as ${second}, but should be`;
+                        return !inverted ? `${first} is the same as ${second}, but should __not__ be` : `${first} is __not__ the same as ${second}, but should be`;
                 }
             case "logic":
                 switch(condition.subtype) {
