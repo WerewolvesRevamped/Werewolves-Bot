@@ -1125,7 +1125,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
     } catch (err) {
         return; // the reaction doenst exist
     }
-    console.log(`${user.globalName ?? user.id} added ${reaction.emoji.name}`);
+    //console.log(`${user.globalName ?? user.id} added ${reaction.emoji.name}`);
 	if(user.bot) return;
     let member = reaction.message.guild.members.cache.get(user.id);
 	// Handle confirmation messages
@@ -1207,7 +1207,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
 client.on("messageReactionRemove", async (reaction, user) => {
     await reaction.fetch();
     await user.fetch();
-    console.log(`${user.globalName ?? user.id} removed ${reaction.emoji.name}`);
+    //console.log(`${user.globalName ?? user.id} removed ${reaction.emoji.name}`);
 	// reaction role
 	if(user.bot) return;
     let member = reaction.message.guild.members.cache.get(user.id);

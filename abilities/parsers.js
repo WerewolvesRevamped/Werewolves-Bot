@@ -1592,7 +1592,6 @@ module.exports = function() {
                 } else if(onElement && parsedGeneric) { // check for generic attribute
                     let srcVal = srcToValue(onElement);
                     let genericAttrs = await getGenericAttributes(srcVal);
-                    console.log("generic attributes", genericAttrs);
                     let filtered;
                     switch(splitTarget.length) {
                         case 1: // just attribute name
