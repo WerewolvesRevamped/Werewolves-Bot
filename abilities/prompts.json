@@ -25,8 +25,9 @@
     "granting.remove": "You may remove a role.",
     
     "comment_2": "Restriction Messages",
-    "succession.target": "You may not select the same target two times in a row. You may resubmit another target as a reply to the original prompt.",
     "condition": "Invalid submission. You likely submitted an invalid value. If necessary, please ask Hosts for clarification!",
+    "succession.target": "you may not select the same target two times in a row. You may resubmit another target as a reply to the original prompt.",
+    "condition.not_self": "you may not select yourself.", 
     
     "comment_3": "Generic Custom Prompts",
     "targeting.emergency.player": "Once per game, you may change your target a second time in a phase. Reply to this prompt to do so and ignore the prompt if you do not want to use your emergency use yet.",

@@ -67,6 +67,11 @@ module.exports = function() {
     
     async function getPromptMessageRestriction(restriction, src_ref, additionalTriggerData) {
         if(restriction.type === "condition") {
+            // special handling
+            if(restriction.condition.type === "comparison" && (restriction.condition.first.toLowerCase().split("[")[0] === "@selection" && restriction.condition.second.toLowerCase().split("[")[0] === "@self") || (restriction.condition.first.toLowerCase().split("[")[0] === "@selection" && restriction.condition.second.toLowerCase().split("[")[0] === "@self") && restriction.subtype === "not_equal") {
+                return getPromptMessage(restriction, "condition.not_self");
+            }
+            // normal handling
             let txt = await getPromptMessageRestrictionCondition(restriction.condition, src_ref, additionalTriggerData);
             txt = txt.replace(/you is/g, "you are");
             txt = txt.replace(/you does/g, "you do");
