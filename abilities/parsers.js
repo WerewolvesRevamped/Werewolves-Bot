@@ -30,10 +30,16 @@ module.exports = function() {
         // handle normal string types
         let selectorTarget = selectorGetTarget(selector);
         let selectorType = selectorGetType(selector);
+        // WIP WIP how is this different than the run time inferring done at the end of the file?????
         // It is a @Self selector -> get type from self
         if(selectorTarget === "@self" && self) {
             selectorType = srcToType(self);
-            if(selectorType === "attribute") selectorType = "player"; // for attributes we want @Self to be the player. @ThisAttr is attribute instead
+            if(selectorType === "attribute") {
+                let valAttr = srcToValue(self);
+                let owner = getCustomAttributeOwner(valAttr);
+                let ownerType = owner.split(":")[0];
+                selectorType = ownerType; // for attributes we want @Self to be the owner (usually player). @ThisAttr is attribute instead
+            }
         } else if(selectorTarget === "@thisattr" && self) {
             selectorType = srcToType(self);
             if(selectorType === "player_attr") selectorType = "activeextrarole"; // for active extra roles @thisattr is an active extra role not an active attribute
@@ -1794,8 +1800,18 @@ module.exports = function() {
                 abilityLog(`❗ **Error:** Used \`@Self\` in invalid context!`);
                 return null;
             }
-            let pself = srcToValue(self);
-            return pself;
+            let val = srcToValue(self);
+            let type = srcToType(self);
+            switch(type) {
+                default:
+                    abilityLog(`❗ **Error:** Used \`@Self\` with invalid self type \`${type}\`!`);
+                    return [ ];
+                case "group":
+                    return [ val ];
+                case "attribute": // retrieve group id through cached attributes
+                    let owner = getCustomAttributeOwner(val);
+                    return [ srcToValue(owner) ];
+            }
         }
         // parse group
         let parsedGroupName = parseGroupName(selectorTarget);
@@ -2589,7 +2605,12 @@ module.exports = function() {
     this.inferTypeRuntime = async function(val, self, additionalTriggerData) {
         if(val === "@self") {
             let type = srcToType(self);
-            if(type === "attribute") type = "player"; // for attributes we want @Self to be the player. @ThisAttr is attribute instead
+            if(type === "attribute") {
+                let valAttr = srcToValue(self);
+                let owner = getCustomAttributeOwner(valAttr);
+                let ownerType = owner.split(":")[0];
+                type = ownerType; // for attributes we want @Self to be the owner (usually player). @ThisAttr is attribute instead
+            }
             return type;
         } else if(val === "@target" || val === "@targetdead") {
             let target = await getTarget(self);
