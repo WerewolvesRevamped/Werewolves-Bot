@@ -1358,6 +1358,12 @@ module.exports = function() {
         }
         /** ROLE CHANGE **/
         // role change
+        exp = new RegExp("^Role Change to " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "changing", subtype: "role", target: "@self[player]", change_to: ttpp(fd[1], "role") };
+        }
+        // role change
         exp = new RegExp("^Role Change " + targetType + " to " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
