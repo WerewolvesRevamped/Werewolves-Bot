@@ -30,7 +30,7 @@ module.exports = function() {
     /**
     Command: $packs list_all
     **/
-    this.AVAILABLE_PACKS = ["glitch","negate","grayscale","edge","emboss","silhouette","pixel","pixel2","pixel3","pixel4","scatter","red","green","blue","yellow","purple","cyan","flip","pale","bw","wire","wire2","rainbow","rainbow2","rainbow3","ts","oil","wave","swirl","noise","cycle","equalize","fourier_noise","fourier_equalize","fourier_oil","fourier_modulate","fourier_wire","glitch2","eyes","thief","mask","eye","fourier_eye","citizen_eye","items","bear","wolfify","grid","light_and_shadow","duo_color","wood","coin","coin_animated", "glitch_animated","wave_animated","spin","rainbow_animated","fourier_merge","fourier_magnitude","fourier_phase","fourier_crop","fourier_crop2","cloud","swirl_animated","pokemon","minecraft", "vowels","glasses","glasses2","magnified","wolfify_oil","wolfify_fourier","redacted","pumpkin"];
+    this.AVAILABLE_PACKS = ["glitch","negate","grayscale","edge","emboss","silhouette","pixel","pixel2","pixel3","pixel4","scatter","red","green","blue","yellow","purple","cyan","flip","pale","bw","wire","wire2","rainbow","rainbow2","rainbow3","ts","oil","wave","swirl","noise","cycle","equalize","fourier_noise","fourier_equalize","fourier_oil","fourier_modulate","fourier_wire","glitch2","eyes","thief","mask","eye","fourier_eye","citizen_eye","items","bear","wolfify","grid","light_and_shadow","duo_color","wood","coin","coin_animated", "glitch_animated","wave_animated","spin","rainbow_animated","fourier_merge","fourier_magnitude","fourier_phase","fourier_crop","fourier_crop2","cloud","swirl_animated","pokemon","minecraft", "vowels","glasses","glasses2","magnified","wolfify_oil","wolfify_fourier","redacted","pumpkin","randomized","you"];
     this.ANIMATED_PACKS = [53, 54, 55, 56, 57, 63, 64];
     this.cmdPacksListAll = function(channel) {
         let packs1 = [`${getEmoji('pack_default')} Default - 0`], packs2 = [], packs3 = [], packs4 = [], packs5 = [], packs6 = [];
@@ -289,14 +289,56 @@ module.exports = function() {
             let pName = AVAILABLE_PACKS[pack - 1];
             if(pName === stats.theme) return txt; // do not apply pack theme, if it matches normal theme
             let lut = await getPackLUT(pName);
-            for(let i = 0; i < lut.length; i++) {
-                if(lut[i][0].length > 1) {
-                    txt = txt.replace(new RegExp("(?<!\\<\\?|[a-zA-Z])" + lut[i][0] + "(?!\\:\\>|[a-rt-zA-Z])", 'g'), lut[i][1]);
-                } else {
-                    txt = txt.replace(new RegExp("(?<!\\<\\?)" + lut[i][0] + "(?!\\:\\>)", 'g'), lut[i][1]);
+            // randomized pack
+            switch(pName) {                                
+                case "randomized": {                                
+                    // flatten array
+                    const map = {};
+                    const mapLc = {};
+                    for(const [group, values] of Object.entries(specialLUT)) {
+                        for(const v of values) {
+                            map[v] = group;
+                            mapLc[v.toLowerCase()] = group;
+                        }
+                    }
+                    // replace with random member of group
+                    txt = txt.replace(/\b\w+\b/g, w => {
+                      let group = map[w];
+                      let lc = false;
+                      if (!group) {
+                          group = mapLc[w.toLowerCase()];
+                          if(group) lc = true;
+                          else return w; // not word
+                      }
+                      const groupArr = specialLUT[group];
+                      let ret = groupArr[Math.floor(Math.random() * groupArr.length)];
+                      return lc ? ret.toLowerCase() : ret;
+                    });
+                    ret = txt;
+                }
+                break;
+                case "you": {
+                    const allValues = Object.values(specialLUT).flat();
+                    const regex = new RegExp(`\\b(${allValues.join("|")})\\b`, "g");
+                    const regexLc = new RegExp(`\\b(${allValues.join("|").toLowerCase()})\\b`, "g");
+                    let disp = mainGuild.members.cache.get(id).displayName;
+                    txt = txt.replace(regex, disp);
+                    txt = txt.replace(regexLc, disp.toLowerCase());
+                    ret = txt;
+                }
+                break;
+                default: {
+                    // normal lut application
+                    for(let i = 0; i < lut.length; i++) {
+                        if(lut[i][0].length > 1) {
+                            txt = txt.replace(new RegExp("(?<!\\<\\?|[a-zA-Z])" + lut[i][0] + "(?!\\:\\>|[a-rt-zA-Z])", 'g'), lut[i][1]);
+                        } else {
+                            txt = txt.replace(new RegExp("(?<!\\<\\?)" + lut[i][0] + "(?!\\:\\>)", 'g'), lut[i][1]);
+                        }
+                    }
+                    ret = txt;
                 }
             }
-            ret = txt;
         }
         if(yellList.includes(id)) return ret.toUpperCase();
         return ret;
@@ -306,7 +348,26 @@ module.exports = function() {
     Cache Pack LUT
     **/
     this.packLUTs = {}
+    this.specialLUT = null;
     this.cachePackLUT = async function(pack) {
+        // special case for randomized pack
+        switch(pack) {
+            case "randomized":
+            case "you":
+                packLUTs[pack] = "SPEC";
+                if(specialLUT) return;
+                let roles = await sqlProm("SELECT display_name FROM roles");
+                let teams = await sqlProm("SELECT display_name FROM teams");
+                let polls = await sqlProm("SELECT display_name FROM polls");
+                let attributes = await sqlProm("SELECT display_name FROM attributes");
+                let groups = await sqlProm("SELECT display_name FROM groups");
+                let locations = await sqlProm("SELECT display_name FROM locations");
+                specialLUT = { roles: roles.map(el => el.display_name), teams: teams.map(el => el.display_name), polls: polls.map(el => el.display_name), attributes: attributes.map(el => el.display_name), groups: groups.map(el => el.display_name), locations: locations.map(el => el.display_name) };
+                console.log(`Cached ${pack} pack LUT`);
+                return;
+            break;
+        }
+        // normal case from csv
         let url = `${themePackBase}${pack}.csv`;
         let urlExists = await checkUrlExists(url);
         if(urlExists) {
@@ -328,6 +389,8 @@ module.exports = function() {
     this.getPackLUT = async function(pack) {
         if(packLUTs[pack] && packLUTs[pack] === true) {
             return [];
+        } if(packLUTs[pack] && packLUTs[pack] === "SPEC") {
+            return specialLUT;
         } else if(packLUTs[pack]) {
             return packLUTs[pack];
         } else {
