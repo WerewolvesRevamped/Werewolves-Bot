@@ -76,7 +76,7 @@ module.exports = function() {
         let totalWeights = filteredRewards.map(el => el[3]).reduce((a,b) => a+b, 0);
         let lootRand = Math.random() * totalWeights;
         
-        console.log("Loot Box", tierRand, lootRand, totalWeights);
+        console.log("Loot Box", tierRand, tier, tierNames[tier], lootRand, totalWeights);
         
         // find reward
         let acc = 0;
