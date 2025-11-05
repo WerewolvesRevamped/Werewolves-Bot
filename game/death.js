@@ -25,13 +25,13 @@ module.exports = function() {
 	/* Lists current killq */
 	this.cmdKillqList = function(channel) {
 		// Get killq
-		sql("SELECT killq.id, players.role FROM killq INNER JOIN players ON killq.id = players.id", result => {
+		sql("SELECT killq.id, players.role, killq.type FROM killq INNER JOIN players ON killq.id = players.id", result => {
 			// Print killq
 			let playerList = result.map(el => {
                 let member = channel.guild.members.cache.get(el.id);
                 let rName = toTitleCase(el.role.split(",")[0]);
                 let rEmoji = getRoleEmoji(rName);
-                return idToEmoji(el.id) + " - " + member.displayName + "/" + member.user.username + " - " + (rEmoji ? `<:${rEmoji.name}:${rEmoji.id}> ` : "") + rName;
+                return idToEmoji(el.id) + " - " + member.displayName + "/" + member.user.username + " - " + (rEmoji ? `<:${rEmoji.name}:${rEmoji.id}> ` : "") + rName + (stats.haunting ? (el.type==="true kill"?" ☠️":" 👻") : "");
             }).join("\n");
 			channel.send("**Kill Queue** | Total: " +  result.length + "\n" + playerList);
 		}, () => {
@@ -54,7 +54,7 @@ module.exports = function() {
 			// Add to killq
 			channel.send("✳️ Adding " + players.length + " player" + (players.length != 1 ? "s" : "") + " (" + playerList  + ") to the kill queue!");
 			players.forEach(el => {
-                killqAdd(el);
+                killqAdd(el, "host:host", stats.haunting ? (isGhost(mainGuild.members.cache.get(el)) ? "true banish" : "true kill") : "true kill");
                 channel.send("✅ Added `" +  mainGuild.members.cache.get(el).displayName + "` to the kill queue!");
 			});
 		} else {
