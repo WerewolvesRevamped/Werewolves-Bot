@@ -367,7 +367,7 @@ module.exports = function() {
         }
         
         // add to storytime
-        if(!silent) await bufferStorytime(`<@${player_id}> has been resurrected!`);
+        if(!silent) await bufferStorytime(`${idToEmoji(player_id)} <@${player_id}> has been resurrected!`);
 	}
 
     
