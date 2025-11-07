@@ -849,6 +849,13 @@ module.exports = function() {
                 parsedScaling.push({ type: "dynamic", compare: fd[1], compare_type: ct, compare_to: fd[3], quantity: fd[4] });
                 scalFound = true;
             }
+            /** Number **/
+            exp = new RegExp("^" + targetType + "$", "g");
+            fd = exp.exec(scaling[scal]);
+            if(fd) {
+                parsedScaling.push({ type: "number", num: ttpp(fd[1], "number") });
+                scalFound = true;
+            }
             /** DEFAULT **/
             if(!scalFound) {
                 if(!debugMode) throw new Error(`Invalid Scaling Type \`\`\`\n${scaling[scal]}\n\`\`\``);
@@ -1978,31 +1985,31 @@ module.exports = function() {
                     exp = new RegExp("^On Poll `" + str +  "` Win$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
-                        complexTrigger = "On Poll Win;" + ttpp(fd[1].trim().toLowerCase().replace(/[^a-z]/g,""), "poll");
+                        complexTrigger = "On Poll Win;" + ttpp(fd[1].trim().toLowerCase().replace(/[^a-z\s]/g,""), "poll");
                     }
                     /** Choice Chosen **/
                     exp = new RegExp("^Choice `" + str +  "` Chosen$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
-                        complexTrigger = "Choice Chosen;" + ttpp(fd[1].trim().toLowerCase().replace(/[^a-z]/g,""), "option");
+                        complexTrigger = "Choice Chosen;" + ttpp(fd[1].trim().toLowerCase().replace(/[^a-z\s]/g,""), "option");
                     }
                     /** On [Value] Emitted **/
                     exp = new RegExp("^On `" + str +  "` Emitted$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
-                        complexTrigger = "On Emitted;" + ttpp(fd[1].trim().toLowerCase().replace(/[^a-z]/g,""), "option");
+                        complexTrigger = "On Emitted;" + ttpp(fd[1].trim().toLowerCase().replace(/[^a-z\s]/g,""), "string");
                     }
                     /** On [Value] End Emitted **/
                     exp = new RegExp("^On `" + str +  "` End Emitted$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
-                        complexTrigger = "On End Emitted;" + ttpp(fd[1].trim().toLowerCase().replace(/[^a-z]/g,""), "option");
+                        complexTrigger = "On End Emitted;" + ttpp(fd[1].trim().toLowerCase().replace(/[^a-z\s]/g,""), "string");
                     }
                     /** On [Value] End Emitted **/
                     exp = new RegExp("^On `" + str +  "` Whisper$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
-                        complexTrigger = "On Whisper;" + ttpp(fd[1].trim().toLowerCase().replace(/[^a-z]/g,""), "string");
+                        complexTrigger = "On Whisper;" + ttpp(fd[1].trim().toLowerCase().replace(/[^a-z\s]/g,""), "string");
                     }
                     /** Otherwise **/
                     if(!complexTrigger) { // could not find a complex trigger match

@@ -633,10 +633,11 @@ module.exports = function() {
                     case "On Emitted Complex":
                     case "On End Emitted Complex":
                         let emitVal = (await parseStringSelector(param, src_ref, additionalTriggerData))[0];
-                        if(emitVal === additionalTriggerData.emit_value) {
+                        let emittedVal = (await parseStringSelector(additionalTriggerData.emit_value, src_ref, additionalTriggerData))[0];
+                        if(emitVal === emittedVal) {
                             await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData, ghostly);
                         } else {
-                            abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\`.`);
+                            abilityLog(`🔴 **Skipped Trigger:** ${srcRefToText(src_ref)} (${toTitleCase(triggerName)}). Failed complex condition \`${param}\` (${emitVal}) with \`${additionalTriggerData.emit_value}\` (${emittedVal}).`);
                         }
                     break;
                     case "On Whisper Complex":
@@ -1024,13 +1025,13 @@ module.exports = function() {
         
         // execute pre-end actions (before polls)
         skipActionQueueChecker = true;
-        await executeEndQueuedAction("Fourth Pre-End Night");
+        await executeEndQueuedAction("Fourth Pre-End Day");
         await actionQueueChecker();
-        await executeEndQueuedAction("Third Pre-End Night");
+        await executeEndQueuedAction("Third Pre-End Day");
         await actionQueueChecker();
-        await executeEndQueuedAction("Second Pre-End Night");
+        await executeEndQueuedAction("Second Pre-End Day");
         await actionQueueChecker();
-        await executeEndQueuedAction("Pre-End Night");
+        await executeEndQueuedAction("Pre-End Day");
         await actionQueueChecker();
         skipActionQueueChecker = false;
         

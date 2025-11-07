@@ -56,6 +56,11 @@ module.exports = function() {
                 if(divNum == 0) return 1; // minimum of 1
                 return divNum;
             break;
+            // NUMBER
+            case "number":
+                let num = await parseNumber(scaling.num, src_ref, additionalTriggerData);
+                return num;
+            break;
             
         }
     }
