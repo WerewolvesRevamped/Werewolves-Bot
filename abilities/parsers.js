@@ -1073,7 +1073,7 @@ module.exports = function() {
                 case "aliveonly":
                     if(compVal === "false") aliveOnly = false;
                 break;
-                // AliveOnly - Allows enabling of selecting dead players
+                // Ghostly - Allows enabling of selecting ghostly players
                 case "ghostly":
                     if(compVal === "true") {
                         ghostly = true;

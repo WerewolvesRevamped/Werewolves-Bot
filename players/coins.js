@@ -16,8 +16,8 @@ module.exports = function() {
 		// Check Subcommand
 		switch(args[0]) {
 			case "get": if(checkGM(message)) cmdCoinsGet(message.channel, args); break;
-			case "add": if(checkGM(message) && message.author.id != "458727748504911884") cmdCoinsModify(message.channel, args, "add", 1); break;
-			case "remove": if(checkGM(message) && message.author.id != "458727748504911884") cmdCoinsModify(message.channel, args, "remove", -1); break;
+			case "add": if(checkGM(message)) cmdCoinsModify(message.channel, args, "add", 1); break;
+			case "remove": if(checkGM(message)) cmdCoinsModify(message.channel, args, "remove", -1); break;
 			case "list": if(checkSafe(message)) cmdCoinsList(message.channel); break;
 			case "reward": if(message.author.id === "1047268746277949600" || message.author.id === "1055202099400540222") cmdCoinsModify(message.channel, args, "reward", 1, true); break;
 			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
