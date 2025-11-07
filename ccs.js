@@ -13,19 +13,12 @@ module.exports = function() {
 	this.cmdCC = function(message, args, argsX) {
 		// Check subcommand
 		if(!args[0]) { 
-			message.channel.send(cmdHelp(channel, member, ["cc"]));
+			message.channel.send(cmdHelp(message.channel, member, ["cc"]));
 			return; 
 		} else if(stats.gamephase != gp.INGAME && args[0] != "cleanup") { 
 			message.channel.send("⛔ Command error. Can only use CCs while a game is running."); 
 			return; 
 		}
-
-        /**
-        if(args[0] === "spam" && message.author.id === "151204089219252224") {
-			message.channel.send("⛔ Permission error. You cannot create spam ccs."); 
-            return;
-        }**/
-
         
 		// Check Subcommand
 		switch(args[0]) {
@@ -42,6 +35,7 @@ module.exports = function() {
 			case "list": cmdCCList(message.channel, 2); break;
 			case "owners": cmdCCList(message.channel, 3); break;
 			case "cleanup": if(checkGM(message)) cmdConfirm(message, "cc cleanup"); break;
+			case "ghostify": if(checkGM(message)) cmdCCGhostify(message.channel, message.member, 0); break;
 			case "create_multi": cmdCCCreateMulti(message.channel, message.member, argsX, 0); break;
 			case "create_multi_hidden": cmdCCCreateMulti(message.channel, message.member, argsX, 1); break;
 			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
@@ -168,9 +162,7 @@ module.exports = function() {
 			channel.send("⛔ You have hit the CC limit of `" + stats.cc_limit + "` CCs!");
 			return;
 		}
-		args[1] = args[1].replace(/🔒/,"lock");
-		args[1] = args[1].replace(/🤖/,"bot");
-		args[1] = args[1].replace(/👻/,"ghost");
+        args[1] = cleanCCName(args[1]);
 		players = parseUserList(args, 2, channel, member, isGhost(member) ? "ghost" : "participant");
         //console.log(players);
         if(!players || spam) players = [];
@@ -268,7 +260,7 @@ module.exports = function() {
                             if(mentor) ccPerms.push(getPerms(mentor, ["read"], ["write"]));
                         }
                         let cc = channel.guild.channels.cache.get(result);
-                        let cobj = { name: (spam?"🤖-":"") + args[1] + "", type: ChannelType.GuildText,  permissionOverwrites: ccPerms, parent: cc.id };
+                        let cobj = { name: (spam?"🤖-":"") + (isGhost(member)?"👻-":"") + args[1] + "", type: ChannelType.GuildText,  permissionOverwrites: ccPerms, parent: cc.id };
                         if(result % 50 === 49) delete cobj.parent;
                         channel.guild.channels.create(cobj)
 						.then(ct => {

@@ -228,10 +228,32 @@ module.exports = function() {
     }
     
     /** PUBLIC
+    Get group data by id
+    **/
+    this.groupGetDataById = function(channelId) {
+        return new Promise(res => {
+            sql("SELECT * FROM active_groups WHERE channel_id=" + connection.escape(channelId), result => {
+                res(result[0]);
+            });
+        });
+    }
+    
+    /** PUBLIC
     Get group members
     **/
-    this.groupGetMembers = function(groupName) {
-        return sqlPromEsc("SELECT players.id FROM players JOIN active_attributes ON active_attributes.owner=players.id WHERE players.type='player' AND players.alive=1 AND active_attributes.attr_type='group_membership' AND active_attributes.val1=", groupName);
+    this.groupGetMembers = async function(groupName) {
+        return sqlProm(`
+            SELECT p.id FROM players p
+            JOIN active_attributes a ON a.owner = p.id
+            JOIN active_groups g ON g.name = a.val1
+            WHERE p.type = 'player'
+            AND a.attr_type = 'group_membership'
+            AND a.val1 = ${connection.escape(groupName)}
+            AND (
+                (g.activation = 0 AND p.alive = 1) OR
+                (g.activation = 1 AND p.alive = 2) OR
+                (g.activation = 2 AND p.alive >= 1)
+            )`);
     }
     
     this.groupGetMembersAll = function(groupName) {
@@ -243,22 +265,52 @@ module.exports = function() {
     group update handler
     **/
     this.updateGroups = async function() {
-        let toBeDisbanded = await sqlProm("SELECT name FROM active_groups WHERE disbanded=0 AND name NOT IN (SELECT DISTINCT val1 FROM active_attributes WHERE attr_type='group_membership' AND alive=1 AND val2 <> 'visitor')");
-        
-        let toBeReopened = await sqlProm(`
-            SELECT name FROM active_groups WHERE disbanded=1
-            AND (
-                (
-                    name IN (SELECT DISTINCT val1 FROM active_attributes WHERE attr_type='group_membership' AND alive=1 AND val2='member') 
-                    AND
-                    name NOT IN (SELECT DISTINCT val1 FROM active_attributes WHERE attr_type='group_membership' AND val2='owner')
-                )
-                OR
-                (
-                    name IN (SELECT DISTINCT val1 FROM active_attributes WHERE attr_type='group_membership' AND alive=1 AND val2='owner')
+        let toBeDisbanded = await sqlProm(`
+            SELECT name, activation FROM active_groups g WHERE disbanded = 0
+            AND name NOT IN (
+                SELECT DISTINCT val1
+                FROM active_attributes a
+                WHERE a.attr_type = 'group_membership'
+                AND a.val2 <> 'visitor'
+                AND (
+                    (g.activation = 0 AND a.alive = 1) OR
+                    (g.activation = 1 AND a.alive = 2) OR
+                    (g.activation = 2 AND a.alive >= 1)
                 )
             )
+        `);
+        
+        let toBeReopened = await sqlProm(`
+            SELECT name,activation FROM active_groups g WHERE disbanded = 1
+            AND (
+                (
+                    name IN (
+                        SELECT DISTINCT val1 FROM active_attributes a WHERE a.attr_type = 'group_membership' AND a.val2 = 'member'
+                        AND (
+                            (g.activation = 0 AND a.alive = 1) OR
+                            (g.activation = 1 AND a.alive = 2) OR
+                            (g.activation = 2 AND a.alive >= 1)
+                        )
+                    )
+                    AND
+                    name NOT IN (
+                        SELECT DISTINCT val1 FROM active_attributes a WHERE a.attr_type = 'group_membership' AND a.val2 = 'owner'
+                    )
+                )
+            OR
+                (
+                    name IN (
+                        SELECT DISTINCT val1 FROM active_attributes a WHERE a.attr_type = 'group_membership' AND a.val2 = 'owner'
+                        AND (
+                            (g.activation = 0 AND a.alive = 1) OR
+                            (g.activation = 1 AND a.alive = 2) OR
+                            (g.activation = 2 AND a.alive >= 1)
+                        )
+                    )
+                )
+            );
         `); // reopen groups with an alive member and no owner or a living owner
+
         
         for(let i = 0; i < toBeDisbanded.length; i++) {
             await groupsDisband(toBeDisbanded[i].name);
@@ -368,10 +420,24 @@ module.exports = function() {
             
             // get base sc permissions
             let scPerms = getSCCatPerms(mainGuild);
+            let groupIsGhostly = false;
             
             // if a first member is specified, grant them permissions to the channel
             if(firstMember) {
                 scPerms.push(getPerms(firstMember, ["history", "read"], []));
+                
+                // if group creator is a ghost, the group is ghostly
+                let mem = mainGuild.members.cache.get(firstMember);
+                if(isGhost(mem)) groupIsGhostly = true;
+            }
+            
+            // ghost permissions based on creator
+            if(groupIsGhostly) {
+                // make ghosts able to talk
+                scPerms.push(getPerms(stats.ghost, ["write"], ["read"]));
+            } else {      
+                // make ghosts unable to talk
+                scPerms.push(getPerms(stats.ghost, [], ["write"]));
             }
             
             let mentor = await getMentor(firstMember); 
@@ -407,8 +473,19 @@ module.exports = function() {
                     sc.send(embed);
                 }
                 
+                // get attribute data
+                let act = 0;
+                if(stats.haunting) { 
+                    let grpData = await (new Promise(res => {
+                         sql("SELECT * FROM groups WHERE name = " + connection.escape(group), result => {
+                             res(result[0]);
+                         });
+                    })); 
+                    act = grpData.activation;
+                }
+                
                 // save group in DB
-                await sqlProm("INSERT INTO active_groups (name, channel_id) VALUES (" + connection.escape(group) + "," + connection.escape(sc.id) + ")");
+                await sqlProm("INSERT INTO active_groups (name, channel_id, activation) VALUES (" + connection.escape(group) + "," + connection.escape(sc.id) + "," + connection.escape(act) +  ")");
                 
                 // run group starting trigger
                 await triggerGroup(sc.id, "Starting");

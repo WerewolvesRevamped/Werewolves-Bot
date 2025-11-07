@@ -24,7 +24,7 @@ module.exports = function() {
     const passiveTriggers = ["Passive", "Passive End Day", "Passive End Night", "Passive Start Day", "Passive Start Night", "Passive Start Phase", "Passive End Phase"];
     const electionTriggers = ["On Election", "On Mayor Election", "On Reporter Election", "On Guardian Election"];
     const defenseTriggers = ["On Defense", "On Passive Defense", "On Partial Defense", "On Recruitment Defense", "On Active Defense", "On Absence Defense"];
-    const basicTriggerTypes = [...actionTimings, "Starting", ...passiveTriggers, "On Death", "On Killed", "On Banished", "On Banishment", "On Visited", "On Action", "On Disbandment", "On Lynch", ...electionTriggers, ...defenseTriggers, "On Betrayal", "On Poll Closed", "On Poll Win", "On Poll Skipped", "On Role Change", "On Removal", "On End", "Choice Chosen", "On Emitted", "On End Emitted", "On Redirect", "On Any Action", "On Join", "On Vote Add", "On Vote Remove", "On Vote Change", "On Hammer"]; // basic trigger types
+    const basicTriggerTypes = [...actionTimings, "Starting", ...passiveTriggers, "On Death", "On Killed", "On Banished", "On Banishment", "On Visited", "On Action", "On Disbandment", "On Lynch", ...electionTriggers, ...defenseTriggers, "On Betrayal", "On Poll Closed", "On Poll Win", "On Poll Skipped", "On Role Change", "On Removal", "On End", "Choice Chosen", "On Emitted", "On End Emitted", "On Redirect", "On Any Action", "On Join", "On Vote Add", "On Vote Remove", "On Vote Change", "On Hammer", "On Whisper", "On Assigned"]; // basic trigger types
     const bullets = ["•","‣","◦","·","⁃","⹀"];
 
     /**
@@ -644,8 +644,8 @@ module.exports = function() {
     const rawStr = "[\\w\\s\\d@]+";
     const str = "(" + rawStr + ")";
     const decNum = "(-?\\d+\\.\\d+)";
-    const abilityType = "(Killing|Investigating|Targeting|Disguising|Protecting|Applying|Redirecting|Vote Manipulating|Whispering|Joining|Granting|Loyalty|Obstructing|Poll Manipulating|Announcements|Changing|Copying|Choices|Ascend|Descend|Disband|Counting|Conversation Reset|Cancel|Switching|Process|Evaluate|Action|Feedback|Action|Success|Failure|Shuffle)";
-    const abilitySubtype = "((Kill|Attack|Lynch|True|Banish|True Banish) Killing|(Role|Alignment|Category|Class|Count|Attribute) Investigating|(Target|Untarget) Targeting|() Disguising|(Absence|Active|Passive|Partial|Recruitment) Protecting|(Add|Remove|Change) Applying|() Redirecting|(Absolute|Relative) Vote Manipulating|() Whispering|(Add|Remove) Joining|(Add|Remove|Transfer) Granting|() Loyalty|() Obstructing|(Addition|Creation|Cancelling|Deletion|Manipulation) Poll Manipulating|() Announcements|(Role|Alignment|Group) Changing|(Ability|Full) Copying|(Creating|Choosing) Choices|() Ascend|() Descend|() Disband|(Increment|Decrement|Set) Counting|() Conversation Reset|() Cancel|() Switching|() Process|() Evaluate|() Action|() Feedback|() Action|() Success|() Failure|() Shuffle)";
+    const abilityType = "(Killing|Investigating|Targeting|Disguising|Protecting|Applying|Redirecting|Vote Manipulating|Whispering|Joining|Granting|Loyalty|Obstructing|Poll Manipulating|Announcements|Changing|Copying|Choices|Ascend|Descend|Disband|Counting|Conversation Reset|Cancel|Switching|Process|Evaluate|Action|Feedback|Action|Success|Failure|Emit|Storing|Displaying|Win|Shuffle|Locking|Executing|Activating|Resurrecting)";
+    const abilitySubtype = "((Kill|Attack|Lynch|True|Banish|True Banish) Killing|(Role|Alignment|Category|Class|Count|Attribute) Investigating|(Target|Untarget) Targeting|() Disguising|(Absence|Active|Passive|Partial|Recruitment) Protecting|(Add|Remove|Change) Applying|() Redirecting|(Absolute|Relative) Vote Manipulating|() Whispering|(Add|Remove) Joining|(Add|Remove|Transfer) Granting|() Loyalty|() Obstructing|(Addition|Creation|Cancelling|Deletion|Manipulation) Poll Manipulating|() Announcements|(Role|Alignment|Group) Changing|(Ability|Full) Copying|(Creating|Choosing) Choices|() Ascend|() Descend|() Disband|(Increment|Decrement|Set) Counting|() Conversation Reset|() Cancel|() Switching|() Process|() Evaluate|() Action|() Feedback|() Action|() Success|() Failure|() Emit|() Storing|(Create|Change) Displaying|() Win|() Shuffle|(Lock|Unlock) Locking|() Executing|() Activating|() Resurrecting)";
     const bulletsRegex = /(•|‣|◦|·|⁃|⹀)/;
 
     // specific
@@ -787,6 +787,14 @@ module.exports = function() {
                 let condType = "precondition";
                 if(fd[1].toLowerCase().includes("@selection") || fd[1].toLowerCase().includes("@secondaryselection")) condType = "condition";
                 parsedRestrictions.push({ type: condType, condition: parseCondition(fd[1]) });
+                restFound = true;
+            }
+            /** Status **/
+            // status
+            exp = new RegExp("^Status: (Ghostly|Any|Alive)$", "g");
+            fd = exp.exec(restrictions[rest]);
+            if(fd) {
+                parsedRestrictions.push({ type: "status", status: lc(fd[1]) });
                 restFound = true;
             }
             /** DEFAULT **/
@@ -1092,13 +1100,25 @@ module.exports = function() {
         exp = new RegExp("^Whisper to " + locationType + " as " + targetType + attrDuration + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "whispering", target: ttpp(fd[1], "location"), disguise: fd[2], duration: dd(fd[3], "permanent") };
+            ability = { type: "whispering", source: "@self[player]", target: ttpp(fd[1], "location"), disguise: fd[2], duration: dd(fd[3], "permanent") };
         }
         // whispering without disguise
         exp = new RegExp("^Whisper to " + locationType + attrDuration + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "whispering", target: ttpp(fd[1], "location"), duration: dd(fd[3], "permanent") };
+            ability = { type: "whispering", source: "@self[player]", target: ttpp(fd[1], "location"), duration: dd(fd[2], "permanent") };
+        }
+        // whispering with disguise
+        exp = new RegExp("^Whisper from " + locationType + " to " + locationType + " as " + targetType + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "whispering", source: ttpp(fd[1]), target: ttpp(fd[2], "location"), disguise: fd[3], duration: dd(fd[4], "permanent") };
+        }
+        // whispering without disguise
+        exp = new RegExp("^Whisper from " + locationType + " to " + locationType + attrDuration + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "whispering", source: ttpp(fd[1]), target: ttpp(fd[2], "location"), duration: dd(fd[3], "permanent") };
         }
         /** JOINING **/
         // default joining
@@ -1263,6 +1283,12 @@ module.exports = function() {
         if(fd) {
             ability = { type: "poll", subtype: "creation", target: ttpp(fd[1], "poll"), poll_location: ttpp(fd[2], "location") };
         }
+        // Creates a new poll named
+        exp = new RegExp("^Create `" + str + "` Poll in " + locationType + " as " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "poll", subtype: "creation", target: ttpp(fd[1], "poll"), poll_location: ttpp(fd[2], "location"), poll_name: ttpp(fd[3], "string") };
+        }
         // poll creates itself
         exp = new RegExp("^Create Poll in " + locationType + "$", "g");
         fd = exp.exec(abilityLine);
@@ -1331,6 +1357,12 @@ module.exports = function() {
             ability = { type: "announcement", subtype: "buffer", info: ttpp(fd[1]) };
         }
         /** ROLE CHANGE **/
+        // role change
+        exp = new RegExp("^Role Change to " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "changing", subtype: "role", target: "@self[player]", change_to: ttpp(fd[1], "role") };
+        }
         // role change
         exp = new RegExp("^Role Change " + targetType + " to " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
@@ -1664,28 +1696,28 @@ module.exports = function() {
         }
         /** EMIT **/
         // emit for somebody else
-        exp = new RegExp("^Emit `" + str + "` for " + targetType + "$", "g");
+        exp = new RegExp("^Emit " + targetType + " for " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "emit", subtype: "immediate", selector: ttpp(fd[2]), emit_value: ttpp(fd[1], "option") };
+            ability = { type: "emit", subtype: "immediate", selector: ttpp(fd[2]), emit_value: ttpp(fd[1], "string") };
         }
         // emit self
-        exp = new RegExp("^Emit `" + str + "`$", "g");
+        exp = new RegExp("^Emit " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "emit", subtype: "immediate", selector: "@self[player]", emit_value: ttpp(fd[1], "option") };
+            ability = { type: "emit", subtype: "immediate", selector: "@self[player]", emit_value: ttpp(fd[1], "string") };
         }
         // emit for somebody else, end effect
-        exp = new RegExp("^End Emit `" + str + "` for " + targetType + "$", "g");
+        exp = new RegExp("^End Emit " + targetType + " for " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "emit", subtype: "end", selector: ttpp(fd[2]), emit_value: ttpp(fd[1], "option") };
+            ability = { type: "emit", subtype: "end", selector: ttpp(fd[2]), emit_value: ttpp(fd[1], "string") };
         }
         // emit self, end effect
-        exp = new RegExp("^End Emit `" + str + "`$", "g");
+        exp = new RegExp("^End Emit " + targetType + "$", "g");
         fd = exp.exec(abilityLine);
         if(fd) {
-            ability = { type: "emit", subtype: "end", selector: "@self[player]", emit_value: ttpp(fd[1], "option") };
+            ability = { type: "emit", subtype: "end", selector: "@self[player]", emit_value: ttpp(fd[1], "string") };
         }
         /** Display **/
         // create display
@@ -1743,6 +1775,32 @@ module.exports = function() {
         fd = exp.exec(abilityLine);
         if(fd) {
             ability = { type: "executing", target: ttpp(fd[2], "location"), command: fd[1] };
+        }
+        /** ACTIVATING **/
+        // activate ghostly
+        exp = new RegExp("^Activate " + targetType + " while `Ghostly`$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "activating", target: ttpp(fd[1]), state: 1 };
+        }
+        // activate alive
+        exp = new RegExp("^Activate " + targetType + " while `Alive`$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "activating", target: ttpp(fd[1]), state: 0 };
+        }
+        // activate ghostly+alive
+        exp = new RegExp("^Activate " + targetType + " always$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "activating", target: ttpp(fd[1]), state: 2 };
+        }
+        /** RESURRECTING **/
+        // resurrection
+        exp = new RegExp("^Resurrect " + targetType + "$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "resurrecting", target: ttpp(fd[1]) };
         }
 
         
@@ -1802,6 +1860,7 @@ module.exports = function() {
         let curTriggerType = null;
         let curTrigger = [];
         let unique = false;
+        let activation = 0;
         let require = [], roleAttribute = [], identity = [], include = [];
         let triggers = [];
 
@@ -1831,6 +1890,14 @@ module.exports = function() {
                 } else if(curInputLine === "Unique Role" || curInputLine === "Unique Group") { // Unique
                     // set unique value to true
                     unique = true;
+                    continue;
+                } else if(curInputLine === "Ghostly Role" || curInputLine === "Ghostly Attribute" || curInputLine === "Ghostly Group") { // Ghostly (active while ghostly)
+                    // set activation value to 1
+                    activation = 1;
+                    continue;
+                } else if(curInputLine === "Haunted Role" || curInputLine === "Haunted Attribute" || curInputLine === "Haunted Group") { // Haunted (active while alive & ghostly)
+                    // set activation value to 2
+                    activation = 2;
                     continue;
                 }
                 
@@ -1907,7 +1974,7 @@ module.exports = function() {
                     if(fd) {
                         complexTrigger = "On " + fd[2] + " Target Basic;" + ttpp(fd[1]);
                     }
-                    /** Choice Chosen **/
+                    /** On Poll Win **/
                     exp = new RegExp("^On Poll `" + str +  "` Win$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
@@ -1931,6 +1998,12 @@ module.exports = function() {
                     if(fd) {
                         complexTrigger = "On End Emitted;" + ttpp(fd[1].trim().toLowerCase().replace(/[^a-z]/g,""), "option");
                     }
+                    /** On [Value] End Emitted **/
+                    exp = new RegExp("^On `" + str +  "` Whisper$", "g");
+                    fd = exp.exec(curTriggerName);
+                    if(fd) {
+                        complexTrigger = "On Whisper;" + ttpp(fd[1].trim().toLowerCase().replace(/[^a-z]/g,""), "string");
+                    }
                     /** Otherwise **/
                     if(!complexTrigger) { // could not find a complex trigger match
                         if(!debugMode) throw new Error(`Invalid Trigger Type \`\`\`\n${curTriggerName}\n\`\`\` in \`\`\`\n${curInputLine}\n\`\`\``);
@@ -1951,7 +2024,7 @@ module.exports = function() {
             triggers.push([curTriggerType, curTrigger]);
         }
 
-        return { triggers: triggers, unique: unique, requires: require, role_attribute: roleAttribute, identity: identity, include: include };
+        return { triggers: triggers, unique: unique, activation: activation, requires: require, role_attribute: roleAttribute, identity: identity, include: include };
 
     }
     
@@ -2085,6 +2158,11 @@ module.exports = function() {
             else return "unknown";
         } else if(first == "#") {
             return "location";
+        }  else if(first == "$") {
+            if(["$living","$dead","$ghostly","$total","$phases"].includes(targetType)) return "number";
+            else if(["$phname"].includes(targetType)) return "string";
+            else if(["$haunting"].includes(targetType)) return "boolean";
+            else return "unknown";
         } else if(first == "`") {
             switch(targetType) {
                 case "`success`": case "`failure`":

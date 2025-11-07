@@ -38,7 +38,7 @@ module.exports = function() {
         if(sourcePlayer === targetPlayer) return (await visitObstructionFailureCheck(sourcePlayer, abilityType, abilitySubtype)) ? { msg: null, success: false } : null;
         
         // get all living ids; check if both are players and alive
-        let living = await getAllLivingIDs();
+        let living = await getAllLivingAndGhostlyIDs();
         let dead = await getAllDeadIDs();
         let sourceIsPlayer = true, targetIsPlayer = true, sourceIsAlive = true, targetIsAlive = true;
         if(!living.includes(sourcePlayer)) sourceIsAlive = false;

@@ -17,6 +17,8 @@ module.exports = function() {
     const CC_PERMS_LOCKED = { ViewChannel: true, ReadMessageHistory: null, SendMessages: false };
     const CC_PERMS_VIEWER = { ViewChannel: true, SendMessages: false };
     const CC_PERMS_NONE = null;
+    const CC_PERMS_MEMBER_ROLE = { ViewChannel: false, SendMessages: true };
+    const CC_PERMS_MEMBER_NONE= { };
 
 	/**
     Command: $cc add
@@ -35,7 +37,7 @@ module.exports = function() {
         }
         
         // get list of new members
-        let players = parseUserList(args, 1, channel, member);
+		let players = parseUserList(args, 1, channel, member, isGhost(member) ? "ghost" : "participant");
         if(!players) players = [];
         players = players.filter(el => !isCCMember(channel, el));
         // add members if at least one exists
@@ -69,7 +71,7 @@ module.exports = function() {
         }
         
         // get list of members to remove
-        let players = parseUserList(args, 1, channel, member);
+		let players = parseUserList(args, 1, channel, member, isGhost(member) ? "ghost" : "participant");
         if(!players) players = [];
         players = players.filter(el => isCCMember(channel, el) && !isCCOwner(channel, el));
         // remove members if at least one exists
@@ -103,7 +105,7 @@ module.exports = function() {
         }
         
         // get list of members to promote
-        let players = parseUserList(args, 1, channel, member);
+		let players = parseUserList(args, 1, channel, member, isGhost(member) ? "ghost" : "participant");
         if(!players) players = [];
         players = players.filter(el => isCCMember(channel, el) && !isCCOwner(channel, el));
         // remove members if at least one exists
@@ -135,7 +137,7 @@ module.exports = function() {
         }
         
         // get list of members to demote
-        let players = parseUserList(args, 1, channel, member);
+		let players = parseUserList(args, 1, channel, member, isGhost(member) ? "ghost" : "participant");
         if(!players) players = [];
         players = players.filter(el => isCCMember(channel, el) && isCCOwner(channel, el));
         // remove members if at least one exists
@@ -197,6 +199,10 @@ module.exports = function() {
         
         // clean cc name
         let name = cleanCCName(args[1]);
+        
+        // make sure to keep haunted symbol
+        if(channel.name.split("-")[0] === "👻") name = "👻-" + name;
+        
         // rename cc
         channelRename(channel, name);
     }
@@ -225,6 +231,31 @@ module.exports = function() {
             channelSetPermission(channel, el, CC_PERMS_LOCKED);
         });
         if(!mode) channel.send("✅ Archived channel!");
+	}
+    
+    
+	/**
+    Command: $cc ghostify
+    Ghostifies a cc
+    **/
+	this.cmdCCGhostify = function(channel, member, mode) {
+		// Check if CC
+		if(!mode && !isCC(channel)) {
+			channel.send("⛔ Command error. Can't use command outside a CC!");
+			return;
+		}
+        // Check if owner
+		if(!isCCOwner(channel, member) && !mode && !isGameMaster(member, true)) {
+			channel.send("⛔ Command error. You are not an owner of this CC!");
+			return;
+        }
+        
+        // rename channel
+        channelRename(channel, `👻-${channel.name}`, true);
+        // set permissions
+        channelSetPermission(channel, channel.guild.roles.cache.get(stats.ghost), CC_PERMS_MEMBER_ROLE);
+        channelSetPermission(channel, channel.guild.roles.cache.get(stats.participant), CC_PERMS_MEMBER_NONE);
+        if(!mode) channel.send("👻 Ghostified channel!");
 	}
     
     /**
@@ -404,7 +435,9 @@ module.exports = function() {
     this.channelSetPermission = async function(channel, member, permission = null) {
         return new Promise(res => {
             if(!permission) { // if no permissions, then revoke
-                channel.permissionOverwrites.cache.get(member).delete()
+                let ow = channel.permissionOverwrites.cache.get(member);
+                if(!ow) res(true);
+                ow.delete()
                 .then(() => {
                     res(true);
                 })

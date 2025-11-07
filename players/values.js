@@ -12,6 +12,14 @@ module.exports = function() {
         return pData && pData.alive == 1;
     }
     
+    /**
+    Check if Player is Ghostly
+    **/
+    this.isGhostly = async function(pid) {
+        let pData = await sqlPromOneEsc("SELECT alive FROM players WHERE id=", pid);
+        return pData && pData.alive == 2;
+    }
+    
     /** 
     Set Final Result
     set the final result for a player
@@ -21,12 +29,38 @@ module.exports = function() {
     }
     
     /**
+    Get Living Status
+    get the alive value for a player
+    **/
+    this.getLivingStatus = async function(player_id) {
+        let res = await sqlPromEsc("SELECT alive FROM players WHERE id=", player_id);
+        return !res || !res[0] ? -1 : res[0].alive;
+    }
+    
+    /**
     Set Living Status
     set the alive value for a player
     **/
     this.setLivingStatus = async function(player_id, status) {
         await sqlPromEsc("UPDATE players SET alive=" + connection.escape(status) + " WHERE id=", player_id);
         updateGameStatus(); // update game status (async)
+    }
+    
+    /**
+    Get Activation
+    get the activation value for a player
+    **/
+    this.getActivation = async function(player_id) {
+        let res = await sqlPromEsc("SELECT activation FROM players WHERE id=", player_id);
+        return !res || !res[0] ? -1 : res[0].activation;
+    }
+    
+    /**
+    Set Activation
+    set the activation value for a player
+    **/
+    this.setActivation = async function(player_id, act) {
+        await sqlPromEsc("UPDATE players SET activation=" + connection.escape(act) + " WHERE id=", player_id);
     }
     
     /**
@@ -45,6 +79,15 @@ module.exports = function() {
         let parsedRole = parseRole(role);
         let roleData = await getRoleDataFromName(parsedRole);
         return sqlProm("UPDATE players SET role=" + connection.escape(parsedRole) + ",alignment=" + connection.escape(roleData.team) + " WHERE id=" + connection.escape(player_id));
+    }
+    
+    /**
+    Get Role
+    get the role value for a player
+    **/
+    this.getPlayerRole = async function(player_id) {
+        let pData = await sqlPromOneEsc("SELECT role FROM players WHERE id=", player_id);
+        return !pData ? "none" : pData.role;
     }
     
     /**

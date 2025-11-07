@@ -19,6 +19,7 @@ require("./death.js")();
 require("./channels.js")();
 require("./discord_roles.js")();
 require("./host_information.js")();
+require("./modifiers.js")();
 require("./displays.js")();
 require("./transition.js")();
 
@@ -63,6 +64,12 @@ module.exports = function() {
             addRoleRecursive(el, backupChannelId, stats.dead_participant, "dead participant");
 		});
         mainGuild.roles.cache.get(stats.mentor).members.forEach(el => {
+            addRoleRecursive(el, backupChannelId, stats.dead_participant, "dead participant");
+		});
+        mainGuild.roles.cache.get(stats.ghost).members.forEach(el => {
+            addRoleRecursive(el, backupChannelId, stats.dead_participant, "dead participant");
+		});
+        mainGuild.roles.cache.get(stats.ghost_mentor).members.forEach(el => {
             addRoleRecursive(el, backupChannelId, stats.dead_participant, "dead participant");
 		});
         // clear schedule
@@ -169,10 +176,14 @@ module.exports = function() {
         resetDisplays();
         // reset host information
         resetHostInformation();
+        // reset modifiers
+        resetModifiers();
         // reset schedule
         clearSchedule();
         // disable action queue checker 
         pauseActionQueueChecker = true;
+        // reset cached sc count
+        scCatCount = 0;
 		// Reset Poll Count
 		sqlSetStat(13, 1, result => {
 			channel.send("✅ Successfully reset poll counter!");
@@ -226,8 +237,8 @@ module.exports = function() {
     
     this.resetRoleNames = async function(channel) {
         // rename roles correctly
-        let roles = [stats.signed_up, stats.spectator, stats.sub, stats.participant, stats.dead_participant, stats.host, stats.gamemaster, stats.ghost, stats.mentor];
-        let names = ["Signed-up","Spectator", "Substitute","Participant","Dead Participant","Host", "Game Master", "Ghost", "Mentor"];
+        let roles = [stats.signed_up, stats.spectator, stats.sub, stats.participant, stats.dead_participant, stats.host, stats.gamemaster, stats.ghost, stats.mentor, stats.ghost_mentor];
+        let names = ["Signed-up","Spectator", "Substitute","Participant","Dead Participant","Host", "Game Master", "Ghostly Participant", "Mentor", "Ghostly Mentor"];
         for(let i = 0; i < roles.length; i++) {
             await channel.guild.roles.cache.get(roles[i]).setName(names[i]);
         }  
@@ -367,7 +378,7 @@ module.exports = function() {
 		if(verifyRole(parsedRole)) {
 			// All roles are valid -> Set it
             let roleData = await getRoleDataFromName(parsedRole);
-			sql("UPDATE players SET role = " + connection.escape(parsedRole) + ",orig_role = " + connection.escape(parsedRole) + ",alignment=" + connection.escape(roleData.team) + " WHERE id = " + connection.escape(el[1]), result => {
+			sql("UPDATE players SET role = " + connection.escape(parsedRole) + ",orig_role = " + connection.escape(parsedRole) + ",alignment=" + connection.escape(roleData.team) + ",activation=" + connection.escape(roleData.all.activation) + " WHERE id = " + connection.escape(el[1]), result => {
 				m.edit(m.content + "\n	✅ Set role to `" + parsedRole + "`!").then(m => {
 				});
 			}, () => {

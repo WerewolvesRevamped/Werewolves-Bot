@@ -37,6 +37,7 @@ module.exports = function() {
         let targetChannel = mainGuild.channels.cache.get(cid);
         
         // bulk delete
+        await sleep(1000); // wait to make sure messages currently being sent arrive first
         let messages = await targetChannel.messages.fetch();
         let first = messages.last();
         await targetChannel.bulkDelete(messages);

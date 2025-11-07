@@ -61,7 +61,7 @@ module.exports = function() {
 				channel.send("✳️ Sending a list of currently existing active attributes instances:\nAI ID: AttrType - Owner (Duration) [Values] {Source}");
 				// Send message
 				chunkArray(result.map(attribute => {
-                    const alive = attribute.alive === 0 ? " 💀" : ""
+                    const alive = attribute.alive === 0 ? " 💀" : (attribute.alive === 2 ? " 👻" : "");
                     const ownerText = srcRefToText(`${attribute.owner_type}:${attribute.owner}`);
                     const attrList = `${attribute.val1};${attribute.val2};${attribute.val3};${attribute.val4}`;
                     return `\`${attribute.ai_id}\`: **${toTitleCase(attribute.attr_type)}** - ${ownerText} (~${toTitleCase(attribute.duration)}) [${attrList}] {${srcNameToText(attribute.src_name)} - ${srcRefToText(attribute.src_ref, null, false)}}${alive}`;
@@ -162,8 +162,26 @@ module.exports = function() {
     Create Attribute
     creates an attribute in the database
     **/
-    this.createAttribute = function(src_name, src_ref, target, targetType, dur, attr_type, val1 = "", val2 = "", val3 = "", val4 = "") {
-         return sqlProm("INSERT INTO active_attributes (owner, owner_type, src_name, src_ref, attr_type, duration, val1, val2, val3, val4, applied_phase) VALUES (" + connection.escape(target) + "," + connection.escape(targetType) + "," + connection.escape(src_name) +  "," + connection.escape(src_ref) + "," + connection.escape(attr_type) + "," + connection.escape(dur) +  "," + connection.escape(val1) +  "," + connection.escape(val2) +  "," + connection.escape(val3) +  "," + connection.escape(val4) + "," + connection.escape(getPhaseAsNumber()) + ")");
+    this.createAttribute = async function(src_name, src_ref, target, targetType, dur, attr_type, val1 = "", val2 = "", val3 = "", val4 = "", activation = 0) {
+        let alive = 1;
+        // in haunting, match alive of element attribute attaches to
+        if(stats.haunting) {
+            switch(targetType.toLowerCase()) {
+                case "player":
+                    alive = await getLivingStatus(target);
+                break;
+                case "activeextrarole":
+                    let queried = await queryAttribute("attr_type", "role", "val2", target);
+                    alive = queried[0].alive;
+                break;
+                case "attribute":
+                    let attr = await getAttribute(target);
+                    alive = attr.alive;
+                break;
+            }
+        }
+        
+         return sqlProm("INSERT INTO active_attributes (owner, owner_type, src_name, src_ref, attr_type, duration, val1, val2, val3, val4, applied_phase, alive, activation) VALUES (" + connection.escape(target) + "," + connection.escape(targetType) + "," + connection.escape(src_name) +  "," + connection.escape(src_ref) + "," + connection.escape(attr_type) + "," + connection.escape(dur) +  "," + connection.escape(val1) +  "," + connection.escape(val2) +  "," + connection.escape(val3) +  "," + connection.escape(val4) + "," + connection.escape(getPhaseAsNumber()) + "," + connection.escape(alive) + "," + connection.escape(activation) + ")");
     }
     
     /**
@@ -382,11 +400,11 @@ module.exports = function() {
         }
     }
     
-    /** PRIVATE
+    /** PUBLIC
     Get Attribute
     gets an attribute by ai id
     **/
-    function getAttribute(id) {
+    this.getAttribute = function(id) {
         // get attribute
         return new Promise(res => {
              sql("SELECT * FROM active_attributes WHERE ai_id=" + connection.escape(id), result => {
@@ -446,6 +464,14 @@ module.exports = function() {
     this.updateAttributeAlive = function(id, newVal) {
         // update attribute
         return updateAttributeValue(id, "alive", newVal);
+    }
+    
+    /** PUBLIC
+    Updates the activation column
+    **/
+    this.updateAttributeActivation = function(id, newVal) {
+        // update attribute
+        return updateAttributeValue(id, "activation", newVal);
     }
     
     /** PRIVATE

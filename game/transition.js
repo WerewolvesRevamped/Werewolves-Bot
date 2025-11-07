@@ -67,7 +67,7 @@ module.exports = function() {
     Replaces all GM ingame roles with the proper variants
     **/
 	this.cmdPromote = function(channel, member) {
-		if(isParticipant(member) && !member.roles.cache.get(stats.admin_ingame)) {
+		if((isParticipant(member) || isGhost(member)) && !member.roles.cache.get(stats.admin_ingame)) {
 			channel.send("⛔ Command error. Can't promote you while you're a participant."); 
 			return;
 		}
@@ -98,7 +98,7 @@ module.exports = function() {
     Adds host role
     **/
 	this.cmdHost = function(channel, member) {
-		if(isParticipant(member) || isDeadParticipant(member)) {
+		if(isParticipant(member) || isGhost(member) || isDeadParticipant(member)) {
 			channel.send("⛔ Command error. Can't host you while you're a participant."); 
 			return;
 		}

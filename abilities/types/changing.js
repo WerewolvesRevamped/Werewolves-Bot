@@ -123,7 +123,7 @@ module.exports = function() {
             }
             for(let j = 0; j < groupMembershipsOwner.length; j++) {
                 await updateAttributeVal2(groupMembershipsOwner[j].ai_id, "visitor");
-                let groupData = await groupGetData(groupMembershipsMember[j].val1);
+                let groupData = await groupGetData(groupMembershipsOwner[j].val1);
                 await triggerGroup(groupData.channel_id, "On Betrayal", { });
                 abilityLog(`✅ <@${targets[i]}> demoted ${toTitleCase(groupMembershipsOwner[j].val1)} membership to \`Visitor\`.`);
             }
@@ -254,14 +254,15 @@ module.exports = function() {
             await updateAttributeVal1(attrsOldMems[i].ai_id, newGroupName);
         }
         
+        // get channel
+        let sc = mainGuild.channels.cache.get(group);
+        
         // run starting trigger
         await triggerGroup(sc.id, "Starting");
         
         // new group info embed
         // get info embed
         infoEmbed = await getGroupEmbed(newGroupName, ["basics","details"], mainGuild);
-        // get channel
-        let sc = mainGuild.channels.cache.get(group);
         // send embed
         sendEmbed(sc, infoEmbed, true);
         

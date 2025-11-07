@@ -227,7 +227,7 @@ module.exports = function() {
             if(hasDef) continue;
             
             // execute the Banishment
-            await queueBanish(targets[i], src_ref, "banish", src_name);
+            await queueKill(targets[i], src_ref, "banish", src_name);
             abilityLog(`✅ ${srcRefToText(src_ref)} banished <@${targets[i]}> - successful.`);
             success = true; // if Banishment succeeds set to true
         }
@@ -260,7 +260,7 @@ module.exports = function() {
             }
             
             // execute the Banishment
-            await queueBanish(targets[i], src_ref, "true banish", src_name);
+            await queueKill(targets[i], src_ref, "true banish", src_name);
             abilityLog(`✅ ${srcRefToText(src_ref)} true banished <@${targets[i]}>.`);
             success = true; // True Banishment always succeeds
         }
@@ -356,13 +356,5 @@ module.exports = function() {
         killqScheduled = true;
     }
     
-    /** PRIVATE
-    Queues a banishment
-    **/
-    async function queueBanish(pid, src_ref, type, src_name) { // WIP: How should this actually work?
-        await killqAdd(pid, src_ref, type, src_name);
-        doStorytimeCheck();
-        killqScheduled = true;
-    }
 
 }

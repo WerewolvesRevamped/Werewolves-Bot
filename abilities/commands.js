@@ -74,6 +74,45 @@ module.exports = function() {
         if(feedback.msg) message.channel.send(basicEmbed(feedback.msg, EMBED_GREEN));
         else if(feedback.success) message.channel.send(basicEmbed(feedback.success, EMBED_GREEN));
 	}
+	
+	/**
+    Command: $apply
+    creates a new attribute
+    **/
+	this.cmdApply = async function(message, args) {
+		// Check arguments
+		if(!args[0] || !args[1]) { 
+			message.channel.send("⛔ Syntax error. Not enough parameters!"); 
+			return; 
+		}
+        
+        // create ability
+        let ability = { type: "applying", subtype: "add" };
+        
+        // get target
+        let target = parseUser(args[0]);
+        let member = mainGuild.members.cache.get(target);
+        if(!member) {
+            message.channel.send("⛔ Input error. Invalid player!"); 
+			return; 
+        }
+        ability.target = `@id:${target}[player]`;
+        
+        // get attribute
+        let parsedAttribute = parseAttributeName(args[1]);
+        if(!verifyAttribute(parsedAttribute)) {
+            message.channel.send("⛔ Input error. Invalid attribute!"); 
+			return; 
+        }
+        ability.attribute = `${parsedAttribute}[attribute]`;
+        
+        // execute ability
+        let feedback = await executeAbility("player:" + message.author.id, "role:host", ability);
+        
+        // send feedback
+        if(feedback.msg) message.channel.send(basicEmbed(feedback.msg, EMBED_GREEN));
+        else if(feedback.success) message.channel.send(basicEmbed(feedback.success, EMBED_GREEN));
+	}
     
     
 }

@@ -47,6 +47,7 @@ module.exports = function() {
     this.cmdIconList = async function(message) {
         let items = await sqlPromEsc("SELECT * FROM inventory WHERE player=", message.member.id);
         items = items.filter(el => el.item.substr(0, 2) === "ic").map(el => [el.count, el.item.split(":")[1], ALL_LOOT.filter(el2 => el2[0].toLowerCase() === el.item)[0]]);
+        item = items.sort((a,b) => a[1].localeCompare(b[1]));
         
         // no icons
         if(items.length === 0) {

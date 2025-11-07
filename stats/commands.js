@@ -8,7 +8,7 @@ function cmdOptionsSet (channel, value, stat) {
     // Set value
     sqlSetStat(stat, value, result => {
         channel.send("✅ Successfully updated *" + stat.name + "* ("+stat.id+") to `" + value + "`!");
-        getStats();
+        loadStats();
     }, () => {
         // Db error
         channel.send("⛔ Database error. Could not update `" + stat.name + "`!");
@@ -26,7 +26,7 @@ function cmdOptionsGet (channel, stat) {
         if(result.length > 0) {
             // Print value
             channel.send("✅ *" + stat.name + "* currently is set to `" + result + "`!");
-            getStats();
+            loadStats();
         } else {
             // Value unset
             channel.send(`⛔ Database error. Could not get *${stat.name}* (${stat.id})!`);
@@ -92,7 +92,7 @@ module.exports = function () {
             sqlSetStat(1, args[1], result => {
                 let phase = getPhaseName(args[1]);
                 channel.send("✅ Game Phase is now `" + phase + "` (" + args[1] + ")!");
-                getStats();
+                loadStats();
                 updateGameStatus();
             }, () => {
                 // Database didn't update gamephase
@@ -153,7 +153,7 @@ module.exports = function () {
                     else gameStatus.setName("📰 Signups Open");
                     break;
                 case gp.SETUP: gameStatus.setName("📝 Game Setup (" + result.length + ")"); break;
-                case gp.INGAME: gameStatus.setName("🔁 In-Game (" + result.filter(el => el.alive).length + "/" + result.length + ")"); break;
+                case gp.INGAME: gameStatus.setName("🔁 In-Game (" + result.filter(el => el.alive==1).length + "/" + result.length + ")"); break;
                 case gp.POSTGAME: gameStatus.setName("✅ Game Concluded"); break;
             }
         });
