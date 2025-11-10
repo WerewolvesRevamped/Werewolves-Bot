@@ -68,12 +68,20 @@ module.exports = function() {
     this applies "auto-correct" by searching for close names and
     trying different combinations of arguments
     **/
-	this.parseList = function(inputList, allPlayers) {
+	this.parseList = function(inputList, allPlayers, isPlayer = true, inverted = false) {
 	    let playerList = [];
 	    // filter out ids, emojis, unicode
 	    inputList = inputList.filter(el => {
             let directMatch = el.match(/^(\d+|<:.+:\d+>|[^\w]{1,2})$/);
-            if(directMatch) playerList.push(el);
+            if(directMatch && isPlayer) {
+                let p = emojiToID(el);
+                if(p) {
+                    playerList.push({ val: 0, name: p });
+                    return true;
+                } else {
+                    return false;
+                }
+            }
             return !directMatch;
 	    });
 
@@ -85,15 +93,15 @@ module.exports = function() {
             // search for a direct match
             let apIndex = allPlayers.indexOf(p => p === nameExtracted);
             if(apIndex >= 0) { // direct match found
-                playerList.push(el);
+                playerList.push({ val: 0, name: nameExtracted });
                 return false;
             } else { // search for closest name
                 let bestMatch = findBestMatch(el, allPlayers);
                 console.log(bestMatch);
                 // close match found?
                 if(bestMatch.value <= ~~(nameExtracted.length/2)) { 
-                    playerList.push(bestMatch.name);
-                    return false;
+                    playerList.push({ val: bestMatch.value, name: bestMatch.name });
+                    return true;
                 }   
             }
             return quoted ? false : true; // no (close) match found
@@ -108,14 +116,15 @@ module.exports = function() {
                         j = inputList.length
                         continue; 
                     }
-                    combinedName += " " + inputList[j];
+                    if(inverted) combinedName = inputList[j] + " " + combinedName;
+                    else combinedName += " " + inputList[j];
                     let bestMatch = findBestMatch(combinedName, allPlayers);
                     //console.log(combinedName, "=>", bestMatch.name, bestMatch.value, i, j);
                     // close match found?
                     if(bestMatch.value <= ~~(combinedName.length/2)) {
                         // remove all used elements
                         for(let k = i; k <= j; k++) inputList[k] = "-".repeat(50); 
-                        playerList.push(bestMatch.name);
+                        playerList.push({ val: bestMatch.value, name: bestMatch.name });
                         //console.log(combinedName, "=>", bestMatch.name, bestMatch.value, i, j, inputList.map(el=>el));
                         j = inputList.length;
                     }
@@ -126,7 +135,7 @@ module.exports = function() {
 	    inputList = inputList.filter(el => el != "-".repeat(50));
 	    // remove duplicates
 	    inputList = [...new Set(inputList)];
-	    playerList = [...new Set(playerList)];
+	    playerList = [...new Set(playerList.sort((a,b) => a.val - b.val).map(el => el.name))];
 	    // output
 	    return {found: playerList, invalid: inputList};
 	}

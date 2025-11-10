@@ -59,7 +59,7 @@
     "clairvoyant_fox.1": "You may choose to either join the wolfpack or to investigate another player.",
     "disguised_fox.1": "You may choose to either join the wolfpack or to strongly disguise yourself.",
     "gallant_fox.1": "You may choose to either join the wolfpack or to protect a player for the next night and day.",
-    "psychic_wolf.1": "You may submit a player and a role and you will learn whether that player has that role or not.",
+    "psychic_wolf.1": "You may submit a player and a role and you will learn whether that player has that role or not. Please specify a player name and a role, separated by `;`.",
     "saboteur_wolf.1": "You may choose one player to disqualify from the next election. Should they win the poll nobody will be elected.",
     "howling_wolf.1": "Confirm this ability to use your masking cry. Ignore to not use it.",
     "howling_wolf.2": "Confirm this ability to use your striking cry. Ignore to not use it.",

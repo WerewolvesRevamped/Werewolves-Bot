@@ -780,7 +780,7 @@ module.exports = function() {
         if(reverse) text = text.split(" ").reverse().join(" "); // invert so a second reply is searched for from end if necessary
         switch(type) {
             case "player": {
-                let player = parsePlayerReply(text, message);
+                let player = parsePlayerReply(text, message, reverse);
                 if(player === false) {
                     if(message) message.reply(basicEmbed("❌ You must specify a valid player.", EMBED_RED));
                     return false;
@@ -788,7 +788,7 @@ module.exports = function() {
                 return player;
             }
             case "player_optional": {
-                let player = parsePlayerOptionalReply(text, message);
+                let player = parsePlayerOptionalReply(text, message, reverse);
                 if(player === false) {
                     if(message) message.reply(basicEmbed("❌ You must either specify a valid player or 'nobody'.", EMBED_RED));
                     return false;
@@ -796,15 +796,23 @@ module.exports = function() {
                 return player;
             }
             case "dead": {
-                let player = parseDeadReply(text, message);
+                let player = parseDeadReply(text, message, reverse);
                 if(player === false) {
                     if(message) message.reply(basicEmbed("❌ You must specify a valid dead player.", EMBED_RED));
                     return false;
                 }
                 return player;
             }
+            case "player_any": {
+                let player = parsePlayerAnyReply(text, message, reverse);
+                if(player === false) {
+                    if(message) message.reply(basicEmbed("❌ You must specify a valid player.", EMBED_RED));
+                    return false;
+                }
+                return player;
+            }
             case "ghost": {
-                let player = parseGhostReply(text, message);
+                let player = parseGhostReply(text, message, reverse);
                 if(player === false) {
                     if(message) message.reply(basicEmbed("❌ You must specify a valid ghostly player.", EMBED_RED));
                     return false;
@@ -812,7 +820,7 @@ module.exports = function() {
                 return player;
             }
             case "role": {
-                let role = parseRoleReply(text, message);
+                let role = parseRoleReply(text, message, reverse);
                 if(role === false) {
                     if(message) message.reply(basicEmbed("❌ You must specify a valid role.", EMBED_RED));
                     return false;
@@ -821,7 +829,7 @@ module.exports = function() {
                 return role;
             }
             case "boolean": {
-                let bool = parseBooleanReply(text, message);
+                let bool = parseBooleanReply(text, message, reverse);
                 if(bool === false) {
                     if(message) message.reply(basicEmbed("❌ You must specify either yes or no.", EMBED_RED));
                     return false;
@@ -829,7 +837,7 @@ module.exports = function() {
                 return bool;
             }
             case "number": {
-                let num = parseNumberReply(text, message);
+                let num = parseNumberReply(text, message, reverse);
                 if(num === false) {
                     if(message) message.reply(basicEmbed("❌ You must specify a valid number.", EMBED_RED));
                     return false;
@@ -860,6 +868,12 @@ module.exports = function() {
                 let ids = await getAllDeadIDs();
                 let randomId = ids[Math.floor(Math.random() * ids.length)];
                 let player = parseDeadReply(randomId);
+                return player;
+            }
+            case "player_any": {
+                let ids = await getAllIDs();
+                let randomId = ids[Math.floor(Math.random() * ids.length)];
+                let player = parsePlayerAnyReply(randomId);
                 return player;
             }
             case "ghost": {
@@ -895,7 +909,7 @@ module.exports = function() {
     /**
     Parses an argument of type player optional in a prompt reply
     **/
-    function parsePlayerOptionalReply(playerName, message = null) {
+    function parsePlayerOptionalReply(playerName, message = null, reverse = false) {
         // list of valid terms
         let nobody = ["nobody","noone","no","none","untarget","nothing"];
         let pSplit = playerName.toLowerCase().split(/[,\-!\?\s ]|\. /);
@@ -903,7 +917,7 @@ module.exports = function() {
             return [`❌ Nobody`, `@nobody[player]`]; // return display name
         } else {
             // if not nobody, go to normal player parsing
-            return parsePlayerReply(playerName, message);
+            return parsePlayerReply(playerName, message, reverse);
         }
     }
     
@@ -911,25 +925,32 @@ module.exports = function() {
     /**
     Parses an argument of type player in a prompt reply
     **/
-    function parsePlayerReply(playerName, message = null) {
-        return parsePlayerTypeReply(playerName, message, isParticipant, "participant");
+    function parsePlayerReply(playerName, message = null, reverse = false) {
+        return parsePlayerTypeReply(playerName, message, isParticipant, "participant", reverse);
+    }
+    
+    /**
+    Parses an argument of type player_any in a prompt reply
+    **/
+    function parsePlayerAnyReply(playerName, message = null, reverse = false) {
+        return parsePlayerTypeReply(playerName, message, (member) => isParticipant(member) || isDeadParticipant(member) || isGhost(member), "participant", reverse);
     }
     
     /**
     Parses an argument of type dead prompt reply
     **/
-    function parseDeadReply(playerName, message = null) {
-        return parsePlayerTypeReply(playerName, message, isDeadParticipant, "dead participant");
+    function parseDeadReply(playerName, message = null, reverse = false) {
+        return parsePlayerTypeReply(playerName, message, isDeadParticipant, "dead participant", reverse);
     }
     
     /**
     Parses an argument of type ghost prompt reply
     **/
-    function parseGhostReply(playerName, message = null) {
-        return parsePlayerTypeReply(playerName, message, isGhost, "ghostly participant");
+    function parseGhostReply(playerName, message = null, reverse = false) {
+        return parsePlayerTypeReply(playerName, message, isGhost, "ghostly participant", reverse);
     }
     
-    function parsePlayerTypeReply(playerName, message = null, validationFunction = isParticipant, typeName = "participant") {
+    function parsePlayerTypeReply(playerName, message = null, validationFunction = isParticipant, typeName = "participant", reverse = false) {
         // check for basic player references
         let pSplit = playerName.toLowerCase().split(/[,\-!\?\s ]|\. /);
         let basic = pSplit.map(el => getUser(el)).filter(el => el);
@@ -937,7 +958,7 @@ module.exports = function() {
         if(basic.length > 0) {
             let member = mainGuild.members.cache.get(basic[0]);
             if(!member) { // this applies in case the player has left the server
-                if(message) message.reply(basicEmbed("❌ Player valid but cannot be found. Please contact Hosts.", EMBED_RED));
+                if(message) message.reply(basicEmbed("❌ Player valid but cannot be found. Please contact Hosts. (1)", EMBED_RED));
                 return false;
             }
             if(!validationFunction(member)) { // this applies in case the player is not of the right type
@@ -960,7 +981,7 @@ module.exports = function() {
         }).flat().filter(el => el).map(el => el.toLowerCase());
         //console.log(allPlayerNames);
         // check provided player name against all player names
-		let parsed = parseList(pSplit, allPlayerNames);
+		let parsed = parseList(pSplit, allPlayerNames, true, reverse);
         console.log("PARSED", parsed.found, parsed.invalid);
         if(parsed.found.length == 0) { // no player found -> false
             return false;
@@ -971,7 +992,7 @@ module.exports = function() {
             let playerName = member?.displayName ?? false; // get name through id
             let playerName2 = member?.user.displayName ?? false; // get name through id
             if(playerName === false) { // this applies in case the player has left the server
-                if(message) message.reply(basicEmbed("❌ Player valid but cannot be found. Please contact Hosts.", EMBED_RED));
+                if(message) message.reply(basicEmbed("❌ Player valid but cannot be found. Please contact Hosts. (2)", EMBED_RED));
                 return false;
             }
             if(!validationFunction(member)) { // this applies in case the player is not of the right type
@@ -985,7 +1006,7 @@ module.exports = function() {
     /**
     Parses an argument of type role in a prompt reply
     **/
-    function parseRoleReply(roleName, message = null) {
+    function parseRoleReply(roleName, message = null, reverse = false) {
         let parsedRole = parseRole(roleName);
         if(verifyRole(parsedRole)) { // direct role
             return [`\`${toTitleCase(parsedRole)}\``, `${parsedRole}[role]`];
@@ -1003,10 +1024,10 @@ module.exports = function() {
             if(parsedRoles.length > 0) return [`\`${toTitleCase(parsedRoles[0])}\``, `${parsedRoles[0]}[role]`];
             
             // advanced searching
-            let parsed = parseList(rSplit, [ cachedRoles, cachedAliases.map(el => el.alias).filter(el => el.length > 5) ].flat() );
+            let parsed = parseList(rSplit, [ cachedRoles, cachedAliases.map(el => el.alias).filter(el => el.length > 5) ].flat(), false, reverse);
             console.log("RParsed", parsed);
             if(parsed.found.length == 0) { // no roles found -> false
-                let parsedAlias = parseList(rSplit, cachedAliases.map(el => el.alias).filter(el => el.length > 2) );
+                let parsedAlias = parseList(rSplit, cachedAliases.map(el => el.alias).filter(el => el.length > 2), false, reverse);
                 console.log("RAParsed", parsed);
                 if(parsedAlias.found.length == 0) return false;
                 let role = parseRole(parsedAlias.found[0]);
@@ -1021,7 +1042,7 @@ module.exports = function() {
     /**
     Parses an argument of type boolean in a prompt reply
     **/
-    function parseBooleanReply(bool, message = null) {
+    function parseBooleanReply(bool, message = null, reverse = false) {
         let boolParsed = bool.toLowerCase().replace(/[^a-z ]+/g,"").trim();
         boolParsed = boolParsed.replace(/(.)\1+/g, "$1"); // remove duplicate consecutive letters
         let trueNames = ["true","yes","yea","ye","yus","yeah","corect","inded","do","alr","yep","yup","ok","confirm","alright","y","reveal","accept","yip","yah"];
@@ -1047,7 +1068,7 @@ module.exports = function() {
     /**
     Parses an argument of type number in a prompt reply
     **/
-    function parseNumberReply(num, message = null) {
+    function parseNumberReply(num, message = null, reverse = false) {
         let numParsed = num.toLowerCase().replace(/[^a-z0-9\- ]+/g,"").trim();
         
         let numberNames = ["zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"];
