@@ -1002,6 +1002,17 @@ client.on("messageCreate", async message => {
         }
 		cmdInventory(message, args);
     break;
+    case "guarantors":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
+        if((isSignedUp(message.member) || isParticipant(message.member) || isGhost(message.member)) && stats.gamephase != gp.POSTGAME && stats.gamephase != gp.SIGNUP) {
+            message.channel.send(`⛔ You cannot use this command while signed up or ingame.`);
+            break;
+        }
+		cmdGuarantors(message, args);
+    break;
     case "market":
         if(!config.coins) {
             message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");

@@ -144,7 +144,8 @@ module.exports = function() {
                 "schedule": ["sched", "sch"],
                 "parse_prompt": ["pp", "prompt_parse"],
                 "reevaluate": ["reeval", "reval"],
-                "bot": ["cmds", "command", "commands", "cmd"]
+                "bot": ["cmds", "command", "commands", "cmd"],
+                "guarantors": ["guarant", "gua", "guarantor"]
         };
         
     this.parseAlias = function(alias) {

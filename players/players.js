@@ -11,6 +11,7 @@ require("./values.js")();
 require("./death_messages.js")();
 require("./boosters.js")();
 require("./inventory.js")();
+require("./guarantors.js")();
 require("./mentors.js")();
 require("./bot.js")();
 require("./permissions.js")();
