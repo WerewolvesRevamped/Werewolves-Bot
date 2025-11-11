@@ -1166,13 +1166,13 @@ client.on("messageReactionAdd", async (reaction, user) => {
                 reaction.message.edit({ embeds: [ embed ] });
                 reaction.message.reactions.removeAll();
             }
-		} else if(isGameMaster(member) && !isParticipant(member) && !isGhost(member) && reaction.emoji.name == "❌") {
+		} else if(isGameMaster(member) && !isGameInvolved(member) && reaction.emoji.name == "❌") {
 			reaction.message.edit({ embeds: [] });
             console.log("invalidate prompt");
             sql("DELETE FROM prompts WHERE message_id=" + connection.escape(reaction.message.id));
             sql("DELETE FROM action_queue WHERE message_id=" + connection.escape(reaction.message.id));
 			reaction.users.remove(user);
-		} else if(isGameMaster(member) && !isParticipant(member) && !isGhost(member) && reaction.emoji == client.emojis.cache.get(stats.no_emoji)) {
+		} else if(isGameMaster(member) && !isGameInvolved(member) && reaction.emoji == client.emojis.cache.get(stats.no_emoji)) {
 			reaction.message.delete();
 		} else if(isParticipant(member) || isDeadParticipant(member) || isGhost(member)) {
             const poll = await getPoll(reaction.message.id);
