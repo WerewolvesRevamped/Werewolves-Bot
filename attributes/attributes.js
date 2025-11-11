@@ -44,6 +44,8 @@ module.exports = function() {
 			case "active": if(checkSafe(message)) cmdAttributesActive(message.channel); break;
 			case "search": if(checkSafe(message)) cmdAttributesSearch(message.channel, args); break;
 			case "delete": cmdAttributesDelete(message.channel, args); break;
+			case "edit": cmdAttributesEdit(message.channel, args); break;
+			case "view": cmdAttributesView(message.channel, args); break;
 			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
 		}
 	}
@@ -127,7 +129,6 @@ module.exports = function() {
     Command: $attributes delete
     Deletes an active attribute instances
     **/
-	/* Lists all attributes names */
 	this.cmdAttributesDelete = function(channel, args) {
 		if(!args[1]) {  
 			channel.send("⛔ Syntax error. Incorrect amount of parameters!"); 
@@ -144,6 +145,55 @@ module.exports = function() {
 		}, () => {
 			// DB error
 			channel.send("⛔ Database error. Couldn't delete active attribute instance!");
+		});
+	}
+    
+    /**
+    Command: $attributes edit
+    Edits an active attribute instances
+    **/
+	this.cmdAttributesEdit = function(channel, args) {
+		if(!args[1] || !args[2] || !args[3]) {  
+			channel.send("⛔ Syntax error. Incorrect amount of parameters!"); 
+			return; 
+		} else if(isNaN(args[1])) {
+			channel.send("⛔ Command error. Invalid attribute instance id `" + args[1] + "`!"); 
+			return; 
+		} else if(!isValidAttributeColumnName(args[2])) {
+			channel.send("⛔ Command error. Invalid attribute column `" + args[2] + "`!"); 
+			return; 
+		}
+        
+		// Get all attributes
+		sql("UPDATE active_attributes SET " + args[2] + "=" + connection.escape(args[3]) + "WHERE ai_id=" + connection.escape(args[1]), result => {
+            channel.send("✅ Updated `" + args[2] + "` to `" + args[3] + "` for active attribute instance.");
+            cacheActiveCustomAttributes();
+		}, () => {
+			// DB error
+			channel.send("⛔ Database error. Couldn't edit active attribute instance!");
+		});
+	}
+    
+    /**
+    Command: $attributes view
+    View an active attribute instances
+    **/
+	this.cmdAttributesView = function(channel, args) {
+		if(!args[1]) {  
+			channel.send("⛔ Syntax error. Incorrect amount of parameters!"); 
+			return; 
+		} else if(isNaN(args[1])) {
+			channel.send("⛔ Command error. Invalid attribute instance id `" + args[1] + "`!"); 
+			return; 
+		}
+        
+		// Get all attributes
+		sql("SELECT * FROM active_attributes WHERE ai_id=" + connection.escape(args[1]), result => {
+            channel.send("✅ Viewing attribute:\n" +  Object.entries(new Object(result[0])).map(el => el[0] + ": " + el[1]).join("\n"));
+            cacheActiveCustomAttributes();
+		}, () => {
+			// DB error
+			channel.send("⛔ Database error. Couldn't edit active attribute instance!");
 		});
 	}
     
@@ -187,7 +237,7 @@ module.exports = function() {
     /**
     Checks if a attribute column name is valid**/
     function isValidAttributeColumnName(name) {
-        return ["owner","owner_type","src_name","src_ref","attr_type","duration","val1","val2","val3","val4","applied_phase","used","target","counter","alive"].includes(name);
+        return ["owner","owner_type","src_name","src_ref","attr_type","duration","val1","val2","val3","val4","applied_phase","used","target","counter","activation","alive"].includes(name);
     }
     
     function validateAttributeColumnName(name) {
