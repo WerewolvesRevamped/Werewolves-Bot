@@ -276,7 +276,12 @@ module.exports = function() {
         }
         
          // send message
-        webhook.send(msg);
+         if(msg.length > 2000) {
+             webhook.send(msg.substr(0, 2000));
+             webhook.send(msg.substr(2000));
+         } else {
+            webhook.send(msg);
+         }
     }
     
     /**
@@ -314,7 +319,12 @@ module.exports = function() {
         }
         
          // send message
-        webhook.send(msg);
+         if(msg.length > 2000) {
+             webhook.send(msg.substr(0, 2000));
+             webhook.send(msg.substr(2000));
+         } else {
+            webhook.send(msg);
+         }
     }
         
 }
