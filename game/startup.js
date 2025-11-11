@@ -85,6 +85,7 @@ module.exports = function() {
     Command: $start
     Starts the game
     */
+    this.notStarted = false;
 	this.cmdStart = async function(channel, debug) {
 		if(stats.gamephase == gp.SETUP || (debug && stats.gamephase == gp.NONE)) {
             // start
@@ -150,13 +151,17 @@ module.exports = function() {
             let time = parseToFutureUnixTimestamp(stats.phaseautoinfo.d0);
             await setupSchedule(time);
             // start game with timestamp parameter
+            notStarted = true;
             setTimeout(function() {
                 eventStarting(time);
+                notStarted = false;
             }, 1000 * 60);
         } else {
             // Start game
+            notStarted = true;
             setTimeout(function() {
                 eventStarting();
+                notStarted = false;
             }, 1000 * 60);     
         }
         

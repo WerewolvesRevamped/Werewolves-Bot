@@ -25,6 +25,13 @@ module.exports = function() {
         }
         lastRunTime = now;
         
+        // disallowed states
+        if((stats.automation_level === autoLvl.FULL || notStarted) && args[1] != "f" && args[1] != "force" && ["set","next","switch"].includes(args[0])) {
+            message.channel.send("⏰ Warning! A phase command should not be run in this game state. Please rerun with 'force' flag to confirm.");
+            lastRunTime = null;
+            return;
+        }
+        
 		// Find subcommand
 		switch(args[0]) {
 			// Attributea Subcommand
