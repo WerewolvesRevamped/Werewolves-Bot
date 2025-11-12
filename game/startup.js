@@ -76,6 +76,23 @@ module.exports = function() {
                 }
             }
         }
+        
+        // Full Automation Timing Checks
+        if(stats.automation_level === autoLvl.FULL && !stats.phaseautoinfo) {
+            channel.send("⛔ Command error. Cannot start a fully automated game without phase timings."); 
+            cancelStart = true;
+        }
+        if(stats.automation_level === autoLvl.FULL && (!parseToFutureUnixTimestamp(stats.phaseautoinfo.d0) || isNaN(stats.phaseautoinfo.day) || isNaN(stats.phaseautoinfo.night) || stats.phaseautoinfo.day <= 2 || stats.phaseautoinfo.night <= 2)) {
+            channel.send("⛔ Command error. Invalid phase timings."); 
+            cancelStart = true;
+        }
+        
+        // Gamephase Check
+        if(!(stats.gamephase == gp.SETUP || stats.gamephase == gp.NONE)) {
+            channel.send("⛔ Command error. Can't start the game unless gamephase is setup."); 
+            cancelStart = true;
+        }
+        
         if(cancelStart) return false;
         return true;
     }
@@ -107,18 +124,6 @@ module.exports = function() {
         
         let check = await gameCheckStart(channel);
         if(!check) return;
-        
-        if(stats.automation_level === autoLvl.FULL && !stats.phaseautoinfo) {
-            channel.send("⛔ Command error. Cannot start a fully automated game without phase timings."); 
-            return;
-        }
-        if(stats.automation_level === autoLvl.FULL && (!parseToFutureUnixTimestamp(stats.phaseautoinfo.d0) || isNaN(stats.phaseautoinfo.day) || isNaN(stats.phaseautoinfo.night) || stats.phaseautoinfo.day <= 2 || stats.phaseautoinfo.night <= 2)) {
-            channel.send("⛔ Command error. Invalid phase timings."); 
-            return;
-        }
-        
-        //channel.send(`⛔ Debug error. Would've started game.`); 
-        //return;
         
 		channel.send("✳️ Game is called `" + stats.game + "`");
         actionLog(`**🎲 The game has started. [${stats.game}]**`);
