@@ -70,6 +70,7 @@ client.on("ready", async () => {
         cachePollMessages();
         cachePacks();
         getEmojis();
+        cachePrompts();
 		global.client.guilds.fetch(stats.log_guild).then(guild => {
 			guild.members.fetch().then((members) => {
                 //members.forEach(el => console.log(el.user.id));
@@ -111,6 +112,7 @@ async function forceReload(channel) {
     try { cachePollMessages(); channel.send("✅ Loaded poll messages."); } catch (err) { logO(err); channel.send("⛔ Failed to load poll messages."); } await sleep(1000);
     try { cachePacks(); channel.send("✅ Loaded player packs."); } catch (err) { logO(err); channel.send("⛔ Failed to load player packs."); } await sleep(1000);
     try { getEmojis(); channel.send("✅ Loaded emojis."); } catch (err) { logO(err); channel.send("⛔ Failed to load emojis."); } await sleep(1000);
+    try { cachePrompts(); channel.send("✅ Loaded prompts."); } catch (err) { logO(err); channel.send("⛔ Failed to load prompts."); } await sleep(1000);
     try { global.client.guilds.fetch(stats.log_guild).then(guild => {guild.members.fetch().then((members) => {})}); channel.send("✅ Loaded users."); } catch (err) { logO(err); channel.send("⛔ Failed to load users."); } await sleep(1000);
 }
 

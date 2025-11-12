@@ -16,11 +16,12 @@ module.exports = function() {
     const iconRepoBranch = "main"
     this.iconRepoBaseUrl = `${githubRaw}${iconRepo}/${iconRepoBranch}/`;
     this.roleRepo = `${wwrOrg}/${config.roles_repo}`;
-    this.roleRepoBranch = "detective-rework";
+    this.roleRepoBranch = "main";
     this.roleRepoBaseUrl = `${githubRaw}${roleRepo}/${roleRepoBranch}/`;
     this.roleRepoSecondary = config.roles_repo_secondary ? `${wwrOrg}/${config.roles_repo_secondary}` : null;
     this.roleRepoSecondaryBranch = "main";
     this.roleRepoSecondaryBaseUrl = config.roles_repo_secondary ? `${githubRaw}${roleRepoSecondary}/${roleRepoSecondaryBranch}/` : null;
+    this.promptsUrl = `${githubRaw}${roleRepo}/${roleRepoBranch}/prompts.json`;
     /** Files **/
     this.iconLUTPath = `${iconRepoBaseUrl}replacements.csv`;
     this.colorsLUTPath = `${iconRepoBaseUrl}colors.csv`;

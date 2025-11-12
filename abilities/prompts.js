@@ -4,7 +4,15 @@
 **/
 
 module.exports = function() {
-    const prompts = require("./prompts.json");
+    var prompts = null;
+    
+    /**
+    Cache Prompts
+    **/
+    this.cachePrompts = async function() {
+        const body = await fetchBody(promptsUrl);
+        prompts = JSON.parse(body);
+    }
     
     this.delayedActionTime = 2147483645;
     this.endActionTime = 2147483646;
