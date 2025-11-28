@@ -192,6 +192,12 @@ module.exports = function() {
                     let deathCause = ["death", "a heart attack", "mauling and fractured bones", "blood loss", "spontaneous human combustion", "a hemorrhage", "apnea", "blood vessel rupture", "choking and loose bowels"];
                     dmsgText =  `Name: %s; [${getFormattedUTCTime()}]\nCause of Death: Died ${deathLoc[Math.floor(Math.random() * deathLoc.length)]} due to ${deathCause[Math.floor(Math.random() * deathCause.length)]}.`;
                 break;
+                case 12:
+                    let card = ["Ace","Ten","Jack","Queen","King"];
+                    let suits = ["♣️","♦️","♥️","♠️"];
+                    let living = await getAllLivingIDs();
+                    dmsgText =  `A laser pierces through %s's skull after failing the \`${card[Math.floor(Math.random() * card.length)]} of ${suits[Math.floor(Math.random() * suits.length)]}\`. ${living.length} players remain in the WWRlands.`;
+                break;
             }
         }
         dmsgText = dmsgText.replace(/%s/g, displayName);
