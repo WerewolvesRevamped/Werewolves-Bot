@@ -67,7 +67,8 @@ module.exports = function() {
         // format item list
         let itemsTxt = [];
         let mult = await getBoosterMultiplier();
-        let embed = { title: "Boosters", description: `Total Multiplier: ${mult}\nHere is a list of currently active boosters.\n\n` + boosters.join("\n"), color: 8984857 };
+        let luck = await getBoosterLuck();
+        let embed = { title: "Boosters", description: `Total XP Multiplier: ${mult}x\nTotal Luck Boost: ${luck / 0.4}%\nHere is a list of currently active boosters.\n\n` + boosters.join("\n"), color: 8984857 };
         message.channel.send({ embeds: [ embed ] });
     }
         
@@ -136,7 +137,7 @@ module.exports = function() {
     **/
     this.getBoosterMultiplier = async function() {
         let nowTime = Math.floor((+new Date()) / 1000);
-        await sqlPromEsc("DELETE FROM active_boosters WHERE end_time <", nowTime);
+        //await sqlPromEsc("DELETE FROM active_boosters WHERE end_time <", nowTime);
         
         let boosters = await sqlProm("SELECT multiplier FROM active_boosters WHERE type='XP'");
         let multiplier = 1;

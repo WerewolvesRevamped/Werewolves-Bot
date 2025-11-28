@@ -52,13 +52,16 @@ module.exports = function() {
     **/
     this.openBox = async function(channel, pid, overwrite = null, possibleTiers = null) {
         let tierRand = Math.random();
+        let tierRandBonus = 0;
         let luck = await getBoosterLuck();
-        tierRand += luck / 20;
+        tierRandBonus += luck / 40;
         
         let l1item = await inventoryGetItem(pid, "std:luck1");
         let l2item = await inventoryGetItem(pid, "std:luck2");
-        tierRand += 0.01 * l1item;
-        tierRand += 0.02 * l2item;
+        tierRandBonus += 0.01 * l1item;
+        tierRandBonus += 0.02 * l2item;
+        
+        tierRand += Math.min(tierRandBonus, 0.4);
         
         let tier = 0;
         if(tierRand >= 0.95) tier = 3;
@@ -263,6 +266,13 @@ module.exports = function() {
                         setTimeout(function() { openBox(channel, pid) }, 3000);
                         setTimeout(function() { openBox(channel, pid) }, 6000);
                         setTimeout(function() { openBox(channel, pid) }, 9000);
+                        return true;
+                    case "std:re5":
+                        setTimeout(function() { openBox(channel, pid) }, 3000);
+                        setTimeout(function() { openBox(channel, pid) }, 6000);
+                        setTimeout(function() { openBox(channel, pid) }, 9000);
+                        setTimeout(function() { openBox(channel, pid) }, 12000);
+                        setTimeout(function() { openBox(channel, pid) }, 15000);
                         return true;
                    case "std:x":
                         return true;

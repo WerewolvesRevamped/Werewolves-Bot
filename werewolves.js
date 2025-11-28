@@ -202,7 +202,10 @@ client.on("messageCreate", async message => {
         await message.fetch();
     } catch (err) {
         console.log("UNKNOWN MESSAGE");
+<<<<<<< HEAD
         console.log(err);
+=======
+>>>>>>> c1b05dc51d18576b7a60fae0360e032cc04c59ac
         return;
     }
     
