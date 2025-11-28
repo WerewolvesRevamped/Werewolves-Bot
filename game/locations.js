@@ -145,6 +145,9 @@ module.exports = function() {
             
         // go through all locations
         for(let i = 0; i < locations.length; i++) {
+            // dont created haunted channels in non-haunted games
+            if(locations[i].haunting && !stats.haunting) continue;
+            
             // get permissions
             const members = locations[i].members.toLowerCase().split(",");
             const viewers = locations[i].viewers.toLowerCase().split(",");
