@@ -49,7 +49,7 @@ module.exports = function() {
         // get the right folder
         var url = iconBaseUrl(authorId, roleName);
         var urlPack = isUrlPack(authorId, roleName);
-        //console.log("GRD URL", url);
+        //console.log("GRD URL", url, urlPack, roleName);
         
         if(!urlPack) {
             if(rClass == "solo") url += `Solo/${toTitleCase(rTeam)}`;

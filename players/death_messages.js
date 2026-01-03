@@ -46,26 +46,13 @@ module.exports = function() {
             return;
         }
         
-        if(items.length > 10) { // >10 items
-            // format item list
-            let items1 = ["• Default (0)"], items2 = [];
-            let half = Math.ceil(items.length / 2);
-            for(let i = 0; i < half; i++) items1.push(`• ${items[i][1][1]} (${items[i][0]}) ${items[i][2] > 1 ? '(x' + items[i][2] + ')' : ''}`);
-            if(items.length > 1) for(let i = half; i < items.length; i++) items2.push(`• ${items[i][1][1]} (${items[i][0]}) ${items[i][2] > 1 ? '(x' + items[i][2] + ')' : ''}`);
-            let embed = { title: "Death Message", description: `<@${message.author.id}>, here is a list of custom death messages available for you. You can switch death message by running \`${stats.prefix}dmsg select <ID>\`, where you replace \`<ID>\` with the __number__ of the death message you want to select.\n\n`, color: 8984857, fields: [ {}, {} ] };
-            embed.fields[0] = { name: "_ _", "value": items1.join("\n"), inline: true };
-            embed.fields[1] = { name: "_ _", "value": items2.join("\n"), inline: true };
-            embed.thumbnail = { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` };
-            message.channel.send({ embeds: [ embed ] });
-        } else { // <=10 items
-            // format item list
-            let itemsTxt = [];
-            for(let i = 0; i < items.length; i++) itemsTxt.push(`• ${items[i][1][1]} (${items[i][0]}) ${items[i][2] > 1 ? '(x' + items[i][2] + ')' : ''}`);
-            let embed = { title: "Death Message", description: `<@${message.author.id}>, here is a list of custom death messages available for you. You can switch death message by running \`${stats.prefix}dmsg select <ID>\`, where you replace \`<ID>\` with the __number__ of the death message you want to select.\n\n• Default (0)\n` + itemsTxt.join("\n"), color: 8984857 };
-            embed.thumbnail = { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` };
-            message.channel.send({ embeds: [ embed ] });
-        }
-        
+        // format item list
+        let itemsTxt = [];
+        for(let i = 0; i < items.length; i++) itemsTxt.push(`• ${items[i][1][1]} (${items[i][0]}) ${items[i][2] > 1 ? '(x' + items[i][2] + ')' : ''}`);
+        let embed = { title: "Death Message", description: `<@${message.author.id}>, here is a list of custom death messages available for you. You can switch death message by running \`${stats.prefix}dmsg select <ID>\`, where you replace \`<ID>\` with the __number__ of the death message you want to select.`, color: 8984857 };
+        buildItemListEmbed(itemsTxt, embed);
+        embed.thumbnail = { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` };
+        message.channel.send({ embeds: [ embed ] });
     }
         
     /**

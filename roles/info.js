@@ -158,6 +158,13 @@ module.exports = function() {
                     embed.title = applyET(dp);
                 }
                 
+                // url pack overwrite
+                if(isUrlPack(authorId, infoName)) {
+                    let url = iconBaseUrl(authorId, infoName);
+                    embed.thumbnail = { "url": url };
+                    if(embed?.author?.icon_url) embed.author.icon_url = url;
+                }
+                
                 // resolve promise, return embed
                 res(embed);
             })
@@ -203,6 +210,13 @@ module.exports = function() {
                     embed.title = applyET(dp);
                 }
                 
+                // url pack overwrite
+                if(isUrlPack(authorId, groupName)) {
+                    let url = iconBaseUrl(authorId, groupName);
+                    embed.thumbnail = { "url": url };
+                    if(embed?.author?.icon_url) embed.author.icon_url = url;
+                }
+                
                 // resolve promise, return embed
                 res(embed);
             })
@@ -240,6 +254,13 @@ module.exports = function() {
                 } else { // just set title afterwards
                     let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
                     embed.title = applyET(dp);
+                }
+                
+                // url pack overwrite
+                if(isUrlPack(authorId, attrName)) {
+                    let url = iconBaseUrl(authorId, attrName);
+                    embed.thumbnail = { "url": url };
+                    if(embed?.author?.icon_url) embed.author.icon_url = url;
                 }
                 
                 // resolve promise, return embed
@@ -286,6 +307,13 @@ module.exports = function() {
                     embed.title = applyET(dp);
                 }
                 
+                // url pack overwrite
+                if(isUrlPack(authorId, teamName)) {
+                    let url = iconBaseUrl(authorId, teamName);
+                    embed.thumbnail = { "url": url };
+                    if(embed?.author?.icon_url) embed.author.icon_url = url;
+                }
+                
                 // resolve promise, return embed
                 res(embed);
             })
@@ -317,6 +345,13 @@ module.exports = function() {
                 } else { // just set title afterwards
                     let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
                     embed.title = applyET(dp);
+                }
+                
+                // url pack overwrite
+                if(isUrlPack(authorId, locationName)) {
+                    let url = iconBaseUrl(authorId, locationName);
+                    embed.thumbnail = { "url": url };
+                    if(embed?.author?.icon_url) embed.author.icon_url = url;
                 }
                 
                 // resolve promise, return embed

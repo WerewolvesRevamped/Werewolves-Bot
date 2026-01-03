@@ -11,7 +11,12 @@ module.exports = function() {
     **/
     this.cachePrompts = async function() {
         const body = await fetchBody(promptsUrl);
-        prompts = JSON.parse(body);
+        try {
+            prompts = JSON.parse(body);
+        } catch (err) {
+            log("FAILED TO CACHE PROMPTS");
+            log(err);
+        }
     }
     
     this.delayedActionTime = 2147483645;

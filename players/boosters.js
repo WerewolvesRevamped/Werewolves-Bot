@@ -37,7 +37,8 @@ module.exports = function() {
         // format item list
         let itemsTxt = [];
         for(let i = 0; i < items.length; i++) itemsTxt.push(`• ${items[i][2][1]} x${items[i][0]} (\`${toTitleCase(items[i][1])}\`)`);
-        let embed = { title: "Boosters", description: `Here is a list of boosters available for you, <@${message.member.id}>. You can use boosters by running \`${stats.prefix}booster use "<Booster Code>"\`, where you replace \`<Booster Code>\` with the code of the booster you want to use.\n\n` + itemsTxt.join("\n"), color: 8984857 };
+        let embed = { title: "Boosters", description: `Here is a list of boosters available for you, <@${message.member.id}>. You can use boosters by running \`${stats.prefix}booster use "<Booster Code>"\`, where you replace \`<Booster Code>\` with the code of the booster you want to use.`, color: 8984857 };
+        buildItemListEmbed(itemsTxt, embed);
         embed.thumbnail = { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` };
         message.channel.send({ embeds: [ embed ] });
         

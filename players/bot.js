@@ -36,26 +36,13 @@ module.exports = function() {
             return;
         }
         
-        if(items.length > 10) { // >10 items
-            // format item list
-            let items1 = [], items2 = [];
-            let half = Math.ceil(items.length / 2);
-            for(let i = 0; i < half; i++) items1.push(`• ${items[i][2][1]} ${items[i][0] > 1 ? '(x' + items[i][0] + ')' : ''}`);
-            if(items.length > 1) for(let i = half; i < items.length; i++) items2.push(`• ${items[i][2][1]} ${items[i][0] > 1 ? '(x' + items[i][0] + ')' : ''}`);
-            let embed = { title: "Bot Features", description: `Here is a list of bot features available for you, <@${message.member.id}>.`, color: 8984857, fields: [ {}, {} ] };
-            embed.fields[0] = { name: "_ _", "value": items1.join("\n"), inline: true };
-            embed.fields[1] = { name: "_ _", "value": items2.join("\n"), inline: true };
-            embed.thumbnail = { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` };
-            message.channel.send({ embeds: [ embed ] });
-        } else { // <=10 items
-            // format item list
-            let itemsTxt = [];
-            for(let i = 0; i < items.length; i++) itemsTxt.push(`• ${items[i][2][1]} ${items[i][0] > 1 ? '(x' + items[i][0] + ')' : ''}`);
-            let embed = { title: "Bot Features", description: `Here is a list of bot features available for you, <@${message.member.id}>.\n\n` + itemsTxt.join("\n"), color: 8984857 };
-            embed.thumbnail = { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` };
-            message.channel.send({ embeds: [ embed ] });
-        }
-        
+        // format item list
+        let itemsTxt = [];
+        for(let i = 0; i < items.length; i++) itemsTxt.push(`• ${items[i][2][1]} ${items[i][0] > 1 ? '(x' + items[i][0] + ')' : ''}`);
+        let embed = { title: "Bot Features", description: `Here is a list of bot features available for you, <@${message.member.id}>.`, color: 8984857 };
+        buildItemListEmbed(itemsTxt, embed);
+        embed.thumbnail = { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` };
+        message.channel.send({ embeds: [ embed ] });
     }
     
 }

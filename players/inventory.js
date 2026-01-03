@@ -193,52 +193,80 @@ module.exports = function() {
         let stashQ = "";
         if(stash !== null) stashQ = "stashed=" + (stash ? "1" : "0") + " AND ";
         let items = await sqlPromEsc("SELECT * FROM inventory WHERE " + stashQ + "player=", user);
-        items = items.map(el => [el.count, el.item.toUpperCase(), ALL_LOOT.filter(el2 => el2[0].toLowerCase() === el.item)[0]]);
+        // .filter(el => el.item.substr(0, 2) != "ic" && el.item.substr(0, 2) != "dm" && el.item.substr(0, 3) != "bot" && el.item.substr(0, 3) != "bst" && el.item.substr(0, 2) != "al" && el.item.substr(0, 3) != "cat" && el.item.substr(0, 2) != "rt" && el.item.substr(0, 2) != "sp")
+        items = items.map(el => [el.count, el.item.toUpperCase(), ALL_LOOT.filter(el2 => el2[0].toLowerCase() === el.item)[0], el.item.split(":")[0]]);
+        items.sort((a, b) => a[3].localeCompare(b[3]));
+        let itemsText = [];
+        
+        let itemsByType = { sp: [], ic: [], dm: [], bot: [], bst: [], gua: [], sp: []};
+        for(let i = 0; i < items.length; i++) {
+            let txt = `• ${items[i][2][1]} x${items[i][0]} (\`${items[i][1]}\`)`;
+            switch(items[i][3]) {
+                default:
+                    itemsText.push(txt);
+                break;
+                case "sp":
+                case "ic":
+                case "dm":
+                case "bot":
+                case "bst":
+                case "sp":
+                    itemsByType[items[i][3]].push(txt);
+                break;
+                case "al":
+                case "cat":
+                case "rt":
+                    itemsByType["gua"].push(txt);
+                break;
+            }
+        }
+        
+        let finalTxts = [];
+        for(let typ in itemsByType) {
+            if(itemsByType[typ].length > 10) {
+                let typName = "Unknown";
+                let typNameMap = { sp: "Skinpacks", ic: "Icons", dm: "Death Messages", bot: "Bot Features", bst: "Boosters", gua: "Guarantors", sp: "Skinpacks" };
+                finalTxts.push(`• ${itemsByType[typ].length} ${typNameMap[typ]}`);
+            } else {
+                itemsText.push(...itemsByType[typ]);
+            }
+        }
+        itemsText.push(...finalTxts);
         
         // no items
+        let embed;
         if(items.length === 0) {
-            let embed = { title: "Inventory", description: `<@${user}>, your inventory is currently empty!`, color: 8984857 };
-            if(returnEmbed) return embed;
-            channel.send({ embeds: [ embed ] });
-            return;
+            embed = { title: "Inventory", description: `<@${user}>, your inventory is currently empty!`, color: 8984857 };
+        } else {
+            embed = { title: "Inventory", description: `<@${user}>, here is your current ${stash ? "stash" : "inventory"}:`, color: 8984857, thumbnail: { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` } };
+            buildItemListEmbed(itemsText, embed);
         }
         
-        if(items.length > 20) { // >20 items
-            // format item list
-            let items1 = [], items2 = [], items3 = [];
-            let third = Math.ceil(items.length / 3);
-            for(let i = 0; i < third; i++) items1.push(`• ${items[i][2][1]} x${items[i][0]} (\`${items[i][1]}\`)`);
-            for(let i = third; i < third * 2; i++) items2.push(`• ${items[i][2][1]} x${items[i][0]} (\`${items[i][1]}\`)`);
-            for(let i = third * 2; i < items.length; i++) items3.push(`• ${items[i][2][1]} x${items[i][0]} (\`${items[i][1]}\`)`);
-            let embed = { title: "Inventory", description: `<@${user}>, here is your current ${stash===true?'stash':'inventory'}:`, color: 8984857, fields: [ {}, {}, {} ] };
-            embed.fields[0] = { name: "_ _", "value": items1.join("\n"), inline: true };
-            embed.fields[1] = { name: "_ _", "value": items2.join("\n"), inline: true };
-            embed.fields[2] = { name: "_ _", "value": items3.join("\n"), inline: true };
-            embed.thumbnail = { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` };
-            if(returnEmbed) return embed;
-            channel.send({ embeds: [ embed ] });
-        } else if(items.length > 10) { // >10 items
-            // format item list
-            let items1 = [], items2 = [];
-            let half = Math.ceil(items.length / 2);
-            for(let i = 0; i < half; i++) items1.push(`• ${items[i][2][1]} x${items[i][0]} (\`${items[i][1]}\`)`);
-            for(let i = half; i < items.length; i++) items2.push(`• ${items[i][2][1]} x${items[i][0]} (\`${items[i][1]}\`)`);
-            let embed = { title: "Inventory", description: `<@${user}>, here is your current ${stash===true?'stash':'inventory'}:`, color: 8984857, fields: [ {}, {} ] };
-            embed.fields[0] = { name: "_ _", "value": items1.join("\n"), inline: true };
-            embed.fields[1] = { name: "_ _", "value": items2.join("\n"), inline: true };
-            embed.thumbnail = { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` };
-            if(returnEmbed) return embed;
-            channel.send({ embeds: [ embed ] });
-        } else { // <=10 items
-            // format item list
-            let itemsTxt = [];
-            for(let i = 0; i < items.length; i++) itemsTxt.push(`• ${items[i][2][1]} x${items[i][0]} (\`${items[i][1]}\`)`);
-            let embed = { title: "Inventory", description: `<@${user}>, here is your current ${stash===true?'stash':'inventory'}:\n\n` + itemsTxt.join("\n"), color: 8984857 };
-            embed.thumbnail = { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` };
-            if(returnEmbed) return embed;
-            channel.send({ embeds: [ embed ] });
-        }
+        if(returnEmbed) return embed;
+        channel.send({ embeds: [ embed ] });
     }
+    
+    this.buildItemListEmbed = function(items, embed = {}, itemsPerColumn = 15) {
+        // determine column amount
+        let columns = Math.floor(items.length / 10) + 1;
+
+        // split into even columns
+        const chunkSize = Math.ceil(items.length / columns);
+        const chunks = [];
+        for (let i = 0; i < columns; i++) {
+            chunks.push(items.slice(i * chunkSize, (i + 1) * chunkSize));
+        }
+       
+        // add to embed
+        if (columns === 1) {
+            embed.description += `\n\n${items.join("\n")}`;
+        } else {
+            embed.fields = chunks.map(chunk => ({ name: "_ _", value: chunk.join("\n") || "_ _", inline: true }));
+        }
+
+        return embed;
+    }
+
     
     /**
     Command: $recycle
