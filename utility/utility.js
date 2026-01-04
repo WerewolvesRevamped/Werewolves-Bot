@@ -235,5 +235,25 @@ module.exports = function() {
         diff = diff.replace(".75", ":45");
         return plus + diff;
     }
+    
+    /**
+    Returns an ordinal as a word
+    **/
+    this.ordinalWord = function (n) {
+        const base = ["zeroth","first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth","eleventh","twelfth","thirteenth","fourteenth","fifteenth","sixteenth","seventeenth","eighteenth","nineteenth"];
+        const tens=["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
+        const tensOrdinals={20:"twentieth",30:"thirtieth",40:"fortieth",50:"fiftieth",60:"sixtieth",70:"seventieth",80:"eightieth",90:"ninetieth"};
+        // 0-19
+        if(n < 20) return base[n];
+        // 20, 30, 40, 50, 60, 70, 80, 90
+        if(tensOrdinals[n]) return tensOrdinals[n];
+        
+        // all others up to 99
+        const t = Math.floor(n / 10);
+        const r = n % 10;
+
+        return `${tens[t]}-${base[r]}`;
+    }
+
 
 }

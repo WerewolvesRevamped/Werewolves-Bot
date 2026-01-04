@@ -193,7 +193,6 @@ module.exports = function() {
         let stashQ = "";
         if(stash !== null) stashQ = "stashed=" + (stash ? "1" : "0") + " AND ";
         let items = await sqlPromEsc("SELECT * FROM inventory WHERE " + stashQ + "player=", user);
-        // .filter(el => el.item.substr(0, 2) != "ic" && el.item.substr(0, 2) != "dm" && el.item.substr(0, 3) != "bot" && el.item.substr(0, 3) != "bst" && el.item.substr(0, 2) != "al" && el.item.substr(0, 3) != "cat" && el.item.substr(0, 2) != "rt" && el.item.substr(0, 2) != "sp")
         items = items.map(el => [el.count, el.item.toUpperCase(), ALL_LOOT.filter(el2 => el2[0].toLowerCase() === el.item)[0], el.item.split(":")[0]]);
         items.sort((a, b) => a[3].localeCompare(b[3]));
         let itemsText = [];
@@ -210,7 +209,6 @@ module.exports = function() {
                 case "dm":
                 case "bot":
                 case "bst":
-                case "sp":
                     itemsByType[items[i][3]].push(txt);
                 break;
                 case "al":
@@ -223,7 +221,7 @@ module.exports = function() {
         
         let finalTxts = [];
         for(let typ in itemsByType) {
-            if(itemsByType[typ].length > 10) {
+            if(itemsByType[typ].length > 5) {
                 let typName = "Unknown";
                 let typNameMap = { sp: "Skinpacks", ic: "Icons", dm: "Death Messages", bot: "Bot Features", bst: "Boosters", gua: "Guarantors", sp: "Skinpacks" };
                 finalTxts.push(`• ${itemsByType[typ].length} ${typNameMap[typ]}`);

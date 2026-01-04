@@ -185,6 +185,52 @@ module.exports = function() {
                     let living = await getAllLivingIDs();
                     dmsgText =  `A laser pierces through %s's skull after failing the \`${card[Math.floor(Math.random() * card.length)]} of ${suits[Math.floor(Math.random() * suits.length)]}\`. ${living.length} players remain in the WWRlands.`;
                 break;
+                case 13:
+                    dmsgText =  `Oh my god, they killed %s! Your bastards!`;
+                break;
+                case 14:
+                    dmsgText =  `🔓Achievements unlocked: %s's demise.`;
+                break;
+                case 15:
+                    dmsgText =  `%s did not go gentle into that good night. Rage, rage, against the dying of the light.`;
+                break;
+                case 16:
+                    dmsgText =  `Do not weep for %s's death, for they chose this fate, eyes open and blade held high.`;
+                break;
+                case 17:
+                    dmsgText =  `%s's journey reached its final destination. Thank you for the company.`;
+                break;
+                case 18:
+                    dmsgText =  `From form, to non-form, to form again. Farewell, %s. Until the next becoming.`;
+                    setCustomStatus(`Farewell ${nickname}.`);
+                break;
+                case 19:
+                    dmsgText =  `%s’s time was shrimply over 🦐`;
+                    setCustomStatus(`Its shrimply over for ${nickname}.`);
+                break;
+                case 20:
+                    dmsgText =  `No one saw anything. No one heard anything. %s is gone.`;
+                break;
+                case 21:
+                    dmsgText =  `A scream echoes in memory, but no one remembers hearing it. %s is gone.`;
+                break;
+                case 22:
+                    dmsgText =  `Status update: %s is no longer among the living.`;
+                    setCustomStatus(`UPDATE ${nickname} SET status='dead'`);
+                break;
+                case 23:
+                    dmsgText =  `A correction is issued: %s will not participate further.`;
+                break;
+                case 24:
+                    let deadCount = (await getAllDeadIDs()).length ?? 0;
+                    let ordinal = ordinalWord(deadCount + 1);
+                    let a24 = "At least they got too play a bit.";
+                    let b24 = "That's not too bad!";
+                    let c24 = "They made it pretty far!";
+                    let d24 = "They made it very far!";
+                    let ending = ["Impressive!", "Too early...", "What a shame...", a24, a24, a24, a24, b24, b24, b24, b24, c24, c24, c24, c24, d24, d24, d24, d24, d24, d24, d24, d24, d24, d24];
+                    dmsgText =  `%s is the ${ordinal} to die. ${ending[deadCount]??""}`;
+                break;
             }
         }
         dmsgText = dmsgText.replace(/%s/g, displayName);
