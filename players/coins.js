@@ -114,6 +114,7 @@ module.exports = function() {
             await sqlProm("INSERT INTO coins (player, coins) VALUES (" + connection.escape(user) + "," + connection.escape(num) + ")");
             return num;
         } else {
+            console.log(coinCount[0].coins, num, coinCount[0].coins + num);
             await sqlPromEsc("UPDATE coins SET coins=" + connection.escape(coinCount[0].coins + num) + " WHERE player=", user);
             return coinCount[0].coins + num;
         }

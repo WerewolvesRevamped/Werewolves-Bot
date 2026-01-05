@@ -312,11 +312,11 @@ module.exports = function() {
         
         // determine coin value
         let coinsA = (tierCoins[tierNames.indexOf(item[0][2])] ?? 500);
-        let val = Math.floor( (( coinsA * (1 / (item[0][3] ?? 1)) ) + coinsA + rand) / 4);
+        let val = Math.floor( (( coinsA * (1 / (item[0][3] ?? 1)) ) + coinsA + rand) / 8);
         
         // get recycle upgrades
         let recUpgrades = await inventoryGetItem(message.author.id, "std:recup");
-        for(let i = 0; i < recUpgrades; i++) val += Math.ceil(Math.random() * 5);
+        for(let i = 0; i < Math.min(recUpgrades, 5); i++) val += Math.ceil(Math.random() * 5);
         
         // update coins
         cmdCoinsModify(message.channel, ["add", message.author.id, val], "add", 1, true);
@@ -421,7 +421,7 @@ module.exports = function() {
 
         // determine coin value
         let coinsA = (tierCoins[tierNames.indexOf(item[0][2])] ?? 500);
-        let val = Math.floor( (( coinsA * (1 / (item[0][3] ?? 1)) ) + coinsA + 7) / 4);
+        let val = Math.floor( (( coinsA * (1 / (item[0][3] ?? 1)) ) + coinsA + 7) / 8);
 
         channel.send(`✅ Evaluated ${code.toUpperCase()} to be worth ${val} coins!`);
     }

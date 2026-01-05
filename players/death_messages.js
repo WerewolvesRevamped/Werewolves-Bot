@@ -231,6 +231,9 @@ module.exports = function() {
                     let ending = ["Impressive!", "Too early...", "What a shame...", a24, a24, a24, a24, b24, b24, b24, b24, c24, c24, c24, c24, d24, d24, d24, d24, d24, d24, d24, d24, d24, d24];
                     dmsgText =  `%s is the ${ordinal} to die. ${ending[deadCount]??""}`;
                 break;
+                case 25:
+                    dmsgText =  "%s died.";
+                break;
             }
         }
         dmsgText = dmsgText.replace(/%s/g, displayName);

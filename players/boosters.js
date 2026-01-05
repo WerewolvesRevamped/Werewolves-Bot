@@ -143,7 +143,7 @@ module.exports = function() {
         let boosters = await sqlProm("SELECT multiplier FROM active_boosters WHERE type='XP'");
         let multiplier = 1;
         for(let i = 0; i < boosters.length; i++) {
-            multiplier *= boosters[i].multiplier;
+            multiplier = Math.max(multiplier, boosters[i].multiplier);
         }
         return Math.max(Math.min(multiplier, 50), -1);
     }
@@ -158,7 +158,7 @@ module.exports = function() {
         let boosters = await sqlProm("SELECT multiplier FROM active_boosters WHERE type='LUCK'");
         let boost = 0;
         for(let i = 0; i < boosters.length; i++) {
-            boost += boosters[i].multiplier;
+            boost = Math.max(boost, boosters[i].multiplier);
         }
         return boost;
     }

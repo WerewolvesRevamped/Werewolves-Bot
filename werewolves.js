@@ -188,9 +188,6 @@ var lastChatterCharacters = 0;
 var srcRefSaved = null;
 var srcNameSaved = null;
 
-var lastMessageBlocked = false;
-var advisorCounter = 0;
-
 /* New Message */
 client.on("messageCreate", async message => {
     if(!message || !message.inGuild()) return;
@@ -306,7 +303,7 @@ client.on("messageCreate", async message => {
                         // Level Up Reward
                         let newLevelString = newLevel + "";
                         if(newLevel % 5 === 0 || newLevel === 16 || newLevel === 18 || newLevel === 7) {
-                            let boxRewards = [null, null, null, [0], [0,1], null, [0,2], [0,1,2], [0,1,3], [0,1,2,3], null, [0,3], [0,2,3], [1], [1,2], null, [1,3], [1,2,3], [2], [2,3], [3]];
+                            let boxRewards = [null, null, null, [1], [1,2], null, [1,3], [1,2,3], [1,2,4], [1,2,3,4], null, [1,4], [1,3,4], [2], [2,3], null, [2,4], [2,3,4], [3], [3,4], [4]];
                             let re = boxRewards[Math.floor(newLevel / 5)];
                             // Standard Box Reward
                             if(newLevel === 100) {
@@ -361,7 +358,7 @@ client.on("messageCreate", async message => {
                                 message.channel.send({ embeds: [ embed ] });
                             }
                         } else if(newLevelString.length === 2 && newLevelString[0] === newLevelString[1]) {
-                            let boxRewards = [[0], [0,1], [0,2], [0,1,3], [0,1,2,3], [1,2], [1,3], [2,3], [3]];
+                            let boxRewards = [[1], [1,2], [1,3], [1,2,4], [1,2,3,4], [2,3], [2,4], [3,4], [4]];
                             let re = boxRewards[(+ newLevelString[0]) - 1];
                             // Standard Box Reward
                             if(re) {

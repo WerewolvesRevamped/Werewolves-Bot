@@ -4,15 +4,15 @@ Loot Boxes
 
 module.exports = function() {
 
-    this.ALL_LOOT = [["SP:1","Glitch","Gold",0.5],["STD:RE","Reroll","Silver",1],["BOT:TEMP","$temp Command","Silver",1],["GM:Ts","Kill Ts","Platinum",0.25],["AL:Town","Townsfolk Alignment Guarantor","Silver",1],["IC:Cat","Cat Icon","Platinum",1],["DM:1","Realsad","Silver",0.5],["BST:XP150","+150 XP","",],["SP:2","Negate","Silver",0.5],["COIN:50","50 Coins","Bronze",2],["BOT:REV","$reverseme Command","Gold",0.5],["GM:Eth","Demote Ethan","Gold",0.33],["AL:Wolf","Werewolves Alignment Guarantor","Silver",1],["IC:Devil","Devil Icon","Gold",1],["DM:2","Salute","Bronze",0.5],["BST:XP300","+300 XP","",],["SP:3","Grayscale","Bronze",1],["COIN:120","120 Coins","Silver",2],["BOT:SHIP","$newship Command","Platinum",1],["GM:Luf","Rename Luffy","Gold",0.33],["AL:UA","Unaligned Alignment Guarantor","Gold",1],["IC:Hooker","Hooker Icon","Silver",1],["DM:3","Rating","Silver",0.5],["BST:XP500","+500 XP","Bronze",0.5],["SP:4","Edge","Bronze",0.5],["COIN:160","160 Coins","Gold",2],["BOT:HATE","$newhate Command","Platinum",1],["GM:Krem","Turn Krem into a Little Bug","Gold",0.33],["AL:Solo","Solo Alignment Guarantor","Gold",1],["IC:Medium","Medium Icon","Silver",1],["DM:4","Cursed","Platinum",0.25],["BST:GL21","Double XP (1 Hour)","Bronze",1],["SP:5","Emboss","Bronze",0.25],["STD:RE2","Reroll x2","Gold",1],["BOT:FLIP","$flip Command","Bronze",1],["GM:Jay","Egg Jay","Platinum",0.25],["AL:Hell","Hell Alignment Guarantor","Platinum",1],["IC:Executioner","Executioner Icon","Bronze",0.5],["DM:5","Mourner","Gold",0.5],["BST:GL31","Triple XP (1 Hour)","Bronze",0.5],["SP:6","Silhouette","Bronze",0.25],["STD:BTNT","Be the next theme","Platinum",1],["BOT:FORTUNE","$fortune Command","Bronze",2],["GM:Kruth","Demote Kruthers","Gold",0.33],["AL:HM","Horseman Alignment Guarantor","Platinum",0.5],["IC:Witch","Witch Icon","Gold",0.5],["DM:6","Random","Silver",0.5],["BST:GL41","Quadruple XP (1 Hour)","Silver",1],["SP:7","Pixel","Silver",0.5],["STD:JOKE","Your own Joke Role","Platinum",0.5],["BOT:STASH","$stash Command","Gold",2],["GM:Fish","Kill Mr. Fish","Bronze",0.33],["AL:Pyro","Pyro Alignment Guarantor","Platinum",1],["IC:Saboteur Wolf","Saboteur Wolf Icon","Bronze",0.5],["DM:7","Horrible","Bronze",0.5],["BST:GL23","Double XP (3 Hours)","Silver",0.5],["SP:8","Pixel #2","Silver",0.125],["STD:X","Unlucky (Nothing)","Bronze",1],["BOT:Skull","💀","Platinum",1],["GM:Arch","Demote Jean D. Arch","Silver",0.33],["AL:Flute","Flute Alignment Guarantor","Platinum",1],["IC:Archivist Fox","Archivist Fox Icon","Silver",1],["DM:8","Gone","Bronze",0.5],["BST:GL35","Triple XP (5 Hours)","Gold",0.5],["SP:9","Pixel #3","Silver",0.5],["STD:RE3","Reroll x3","Platinum",1],["BOT:YELL","$yell Command","Gold",2],["GM:Fed","Kill Federick","",],["AL:WWW","White Wolves Alignment Guarantor","Platinum",0.5],["IC:Lone Wolf","Lone Wolf Icon","Gold",0.5],["DM:9","Crow","Bronze",0.5],["BST:GL43","Quadruple XP (3 Hours)","Gold",1],["SP:10","Pixel #4","Silver",0.125],["STD:Icon","Custom Icon","",],["GM:Ghost","Exorcise Gh0st","Silver",0.33],["AL:Plague","Plague Alignment Guarantor","Platinum",0.5],["IC:Flute Player","Flute Player Icon","Silver",0.5],["DM:10","Bear","Platinum",0.25],["BST:GL77","Septuple (7 Hours)","Platinum",1],["SP:11","Scatter","Bronze",0.125],["STD:Theme","Suggest a Theme","Gold",0.5],["GM:Katy","Kill KatyHawk","Bronze",0.33],["AL:UW","Underworld Alignment Guarantor","Platinum",0.5],["IC:Pyromancer","Pyromancer Icon","Gold",1],["DM:11","Death Certificate","Platinum",1],["BST:GLX10","Dectuple XP (10 Hours)","Platinum",0.5],["SP:12","Red","Bronze",0.25],["STD:CMD","Custom Bot Command","Platinum",0.5],["GM:Marten","Promote Marten","Platinum",0.25],["AL:T/W","Townsfolk/Werewolves Alignment Guarantor","Bronze",1],["IC:Plague Bearer","Plague Bearer Icon","Gold",0.5],["DM:12","Card","Gold",0.5],["BST:GLN1","Negative XP (1 Hour)","Silver",0.5],["SP:13","Green","Bronze",0.25],["STD:Ban","Get banned","Bronze",0.25],["GM:Turtle","Demote Mr. Turtle","Gold",0.33],["AL:Sub","Substitute Guarantor","Bronze",0.25],["IC:Vampire","Vampire Icon","Gold",1],["DM:13","OMG","Bronze",1],["BST:LU11","Lucky (1 Hour)","Silver",0.5],["SP:14","Blue","Bronze",0.25],["STD:SP","Suggest a Skinpack","Platinum",0.5],["GM:Stein","Take Steinator as a Hostage","Gold",0.33],["AL:U/S","Unaligned/Solo Alignment Guarantor","Silver",0.75],["IC:Angel","Angel Icon","Gold",0.5],["DM:14","Achievement","Bronze",1],["BST:LU21","Very Lucky (1 Hour)","Gold",0.5],["SP:15","Yellow","Bronze",0.25],["STD:OS","Suggest an Offseason Game","Gold",1],["BOT:invtransfer","$inventory transfer Command","Bronze",0.25],["GM:Vera","Evict Vera","Platinum",0.25],["IC:Hellhound","Hellhound Icon","Silver",1],["DM:15","Dylan Thomas","Silver",1],["BST:LU31","Super Lucky (1 Hour)","Platinum",1],["SP:16","Purple","Bronze",0.25],["STD:DMsg","Custom Death Message","Gold",0.5],["BOT:recycle","$recycle Command","Bronze",0.25],["GM:EvilTs","Be Killed by Evil Ts","Platinum",0.125],["CAT:Misc","Miscellaneous Category Guarantor","Bronze",1],["IC:Bear","Bear Icon","Platinum",1],["DM:16","Fate","Silver",1],["BST:XP1000","+1000 XP","Bronze",1],["SP:17","Cyan","Bronze",0.25],["STD:Luck1","Minor Luck Boost","",],["BOT:nick","$nickname Command","Bronze",0.25],["GM:Sniv","Make Snivy pink","Bronze",0.33],["CAT:Power","Power Category Guarantor","Silver",1],["IC:White Werewolf","White Werewolf Icon","Silver",1],["DM:17","Thank you","Bronze",1],["BST:XP5000","+5000 XP","Silver",1],["SP:18","Flip","Bronze",1],["STD:Luck2","Major Luck Boost","",],["BOT:market","$market Command","Bronze",0.25],["GM:Huck","Turn Huck into a bird","Bronze",0.33],["CAT:Invest","Investigative Category Guarantor","Gold",1],["IC:Reaper","Reaper Icon","Platinum",1],["DM:18","Samsara","Gold",1],["BST:XP9999","+9999 XP","Gold",1],["SP:19","Pale","Bronze",0.5],["STD:RE5","Reroll x5","Platinum",0.5],["GM:Tank","Kill Invincitank","Bronze",0.33],["CAT:Kill","Killing Category Guarantor","Gold",0.5],["IC:Herding Dog","Herding Dog Icon","Silver",0.5],["DM:19","Shrimp","Gold",0.5],["SP:20","BW","Bronze",1],["STD:X-item","Unlucky (Nothing)","Platinum",1],["GM:Chimi","Timeout Chimi","Silver",0.33],["CAT:!Misc","Not-Miscellaneous Category Guarantor","Bronze",1],["IC:Bard","Bard Icon","Silver",0.5],["DM:20","Unseen","Bronze",1],["SP:21","Wire","Gold",2],["STD:RecUp","Recycle Upgrade","Gold",3],["CAT:Group","Group Category Guarantor","Gold",0.5],["IC:Cerberus","Cerberus Icon","Bronze",1],["DM:21","Scream","Bronze",1],["SP:22","Wire #2","Gold",0.25],["CAT:Align","Align Category Guarantor","Platinum",0.5],["IC:Lover","Lover Icon","Bronze",0.5],["DM:22","Status Update","Gold",1],["SP:23","Rainbow","Silver",0.125],["SPEC:AnySkinpack","(SPECIAL) Any Skinpack","Platinum",0.05],["CAT:Elected","Elected Category Guarantor","Platinum",0.25],["IC:Citizen","Citizen Icon","Bronze",1],["DM:23","Correction","Silver",1],["SP:24","Rainbow #2","Silver",0.5],["SPEC:AnyIcon","(SPECIAL) Any Icon","Platinum",0.05],["IC:Devout Villager","Devout Villager Icon","Bronze",0.5],["DM:24","Ordinal","Gold",1],["SP:25","Rainbow #3","Silver",0.5],["SPEC:AnyGuarantor","(SPECIAL) Any Guarantor","Platinum",0.05],["RT:Pack","Wolfpack Role Guarantor","Gold",0.5],["IC:Baroness","Baroness Icon","Bronze",1],["SP:26","Ts","Platinum",0.5],["SPEC:Any","(SPECIAL) Any Prize","Platinum",0.01],["RT:Packless","Packless Wolf Role Guarantor","Silver",0.5],["IC:Apothecary","Apothecary Icon","Silver",1],["SP:27","Oil","Silver",1],["SPEC:AnyDeath","(SPECIAL) Any Death Message","Platinum",0.05],["RT:Whisper","Whispering Role Guarantor","Silver",0.5],["IC:Firebug","Firebug Icon","Silver",1],["SP:28","Wave","Bronze",0.5],["RT:SoloSec","Solo Secondary Role Guarantor","Gold",0.5],["IC:Wraith","Wraith Icon","Silver",1],["SP:29","Swirl","Bronze",1],["UNK:Mystery","Mystery","",],["RT:SoloPri","Solo Primary Role Guarantor","Gold",0.5],["IC:Dog","Dog Icon","Bronze",0.5],["SP:30","Noise","Bronze",0.125],["UNK:Egg","Easter Egg","",],["RT:Thief","Thief Role Guarantor","Gold",0.1],["IC:Bat","Bat Icon","Silver",1],["SP:31","Cycle","Silver",0.5],["RT:Limited","Limited Role Guarantor","Silver",0.75],["IC:Assassin","Assassin Icon","Silver",0.5],["SP:32","Equalize","Bronze",0.5],["IC:Alpha Wolf","Alpha Wolf Icon","Gold",0.5],["SP:33","Fourier Noise","Gold",0.5],["IC:Baker","Baker Icon","Bronze",0.5],["SP:34","Fourier Equalize","Silver",0.125],["IC:Apprentice","Apprentice Icon","Gold",0.5],["SP:35","Fourier Oil","Gold",1],["IC:Chef","Chef Icon","Silver",0.5],["SP:36","Fourier Modulate","Platinum",1],["IC:Plague Doctor","Plague Doctor","Bronze",0.5],["SP:37","Fourier Wire","Silver",0.25],["IC:Bartender","Bartender Icon","Gold",0.5],["SP:38","Glitch #2","Gold",0.5],["IC:Wolf","Wolf Icon","Bronze",0.5],["SP:39","Eyes","Gold",0.5],["IC:Knife","Knife Icon","Gold",1],["SP:40","Thief","",],["IC:Cult","Cult Icon","Gold",1],["SP:41","Mask","Silver",0.25],["IC:Lute","Lute Icon","Gold",1],["SP:42","Eye","Gold",0.5],["IC:Rodent","Rodent Icon","Gold",1],["SP:43","Fourier Eye","Gold",0.5],["IC:Flame","Flame Icon","Platinum",0.5],["SP:44","Citizen Eye","Silver",0.25],["IC:Duck","Duck Icon","Gold",0.5],["SP:45","Items","Gold",1],["IC:Coroner","Coroner Icon","Bronze",1],["SP:46","Bear","Platinum",1],["IC:Journalist","Journalist Icon","Bronze",1],["SP:47","Wolfify","Gold",1],["IC:Royal Knight","Royal Knight Icon","Silver",1],["SP:48","Grid","Gold",0.5],["IC:Direwolf","Direwolf Icon","Silver",1],["SP:49","Light and Shadow","Silver",0.5],["IC:Bloody Butcher","Bloody Butcher Icon","Gold",1],["SP:50","Duo Color","Gold",0.5],["IC:Warlock","Warlock Icon","Gold",1],["SP:51","Wood","Bronze",0.5],["IC:Demonic Cupid","Demonic Cupid Icon","Gold",1],["SP:52","Coin","Gold",1],["IC:Despot","Despot Icon","Silver",1],["SP:53","Coin Animated","Platinum",1],["IC:Detective","Detective Icon","Gold",1],["SP:54","Glitch Animated","Platinum",1],["SP:55","Wave Animated","Silver",0.25],["SP:56","Spin","Gold",0.5],["SP:57","Rainbow Animated","Platinum",1],["SP:58","Fourier Merge","Silver",0.125],["SP:59","Fourier Magnitude","Bronze",0.125],["SP:60","Fourier Phase","Bronze",0.125],["SP:61","Fourier Crop","Bronze",0.125],["SP:62","Fourier Crop #2","Silver",0.25],["SP:63","Cloud","Gold",0.5],["SP:64","Swirl Animated","Silver",0.25],["SP:65","Pokemon","",],["SP:66","Minecraft","Platinum",1],["SP:67","Vowels","Bronze",0.25],["SP:68","Glasses","Bronze",0.5],["SP:69","Glasses #2","Bronze",0.5],["SP:70","Magnified","Bronze",0.5],["SP:71","Wolfify Oil","Gold",0.5],["SP:72","Wolfify Fourier","Gold",0.5],["SP:73","Redacted","Silver",1],["SP:74","Pumpkin","",],["SP:75","Randomized","",],["SP:76","You","",],["SP:77","One Piece","Platinum",2],["SP:78","Zelda (Wilds Era)","Platinum",2],["SP:79","Golden","",],["SP:80","Hearts","Silver",1],["SP:81","Shuffle","Bronze",1],["SP:82","Shuffle #2","Silver",1],["SP:83","German","Silver",1],["SP:84","Flame","Gold",1],["SP:85","Ice","Gold",1],["SP:86","Air","Bronze",1],["SP:87","Earth","Bronze",1],["SP:88","Charred","Bronze",1],["SP:89","Leaves","Silver",1],["SP:90","Tsified","Gold",1],["SP:91","Colorful","Gold",1]];
+    this.ALL_LOOT = [["SP:1","Glitch","Gold",0.5],["STD:RE","Reroll","Silver",1],["BOT:TEMP","$temp Command","Silver",1],["GM:Ts","Kill Ts","Platinum",0.25],["AL:Town","Townsfolk Alignment Guarantor","Silver",1],["IC:Cat","Cat Icon","Platinum",1],["DM:1","Realsad","Silver",0.5],["BST:XP-200","-200 XP","Coal",1],["SP:2","Negate","Silver",0.5],["COIN:50","50 Coins","Bronze",2],["BOT:REV","$reverseme Command","Gold",0.5],["GM:Eth","Demote Ethan","Gold",0.33],["AL:Wolf","Werewolves Alignment Guarantor","Silver",1],["IC:Devil","Devil Icon","Gold",1],["DM:2","Salute","Bronze",0.5],["BST:XP150","+150 XP","",],["SP:3","Grayscale","Bronze",1],["COIN:120","120 Coins","Silver",2],["BOT:SHIP","$newship Command","Platinum",1],["GM:Luf","Rename Luffy","Gold",0.33],["AL:UA","Unaligned Alignment Guarantor","Gold",1],["IC:Hooker","Hooker Icon","Silver",1],["DM:3","Rating","Silver",0.5],["BST:XP300","+300 XP","",],["SP:4","Edge","Bronze",0.5],["COIN:160","160 Coins","Gold",2],["BOT:HATE","$newhate Command","Platinum",1],["GM:Krem","Turn Krem into a Little Bug","Gold",0.33],["AL:Solo","Solo Alignment Guarantor","Gold",1],["IC:Medium","Medium Icon","Silver",1],["DM:4","Cursed","Platinum",0.25],["BST:XP500","+500 XP","Bronze",0.5],["SP:5","Emboss","Bronze",0.25],["COIN:-25","-25 Coins","Coal",1],["BOT:FLIP","$flip Command","Bronze",1],["GM:Jay","Egg Jay","Platinum",0.25],["AL:Hell","Hell Alignment Guarantor","Platinum",0.5],["IC:Executioner","Executioner Icon","Bronze",0.5],["DM:5","Mourner","Gold",0.5],["BST:GL21","Double XP (1 Hour)","Bronze",1],["SP:6","Silhouette","Bronze",0.25],["STD:RE2","Reroll x2","Gold",1],["BOT:FORTUNE","$fortune Command","Bronze",2],["GM:Kruth","Demote Kruthers","Gold",0.33],["AL:HM","Horseman Alignment Guarantor","Platinum",0.25],["IC:Witch","Witch Icon","Gold",0.5],["DM:6","Random","Silver",0.5],["BST:GL31","Triple XP (1 Hour)","Bronze",0.5],["SP:7","Pixel","Silver",0.5],["STD:BTNT","Be the next theme","Platinum",1],["BOT:STASH","$stash Command","Gold",2],["GM:Fish","Kill Mr. Fish","Bronze",0.33],["AL:Pyro","Pyro Alignment Guarantor","Platinum",0.5],["IC:Saboteur Wolf","Saboteur Wolf Icon","Bronze",0.5],["DM:7","Horrible","Bronze",0.5],["BST:GL41","Quadruple XP (1 Hour)","Silver",1],["SP:8","Pixel #2","Silver",0.125],["STD:JOKE","Your own Joke Role","Platinum",0.5],["BOT:Skull","💀","Platinum",1],["GM:Arch","Demote Jean D. Arch","Silver",0.33],["AL:Flute","Flute Alignment Guarantor","Platinum",0.5],["IC:Archivist Fox","Archivist Fox Icon","Silver",1],["DM:8","Gone","Bronze",0.5],["BST:GL23","Double XP (3 Hours)","Silver",0.5],["SP:9","Pixel #3","Silver",0.5],["STD:X","Unlucky (Nothing)","Coal",1],["BOT:YELL","$yell Command","Gold",2],["GM:Fed","Kill Federick","",],["AL:WWW","White Wolves Alignment Guarantor","Platinum",0.25],["IC:Lone Wolf","Lone Wolf Icon","Gold",0.5],["DM:9","Crow","Bronze",0.5],["BST:GL35","Triple XP (5 Hours)","Gold",0.5],["SP:10","Pixel #4","Silver",0.125],["STD:RE3","Reroll x3","Platinum",1],["GM:Ghost","Exorcise Gh0st","Silver",0.33],["AL:Plague","Plague Alignment Guarantor","Platinum",0.25],["IC:Flute Player","Flute Player Icon","Silver",0.5],["DM:10","Bear","Platinum",0.25],["BST:GL43","Quadruple XP (3 Hours)","Gold",1],["SP:11","Scatter","Bronze",0.125],["STD:Icon","Custom Icon","Diamond",1],["GM:Katy","Kill KatyHawk","Bronze",0.33],["AL:UW","Underworld Alignment Guarantor","Platinum",0.25],["IC:Pyromancer","Pyromancer Icon","Gold",1],["DM:11","Death Certificate","Platinum",1],["BST:GL77","Septuple (7 Hours)","Platinum",1],["SP:12","Red","Bronze",0.25],["STD:Theme","Suggest a Theme","Gold",0.5],["GM:Marten","Promote Marten","Platinum",0.25],["AL:T/W","Townsfolk/Werewolves Alignment Guarantor","Bronze",1],["IC:Plague Bearer","Plague Bearer Icon","Gold",0.5],["DM:12","Card","Gold",0.5],["BST:GLX10","Dectuple XP (10 Hours)","Platinum",0.5],["SP:13","Green","Bronze",0.25],["STD:CMD","Custom Bot Command","Platinum",0.5],["GM:Turtle","Demote Mr. Turtle","Gold",0.33],["AL:Sub","Substitute Guarantor","Bronze",0.25],["IC:Vampire","Vampire Icon","Gold",1],["DM:13","OMG","Bronze",1],["BST:GLN1","Negative XP (1 Hour)","Silver",0.5],["SP:14","Blue","Bronze",0.25],["STD:Ban","Get banned","Coal",1],["GM:Stein","Take Steinator as a Hostage","Gold",0.33],["AL:U/S","Unaligned/Solo Alignment Guarantor","Silver",0.75],["IC:Angel","Angel Icon","Gold",0.5],["DM:14","Achievement","Bronze",1],["BST:LU11","Lucky (1 Hour)","Silver",0.5],["SP:15","Yellow","Bronze",0.25],["STD:SP","Suggest a Skinpack","Platinum",0.5],["BOT:invtransfer","$inventory transfer Command","Bronze",0.25],["GM:Vera","Evict Vera","Platinum",0.25],["AL:SignedOut","Signed Out Guarantor","Coal",0.5],["IC:Hellhound","Hellhound Icon","Silver",1],["DM:15","Dylan Thomas","Silver",1],["BST:LU21","Very Lucky (1 Hour)","Gold",0.5],["SP:16","Purple","Bronze",0.25],["STD:OS","Suggest an Offseason Game","Gold",1],["BOT:recycle","$recycle Command","Bronze",0.25],["GM:EvilTs","Be Killed by Evil Ts","Platinum",0.125],["AL:Suspended","Suspended Guarantor","Coal",0.5],["IC:Bear","Bear Icon","Platinum",1],["DM:16","Fate","Silver",1],["BST:LU31","Super Lucky (1 Hour)","Platinum",1],["SP:17","Cyan","Bronze",0.25],["STD:DMsg","Custom Death Message","Gold",0.5],["BOT:nick","$nickname Command","Bronze",0.25],["GM:Sniv","Make Snivy pink","Bronze",0.33],["AL:Player","Player Guarantor","Coal",0.5],["IC:White Werewolf","White Werewolf Icon","Silver",1],["DM:17","Thank you","Bronze",1],["BST:XP1000","+1000 XP","Bronze",1],["SP:18","Flip","Bronze",1],["STD:Luck1","Minor Luck Boost","",],["BOT:market","$market Command","Bronze",2],["GM:Huck","Turn Huck into a bird","Bronze",0.33],["AL:Spec","Spectator Guarantor","Coal",0.5],["IC:Reaper","Reaper Icon","Platinum",1],["DM:18","Samsara","Gold",1],["BST:XP5000","+5000 XP","Silver",1],["SP:19","Pale","Bronze",0.5],["STD:Luck2","Major Luck Boost","",],["GM:Tank","Kill Invincitank","Bronze",0.33],["IC:Herding Dog","Herding Dog Icon","Silver",0.5],["DM:19","Shrimp","Gold",0.5],["BST:XP9999","+9999 XP","Gold",1],["SP:20","BW","Bronze",1],["STD:RE5","Reroll x5","Platinum",0.5],["GM:Chimi","Timeout Chimi","Silver",0.33],["CAT:Misc","Miscellaneous Category Guarantor","Bronze",1],["IC:Bard","Bard Icon","Silver",0.5],["DM:20","Unseen","Bronze",1],["BST:GL11","Normal XP (1 Hour)","Coal",1],["SP:21","Wire","Gold",2],["STD:RE10","Reroll x10","Diamond",0.5],["CAT:Power","Power Category Guarantor","Silver",1],["IC:Cerberus","Cerberus Icon","Bronze",1],["DM:21","Scream","Bronze",1],["SP:22","Wire #2","Gold",0.25],["STD:X-item","Unlucky (Nothing)","Platinum",1],["CAT:Invest","Investigative Category Guarantor","Gold",1],["IC:Lover","Lover Icon","Bronze",0.5],["DM:22","Status Update","Gold",1],["SP:23","Rainbow","Silver",0.125],["STD:RecUp","Recycle Upgrade","Gold",3],["CAT:Kill","Killing Category Guarantor","Gold",0.5],["IC:Citizen","Citizen Icon","Bronze",1],["DM:23","Correction","Silver",1],["SP:24","Rainbow #2","Silver",0.5],["STD:Timeout5","5 Minute Timeout","Coal",1],["CAT:!Misc","Not-Miscellaneous Category Guarantor","Bronze",1],["IC:Devout Villager","Devout Villager Icon","Bronze",0.5],["DM:24","Ordinal","Gold",1],["SP:25","Rainbow #3","Silver",0.5],["STD:1Euro","1€","Coal",1],["CAT:Group","Group Category Guarantor","Gold",0.5],["IC:Baroness","Baroness Icon","Bronze",1],["DM:25","Died","Coal",1],["SP:26","Ts","Platinum",0.5],["CAT:Align","Align Category Guarantor","Platinum",0.25],["IC:Apothecary","Apothecary Icon","Silver",1],["SP:27","Oil","Silver",1],["CAT:Elected","Elected Category Guarantor","Platinum",0.25],["IC:Firebug","Firebug Icon","Silver",1],["SP:28","Wave","Bronze",0.5],["IC:Wraith","Wraith Icon","Silver",1],["SP:29","Swirl","Bronze",1],["RT:Pack","Wolfpack Role Guarantor","Gold",0.5],["IC:Dog","Dog Icon","Bronze",0.5],["SP:30","Noise","Bronze",0.125],["SPEC:AnySkinpack","(SPECIAL) Any Skinpack","Diamond",1],["RT:Packless","Packless Wolf Role Guarantor","Silver",0.5],["IC:Bat","Bat Icon","Silver",1],["SP:31","Cycle","Silver",0.5],["SPEC:AnyIcon","(SPECIAL) Any Icon","Diamond",2],["RT:Whisper","Whispering Role Guarantor","Silver",0.5],["IC:Assassin","Assassin Icon","Silver",0.5],["SP:32","Equalize","Bronze",0.5],["SPEC:AnyGuarantor","(SPECIAL) Any Guarantor","Diamond",2],["RT:SoloSec","Solo Secondary Role Guarantor","Gold",0.5],["IC:Alpha Wolf","Alpha Wolf Icon","Gold",0.5],["SP:33","Fourier Noise","Gold",0.5],["SPEC:Any","(SPECIAL) Any Prize","Diamond",1],["RT:SoloPri","Solo Primary Role Guarantor","Platinum",1],["IC:Baker","Baker Icon","Bronze",0.5],["SP:34","Fourier Equalize","Silver",0.125],["SPEC:AnyDeath","(SPECIAL) Any Death Message","Diamond",2],["RT:Thief","Thief Role Guarantor","Diamond",1],["IC:Apprentice","Apprentice Icon","Gold",0.5],["SP:35","Fourier Oil","Gold",1],["RT:Limited","Limited Role Guarantor","Silver",0.75],["IC:Chef","Chef Icon","Silver",0.5],["SP:36","Fourier Modulate","Platinum",1],["UNK:Mystery","Mystery","",],["IC:Plague Doctor","Plague Doctor","Bronze",0.5],["SP:37","Fourier Wire","Silver",0.25],["UNK:Egg","Easter Egg","",],["IC:Bartender","Bartender Icon","Gold",0.5],["SP:38","Glitch #2","Gold",0.5],["IC:Wolf","Wolf Icon","Bronze",0.5],["SP:39","Eyes","Gold",0.5],["IC:Knife","Knife Icon","Gold",1],["SP:40","Thief","Diamond",1],["IC:Cult","Cult Icon","Gold",1],["SP:41","Mask","Silver",0.25],["IC:Lute","Lute Icon","Gold",1],["SP:42","Eye","Gold",0.5],["IC:Rodent","Rodent Icon","Gold",1],["SP:43","Fourier Eye","Gold",0.5],["IC:Flame","Flame Icon","Platinum",0.5],["SP:44","Citizen Eye","Silver",0.25],["IC:Duck","Duck Icon","Gold",0.5],["SP:45","Items","Gold",1],["IC:Coroner","Coroner Icon","Bronze",1],["SP:46","Bear","Platinum",1],["IC:Journalist","Journalist Icon","Bronze",1],["SP:47","Wolfify","Gold",1],["IC:Royal Knight","Royal Knight Icon","Silver",1],["SP:48","Grid","Gold",0.5],["IC:Direwolf","Direwolf Icon","Silver",1],["SP:49","Light and Shadow","Silver",0.5],["IC:Bloody Butcher","Bloody Butcher Icon","Gold",1],["SP:50","Duo Color","Gold",0.5],["IC:Warlock","Warlock Icon","Gold",1],["SP:51","Wood","Bronze",0.5],["IC:Demonic Cupid","Demonic Cupid Icon","Gold",1],["SP:52","Coin","Gold",1],["IC:Despot","Despot Icon","Silver",1],["SP:53","Coin Animated","Platinum",1],["IC:Detective","Detective Icon","Gold",1],["SP:54","Glitch Animated","Platinum",1],["SP:55","Wave Animated","Silver",0.25],["SP:56","Spin","Gold",0.5],["SP:57","Rainbow Animated","Platinum",1],["SP:58","Fourier Merge","Silver",0.125],["SP:59","Fourier Magnitude","Bronze",0.125],["SP:60","Fourier Phase","Bronze",0.125],["SP:61","Fourier Crop","Bronze",0.125],["SP:62","Fourier Crop #2","Silver",0.25],["SP:63","Cloud","Gold",0.5],["SP:64","Swirl Animated","Silver",0.25],["SP:65","Pokemon","Diamond",1],["SP:66","Minecraft","Platinum",1],["SP:67","Vowels","Bronze",0.25],["SP:68","Glasses","Bronze",0.5],["SP:69","Glasses #2","Bronze",0.5],["SP:70","Magnified","Bronze",0.5],["SP:71","Wolfify Oil","Gold",0.5],["SP:72","Wolfify Fourier","Gold",0.5],["SP:73","Redacted","Silver",1],["SP:74","Pumpkin","Diamond",1],["SP:75","Randomized","",],["SP:76","You","",],["SP:77","One Piece","Platinum",2],["SP:78","Zelda (Wilds Era)","Platinum",2],["SP:79","Golden","Diamond",1],["SP:80","Hearts","Silver",1],["SP:81","Shuffle","Bronze",1],["SP:82","Shuffle #2","Silver",1],["SP:83","German","Silver",1],["SP:84","Flame","Gold",1],["SP:85","Ice","Gold",1],["SP:86","Air","Bronze",1],["SP:87","Earth","Bronze",1],["SP:88","Charred","Bronze",1],["SP:89","Leaves","Silver",1],["SP:90","Tsified","Gold",1],["SP:91","Colorful","Gold",1],["SP:92","Aquatic","Platinum",2],["SP:93","Chinese","Silver",1]];
 
     /**
     Command: $loot
     **/
-    this.tierNames = ["Bronze", "Silver", "Gold","Platinum", "Cheated"];
-    this.tierColors = [9785610, 13027014, 14922018, 10877429, 15469740];
-    this.tierIcons = ["Extras/Token%20Bronze", "Extras/Token%20Silver", "Extras/Token", "Extras/Token%20Platinum", "Extras/Bot%20Developer"];
-    this.tierCoins = [30, 50, 100, 200, 0];
+    this.tierNames = ["Coal", "Bronze", "Silver", "Gold","Platinum", "Diamond", "Cheated"];
+    this.tierColors = [4408131, 9785610, 13027014, 14922018, 10877429, 6273489, 15469740];
+    this.tierIcons = ["Extras/Token%20Coal", "Extras/Token%20Bronze", "Extras/Token%20Silver", "Extras/Token", "Extras/Token%20Platinum", "Extras/Token%20Diamond", "Extras/Bot%20Developer"];
+    this.tierCoins = [-10, 25, 50, 75, 100, 150, 0];
     this.cmdLoot = async function(message) {
         // check coins
         let coinCount = await getCoins(message.member.id);
@@ -48,25 +48,28 @@ module.exports = function() {
     }
     
     /**
-    Open Loot Box
+    Open Loot Box 
     **/
     this.openBox = async function(channel, pid, overwrite = null, possibleTiers = null) {
         let tierRand = Math.random();
         let tierRandBonus = 0;
         let luck = await getBoosterLuck();
-        tierRandBonus += luck / 40;
+        tierRandBonus += luck / 50;
         
         let l1item = await inventoryGetItem(pid, "std:luck1");
         let l2item = await inventoryGetItem(pid, "std:luck2");
-        tierRandBonus += 0.01 * l1item;
-        tierRandBonus += 0.02 * l2item;
+        tierRandBonus += 0.01 * Math.min(l1item, 1);
+        tierRandBonus += 0.02 * Math.min(l2item, 1);
         
-        tierRand += Math.min(tierRandBonus, 0.4);
+        tierRand += Math.min(tierRandBonus, 0.2);
+        tierRand = 0.0;
         
         let tier = 0;
-        if(tierRand >= 0.95) tier = 3;
-        else if(tierRand >= 0.8) tier = 2;
-        else if(tierRand >= 0.5) tier = 1;
+        if(tierRand >= 0.999) tier = 5;
+        else if(tierRand >= 0.95) tier = 4;
+        else if(tierRand >= 0.80) tier = 3;
+        else if(tierRand >= 0.50) tier = 2;
+        else if(tierRand >= 0.02) tier = 1;
         
         if(possibleTiers) {
             if(!possibleTiers.includes(tier)) {
@@ -95,7 +98,7 @@ module.exports = function() {
         // overwrite reward
         if(overwrite) {
             reward = overwrite;
-            tier = 4;
+            tier = 6;
         }
                 
         // unlock reward
@@ -106,7 +109,7 @@ module.exports = function() {
         
         let embed = { title: "Lootbox opened!", description: `<@${pid}> opened a loot box and got a **${tierNames[tier].toUpperCase()}** tier reward!\n\n**__You won:__** ${rewardToText(reward)}` + (!result ? `\n\nYou already have this reward so as a consolation prize you get ${tierCoins[tier]} ${getEmoji('token')} coins.` : ""), color: tierColors[tier] };
         embed.thumbnail = { url: iconRepoBaseUrl + tierIcons[tier] + ".png?v=2" };
-        embed.image = { url: `https://werewolves.me/images/${tierNames[tier]}.png?v=5` };
+        embed.image = { url: `https://werewolves.me/images/${tierNames[tier]}.png?v=7` };
         channel.send({ embeds: [ embed ] });
         
         // log reward
@@ -157,20 +160,23 @@ module.exports = function() {
                     case "std:re2": return "__Two__ free lootbox re-rolls!";
                     case "std:re3": return "__Three__ free lootbox re-rolls!";
                     case "std:re5": return "__Five__ free lootbox re-rolls!";
+                    case "std:re10": return "__Ten__ free lootbox re-rolls!";
                     case "std:x": return "Nothing! You got unlucky. 😭";
                     case "std:x-item": return "Nothing! You got lucky! 🎉";
                     case "std:btnt": return `Be the next theme! (Some conditions apply). ${VOUCHER} Redeem by notifying GMs before a game is announced.`;
                     case "std:joke": return `Get your own joke role! (Some conditions apply). ${VOUCHER} Redeem by notifying a GM.`;
-                    case "std:icon": return `Get a custom WWR Role Icon made for you. ${VOUCHER} Redeem by notifying Vera. Terms and conditions may apply.`;
+                    case "std:icon": return `Get a custom WWR Role Icon made for you. ${VOUCHER} Redeem by notifying a willing GM. Terms and conditions may apply.`;
                     case "std:cmd": return `Get a custom WWR Bot Joke Command made for you. Redeem by notifying Ts. Terms and conditions may apply.`;
                     case "std:sp": return `Suggest a skinpack. Redeem by notifying Ts. Terms and conditions may apply. If your suggestion is not accepted you are refunded with 100 coins.`;
                     case "std:theme": return `Suggest a theme for an upcoming game. ${VOUCHER} Redeem by notifying a Host or Game Master. You must use this before the theme for the next game is decided/announced. Theme suggestions must be reasonable and terms and conditions may apply. Some themes may be rejected (with the voucher being refunded). If you cannot get your theme accepted, you may be able to exchange this voucher for 100 coins.`;
                     case "std:ban": return `The chance to get banned. ${VOUCHER} Please notify an Admin or Senior GM when you wish to be banned and we will do so. Congratulations!`;
                     case "std:os": return `Suggest a game concept for an upcoming offseason game. ${VOUCHER} Redeem by notifying a suitable Game Master. Your game may not be executed immediately and the idea might be slightly altered. Game concept suggestions must be reasonable and terms and conditions may apply. Some game concepts may be rejected (with the voucher being refunded). If you cannot get your game concept accepted, you may be able to exchange this voucher for 100 coins.`;
                     case "std:dmsg": return `Get a custom death message. ${VOUCHER} Redeem by notifying a Ts of your choice. Death messages must be reasonable and terms and conditions may apply. Some death messages may be rejected (with the voucher being refunded). If you cannot get your death message accepted, you may be able to exchange this voucher for 100 coins. Your death message may become winnable as a loot box reward afterwards.`;
-                    case "std:luck1": return `A bit of luck! All future lootbox rolls will be ever so slightly more lucky.`;
-                    case "std:luck2": return `Some luck! All future lootbox rolls will be a bit more lucky.`;
-                    case "std:recup": return `A ${stats.prefix}recycle upgrade! Recycling will now yield slightly more coins.`;
+                    case "std:luck1": return `A bit of luck! All future lootbox rolls will be ever so slightly more lucky. These __cannot__ be combined.`;
+                    case "std:luck2": return `Some luck! All future lootbox rolls will be a bit more lucky. These __cannot__ be combined.`;
+                    case "std:recup": return `A ${stats.prefix}recycle upgrade! Recycling will now yield slightly more coins. Only your first five upgrades will increase the yield.`;
+                    case "std:timeout5": return `The opportunity to get timed out for five minutes. Use this time wisely!`;
+                    case "std:1euro": return "1€ (cash only; to be redeemed in person). Redeem by walking up to Ts and requesting it.";
                     default: return `An unknown standard reward: ${reward[1]}.`;
                 }
             break;
@@ -197,7 +203,7 @@ module.exports = function() {
             break;
             // Special
             case "spec":
-                return `A special reward: ${reward[1]} These are the rarest rewards there are and almost impossible to obtain through a loot box! Ask a Game Master to redeem it.`;
+                return `A special reward: ${reward[1]}. These are the rarest rewards there are and almost impossible to obtain through a loot box! Ask a Game Master to redeem it.`;
             break;
             // Icon
             case "ic":
@@ -211,8 +217,8 @@ module.exports = function() {
                 let type = reward[0].split(":")[1].substr(0, 2).toLowerCase();
                 switch(type) {
                     case "xp": return `An XP booster: ${reward[1]}. This will give you an one-time XP boost. Use it with \`${stats.prefix}boosters use ${reward[0]}\`.`;
-                    case "gl": return `An XP booster: ${reward[1]}. This boosts the gained XP for everyone for a certain time. Use it with \`${stats.prefix}boosters use ${reward[0]}\`.`;
-                    case "lu": return `A Luck booster: ${reward[1]}. This will improve everyone's $loot luck for a certain time. Use it with \`${stats.prefix}boosters use ${reward[0]}\`.`;
+                    case "gl": return `An XP booster: ${reward[1]}. This boosts the gained XP for everyone for a certain time. Boosters __cannot__ be combined. Use it with \`${stats.prefix}boosters use ${reward[0]}\`.`;
+                    case "lu": return `A Luck booster: ${reward[1]}. This will improve everyone's $loot luck for a certain time. Boosters __cannot__ be combined. Use it with \`${stats.prefix}boosters use ${reward[0]}\`.`;
                     default: return `An unknown booster: ${reward[1]}.`;
                 }
             break;
@@ -235,6 +241,8 @@ module.exports = function() {
                     case "bot:nick": return `Access to the ${stats.prefix}nickname command. Lets you change your nickname!`;
                     case "bot:market": return `Access to the ${stats.prefix}market command. Lets you access the market!`;
                     case "bot:stash": return `Access to the ${stats.prefix}stash and ${stats.prefix}unstash commands. Lets you hide items from your inventory! Use  ${stats.prefix}stash list to receive a list of stashed items as a DM.`;
+                    case "bot:yell": return `Access to the ${stats.prefix}yell command. Capitalizes bot info messages.`;
+                    case "bot:skull": return `💀`;
                     default: return `An unknown bot reward: ${reward[1]}.`;
                 }
             case "unk":
@@ -274,6 +282,23 @@ module.exports = function() {
                         setTimeout(function() { openBox(channel, pid) }, 12000);
                         setTimeout(function() { openBox(channel, pid) }, 15000);
                         return true;
+                    case "std:re10":
+                        setTimeout(function() { openBox(channel, pid) }, 3000);
+                        setTimeout(function() { openBox(channel, pid) }, 6000);
+                        setTimeout(function() { openBox(channel, pid) }, 9000);
+                        setTimeout(function() { openBox(channel, pid) }, 12000);
+                        setTimeout(function() { openBox(channel, pid) }, 15000);
+                        setTimeout(function() { openBox(channel, pid) }, 18000);
+                        setTimeout(function() { openBox(channel, pid) }, 21000);
+                        setTimeout(function() { openBox(channel, pid) }, 24000);
+                        setTimeout(function() { openBox(channel, pid) }, 27000);
+                        setTimeout(function() { openBox(channel, pid) }, 30000);
+                        return true;
+                    case "std:timeout5":
+                        let mem = channel.guild.members.cache.get(pid);
+                        mem.timeout(5 * 60 * 1000);
+                        return true;
+                    break;
                    case "std:x":
                         return true;
                    case "std:x-item":
@@ -284,15 +309,26 @@ module.exports = function() {
                     case "std:icon":
                     case "std:theme":
                     case "std:cmd":
-                    case "std:ban":
                     case "std:sp":
                     case "std:os":
                     case "std:dmsg":
-                    case "std:luck1":
-                    case "std:luck2":
                     case "std:recup":
                         await inventoryModifyItem(pid, reward[0], 1);
                         return true;
+                    case "std:luck1":
+                    case "std:luck2":
+                    case "std:ban":
+                        let count = await inventoryModifyItem(pid, reward[0], 1);
+                        return count === 1;
+                    case "std:1euro":
+                        let count2 = await inventoryGetItem(pid, reward[0]);
+                        if(count2 === 0) {
+                            await inventoryModifyItem(pid, reward[0], 1);
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    break;
                     default:
                         return false;
                 }
