@@ -99,7 +99,7 @@ module.exports = function() {
         }
         
         // get prompt message / send choice message
-        const promptMsg = getPromptMessage(ability, promptOverwrite);
+        const promptMsg = autoUnpunctate(getPromptMessage(ability, promptOverwrite));
         const refImg = await refToImg(src_name);
         const message = await sendChoiceMessage(sc, `${getAbilityEmoji(ability.type)} ${promptMsg}${PROMPT_SPLIT}\nPlease select one of the choices by clicking the respective button. You may be prompted for additional selections after the choice.`, choiceName, choice.options, refImg, "Ability Prompt - Choice", promptPing);
         

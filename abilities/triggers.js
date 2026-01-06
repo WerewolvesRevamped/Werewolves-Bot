@@ -856,7 +856,7 @@ module.exports = function() {
                     let refImg = await refToImg(src_name);
                     for(let i = 0; i < actionCount; i++) { // iterate for scaling
                         if(stats.automation_level < 2) continue;
-                        if(promptMsg[promptMsg.length - 1] === ".") promptMsg = promptMsg.substr(0, promptMsg.length - 1); // if last character is normal . remove it 
+                        promptMsg = autoUnpunctate(promptMsg);
                         let message = await sendSelectionlessPrompt(promptLoc, ptype[0], `${getAbilityEmoji(trigger.abilities[0].type)} ${promptMsg}${PROMPT_SPLIT}${origPromptLocText}`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt");
                         abilityLog(`🟩 **Prompting Ability:** ${srcRefToText(src_ref)} (${srcNameToText(src_name)}) - ${toTitleCase(trigger.abilities[0].type)} {Selectionless}`);
                         // schedule actions

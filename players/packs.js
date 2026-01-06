@@ -23,6 +23,7 @@ module.exports = function() {
 			case "set": if(checkGM(message)) cmdPacksSet(message.channel, args); break;
 			case "unlock": if(checkGM(message)) cmdPacksUnlock(message.channel, args); break;
 			case "delete": if(checkGM(message)) cmdPacksDelete(message.channel, args); break;
+			case "check_luts": if(checkGM(message)) cmdPacksCheckLuts(message.channel, message.author, args); break;
 			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
 		}
 	}
@@ -196,6 +197,75 @@ module.exports = function() {
 			return;
         }
     }
+    
+    /**
+    Command: $packs check_luts
+    Checks the URL and Theme LUTs for a pack
+    **/
+    this.cmdPacksCheckLuts = async function(channel, author, args) {
+        if(!args[1]) {
+            channel.send("⛔ Syntax error. Not enough parameters!");
+            return;
+        }
+        let user = parseUser(author.id, channel);
+        if(!user) {
+			// Invalid user
+			channel.send("⛔ Syntax error. `" + author.id + "` is not a valid player!");
+			return;
+		}
+        if(AVAILABLE_PACKS.includes(args[1])) {
+            args[1] = AVAILABLE_PACKS.indexOf(args[1]) + 1;
+        }
+        let num = + args[1];
+        if(num >= 0 && num <= AVAILABLE_PACKS.length) {
+			channel.send("🔘 Checking Skinpack (Theme LUT)");
+            let allNames = { roles: deepCopy(cachedRoles), groups: cachedGroups, teams: cachedTeams, terms: config.terms };
+            let missing = [];
+            for(let name in allNames) {
+                missing = [];
+                for(let i = 0; i < allNames[name].length; i++) {
+                    if((await applyPackLUT(allNames[name][i].toLowerCase(), author.id, num)) === allNames[name][i].toLowerCase()) {
+                        missing.push(allNames[name][i]);
+                    }
+                    if(missing.length > 100) {
+                        channel.send(`**Missing ${toTitleCase(name)}:** ${missing.join(", ")}`);
+                        missing = [];
+                    }
+                }
+                if(missing.length > 0) channel.send(`**Missing ${toTitleCase(name)}:** ${missing.join(", ")}`);
+            }
+            missing = [];
+            let error = [];
+			channel.send("🔘 Checking Skinpack (URL LUT)");
+            allNames["roles"].push("Skinpack Updated");
+            for(let i = 0; i < allNames["roles"].length; i++) {
+                if(!isUrlPack(author.id, allNames["roles"][i], num)) {
+                    missing.push(allNames["roles"][i]);
+                } else if(args[2] === "full") {
+                    let url = iconBaseUrl(author.id, allNames["roles"][i], num);
+                    let res = await checkUrlExists(url);
+                    await sleep(100);
+                    if(!res) error.push(allNames["roles"][i]);
+                }
+                if(missing.length > 100) {
+                    channel.send(`**Missing URLs:** ${missing.join(", ")}`);
+                    missing = [];
+                }
+                if(error.length > 100) {
+                    channel.send(`**Broken URLs:** ${error.join(", ")}`);
+                    error = [];
+                }
+            }
+            if(missing.length > 0) channel.send(`**Missing URLs:** ${missing.join(", ")}`);
+            if(error.length > 0) channel.send(`**Broken URLs:** ${error.join(", ")}`);
+			channel.send("✅ Checking Complete");
+        } else {
+			// Invalid pack
+			channel.send("⛔ Syntax error. `" + args[1] + "` is not a valid pack!");
+			return;
+        }
+    }
+    
 
     /**
     Cache packs
@@ -219,9 +289,10 @@ module.exports = function() {
     /**
     Get Icon Base Url
     **/
-    this.iconBaseUrl = function(id, name = false) {
+    this.iconBaseUrl = function(id, name = false, packId = null) {
         if(!id) return iconRepoBaseUrl;
         let pack = getPack(id);
+        if(packId) pack = packId;
         let pName = AVAILABLE_PACKS[pack - 1];
         let urlLUT = getPackURLLUT(pName);
         if(pack === 0) {
@@ -242,9 +313,10 @@ module.exports = function() {
         }
     }
     
-    this.isUrlPack = function(id, name) {
+    this.isUrlPack = function(id, name, packId = null) {
         if(!id) return false;
         let pack = getPack(id);
+        if(packId) pack = packId;
         let pName = AVAILABLE_PACKS[pack - 1];
         let urlLUT = getPackURLLUT(pName);
         if(urlLUT && urlLUT.length > 0 && name) {
@@ -260,9 +332,10 @@ module.exports = function() {
     /**
     Apply Pack LUT
     **/
-    this.applyPackLUT = async function(txt, id) {
+    this.applyPackLUT = async function(txt, id, packId = null) {
         if(!id) return txt;
         let pack = getPack(id);
+        if(packId) pack = packId;
         let ret;
         if(pack === 0) {
             ret = txt;
@@ -400,8 +473,8 @@ module.exports = function() {
                         if(!el[0]) return;
                         packLUTs[pack].push(["The " + el[0] ?? "-", (el[1] ?? "").trim()]);
                         packLUTs[pack].push(["the " + el[0] ?? "-", (el[1] ?? "").trim()]);
-                        packLUTs[pack].push(["The " + (el[0] ?? "-").toLowerCase(), el[1]?.[0]??" " + (el[1]??"").substr(1).trim().toLowerCase()]);
-                        packLUTs[pack].push(["the " + (el[0] ?? "-").toLowerCase(), ((el[1] ?? "").trim()).toLowerCase()]);
+                        packLUTs[pack].push(["The " + (el[0] ?? "-").toLowerCase(), (el[1]?.[0]??"") + (el[1]??"").substr(1).trim().toLowerCase()]);
+                        packLUTs[pack].push(["the " + (el[0] ?? "-").toLowerCase(), (el[1] ?? "").trim().toLowerCase()]);
                         packLUTs[pack].push([el[0] ?? "-", (el[1] ?? "").trim()]);
                         packLUTs[pack].push([(el[0] ?? "-").toLowerCase(), ((el[1] ?? "").trim()).toLowerCase()]);
                     });      

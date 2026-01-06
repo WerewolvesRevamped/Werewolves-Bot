@@ -170,6 +170,19 @@ module.exports = function() {
     }
     
     /**
+    Auto Unpunctate
+    Remove punctation if the last character is punctation
+    **/
+    this.autoUnpunctate = function(txt) {
+        txt = txt.trim();
+        if(/[\.,!\?\)\(\]\[\}\{\-\*\:]/.test(txt[txt.length - 1])) {
+            return txt.substr(0, txt.length - 1);
+        } else {
+            return txt;
+        }
+    }
+    
+    /**
     Replace Object Recursively
     **/
     this.objRecReplace = function(obj, func) {
