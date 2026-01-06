@@ -30,9 +30,10 @@ module.exports = function() {
     /**
     Command: $packs list_all
     **/
-    this.AVAILABLE_PACKS = ["glitch","negate","grayscale","edge","emboss","silhouette","pixel","pixel2","pixel3","pixel4","scatter","red","green","blue","yellow","purple","cyan","flip","pale","bw","wire","wire2","rainbow","rainbow2","rainbow3","ts","oil","wave","swirl","noise","cycle","equalize","fourier_noise","fourier_equalize","fourier_oil","fourier_modulate","fourier_wire","glitch2","eyes","thief","mask","eye","fourier_eye","citizen_eye","items","bear","wolfify","grid","light_and_shadow","duo_color","wood","coin","coin_animated", "glitch_animated","wave_animated","spin","rainbow_animated","fourier_merge","fourier_magnitude","fourier_phase","fourier_crop","fourier_crop2","cloud","swirl_animated","pokemon","minecraft", "vowels","glasses","glasses2","magnified","wolfify_oil","wolfify_fourier","redacted","pumpkin","randomized","you","onepiece","zelda","golden","hearts","shuffle","shuffle2","german","flame","ice","air","earth","charred","leaves","tsified","colorful","aquatic","chinese"];
+    this.AVAILABLE_PACKS = ["glitch","negate","grayscale","edge","emboss","silhouette","pixel","pixel2","pixel3","pixel4","scatter","red","green","blue","yellow","purple","cyan","flip","pale","bw","wire","wire2","rainbow","rainbow2","rainbow3","ts","oil","wave","swirl","noise","cycle","equalize","fourier_noise","fourier_equalize","fourier_oil","fourier_modulate","fourier_wire","glitch2","eyes","thief","mask","eye","fourier_eye","citizen_eye","items","bear","wolfify","grid","light_and_shadow","duo_color","wood","coin","coin_animated", "glitch_animated","wave_animated","spin","rainbow_animated","fourier_merge","fourier_magnitude","fourier_phase","fourier_crop","fourier_crop2","cloud","swirl_animated","pokemon","minecraft", "vowels","glasses","glasses2","magnified","wolfify_oil","wolfify_fourier","redacted","pumpkin","randomized","you","onepiece","zelda","golden","hearts","shuffle","shuffle2","german","flame","ice","air","earth","charred","leaves","tsified","colorful","aquatic","chinese","lowsaxon"];
     this.ANIMATED_PACKS = [53, 54, 55, 56, 57, 63, 64];
     this.NAME_PACKS = [77, 78];
+    this.SINGULAR_PACKS = [93];
     this.cmdPacksListAll = function(channel) {
         // format item list
         let itemsTxt = [`${getEmoji('pack_default')} Default - 0`];
@@ -175,9 +176,10 @@ module.exports = function() {
                 if(num > 0) {
                     let embed = { title: "Skinpack Updated", description: `Updated <@${user}>'s skinpack to \`${num}\` (${toTitleCase(AVAILABLE_PACKS[num-1])}). You can disable the skinpack by running \`${stats.prefix}packs select 0\`.`, color: 5490704 };
                     embed.thumbnail = { url: skinpackUrl(AVAILABLE_PACKS[num-1]) + "Werewolf/Miscellaneous/Wolf.png" };
-                    channel.send({ embeds: [ embed ] });
                     // get pack lut (if necessary)
-                    cachePackLUT(AVAILABLE_PACKS[num-1]);
+                    await cachePackLUT(AVAILABLE_PACKS[num-1]);
+                    if(isUrlPack(user, "Skinpack Updated")) embed.thumbnail.url = iconBaseUrl(user, "Skinpack Updated");
+                    channel.send({ embeds: [ embed ] });
                 } else {
                     let embed = { title: "Skinpack Disabled", description: `Disabled skinpack for <@${user}>.`, color: 16715021 };
                     embed.thumbnail = { url: skinpackUrl("default") + "Werewolf/Miscellaneous/Wolf.png" };
@@ -324,6 +326,38 @@ module.exports = function() {
     }
     
     /**
+    Apply Pack LUT (Inverted)
+    **/
+    this.applyPackLUTInverted = async function(txt, id) {
+        if(!id) return txt;
+        let pack = getPack(id);
+        let ret;
+        if(pack === 0) {
+            ret = txt;
+        } else {
+            let pName = AVAILABLE_PACKS[pack - 1];
+            if(pName === stats.theme) return txt; // do not apply pack theme, if it matches normal theme
+            let lut = await getPackLUT(pName);
+            // randomized pack
+            switch(pName) {                                
+                default: {
+                    // normal lut application
+                    for(let i = lut.length - 1; i >= 0; i--) {
+                        if(lut[i][1].length > 1) {
+                            txt = txt.replace(new RegExp("(?<!\\<\\?|[a-zA-Z])" + lut[i][1] + "(?!\\:\\>|[a-rt-zA-Z])", 'g'), lut[i][0]);
+                        } else {
+                            txt = txt.replace(new RegExp("(?<!\\<\\?)" + lut[i][1] + "(?!\\:\\>)", 'g'), lut[i][0]);
+                        }
+                    }
+                    ret = txt;
+                }
+            }
+        }
+        if(yellList.includes(id)) return ret.toUpperCase();
+        return ret;
+    }
+    
+    /**
     Cache Pack LUT
     **/
     this.packLUTs = {}
@@ -353,12 +387,20 @@ module.exports = function() {
             const body = await fetchBody(url);
             if(body) {
                 packLUTs[pack] = [];
-                if(NAME_PACKS.includes(AVAILABLE_PACKS.indexOf(pack) + 1)) {
+                if(SINGULAR_PACKS.includes(AVAILABLE_PACKS.indexOf(pack) + 1)) {
+                    body.split("\n").filter(el => el && el.length).map(el => el.split(",")).forEach(el => {
+                        if(!el[0]) return;
+                        packLUTs[pack].push([(el[0] ?? "-") + "s", (el[1] ?? "").trim()]);
+                        packLUTs[pack].push([(el[0] ?? "-").toLowerCase() + "s", ((el[1] ?? "").trim()).toLowerCase()]);
+                        packLUTs[pack].push([el[0] ?? "-", (el[1] ?? "").trim()]);
+                        packLUTs[pack].push([(el[0] ?? "-").toLowerCase(), ((el[1] ?? "").trim()).toLowerCase()]);
+                    });    
+                } else if(NAME_PACKS.includes(AVAILABLE_PACKS.indexOf(pack) + 1)) {
                     body.split("\n").filter(el => el && el.length).map(el => el.split(",")).forEach(el => {
                         if(!el[0]) return;
                         packLUTs[pack].push(["The " + el[0] ?? "-", (el[1] ?? "").trim()]);
                         packLUTs[pack].push(["the " + el[0] ?? "-", (el[1] ?? "").trim()]);
-                        packLUTs[pack].push(["The " + (el[0] ?? "-").toLowerCase(), el[1][0] + ((el[1].substr(1) ?? "").trim()).toLowerCase()]);
+                        packLUTs[pack].push(["The " + (el[0] ?? "-").toLowerCase(), el[1]?.[0]??" " + (el[1]??"").substr(1).trim().toLowerCase()]);
                         packLUTs[pack].push(["the " + (el[0] ?? "-").toLowerCase(), ((el[1] ?? "").trim()).toLowerCase()]);
                         packLUTs[pack].push([el[0] ?? "-", (el[1] ?? "").trim()]);
                         packLUTs[pack].push([(el[0] ?? "-").toLowerCase(), ((el[1] ?? "").trim()).toLowerCase()]);

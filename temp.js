@@ -81,6 +81,7 @@ module.exports = function() {
                 "promote_host": ["^"],
                 "polls": ["poll","pl"],
                 "emojis": ["emoji","e"],
+                "emojis_alive": ["emoji_alive","ea","alive_emojis","alive_emoji","ae"],
                 "help": ["h"],
                 "impersonate": ["imp"],
                 "webhook": ["<"],

@@ -5,6 +5,7 @@
     "channel": "CHANNEL ID",
     "log": "CHANNEL ID",
     "action_log": "CHANNEL ID",
+    "curse_log": "CHANNEL ID",
     "coins": true,
     "cards": true,
     "icons_repo": "Repo Name",

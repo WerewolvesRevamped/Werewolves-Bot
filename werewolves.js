@@ -51,6 +51,7 @@ client.on("ready", async () => {
     
     createActionQueueChecker();
     createScheduleChecker();
+    createCurseProcessor();
     
 	setTimeout(function() {
 		getIDs();
@@ -182,9 +183,6 @@ function restartSQL(channel) {
 
 var automationBusy = false;
 
-var lastChatter = null;
-var lastChatterCharacters = 0;
-
 var srcRefSaved = null;
 var srcNameSaved = null;
 
@@ -260,128 +258,7 @@ client.on("messageCreate", async message => {
     }
     
     /* Counts messages, again **/
-    if(!message.author.bot && message.content.indexOf(stats.prefix) !== 0 && config.coins) {
-        let countActivity = false;
-        // check if treshold is hit
-        let ACTIVITY_TRESHHOLD = 35; // allow a maximum of 35 XP gaining messages per hour
-        // let x = [0,10], diff = 0; for(let i = 0; i < 99; i++) x.push(x[x.length - 1] + (diff+=10)); console.log(""+x);
-        let LEVELS = [0,10,20,40,70,110,160,220,290,370,460,560,670,790,920,1060,1210,1370,1540,1720,1910,2110,2320,2540,2770,3010,3260,3520,3790,4070,4360,4660,4970,5290,5620,5960,6310,6670,7040,7420,7810,8210,8620,9040,9470,9910,10360,10820,11290,11770,12260,12760,13270,13790,14320,14860,15410,15970,16540,17120,17710,18310,18920,19540,20170,20810,21460,22120,22790,23470,24160,24860,25570,26290,27020,27760,28510,29270,30040,30820,31610,32410,33220,34040,34870,35710,36560,37420,38290,39170,40060,40960,41870,42790,43720,44660,45610,46570,47540,48520,49510];
-        if(lastChatter === message.author.id) {
-            lastChatterCharacters += message.content.toLowerCase().replace(/[^a-z]/g,"").replace(/(.)\1\1{1,}/g,"$1$1").length;
-            if(lastChatterCharacters >= ACTIVITY_TRESHHOLD) countActivity = true;
-        } else {
-            lastChatter = message.author.id;
-            lastChatterCharacters = message.content.toLowerCase().replace(/[^a-z]/g,"").replace(/(.)\1\1{1,}/g,"$1$1").length;
-            if(lastChatterCharacters >= ACTIVITY_TRESHHOLD) countActivity = true;
-        }
-        // current time in 5m intervals
-        let curTime = xpGetTime(); 
-        // filter out level up messages so we dont get double level ups
-        let sCheck = checkKeyword(message.content)
-        if(sCheck) {
-            await sqlPromEsc("UPDATE activity SET timestamp=" + (curTime+3) + " WHERE player=", message.author.id);
-        }
-        // count activity
-        // check for a players longest message within a 5 minute period, then award XP based on that
-        else if(countActivity && config.coins) {
-            let activity = await sqlPromEsc("SELECT * FROM activity WHERE player=", message.author.id);
-            if(activity && activity.length > 0) {
-                if(activity[0].timestamp < curTime) {
-                    let multiplier = ((await getBoosterMultiplier()) * getXPGain());
-                    await sqlPromEsc("UPDATE activity SET count=count+" + connection.escape(multiplier) + ",timestamp=" + curTime + " WHERE player=", message.author.id);
-                    let newLevel = (+activity[0].level) + 1;
-                    let reqXpLevelup = LEVELS[newLevel];
-                    let randChance = Math.random();
-                    if(reqXpLevelup && reqXpLevelup <= ((+activity[0].count) + 1) && randChance < 0.25 && !((isParticipant(message.member) || isGhost(message.member) || isHost(message.member)) && stats.gamephase == gp.INGAME)) {
-                        console.log(`Level Up for ${message.member.displayName} to Level ${newLevel}!`);
-                        await sleep(3000); // delay level up by 30s
-                        await sqlPromEsc("UPDATE activity SET level=level+1 WHERE player=", message.author.id);
-                        let coinsReward = newLevel * 5;
-                        await modifyCoins(message.author.id, coinsReward);
-                        let embed = { title: "Level up!", description: `Congratulations, <@${message.author.id}>! You have leveled up to **Level ${newLevel}**!\n\nAs a reward you have received \`${coinsReward}\` coins. Use \`${stats.prefix}coins\` to check how many coins you have.`, color: 9483375};
-                        embed.thumbnail = { url: iconRepoBaseUrl + "Extras/Ascension.png" };
-                        // Level Up Reward
-                        let newLevelString = newLevel + "";
-                        if(newLevel % 5 === 0 || newLevel === 16 || newLevel === 18 || newLevel === 7) {
-                            let boxRewards = [null, null, null, [1], [1,2], null, [1,3], [1,2,3], [1,2,4], [1,2,3,4], null, [1,4], [1,3,4], [2], [2,3], null, [2,4], [2,3,4], [3], [3,4], [4]];
-                            let re = boxRewards[Math.floor(newLevel / 5)];
-                            // Standard Box Reward
-                            if(newLevel === 100) {
-                                embed.description += `\n\nAdditionally, you get a free loot box with a guaranteed platinum tier reward.`;
-                                embed.description += `\n\nAdditionally, you may select any lootbox prize that will be unlocked for you.`;
-                                message.channel.send({ embeds: [ embed ] });
-                                await openBox(message.channel, message.author.id, null, re);
-                                await inventoryModifyItem(message.author.id, "SPEC:Any", 1);
-                            } else if(re && newLevel != 16 && newLevel != 18 && newLevel != 7) {
-                                let boxName = re.map(el => tierNames[el].toLowerCase()).join(" or ");
-                                embed.description += `\n\nAdditionally, you get a free loot box with a guaranteed ${boxName} tier reward.`;
-                                message.channel.send({ embeds: [ embed ] });
-                                await openBox(message.channel, message.author.id, null, re);
-                            } else {
-                                switch(newLevel) {
-                                    case 5: 
-                                        let verified = message.guild.roles.cache.find(role => role.name == "Verified");
-                                        if(verified) {
-                                            message.member.roles.add(verified);
-                                            embed.description += `\n\nAdditionally, you got the \`Verified\` role, which grants a few additional permissions.`;    
-                                        }
-                                    break;
-                                    case 7:
-                                        embed.description += `\n\nAdditionally, you may now transfer rewards to others using \`${stats.prefix}inventory transfer\`.`;
-                                        await inventoryModifyItem(message.author.id, "BOT:invtransfer", 1);
-                                    break;
-                                    case 10:
-                                        embed.description += `\n\nAdditionally, you may now access the market using \`${stats.prefix}market\`.`;
-                                        await inventoryModifyItem(message.author.id, "BOT:market", 1);
-                                    break;
-                                    case 16:
-                                        embed.description += `\n\nAdditionally, you may now recycle rewards into coins using \`${stats.prefix}recycle\`.`;
-                                        await inventoryModifyItem(message.author.id, "BOT:recycle", 1);
-                                    break;
-                                    case 18:
-                                        embed.description += `\n\nAdditionally, you may now update your nickname while out of game \`${stats.prefix}nickname\`.`;
-                                        await inventoryModifyItem(message.author.id, "BOT:nick", 1);
-                                    break;
-                                    case 25:
-                                        embed.description += `\n\nAdditionally, you may select an icon (that is available as loot) that will be unlocked for you.`;
-                                        await inventoryModifyItem(message.author.id, "SPEC:AnyIcon", 1);
-                                    break;
-                                    case 50:
-                                        embed.description += `\n\nAdditionally, you may select a skinpack (that is available as loot) that will be unlocked for you.`;
-                                        await inventoryModifyItem(message.author.id, "SPEC:AnySkinpack", 1);
-                                    break;
-                                    case 75:
-                                        embed.description += `\n\nAdditionally, you may select a guarantor (that is available as loot) that will be unlocked for you.`;
-                                        await inventoryModifyItem(message.author.id, "SPEC:AnyGuarantor", 1);
-                                    break;
-                                }
-                                message.channel.send({ embeds: [ embed ] });
-                            }
-                        } else if(newLevelString.length === 2 && newLevelString[0] === newLevelString[1]) {
-                            let boxRewards = [[1], [1,2], [1,3], [1,2,4], [1,2,3,4], [2,3], [2,4], [3,4], [4]];
-                            let re = boxRewards[(+ newLevelString[0]) - 1];
-                            // Standard Box Reward
-                            if(re) {
-                                let boxName = re.map(el => tierNames[el].toLowerCase()).join(" or ");
-                                embed.description += `\n\nAdditionally, you get a free loot box with a guaranteed ${boxName} tier reward.`;
-                                message.channel.send({ embeds: [ embed ] });
-                                await openBox(message.channel, message.author.id, null, re);
-                            } else {
-                                message.channel.send({ embeds: [ embed ] });
-                            }
-                        } else {  
-                            if(newLevel === 1) embed.description += `\n\nYou can check your XP and Level using \`${stats.prefix}xp\` and see a leaderboard using \`${stats.prefix}xp list\`.`;  
-                            message.channel.send({ embeds: [ embed ] });
-                        }
-                    } else {
-                        console.log(`Delayed Level Up for ${message.member.displayName}!`);
-                    }
-                }
-            } else {
-                await sqlProm("INSERT INTO activity (player, count, timestamp) VALUES (" + connection.escape(lastChatter) + ", 1, " + connection.escape(curTime) +  ")");
-            }
-        }
-    }
+    xpProcessMessage(message);
     
 	/* Gif Check */
 	if(!message.author.bot && (isParticipant(message.member) || isGhost(message.member)) && message.content.search("http") >= 0 && stats.ping.length > 0 && stats.gamephase == gp.INGAME) {
@@ -795,6 +672,10 @@ client.on("messageCreate", async message => {
 	/* Emoji */
 	case "emojis":
 		cmdEmojis(message.channel);
+	break;
+	/* Emoji Alive */
+	case "emojis_alive":
+		cmdEmojisAlive(message.channel);
 	break;
 	/* Promote */
 	case "promote":

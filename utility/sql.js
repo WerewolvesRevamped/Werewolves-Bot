@@ -80,6 +80,7 @@ module.exports = function() {
 		sqlQuery("CREATE TABLE IF NOT EXISTS `storytime` ( `ai_id` int(11) NOT NULL AUTO_INCREMENT, `message` text NOT NULL, PRIMARY KEY (`ai_id`))")
 		sqlQuery("CREATE TABLE IF NOT EXISTS `teams` ( `ai_id` int(11) NOT NULL AUTO_INCREMENT, `name` text NOT NULL, `display_name` text NOT NULL, `win_condition` text NOT NULL, `desc_basics` text NOT NULL, `desc_formalized` text NOT NULL, `parsed` text DEFAULT NULL, `target` text DEFAULT NULL, `counter` int(11) NOT NULL DEFAULT 0, `active` int(11) NOT NULL DEFAULT 0, PRIMARY KEY (`ai_id`))")
 		sqlQuery("CREATE TABLE IF NOT EXISTS `theme` ( `ai_id` int(11) NOT NULL AUTO_INCREMENT, `theme` text NOT NULL, `original` text NOT NULL, `new` text NOT NULL, PRIMARY KEY (`ai_id`))")
+		sqlQuery("CREATE TABLE IF NOT EXISTS `curses` ( `ai_id` int(11) NOT NULL AUTO_INCREMENT, `owner` text NOT NULL, `type` text NOT NULL, `target` text NOT NULL, `data` text NOT NULL, `time` text NOT NULL, PRIMARY KEY (`ai_id`))")
 	}
 
 	/**

@@ -21,6 +21,8 @@ module.exports = function() {
             return;
         }
 		let roleName = args.join(" ").replace(/[^a-zA-Z0-9'\-_\$ ]+/g,""); // get rid of characters that are not allowed in role names
+        console.log(roleName, authorId, await applyPackLUTInverted(roleName, authorId));
+        roleName = await applyPackLUTInverted(roleName, authorId);
         let origRoleName = roleName;
         roleName = parseRole(roleName);
 		if(!verifyInfoMessage(roleName)) { // not a valid role

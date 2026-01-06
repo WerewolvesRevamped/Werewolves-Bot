@@ -139,9 +139,7 @@ module.exports = function() {
                 case 4:
                     let ids = await getAllLivingIDs();
                     for(let i = 0; i < ids.length; i++) {
-                        if(Math.random() > 0.75) {
-                            await sqlProm("INSERT INTO packs (player, pack) VALUES (" + connection.escape(ids[i]) + ",6) ON DUPLICATE KEY UPDATE pack=6");
-                        }
+                        createPackCurse(pid, ids[i], 6, 24 * 60);
                     }
                     await cachePacks();
                     dmsgText =  `You will regret killing %s. You have been cursed.`;
@@ -166,9 +164,7 @@ module.exports = function() {
                 case 10:
                     let ids2 = await getAllLivingIDs();
                     for(let i = 0; i < ids2.length; i++) {
-                        if(Math.random() > 0.75) {
-                            await sqlProm("INSERT INTO packs (player, pack) VALUES (" + connection.escape(ids2[i]) + ",46) ON DUPLICATE KEY UPDATE pack=46");
-                        }
+                        createPackCurse(pid, ids2[i], 46, 24 * 60);
                     }
                     await cachePacks();
                     dmsgText =  `${getEmoji('Bear')} %s couldn't *bear* it anymore! ${getEmoji('Bear')}`;

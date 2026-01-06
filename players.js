@@ -84,6 +84,18 @@ module.exports = function() {
 	this.cmdEmojis = function(channel) {
 		channel.send("```\n" + emojiIDs.map(el =>  el.emoji + " " + el.id).join("\n") + "\n``` ```\n" + emojiIDs.map(el =>  el.emoji).join(" ") + "\n```");
 	}
+    
+	/* Handles Emoji Get command */
+	this.cmdEmojisAlive = async function(channel) {
+		// Check gamephase
+		if(stats.gamephase < gp.INGAME) { 
+			channel.send("⛔ Command error. Can only list alive players in ingame phase."); 
+			return; 
+		}
+        let res = await sqlProm("SELECT id,emoji FROM players WHERE alive=1");
+        let top = res.map(el =>  el.emoji + " " + el.id).join("\n");
+		channel.send("```\n" + (top.length?top:"-") + "\n``` ```\n" + (top.length?res.map(el =>  el.emoji).join(" "):"-") + "\n```");
+	}
 	
 	/* Lists all signedup players */
 	this.cmdPlayersList = function(channel) {
@@ -672,6 +684,10 @@ module.exports = function() {
 			message.channel.send("⛔ Player error. Can not sub in a non-substitute!"); 
 			return; 
         }
+        if(isMentor(newPlayerMember)) {
+			message.channel.send("⛔ Player error. Can not sub in a mentor!"); 
+			return; 
+        }
         
         
         message.channel.send(`✳️ Replacing <@${originalPlayer}> with <@${newPlayer}>! This may take a while. Please wait until execution is complete before executing further commands.`);
@@ -1097,6 +1113,12 @@ module.exports = function() {
 			return; 
         } else if(isSignedUp(member) && signupMode == "substitute") {
 			channel.send("⛔ Sign up error. Can't substitute while being signed up! Use `" + stats.prefix + "signout` to sign out."); 
+			return; 
+        } else if(isMentor(member) && signupMode == "signup") {
+			channel.send("⛔ Sign up error. Can't sign up while being a mentor! Use `" + stats.prefix + "unsubstitute` to stop being a substitute player."); 
+			return; 
+        } else if(isMentor(member) && signupMode == "substitute") {
+			channel.send("⛔ Sign up error. Can't substitute while being a mentor! Use `" + stats.prefix + "signout` to sign out."); 
 			return; 
         }
         

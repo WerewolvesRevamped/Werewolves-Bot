@@ -16,6 +16,7 @@ require("./mentors.js")();
 require("./bot.js")();
 require("./permissions.js")();
 require("./parsing.js")();
+require("./curses.js")();
 
 
 module.exports = function() {

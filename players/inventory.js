@@ -293,6 +293,11 @@ module.exports = function() {
 			return;   
         }
         
+        if(code.substr(0, 3).toLowerCase() === "tro") { 
+			message.channel.send("⛔ Command error. Cannot recycle trophy type items."); 
+			return;   
+        }
+        
         if(code.substr(0, 3).toLowerCase() === "unk") { 
 			message.channel.send("⛔ Command error. Cannot recycle unknown type items."); 
 			return;   
