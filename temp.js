@@ -146,7 +146,8 @@ module.exports = function() {
                 "parse_prompt": ["pp", "prompt_parse"],
                 "reevaluate": ["reeval", "reval"],
                 "bot": ["cmds", "command", "commands", "cmd"],
-                "guarantors": ["guarant", "gua", "guarantor"]
+                "guarantors": ["guarant", "gua", "guarantor"],
+                "status": ["st"],
         };
         
     this.parseAlias = function(alias) {

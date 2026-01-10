@@ -440,6 +440,9 @@ module.exports = function() {
         // link/parse
         ["update", PERM.GM, "Syncs the bot to github.", "", "Pulls all data from github and reparses all elements.", "update", [], CMDSTATE.RDY],
         ["parse", PERM.GM, "Parses a specific element.", "<Element Type> <Element Name>", "Parses a specific element of type <Element Type> with name <Element Name>", "parse roles citizen", [], CMDSTATE.RDY],
+        // status
+        ["status", PERM.GM, "Manages statuses.", "<Subcommand>", "Group of commands to handle statuses. $help status <sub-command> for detailed help.", "", [], CMDSTATE.RDY],
+            ["status role", PERM.GM, "Sets the status for a role.", "<Role> <Status>", "Updates the status of a role. When no status is set, looks up the current status instead.", "status role citizen tested", [], CMDSTATE.RDY],
     ];
     
     this.getCommandHelp = function(cmd, member) {

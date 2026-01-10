@@ -38,6 +38,7 @@ require("./utility/utility.js")();
 require("./abilities/abilities.js")();
 require("./attributes/attributes.js")();
 require("./stats/stats.js")();
+require("./shared/roles.js")();
 
 var botLoaded = false;
 
@@ -962,6 +963,9 @@ client.on("messageCreate", async message => {
     break;
     case "parse_prompt":
         if(checkGM(message)) cmdParsePrompt(message, args, argsX);
+    break;
+    case "status":
+        if(checkGM(message)) cmdStatus(message, args, argsX);
     break;
 	/* Invalid Command */
 	default:

@@ -17,6 +17,7 @@
 		"host": "localhost",
 		"user": "USER",
 		"password": "PASSWORD",
-		"database": "DB Name"
+		"database": "DB Name",
+        "shared_database": "DB Name"
 	}
 }

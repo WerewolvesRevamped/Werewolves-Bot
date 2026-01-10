@@ -6,6 +6,7 @@
 module.exports = function() {
 	/* Variables */
 	this.connection = null;
+	this.connectionShared = null;
 	this.mysql = require("mysql");
 
 	
@@ -14,7 +15,7 @@ module.exports = function() {
     Creates the connection to the database and then loads all the stats afterwards
     */
 	this.sqlSetup = async function() {
-		return new Promise((resolve) => {
+		let mainProm = new Promise((resolve) => {
 			// Create connection
 			connection = mysql.createConnection({
 				host     :  config.db.host,
@@ -35,7 +36,24 @@ module.exports = function() {
 				}
 				resolve();
 			});
-		})
+		});
+        let sharedProm = new Promise((resolve) => {
+			// Create connectionShared
+			connectionShared = mysql.createConnection({
+				host     :  config.db.host,
+				user     : config.db.user,
+				password : config.db.password,
+				database : config.db.shared_database,
+				charset: "utf8mb4",
+				supportBigNumbers : true
+			});
+			// Connection connectionShared
+			connectionShared.connect(async (err) => {
+				if(err) logO(err);
+				resolve();
+			});
+		});
+        return await Promise.all([mainProm, sharedProm]);
 	}
 
 	function createTables() {
@@ -172,6 +190,12 @@ module.exports = function() {
               sql(query, result => {
                   res(result);
               });
+        });
+    }
+    
+    this.sqlPromShared = function(query) {
+        return new Promise(res => {
+              connectionShared.query(query, (err, result, fields) => res(result));
         });
     }
     
