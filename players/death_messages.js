@@ -118,6 +118,7 @@ module.exports = function() {
         let nickname = client.users.cache.get(pid)?.displayName ?? pid;
         let dmsg = await sqlPromOneEsc("SELECT message FROM death_message WHERE player=", pid);
         let dmsgText = "%s has died.";
+        let livingIds = await getAllLivingIDs();
         if(dmsg && dmsg.message) {
             switch(+dmsg.message) {
                 default:
@@ -137,9 +138,8 @@ module.exports = function() {
                     setCustomStatus(`Rating ${nickname}'s death: ${rand}/10`);
                 break;
                 case 4:
-                    let ids = await getAllLivingIDs();
-                    for(let i = 0; i < ids.length; i++) {
-                        createPackCurse(pid, ids[i], 6, 24 * 60);
+                    for(let i = 0; i < livingIds.length; i++) {
+                        createPackCurse(pid, livingIds[i], 6, 24 * 60);
                     }
                     await cachePacks();
                     dmsgText =  `You will regret killing %s. You have been cursed.`;
@@ -162,9 +162,8 @@ module.exports = function() {
                     dmsgText =  `${getEmoji('crow')} It seems a murder of crows has murdered %s! ${getEmoji('crow')}`;
                 break;
                 case 10:
-                    let ids2 = await getAllLivingIDs();
-                    for(let i = 0; i < ids2.length; i++) {
-                        createPackCurse(pid, ids2[i], 46, 24 * 60);
+                    for(let i = 0; i < livingIds.length; i++) {
+                        createPackCurse(pid, livingIds[i], 46, 2 * 60);
                     }
                     await cachePacks();
                     dmsgText =  `${getEmoji('Bear')} %s couldn't *bear* it anymore! ${getEmoji('Bear')}`;
@@ -229,6 +228,12 @@ module.exports = function() {
                 break;
                 case 25:
                     dmsgText =  "%s died.";
+                break;
+                case 26:
+                    for(let i = 0; i < livingIds.length; i++) {
+                        createPackCurse(pid, livingIds[i], 1, 24 * 60);
+                    }
+                    dmsgText =  "⚠️ SYSTEM ERROR ⚠️ FAILED TO DETECT COMPONENT %s";
                 break;
             }
         }
