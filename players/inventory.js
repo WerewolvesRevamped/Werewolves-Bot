@@ -545,6 +545,98 @@ module.exports = function() {
     }
     
     /**
+    Command: $keep
+    **/
+    this.cmdKeep = async function(channel, authorid, args) {
+        let keeping = await sqlProm("SELECT * FROM market WHERE owner=" + connection.escape(authorid));
+        keeping = keeping.map(el => el.item.toLowerCase());
+        let keepingCodes = keeping.map(el => el.split(":")[0].toLowerCase());
+        
+        // Check arguments
+		if(!args[0]) { 
+            if(keeping.length === 0) {
+                channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "keep <item>`!"); 
+                return; 
+            } else {
+                channel.send("ℹ️ You are currently keeping the following items:\n- " + keeping.map(el2 => ALL_LOOT.filter(el => el[0].toLowerCase() === el2.toLowerCase())[0][1] + " (" + el2.toUpperCase() + ")").join("\n- "));
+                return;
+            }
+		}
+        // Get item
+        let item = ALL_LOOT.filter(el => el[0].toLowerCase() === args[0].toLowerCase());
+        // Invalid item
+		if(item.length != 1) { 
+			channel.send("⛔ Command error. Not a valid item! Make sure to use the item code as specified in your inventory."); 
+			return; 
+		} 
+        let code = item[0][0];
+        
+        if(keeping.includes(code.toLowerCase())) {
+            // readd item
+            await inventoryModifyItem(authorid, code, 1);
+            // delete offer
+            await sqlPromEsc("DELETE FROM market WHERE owner=" + connection.escape(authorid) + " AND item=", code);
+            channel.send(`✅ Removed ${item[0][1]} (${code.toUpperCase()}) from the items you are keeping!`);
+            return;
+        }
+        
+        // get item count
+        let count = await inventoryGetItem(authorid, code);
+        if(count <= 0) {
+			channel.send("⛔ Command error. Insufficient item count! Check your inventory to make sure you have this item."); 
+			return; 
+        }
+        
+        let codeType = code.split(":")[0].toLowerCase();
+        let typeCount;
+        
+        switch(codeType) {
+            default:
+                channel.send("😭 Unfortunately items of this type are not eligible for keeping.");
+                return;
+            break;
+            case "sp":
+                typeCount = keepingCodes.filter(el => el === "sp").length;
+                if(typeCount > 3) {
+                    channel.send("😭 You have already marked the maximum amount of skinpacks for keeping.");
+                    return;
+                }
+            break;
+            case "cat":
+            case "rt":
+            case "al":
+                typeCount = keepingCodes.filter(el => el === "cat" || el === "rt" || el === "al").length;
+                if(typeCount > 3) {
+                    channel.send("😭 You have already marked the maximum amount of guarantors for keeping.");
+                    return;
+                }
+            break;
+            case "ic":
+                typeCount = keepingCodes.filter(el => el === "ic").length;
+                if(typeCount > 2) {
+                    channel.send("😭 You have already marked the maximum amount of icons for keeping.");
+                    return;
+                }
+            break;
+            case "dm":
+                typeCount = keepingCodes.filter(el => el === "dm").length;
+                if(typeCount > 2) {
+                    channel.send("😭 You have already marked the maximum amount of death messages for keeping.");
+                    return;
+                }
+            break;
+        }
+        
+        // update item count
+        await inventoryModifyItem(authorid, code, -1);
+        let timestamp = xpGetTime();
+        let day = 1440 / 12;
+        let expiration = timestamp + 10000 * day;
+        await sqlProm("INSERT INTO market (item, price, owner, timestamp) VALUES (" + connection.escape(code.toLowerCase()) + ",100000," + connection.escape(authorid) + "," + connection.escape(expiration) + ")");
+        channel.send(`✅ Keeping ${item[0][1]} (${code.toUpperCase()})!`);
+    }
+    
+    /**
     Command: $market buy
     **/
     this.cmdMarketBuy = async function(channel, author, args) {
