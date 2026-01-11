@@ -48,7 +48,7 @@ module.exports = function() {
         
         // format item list
         let itemsTxt = [];
-        for(let i = 0; i < items.length; i++) itemsTxt.push(`• ${items[i][1][1]} (${items[i][0]}) ${items[i][2] > 1 ? '(x' + items[i][2] + ')' : ''}`);
+        for(let i = 0; i < items.length; i++) itemsTxt.push(`• ${items[i][1][1]} (DM:${items[i][0]}) ${items[i][2] > 1 ? '(x' + items[i][2] + ')' : ''}`);
         let embed = { title: "Death Message", description: `<@${message.author.id}>, here is a list of custom death messages available for you. You can switch death message by running \`${stats.prefix}dmsg select <ID>\`, where you replace \`<ID>\` with the __number__ of the death message you want to select.`, color: 8984857 };
         buildItemListEmbed(itemsTxt, embed);
         embed.thumbnail = { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` };

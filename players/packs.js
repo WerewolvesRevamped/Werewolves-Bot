@@ -54,8 +54,8 @@ module.exports = function() {
         items = items.sort((a,b) => a[0] - b[0]); 
         
         // format item list
-        let itemsTxt = [`${getEmoji('pack_default')} Default - 0`];
-        for(let i = 0; i < items.length; i++) itemsTxt.push(`${getEmoji('pack_'+items[i][1])} ${toTitleCase(items[i][1])} - ${items[i][0]} ${items[i][2] > 1 ? '(x' + items[i][2] + ')' : ''}`);
+        let itemsTxt = [`${getEmoji('pack_default')} Default - SP:0`];
+        for(let i = 0; i < items.length; i++) itemsTxt.push(`${getEmoji('pack_'+items[i][1])} ${toTitleCase(items[i][1])} - SP:${items[i][0]} ${items[i][2] > 1 ? '(x' + items[i][2] + ')' : ''}`);
         let embed = { title: "Available Packs", description: `<@${author.id}>, here is a list of skinpacks available for you. You can switch skinpack by running \`${stats.prefix}packs select <ID>\`, where you replace \`<ID>\` with the __number__ of the skinpack you want to select.`, color: 8984857 };
         buildItemListEmbed(itemsTxt, embed);
         embed.thumbnail = { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` };
@@ -418,7 +418,7 @@ module.exports = function() {
                     for(let i = lut.length - 1; i >= 0; i--) {
                         if(lut[i][1].length > 1) {
                             txt = txt.replace(new RegExp("(?<!\\<\\?|[a-zA-Z])" + lut[i][1] + "(?!\\:\\>|[a-rt-zA-Z])", 'g'), lut[i][0]);
-                        } else {
+                        } else if(lut[i][1].length > 0) {
                             txt = txt.replace(new RegExp("(?<!\\<\\?)" + lut[i][1] + "(?!\\:\\>)", 'g'), lut[i][0]);
                         }
                     }

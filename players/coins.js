@@ -53,6 +53,9 @@ module.exports = function() {
         if(coinCount.length === 0) {
             await sqlProm("INSERT INTO coins (player, coins) VALUES (" + connection.escape(user) + "," + connection.escape(num) + ")");
             if(!silent) channel.send(`✅ Updated <@${user}>'s coin count from \`0\` to \`${num}\`.`);
+        } else if((coinCount[0].coins + num) > 1000) {
+            await sqlPromEsc("UPDATE coins SET coins=1000 WHERE player=", user);
+            if(!silent) channel.send(`✅ Updated <@${user}>'s coin count from \`${coinCount[0].coins}\` to \`1000\` [Max. Coins Reached].`);
         } else {
             await sqlPromEsc("UPDATE coins SET coins=" + connection.escape(coinCount[0].coins + num) + " WHERE player=", user);
             if(!silent) channel.send(`✅ Updated <@${user}>'s coin count from \`${coinCount[0].coins}\` to \`${coinCount[0].coins + num}\`.`);

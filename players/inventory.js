@@ -588,8 +588,6 @@ module.exports = function() {
         }
         
         let codeType = code.split(":")[0].toLowerCase();
-                console.log(keeping);
-                console.log(keepingCodes);
         let typeCount;
         
         switch(codeType) {

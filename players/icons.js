@@ -58,7 +58,7 @@ module.exports = function() {
         
         // format item list
         let itemsTxt = [];
-        for(let i = 0; i < items.length; i++) itemsTxt.push(`• ${getEmoji(items[i][1])} ${items[i][2][1]} ${items[i][0] > 1 ? '(x' + items[i][0] + ')' : ''}`);
+        for(let i = 0; i < items.length; i++) itemsTxt.push(`• ${getEmoji(items[i][1])} ${items[i][2][0]} ${items[i][0] > 1 ? '(x' + items[i][0] + ')' : ''}`);
         let embed = { title: "Role Icons", description: `Here is a list of icon roles available for you, <@${message.member.id}>. You can switch icon role by running \`${stats.prefix}icon select "<Name>"\`, where you replace \`<Name>\` with the name of the icon you want to select.`, color: 8984857 };
         buildItemListEmbed(itemsTxt, embed);
         embed.thumbnail = { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` };
