@@ -141,6 +141,7 @@ module.exports = function() {
                 "recycle": ["rec", "re"],
                 "nickname": ["nick"],
                 "booster": ["boosters", "bst"],
+                "curse": ["curses", "cur"],
                 "market": ["mk", "mkt"],
                 "schedule": ["sched", "sch"],
                 "parse_prompt": ["pp", "prompt_parse"],

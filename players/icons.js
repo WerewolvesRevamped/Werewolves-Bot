@@ -86,23 +86,39 @@ module.exports = function() {
             return;
         } 
         
+        let res = await setIcon(message.member, iconName, args[1]);
+        if(res) {
+            let embed = { title: "Role Icon", description: `<@${message.member.id}>, your role icon has been updated to ${toTitleCase(iconName)}.`, color: 5490704 };
+            embed.thumbnail = { url: iconUrl };
+            message.channel.send({ embeds: [ embed ] });
+        } else {
+            message.channel.send("⛔ Command error! Could not find icon!");
+        }
+        
+    }
+    
+    /**
+    Set icon
+    **/
+    this.setIcon = async function(member, iconNameRaw) {
+        let iconName = iconNameRaw.toLowerCase().replace(/[^a-z ]*/g, "").trim();
         // revoke old role if applicable
-        let trOld = message.member.roles.cache.find(r => r.name.substr(0, 5) === "Icon_");
+        let trOld = member.roles.cache.find(r => r.name.substr(0, 5) === "Icon_");
         if(trOld) {
             if(trOld.members.size === 1) {
                 trOld.delete();
             } else {
-                message.member.roles.remove(trOld);
+                member.roles.remove(trOld);
             }
         }
         
         // get user data
         let rName = `Icon_${toTitleCase(iconName).replace(/ /g,"")}`;
-        let tr = message.guild.roles.cache.find(r => r.name === rName);
+        let tr = member.guild.roles.cache.find(r => r.name === rName);
         
         let iconUrl;
         // get role url
-        let role = parseRole(args[1]);
+        let role = parseRole(iconNameRaw);
         let isRole = verifyRole(role);
         if(isRole) {
             let roleData = await getRoleDataFromName(iconName);
@@ -114,26 +130,27 @@ module.exports = function() {
             if(lutval) {
                 iconUrl = `${iconRepoBaseUrl}${lutval}.png`;
             } else {
-                message.channel.send("⛔ Command error! Could not find icon!");
-                return; 
+                return false; 
             }
         }
         
         if(tr) { // role found -> assign it
-            message.member.roles.add(tr);
-            let embed = { title: "Role Icon", description: `<@${message.member.id}>, your role icon has been updated to ${toTitleCase(iconName)}.`, color: 5490704 };
-            embed.thumbnail = { url: iconUrl };
-            message.channel.send({ embeds: [ embed ] });
+            member.roles.add(tr);
         } else {
-            let dRole = await message.guild.roles.create({ name: rName, reason: "Automatic Token Role" });
-            let hr = message.guild.roles.cache.find(r => r.name === "--- Token Role ---");
+            let dRole = await member.guild.roles.create({ name: rName, reason: "Automatic Token Role" });
+            let hr = member.guild.roles.cache.find(r => r.name === "--- Token Role ---");
             await dRole.setPosition(hr ? hr.position - 2 : 0);
             await dRole.setIcon(iconUrl);
-            await message.member.roles.add(dRole);
-            let embed = { title: "Role Icon", description: `<@${message.member.id}>, your role icon has been set to ${toTitleCase(iconName)}.`, color: 5490704 };
-            embed.thumbnail = { url: iconUrl };
-            message.channel.send({ embeds: [ embed ] });
+            await member.roles.add(dRole);
         }
+        return true;
+    }
+    
+    /** Get current icon **/
+    this.getCurrentIcon = function(id) {
+        let tr = mainGuild.members.cache.get(id).roles.cache.find(r => r.name.substr(0, 5) === "Icon_");
+        if(!tr) return null;
+        return tr.split("_")[1].replace(/([a-z])(?=[A-Z])/,"$1 ");
     }
     
     

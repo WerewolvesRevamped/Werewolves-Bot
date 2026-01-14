@@ -940,6 +940,13 @@ client.on("messageCreate", async message => {
         }
 		cmdBooster(message, args);
     break;
+    case "curse":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
+		cmdCurse(message, args);
+    break;
     case "recycle":
         if(!config.coins) {
             message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
