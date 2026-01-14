@@ -75,6 +75,8 @@ module.exports = function() {
 			return; 
 		} 
         
+        args[1] = args[1].replace(/ic:|IC:/, "");
+        
         // parse icon name
         let iconName = args[1].toLowerCase().replace(/[^a-z ]*/g, "").trim();
 
@@ -89,7 +91,7 @@ module.exports = function() {
         let res = await setIcon(message.member, iconName, args[1]);
         if(res) {
             let embed = { title: "Role Icon", description: `<@${message.member.id}>, your role icon has been updated to ${toTitleCase(iconName)}.`, color: 5490704 };
-            embed.thumbnail = { url: iconUrl };
+            embed.thumbnail = { url: res };
             message.channel.send({ embeds: [ embed ] });
         } else {
             message.channel.send("⛔ Command error! Could not find icon!");
@@ -143,14 +145,14 @@ module.exports = function() {
             await dRole.setIcon(iconUrl);
             await member.roles.add(dRole);
         }
-        return true;
+        return iconUrl;
     }
     
     /** Get current icon **/
     this.getCurrentIcon = function(id) {
         let tr = mainGuild.members.cache.get(id).roles.cache.find(r => r.name.substr(0, 5) === "Icon_");
         if(!tr) return null;
-        return tr.split("_")[1].replace(/([a-z])(?=[A-Z])/,"$1 ");
+        return tr.name.split("_")[1].replace(/([a-z])(?=[A-Z])/,"$1 ");
     }
     
     

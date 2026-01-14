@@ -163,7 +163,7 @@ module.exports = function() {
                 break;
                 case 10:
                     for(let i = 0; i < livingIds.length; i++) {
-                        createPackCurse(pid, livingIds[i], 46, 2 * 60);
+                        createPackCurse(pid, livingIds[i], 46, 60);
                     }
                     await cachePacks();
                     dmsgText =  `${getEmoji('Bear')} %s couldn't *bear* it anymore! ${getEmoji('Bear')}`;
