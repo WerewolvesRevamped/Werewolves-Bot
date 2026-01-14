@@ -164,6 +164,13 @@ module.exports = function() {
 			channel.send("⛔ Syntax error. `" + author.id + "` is not a valid player!");
 			return;
 		}
+        let ch = await checkCurse(author.id, "pack");
+        if(ch) {
+            channel.send("☠️ You cannot change packs while you have been cursed. Please wait for the curse to expire <t:" + ch.time + ":R>!");
+			return;
+        }
+        
+        
         if(AVAILABLE_PACKS.includes(args[1])) {
             args[1] = AVAILABLE_PACKS.indexOf(args[1]) + 1;
         }
