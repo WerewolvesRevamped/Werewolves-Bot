@@ -53,7 +53,7 @@ module.exports = function() {
             let name = "";
             switch(el.type) {
                 case "XP": name = `x${el.multiplier} XP Booster`; break;
-                case "LUCK": name = `${luckBoosterNames[(+el.multiplier)-1]} Luck Booster`; break;
+                case "LUCK": name = `${luckBoosterNames[el.multiplier]} Luck Booster`; break;
             }
             return `${name} - <@${el.creator}> - ${Math.floor((new Date((+el.end_time) * 1000) - new Date()) / 1000 / 60)}m left`
         });
@@ -76,8 +76,8 @@ module.exports = function() {
     /**
     Command: $booster use
     **/
-    this.luckBoosterNames = ["Slight", "Decent", "Significant"];
-    this.luckBoosterNames2 = ["Slightly", "Decently", "Significantly"];
+    this.luckBoosterNames = { 1: "Slight", 2: "Decent", 3: "Significant", "-10": "Inverse" };
+    this.luckBoosterNames2 = { 1: "Slightly", 2: "Decently", 3: "Significantly", "-10": "Inversely" };
     this.cmdBoosterUse = async function(message, args) {
         if(!args[1]) { 
 			message.channel.send("⛔ Syntax error. Not enough arguments!");
@@ -120,11 +120,11 @@ module.exports = function() {
                 message.channel.send({ embeds: [ embed ] });
             } break;
             case "lu": {
-                let multiplier = + cSplit[1].substr(0, 1);
+                let multiplier = + cSplit[1].substr(0, 1).replace("x","10").replace("n","-10");
                 let duration = + cSplit[1].substr(1);
                 let endTime = Math.floor((+new Date()) / 1000) + duration * 60 * 60;
                 await sqlProm("INSERT INTO active_boosters (multiplier, end_time, creator, type) VALUES (" + connection.escape(multiplier) + "," + connection.escape(endTime) + "," + connection.escape(message.author.id) + ",'LUCK')");
-                embed = { title: "Boosters", description: `<@${message.member.id}>, you have activated a booster to improve everyones luck \`${luckBoosterNames2[multiplier-1].toLowerCase()}\` for the next \`${duration}\` hour(s).`, color: 5490704 };
+                embed = { title: "Boosters", description: `<@${message.member.id}>, you have activated a booster to improve everyones luck \`${luckBoosterNames2[multiplier].toLowerCase()}\` for the next \`${duration}\` hour(s).`, color: 5490704 };
                 message.channel.send({ embeds: [ embed ] });
             } break;
             default:
@@ -156,7 +156,8 @@ module.exports = function() {
         await sqlPromEsc("DELETE FROM active_boosters WHERE end_time <", nowTime);
         
         let boosters = await sqlProm("SELECT multiplier FROM active_boosters WHERE type='LUCK'");
-        let boost = 0;
+        if(boosters.length === 0) return 0;
+        let boost = -100;
         for(let i = 0; i < boosters.length; i++) {
             boost = Math.max(boost, boosters[i].multiplier);
         }

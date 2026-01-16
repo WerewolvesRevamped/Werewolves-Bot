@@ -17,6 +17,7 @@ require("./bot.js")();
 require("./permissions.js")();
 require("./parsing.js")();
 require("./curses.js")();
+require("./reservations.js")();
 
 
 module.exports = function() {

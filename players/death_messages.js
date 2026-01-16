@@ -235,6 +235,14 @@ module.exports = function() {
                     }
                     dmsgText =  "⚠️ SYSTEM ERROR ⚠️ FAILED TO DETECT COMPONENT %s";
                 break;
+                case 27:
+                    dmsgText =  "%s was hit by a trophy.";
+                break;
+                case 28:
+                    dmsgText =  "%s died, but they get a consolation curse.";
+                    let consolationPacks = [52, 84, 96, 26, 53, 54, 57, 40, 79];
+                    createPackCurse(pid, pid, consolationPacks[Math.floor(Math.random() * consolationPacks.length)], 7 * 24 * 60);
+                break;
             }
         }
         dmsgText = dmsgText.replace(/%s/g, displayName);

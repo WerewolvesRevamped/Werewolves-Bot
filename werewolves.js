@@ -43,7 +43,7 @@ require("./shared/roles.js")();
 var botLoaded = false;
 
 /* Setup */
-client.on("ready", async () => {
+client.on("clientReady", async () => {
     
     setMainGuild();
 
@@ -73,6 +73,7 @@ client.on("ready", async () => {
         cachePacks();
         getEmojis();
         cachePrompts();
+        cacheReservations();
 		global.client.guilds.fetch(stats.log_guild).then(guild => {
 			guild.members.fetch().then((members) => {
                 //members.forEach(el => console.log(el.user.id));
@@ -229,6 +230,7 @@ client.on("messageCreate", async message => {
         return; // dont do further steps for prompts
     }
     
+    
     // skull reaction
     if(message.content.indexOf("💀") >= 0) {
         let skullPerms = await inventoryGetItem(message.author.id, "bot:skull");
@@ -321,6 +323,13 @@ client.on("messageCreate", async message => {
 	}
 	if(message.content.indexOf(stats.prefix) !== 0) {
         if(message.embeds.length <= 0 && !message.author.bot) uncacheMessage(message);
+        /** NOT A COMMAND */
+        // rage curse [async]
+        handleRageCurse(message);
+        // skull curse [async]
+        handleSkullCurse(message);
+        // huh curse [async]
+        handleHuhCurse(message);
         return;
     }
     
@@ -947,6 +956,13 @@ client.on("messageCreate", async message => {
         }
 		cmdCurse(message, args);
     break;
+    case "reservation":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
+		cmdReservation(message, args);
+    break;
     case "recycle":
         if(!config.coins) {
             message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
@@ -974,6 +990,20 @@ client.on("messageCreate", async message => {
             return;
         }
 		cmdNickname(message, argsX);
+    break;
+    case "profile":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
+		cmdProfile(message, argsX);
+    break;
+    case "me":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
+		cmdProfile(message, [ message.member.id ]);
     break;
     case "parse_prompt":
         if(checkGM(message)) cmdParsePrompt(message, args, argsX);
