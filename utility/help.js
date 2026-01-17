@@ -222,6 +222,7 @@ module.exports = function() {
             ["booster active", PERM.AL, "Lists currently active boosters.", "", "Lists all currently globally active boosters.", "booster active", [], CMDSTATE.RDY],
         ["guarantors", PERM.AL, "Manages your guarantors.", "", "Group of commands to manage your guarantors. See $help guarantors <subcommand>", "", [], CMDSTATE.RDY],
             ["guarantors list", PERM.AL, "Lists your guarantors.", "", "Lists your guarantors.", "guarantors list", [], CMDSTATE.RDY],
+            ["guarantors get", PERM.GM, "Lists a player's guarantors.", "", "Lists a player's guarantors.", "guarantors get @Ts", [], CMDSTATE.RDY],
         ["stash", PERM.AL, "Hides an item.", "<Item Code>", "Hides an item from your inventory.", "stash std:x", ["Stashed!"], CMDSTATE.RDY],
             ["stash list", PERM.AL, "Shows your stash.", "", "Sends your stash as a DM.", "stash list", [], CMDSTATE.RDY, ["stash show"]],
         ["unstash", PERM.AL, "Unhides an item.", "<Item Code>", "Unhides an item in your inventory.", "unstash std:x", ["Unstashed Nothing (STD:X)!"], CMDSTATE.RDY],
