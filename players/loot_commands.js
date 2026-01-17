@@ -4,6 +4,37 @@
 module.exports = function() {
     
     /**
+    Command: $profile
+    **/
+    this.cmdProfile = async function(message, args) {
+        let nickPerms = await inventoryGetItem(message.author.id, "bot:profile");
+        if(nickPerms === 0) {
+            message.channel.send(`⛔ You have not unlocked the ${stats.prefix}profile command.`);
+            return;
+        } else {
+            if(!args[0]) args[0] = message.member.id;
+            let targetUser = parseUser(args[0], message.channel);
+            if(!targetUser) {
+                // Invalid user
+                channel.send("⛔ Syntax error. `" + args[2] + "` is not a valid player!");
+                return;
+            }
+            let targetMember = message.guild.members.cache.get(targetUser);
+            let embed = await getBasicEmbed(message.guild);
+            let name = targetMember.displayName ?? targetMember.user.username;
+            let avatar = targetMember.displayAvatarURL({ size: 4096 }) ?? client.user.displayAvatarURL();
+            embed.image = { url: avatar };
+            embed.author = { icon_url: avatar, name: name };
+            embed.description = `Member of ${message.guild.name} since <t:${Math.floor(targetMember.joinedTimestamp / 1000)}:D>.`;
+            if(targetMember.premiumSinceTimestamp) embed.description += `\nBoosting ${message.guild.name} since <t:${Math.floor(targetMember.premiumSinceTimestamp / 1000)}:D>.`;
+            let ranks = targetMember.roles.cache.filter(r => r.name.search(/Bronze|Silver|Gold|Platinum|Event Winner/)>=0).map(el => el.name).join(", ");
+            if(ranks.length) embed.description += `\nRanks: ${ranks}`; 
+            embed.color = targetMember.displayColor;
+            sendEmbed(message.channel, embed);
+		}
+    }
+    
+    /**
     Command: $nickname
     **/
     this.cmdNickname = async function(message, argsX) {

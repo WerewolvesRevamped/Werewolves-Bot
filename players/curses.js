@@ -54,6 +54,10 @@ module.exports = function() {
             switch(el.type) {
                 case "pack": name = `Pack Curse`; break;
                 case "icon": name = `Icon Curse`; break;
+                case "rage": name = `Rage Curse`; break;
+                case "skul": name = `Skull Curse`; break;
+                case "huhh": name = `Huh Curse`; break;
+                case "cost": name = `Cost Curse`; break;
             }
             return `${name} from <@${el.owner}>. Expires <t:${el.time}:R>.`;
         });
@@ -80,7 +84,7 @@ module.exports = function() {
         let targetUser = parseUser(args[2], message.channel);
         if(!targetUser) {
 			// Invalid user
-			channel.send("⛔ Syntax error. `" + args[2] + "` is not a valid player!");
+			message.channel.send("⛔ Syntax error. `" + args[2] + "` is not a valid player!");
 			return;
 		}
         
@@ -111,7 +115,7 @@ module.exports = function() {
                 }
                 await inventoryModifyItem(message.author.id, code, -1);
                 createPackCurse(message.author.id, targetUser, cSplit[1], 6 * 60);
-                embed = { title: "Curses", description: `<@${message.member.id}>, you have used your curse to apply ${toTitleCase(AVAILABLE_PACKS[cSplit[1]-1])} skinpack to <@${targetUser}>.`, color: 5490704 };
+                embed = { title: "Curses", description: `<@${message.member.id}>, you have used your curse to apply ${cSplit[1]==0?"default":toTitleCase(AVAILABLE_PACKS[cSplit[1]-1])} skinpack to <@${targetUser}>.`, color: 5490704 };
                 message.channel.send({ embeds: [ embed ] });
             } break;
             case "icon": {
@@ -126,12 +130,97 @@ module.exports = function() {
                 embed = { title: "Curses", description: `<@${message.member.id}>, you have used your curse to apply ${toTitleCase(cSplit[1])} icon to <@${targetUser}>.`, color: 5490704 };
                 message.channel.send({ embeds: [ embed ] });
             } break;
+            case "rage": {
+                let ch = await checkCurse(targetUser, "rage");
+                if(ch) {
+                    embed = { title: "Curses", description: `<@${message.member.id}>, you cannot apply a rage curse to <@${targetUser}> as they already have an active rage curse.`, color: 16715021 };
+                    message.channel.send({ embeds: [ embed ] });
+                    return;
+                }
+                await inventoryModifyItem(message.author.id, code, -1);
+                createCurse(message.author.id, "rage", targetUser, "", 24 * 60);
+                curseLog(`<@${message.author.id}> cast a **RAGE** curse on <@${targetUser}>`);
+                embed = { title: "Curses", description: `<@${message.member.id}>, you have used your rage curse on <@${targetUser}>.`, color: 5490704 };
+                message.channel.send({ embeds: [ embed ] });
+            } break;
+            case "skul": {
+                let ch = await checkCurse(targetUser, "skul");
+                if(ch) {
+                    embed = { title: "Curses", description: `<@${message.member.id}>, you cannot apply a skull curse to <@${targetUser}> as they already have an active skull curse.`, color: 16715021 };
+                    message.channel.send({ embeds: [ embed ] });
+                    return;
+                }
+                await inventoryModifyItem(message.author.id, code, -1);
+                createCurse(message.author.id, "skul", targetUser, "", 6 * 60);
+                curseLog(`<@${message.author.id}> cast a **SKULL** curse on <@${targetUser}>`);
+                embed = { title: "Curses", description: `<@${message.member.id}>, you have used your skull curse on <@${targetUser}>.`, color: 5490704 };
+                message.channel.send({ embeds: [ embed ] });
+            } break;
+            case "huh": {
+                let ch = await checkCurse(targetUser, "huhh");
+                if(ch) {
+                    embed = { title: "Curses", description: `<@${message.member.id}>, you cannot apply a huh curse to <@${targetUser}> as they already have an active huh curse.`, color: 16715021 };
+                    message.channel.send({ embeds: [ embed ] });
+                    return;
+                }
+                await inventoryModifyItem(message.author.id, code, -1);
+                createCurse(message.author.id, "huhh", targetUser, "", 24 * 60);
+                curseLog(`<@${message.author.id}> cast a **HUH** curse on <@${targetUser}>`);
+                embed = { title: "Curses", description: `<@${message.member.id}>, you have used your huh curse on <@${targetUser}>.`, color: 5490704 };
+                message.channel.send({ embeds: [ embed ] });
+            } break;
+            case "cost": {
+                let ch = await checkCurse(targetUser, "cost");
+                if(ch) {
+                    embed = { title: "Curses", description: `<@${message.member.id}>, you cannot apply a cost curse to <@${targetUser}> as they already have an active cost curse.`, color: 16715021 };
+                    message.channel.send({ embeds: [ embed ] });
+                    return;
+                }
+                await inventoryModifyItem(message.author.id, code, -1);
+                createCurse(message.author.id, "cost", targetUser, "", 7 * 24 * 60);
+                curseLog(`<@${message.author.id}> cast a **COST** curse on <@${targetUser}>`);
+                embed = { title: "Curses", description: `<@${message.member.id}>, you have used your cost curse on <@${targetUser}>.`, color: 5490704 };
+                message.channel.send({ embeds: [ embed ] });
+            } break;
             default:
                 message.channel.send("⛔ Curse error. Unknown curse type."); 
             break;
         }
     }
     
+    /**
+    Rage Curse
+    **/
+    this.handleRageCurse = async function(message) {
+        if(message.content.length < 20 || Math.random() >= 0.2) return;
+        let ch = await checkCurse(message.author.id, "rage");
+        if(ch) {
+            let rageMessages = ["I disagree with your line of thinking because it's stupid.","That logic doesn't really hold up.","I don't think that makes sense.","You're missing something obvious here.","That's a very questionable conclusion.","I strongly doubt that's correct.","That's... an interesting take.","You might want to think that through again.","I'm not convinced you understand what you're saying.","That's just incorrect.","That's a dumb argument.","This makes no sense at all.","That's an impressively bad take.","That interpretation feels off.","That's not very convincing.","I don't think that works the way you think it does.","That's a strange way to look at it.","You lost me there.","I'm not sure that logic checks out.","That feels unnecessarily wrong.","I think you're overlooking the obvious.","That's a very questionable assumption.","I completely disagree because this makes no sense.","I don't know how you came up with this, but it's dumb.","This line of thinking is awful.","This makes absolutely no sense.","I can't take this seriously."];
+            message.reply(rageMessages[Math.floor(Math.random() * rageMessages.length)]);
+        }
+    }
+    
+    /**
+    Skull Curse
+    **/
+    this.handleSkullCurse = async function(message) {
+        if(Math.random() < 0.5) return;
+        let ch = await checkCurse(message.author.id, "skul");
+        if(ch) {
+            message.react("💀");
+        }
+    }
+    
+    /**
+    Huh Curse
+    **/
+    this.handleHuhCurse = async function(message) {
+        if(Math.random() < 0.9) return;
+        let ch = await checkCurse(message.author.id, "huhh");
+        if(ch) {
+            message.react("🤨");
+        }
+    }
     
     /**
     Create Curses
@@ -200,6 +289,18 @@ module.exports = function() {
                         mem.roles.remove(tr);
                     }
                     curseLog(`**ICON** curse on <@${curCurse.target}> has expired.`);
+                break;
+                case "rage":
+                    curseLog(`**RAGE** curse on <@${curCurse.target}> has expired.`);
+                break;
+                case "skul":
+                    curseLog(`**SKULL** curse on <@${curCurse.target}> has expired.`);
+                break;
+                case "huhh":
+                    curseLog(`**HUH** curse on <@${curCurse.target}> has expired.`);
+                break;
+                case "cost":
+                    curseLog(`**COST** curse on <@${curCurse.target}> has expired.`);
                 break;
             }
         }

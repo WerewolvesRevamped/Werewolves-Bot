@@ -74,10 +74,13 @@ module.exports = function() {
 
         //emoji handling
         if (stats.yes_emoji) {
-            idEmojis.push(["", `<:${client.emojis.cache.get(stats.yes_emoji).name}:${client.emojis.cache.get(stats.yes_emoji).id}>`]);
+            SYSTEM_RESERVATIONS.push(`<:${client.emojis.cache.get(stats.yes_emoji).name}:${client.emojis.cache.get(stats.yes_emoji).id}>`);
         }
         if (stats.no_emoji) {
-            idEmojis.push(["", `<:${client.emojis.cache.get(stats.no_emoji).name}:${client.emojis.cache.get(stats.no_emoji).id}>`]);
+            SYSTEM_RESERVATIONS.push(`<:${client.emojis.cache.get(stats.no_emoji).name}:${client.emojis.cache.get(stats.no_emoji).id}>`);
+        }
+        if(stats.yes_emoji || stats.no_emoji) {
+            cacheReservations();
         }
 
         //later caching
