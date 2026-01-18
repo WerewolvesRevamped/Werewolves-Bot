@@ -454,7 +454,7 @@ module.exports = function() {
     }
     
     this.skinpackUrl = function(name) {
-        return`https://werewolves.me/cards/skinpack.php?pack=${name}&src=`;
+        return`https://scripts.werewolves.me/packs/skinpack.php?pack=${name}&src=`;
     }
     
 }

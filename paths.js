@@ -43,8 +43,9 @@ module.exports = function() {
     /**
     Website Paths
     **/
-    this.website = "https://werewolves.me/";
-    this.cardBaseUrl = `${website}cards/card.php?name=`;
+    this.websiteDomain = `werewolves.me`;
+    this.website = `https://${websiteDomain}/`;
+    this.cardBaseUrl = `https://scripts.${websiteDomain}/cards/card.php?name=`;
     /**
     Packs
     **/

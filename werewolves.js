@@ -783,7 +783,7 @@ client.on("messageCreate", async message => {
     break;
     /* Skinpacks */
     case "packs":
-        if(!config.coins && false) {
+        if(!config.coins) {
             message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
             return;
         }
@@ -882,7 +882,7 @@ client.on("messageCreate", async message => {
 		cmdCoins(message, args);
     break;
     case "inventory":
-        if(!config.coins && false) {
+        if(!config.coins) {
             message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
             return;
         }
@@ -892,15 +892,8 @@ client.on("messageCreate", async message => {
         }
 		cmdInventory(message, args);
     break;
-    case "keep":
-        if(!config.coins && false) {
-            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
-            return;
-        }
-		cmdKeep(message.channel, message.author.id, args);
-    break;
     case "guarantors":
-        if(!config.coins && false) {
+        if(!config.coins) {
             message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
             return;
         }
@@ -918,7 +911,7 @@ client.on("messageCreate", async message => {
 		cmdMarket(message, args);
     break;
     case "icon":
-        if(!config.coins && false) {
+        if(!config.coins) {
             message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
             return;
         }
@@ -936,7 +929,7 @@ client.on("messageCreate", async message => {
 		cmdBot(message, args);
     break;
     case "death_message":
-        if(!config.coins && false) {
+        if(!config.coins) {
             message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
             return;
         }
