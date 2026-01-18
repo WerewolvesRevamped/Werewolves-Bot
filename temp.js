@@ -89,6 +89,7 @@ module.exports = function() {
                 "bot": ["cmds", "command", "commands", "cmd"],
                 "guarantors": ["guarant", "gua", "guarantor"],
                 "status": ["st"],
+                "levelup": ["lvlup", "lu"],
         };
         
     this.parseAlias = function(alias) {

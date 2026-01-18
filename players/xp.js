@@ -163,7 +163,7 @@ module.exports = function() {
                         if(reqXpLevelup && reqXpLevelup <= ((+activity[0].count) + 1) && randChance < 0.25 && !((isParticipant(message.member) || isGhost(message.member) || isHost(message.member)) && stats.gamephase == gp.INGAME)) {
                             console.log(`Level Up for ${message.member.displayName} to Level ${newLevel}!`);
                             await sleep(3000); // delay level up by 30s
-                            await levelUp(message.member, message.channel);
+                            await levelUp(message.member, message.channel, newLevel);
                         } else {
                             console.log(`Delayed Level Up for ${message.member.displayName}!`);
                         }
@@ -176,9 +176,20 @@ module.exports = function() {
     }
     
     /**
+    Command: $levelup
+    **/
+    this.cmdLevelup = function(message, args) {
+        if(args[0] && +args[0] > 0) {
+            levelUp(message.member, message.channel, +args[0]);
+        } else {
+            channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "levelup <level>`!"); 
+        }
+    }
+    
+    /**
     Level Up
     **/
-    this.levelUp = async function(member, channel) {
+    this.levelUp = async function(member, channel, newLevel) {
         await sqlPromEsc("UPDATE activity SET level=level+1 WHERE player=", member.id);
         let coinsReward = newLevel * 5;
         await modifyCoins(member.id, coinsReward);
@@ -187,7 +198,7 @@ module.exports = function() {
         // Level Up Reward
         let newLevelString = newLevel + "";
         if(newLevel % 5 === 0 || [7,16,18].includes(newLevel)) {
-            let boxRewards = [null, null, null, [1], [1,2], null, [1,3], [1,2,3], [1,2,4], [1,2,3,4], null, [1,4], [1,3,4], [2], [2,3], null, [2,4], [2,3,4], [3], [3,4], [4]];
+            let boxRewards = [null, null, null, [1], [1,2], null, null, [1,3], [1,2,3], [1,2,4], null, [1,4], [1,3,4], [2], [2,3], null, [2,4], [2,3,4], [3], [3,4], [4], [0,1,2,3,4,5], [1,2,3,4,5], [2,3,4,5], [3,4,5], [4,5], [5]];
             let re = boxRewards[Math.floor(newLevel / 5)];
             // Standard Box Reward
             if(newLevel === 100) {
@@ -229,6 +240,10 @@ module.exports = function() {
                     case 25:
                         embed.description += `\n\nAdditionally, you may select an icon (that is available as loot) that will be unlocked for you.`;
                         await inventoryModifyItem(member.id, "SPEC:AnyIcon", 1);
+                    break;
+                    case 30:
+                        embed.description += `\n\nAdditionally, you may now reserve an emoji for signups.`;
+                        await inventoryModifyItem(member.id, "BOT:reserve", 1);
                     break;
                     case 50:
                         embed.description += `\n\nAdditionally, you may select a skinpack (that is available as loot) that will be unlocked for you.`;

@@ -182,6 +182,20 @@ module.exports = function() {
                 embed = { title: "Curses", description: `<@${message.member.id}>, you have used your cost curse on <@${targetUser}>.`, color: 5490704 };
                 message.channel.send({ embeds: [ embed ] });
             } break;
+            case "xp": {
+                await inventoryModifyItem(message.author.id, code, -1);
+                curseLog(`<@${message.author.id}> cast a **XP** curse on <@${targetUser}>`);
+                embed = { title: "Curses", description: `<@${message.member.id}>, you have used your xp curse on <@${targetUser}>.`, color: 5490704 };
+                message.channel.send({ embeds: [ embed ] });
+                await sqlPromEsc("UPDATE activity SET count=count-(level*10) WHERE player=", targetUser);
+            } break;
+            case "coin": {
+                await inventoryModifyItem(message.author.id, code, -1);
+                curseLog(`<@${message.author.id}> cast a **COIN** curse on <@${targetUser}>`);
+                embed = { title: "Curses", description: `<@${message.member.id}>, you have used your coin curse on <@${targetUser}>.`, color: 5490704 };
+                message.channel.send({ embeds: [ embed ] });
+                await sqlPromEsc("UPDATE coins SET coins=coins-FLOOR(coins/10) WHERE player=", targetUser);
+            } break;
             default:
                 message.channel.send("⛔ Curse error. Unknown curse type."); 
             break;

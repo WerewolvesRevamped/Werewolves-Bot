@@ -4,34 +4,168 @@
 module.exports = function() {
     
     /**
+    Command: $time
+    **/
+    function pad(num) {
+        return num.toString().padStart(2, '0');
+    }
+    
+    const locations = [
+        { name: "New York, USA", timeZone: "America/New_York", emoji: "🗽" },
+        { name: "Los Angeles, USA", timeZone: "America/Los_Angeles", emoji: "🎬" },
+        { name: "Chicago, USA", timeZone: "America/Chicago", emoji: "🌆" },
+        { name: "Houston, USA", timeZone: "America/Chicago", emoji: "🚀" },
+        { name: "Miami, USA", timeZone: "America/New_York", emoji: "🏖️" },
+        { name: "London, UK", timeZone: "Europe/London", emoji: "🎡" },
+        { name: "Paris, France", timeZone: "Europe/Paris", emoji: "🗼" },
+        { name: "Berlin, Germany", timeZone: "Europe/Berlin", emoji: "🖼️" },
+        { name: "Madrid, Spain", timeZone: "Europe/Madrid", emoji: "🏰" },
+        { name: "Rome, Italy", timeZone: "Europe/Rome", emoji: "🏛️" },
+        { name: "Moscow, Russia", timeZone: "Europe/Moscow", emoji: "🪆" },
+        { name: "Dubai, UAE", timeZone: "Asia/Dubai", emoji: "🏙️" },
+        { name: "Beijing, China", timeZone: "Asia/Shanghai", emoji: "🏯" },
+        { name: "Tokyo, Japan", timeZone: "Asia/Tokyo", emoji: "🗾" },
+        { name: "Seoul, South Korea", timeZone: "Asia/Seoul", emoji: "🏯" },
+        { name: "Bangkok, Thailand", timeZone: "Asia/Bangkok", emoji: "🌺" },
+        { name: "Singapore", timeZone: "Asia/Singapore", emoji: "🌆" },
+        { name: "Sydney, Australia", timeZone: "Australia/Sydney", emoji: "🌉" },
+        { name: "Melbourne, Australia", timeZone: "Australia/Melbourne", emoji: "🏙️" },
+        { name: "Auckland, New Zealand", timeZone: "Pacific/Auckland", emoji: "🏞️" },
+        { name: "Rio de Janeiro, Brazil", timeZone: "America/Sao_Paulo", emoji: "🌴" },
+        { name: "Sao Paulo, Brazil", timeZone: "America/Sao_Paulo", emoji: "🏙️" },
+        { name: "Buenos Aires, Argentina", timeZone: "America/Argentina/Buenos_Aires", emoji: "💃" },
+        { name: "Cape Town, South Africa", timeZone: "Africa/Johannesburg", emoji: "⛰️" },
+        { name: "Johannesburg, South Africa", timeZone: "Africa/Johannesburg", emoji: "🏙️" },
+        { name: "Lagos, Nigeria", timeZone: "Africa/Lagos", emoji: "🌴" },
+        { name: "Cairo, Egypt", timeZone: "Africa/Cairo", emoji: "🕌" },
+        { name: "Nairobi, Kenya", timeZone: "Africa/Nairobi", emoji: "🌄" },
+        { name: "Istanbul, Turkey", timeZone: "Europe/Istanbul", emoji: "🕌" },
+        { name: "Athens, Greece", timeZone: "Europe/Athens", emoji: "🏛️" },
+        { name: "Helsinki, Finland", timeZone: "Europe/Helsinki", emoji: "❄️" },
+        { name: "Stockholm, Sweden", timeZone: "Europe/Stockholm", emoji: "🏙️" },
+        { name: "Oslo, Norway", timeZone: "Europe/Oslo", emoji: "⛰️" },
+        { name: "Warsaw, Poland", timeZone: "Europe/Warsaw", emoji: "🏰" },
+        { name: "Lisbon, Portugal", timeZone: "Europe/Lisbon", emoji: "🌊" },
+        { name: "Vienna, Austria", timeZone: "Europe/Vienna", emoji: "🎶" },
+        { name: "Zurich, Switzerland", timeZone: "Europe/Zurich", emoji: "⛰️" },
+        { name: "Reykjavik, Iceland", timeZone: "Atlantic/Reykjavik", emoji: "🧊" },
+        { name: "Honolulu, USA", timeZone: "Pacific/Honolulu", emoji: "🌺" },
+        { name: "Anchorage, USA", timeZone: "America/Anchorage", emoji: "❄️" },
+        { name: "Vancouver, Canada", timeZone: "America/Vancouver", emoji: "🌲" },
+        { name: "Toronto, Canada", timeZone: "America/Toronto", emoji: "🏙️" },
+        { name: "Montreal, Canada", timeZone: "America/Toronto", emoji: "🛶" },
+        { name: "Mexico City, Mexico", timeZone: "America/Mexico_City", emoji: "🌮" },
+        { name: "Lima, Peru", timeZone: "America/Lima", emoji: "🏔️" },
+        { name: "Santiago, Chile", timeZone: "America/Santiago", emoji: "🏔️" },
+        { name: "Bogota, Colombia", timeZone: "America/Bogota", emoji: "🌄" },
+        { name: "Caracas, Venezuela", timeZone: "America/Caracas", emoji: "🏞️" },
+
+        { name: "Mars Colony, Mars", offsetHours: 24 * 687, emoji: "🔴" }, 
+        { name: "Future City", offsetHours: 1000000, emoji: "🤖" },
+        { name: "Ancient Village", offsetHours: -500000000, emoji: "🏚️" },
+        { name: "Ankardia, Tharros", offsetHours: -4380000 + 7.2949, emoji: "🏰" },
+        { name: "Invaila, Tharros", offsetHours: -4380000 + 7.2949, emoji: "⚓" },
+        { name: "Surastu, Tharros", offsetHours: -4380000 + 7.2949, emoji: "🏔️" },
+        { name: "Glarthford, Tharros", offsetHours: -4380001 + 7.2949, emoji: "🏘️" },
+        { name: "Sinluv, Lusting", offsetHours: -4380001 + 7.2949, emoji: "❄️" },
+        { name: "Quagyn, Sentia", offsetHours: -4380000 + 7.2949, emoji: "🌾" },
+        { name: "Warthford, Sentia", offsetHours: -4380000 + 7.2949, emoji: "🏘️" },
+        { name: "Mystford, Mindar", offsetHours: -4380001 + 7.2949, emoji: "🏘️" },
+        { name: "Scoria, Vulkanian", offsetHours: -4379998 + 7.2949, emoji: "🌋" },
+        { name: "Glimford, Vulkanian", offsetHours: -4379998 + 7.2949, emoji: "🏘️" },
+        { name: "Bolo, Slashen", offsetHours: -4379998 + 7.2949, emoji: "🏜️" },
+        { name: "Isdisit, Mindar", offsetHours: -4379999 + 7.2949, emoji: "🌳" },
+        { name: "Time Traveler HQ", offsetHours: 123456, emoji: "⏳" },
+        { name: "Parallel Universe", offsetHours: -98765, emoji: "🌀" },
+        { name: "The Floating Isles", offsetHours: 42, emoji: "🏝️" },
+        { name: "Wolvespine, WWR", offsetHours: -1.5, emoji: "🐺" },
+        { name: "Imaginary City", offsetHours: -3.25, emoji: "🌈" },
+        { name: "Quantum Realm", offsetHours: 999999, emoji: "⚛️" },
+        { name: "WWR Island, WWR", offsetHours: -2, emoji: "🏝️" }
+    ];
+
+    this.cmdNow = async function(message, args) {
+        let nowPerms = await inventoryGetItem(message.author.id, "bot:now");
+        if(nowPerms === 0) {
+            message.channel.send(`⛔ You have not unlocked the ${stats.prefix}now command.`);
+            return;
+        } 
+        // Get Location
+        const randomIndex = Math.floor(Math.random() * locations.length);
+        const location = locations[randomIndex];
+
+        // Get Time
+        let hh, mm, ss, dd, MM, yyyy;
+        const now = new Date();
+        if (location.timeZone) {
+            const options = { timeZone: location.timeZone, hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' };
+            const formatter = new Intl.DateTimeFormat('en-GB', options);
+            const parts = formatter.formatToParts(now);
+
+            // Extract components
+            for (const part of parts) {
+                switch (part.type) {
+                    case 'hour': hh = part.value; break;
+                    case 'minute': mm = part.value; break;
+                    case 'second': ss = part.value; break;
+                    case 'day': dd = part.value; break;
+                    case 'month': MM = part.value; break;
+                    case 'year': yyyy = part.value; break;
+                }
+            }
+        } else if (location.offsetHours !== undefined) {
+            const utcTime = now.getTime();
+            const offsetMillis = location.offsetHours * 60 * 60 * 1000;
+            const fakeTime = new Date(utcTime + offsetMillis);
+
+            hh = pad(fakeTime.getUTCHours());
+            mm = pad(fakeTime.getUTCMinutes());
+            ss = pad(fakeTime.getUTCSeconds());
+            dd = pad(fakeTime.getUTCDate());
+            MM = pad(fakeTime.getUTCMonth() + 1);
+            yyyy = fakeTime.getUTCFullYear();
+        }
+
+        message.channel.send(`** 🕰️ The current time in ${location.name} is ${hh}:${mm}:${ss} ${dd}.${MM}.${yyyy} ${location.emoji}**`);
+    }
+    
+    /**
     Command: $profile
     **/
-    this.cmdProfile = async function(message, args) {
-        let nickPerms = await inventoryGetItem(message.author.id, "bot:profile");
-        if(nickPerms === 0) {
-            message.channel.send(`⛔ You have not unlocked the ${stats.prefix}profile command.`);
-            return;
-        } else {
-            if(!args[0]) args[0] = message.member.id;
-            let targetUser = parseUser(args[0], message.channel);
-            if(!targetUser) {
-                // Invalid user
-                channel.send("⛔ Syntax error. `" + args[2] + "` is not a valid player!");
+    this.cmdProfile = async function(message, args, me = false) {
+        if(!me) {
+            let profPerms = await inventoryGetItem(message.author.id, "bot:profile");
+            if(profPerms === 0) {
+                message.channel.send(`⛔ You have not unlocked the ${stats.prefix}profile command.`);
                 return;
-            }
-            let targetMember = message.guild.members.cache.get(targetUser);
-            let embed = await getBasicEmbed(message.guild);
-            let name = targetMember.displayName ?? targetMember.user.username;
-            let avatar = targetMember.displayAvatarURL({ size: 4096 }) ?? client.user.displayAvatarURL();
-            embed.image = { url: avatar };
-            embed.author = { icon_url: avatar, name: name };
-            embed.description = `Member of ${message.guild.name} since <t:${Math.floor(targetMember.joinedTimestamp / 1000)}:D>.`;
-            if(targetMember.premiumSinceTimestamp) embed.description += `\nBoosting ${message.guild.name} since <t:${Math.floor(targetMember.premiumSinceTimestamp / 1000)}:D>.`;
-            let ranks = targetMember.roles.cache.filter(r => r.name.search(/Bronze|Silver|Gold|Platinum|Event Winner/)>=0).map(el => el.name).join(", ");
-            if(ranks.length) embed.description += `\nRanks: ${ranks}`; 
-            embed.color = targetMember.displayColor;
-            sendEmbed(message.channel, embed);
-		}
+            } 
+        } else {
+            let mePerms = await inventoryGetItem(message.author.id, "bot:me");
+            if(mePerms === 0) {
+                message.channel.send(`⛔ You have not unlocked the ${stats.prefix}me command.`);
+                return;
+            } 
+        }
+        
+        if(!args[0]) args[0] = message.member.id;
+        let targetUser = parseUser(args[0], message.channel);
+        if(!targetUser) {
+            // Invalid user
+            channel.send("⛔ Syntax error. `" + args[2] + "` is not a valid player!");
+            return;
+        }
+        let targetMember = message.guild.members.cache.get(targetUser);
+        let embed = await getBasicEmbed(message.guild);
+        let name = targetMember.displayName ?? targetMember.user.username;
+        let avatar = targetMember.displayAvatarURL({ size: 4096 }) ?? client.user.displayAvatarURL();
+        embed.image = { url: avatar };
+        embed.author = { icon_url: avatar, name: name };
+        embed.description = `Member of ${message.guild.name} since <t:${Math.floor(targetMember.joinedTimestamp / 1000)}:D>.`;
+        if(targetMember.premiumSinceTimestamp) embed.description += `\nBoosting ${message.guild.name} since <t:${Math.floor(targetMember.premiumSinceTimestamp / 1000)}:D>.`;
+        let ranks = targetMember.roles.cache.filter(r => r.name.search(/Bronze|Silver|Gold|Platinum|Event Winner/)>=0).map(el => el.name).join(", ");
+        if(ranks.length) embed.description += `\nRanks: ${ranks}`; 
+        embed.color = targetMember.displayColor;
+        sendEmbed(message.channel, embed);
     }
     
     /**

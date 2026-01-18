@@ -239,6 +239,14 @@ client.on("messageCreate", async message => {
         }
     }
     
+    // gay rights reaction
+    if(message.content.indexOf("gay rights") >= 0) {
+        let skullPerms = await inventoryGetItem(message.author.id, "bot:gay");
+        if(skullPerms) {
+            message.react("🏳️‍🌈");
+        }
+    }
+    
     
 	/* Fetch Channel */
     if(isParticipant(message.member) || isGhost(message.member)) {
@@ -801,6 +809,13 @@ client.on("messageCreate", async message => {
         }
         cmdTemp(message, args);
     break;
+    case "now":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
+        cmdNow(message, args);
+    break;
     case "reverseme":
         if(!config.coins) {
             message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
@@ -862,6 +877,13 @@ client.on("messageCreate", async message => {
             return;
         }
 		if(checkGM(message)) cmdLootForce(message, args);
+    break;
+    case "levelup":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
+		if(checkGM(message)) cmdLevelup(message, args);
     break;
     case "xp":
         if(!config.coins) {
@@ -996,7 +1018,7 @@ client.on("messageCreate", async message => {
             message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
             return;
         }
-		cmdProfile(message, [ message.member.id ]);
+		cmdProfile(message, [ message.member.id ], true);
     break;
     case "parse_prompt":
         if(checkGM(message)) cmdParsePrompt(message, args, argsX);

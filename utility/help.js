@@ -205,6 +205,7 @@ module.exports = function() {
             ["xp get", PERM.AL, "Shows someone's XP.", "<Player>", "Shows the XP of somebody.", "xp get mctsts", ["@Ts has 100000 XP and is on Level 100"], CMDSTATE.RDY],
             ["xp list", PERM.AL, "Shows everyone's XP.", "", "Shows the XP of everybody.", "xp list", [], CMDSTATE.RDY],
             ["xp list_actual", PERM.GM, "Shows everyone's XP.", "", "Shows the XP of everybody, but without modifying the display values.", "xp list_actual", [], CMDSTATE.RDY],
+        ["levelup", PERM.GM, "Levels you up.", "<Level>", "Levels you up to a specified level.", "levelup 10", [], CMDSTATE.RDY],
         ["icon", PERM.AL, "Manages your role icon.", "", "Group of commands to manage your role icon. See $help icon <subcommand>", "", [], CMDSTATE.RDY],
             ["icon select", PERM.AL, "Sets your role icon.", "<Role Name>", "Sets your role icon.", "icon set cat", ["@Ts, your role icon has been updated to Cat."], CMDSTATE.RDY, ["icon set"]],
             ["icon disable", PERM.AL, "Removes your role icon.", "", "Removes your role icon.", "icon disable", ["@Ts, your role icon has been disabled."], CMDSTATE.RDY],
@@ -239,6 +240,7 @@ module.exports = function() {
         ["fortune", PERM.AL, "Tells your fortune.", "", "Tells your fortune from the WWR Tarot Cards.", "fortune", [], CMDSTATE.RDY],
         ["me", PERM.AL, "Shows your info.", "", "Shows info about you.", "me", [], CMDSTATE.RDY],
         ["profile", PERM.AL, "Shows your info.", "<Target>", "Shows info about another user.", "profile @Ts", [], CMDSTATE.RDY],
+        ["now", PERM.AL, "Shows the current time.", "", "Shows the current time... in some location.", "now", [], CMDSTATE.RDY],
         ["reservation", PERM.AL, "Manages your reservation.", "", "Group of commands to manage your reservations. See $help reservation <subcommand>", "reservation <subcommand>", [], CMDSTATE.RDY],
             ["reservation set", PERM.AL, "Reserves an emoji.", "<Emoji>", "Reserves a specific emoji.", "reservation set 🛠", [], CMDSTATE.RDY, ["reservation select"]],
             ["reservation disable", PERM.AL, "Disables your reservation.", "", "Disables your emoji reservation.", "reservation disable", [], CMDSTATE.RDY],
@@ -398,6 +400,8 @@ module.exports = function() {
             ["packs unlock", PERM.GM, "Unlocks skinpack for another player.", "<Player> <Pack ID>", "Unlocks the skinpack for another player. Find <Pack ID> through $packs list_all.", "packs unlock mctsts 1", [], CMDSTATE.RDY],
             ["packs delete", PERM.GM, "Deletes skinpack for another player.", "<Player> <Pack ID>", "Deeltes the skinpack for another player. Find <Pack ID> through $packs list_all.", "packs delete mctsts 1", [], CMDSTATE.RDY],
             ["packs select", PERM.AL, "Selects your own skinpack.", "<Pack ID>", "Sets the skinpack for you. Find <Pack ID> through $packs list.", "packs select 1", [], CMDSTATE.RDY],
+            ["packs check_luts", PERM.GM, "Checks pack luts.", "<Pack ID>", "Checks the Look-up Tables (LUTs) for a specified pack.", "packs check_luts 1", [], CMDSTATE.RDY],
+            ["packs preview", PERM.AL, "Skinpack preview.", "", "Shows a preview for your selected skinpack.", "packs preview", [], CMDSTATE.RDY],
         /** Roles Module **/
         // roles
         ["roles", PERM.GM, "Manages roles.", "<Subcommand>", "Group of commands to handle roles. $help roles <sub-command> for detailed help.", "", [], CMDSTATE.RDY],
