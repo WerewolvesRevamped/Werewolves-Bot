@@ -35,7 +35,7 @@ module.exports = function() {
         let lb = await sqlProm("SELECT * FROM activity WHERE timestamp > " + connection.escape(pastTime) + " ORDER BY count DESC, player DESC");
         
         let i = 1;
-        let lbText = lb.map(el => `**#${i++}:** <@${''+el.player}> - ${Math.floor(el.count * XP_MULTIPLIER + (+el.player[0]))} [${el.level}]`);
+        let lbText = lb.sort((a,b) => Math.floor(b.count * XP_MULTIPLIER + (+b.player[0])) - Math.floor(a.count * XP_MULTIPLIER + (+a.player[0]))).map(el => `**#${i++}:** <@${''+el.player}> - ${Math.floor(el.count * XP_MULTIPLIER + (+el.player[0]))} [${el.level}]`);
         let lbPings = lb.map(el => `<@${''+el.player}>`);
         let chunked = chunkArray(lbText, 20);
         

@@ -345,6 +345,7 @@ module.exports = function() {
                     case "std:event":
                     case "std:help":
                     case "std:role":
+                    case "std:emoji":
                     case "std:sticker":
                         await inventoryModifyItem(pid, reward[0], 1);
                         return true;
