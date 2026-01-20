@@ -12,13 +12,13 @@ module.exports = function() {
     /**
     Permissions
     **/
-    const CC_PERMS_MEMBER = { ViewChannel: true };
-    const CC_PERMS_OWNER = { ViewChannel: true, ReadMessageHistory: true };
-    const CC_PERMS_LOCKED = { ViewChannel: true, ReadMessageHistory: null, SendMessages: false };
-    const CC_PERMS_VIEWER = { ViewChannel: true, SendMessages: false };
-    const CC_PERMS_NONE = null;
-    const CC_PERMS_MEMBER_ROLE = { ViewChannel: false, SendMessages: true };
-    const CC_PERMS_MEMBER_NONE= { };
+    this.CC_PERMS_MEMBER = { ViewChannel: true };
+    this.CC_PERMS_OWNER = { ViewChannel: true, ReadMessageHistory: true };
+    this.CC_PERMS_LOCKED = { ViewChannel: true, ReadMessageHistory: null, SendMessages: false };
+    this.CC_PERMS_VIEWER = { ViewChannel: true, SendMessages: false };
+    this.CC_PERMS_NONE = null;
+    this.CC_PERMS_MEMBER_ROLE = { ViewChannel: false, SendMessages: true };
+    this.CC_PERMS_MEMBER_NONE= { };
 
 	/**
     Command: $cc add

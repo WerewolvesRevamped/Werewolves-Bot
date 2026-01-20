@@ -680,13 +680,42 @@ module.exports = function() {
 			message.channel.send("⛔ Player error. Can not sub out a non-participant!"); 
 			return; 
         }
+        
+        // attempt auto sub signup
         if(!isSub(newPlayerMember)) {
+            let em = idEmojis.filter(el => el[0] == newPlayer);
+            if(em[0]) {
+                message.channel.send(`✳️ Detected <@${newPlayer}> as not a substitute. Signing them up as a substitute.`); 
+                cmdSignup(message.channel, newPlayerMember, [ em[0][1] ], false, "substitute");
+                await sleep(5000);
+            }
+        }
+        
+        // check if is sub or mentor
+        if(!isSub(newPlayerMember) && !isMentor(newPlayerMember)) {
 			message.channel.send("⛔ Player error. Can not sub in a non-substitute!"); 
 			return; 
         }
+        
+        // Auto-unmentor
         if(isMentor(newPlayerMember)) {
-			message.channel.send("⛔ Player error. Can not sub in a mentor!"); 
-			return; 
+			message.channel.send(`✳️ Detected <@${newPlayer}> as mentor. Removing mentor from them.`); 
+            removeRoleRecursive(newPlayerMember, message.channel, stats.mentor, "Mentor");
+            sqlPromEsc("UPDATE players SET mentor='' WHERE mentor=", newPlayer);
+            await sleep(1000);
+            // get emoji
+			message.channel.send(`✳️ Detected <@${newPlayer}> as mentor. Signing them up as a substitute.`); 
+            let newEmoji;
+            let em = idEmojis.filter(el => el[0] == newPlayer);
+            if(em[0]) {
+                newEmoji = em[0][1];
+            } else {
+                let res = await sqlPromOneEsc("SELECT emoji FROM players WHERE id=", originalPlayer);
+                await sqlPromOneEsc("UPDATE players SET emoji='none' WHERE id=", originalPlayer);
+                newEmoji = res.emoji;
+            }
+            cmdSignup(message.channel, newPlayerMember, [ newEmoji ], false, "substitute");
+            await sleep(5000);
         }
         
         
@@ -866,11 +895,11 @@ module.exports = function() {
 			let channelMembers = channel.guild.channels.cache.get(channels[channelIndex].id).permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Member).map(el => el.id);
 			let channelOwners = channel.guild.channels.cache.get(channels[channelIndex].id).permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Member).filter(el => el.allow == 66560).map(el => el.id);
 			if(channelMembers.includes(subPlayerFrom)) {
-				cmdCCAdd(channel.guild.channels.cache.get(channels[channelIndex].id), channel.guild.members.cache.get(subPlayerFrom), ["add", subPlayerTo], 1);
+                channelSetPermission(channel.guild.channels.cache.get(channels[channelIndex].id), subPlayerTo, CC_PERMS_MEMBER);
 			}
 			if(channelOwners.includes(subPlayerFrom)) {
 				setTimeout(function() {
-					cmdCCPromote(channel.guild.channels.cache.get(channels[channelIndex].id), channel.guild.members.cache.get(subPlayerFrom), ["promote", subPlayerTo], 1);
+                    channelSetPermission(channel.guild.channels.cache.get(channels[channelIndex].id), subPlayerTo, CC_PERMS_OWNER);
 					substituteOneChannel(channel, ccCats, index, channels, ++channelIndex, subPlayerFrom, subPlayerTo);
 				}, 1000);
 			} else {
@@ -912,26 +941,25 @@ module.exports = function() {
 			let channelMembers = channel.guild.channels.cache.get(channels[channelIndex].id).permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Member).map(el => el.id);
 			let channelOwners = channel.guild.channels.cache.get(channels[channelIndex].id).permissionOverwrites.cache.toJSON().filter(el => el.type === OverwriteType.Member).filter(el => el.allow == 66560).map(el => el.id);
 			if(channelMembers.includes(subPlayerFrom) && !channelMembers.includes(subPlayerTo)) {
-				cmdCCAdd(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["add", subPlayerTo], 1);
-				cmdCCRemove(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["remove", subPlayerFrom], 1);
+                channelSetPermission(channel.guild.channels.cache.get(channels[channelIndex].id), subPlayerTo, CC_PERMS_MEMBER);
+                channelSetPermission(channel.guild.channels.cache.get(channels[channelIndex].id), subPlayerFrom, CC_PERMS_NONE);
 				channel.guild.channels.cache.get(channels[channelIndex].id).send("❗ " + channel.guild.members.cache.get(subPlayerFrom).displayName + " switched to " + channel.guild.members.cache.get(subPlayerTo).displayName + " ❗");
 			}
 			if(!channelMembers.includes(subPlayerFrom) && channelMembers.includes(subPlayerTo)) {
-				cmdCCAdd(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["add", subPlayerFrom], 1);
-				cmdCCRemove(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["remove", subPlayerTo], 1);
+                channelSetPermission(channel.guild.channels.cache.get(channels[channelIndex].id), subPlayerFrom, CC_PERMS_MEMBER);
+                channelSetPermission(channel.guild.channels.cache.get(channels[channelIndex].id), subPlayerTo, CC_PERMS_NONE);
 				channel.guild.channels.cache.get(channels[channelIndex].id).send("❗ " + channel.guild.members.cache.get(subPlayerTo).displayName + " switched to " + channel.guild.members.cache.get(subPlayerFrom).displayName + " ❗");
 			}
 			if(channelOwners.includes(subPlayerFrom) && !channelOwners.includes(subPlayerTo)) {
 				setTimeout(function() {
-					cmdCCPromote(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["promote", subPlayerTo], 1);
-					if(channelMembers.includes(subPlayerTo) && channelMembers.includes(subPlayerFrom)) cmdCCDemote(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["demote", subPlayerFrom], 1);
+                    channelSetPermission(channel.guild.channels.cache.get(channels[channelIndex].id), subPlayerTo, CC_PERMS_OWNER);
+					if(channelMembers.includes(subPlayerTo) && channelMembers.includes(subPlayerFrom)) channelSetPermission(channel.guild.channels.cache.get(channels[channelIndex].id), subPlayerFrom, CC_PERMS_MEMBER);
 					switchOneChannel(channel, ccCats, index, channels, ++channelIndex, subPlayerFrom, subPlayerTo);
 				}, 1000);
 			} else if(!channelOwners.includes(subPlayerFrom) && channelOwners.includes(subPlayerTo)) {
 				setTimeout(function() {
-					cmdCCPromote(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["promote", subPlayerFrom], 1);
-                    if(channelMembers.includes(subPlayerTo) && channelMembers.includes(subPlayerFrom)) cmdCCDemote(channel.guild.channels.cache.get(channels[channelIndex].id), {}, ["demote", subPlayerTo], 1);
-					switchOneChannel(channel, ccCats, index, channels, ++channelIndex, subPlayerFrom, subPlayerTo);
+                    channelSetPermission(channel.guild.channels.cache.get(channels[channelIndex].id), subPlayerFrom, CC_PERMS_OWNER);
+                    if(channelMembers.includes(subPlayerTo) && channelMembers.includes(subPlayerFrom)) channelSetPermission(channel.guild.channels.cache.get(channels[channelIndex].id), subPlayerTo, CC_PERMS_MEMBER);
 				}, 1000);
 			} else {
 				switchOneChannel(channel, ccCats, index, channels, ++channelIndex, subPlayerFrom, subPlayerTo);

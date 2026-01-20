@@ -53,7 +53,6 @@ module.exports = function() {
         let reservations = await sqlProm("SELECT * FROM reservations");
         idEmojis.push(...reservations.map(el => [el.player, el.emoji]));
         idEmojis.push(...SYSTEM_RESERVATIONS.map(el => ["", el]));
-        console.log(idEmojis);
     }
     
     /**
