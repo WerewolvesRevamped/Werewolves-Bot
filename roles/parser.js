@@ -644,8 +644,8 @@ module.exports = function() {
     const rawStr = "[\\w\\s\\d@]+";
     const str = "(" + rawStr + ")";
     const decNum = "(-?\\d+\\.\\d+)";
-    const abilityType = "(Killing|Investigating|Targeting|Disguising|Protecting|Applying|Redirecting|Vote Manipulating|Whispering|Joining|Granting|Loyalty|Obstructing|Poll Manipulating|Announcements|Changing|Copying|Choices|Ascend|Descend|Disband|Counting|Conversation Reset|Cancel|Switching|Process|Evaluate|Action|Feedback|Action|Success|Failure|Emit|Storing|Displaying|Win|Shuffle|Locking|Executing|Activating|Resurrecting)";
-    const abilitySubtype = "((Kill|Attack|Lynch|True|Banish|True Banish) Killing|(Role|Alignment|Category|Class|Count|Attribute) Investigating|(Target|Untarget) Targeting|() Disguising|(Absence|Active|Passive|Partial|Recruitment) Protecting|(Add|Remove|Change) Applying|() Redirecting|(Absolute|Relative) Vote Manipulating|() Whispering|(Add|Remove) Joining|(Add|Remove|Transfer) Granting|() Loyalty|() Obstructing|(Addition|Creation|Cancelling|Deletion|Manipulation) Poll Manipulating|() Announcements|(Role|Alignment|Group) Changing|(Ability|Full) Copying|(Creating|Choosing) Choices|() Ascend|() Descend|() Disband|(Increment|Decrement|Set) Counting|() Conversation Reset|() Cancel|() Switching|() Process|() Evaluate|() Action|() Feedback|() Action|() Success|() Failure|() Emit|() Storing|(Create|Change) Displaying|() Win|() Shuffle|(Lock|Unlock) Locking|() Executing|() Activating|() Resurrecting)";
+    const abilityType = "(Killing|Investigating|Targeting|Disguising|Protecting|Applying|Redirecting|Vote Manipulating|Whispering|Joining|Granting|Loyalty|Obstructing|Poll Manipulating|Announcements|Changing|Choices|Ascend|Descend|Disband|Counting|Conversation Reset|Cancel|Switching|Process|Evaluate|Action|Feedback|Action|Success|Failure|Emit|Storing|Displaying|Win|Shuffle|Locking|Executing|Activating|Resurrecting)";
+    const abilitySubtype = "((Kill|Attack|Lynch|True|Banish|True Banish) Killing|(Role|Alignment|Category|Class|Count|Attribute) Investigating|(Target|Untarget) Targeting|() Disguising|(Absence|Active|Passive|Partial|Recruitment) Protecting|(Add|Remove|Change) Applying|() Redirecting|(Absolute|Relative) Vote Manipulating|() Whispering|(Add|Remove) Joining|(Add|Remove|Transfer) Granting|() Loyalty|() Obstructing|(Addition|Creation|Cancelling|Deletion|Manipulation) Poll Manipulating|() Announcements|(Role|Alignment|Group) Changing|(Creating|Choosing) Choices|() Ascend|() Descend|() Disband|(Increment|Decrement|Set) Counting|() Conversation Reset|() Cancel|() Switching|() Process|() Evaluate|() Action|() Feedback|() Action|() Success|() Failure|() Emit|() Storing|(Create|Change) Displaying|() Win|() Shuffle|(Lock|Unlock) Locking|() Executing|() Activating|() Resurrecting)";
     const bulletsRegex = /(•|‣|◦|·|⁃|⹀)/;
 
     // specific
@@ -1387,19 +1387,6 @@ module.exports = function() {
         fd = exp.exec(abilityLine);
         if(fd) {
             ability = { type: "changing", subtype: "group", target: ttpp(fd[1], "group"), change_to: ttpp(fd[2], "group") };
-        }
-        /** COPYING **/
-        // full copy
-        exp = new RegExp("^Copy " + targetType + "$", "g");
-        fd = exp.exec(abilityLine);
-        if(fd) {
-            ability = { type: "copying", target: ttpp(fd[1]), copy_to: "@self[player]", suppressed: false, duration: dd(fd[2], "permanent") };
-        }
-        // full copy, surpressed
-        exp = new RegExp("^Copy " + targetType + " \\(Suppressed\\)$", "g");
-        fd = exp.exec(abilityLine);
-        if(fd) {
-            ability = { type: "copying", target: ttpp(fd[1]), copy_to: "@self[player]", suppressed: true, duration: dd(fd[2], "permanent") };
         }
         /** CHOICES **/
         // choice choosing

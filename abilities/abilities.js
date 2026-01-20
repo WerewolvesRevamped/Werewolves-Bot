@@ -586,7 +586,6 @@ module.exports = function() {
             case "poll": emojiName = "VotingBooth"; break;
             case "announcement": emojiName = "Announcement"; break;
             case "changing": emojiName = "RoleChange"; break;
-            case "copying": emojiName = "Copying"; break;
             case "choices": emojiName = "UnalignedPlaceholder"; break;
             case "ascend": emojiName = "Ascension"; break;
             case "descend": emojiName = ""; break;
