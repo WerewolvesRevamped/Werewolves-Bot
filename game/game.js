@@ -175,9 +175,9 @@ module.exports = function() {
         // reset displays
         resetDisplays();
         // reset host information
-        resetHostInformation();
+        if(!debug) resetHostInformation();
         // reset modifiers
-        resetModifiers();
+        if(!debug) resetModifiers();
         // reset schedule
         clearSchedule();
         // disable action queue checker 
