@@ -32,18 +32,23 @@ module.exports = function() {
                 // parse parameters
                 let target;
                 let type;
-                if(ability.target[0] === "`" || ability.target.toLowerCase().substr(0, 9) === "@thisattr") {
+                if(ability.target[0] === "`" || ability.target.toLowerCase().substr(0, 9) === "@thisattr") { // this is needed to ensure an extra role is not accidentally parsed as a normal role
                     target = await parseActiveExtraRoleSelector(ability.target, src_ref, additionalTriggerData);
                     type = "player_attr";
                 } else {
-                    target = await parsePlayerSelector(ability.target, src_ref, additionalTriggerData);
-                    type = "player";
+                    target = await parseSelector(ability.target, src_ref, additionalTriggerData);
+                    type = target.type;
+                    target = target.value;
                 }
                 target = await applyRedirection(target, src_ref, ability.type, ability.subtype, additionalTriggerData);
                 const options = ability.options.map(el => parseOptionDisplay(el));
                 // can only apply a single attribute
                 if(target.length != 1) {
                     abilityLog(`❗ **Error:** Tried to create a choice for ${target.length} players!`);
+                    return { msg: "Choices failed! " + abilityError, success: false };
+                }
+                if(!["player","player_attr"].includes(type)) {
+                    abilityLog(`❗ **Error:** Tried to create a choice for ${type} type!`);
                     return { msg: "Choices failed! " + abilityError, success: false };
                 }
                 // check if is forced

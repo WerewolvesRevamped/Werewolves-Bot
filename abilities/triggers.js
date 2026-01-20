@@ -25,7 +25,7 @@ module.exports = function() {
             case "activeextrarole":
                 let attr = await roleAttributeGetPlayer(val);
                 if(!attr) { // after a remove granting we wont be able to find the owner anymore
-                    abilityLog(`❗ **Skipped Trigger:** Could not find who <#${val}> belongs to.`);
+                    if(!recentUngrantings.includes(val)) abilityLog(`❗ **Skipped Trigger:** Could not find who <#${val}> belongs to.`);
                     return;
                 }
                 await triggerPlayer(attr.id, triggerName, additionalTriggerData);
@@ -743,6 +743,7 @@ module.exports = function() {
                 break;
                 case "player_attr":
                     let queried = await queryAttribute("attr_type", "role", "val2", srcVal);
+                    if(!queried[0]) return; // attribute has since been deleted
                     activation = queried[0].activation;
                 break;
                 case "attribute":
@@ -1075,7 +1076,7 @@ module.exports = function() {
         // storytime
         if(stats.automation_level === 4) {
             let endNight = await sqlPromOne("SELECT * FROM schedule WHERE name='night-end'");
-            await bufferStorytime(`\n*The night will end at <t:${(+endNight.timestamp) + 60}:R>.*`);
+            if(endNight) await bufferStorytime(`\n*The night will end at <t:${(+endNight.timestamp) + 60}:R>.*`);
         }
         await postStorytime();
         
@@ -1200,7 +1201,7 @@ module.exports = function() {
         // storytime
         if(stats.automation_level === 4) {
             let endDay = await sqlPromOne("SELECT * FROM schedule WHERE name='day-end'");
-            await bufferStorytime(`\n*The day will end at <t:${(+endDay.timestamp) + 60}:R>.*`);
+            if(endDay) await bufferStorytime(`\n*The day will end at <t:${(+endDay.timestamp) + 60}:R>.*`);
         }
         await postStorytime();
         

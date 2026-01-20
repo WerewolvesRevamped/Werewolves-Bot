@@ -10,6 +10,7 @@ module.exports = function() {
     **/
     this.abilityGranting = async function(src_ref, src_name, ability, additionalTriggerData) {
         let result;
+        recentUngrantings = [];
         // check parameters
         if(!ability.target || !ability.role) {
             abilityLog(`❗ **Error:** Missing arguments for type \`${ability.type}\`!`);
@@ -114,6 +115,7 @@ module.exports = function() {
     Ability: Granting - Remove
     removes a role to a player
     **/
+    this.recentUngrantings = [];
     this.grantingRemove = async function(src_name, src_ref, targets, activeExtraRole, additionalTriggerData) {
         let channelId = activeExtraRole;
         let roleName = `<#${channelId}>`;
@@ -139,6 +141,7 @@ module.exports = function() {
             await grantingLeave(targets[i], channelId);
             await deleteAttributePlayer(targets[i], "attr_type", "role", "val2", channelId); // delete old membership(s)
             abilityLog(`✅ <@${targets[i]}> was removed from ${roleName} at <#${channelId}>.`);
+            recentUngrantings.push(channelId);
             if(targets.length === 1) return { msg: "Ungranting succeeded!", success: true, target: `player:${targets[0]}` };
         }
         return { msg: "Ungrantings succeeded!", success: true, target: `player:${targets[0]}` };

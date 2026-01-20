@@ -195,11 +195,10 @@ client.on("messageCreate", async message => {
         console.log(`WARNING! Blocked command execution on guild ${message.guild.name}`);
         return;
     }
+    // make sure the message actually? still? exists
     try {
         await message.fetch();
     } catch (err) {
-        console.log("UNKNOWN MESSAGE");
-        console.log(err);
         return;
     }
     
