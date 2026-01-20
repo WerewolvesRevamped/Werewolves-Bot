@@ -177,6 +177,7 @@ module.exports = function() {
 		if(isParticipant(member) || isGhost(member) || ((isGameMaster(member, true) || isHelper(member)) && players.length > 0) || (isMentor(member) && spam)) {
 			sqlGetStat(9, result => {
 				// Check if a new category is needed
+                let curCCCount = result;
 				if(result % 50 === 0) {
 					// Create a new category
 					let ccCatNum = Math.round(result / 50) + 1;
@@ -261,7 +262,7 @@ module.exports = function() {
                         }
                         let cc = channel.guild.channels.cache.get(result);
                         let cobj = { name: (spam?"🤖-":"") + (isGhost(member)?"👻-":"") + args[1] + "", type: ChannelType.GuildText,  permissionOverwrites: ccPerms, parent: cc.id };
-                        if(result % 50 === 49) delete cobj.parent;
+                        if(curCCCount % 50 === 49) delete cobj.parent;
                         channel.guild.channels.create(cobj)
 						.then(ct => {
 							let cc = channel.guild.channels.cache.get(result);
