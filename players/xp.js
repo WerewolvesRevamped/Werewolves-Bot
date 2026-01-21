@@ -17,7 +17,7 @@ module.exports = function() {
 		// Check Subcommand
 		switch(args[0]) {
 			case "list": cmdXPList(message.channel); break;
-			case "get": cmdXPGet(message.channel, args); break;
+			case "get": cmdXPGet(message.channel, message.author, args); break;
 			case "list_actual": if(checkSafe(message)) cmdXPListActual(message.channel, args); break;
 			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
 		}
@@ -73,7 +73,7 @@ module.exports = function() {
     /**
     Command: $xp get
     **/
-    this.cmdXPGet = async function(channel, args) {
+    this.cmdXPGet = async function(channel, author, args) {
 		// Check arguments
 		if(!args[1]) { 
 			channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "xp get <player>`!"); 
@@ -92,6 +92,7 @@ module.exports = function() {
             let embed = { title: "XP Leaderboard", color: 8984857, description: `<@${user}> has **0 XP** and is on **Level 0**.` };
             channel.send({ embeds: [ embed ] });
         } else {
+            incrementXP(author.id);
             let embed = { title: "XP Leaderboard", color: 8984857, description: `<@${user}> has **${Math.floor(lb.count * XP_MULTIPLIER + (+lb.player[0]))} XP** and is on **Level ${lb.level}**.` };
             channel.send({ embeds: [ embed ] });
         }
@@ -113,13 +114,19 @@ module.exports = function() {
     }
     
     // these words do not count towards the minimum word requirement for a message
-    let keywords = ["xp","level","levels","experience","yap","coins","leveling","lvls","lvl","coin", "levelling"] ;
+    let keywords = ["xp","level","levels","experience","yap","coins","leveling","lvls","lvl","coin", "levelling","wwr","lynch wolves cub scum","pinging for an action","hi town, hi wolfpack"] ;
     this.checkKeyword = function(msg) {
         let spl = msg.toLowerCase().replace(/[^a-z ]/g,"").split(" ");
         for(let i = 0; i < keywords.length; i++) {
             if(spl.includes(keywords[i])) return true;
         }
         return false;
+    }
+    
+    // Increases XP by 3
+    this.incrementXP = async function(id) {
+        let curTime = xpGetTime(); 
+        await sqlPromEsc("UPDATE activity SET timestamp=" + (curTime+3) + " WHERE player=", id);
     }
     
     /**
@@ -147,7 +154,7 @@ module.exports = function() {
             // filter out level up messages so we dont get double level ups
             let sCheck = checkKeyword(message.content)
             if(sCheck) {
-                await sqlPromEsc("UPDATE activity SET timestamp=" + (curTime+3) + " WHERE player=", message.author.id);
+                await incrementXP(message.author.id);
             }
             // count activity
             // check for a players longest message within a 5 minute period, then award XP based on that
