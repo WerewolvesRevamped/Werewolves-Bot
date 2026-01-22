@@ -1,7 +1,7 @@
 
 module.exports = function() {
     
-    const LATEST_DB_VERSION = 4;
+    const LATEST_DB_VERSION = 5;
     
     /** Update Tables
     Check what DB updates are necessary
@@ -17,6 +17,7 @@ module.exports = function() {
         if(stats.db_version < 2) await update_2();  
         if(stats.db_version < 3) await update_3();  
         if(stats.db_version < 4) await update_4();  
+        if(stats.db_version < 5) await update_5();  
         
         // set latest version
         sqlSetStat(statID.DB_VERSION, LATEST_DB_VERSION);
@@ -62,4 +63,14 @@ module.exports = function() {
 		await sqlProm("CREATE TABLE IF NOT EXISTS `modifiers` ( `ai_id` int(11) NOT NULL AUTO_INCREMENT, `id` text NOT NULL, `name` text NOT NULL, PRIMARY KEY (`ai_id`))")
     }
     
+    /**
+    Update #5
+    adds 'opened' column to grouos
+    **/
+    async function update_5() {
+        log("⤴️ Running DB Update #5");
+        await sqlProm("ALTER TABLE `active_groups` ADD COLUMN `opened` int(11) NOT NULL DEFAULT 0 AFTER `activation`");
+    }
+    
+
 }
