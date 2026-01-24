@@ -266,7 +266,7 @@ module.exports = function() {
     **/
     this.updateGroups = async function() {
         let toBeDisbanded = await sqlProm(`
-            SELECT name, activation FROM active_groups g WHERE disbanded = 0
+            SELECT name, activation FROM active_groups g WHERE disbanded = 0 AND opened = 1
             AND name NOT IN (
                 SELECT DISTINCT val1
                 FROM active_attributes a
@@ -281,7 +281,7 @@ module.exports = function() {
         `);
         
         let toBeReopened = await sqlProm(`
-            SELECT name,activation FROM active_groups g WHERE disbanded = 1
+            SELECT name,activation FROM active_groups g WHERE disbanded = 1 AND opened = 1
             AND (
                 (
                     name IN (
@@ -331,6 +331,11 @@ module.exports = function() {
         return new Promise(res => {
             sql("SELECT * FROM active_groups WHERE name=" + connection.escape(group), async result => {
                 if(result && result[0]) {
+					// open group if closed
+					if(result[0].opened == 0) {
+						await sqlPromEsc("UPDATE active_groups SET opened=1 WHERE name=", group);
+					}
+					
                     // group exists, add target to group
                     let groupChannel = await mainGuild.channels.fetch(result[0].channel_id);
                     
@@ -483,9 +488,11 @@ module.exports = function() {
                     })); 
                     act = grpData.activation;
                 }
-                
+
+				let opened = 1;
+				if(!firstMember) opened = 0;
                 // save group in DB
-                await sqlProm("INSERT INTO active_groups (name, channel_id, activation) VALUES (" + connection.escape(group) + "," + connection.escape(sc.id) + "," + connection.escape(act) +  ")");
+                await sqlProm("INSERT INTO active_groups (name, channel_id, activation, opened) VALUES (" + connection.escape(group) + "," + connection.escape(sc.id) + "," + connection.escape(act) + "," + connection.escape(opened) +  ")");
                 
                 // run group starting trigger
                 await triggerGroup(sc.id, "Starting");
@@ -498,4 +505,5 @@ module.exports = function() {
     }
     
     
+
 }
