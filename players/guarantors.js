@@ -8,7 +8,7 @@ module.exports = function() {
     **/
     this. cmdGuarantors = async function(message, args) {
         if(!args[0]) { 
-            cmdGuarantorsList(message);
+            cmdGuarantorsList(message.channel, message.author);
 			return; 
 		} 
 		// Check Subcommand
