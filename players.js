@@ -682,7 +682,7 @@ module.exports = function() {
         }
         
         // attempt auto sub signup
-        if(!isSub(newPlayerMember)) {
+        if(!isSub(newPlayerMember) && !isMentor(newPlayerMember)) {
             let em = idEmojis.filter(el => el[0] == newPlayer);
             if(em[0]) {
                 message.channel.send(`✳️ Detected <@${newPlayer}> as not a substitute. Signing them up as a substitute.`); 
@@ -691,18 +691,12 @@ module.exports = function() {
             }
         }
         
-        // check if is sub or mentor
-        if(!isSub(newPlayerMember) && !isMentor(newPlayerMember)) {
-			message.channel.send("⛔ Player error. Can not sub in a non-substitute!"); 
-			return; 
-        }
-        
         // Auto-unmentor
         if(isMentor(newPlayerMember)) {
 			message.channel.send(`✳️ Detected <@${newPlayer}> as mentor. Removing mentor from them.`); 
             removeRoleRecursive(newPlayerMember, message.channel, stats.mentor, "Mentor");
             sqlPromEsc("UPDATE players SET mentor='' WHERE mentor=", newPlayer);
-            await sleep(1000);
+            await sleep(5000);
             // get emoji
 			message.channel.send(`✳️ Detected <@${newPlayer}> as mentor. Signing them up as a substitute.`); 
             let newEmoji;
@@ -716,6 +710,13 @@ module.exports = function() {
             }
             cmdSignup(message.channel, newPlayerMember, [ newEmoji ], false, "substitute");
             await sleep(5000);
+        }
+
+		
+        // check if is sub or mentor
+        if(!isSub(newPlayerMember)) {
+			message.channel.send("⛔ Player error. Can not sub in a non-substitute!"); 
+			return; 
         }
         
         

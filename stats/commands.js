@@ -6,6 +6,7 @@
  */
 function cmdOptionsSet (channel, value, stat) {
     // Set value
+    if(value.match(/^(\d+\+?)+$/)) value = value.split("+").filter(el => el).reduce((a,b) => (+a)+(+b), 0)
     sqlSetStat(stat, value, result => {
         channel.send("✅ Successfully updated *" + stat.name + "* ("+stat.id+") to `" + value + "`!");
         loadStats();
