@@ -114,11 +114,17 @@ module.exports = function() {
     Modifies coins and returns the updated count amount
     **/
     this.modifyCoins = async function(user, num) {
+        // get max coin count
+        let walUpgrades = await inventoryGetItem(user, "std:walup");
+        let maxCoins = 500 + 50 * Math.min(walUpgrades, 10);
         // increment numbers
         let coinCount = await sqlPromEsc("SELECT * FROM coins WHERE player=", user);
         if(coinCount.length === 0) {
             await sqlProm("INSERT INTO coins (player, coins) VALUES (" + connection.escape(user) + "," + connection.escape(num) + ")");
             return num;
+        } else if((coinCount[0].coins + num) > maxCoins) { 
+            await sqlPromEsc("UPDATE coins SET coins=" + connection.escape(maxCoins) + " WHERE player=", user);
+            return maxCoins;
         } else {
             await sqlPromEsc("UPDATE coins SET coins=" + connection.escape(coinCount[0].coins + num) + " WHERE player=", user);
             return coinCount[0].coins + num;
