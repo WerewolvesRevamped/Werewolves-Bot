@@ -32,10 +32,11 @@ module.exports = function() {
     /**
     Command: $packs list_all
     **/
-    this.AVAILABLE_PACKS = ["glitch","negate","grayscale","edge","emboss","silhouette","pixel","pixel2","pixel3","pixel4","scatter","red","green","blue","yellow","purple","cyan","flip","pale","bw","wire","wire2","rainbow","rainbow2","rainbow3","ts","oil","wave","swirl","noise","cycle","equalize","fourier_noise","fourier_equalize","fourier_oil","fourier_modulate","fourier_wire","glitch2","eyes","thief","mask","eye","fourier_eye","citizen_eye","items","bear","wolfify","grid","light_and_shadow","duo_color","wood","coin","coin_animated", "glitch_animated","wave_animated","spin","rainbow_animated","fourier_merge","fourier_magnitude","fourier_phase","fourier_crop","fourier_crop2","cloud","swirl_animated","pokemon","minecraft", "vowels","glasses","glasses2","magnified","wolfify_oil","wolfify_fourier","redacted","pumpkin","randomized","you","onepiece","zelda","golden","hearts","shuffle","shuffle2","german","flame","ice","air","earth","charred","leaves","tsified","colorful","aquatic","chinese","lowsaxon","card","card2","pattern","pattern2","pattern3","wwr","fourier_blur","rainbow_animated2","hologram","rainbow_animated3","wolfify_wwr","translate"];
+    this.AVAILABLE_PACKS = ["glitch","negate","grayscale","edge","emboss","silhouette","pixel","pixel2","pixel3","pixel4","scatter","red","green","blue","yellow","purple","cyan","flip","pale","bw","wire","wire2","rainbow","rainbow2","rainbow3","ts","oil","wave","swirl","noise","cycle","equalize","fourier_noise","fourier_equalize","fourier_oil","fourier_modulate","fourier_wire","glitch2","eyes","thief","mask","eye","fourier_eye","citizen_eye","items","bear","wolfify","grid","light_and_shadow","duo_color","wood","coin","coin_animated", "glitch_animated","wave_animated","spin","rainbow_animated","fourier_merge","fourier_magnitude","fourier_phase","fourier_crop","fourier_crop2","cloud","swirl_animated","pokemon","minecraft", "vowels","glasses","glasses2","magnified","wolfify_oil","wolfify_fourier","redacted","pumpkin","randomized","you","onepiece","zelda","golden","hearts","shuffle","shuffle2","german","flame","ice","air","earth","charred","leaves","tsified","colorful","aquatic","chinese","lowsaxon","card","card2","pattern","pattern2","pattern3","wwr","fourier_blur","rainbow_animated2","hologram","rainbow_animated3","wolfify_wwr","translate","voweless","consonantless","pairs","morse","capitalism"];
     this.ANIMATED_PACKS = [53, 54, 55, 56, 57, 63, 64, 102, 103, 104];
     this.NAME_PACKS = [77, 78];
     this.SINGULAR_PACKS = [93];
+    this.NO_ALIAS_PACKS = [107,108,109,110,111];
     this.cmdPacksListAll = function(channel) {
         // format item list
         let itemsTxt = [`${getEmoji('pack_default')} Default - 0`];
@@ -412,7 +413,9 @@ module.exports = function() {
                 default: {
                     // normal lut application
                     for(let i = 0; i < lut.length; i++) {
-                        if(lut[i][0].length > 1) {
+                        if(lut[i][0].match(/#-\d+-#/)) {
+                            txt = txt.replace(new RegExp(lut[i][0], 'g'), lut[i][1]);
+                        } else if(lut[i][0].length > 1) {
                             txt = txt.replace(new RegExp("(?<!\\<\\?|[a-zA-Z])" + lut[i][0] + "(?!\\:\\>|[a-rt-zA-Z])", 'g'), lut[i][1]);
                         } else {
                             txt = txt.replace(new RegExp("(?<!\\<\\?)" + lut[i][0] + "(?!\\:\\>)", 'g'), lut[i][1]);
@@ -438,6 +441,7 @@ module.exports = function() {
         } else {
             let pName = AVAILABLE_PACKS[pack - 1];
             if(pName === stats.theme) return txt; // do not apply pack theme, if it matches normal theme
+            if(NO_ALIAS_PACKS.includes(pack)) return txt;
             let lut = await getPackLUT(pName);
             // randomized pack
             switch(pName) {                                

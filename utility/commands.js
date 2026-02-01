@@ -134,7 +134,7 @@ module.exports = function() {
     **/
 	this.cmdModify = function(message, args, argsX) {
 		if(!args[0] || !args[1]) {
-			channel.send("⛔ Syntax error. Not enough parameters!"); 
+			message.channel.send("⛔ Syntax error. Not enough parameters!"); 
 			return; 
 		} 
 		switch(args[0]) {

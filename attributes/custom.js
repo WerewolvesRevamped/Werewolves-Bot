@@ -75,7 +75,7 @@ module.exports = function() {
     **/
     this.cachedActiveCustomAttributes = [];
     this.cacheActiveCustomAttributes = async function() {
-        let result = await sqlProm("SELECT ai_id,src_ref,src_name,owner,owner_type,val1 AS name,val2 FROM active_attributes WHERE attr_type='custom'");
+        let result = await sqlProm("SELECT ai_id,src_ref,src_name,owner,owner_type,val1 AS name,val2 FROM active_attributes WHERE attr_type='custom' OR attr_type='modifier'");
         cachedActiveCustomAttributes = result.map(el => [el.ai_id, el.src_ref, `${el.owner_type}:${el.owner}`, el.name, el.src_name, el.val2]);
     }
     
@@ -127,7 +127,7 @@ module.exports = function() {
     Create Custom Attribute
     creates a custom attribute
     **/
-    this.createCustomAttribute = async function(src_name, src_ref, target, targetType, dur, attrType, val1 = "", val2 = "", val3 = "") {
+    this.createCustomAttribute = async function(src_name, src_ref, target, targetType, dur, attrType, val1 = "", val2 = "", val3 = "", type = "custom") {
         // get attribute data
         let act = 0;
         if(stats.haunting) { 
@@ -139,8 +139,13 @@ module.exports = function() {
             act = attrData.activation;
         }
         // create attribute
-        await createAttribute(src_name, src_ref, target, targetType, dur, "custom", attrType, val1, val2, val3, act);
+        await createAttribute(src_name, src_ref, target, targetType, dur, type, attrType, val1, val2, val3, act);
         await cacheActiveCustomAttributes();
+    }
+    
+    this.createModifierAttribute = async function(src_name, src_ref, target, targetType, dur, attrType) {
+        // create attribute
+        await createCustomAttribute(src_name, src_ref, target, targetType, dur, attrType, "", "", "", "modifier");
     }
     
     /** PRIVATE

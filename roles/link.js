@@ -747,7 +747,7 @@ module.exports = function() {
         const roleDescs = splitRoleDescSections(attributeContents); // split the attribute descriptions, into the different types of attribute description
         const roleName = getRoleDescName(attributeContents); // grabs the attribute name inbetween the **'s in the first line
         const basics = roleDescs.filter(el => el[0] == "basics")[0][1] ?? "";
-        const formalized = roleDescs.filter(el => el[0] == "formalized")[0][1] ?? "";
+        const formalized = roleDescs.filter(el => el[0] == "formalized")[0]?.[1] ?? "";
         // imsert the attribute into the databse
         sql("INSERT INTO attributes (name,display_name,desc_basics,desc_formalized) VALUES (" + connection.escape(dbName) + "," + connection.escape(roleName) + "," + connection.escape(basics) + "," + connection.escape(formalized) + ")");
         // return nothing

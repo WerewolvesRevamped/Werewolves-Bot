@@ -123,6 +123,16 @@ module.exports = function() {
             let targetChannel = mainGuild.channels.cache.get(cid);
             targetChannel.setName(channelName);
             
+            // handle modifiers
+            let modifiers = await sqlPromEsc("SELECT * FROM modifiers WHERE id=", players[i].id);
+            for(let j = 0; j < modifiers.length; j++) {
+                // get data
+                let modData = await sqlPromOneEsc("SELECT * FROM attributes WHERE name=", modifiers[j].name);
+                // apply attribute
+                await createModifierAttribute(`role:${role.name}`, `player:${players[i].id}`, players[i].id, "player", "permanent", modData.name);
+                abilityLog(`✅ ${srcRefToText('player:' + players[i].id)} had ${modData.name} applied as a modifier.`);
+            }
+            
             // Send info message for each role
             cmdInfo(targetChannel, players[i].id, [ rolesNameBot ], true, false);
             

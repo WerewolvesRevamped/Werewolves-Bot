@@ -26,7 +26,7 @@ module.exports = function() {
         roleName = parseRole(roleName);
 		if(!verifyInfoMessage(roleName)) { // not a valid role
 			// get all roles and aliases, to get an array of all possible role names
-			let allRoleNames = [...cachedRoles, ...cachedGroups, ...cachedAttributes, ...cachedLocations, ...cachedTeams, ...cachedTeamNames, ...cachedAliases.map(el => el.alias), ...cachedInfoNames];
+			let allRoleNames = [...cachedRoles, ...cachedGroups, ...cachedLocations, ...cachedTeams, ...cachedTeamNames, ...cachedAliases.map(el => el.alias), ...cachedInfoNames];
 			let bestMatch = findBestMatch(roleName.toLowerCase(), allRoleNames.map(el => el.toLowerCase())); // find closest match
 			// check if match is close enough
 			if(bestMatch.value <= ~~(roleName.length/2)) { // auto alias if so, but send warning 
@@ -66,9 +66,6 @@ module.exports = function() {
         } else if(cachedLocations.includes(roleName)) {
             // its a location
             infoEmbed = await getLocationEmbed(roleName, authorId);
-        } else if(cachedAttributes.includes(roleName)) {
-            // its a location
-            infoEmbed = await getAttributeEmbed(roleName, sections, authorId);
         } else if(cachedTeams.includes(roleName)) {
             // its a team
             infoEmbed = await getTeamEmbed(roleName, sections, authorId);

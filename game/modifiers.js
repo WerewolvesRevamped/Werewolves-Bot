@@ -42,7 +42,7 @@ module.exports = function() {
                 });
 				// Send message
 				chunkArray(Object.entries(resultByPlayer).map(val => {
-                    let mods = val[1].map(el => `(${el.ai_id}) \`${toTitleCase(el.name)}\` ${getEmoji(el.name)}`);
+                    let mods = val[1].map(el => `(${el.ai_id}) \`${toTitleCase(el.name)}\` ${getLUTEmoji(el.name, el.name)}`);
                     return `<@${val[0]}> - ${mods.join(", ")}`;
                 }), 20).map(el => el.join("\n")).forEach(el => channel.send(el));
 			} else { 

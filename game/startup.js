@@ -262,9 +262,10 @@ module.exports = function() {
                         let modData = await sqlPromOneEsc("SELECT * FROM attributes WHERE name=", modifiers[i].name);
                         // format for channel/info
                         rolesName = modData.display_name + " " + rolesName;
-                        modDescs.push([`Modifier - ${modData?.display_name ?? "??"}`, getEmoji(modData.name, false) + " " + modData?.desc_basics ?? "No info found"]);
+                        let emoji = getLUTEmoji(modData.name, modData.display_name);
+                        modDescs.push([`Modifier - ${modData?.display_name ?? "??"}`, `${emoji} ${modData?.desc_basics ?? "No info found"}`]);
                         // apply attribute
-                        await createCustomAttribute(`role:${result[0].name}`, `player:${player.id}`, player.id, "player", "permanent", modData.name);
+                        await createModifierAttribute(`role:${result[0].name}`, `player:${player.id}`, player.id, "player", "permanent", modData.name);
                         abilityLog(`✅ ${srcRefToText('player:' + player.id)} had ${modData.name} applied as a modifier.`);
                     }
                     // split a single section into several fields if necessary
