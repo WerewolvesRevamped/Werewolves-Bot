@@ -78,7 +78,7 @@ module.exports = function() {
             // check status
             if(connectionShared && stats.automation_level > autoLvl.NONE) {
                 let rDataShared = await sqlPromShared("SELECT * FROM roles WHERE name=" + connectionShared.escape(rName));
-                switch(rDataShared[0].status) {
+                switch(rDataShared[0]?.status ?? "unknown") {
                     case "unknown": channel.send(`⚠️ List warning. The status of role \`${rName}\` is **unknown**. This means the role may not be formalized or may not work correctly. You can still start the game if you feel confident that the role will work or will otherwise ensure a smooth game.`); break;
                     case "manual": channel.send(`⚠️ List warning. The status of role \`${rName}\` is **manual**. This means that the role is formalized in a way that requires host intervention (e.g. the player may be prompted to contact Hosts for specific actions). Make sure you are aware of what is necessary to make this role work correctly.`); break;
                     case "unformalized": channel.send(`⚠️ List warning. The status of role \`${rName}\` is **unformalized**. This means no automation will be done for this role. You can still start the game, but you should be aware that all actions for this role will have to be handeled manually.`); break;
