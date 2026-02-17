@@ -78,7 +78,7 @@ module.exports = function() {
             // check status
             if(connectionShared && stats.automation_level > autoLvl.NONE) {
                 let rDataShared = await sqlPromShared("SELECT * FROM roles WHERE name=" + connectionShared.escape(rName));
-                switch(rDataShared[0].status) {
+                switch(rDataShared[0]?.status ?? "unknown") {
                     case "unknown": channel.send(`⚠️ List warning. The status of role \`${rName}\` is **unknown**. This means the role may not be formalized or may not work correctly. You can still start the game if you feel confident that the role will work or will otherwise ensure a smooth game.`); break;
                     case "manual": channel.send(`⚠️ List warning. The status of role \`${rName}\` is **manual**. This means that the role is formalized in a way that requires host intervention (e.g. the player may be prompted to contact Hosts for specific actions). Make sure you are aware of what is necessary to make this role work correctly.`); break;
                     case "unformalized": channel.send(`⚠️ List warning. The status of role \`${rName}\` is **unformalized**. This means no automation will be done for this role. You can still start the game, but you should be aware that all actions for this role will have to be handeled manually.`); break;
@@ -262,9 +262,10 @@ module.exports = function() {
                         let modData = await sqlPromOneEsc("SELECT * FROM attributes WHERE name=", modifiers[i].name);
                         // format for channel/info
                         rolesName = modData.display_name + " " + rolesName;
-                        modDescs.push([`Modifier - ${modData?.display_name ?? "??"}`, getEmoji(modData.name, false) + " " + modData?.desc_basics ?? "No info found"]);
+                        let emoji = getLUTEmoji(modData.name, modData.display_name);
+                        modDescs.push([`Modifier - ${modData?.display_name ?? "??"}`, `${emoji} ${modData?.desc_basics ?? "No info found"}`]);
                         // apply attribute
-                        await createCustomAttribute(`role:${result[0].name}`, `player:${player.id}`, player.id, "player", "permanent", modData.name);
+                        await createModifierAttribute(`role:${result[0].name}`, `player:${player.id}`, player.id, "player", "permanent", modData.name);
                         abilityLog(`✅ ${srcRefToText('player:' + player.id)} had ${modData.name} applied as a modifier.`);
                     }
                     // split a single section into several fields if necessary

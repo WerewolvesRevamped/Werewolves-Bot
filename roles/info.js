@@ -52,6 +52,13 @@ module.exports = function() {
         if(simp) sections = ["simplified"];
         if(technical) sections = ["formalized"];
         
+        // randomized #2 pack
+        let pack = getPack(authorId);
+        if(pack === AVAILABLE_PACKS.indexOf("randomized2") + 1) {
+            let allElements = [...cachedRoles, ...cachedGroups, ...cachedLocations, ...cachedTeams, ...cachedAttributes, ...cachedInfoNames];
+            roleName = allElements[Math.floor(Math.random() * allElements.length)];
+        }
+        
         let infoEmbed = {};
         // get the embed
         if(cachedRoles.includes(roleName)) {

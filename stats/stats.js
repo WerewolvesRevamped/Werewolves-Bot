@@ -71,6 +71,7 @@ module.exports = function() {
         {id: 53, name: "D0 Time", type: "number", property: "d0_time"},
         {id: 54, name: "Ghostly Mentor Role", type: "roleID", cmd: "ghost_mentor", property: "ghost_mentor", adminOnly: true},
         {id: 55, name: "DB Version", type: "number", cmd: "db_version", property: "db_version", default: 0 },
+        {id: 56, name: "Forced Pack", type: "number", cmd: "forced_pack", property: "forced_pack", default: 0 },
     ]
 
     /**

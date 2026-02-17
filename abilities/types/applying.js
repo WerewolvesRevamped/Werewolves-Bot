@@ -156,7 +156,7 @@ module.exports = function() {
                 continue;
             }
             for(let j = 0; j < attr.length; j++) {
-                if(attr[j].type === "custom") await triggerAttribute(attr[j].ai_id, "On Removal"); // on removal trigger
+                if(attr[j].type === "custom" || attr[j].type === "modifier") await triggerAttribute(attr[j].ai_id, "On Removal"); // on removal trigger
                 await deleteAttribute(attr[j].ai_id); // delete the attribute
                 abilityLog(`✅ ${srcRefToText(targets.type + ':' + targets.value[i])} had ${attr[j].name} (Attr-${attr[j].ai_id}) unapplied${j>0?' x'+(j+1):''}.`);
             }

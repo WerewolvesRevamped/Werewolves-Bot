@@ -105,7 +105,7 @@ module.exports = function() {
     this.triggerPlayerAttrCustom = async function(player_id, triggerName, additionalTriggerData = {}) {
         return new Promise(res => {
             // get all players
-            sql("SELECT active_attributes.ai_id FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.attr_type='custom' AND id=" + connection.escape(player_id), async r => {
+            sql("SELECT active_attributes.ai_id FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND (active_attributes.attr_type='custom' OR active_attributes.attr_type='modifier') AND id=" + connection.escape(player_id), async r => {
                 // iterate through additional roles
                 for(let i = 0; i < r.length; i++) {
                 //trigger handler
@@ -364,7 +364,7 @@ module.exports = function() {
     function triggerHandlerAttributes(triggerName, additionalTriggerData = {}) {
         return new Promise(res => {
             // get all players
-            sql("SELECT active_attributes.ai_id,attributes.name,attributes.parsed,active_attributes.alive FROM attributes INNER JOIN active_attributes ON attributes.name = active_attributes.val1 WHERE active_attributes.attr_type='custom' AND active_attributes.alive>=1", async r => {
+            sql("SELECT active_attributes.ai_id,attributes.name,attributes.parsed,active_attributes.alive FROM attributes INNER JOIN active_attributes ON attributes.name = active_attributes.val1 WHERE (active_attributes.attr_type='custom' OR active_attributes.attr_type='modifier') AND active_attributes.alive>=1", async r => {
                 // no need for an extra layer for attributes due to JOIN which I forgot about previously!
                 r = shuffleArray(r);
                 for(let pr of r) {
