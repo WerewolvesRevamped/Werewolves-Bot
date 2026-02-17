@@ -608,7 +608,7 @@ module.exports = function() {
 			return; 
 		}
 		// Get a list of players
-		sql("SELECT id,emoji FROM players WHERE alive = 0", result => {
+		sql("SELECT id,emoji FROM players WHERE alive = 0 AND type='player'", result => {
 			let playerList = result.map(el => `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username.replace(/(_|\*|~)/g,"\\$1") : "*user left*"} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
 			// Print message
 			channel.send("✳️ Listing dead players").then(m => {
@@ -635,7 +635,7 @@ module.exports = function() {
 			return; 
         }
 		// Get a list of players
-		sql("SELECT id,emoji FROM players WHERE alive = 2", result => {
+		sql("SELECT id,emoji FROM players WHERE alive = 2 AND type='player'", result => {
 			let playerList = result.map(el => `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id).user.username.replace(/(_|\*|~)/g,"\\$1") : "*user left*"} (${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id) : "<@" + el.id + ">"})`).join("\n");
 			// Print message
 			channel.send("✳️ Listing ghostly players").then(m => {

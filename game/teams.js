@@ -169,7 +169,7 @@ module.exports = function() {
             //console.log(activeTeams[i].name, allowedPlayers);
             // check if all players are included
             let all = await getAllLivingIDs();
-            let teamHasWon = all.every(el => allowedPlayers.includes(el) || el === "328035409055449089");
+            let teamHasWon = all.every(el => allowedPlayers.includes(el));
             // if so a team has won
             if(teamHasWon) {
                 gameEnds = true;

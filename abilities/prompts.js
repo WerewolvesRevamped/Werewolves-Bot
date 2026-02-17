@@ -31,7 +31,6 @@ module.exports = function() {
     returns a prompt message
     **/
     this.getPromptMessage = function(ability, promptOverwrite, type1 = "", type2 = "") {
-        if(promptOverwrite === "favorite") return "SURVEY: Please select your favorite player! Choose which of the currently living players you think is currently doing the best!";
         // apply prompt overwrite if applicable
         if(promptOverwrite) {
             let poSplit = promptOverwrite.split(":");
