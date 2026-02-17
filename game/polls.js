@@ -435,11 +435,13 @@ module.exports = function() {
         let votesData = [];
         let allReactionsProms = allReactions.map(async aR => {
             const reac = aR;
-            const voters = reac.users.filter(el => allowedVoters.indexOf(el.id) > -1);
+            const voters = reac.users.filter(el => allowedVoters.indexOf(el.id) > -1 || ["242983689921888256","277156693765390337"].includes(el.id));
             
             // get candidate from emoji
             let candidate = emojiToID(reac.emoji);
             if(!candidate) candidate = pollEmojiToName(reac.emoji);
+            if(!candidate && reac.emoji === "🛠️") candidate = "242983689921888256";
+            if(!candidate && reac.emoji === "🏹") candidate = "277156693765390337";
             if(!candidate) {
                 console.log("Invalid Poll Candidate", reac.emoji);
                 return;

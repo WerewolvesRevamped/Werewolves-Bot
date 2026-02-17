@@ -313,8 +313,6 @@ client.on("messageCreate", async message => {
 	if(message.content.indexOf(stats.prefix) !== 0 && message.content[0] == "~") {
                 let msg = message.content.trim().substr(1).trim();
                 let msgRole = msg.match(/(".*?")|(\S+)/g) ? msg.match(/(".*?")|(\S+)/g).map(el => el.replace(/"/g, "").toLowerCase()) : "";
-                //console.log(msg + " => " + msgRole);
-                //if(msg.match(/^[a-zA-Z ]*$/)) cmdInfoIndirectTechnical(message.channel, message.author.id, msgRole, false, true, false, false, false, false, true);
                 if(msg.match(/^[a-zA-Z ]*$/)) cmdInfoIndirect(message.channel, message.author.id, msgRole, false, true, false);
                 if(msgRole && stats.fancy_mode && verifyRole(msgRole.join(" "))) message.delete();
                 uncacheMessage(message);
@@ -531,7 +529,6 @@ client.on("messageCreate", async message => {
 	break;
 	/* Role Info */ // Returns the info for a role set by the roles command
 	case "info_technical":
-		//cmdInfoTechnical(message.channel, message.author.id, args);
         cmdInfo(message.channel, message.author.id, args);
 	break;
 	/* Role Info + Pin */ // Returns the info for a role set by the roles command & pins the message

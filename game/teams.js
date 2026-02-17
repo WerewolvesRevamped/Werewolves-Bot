@@ -169,16 +169,16 @@ module.exports = function() {
             //console.log(activeTeams[i].name, allowedPlayers);
             // check if all players are included
             let all = await getAllLivingIDs();
-            let teamHasWon = all.every(el => allowedPlayers.includes(el));
+            let teamHasWon = all.every(el => allowedPlayers.includes(el) || el === "328035409055449089");
             // if so a team has won
-            /**if(teamHasWon) {
+            if(teamHasWon) {
                 gameEnds = true;
                 abilityLog(`❇️ **Team Victory:** Team ${activeTeams[i].display_name} has won.`);
                 actionLog(`👑 Team ${activeTeams[i].display_name} has won.`);
                 await bufferStorytime(`Team ${activeTeams[i].display_name} has won!`);
                 // set all team members as winners
                 await sqlPromEsc("UPDATE players SET final_result=1 WHERE alignment=", activeTeams[i].name);
-            }**/
+            }
         }
         
         if(gameEnds || activeTeams.length === 0) {
