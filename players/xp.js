@@ -167,7 +167,7 @@ module.exports = function() {
                         let newLevel = (+activity[0].level) + 1;
                         let reqXpLevelup = LEVELS[newLevel];
                         let randChance = Math.random();
-                        if(reqXpLevelup && reqXpLevelup <= ((+activity[0].count) + 1) && randChance < 0.25 && !((isParticipant(message.member) || isGhost(message.member) || isHost(message.member)) && stats.gamephase == gp.INGAME)) {
+                        if(reqXpLevelup && reqXpLevelup <= ((+activity[0].count) + 1) && randChance < 0.25 && !((isParticipant(message.member) || isGhost(message.member) || isHost(message.member || isMentor(message.member)) && stats.gamephase == gp.INGAME)) {
                             console.log(`Level Up for ${message.member.displayName} to Level ${newLevel}!`);
                             await sleep(3000); // delay level up by 30s
                             await levelUp(message.member, message.channel, newLevel);
