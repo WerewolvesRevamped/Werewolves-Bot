@@ -40,12 +40,18 @@ module.exports = function() {
     this.NO_ALIAS_PACKS = [107,108,109,110,111];
     this.cmdPacksListAll = function(channel) {
         // format item list
-        let itemsTxt = [`${getEmoji('pack_default')} Default - 0`];
-        for(let i = 0; i < AVAILABLE_PACKS.length; i++) itemsTxt.push(`${getEmoji('pack_'+AVAILABLE_PACKS[i])} ${toTitleCase(AVAILABLE_PACKS[i])} - ${i+1}`);
+        let itemsTxt = [`${getEmojiSkinpack('pack_default')} Default - 0`];
+        for(let i = 0; i < AVAILABLE_PACKS.length; i++) itemsTxt.push(`${getEmojiSkinpack('pack_'+AVAILABLE_PACKS[i])} ${toTitleCase(AVAILABLE_PACKS[i])} - ${i+1}`);
         let embed = { title: "All Packs", color: 8984857 };
         buildItemListEmbed(itemsTxt, embed);
         embed.thumbnail = { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` };
         channel.send({ embeds: [ embed ] });
+    }
+    
+    this.getEmojiSkinpack = function(txt) {
+        let em = getEmoji(txt);
+        if(em === "❓") return getEmoji('pack_default');
+        else return em;
     }
 
     /**
@@ -70,8 +76,8 @@ module.exports = function() {
         items = items.sort((a,b) => a[0] - b[0]); 
         
         // format item list
-        let itemsTxt = [`${getEmoji('pack_default')} Default - SP:0`];
-        for(let i = 0; i < items.length; i++) itemsTxt.push(`${getEmoji('pack_'+items[i][1])} ${toTitleCase(items[i][1])} - SP:${items[i][0]} ${items[i][2] > 1 ? '(x' + items[i][2] + ')' : ''}`);
+        let itemsTxt = [`${getEmojiSkinpack('pack_default')} Default - SP:0`];
+        for(let i = 0; i < items.length; i++) itemsTxt.push(`${getEmojiSkinpack('pack_'+items[i][1])} ${toTitleCase(items[i][1])} - SP:${items[i][0]} ${items[i][2] > 1 ? '(x' + items[i][2] + ')' : ''}`);
         let embed = { title: "Available Packs", description: `<@${user}>, here is a list of skinpacks available for you. You can switch skinpack by running \`${stats.prefix}packs select <ID>\`, where you replace \`<ID>\` with the __number__ of the skinpack you want to select.`, color: 8984857 };
         buildItemListEmbed(itemsTxt, embed);
         embed.thumbnail = { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` };
