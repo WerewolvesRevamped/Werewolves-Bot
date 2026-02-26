@@ -19,6 +19,7 @@ module.exports = function() {
         
         // execute the kill
         await killPlayer(self, true);
+        await clearRoleAttributes(self);
         
         // set final status as win
         await setFinalResult(self, 1);
@@ -48,6 +49,7 @@ module.exports = function() {
         
         // execute the kill
         await killPlayer(self, true);
+        await clearRoleAttributes(self);
         
         // set final status as loss
         await setFinalResult(self, 0);

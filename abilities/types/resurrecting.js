@@ -22,6 +22,7 @@ module.exports = function() {
                 case "player":
                     // Resurrect
                     await resurrectPlayer(targets.value[i]);
+                    await clearRoleAttributes(targets.value[i]);
                     // reopen groups/teams
                     await updateActiveTeams();
                     await updateGroups();

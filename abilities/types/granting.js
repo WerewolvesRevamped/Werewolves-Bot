@@ -152,7 +152,11 @@ module.exports = function() {
     transfers a role from one player to another player
     **/
     this.grantingTransfer = async function(src_name, src_ref, targets, transferTo, activeExtraRole, additionalTriggerData) {
+        console.log(targets[0]);
         let queried = await queryAttributePlayer(targets[0], "attr_type", "role", "val2", activeExtraRole); // query old role to get role name
+        if(!queried || !queried[0]) {
+            return { msg: "Transfer failed!", success: false, target: `player:${transferTo[0]}` };
+        }
         let remove = await grantingRemove(src_name, src_ref, targets, activeExtraRole, additionalTriggerData);
         let add = await grantingAdd(src_name, src_ref, transferTo, queried[0].val1, additionalTriggerData, activeExtraRole);
         

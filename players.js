@@ -1047,6 +1047,7 @@ module.exports = function() {
 			channel.send("ℹ️ Please consider the following things after resurrecting:\n• If applicable, reassign the discord roles for elected roles manually\n• Manually undo actions that occur on player deaths (e.g. delete reporter message)");
             // Resurrect
             await resurrectPlayer(user, true);
+            await clearRoleAttributes(user);
             // reopen groups/teams
             await updateActiveTeams();
             await updateGroups();

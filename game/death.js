@@ -165,6 +165,8 @@ module.exports = function() {
                     await triggerHandler("On Killed Complex", { attacker: attacker, death_type: type, attack_source: src_name, this: target, haunted_overwrite: true }); 
                     // passive
                     await triggerHandler("Passive");
+                    // clear attribute
+                    await clearRoleAttributes(playersFiltered[i]);
                 break;
                 case "lynch":
                     // kill player
@@ -176,6 +178,8 @@ module.exports = function() {
                     await triggerHandler("On Death Complex", { attacker: attacker, death_type: "lynch", attack_source: src_name, this: target, haunted_overwrite: true }); 
                     // passive
                     await triggerHandler("Passive");
+                    // clear attribute
+                    await clearRoleAttributes(playersFiltered[i]);
                 break;
             }
         }
@@ -202,6 +206,8 @@ module.exports = function() {
             await triggerHandler("On Banishment Complex", { attacker: attacker, death_type: type, attack_source: src_name, this: target }); 
             // passive
             await triggerHandler("Passive");
+            // clear attribute
+            await clearRoleAttributes(playersFilteredBanish[i]);
         }
         
         // check if new killq entries were created
@@ -228,6 +234,8 @@ module.exports = function() {
     kills a player (does not consider or defenses or anything, just kills)
     **/
 	this.killPlayer = async function(player_id, silent = false) {
+        // clear attr delete queue
+        killAttributeDeleteQueue = [];
        // set to dead
        await setLivingStatus(player_id, !stats.haunting ? 0 : 2);
        // set death phase
@@ -267,7 +275,6 @@ module.exports = function() {
             if(playerAttributes[i].attr_type === "role") {
                 let sc = mainGuild.channels.cache.get(playerAttributes[i].val2);
                 if(sc) channelSetPermission(sc, player_id, null);
-                await deleteAttribute(playerAttributes[i].ai_id)
             } else {
                 // set attribute to dead
                 await updateAttributeAlive(playerAttributes[i].ai_id,  !stats.haunting ? 0 : 2);
@@ -277,6 +284,17 @@ module.exports = function() {
         // add to storytime
         let dmsg = await getDeathMessage(player_id, `${idToEmoji(player_id)} <@${player_id}>`);
         if(!silent) await bufferStorytime(dmsg);
+	}   
+    
+	this.clearRoleAttributes = async function(player_id) {
+        // retrieve all attributes of the player and set to dead
+        let playerAttributes =  await queryAttributePlayer(player_id, "owner", player_id);
+        for(let i = 0; i < playerAttributes.length; i++) {
+            // revoke extra role entirely
+            if(playerAttributes[i].attr_type === "role") {
+                await deleteAttribute(playerAttributes[i].ai_id)
+            }
+        }
 	}   
     
     /** PUBLIC
@@ -312,7 +330,6 @@ module.exports = function() {
             if(playerAttributes[i].attr_type === "role") {
                 let sc = mainGuild.channels.cache.get(playerAttributes[i].val2);
                 if(sc) channelSetPermission(sc, player_id, null);
-                await deleteAttribute(playerAttributes[i].ai_id)
             } else {
                 // set attribute to dead
                 await updateAttributeAlive(playerAttributes[i].ai_id, 0);
@@ -359,7 +376,6 @@ module.exports = function() {
             if(playerAttributes[i].attr_type === "role") {
                 let sc = mainGuild.channels.cache.get(playerAttributes[i].val2);
                 if(sc) channelSetPermission(sc, player_id, null);
-                await deleteAttribute(playerAttributes[i].ai_id)
             } else {
                 // set attribute to dead
                 await updateAttributeAlive(playerAttributes[i].ai_id, 1);
