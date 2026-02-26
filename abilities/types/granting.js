@@ -132,7 +132,7 @@ module.exports = function() {
             
             // revoke discord role
             let queried = await queryAttributePlayer(targets[i], "attr_type", "role", "val2", channelId); // delete old membership(s)
-            if(!queried) {
+            if(!queried || !queried[0]) {
                 return { msg: "Ungranting failed!", success: false, target: `player:${targets[0]}` };
             }
             unassignDR(targets[i], queried[0].val1);

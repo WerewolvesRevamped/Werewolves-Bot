@@ -1,3 +1,7 @@
+// ipv4
+const dns = require('dns');
+dns.setDefaultResultOrder('ipv4first');
+
 /* Discord */
 const { Client, Intents, Options, GatewayIntentBits, ChannelType, MessageType, OverwriteType, PermissionsBitField } = require('discord.js');
 global.client = new Client({ 
