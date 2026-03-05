@@ -21,6 +21,7 @@ module.exports = function() {
 			case "recur": cmdScheduleRecur(message.channel, args, argsX); break;
 			case "remove": cmdScheduleRemove(message.channel, args); break;
 			case "setup": cmdScheduleSetup(message.channel); break;
+			case "clear": cmdScheduleClear(message.channel); break;
 			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
 		}
 	}
@@ -97,8 +98,19 @@ module.exports = function() {
     sets up the schedule for fully automated games
     **/
     this.cmdScheduleSetup = async function(channel) {
-        await setupSchedule();
+        let time = parseToFutureUnixTimestamp(stats.phaseautoinfo.d0);
+        await setupSchedule(time);
         channel.send(`✅ Setup schedule!`);
+        cmdScheduleList(channel);
+    }
+    
+    /**
+    Command: $schedule clear
+    clears the schedule
+    **/
+    this.cmdScheduleClear = async function(channel) {
+        await clearSchedule();
+        channel.send(`✅ Cleared schedule!`);
         cmdScheduleList(channel);
     }
     

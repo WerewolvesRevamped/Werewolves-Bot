@@ -114,6 +114,7 @@ module.exports = function() {
             ["schedule recur", PERM.GM, "Adds a scheduled event that recurs.", "<Event Type> <Timestamp> <Recurrence> <Event Value(s)>", "Schedules an event that recurs. Same as $schedule add with an added <Recurrence> parameter which is specified in minutes.", "schedule recur command 5m 5 help", ["✅ Command scheduled for in 5 minutes!"], CMDSTATE.RDY],
             ["schedule remove", PERM.GM, "Removes a scheduled event.", "<Event ID>", "Removes a scheduled event by ID. Use $schedule list to identify Event IDs.", "schedule remove 1", ["✅ Deleted scheduled event 1!"], CMDSTATE.RDY],
             ["schedule setup", PERM.GM, "Sets up the schedule.", "", "Sets up the schedule for a fully automatic game. As this is usually done automatically, this command should normally not be needed.", "schedule setup", ["✅ Setup schedule!"], CMDSTATE.RDY],
+            ["schedule clear", PERM.GM, "Clears the schedule.", "", "Clears the entire schedule.", "schedule clear", ["✅ Cleared schedule!"], CMDSTATE.RDY],
         /** CC Module **/
         // CC
         ["cc", PERM.AL, "Manages CCs.", "<Subcommand>", `Group of commands to handle CCs. Use $help cc <subcommand> for detailed help.`, "", [], CMDSTATE.RDY],
@@ -377,6 +378,7 @@ module.exports = function() {
         ["end", PERM.GM, "Ends a game.", "", "Ends the game. Sets the gamephase, and makes all Participants Dead Participants.", "end", [], CMDSTATE.RDY],
         ["tie", PERM.GM, "Ends a game in a tie.", "", "Ends the game in a tie. All living players are marked as winners.", "tie", [], CMDSTATE.RDY],
         ["reevaluate", PERM.GM, "Reevaluates win conditions.", "", "Reevaluates win conditions of all teams. Use this when a game is meant to end but did not end (e.g. due to a death outside of phase change).", "reevaluate", [], CMDSTATE.RDY],
+        ["archived", PERM.GM, "Marks game as archived.", "", "Marks a game as archived allowing it to be reset.", "archived", [], CMDSTATE.RDY],
         ["open", PERM.GM, "Opens signups and notifies players.", "", "Opens signups, then makes New Game Ping role mentionable, pings it and then makes it unmentionable again.", "open", [], CMDSTATE.RDY],
         ["close", PERM.GM, "Closes signups.", "", "Closes signups.", "close", [], CMDSTATE.RDY],
         ["gameping", PERM.GM, "Ping New Game Ping role.", "", "Makes New Game Ping role mentionable, pings it and then makes it unmentionable again.", "gameping", [], CMDSTATE.RDY],
