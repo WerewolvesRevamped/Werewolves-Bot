@@ -363,30 +363,6 @@ client.on("messageCreate", async message => {
 	case "ping":
 		cmdPing(message);
 	break;
-    case "drag": // drags players to townsquare VC MWR
-        if(checkGM(message)) {
-            sql("SELECT id FROM players WHERE alive = 1 AND type='player'", result => {
-                result.forEach(p => {
-                    let member = message.channel.guild.members.cache.get(p.id);
-                    member.voice.setChannel("1075234996329136138");
-                });
-            });
-            let member = message.channel.guild.members.cache.get("242983689921888256");
-            member.voice.setChannel("1075234996329136138");
-        }
-    break;
-    case "drag_dead": // drags players to dead VC MWR
-        if(checkGM(message)) {
-            sql("SELECT id FROM players WHERE alive = 1 AND type='player'", result => {
-                result.forEach(p => {
-                    let member = message.channel.guild.members.cache.get(p.id);
-                    member.voice.setChannel("1075235455123083264");
-                });
-            });
-            let member = message.channel.guild.members.cache.get("242983689921888256");
-            member.voice.setChannel("1075235455123083264");
-        }
-    break;
     case "image": // displays an image
         cmdGetImg(message.channel, args.join(" "), message.author);
     break;
@@ -398,13 +374,7 @@ client.on("messageCreate", async message => {
         cmdGetCard(message.channel, args.join(" "));
     break;
     case "embed": // generates an embed 
-        if(checkGMHelper(message)) { 
-            let embed = message.content.split(" ");
-            embed.shift();
-            embed = JSON.parse(embed.join(" ").replace(/'/g,'"'));
-            if(embed.embed) embed = embed.embed;
-            message.channel.send({embeds:[ embed ]});
-        }
+        if(checkGMHelper(message)) cmdEmbed(message);
     break;
     case "force_reload": // reloads db and caches 
         if(checkGM(message)) forceReload(message.channel);

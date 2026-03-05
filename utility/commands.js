@@ -5,6 +5,17 @@
 module.exports = function() {
     
     /**
+    Command: $embed
+    **/
+    this.cmdEmbed = function(message) {
+        let embed = message.content.split(" ");
+        embed.shift();
+        embed = JSON.parse(embed.join(" ").replace(/'/g,'"'));
+        if(embed.embed) embed = embed.embed;
+        message.channel.send({embeds:[ embed ]});
+    }
+    
+    /**
     Command: $time
     **/
     this.cmdTime = function(channel, args) {

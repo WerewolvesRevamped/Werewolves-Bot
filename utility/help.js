@@ -90,11 +90,9 @@ module.exports = function() {
     this.CONF_TXT = "❗ Click the reaction in the next 20.0 seconds to confirm the command!";
     this.COMMANDS = [
         /** Top Level Commands **/
-        ["drag", PERM.GM, "Pulls all living players into a hardcoded townsquare VC.", "", "", "drag", [], CMDSTATE.UNK],
-        ["drag_dead", PERM.GM, "Pulls all living players into a hardcoded deadspectator VC.", "", "", "drag_dead", [], CMDSTATE.UNK],
-        ["force_reload", PERM.GM, "Reloads boat.", "", "", "", [], CMDSTATE.UNK],
-        ["sql_reload", PERM.SG, "Restarts SQL.", "", "", "", [], CMDSTATE.UNK],
-        ["embed", PERM.GH, "Sends an embed.", "", "", "", [], CMDSTATE.UNK],
+        ["force_reload", PERM.GM, "Reloads bot.", "", "Reloads various caches.", "force_reload", [], CMDSTATE.RDY],
+        ["sql_reload", PERM.SG, "Restarts SQL.", "", "Restarts the database.", "sql_reload", [], CMDSTATE.RDY],
+        ["embed", PERM.GH, "Sends an embed.", "<Embed JSON>", "Replace all double quotes with single quotes.", "embed {'title':'test'}", [], CMDSTATE.RDY],
         /** Utility Commands **/
         ["help", PERM.AL, "Provides information about commands.", "<Command> [Sub-Command(s)]", "Provides help for a command. Use $help all to also see all subcommands.", "help help", [], CMDSTATE.RDY],
             ["help all", PERM.AL, "Provides information about commands and subcommands.", "", "Provides help for all commands and subcommands", "help all", [], CMDSTATE.RDY],
