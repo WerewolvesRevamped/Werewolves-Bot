@@ -10,6 +10,17 @@ module.exports = function() {
     **/
     this.cmdCheckStart = async function(channel) {
         let check = await gameCheckStart(channel);
+        // Info Messages
+        channel.send("ℹ️ Game is called `" +  stats.game + "`!"); 
+        channel.send("ℹ️ Automation level is `" +  stats.automation_level + "`!"); 
+        if(check && stats.automation_level === autoLvl.FULL) {
+            channel.send("ℹ️ Day 0 ends <t:" +  parseToFutureUnixTimestamp(stats.phaseautoinfo.d0) + ":R>!"); 
+            if((+stats.phaseautoinfo.day) % 60 != 0) channel.send("ℹ️ Days last `" +  stats.phaseautoinfo.day + "` minutes!"); 
+            else channel.send("ℹ️ Days last `" +  (stats.phaseautoinfo.day/60) + "` hours!"); 
+            if((+stats.phaseautoinfo.night) % 60 != 0) channel.send("ℹ️ Nights last `" +  stats.phaseautoinfo.night + "` minutes!"); 
+            else channel.send("ℹ️ Nights last `" +  (stats.phaseautoinfo.night/60) + "` hours!"); 
+        }
+        if(stats.haunting) channel.send("👻 Haunting is __enabled__!");
         if(!check) channel.send("⛔ The game is **not** ready to start.");
         else channel.send("✅ The game is ready to start.");
     }
