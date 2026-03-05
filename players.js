@@ -482,25 +482,6 @@ module.exports = function() {
         });
 	}
 	
-	this.cmdModrole = function(message, args) {
-		let aid = getUser(args[1]);
-		if(!aid) return;
-		let author = message.guild.members.cache.get(aid);
-		if(!author) return;
-		let role = message.guild.roles.cache.get(args[2]);
-		if(!role) return;
-		switch(args[0]) {
-			 case "add": 
-                addRoleRecursive(author, message.channel, role, role.name);
-				message.channel.send("✅ Added `" + role.name + "` to <@" + author.id + "> (" + author.user.username + ")!");
-			break;
-			 case "remove": 
-                removeRoleRecursive(author, message.channel, role, role.name);
-				message.channel.send("✅ Remove `" + role.name + "` from <@" + author.id + "> (" + author.user.username + ")!");
-			break;
-		}
-	}
-	
 	/* Lists all signedup players */
 	this.cmdListSignedup = function(channel) {
 		// Get a list of players

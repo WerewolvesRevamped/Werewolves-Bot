@@ -149,9 +149,10 @@ module.exports = function() {
         SETUP: 2,
         INGAME: 3,
         POSTGAME: 4,
+        ARCHIVED: 5,
 
         MIN: 0,
-        MAX: 4
+        MAX: 5
     };
 
     /** @enum {number} */

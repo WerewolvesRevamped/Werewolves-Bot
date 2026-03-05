@@ -156,6 +156,7 @@ module.exports = function () {
                 case gp.SETUP: gameStatus.setName("📝 Game Setup (" + result.length + ")"); break;
                 case gp.INGAME: gameStatus.setName("🔁 In-Game (" + result.filter(el => el.alive==1).length + "/" + result.length + ")"); break;
                 case gp.POSTGAME: gameStatus.setName("✅ Game Concluded"); break;
+                case gp.ARCHIVED: gameStatus.setName("✅ Game Archived"); break;
             }
         });
     }

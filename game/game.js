@@ -147,8 +147,8 @@ module.exports = function() {
     
 	/* Handles reset command */
 	this.cmdReset = function(channel, debug, restart = false) {
-		if(stats.gamephase != gp.POSTGAME && stats.gamephase != gp.NONE && !debug) {
-            channel.send("⛔ Command error. Can only reset game while in post-game state!");
+		if(stats.gamephase != gp.ARCHIVED && stats.gamephase != gp.NONE && !debug) {
+            channel.send("⛔ Command error. Can only reset game while in archived state!");
             return;
         }
 		// Set Gamephase

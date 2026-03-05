@@ -596,14 +596,6 @@ client.on("messageCreate", async message => {
 	break;
 	/* End */ // Ends a game
 	case "end":
-        if(args[0] == "poll") {
-            removeRoleRecursive(message.member, message.channel, stats.host, "host");
-            removeRoleRecursive(message.member, message.channel, stats.gamemaster, "gamemaster");
-            removeRoleRecursive(message.member, message.channel, stats.senior_gamemaster, "senior gamemaster");
-            message.channel.send("⛔ Command execution blocked. This is not the command you're looking for.");
-            message.member.createDM().then(dm => dm.send("You have been automatically demoted due to incompetence 🙂 ❤️"));
-            break;
-        }
 		if(checkSafe(message)) cmdConfirm(message, "end");
 	break;
 	/* Tie */ // Ends the game in a tie
@@ -613,6 +605,10 @@ client.on("messageCreate", async message => {
 	/* Reevaluate */ // Ends the game in a tie
 	case "reevaluate":
 		if(checkSafe(message)) cmdReevaluate(message.channel);
+	break;
+	/* Archived */ // Marks the game as archived
+	case "archived":
+		if(checkSafe(message)) cmdArchived(message.channel);
 	break;
 	/* Sheet */ // Simplifies game managment via sheet
 	case "sheet":
@@ -717,14 +713,6 @@ client.on("messageCreate", async message => {
 	break;
 	/* Close Signups */
 	case "close":
-        if(args[0] == "poll") {
-            removeRoleRecursive(message.member, message.channel, stats.host, "host");
-            removeRoleRecursive(message.member, message.channel, stats.gamemaster, "gamemaster");
-            removeRoleRecursive(message.member, message.channel, stats.senior_gamemaster, "senior gamemaster");
-            message.channel.send("⛔ Command execution blocked. This is not the command you're looking for.");
-            message.member.createDM().then(dm => dm.send("You have been automatically demoted due to incompetence 🙂 ❤️"));
-            break;
-        }
 		if(checkGM(message)) cmdClose(message);
 	break;
 	/* Spectate */
@@ -742,12 +730,6 @@ client.on("messageCreate", async message => {
 	/* Confirm */
 	case "confirm":
 		confirmActionExecute(args.join(" "), message, false);
-	break;
-	/* Modrole */ 
-	case "modrole": 
-    /** DISABLED
-		if(message.author.id == client.user.id || checkAdmin(message)) cmdModrole(message, args);
-        **/
 	break;
     /* Discord Role */
     case "dr":
@@ -862,7 +844,7 @@ client.on("messageCreate", async message => {
             message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
             return;
         }
-        if((isParticipant(message.member) || isGhost(message.member)) && stats.gamephase != gp.POSTGAME && stats.gamephase != gp.SIGNUP) {
+        if((isParticipant(message.member) || isGhost(message.member)) && ![gp.SIGNUP, gp.POSTGAME, gp.ARCHIVED].includes(stats.gamephase)) {
             message.channel.send(`⛔ You cannot use this command while ingame.`);
             break;
         }
@@ -880,7 +862,7 @@ client.on("messageCreate", async message => {
             message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
             return;
         }
-        if((isSignedUp(message.member) || isParticipant(message.member) || isGhost(message.member)) && stats.gamephase != gp.POSTGAME && stats.gamephase != gp.SIGNUP) {
+        if((isSignedUp(message.member) || isParticipant(message.member) || isGhost(message.member)) && ![gp.SIGNUP, gp.POSTGAME, gp.ARCHIVED].includes(stats.gamephase)) {
             message.channel.send(`⛔ You cannot use this command while signed up or ingame.`);
             break;
         }
@@ -891,7 +873,7 @@ client.on("messageCreate", async message => {
             message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
             return;
         }
-        if((isSignedUp(message.member) || isParticipant(message.member) || isGhost(message.member)) && stats.gamephase != gp.POSTGAME && stats.gamephase != gp.SIGNUP) {
+        if((isSignedUp(message.member) || isParticipant(message.member) || isGhost(message.member)) && ![gp.SIGNUP, gp.POSTGAME, gp.ARCHIVED].includes(stats.gamephase)) {
             message.channel.send(`⛔ You cannot use this command while signed up or ingame.`);
             break;
         }
@@ -909,7 +891,7 @@ client.on("messageCreate", async message => {
             message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
             return;
         }
-        if((isParticipant(message.member) || isGhost(message.member)) && stats.gamephase != gp.POSTGAME && stats.gamephase != gp.SIGNUP) {
+        if((isParticipant(message.member) || isGhost(message.member)) && ![gp.SIGNUP, gp.POSTGAME, gp.ARCHIVED].includes(stats.gamephase)) {
             message.channel.send(`⛔ You cannot use this command while ingame.`);
             break;
         }

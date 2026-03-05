@@ -22,4 +22,21 @@ module.exports = function() {
         });
 	}
     
+    /**
+    Command: $archived
+    Marks a game as archived
+    **/
+	this.cmdArchived = async function(channel) {
+		if(stats.gamephase != gp.POSTGAME && stats.gamephase != gp.NONE) {
+            channel.send("⛔ Command error. Can only mark game as archived while in postgame state!");
+            return;
+        }
+        // update gamephase
+        await sqlProm("UPDATE stats SET value=" + connection.escape(gp.ARCHIVED) + " WHERE id=1");
+        stats.gamephase = gp.ARCHIVED;
+        // update gp channel
+        updateGameStatus();
+        channel.send("✅ Game has been archived.");
+	}
+    
 }
