@@ -168,7 +168,7 @@ module.exports = function() {
 				message.channel.send("✅ Updated bot status!");
 			break;
 			case "activity":
-				client.user.setPresence({ activities: [{ name: argsX[1], type: "PLAYING" }] })
+                client.user.setPresence({ activities: [{ name: "custom", type: 4, state: argsX[1] }] });
 				message.channel.send("✅ Updated bot activity!");
 			break;
 			default:
