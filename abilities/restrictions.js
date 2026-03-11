@@ -72,7 +72,7 @@ module.exports = function() {
                         let lastPhase = await getLastPhase(src_ref, ability);
                         let now = getPhaseAsNumber();
                         // check if current phase is at least 2 higher than the phase the ability was last used in
-                        console.log("SUCC", src_ref, "last", lastPhase, "now", now);
+                        //console.log("SUCC", src_ref, "last", lastPhase, "now", now);
                         if(now >= lastPhase+4) {
                             return true;
                         } else {

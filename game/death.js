@@ -234,6 +234,7 @@ module.exports = function() {
     kills a player (does not consider or defenses or anything, just kills)
     **/
 	this.killPlayer = async function(player_id, silent = false) {
+        console.log(`Killing ${player_id}`);
         // clear attr delete queue
         killAttributeDeleteQueue = [];
        // set to dead

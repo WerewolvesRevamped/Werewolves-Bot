@@ -453,7 +453,7 @@ module.exports = function() {
 	/* Randomizes */
 	this.cmdRollExe = function(channel, args, wl, alive = 1) {
 		let blacklist = parseUserList(args, 1, channel, null, alive === 2 ? "ghost" : "participant") || [];
-		console.log(blacklist);
+		//console.log(blacklist);
 		// Get a list of players
 		sql("SELECT id FROM players WHERE alive=" + alive + " AND type='player'", result => {
 			let playerList = result.map(el => getUser(el.id)); 

@@ -226,17 +226,14 @@ module.exports = function() {
             
             // on action trigger
             const actionTarget = feedback.target ? feedback.target : null;
-            
             let thisId = srcToValue(src_ref);
-            await trigger(src_ref, "On Action", { action_result: feedback, action_target: actionTarget, action_feedback: feedback.msg, ability_type: ability.type, src_name: src_name }); 
-            await trigger(src_ref, "On Action Complex", { action_result: feedback, action_target: actionTarget, action_feedback: feedback.msg, ability_type: ability.type, ability_subtype: ability.subtype, src_name: src_name }); 
-            await trigger(src_ref, "On Action Inverted Complex", { action_result: feedback, action_target: actionTarget, action_feedback: feedback.msg, ability_type: ability.type, ability_subtype: ability.subtype, src_name: src_name }); 
-            await triggerHandler("On Action Target Complex", { action_result: feedback, action_target: actionTarget, action_feedback: feedback.msg, ability_type: ability.type, ability_subtype: ability.subtype, src_name: src_name, this: thisId }); 
-            await triggerHandler("On Action Target Basic Complex", { action_result: feedback, action_target: actionTarget, action_feedback: feedback.msg, ability_type: ability.type, ability_subtype: ability.subtype, src_name: src_name, this: thisId }); 
-             await triggerHandler("On Action Target Inverted Complex", { action_result: feedback, action_target: actionTarget, action_feedback: feedback.msg, ability_type: ability.type, ability_subtype: ability.subtype, src_name: src_name, this: thisId }); 
-            await trigger(src_ref, "On Any Action", { action_result: feedback, action_target: actionTarget, action_feedback: feedback.msg, ability_type: ability.type, src_name: src_name }); 
-            await trigger(src_ref, "On Any Action Complex", { action_result: feedback, action_target: actionTarget, action_feedback: feedback.msg, ability_type: ability.type, ability_subtype: ability.subtype, src_name: src_name }); 
-            await trigger(src_ref, "On Any Action Inverted Complex", { action_result: feedback, action_target: actionTarget, action_feedback: feedback.msg, ability_type: ability.type, ability_subtype: ability.subtype, src_name: src_name }); 
+            let trData = { action_result: feedback, action_target: actionTarget, action_feedback: feedback.msg, ability_type: ability.type, visit_type: ability.type, src_name: src_name, this: thisId };
+            for(let trName of ["On Action", "On Action Complex", "On Action Inverted Complex", "On Any Action", "On Any Action Complex", "On Any Action Inverted Complex"]) {
+                await trigger(src_ref, trName, trData); 
+            }
+            for(let trName of ["On Action Target Complex", "On Action Target Basic Complex", "On Action Target Inverted Complex"]) {
+                await triggerHandler(trName, trData); 
+            }
             
             // check choice completion (if applicable)
             if(additionalTriggerData.choice_data) {

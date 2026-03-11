@@ -92,19 +92,28 @@ module.exports = function() {
         }
         
         // run triggers
-        if(sourceIsPlayer && targetIsPlayer) {
-            await triggerPlayer(targetPlayer, "On Visited", { visitor: sourcePlayer, visit_parameter: visitParameter, second_visit_parameter: secondVisitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
-            await triggerPlayer(targetPlayer, "On Visited Complex", { visitor: sourcePlayer, visit_parameter: visitParameter, second_visit_parameter: secondVisitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
-            await triggerPlayer(targetPlayer, "On Visited Inverted Complex", { visitor: sourcePlayer, visit_parameter: visitParameter, second_visit_parameter: secondVisitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
-            await triggerHandler("On Visited Target Complex", { visitor: sourcePlayer, visit_parameter: visitParameter, second_visit_parameter: secondVisitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, this: targetPlayer, visit_id: visitId });
-            await triggerHandler("On Visited Target Basic Complex", { visitor: sourcePlayer, visit_parameter: visitParameter, second_visit_parameter: secondVisitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, this: targetPlayer, visit_id: visitId });
-            await triggerHandler("On Visited Target Inverted Complex", { visitor: sourcePlayer, visit_parameter: visitParameter, second_visit_parameter: secondVisitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, this: targetPlayer, visit_id: visitId });
-        } else if(targetIsPlayer) {
-            await triggerPlayer(targetPlayer, "On Visited", { visitor: null, visit_parameter: visitParameter, second_visit_parameter: secondVisitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
-            await triggerPlayer(targetPlayer, "On Visited Complex", { visitor: null, visit_parameter: visitParameter, second_visit_parameter: secondVisitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
-            await triggerPlayer(targetPlayer, "On Visited Inverted Complex", { visitor: null, visit_parameter: visitParameter, second_visit_parameter: secondVisitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, visit_id: visitId }); 
-            await triggerHandler("On Visited Target Complex", { visitor: null, visit_parameter: visitParameter, second_visit_parameter: secondVisitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, this: targetPlayer, visit_id: visitId });    
-            await triggerHandler("On Visited Target Inverted Complex", { visitor: null, visit_parameter: visitParameter, second_visit_parameter: secondVisitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, this: targetPlayer, visit_id: visitId });    
+        let trData1 = { visitor: null, visit_parameter: visitParameter, second_visit_parameter: secondVisitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, this: targetPlayer, visit_id: visitId };
+        let trData2 = { action_target: `player:${targetPlayer}`, visit_parameter: visitParameter, second_visit_parameter: secondVisitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, this: null, visit_id: visitId };
+        if(targetIsPlayer) {
+            if(sourceIsPlayer) {
+                trData1.visitor = sourcePlayer;
+                trData2.this = sourcePlayer;
+            }
+                
+            for(let trName of ["On Visited", "On Visited Complex", "On Visited Inverted Complex"]) {
+                await triggerPlayer(targetPlayer, trName, trData1);
+            }
+            for(let trName of ["On Visited Target Complex", "On Visited Target Basic Complex", "On Visited Target Inverted Complex"]) {
+                await triggerHandler(trName, trData1);
+            }
+            if(sourceIsPlayer) {
+                for(let trName of ["On Visit", "On Visit Complex", "On Visit Inverted Complex"]) {
+                    await triggerPlayer(sourcePlayer, trName, trData2);
+                }
+                for(let trName of ["On Visit Target Complex", "On Visit Target Basic Complex", "On Visit Target Inverted Complex"]) {
+                    await triggerHandler(trName, trData2);
+                }
+            }
         }
         
         // check if is canceled

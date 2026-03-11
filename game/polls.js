@@ -697,7 +697,7 @@ module.exports = function() {
                 let grpMemAll = await queryAttribute("attr_type", "group_membership", "val1", grpName);
                 if(grpMem[0] && ["member","owner"].includes(grpMem[0].val2)) voteValue = 1;
                 if(grpMemAll.length === 0) voteValue = 1; // empty group -> anyone can vote
-                console.log(grpName, grpMem, voteValue);
+                //console.log(grpName, grpMem, voteValue);
             } else {
                 voteValue = 1; // default for 1 if no group is specified
             }

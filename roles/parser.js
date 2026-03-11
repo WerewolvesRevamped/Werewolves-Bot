@@ -24,7 +24,7 @@ module.exports = function() {
     const passiveTriggers = ["Passive", "Passive End Day", "Passive End Night", "Passive Start Day", "Passive Start Night", "Passive Start Phase", "Passive End Phase"];
     const electionTriggers = ["On Election", "On Mayor Election", "On Reporter Election", "On Guardian Election"];
     const defenseTriggers = ["On Defense", "On Passive Defense", "On Partial Defense", "On Recruitment Defense", "On Active Defense", "On Absence Defense"];
-    const basicTriggerTypes = [...actionTimings, "Starting", ...passiveTriggers, "On Death", "On Killed", "On Banished", "On Banishment", "On Visited", "On Action", "On Disbandment", "On Lynch", ...electionTriggers, ...defenseTriggers, "On Betrayal", "On Poll Closed", "On Poll Win", "On Poll Skipped", "On Role Change", "On Removal", "On End", "Choice Chosen", "On Emitted", "On End Emitted", "On Redirect", "On Any Action", "On Join", "On Vote Add", "On Vote Remove", "On Vote Change", "On Hammer", "On Whisper", "On Assigned"]; // basic trigger types
+    const basicTriggerTypes = [...actionTimings, "Starting", ...passiveTriggers, "On Death", "On Killed", "On Banished", "On Banishment", "On Visited", "On Visit", "On Action", "On Disbandment", "On Lynch", ...electionTriggers, ...defenseTriggers, "On Betrayal", "On Poll Closed", "On Poll Win", "On Poll Skipped", "On Role Change", "On Removal", "On End", "Choice Chosen", "On Emitted", "On End Emitted", "On Redirect", "On Any Action", "On Join", "On Vote Add", "On Vote Remove", "On Vote Change", "On Hammer", "On Whisper", "On Assigned"]; // basic trigger types
     const bullets = ["•","‣","◦","·","⁃","⹀"];
 
     /**
@@ -1921,49 +1921,49 @@ module.exports = function() {
                         complexTrigger = "On " + fd[2] + ";" + ttpp(fd[1]);
                     }
                     /** On Visited [Ability], On Action [Ability] **/
-                    exp = new RegExp("^On (Visited|Action|Any Action) \\[" + abilityType + "\\]$", "g");
+                    exp = new RegExp("^On (Visited|Action|Any Action|Visit) \\[" + abilityType + "\\]$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
                         complexTrigger = "On " + fd[1] + ";" + ttpp(fd[2], "abilityType");
                     }
-                    exp = new RegExp("^On (Visited|Action|Any Action) \\[" + abilitySubtype + "\\]$", "g");
+                    exp = new RegExp("^On (Visited|Action|Any Action|Visit) \\[" + abilitySubtype + "\\]$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
                         complexTrigger = "On " + fd[1] + ";" + ttpp(fd[2], "abilitySubtype");
                     }
-                    exp = new RegExp("^On (Visited|Action|Any Action) \\[!" + abilityType + "\\]$", "g");
+                    exp = new RegExp("^On (Visited|Action|Any Action|Visit) \\[!" + abilityType + "\\]$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
                         complexTrigger = "On " + fd[1] + " Inverted;" + ttpp(fd[2], "abilityType");
                     }
-                    exp = new RegExp("^On (Visited|Action|Any Action) \\[!" + abilitySubtype + "\\]$", "g");
+                    exp = new RegExp("^On (Visited|Action|Any Action|Visit) \\[!" + abilitySubtype + "\\]$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
                         complexTrigger = "On " + fd[1] + " Inverted;" + ttpp(fd[2], "abilitySubtype");
                     }
                     /** On Target Visited [Ability], On Target Action [Ability] **/
-                    exp = new RegExp("^On " + targetType + " (Visited|Action) \\[" + abilityType + "\\]$", "g");
+                    exp = new RegExp("^On " + targetType + " (Visited|Action|Visit) \\[" + abilityType + "\\]$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
                         complexTrigger = "On " + fd[2] + " Target;" + ttpp(fd[1]) + ";" + ttpp(fd[3], "abilityType");
                     }
-                    exp = new RegExp("^On " + targetType + " (Visited|Action) \\[" + abilitySubtype + "\\]$", "g");
+                    exp = new RegExp("^On " + targetType + " (Visited|Action|Visit) \\[" + abilitySubtype + "\\]$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
                         complexTrigger = "On " + fd[2] + " Target;" + ttpp(fd[1]) + ";" + ttpp(fd[3], "abilitySubtype");
                     }
-                    exp = new RegExp("^On " + targetType + " (Visited|Action) \\[!" + abilityType + "\\]$", "g");
+                    exp = new RegExp("^On " + targetType + " (Visited|Action|Visit) \\[!" + abilityType + "\\]$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
                         complexTrigger = "On " + fd[2] + " Target Inverted;" + ttpp(fd[1]) + ";" + ttpp(fd[3], "abilityType");
                     }
-                    exp = new RegExp("^On " + targetType + " (Visited|Action) \\[!" + abilitySubtype + "\\]$", "g");
+                    exp = new RegExp("^On " + targetType + " (Visited|Action|Visit) \\[!" + abilitySubtype + "\\]$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
                         complexTrigger = "On " + fd[2] + " Target Inverted;" + ttpp(fd[1]) + ";" + ttpp(fd[3], "abilitySubtype");
                     }
                     /** On Target Visited, On Target Action**/
-                    exp = new RegExp("^On " + targetType + " (Visited|Action)$", "g");
+                    exp = new RegExp("^On " + targetType + " (Visited|Action|Visit)$", "g");
                     fd = exp.exec(curTriggerName);
                     if(fd) {
                         complexTrigger = "On " + fd[2] + " Target Basic;" + ttpp(fd[1]);
