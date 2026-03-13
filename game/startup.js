@@ -227,7 +227,7 @@ module.exports = function() {
     **/
 	function createSCs_Start(channel, category, debug) {
         // IMPORTANT: changing this query requires also changing a call from "createOneSC" which mirrors this query
-		sql("SELECT id,role,mentor FROM players ORDER BY role ASC", async result => {
+		sql("SELECT id,role,mentor FROM players ORDER BY alignment,role ASC", async result => {
             let nextCategory = category;
             // iterate through players
             for(let player in result) {
