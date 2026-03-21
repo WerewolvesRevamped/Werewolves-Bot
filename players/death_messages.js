@@ -181,7 +181,7 @@ module.exports = function() {
                     dmsgText =  `A laser pierces through %s's skull after failing the \`${card[Math.floor(Math.random() * card.length)]} of ${suits[Math.floor(Math.random() * suits.length)]}\`. ${living.length} players remain in the WWRlands.`;
                 break;
                 case 13:
-                    dmsgText =  `Oh my god, they killed %s! Your bastards!`;
+                    dmsgText =  `Oh my god, they killed %s! You bastards!`;
                 break;
                 case 14:
                     dmsgText =  `🔓Achievements unlocked: %s's demise.`;
