@@ -51,4 +51,5 @@ module.exports = function() {
     **/
     this.themePackBase = `https://raw.githubusercontent.com/${wwrOrg}/Packs/refs/heads/main/Theme/`;
     this.urlPackBase = `https://raw.githubusercontent.com/${wwrOrg}/Packs/refs/heads/main/URL/`;
+    this.replPackBase = `https://raw.githubusercontent.com/${wwrOrg}/Packs/refs/heads/main/Replacement/`;
 }

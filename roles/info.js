@@ -391,6 +391,13 @@ module.exports = function() {
                 const roleTypeData = getRoleTypeData(result.type); // display the role type
                 if(result.type != "default") embed.title = applyTheme(roleTypeData.name); // but dont display "Default"
                 
+                let replLUT = getPackReplLUT(AVAILABLE_PACKS[getPack(authorId) - 1]);
+                if(replLUT[roleName]) {
+                    result.desc_basics = replLUT[roleName].basics ?? result.desc_basics;
+                    result.desc_details = replLUT[roleName].details ?? result.desc_details;
+                    result.desc_simplified = replLUT[roleName].simplified ?? result.desc_simplified;
+                }
+                
                 let isFormalized = false;
                 // add visible sections as sections
                 for(const sec in visibleSections) {
@@ -410,7 +417,8 @@ module.exports = function() {
                             embed.description = applyETN(sectionText, guild);
                         } else {
                             sectionText = await applyPackLUT(sectionText, authorId);
-                            embed.fields.push(...handleFields(applyETN(sectionText, guild), toTitleCase(applyTheme(visibleSections[sec])), !isFormalized));
+                            let title = await applyPackLUT(toTitleCase(applyTheme(visibleSections[sec])), authorId);
+                            embed.fields.push(...handleFields(applyETN(sectionText, guild), title, !isFormalized));
                         }
                     }
                 }
