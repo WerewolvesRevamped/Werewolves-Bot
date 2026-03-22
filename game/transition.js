@@ -67,11 +67,11 @@ module.exports = function() {
     Replaces all GM ingame roles with the proper variants
     **/
 	this.cmdPromote = function(channel, member) {
-		if((isParticipant(member) || isGhost(member)) && !member.roles.cache.get(stats.admin_ingame)) {
+		if((isParticipant(member) || isGhost(member)) && !member.roles.cache.get(stats.admin_ingame) && stats.gamephase != gp.ARCHIVED) {
 			channel.send("⛔ Command error. Can't promote you while you're a participant."); 
 			return;
 		}
-        if(isDeadParticipant(member) && !member.roles.cache.get(stats.senior_gamemaster_ingame) && !member.roles.cache.get(stats.admin_ingame)) {
+        if(isDeadParticipant(member) && !member.roles.cache.get(stats.senior_gamemaster_ingame) && !member.roles.cache.get(stats.admin_ingame) && stats.gamephase != gp.ARCHIVED) {
 			channel.send("⛔ Command error. Can't promote you while you're a dead participant."); 
 			return;
 		}
