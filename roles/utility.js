@@ -345,7 +345,7 @@ module.exports = function() {
                     let ret = format;
                     ret = ret.replace(/\$\.Team/g, toTitleCase(el.team));
                     ret = ret.replace(/\$\.Name/g, el.display_name);
-                    ret = ret.replace(/\$\.Emoji/g, `<?${el.display_name.replace(/ /g,"")}:>`);
+                    ret = ret.replace(/\$\.Emoji/g, `<?${el.display_name.replace(/[ \-]/g,"")}:>`);
                     ret = ret.replace(/\$\.ClassCat/g, (el.class == "unaligned" ? "UA" : el.class[0].toUpperCase()) + el.category[0].toUpperCase());
                     return ret;
                 }).join("\n");
