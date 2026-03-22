@@ -114,7 +114,7 @@ module.exports = function() {
                     return;
                 }
                 await inventoryModifyItem(message.author.id, code, -1);
-                createPackCurse(message.author.id, targetUser, cSplit[1], 6 * 60);
+                createPackCurse(message.author.id, targetUser, cSplit[1], 12 * 60);
                 embed = { title: "Curses", description: `<@${message.member.id}>, you have used your curse to apply ${cSplit[1]==0?"default":toTitleCase(AVAILABLE_PACKS[cSplit[1]-1])} skinpack to <@${targetUser}>.`, color: 5490704 };
                 message.channel.send({ embeds: [ embed ] });
             } break;
@@ -126,7 +126,7 @@ module.exports = function() {
                     return;
                 }
                 await inventoryModifyItem(message.author.id, code, -1);
-                createIconCurse(message.author.id, targetUser, cSplit[1], 24 * 60);
+                createIconCurse(message.author.id, targetUser, cSplit[1], 48 * 60);
                 embed = { title: "Curses", description: `<@${message.member.id}>, you have used your curse to apply ${toTitleCase(cSplit[1])} icon to <@${targetUser}>.`, color: 5490704 };
                 message.channel.send({ embeds: [ embed ] });
             } break;
@@ -151,7 +151,7 @@ module.exports = function() {
                     return;
                 }
                 await inventoryModifyItem(message.author.id, code, -1);
-                createCurse(message.author.id, "skul", targetUser, "", 6 * 60);
+                createCurse(message.author.id, "skul", targetUser, "", 12 * 60);
                 curseLog(`<@${message.author.id}> cast a **SKULL** curse on <@${targetUser}>`);
                 embed = { title: "Curses", description: `<@${message.member.id}>, you have used your skull curse on <@${targetUser}>.`, color: 5490704 };
                 message.channel.send({ embeds: [ embed ] });

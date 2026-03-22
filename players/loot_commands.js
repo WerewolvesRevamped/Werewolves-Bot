@@ -295,6 +295,20 @@ module.exports = function() {
     }
     
     /**
+    Command: $shrimp
+    **/
+    this.cmdShrimp = async function(message) {
+        let shrimpPerms = await inventoryGetItem(message.author.id, "bot:shrimp");
+        if(shrimpPerms === 0) {
+            message.channel.send(`⛔ You have not unlocked the ${stats.prefix}shrimp command.`);
+            return;
+        } else {
+            let gifs = ["https://i.giphy.com/nea92UKHGgx9DLM2Bf.webp","https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExeHc2c28xc2J2a3loNW8wcmo2Z3NwbDc0YWRwdnIyMmV5ejNnNDNyayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/vwwqRy05fH8xKs9TSp/giphy.gif","https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExczFhanN4amprcmlob3RjbmhvMHA5bTMyaWdsaXd0Y2t2bGU5ZmIzdiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/7H76lZu4l8K0ii02tY/giphy.gif"];
+            message.channel.send(gifs[Math.floor(Math.random() * gifs.length)]);
+        }
+    }
+    
+    /**
     Command: $fortune
     **/
     this.cmdFortune = async function(message, args) {

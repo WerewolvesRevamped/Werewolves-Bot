@@ -812,6 +812,13 @@ client.on("messageCreate", async message => {
         }
         cmdYell(message, args);
 	break;
+	case "shrimp":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
+        cmdShrimp(message, args);
+	break;
     case "time":
         cmdTime(message.channel, args);
     break;

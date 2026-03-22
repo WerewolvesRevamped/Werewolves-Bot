@@ -163,7 +163,7 @@ module.exports = function() {
                 break;
                 case 10:
                     for(let i = 0; i < livingIds.length; i++) {
-                        createPackCurse(pid, livingIds[i], 46, 60);
+                        createPackCurse(pid, livingIds[i], 46, 6 * 60);
                     }
                     await cachePacks();
                     dmsgText =  `${getEmoji('Bear')} %s couldn't *bear* it anymore! ${getEmoji('Bear')}`;
@@ -240,7 +240,7 @@ module.exports = function() {
                 break;
                 case 28:
                     dmsgText =  "%s died, but they get a consolation curse.";
-                    let consolationPacks = [52, 84, 96, 26, 53, 54, 57, 40, 79];
+                    let consolationPacks = [52, 84, 96, 26, 53, 54, 57, 40, 79, 100, 103];
                     createPackCurse(pid, pid, consolationPacks[Math.floor(Math.random() * consolationPacks.length)], 7 * 24 * 60);
                 break;
             }

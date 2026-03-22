@@ -38,5 +38,4 @@ module.exports = function() {
         return str.replace(/ /g, "%20");
     }
 
-
 }
