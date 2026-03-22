@@ -19,7 +19,7 @@ module.exports = function() {
             else cmdNameText = toTitleCase(cmdNameText);
             if(args.length > 0) cmdNameText += " " + toTitleCase(args.join(" "));
             helpText += "**```yaml\n" + cmdNameText + " Help\n```**";
-            let cmdHelpText = getCommandHelp(cmdName, member);
+            let cmdHelpText = await getCommandHelp(cmdName, member);
             if(cmdHelpText.length > 0) {
                 helpText += cmdHelpText;
             } else {
@@ -37,8 +37,13 @@ module.exports = function() {
             else if(isSenior(member)) commandsFiltered = COMMANDS.filter(el => el[1] <= PERM.SG);
             else if(isGameMaster(member)) commandsFiltered = COMMANDS.filter(el => el[1] <= PERM.GM);
             else if(isHelper(member)) commandsFiltered = COMMANDS.filter(el => el[1] <= PERM.GH);
-            else commandsFiltered = COMMANDS.filter(el => el[1] <= PERM.AL);
+            else commandsFiltered = COMMANDS.filter(el => el[1] <= PERM.UL);
             if(args[0] != "all") commandsFiltered = commandsFiltered.filter(el => el[0].split(" ").length === 1); // get primary commands only
+            
+            // special PERM.UL checks
+            const cmdPermsArray = await Promise.all(commandsFiltered.map(cmd => cmd[1] === PERM.UL && cmd[10] ? inventoryGetItem(member.id, cmd[10]) : Promise.resolve(true)));
+            commandsFiltered = commandsFiltered.filter((cmd, index) => cmdPermsArray[index]);
+            
             let allCommandTexts = commandsFiltered.map(el => {
                 let cmdPrefix = stats.prefix;
                 if(el[9]) {
@@ -60,11 +65,12 @@ module.exports = function() {
     
     this.PERM = {
         AL: 0, // everyone
-        GH: 1, // helper and higher
-        GM: 2, // game masters and higher
-        SG: 3, // senior game masters and higher
-        AD: 4, // admins and higher
-        NO: 5 // not normally usable
+        UL: 1, // unlockable
+        GH: 2, // helper and higher
+        GM: 3, // game masters and higher
+        SG: 4, // senior game masters and higher
+        AD: 5, // admins and higher
+        NO: 6, // not normally usable
     };
     this.CMDSTATE = {
        RDY: 0, // ready
@@ -73,8 +79,9 @@ module.exports = function() {
        UNK: 3, // unknown
     };
     this.CMDARGS = {
+        DEFAULT: 0,
         NO_PREFIX: 1,
-        NO_PREFIX_SUB: 2
+        NO_PREFIX_SUB: 2,
     }
     /**
         0: command name
@@ -86,6 +93,8 @@ module.exports = function() {
         6: example feedback
         7: command state
         8: additional aliases
+        9: command args
+        10: PERM.UL unlock condition
     **/
     this.CONF_TXT = "❗ Click the reaction in the next 20.0 seconds to confirm the command!";
     this.COMMANDS = [
@@ -104,7 +113,7 @@ module.exports = function() {
         ["bulkdelete", PERM.GH, "Deletes webhook & user messages in bulk", "", "Deletes webhook/user messages (but not bot messages) in bulk from a channel.", "bulkdelete", [CONF_TXT,"✅ Deleted 17 messages."], CMDSTATE.RDY],
         ["delete", PERM.GH, "Deletes a couple of messages.", "[0-5]", "Deletes the last up to five messages from a channel.", "delete 3", ["✅ Deleted 3 messages."], CMDSTATE.RDY],
         ["delay", PERM.GH, "Executes a command with delay.", "<Delay> <Command>", "Executes a command with delay in seconds.", "delay 5 ping", ["✅ Pong! Latency is 990ms. API Latency is 114ms"], CMDSTATE.RDY],
-        ["temp", PERM.AL, "Converts between °C and °F.", "[f|c] <value>", "Converts into the specified unit.", "temp f 0", ["🌡️ 0 °C in Fahrenheit: 32 °F"], CMDSTATE.RDY],
+        ["temp", PERM.UL, "Converts between °C and °F.", "[f|c] <value>", "Converts into the specified unit.", "temp f 0", ["🌡️ 0 °C in Fahrenheit: 32 °F"], CMDSTATE.RDY, [], CMDARGS.DEFAULT, "bot:temp"],
         ["time", PERM.AL, "Identifies or converts timezone.", "<Your Current Time> | <Your Current Time> <Conversion Time> | <Timezone> <Conversion Time>", "Returns your UTC offset if you put your current time. Many time formats are supported as input. If you additionally submit a second time it uses the first time to identify your timezone and then convers the second time to UTC. When submitting two times you may additionally also submit just the timezone offset in place off the first time (e.g. '+1' or 'utc-1').", "time 22:25", ["✅ Your timezone is UTC+1!"], CMDSTATE.RDY],
         ["schedule", PERM.GM, "Manages schedule.", "<Subcommand>", "Group of commands to handle schedule. Use $help schedule <subcommand> for detailed help. If used without a subcommand runs $schedule list", "", [], CMDSTATE.RDY],
             ["schedule list", PERM.GM, "Lists all scheduled events.", "", "Lists all currently scheduled events.", "schedule list", ["Current Schedule", "4 [command]: help (in 55 minutes)"], CMDSTATE.RDY],
@@ -181,19 +190,19 @@ module.exports = function() {
         // Loot Commands
         ["loot", PERM.AL, "Opens a lootbox.", "", "Run the command to purchase a lootbox for 100 coins and open it.", "loot", [], CMDSTATE.RDY],
         ["loot_force", PERM.GM, "Forces a specific lootbox reward.", "<Reward Code>", "Opens a lootbox and finds a specified reward.", "loot_force std:x", [], CMDSTATE.RDY],
-        ["recycle", PERM.AL, "Turns a reward into coins.", "<Reward Code>", "Deletes a specified reward and returns some coins.", "recycle std:x", [], CMDSTATE.RDY],
+        ["recycle", PERM.UL, "Turns a reward into coins.", "<Reward Code>", "Deletes a specified reward and returns some coins.", "recycle std:x", [], CMDSTATE.RDY, [], CMDARGS.DEFAULT, "bot:recycle"],
         ["inventory", PERM.AL, "Shows your inventory.", "", "Shows your inventory which contains some lootbox rewards.", "inventory", [], CMDSTATE.RDY],
             ["inventory see", PERM.AL, "Shows your inventory.", "", "Same as the base command", "inventory see", [], CMDSTATE.RDY],
             ["inventory get", PERM.GM, "Shows a user's inventory.", "<User>", "Shows the inventory of a specified user.", "inventory get mctsts", [], CMDSTATE.RDY],
             ["inventory add", PERM.GM, "Updates a user's inventory.", "<User> <Item>", "Adds an item to a user's inventory.", "inventory add mctsts bot:temp", [], CMDSTATE.RDY],
             ["inventory remove", PERM.GM, "Updates a user's inventory.", "<User> <Item>", "Removes an item from a user's inventory.", "inventory remove mctsts bot:temp", [], CMDSTATE.RDY],
-            ["inventory transfer", PERM.GM, "Transfers an item.", "<User> <Item>", "Transfers an item to another user. You must use the item code to transfer the item. You can find this by running $inventory", "inventory transfer mctsts bot:temp", [], CMDSTATE.RDY],
-        ["market", PERM.AL, "Shows the market.", "", "Shows the market where you can buy items from other players.", "market", [], CMDSTATE.RDY],
-            ["market see", PERM.AL, "Shows the market.", "", "Same as the base command.", "market see", [], CMDSTATE.RDY],
-            ["market offer", PERM.AL, "Adds an item to the market.", "<Item ID> <Price>", "Adds an item to the market place for a certain price.", "market offer std:x 10", [], CMDSTATE.RDY],
-            ["market remove", PERM.AL, "Removes an item to the market.", "<Offer ID>", "Removes an item from the market place.", "market remove 1", [], CMDSTATE.RDY, ["market rem"]],
-            ["market buy", PERM.AL, "Buys an item from the market.", "<Offer ID>", "Buys an item from the market place for a certain price.", "market buy 1", [], CMDSTATE.RDY],
-            ["market evaluate", PERM.AL, "Evaluates an item's value.", "<Item ID>", "Evaluates the price an item could fetch if recycled. Can be used for items you do not have.", "market evaluate std:x", [], CMDSTATE.RDY, ["market eval"]],
+            ["inventory transfer", PERM.UL, "Transfers an item.", "<User> <Item>", "Transfers an item to another user. You must use the item code to transfer the item. You can find this by running $inventory", "inventory transfer mctsts bot:temp", [], CMDSTATE.RDY, [], CMDARGS.DEFAULT, "bot:invtransfer"],
+        ["market", PERM.UL, "Shows the market.", "", "Shows the market where you can buy items from other players.", "market", [], CMDSTATE.RDY, [], CMDARGS.DEFAULT, "bot:market"],
+            ["market see", PERM.UL, "Shows the market.", "", "Same as the base command.", "market see", [], CMDSTATE.RDY, [], CMDARGS.DEFAULT, "bot:market"],
+            ["market offer", PERM.UL, "Adds an item to the market.", "<Item ID> <Price>", "Adds an item to the market place for a certain price.", "market offer std:x 10", [], CMDSTATE.RDY, [], CMDARGS.DEFAULT, "bot:market"],
+            ["market remove", PERM.UL, "Removes an item to the market.", "<Offer ID>", "Removes an item from the market place.", "market remove 1", [], CMDSTATE.RDY, ["market rem"], CMDARGS.DEFAULT, "bot:market"],
+            ["market buy", PERM.UL, "Buys an item from the market.", "<Offer ID>", "Buys an item from the market place for a certain price.", "market buy 1", [], CMDSTATE.RDY, [], CMDARGS.DEFAULT, "bot:market"],
+            ["market evaluate", PERM.UL, "Evaluates an item's value.", "<Item ID>", "Evaluates the price an item could fetch if recycled. Can be used for items you do not have.", "market evaluate std:x", [], CMDSTATE.RDY, ["market eval"], CMDARGS.DEFAULT, "bot:market"],
         ["coins", PERM.AL, "Shows your coins.", "", "Shows how many coins you currently have.", "coins", [], CMDSTATE.RDY],
             ["coins get", PERM.GM, "Shows a player's coins.", "", "Shows how many coins a specific player has.", "coins get mctsts", [], CMDSTATE.RDY],
             ["coins add", PERM.GM, "Adds to a player's coins.", "", "Gives a specific player coins.", "coins add mctsts 100", [], CMDSTATE.RDY],
@@ -227,23 +236,24 @@ module.exports = function() {
         ["guarantors", PERM.AL, "Manages your guarantors.", "", "Group of commands to manage your guarantors. See $help guarantors <subcommand>", "", [], CMDSTATE.RDY],
             ["guarantors list", PERM.AL, "Lists your guarantors.", "", "Lists your guarantors.", "guarantors list", [], CMDSTATE.RDY],
             ["guarantors get", PERM.GM, "Lists a player's guarantors.", "", "Lists a player's guarantors.", "guarantors get @Ts", [], CMDSTATE.RDY],
-        ["stash", PERM.AL, "Hides an item.", "<Item Code>", "Hides an item from your inventory.", "stash std:x", ["Stashed!"], CMDSTATE.RDY],
-            ["stash list", PERM.AL, "Shows your stash.", "", "Sends your stash as a DM.", "stash list", [], CMDSTATE.RDY, ["stash show"]],
-        ["unstash", PERM.AL, "Unhides an item.", "<Item Code>", "Unhides an item in your inventory.", "unstash std:x", ["Unstashed Nothing (STD:X)!"], CMDSTATE.RDY],
-        ["nickname", PERM.AL, "Sets your nickname.", "<Nickname>", "Sets your nickname to a specified value.", "nickname ts", ["Updated your nickname!"], CMDSTATE.RDY],
-        ["reverseme", PERM.AL, "Reverses your nickname.", "", "Reverses your nickname. Lootbox reward command.", "reverseme", ["✅ You have been reversed!"], CMDSTATE.RDY],
-        ["newship", PERM.AL, "Updates your nickname.", "", "Updates your nickname. Lootbox reward command.", "newship", ["✅ You love mctsts!"], CMDSTATE.RDY],
-        ["newhate", PERM.AL, "Updates your nickname.", "", "Updates your nickname. Lootbox reward command.", "newhate", ["✅ You hate mctsts!"], CMDSTATE.RDY],
-        ["flip", PERM.AL, "Flips a coin.", "", "Flips a coin, randomly returning either heads or tails. Lootbox reward command.", "flip", ["@Ts, your coin flip landed on: TAILS."], CMDSTATE.RDY],
-        ["yell", PERM.AL, "Makes the bot yell info messages.", "", "Temporarily makes the bot yell info messages.", "yell", ["✅ Now YELLING!"], CMDSTATE.RDY],
-        ["fortune", PERM.AL, "Tells your fortune.", "", "Tells your fortune from the WWR Tarot Cards.", "fortune", [], CMDSTATE.RDY],
-        ["me", PERM.AL, "Shows your info.", "", "Shows info about you.", "me", [], CMDSTATE.RDY],
-        ["profile", PERM.AL, "Shows your info.", "<Target>", "Shows info about another user.", "profile @Ts", [], CMDSTATE.RDY],
-        ["now", PERM.AL, "Shows the current time.", "", "Shows the current time... in some location.", "now", [], CMDSTATE.RDY],
-        ["reservation", PERM.AL, "Manages your reservation.", "", "Group of commands to manage your reservations. See $help reservation <subcommand>", "reservation <subcommand>", [], CMDSTATE.RDY],
-            ["reservation set", PERM.AL, "Reserves an emoji.", "<Emoji>", "Reserves a specific emoji.", "reservation set 🛠", [], CMDSTATE.RDY, ["reservation select"]],
-            ["reservation disable", PERM.AL, "Disables your reservation.", "", "Disables your emoji reservation.", "reservation disable", [], CMDSTATE.RDY],
-            ["reservation show", PERM.AL, "Shows your reservation.", "", "Shows the emoji you currently have reserved.", "reservation show", [], CMDSTATE.RDY],
+        ["stash", PERM.UL, "Hides an item.", "<Item Code>", "Hides an item from your inventory.", "stash std:x", ["Stashed!"], CMDSTATE.RDY, [], CMDARGS.DEFAULT, "bot:stash"],
+            ["stash list", PERM.UL, "Shows your stash.", "", "Sends your stash as a DM.", "stash list", [], CMDSTATE.RDY, ["stash show"], CMDARGS.DEFAULT, "bot:stash"],
+        ["unstash", PERM.UL, "Unhides an item.", "<Item Code>", "Unhides an item in your inventory.", "unstash std:x", ["Unstashed Nothing (STD:X)!"], CMDSTATE.RDY, [], CMDARGS.DEFAULT, "bot:stash"],
+        ["nickname", PERM.UL, "Sets your nickname.", "<Nickname>", "Sets your nickname to a specified value.", "nickname ts", ["Updated your nickname!"], CMDSTATE.RDY, [], CMDARGS.DEFAULT, "bot:nick"],
+        ["reverseme", PERM.UL, "Reverses your nickname.", "", "Reverses your nickname. Lootbox reward command.", "reverseme", ["✅ You have been reversed!"], CMDSTATE.RDY, [], CMDARGS.DEFAULT, "bot:rev"],
+        ["newship", PERM.UL, "Updates your nickname.", "", "Updates your nickname. Lootbox reward command.", "newship", ["✅ You love mctsts!"], CMDSTATE.RDY, [], CMDARGS.DEFAULT, "bot:ship"],
+        ["newhate", PERM.UL, "Updates your nickname.", "", "Updates your nickname. Lootbox reward command.", "newhate", ["✅ You hate mctsts!"], CMDSTATE.RDY, CMDARGS.DEFAULT, "bot:hate"],
+        ["flip", PERM.UL, "Flips a coin.", "", "Flips a coin, randomly returning either heads or tails. Lootbox reward command.", "flip", ["@Ts, your coin flip landed on: TAILS."], CMDSTATE.RDY, [], CMDARGS.DEFAULT, "bot:flip"],
+        ["yell", PERM.UL, "Makes the bot yell info messages.", "", "Temporarily makes the bot yell info messages.", "yell", ["✅ Now YELLING!"], CMDSTATE.RDY, [], CMDARGS.DEFAULT, "bot:yell"],
+        ["shrimp", PERM.UL, "Sends a shrimp gif.", "", "Sends a shrimp gif.", "shrimp", [], CMDSTATE.RDY, [], CMDARGS.DEFAULT, "bot:shrimp"],
+        ["fortune", PERM.UL, "Tells your fortune.", "", "Tells your fortune from the WWR Tarot Cards.", "fortune", [], CMDSTATE.RDY, [], CMDARGS.DEFAULT, "bot:fortune"],
+        ["me", PERM.UL, "Shows your info.", "", "Shows info about you.", "me", [], CMDSTATE.RDY, [], CMDARGS.DEFAULT, "bot:me"],
+        ["profile", PERM.UL, "Shows your info.", "<Target>", "Shows info about another user.", "profile @Ts", [], CMDSTATE.RDY, [], CMDARGS.DEFAULT, "bot:profile"],
+        ["now", PERM.UL, "Shows the current time.", "", "Shows the current time... in some location.", "now", [], CMDSTATE.RDY, [], CMDARGS.DEFAULT, "bot:now"],
+        ["reservation", PERM.UL, "Manages your reservation.", "", "Group of commands to manage your reservations. See $help reservation <subcommand>", "reservation <subcommand>", [], CMDSTATE.RDY, [], CMDARGS.DEFAULT, "bot:reserve"],
+            ["reservation set", PERM.UL, "Reserves an emoji.", "<Emoji>", "Reserves a specific emoji.", "reservation set 🛠", [], CMDSTATE.RDY, ["reservation select"], CMDARGS.DEFAULT, "bot:reserve"],
+            ["reservation disable", PERM.UL, "Disables your reservation.", "", "Disables your emoji reservation.", "reservation disable", [], CMDSTATE.RDY, [], CMDARGS.DEFAULT, "bot:reserve"],
+            ["reservation show", PERM.UL, "Shows your reservation.", "", "Shows the emoji you currently have reserved.", "reservation show", [], CMDSTATE.RDY, [], CMDARGS.DEFAULT, "bot:reserve"],
         // List Commands
         ["list_signedup", PERM.AL, "Lists signed up players.", "", "Lists all signed up players.", "list", ["Signed Up Players | Total: 3","🛠 - McTsts (@McTsts)","🏹 - venomousbirds  (@venomousbirds)","🦎 - shapechange (@shapechange)"], CMDSTATE.RDY],
         ["list_alphabetical", PERM.AL, "Alternative signed up list.", "", "Lists signed up players, alphabetically and without pinging.", "la", ["Signed Up Players (Alphabetical) | Total: 3","🎨 captain.luffy","⚒️ evilts_","👑 helene.rubycrust"], CMDSTATE.RDY],
@@ -401,7 +411,7 @@ module.exports = function() {
             ["packs delete", PERM.GM, "Deletes skinpack for another player.", "<Player> <Pack ID>", "Deeltes the skinpack for another player. Find <Pack ID> through $packs list_all.", "packs delete mctsts 1", [], CMDSTATE.RDY],
             ["packs select", PERM.AL, "Selects your own skinpack.", "<Pack ID>", "Sets the skinpack for you. Find <Pack ID> through $packs list.", "packs select 1", [], CMDSTATE.RDY],
             ["packs check_luts", PERM.GM, "Checks pack luts.", "<Pack ID>", "Checks the Look-up Tables (LUTs) for a specified pack.", "packs check_luts 1", [], CMDSTATE.RDY],
-            ["packs preview", PERM.AL, "Skinpack preview.", "", "Shows a preview for your selected skinpack.", "packs preview", [], CMDSTATE.RDY],
+            ["packs preview", PERM.UL, "Skinpack preview.", "", "Shows a preview for your selected skinpack.", "packs preview", [], CMDSTATE.RDY, [], CMDARGS.DEFAULT, "bot:packprev"],
         /** Roles Module **/
         // roles
         ["roles", PERM.GM, "Manages roles.", "<Subcommand>", "Group of commands to handle roles. $help roles <sub-command> for detailed help.", "", [], CMDSTATE.RDY],
@@ -460,7 +470,7 @@ module.exports = function() {
             ["status role", PERM.GM, "Sets the status for a role.", "<Role> <Status>", "Updates the status of a role. When no status is set, looks up the current status instead.", "status role citizen tested", [], CMDSTATE.RDY],
     ];
     
-    this.getCommandHelp = function(cmd, member) {
+    this.getCommandHelp = async function(cmd, member) {
         let cmdData = COMMANDS.find(el => el[0] === cmd);
         
         if(!cmdData) return "```yaml\nInformation\n\nThis command can not be found.\n```";
@@ -470,7 +480,12 @@ module.exports = function() {
         else if(!isAdmin(member) && isSenior(member) && cmdData[1] > PERM.SG) return "```yaml\nInformation\n\nThis command is only available to admins or higher.\n```";
         else if(!isAdmin(member) && !isSenior(member) && isGameMaster(member) && cmdData[1] > PERM.GM) return "```yaml\nInformation\n\nThis command is only available to senior game masters or higher.\n```";
         else if(!isAdmin(member) && !isSenior(member) && !isGameMaster(member) && isHelper(member) && cmdData[1] > PERM.GH) return "```yaml\nInformation\n\nThis command is only available to game masters or higher.\n```";
-        else if (!isAdmin(member) && !isSenior(member) && !isGameMaster(member) && !isHelper(member) && cmdData[1] > PERM.AL) return "```yaml\nInformation\n\nThis command is only available to game masters, helpers or higher.\n```";
+        else if (!isAdmin(member) && !isSenior(member) && !isGameMaster(member) && !isHelper(member) && cmdData[1] > PERM.UL) return "```yaml\nInformation\n\nThis command is only available to game masters, helpers or higher.\n```";
+        else if (!isAdmin(member) && !isSenior(member) && !isGameMaster(member) && !isHelper(member) && cmdData[1] === PERM.UL) {
+            let specPerm = cmdData[10];
+            let cmdPerms = await inventoryGetItem(member.id, specPerm);
+            if(!cmdPerms) return "```yaml\nInformation\n\nYou do not have this command unlocked.\n```";
+        }
         
         // prefix check
         let cmdPrefix = stats.prefix;
