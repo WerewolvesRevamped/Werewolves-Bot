@@ -27,14 +27,9 @@ module.exports = function() {
             let result = await executeAbility(src_ref, src_name, process[i].ability, [], additionalTriggerData, doNotRecheckRestriction);
             if(result) doNotRecheckRestriction = true;
             results.push(result);
+            additionalTriggerData["result" + (i+1)] = result;
+            if(i === 0) additionalTriggerData.result = result;
         }
-        
-        // populate result selectors
-        for(let i = 0; i < results.length; i++) {
-            additionalTriggerData["result" + (i+1)] = results[i];
-        }
-        additionalTriggerData.result = results[0];
-        
         
         abilityLog(`✳️ **Evaluating**`);
         // run all evaluate abilities

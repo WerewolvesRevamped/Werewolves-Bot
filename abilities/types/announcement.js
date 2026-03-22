@@ -62,7 +62,8 @@ module.exports = function() {
     **/
      this.announcementImmediate = async function(src_ref, info, loc, additionalTriggerData) {
         let result;
-        if(!(".;!?\"'-`".split("").includes(info[info.length - 1]))) info += ".";
+        let title = "Announcement";
+        if(!(".;!?\"'-`".split("").includes(info[info.length - 1])) && !info.includes("\n")) info += ".";
         // get role image if applicable
         let spl = info.split(" ");
         let img = null;
@@ -80,7 +81,7 @@ module.exports = function() {
             }
             
             // one word roles
-            if(spl[i].length > 4) { // avoid really short aliases
+            if(spl[i].length > 4 || cachedRoles.includes(spl[i].toLowerCase())) { // avoid really short aliases
                 let parsedRole2 = parseRole(spl[i]);
                 if(verifyRole(parsedRole2)) {
                     let refImg = await refToImg(`role:${parsedRole2}`);
@@ -92,10 +93,20 @@ module.exports = function() {
             }
         }
         
+        // detect lists
+        if(info.includes("\n") && info.split("\n")?.[0]?.trim()?.at(-1) === ":" && info.split("\n")?.[1]?.trim()[0] === "-") {
+            let spln = info.split("\n");
+            title = spln.shift().trim().replace(/:$/,"");
+            info = spln.join("\n");
+        }
+        
+        // newline handler
+        info = info.replace(/\\n/g, "\n");
+        
         // send different type of message depending on type
         switch(loc.type) {
             case "location":
-                locationSend(loc.value, info, EMBED_GRAY, img, "Announcement");
+                locationSend(loc.value, info, EMBED_GRAY, img, title);
             break;
             case "player":
                 // handle visit
@@ -104,7 +115,7 @@ module.exports = function() {
                     if(result) return visitReturn(result, "Announcement failed!", "");
                 }
             
-                abilitySend(`player:${loc.value}`, info, EMBED_GRAY, false, false, img, "Announcement");
+                abilitySend(`player:${loc.value}`, info, EMBED_GRAY, false, false, img, title);
             break;
             case "players":
                 for(let i = 0; i < loc.value.length; i++) {
@@ -114,17 +125,17 @@ module.exports = function() {
                         if(result) return visitReturn(result, "Announcement failed!", "");
                     }
                 
-                    abilitySend(`player:${loc.value[i]}`, info, EMBED_GRAY, false, false, img, "Announcement");
+                    abilitySend(`player:${loc.value[i]}`, info, EMBED_GRAY, false, false, img, title);
                 }
             break;
             case "player_attr":
-                abilitySend(`player_attr:${loc.value}`, info, EMBED_GRAY, false, false, img, "Announcement");
+                abilitySend(`player_attr:${loc.value}`, info, EMBED_GRAY, false, false, img, title);
             break;
             case "group":
-                abilitySend(`group:${loc.value}`, info, EMBED_GRAY, false, false, img, "Announcement");
+                abilitySend(`group:${loc.value}`, info, EMBED_GRAY, false, false, img, title);
             break;
             case "channel":
-                abilitySend(`channel:${loc.value}`, info, EMBED_GRAY, false, false, img, "Announcement");
+                abilitySend(`channel:${loc.value}`, info, EMBED_GRAY, false, false, img, title);
             break;
         }
         

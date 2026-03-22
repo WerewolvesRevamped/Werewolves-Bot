@@ -644,8 +644,8 @@ module.exports = function() {
     const rawStr = "[\\w\\s\\d@]+";
     const str = "(" + rawStr + ")";
     const decNum = "(-?\\d+\\.\\d+)";
-    const abilityType = "(Killing|Investigating|Targeting|Disguising|Protecting|Applying|Redirecting|Manipulating|Whispering|Joining|Granting|Loyalty|Obstructing|Manipulating|Announcements|Changing|Choices|Ascend|Descend|Disband|Counting|Conversation Reset|Cancel|Switching|Process|Evaluate|Action|Feedback|Action|Success|Failure|Emit|Storing|Displaying|Win|Shuffle|Locking|Executing|Activating|Resurrecting)";
-    const abilitySubtype = "((Kill|Attack|Lynch|True|Banish|True Banish) Killing|(Role|Alignment|Category|Class|Count|Attribute) Investigating|(Target|Untarget) Targeting|() Disguising|(Absence|Active|Passive|Partial|Recruitment) Protecting|(Add|Remove|Change) Applying|() Redirecting|(Absolute|Relative) Manipulating|() Whispering|(Add|Remove) Joining|(Add|Remove|Transfer) Granting|() Loyalty|() Obstructing|(Addition|Creation|Cancelling|Deletion|Manipulation) Poll|() Announcements|(Role|Alignment|Group) Changing|(Creating|Choosing) Choices|() Ascend|() Descend|() Disband|(Increment|Decrement|Set) Counting|() Conversation Reset|() Cancel|() Switching|() Process|() Evaluate|() Action|() Feedback|() Action|() Success|() Failure|() Emit|() Storing|(Create|Change) Displaying|() Win|() Shuffle|(Lock|Unlock) Locking|() Executing|() Activating|() Resurrecting)";
+    const abilityType = "(Killing|Investigating|Targeting|Disguising|Protecting|Applying|Redirecting|Manipulating|Whispering|Joining|Granting|Loyalty|Obstructing|Manipulating|Announcements|Changing|Choices|Ascend|Descend|Disband|Counting|Conversation Reset|Cancel|Switching|Process|Evaluate|Action|Feedback|Action|Success|Failure|Emit|Storing|Displaying|Win|Shuffle|Locking|Executing|Activating|Resurrecting|Formatting)";
+    const abilitySubtype = "((Kill|Attack|Lynch|True|Banish|True Banish) Killing|(Role|Alignment|Category|Class|Count|Attribute) Investigating|(Target|Untarget) Targeting|() Disguising|(Absence|Active|Passive|Partial|Recruitment) Protecting|(Add|Remove|Change) Applying|() Redirecting|(Absolute|Relative) Manipulating|() Whispering|(Add|Remove) Joining|(Add|Remove|Transfer) Granting|() Loyalty|() Obstructing|(Addition|Creation|Cancelling|Deletion|Manipulation) Poll|() Announcements|(Role|Alignment|Group) Changing|(Creating|Choosing) Choices|() Ascend|() Descend|() Disband|(Increment|Decrement|Set) Counting|() Conversation Reset|() Cancel|() Switching|() Process|() Evaluate|() Action|() Feedback|() Action|() Success|() Failure|() Emit|() Storing|(Create|Change) Displaying|() Win|() Shuffle|(Lock|Unlock) Locking|() Executing|() Activating|() Resurrecting|() Formatting)";
     const bulletsRegex = /(•|‣|◦|·|⁃|⹀)/;
 
     // specific
@@ -1795,6 +1795,19 @@ module.exports = function() {
         fd = exp.exec(abilityLine);
         if(fd) {
             ability = { type: "resurrecting", target: ttpp(fd[1]) };
+        }
+        /** FORMATTING **/
+        // formatting
+        exp = new RegExp("^Format " + targetType + " as `([^`]+)`$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "formatting", target: ttpp(fd[1]), format: fd[2] };
+        }
+        // formatting from
+        exp = new RegExp("^Format " + targetType + " as `([^`]+)` split by `([^`]+)` as `(\\w+)`$", "g");
+        fd = exp.exec(abilityLine);
+        if(fd) {
+            ability = { type: "formatting", target: ttpp(fd[1]), format: fd[2], split_by: fd[3], split_type: fd[4] };
         }
 
         
