@@ -2541,8 +2541,8 @@ module.exports = function() {
     parses a manipulation type
     defaults to "public" (public voting power);
     **/
-    const manipTypes = ["public voting power","special public voting power","private voting power"];
-    const manipTypesShort = ["public","special","private","starting"];
+    const manipTypes = ["public voting power","special public voting power","hidden public voting power","private voting power"];
+    const manipTypesShort = ["public","special","hidden","private"];
     this.parseManipType = function(manip_type) {
         manip_type = manip_type.toLowerCase();
         if(manipTypes.includes(manip_type)) {

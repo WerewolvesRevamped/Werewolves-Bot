@@ -462,7 +462,8 @@ module.exports = function() {
             await Promise.all(validVotersProms);
             
             // calculate votes
-            let votes = votesArray.reduce((a,b) => a+b, 0)
+            let totalVotes = votesArray.reduce((sum, el) => sum + el.total, 0);
+            let visibleVotes = votesArray.reduce((sum, el) => sum + el.visible, 0);
             
             // get extra votes
             let extraVisible = await queryAttribute("attr_type", "poll_votes", "val1", pollType, "val2", candidate, "val3", "visible");
@@ -477,11 +478,11 @@ module.exports = function() {
             // count votes
             extraVisible = extraVisible.map(el => +el.val4).reduce((a,b) => a+b, 0);
             extraHidden = extraHidden.map(el => +el.val4).reduce((a,b) => a+b, 0);
-            votes += extraVisible;
-            votes += extraHidden;
+            totalVotes += extraHidden + extraVisible;
+            visibleVotes += extraVisible;
             
             // if no votes, continue
-            if(votes < 0 || (voters.length === 0 && votes === 0)) return;
+            if(totalVotes < 0 || (voters.length === 0 && totalVotes === 0)) return;
             
             // if no valid voters, but votes
             let validVotersText = validVoters.join(', ');
@@ -493,20 +494,19 @@ module.exports = function() {
             
             // create message
             let msg;
-            let displayVotes = votes - extraHidden;
-            if(validVoters.length === 0 && invalidVoters.length === 0 && votes > 0 && displayVotes === 0) {
+            if(validVoters.length === 0 && invalidVoters.length === 0 && totalVotes > 0 && visibleVotes === 0) {
                 // nothing - this is the case when nobody votes and an invisible vote was played which should not be displayed
                 forceResult = true; // forces result in case of no votes
             } else {
-                if(showVoters) msg = `(${displayVotes}) ${reac.emoji} ${candidateName} **-** ${validVotersText}` + (invalidVoters.length>0 ? ` (Invalid Votes: ${invalidVoters.join(', ')})` : "");
-                else msg = `(${displayVotes}) ${reac.emoji} ${candidateName}`;
+                if(showVoters) msg = `(${visibleVotes}) ${reac.emoji} ${candidateName} **-** ${validVotersText}` + (invalidVoters.length>0 ? ` (Invalid Votes: ${invalidVoters.join(', ')})` : "");
+                else msg = `(${visibleVotes}) ${reac.emoji} ${candidateName}`;
                 outputLines.push(msg);
             }
             
-            if(votes <= 0) return;
+            if(totalVotes <= 0) return;
             
             // save votes data
-            if(candidate != "Abstain" && candidate != "Hammer") votesData.push({ votes: votes, candidate: candidate, validVoters: validVoters });
+            if(candidate != "Abstain" && candidate != "Hammer") votesData.push({ votes: totalVotes, candidate: candidate, validVoters: validVoters });
         });
         
         // await all promises
@@ -716,6 +716,7 @@ module.exports = function() {
         } else if(type === "public") { // PUBLIC POLLS
             const voteManipulations = await getManipulations(player_id, "public");
             const specialVoteManipulations = await getManipulations(player_id, "special");
+            const hiddenVoteManipulations = await getManipulations(player_id, "hidden");
             let voteValue = 1, specialVoteValue = 0;
             // add public votes
             for(let i = 0; i < voteManipulations.length; i++) {
@@ -731,12 +732,20 @@ module.exports = function() {
                     case "relative": specialVoteValue += + specialVoteManipulations[i].val3; break;
                 }
             }
+            // add hidden votes
+            let visibleVotes = voteValue;
+            for(let i = 0; i < hiddenVoteManipulations.length; i++) {
+                switch(hiddenVoteManipulations[i].val1) {
+                    case "absolute": voteValue = + hiddenVoteManipulations[i].val3; break;
+                    case "relative": voteValue += + hiddenVoteManipulations[i].val3; break;
+                }
+            }
             // return vote total
-            let totalVotes = voteValue + ((voteValue>=0 ? 1 : -1) * specialVoteValue);
+            let totalVotes = voteValue + ((voteValue>= 0 ? 1 : -1) * specialVoteValue);
             console.log("PUBLIC VOTE VALUE", totalVotes, voteManipulations.map(el => `${el.val1}${el.val2}${el.val3}`), specialVoteManipulations.map(el => `${el.val1}${el.val2}${el.val3}`));
-            return totalVotes;
+            return { visible: visibleVotes, total: totalVotes };
         } else { // UNKNOWN / OTHER POLLS
-            return 1;
+            return { visible: 1, total: 1 };
         }
     }
     
