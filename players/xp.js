@@ -11,7 +11,7 @@ module.exports = function() {
     **/
     this.cmdXP = async function(message, args) {
         if(!args[0]) { 
-            cmdXPGet(message.channel, ["get", message.author.id]);
+            cmdXPGet(message.channel, message.author, ["get", message.author.id]);
 			return; 
 		} 
 		// Check Subcommand
