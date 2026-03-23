@@ -948,6 +948,7 @@ module.exports = function() {
         // set flags
         let aliveOnly = aliveOnlyDefault;
         let selectAll = true;
+        let random = false;
         let ghostly = false;
         // iterate through all selector components
         for(let i = 0; i < selSplit.length; i++) {
@@ -1085,6 +1086,10 @@ module.exports = function() {
                 case "selectall":
                     if(compVal === "false") selectAll = false;
                 break;
+                // Random - randomizes output
+                case "random":
+                    if(compVal === "true") random = true;
+                break;
             }
         }
         // apply flags
@@ -1097,6 +1102,8 @@ module.exports = function() {
         if(!selectAll) {
             let shuffled = shuffleArray(allPlayers);
             return shuffled[0] ? [ shuffled[0].id ] : [ ];
+        } else if(random) {
+            return shuffleArray(allPlayers.map(el => el.id));
         } else {
             return allPlayers.map(el => el.id);
         }
@@ -2092,7 +2099,7 @@ module.exports = function() {
     /**
     Parse ability type
     **/
-    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","redirecting","manipulating","whispering","joining","granting","loyalty","obstructing","poll","announcement","changing","choices","ascend","descend","disband","counting","reset","cancel","","feedback","success","failure","log","process_evaluate","abilities","emit","storing","displaying", "win","shuffle","locking","executing","activating","resurrecting"];
+    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","redirecting","manipulating","whispering","joining","granting","loyalty","obstructing","poll","announcement","changing","choices","ascend","descend","disband","counting","reset","cancel","","feedback","success","failure","log","process_evaluate","abilities","emit","storing","displaying", "win","shuffle","locking","executing","activating","resurrecting","formatting"];
     this.parseAbilityType = function(ability_type, self = null, additionalTriggerData = {}) {
         // get target
         let selectorTarget = selectorGetTarget(ability_type);
@@ -2243,6 +2250,7 @@ module.exports = function() {
         [], // executing
         [], // activating
         [], // resurrecting
+        [], // formatting
         ];
     this.parseAbilitySubtype = function(ability_subtype, self = null, additionalTriggerData = {}) {
         // get target
