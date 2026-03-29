@@ -143,8 +143,8 @@ module.exports = function() {
                 let rEmoji = getRoleEmoji(rName);
                 let publicVotingPower = await pollValue(el.id, "public");
                 let privateVotingPower = await pollValue(el.id, "private");
-                let publicText = `Public: ${publicVotingPower}`;
-                let privateText = `Private: ${privateVotingPower}`;
+                let publicText = `Public: ${publicVotingPower.total} (${publicVotingPower.visible})`;
+                let privateText = `Private: ${privateVotingPower.total} (${privateVotingPower.visible})`;
                 if(publicVotingPower != 1) publicText = `**${publicText}**`;
                 if(privateVotingPower != 1) privateText = `**${privateText}**`;
                 rEmoji = (rEmoji ? `<:${rEmoji.name}:${rEmoji.id}> | ` : "❓ | ");
