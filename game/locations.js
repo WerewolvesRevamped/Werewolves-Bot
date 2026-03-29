@@ -151,7 +151,7 @@ module.exports = function() {
             // get permissions
             const members = locations[i].members.toLowerCase().split(",");
             const viewers = locations[i].viewers.toLowerCase().split(",");
-            const displayName = applyTheme(locations[i].display_name).replace(/[^a-zA-Z0-9\-_ ]+/g, "").replace(/  +/g, "");
+            const displayName = applyTheme(locations[i].display_name).replace(/[^a-zA-Z0-9\-_ ]+/g, "").replace(/  +/g, " ");
             let permissions = [ getPerms(mainGuild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []) ];
             // add member permissions
             members.forEach(mem => {
