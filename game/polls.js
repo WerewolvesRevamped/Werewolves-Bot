@@ -712,7 +712,7 @@ module.exports = function() {
             }
             // return vote total
             console.log("PRIVATE VOTE VALUE", voteValue);
-            return voteValue;
+            return { visible: voteValue, total: voteValue };
         } else if(type === "public") { // PUBLIC POLLS
             const voteManipulations = await getManipulations(player_id, "public");
             const specialVoteManipulations = await getManipulations(player_id, "special");
