@@ -204,7 +204,7 @@ module.exports = function() {
         if(channel.name.split("-")[0] === "👻") name = "👻-" + name;
         
         // rename cc
-        channelRename(channel, name);
+        channelRename(channel, name, false, channel.name);
     }
     
 	/**
@@ -462,13 +462,16 @@ module.exports = function() {
     /**
     Renames a channel
     **/
-    this.channelRename = function(channel, name, hidden = false) {
+    this.channelRename = function(channel, name, hidden = false, oldName = "") {
         // make sure length is valid
         name = name.substr(0, 100);
         // rename
         channel.edit({ name: name })
         .then(c => {
-            if(!hidden) c.send("✅ Renamed channel to `" + c.name + "`!");
+            if(!hidden) {
+                if(oldName) c.send("✅ Renamed channel from `" + oldName + "` to `" + c.name + "`!");
+                else c.send("✅ Renamed channel to `" + c.name + "`!");
+            }
         })
         .catch(err => {
             // Permission error
