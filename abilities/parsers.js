@@ -2099,7 +2099,7 @@ module.exports = function() {
     /**
     Parse ability type
     **/
-    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","redirecting","manipulating","whispering","joining","granting","loyalty","obstructing","poll","announcement","changing","choices","ascend","descend","disband","counting","reset","cancel","","feedback","success","failure","log","process_evaluate","abilities","emit","storing","displaying", "win","shuffle","locking","executing","activating","resurrecting","formatting"];
+    const abilityTypeNames = ["killing","investigating","targeting","disguising","protecting","applying","redirecting","manipulating","whispering","joining","granting","loyalty","obstructing","poll","announcement","changing","choices","ascend","descend","disband","counting","reset","cancel","","feedback","success","failure","log","process_evaluate","abilities","emit","storing","displaying", "win","shuffle","locking","executing","activating","resurrecting","formatting","copying"];
     this.parseAbilityType = function(ability_type, self = null, additionalTriggerData = {}) {
         // get target
         let selectorTarget = selectorGetTarget(ability_type);
@@ -2251,6 +2251,7 @@ module.exports = function() {
         [], // activating
         [], // resurrecting
         [], // formatting
+        [], // copying
         ];
     this.parseAbilitySubtype = function(ability_subtype, self = null, additionalTriggerData = {}) {
         // get target

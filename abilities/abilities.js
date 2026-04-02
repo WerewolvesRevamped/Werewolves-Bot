@@ -47,6 +47,7 @@ require("./types/executing.js")();
 require("./types/activating.js")();
 require("./types/resurrecting.js")();
 require("./types/formatting.js")();
+require("./types/copying.js")();
 
 module.exports = function() {
     
@@ -216,6 +217,9 @@ module.exports = function() {
                 break;
                 case "formatting":
                     feedback = await abilityFormatting(src_refAction, src_name, ability, additionalTriggerData);
+                break;
+                case "copying":
+                    feedback = await abilityCopying(src_refAction, src_name, ability, additionalTriggerData);
                 break;
                 case "success":
                     feedback = { msg: "Ability succeeded!", success: true };

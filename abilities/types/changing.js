@@ -158,7 +158,7 @@ module.exports = function() {
             // get alignment, alignment join trigger
             let parsedRole = parseRole(role);
             let roleData = await getRoleDataFromName(parsedRole);
-            await triggerTeam(roleData.team, "On Join", { joiner: targets[i] });
+            await triggerTeam(roleData.team, "On Join", { joiner: targets[i] }, true);
             
             // passive
             await triggerHandler("Passive");
@@ -210,7 +210,7 @@ module.exports = function() {
             
             // join trigger
             let team = parseTeam(alignment);
-            await triggerTeam(team, "On Join", { joiner: targets[i] });
+            await triggerTeam(team, "On Join", { joiner: targets[i] }, true);
             
             // passive
             await triggerHandler("Passive");

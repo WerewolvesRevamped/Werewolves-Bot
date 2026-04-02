@@ -178,10 +178,12 @@ module.exports = function() {
     Trigger Team
     triggers a trigger for a specified team
     **/
-    this.triggerTeam = function(teamName, triggerName, additionalTriggerData = {}) {
+    this.triggerTeam = function(teamName, triggerName, additionalTriggerData = {}, allowInactive = true) {
         return new Promise(res => {
             // get all players
-            sql("SELECT * FROM teams WHERE active=1 AND name=" + connection.escape(teamName), async r => {
+            let active = "active=1 AND";
+            if(allowInactive) active = "";
+            sql("SELECT * FROM teams WHERE " + active + " name=" + connection.escape(teamName), async r => {
                 //trigger handler
                 if(!r[0]) {
                     abilityLog(`❗ **Skipped Trigger:** Cannot find matching team for ${toTitleCase(teamName)}.`);
