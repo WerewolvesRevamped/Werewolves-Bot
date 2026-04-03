@@ -37,11 +37,11 @@ require("./players/players.js")();
 
 // V2 Modules
 require("./paths.js")();
-require("./roles/roles.js")();
+require("./stats/stats.js")();
 require("./utility/utility.js")();
+require("./roles/roles.js")();
 require("./abilities/abilities.js")();
 require("./attributes/attributes.js")();
-require("./stats/stats.js")();
 require("./shared/roles.js")();
 
 var botLoaded = false;
