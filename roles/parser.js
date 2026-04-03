@@ -664,7 +664,7 @@ module.exports = function() {
     const joiningSubtype = "(Member|Owner|Visitor)";
     const loyaltySubtype = "(Group|Alignment)";
     const pollManipManipSubtype = "(Unvotable|Disqualified)";
-    const targetingType = "(Player|Dead|Role|Attribute|Category|Full Category|Boolean|Option|Player Optional)";
+    const targetingType = "(Player|Dead|Ghost|Role|Attribute|Category|Full Category|Boolean|Option|Player Optional)";
 
     /**
     Parse Abilities
