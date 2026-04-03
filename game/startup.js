@@ -374,9 +374,16 @@ module.exports = function() {
             embed.description = "This message is giving you your role for the next game of " + guild.name + "!\n\nYour role is `" + roleName + "`.\n\nYou are __not__ allowed to share a screenshot of this message! You can claim whatever you want about your role, but you may under __NO__ circumstances show this message in any way to any other participants.\n\nIf you're confused about your role at all, then check #how-to-play on the discord, which contains a role book with information on all the roles in this game. If you have any questions about the game, ping @Host.";
             embed.color = roleData.color;
             if(config.cards) embed.image = { "url": getCardUrl(role.name) };
+            
+            let player = guild.members.cache.get(playerID);
+            let noDMRole = guild.roles.cache.find(role => role.name == "No Bot DM");
+            if(player.roles.cache.get(noDMRole.id)) { // NO DM
+                res();
+                return;
+            }
 
             // send the embed
-            guild.members.cache.get(playerID).user.send({embeds: [ embed ]}).then(m => {
+            player.user.send({embeds: [ embed ]}).then(m => {
                 res(); // resolve the promise
             }).catch(err => {
                 logO(err); 
