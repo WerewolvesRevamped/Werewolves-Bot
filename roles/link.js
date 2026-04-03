@@ -216,6 +216,7 @@ module.exports = function() {
             output.output.forEach(el => channel.send(`❗ ${el}`));
             channel.send(`✅ Successfully parsed \`${output.success}\` roles. `);
             channel.send(`😔 Failed to parse \`${output.failure}\` roles. `);
+            channel.send(`❓ Skipped \`${output.skipped}\` roles. `);
         } catch(err) {
             channel.send(`⛔ Parsing roles failed.`);
         }
@@ -238,6 +239,7 @@ module.exports = function() {
             output.output.forEach(el => channel.send(`❗ ${el}`));
             channel.send(`✅ Successfully parsed \`${output.success}\` groups. `);
             channel.send(`😔 Failed to parse \`${output.failure}\` groups. `);
+            channel.send(`❓ Skipped \`${output.skipped}\` groups. `);
         } catch(err) {
             channel.send(`⛔ Parsing groups failed.`);
         }
@@ -260,6 +262,7 @@ module.exports = function() {
             output.output.forEach(el => channel.send(`❗ ${el}`));
             channel.send(`✅ Successfully parsed \`${output.success}\` polls. `);
             channel.send(`😔 Failed to parse \`${output.failure}\` polls. `);
+            channel.send(`❓ Skipped \`${output.skipped}\` polls. `);
         } catch(err) {
             channel.send(`⛔ Parsing polls failed.`);
         }
@@ -282,6 +285,7 @@ module.exports = function() {
             output.output.forEach(el => channel.send(`❗ ${el}`));
             channel.send(`✅ Successfully parsed \`${output.success}\` attributes. `);
             channel.send(`😔 Failed to parse \`${output.failure}\` attributes. `);
+            channel.send(`❓ Skipped \`${output.skipped}\` attributes. `);
         } catch(err) {
             channel.send(`⛔ Parsing attributes failed.`);
         }
@@ -304,6 +308,7 @@ module.exports = function() {
             output.output.forEach(el => channel.send(`❗ ${el}`));
             channel.send(`✅ Successfully parsed \`${output.success}\` teams. `);
             channel.send(`😔 Failed to parse \`${output.failure}\` teams. `);
+            channel.send(`❓ Skipped \`${output.skipped}\` teams. `);
         } catch(err) {
             channel.send(`⛔ Parsing teams failed.`);
         }
@@ -321,67 +326,82 @@ module.exports = function() {
         }
         
         var output;
+        var totalErrors = 0;
         /** Pre Parsing */
         // query ability sets
         channel.send(`🔄 Querying ability sets. Please wait. This may take several minutes.`);
         output = await querySets();
         channel.send(`❗ Querying ability sets completed with \`${output.length}\` errors.`);
+        totalErrors += output.length;
         /** Parsed Elements */
         // query roles
         channel.send(`🔄 Querying roles. Please wait. This may take several minutes.`);
         output = await queryRoles();
         channel.send(`❗ Querying roles completed with \`${output.length}\` errors.`);
+        totalErrors += output.length;
         // query groups
         channel.send(`🔄 Querying groups. Please wait. This may take several minutes.`);
         output = await queryGroups();
         channel.send(`❗ Querying groups completed with \`${output.length}\` errors.`);
+        totalErrors += output.length;
         // query polls
         channel.send(`🔄 Querying polls. Please wait. This may take several minutes.`);
         output = await queryPolls(); 
         channel.send(`❗ Querying polls completed with \`${output.length}\` errors.`);
+        totalErrors += output.length;
         // query attributes
         channel.send(`🔄 Querying attributes. Please wait. This may take several minutes.`);
         output = await queryAttributes();
         channel.send(`❗ Querying attributes completed with \`${output.length}\` errors.`);
+        totalErrors += output.length;
         // query teams
         channel.send(`🔄 Querying teams. Please wait. This may take several minutes.`);
         output = await queryTeams();
         channel.send(`❗ Querying teams completed with \`${output.length}\` errors.`);
+        totalErrors += output.length;
         /** parsing **/
         cacheRoleInfo();
         // parse roles
         channel.send(`🔄 Parsing roles. Please wait. This may take several minutes.`);
         output = await parseRoles();
-        channel.send(`❗ Parsing roles completed with \`${output.output.length}\` errors.`);
+        channel.send(`❗ Parsing roles completed with \`${output.failure}\` errors.`);
+        totalErrors += output.failure;
         // parse groups
         channel.send(`🔄 Parsing groups. Please wait. This may take several minutes.`);
         output = await parseGroups();
-        channel.send(`❗ Parsing groups completed with \`${output.output.length}\` errors.`);
+        channel.send(`❗ Parsing groups completed with \`${output.failure}\` errors.`);
+        totalErrors += output.failure;
         // parse polls
         channel.send(`🔄 Parsing polls. Please wait. This may take several minutes.`);
         output = await parsePolls();
-        channel.send(`❗ Parsing polls completed with \`${output.output.length}\` errors.`);
+        channel.send(`❗ Parsing polls completed with \`${output.failure}\` errors.`);
+        totalErrors += output.failure;
         // parse attributes
         channel.send(`🔄 Parsing attributes. Please wait. This may take several minutes.`);
         output = await parseAttributes();
-        channel.send(`❗ Parsing attributes completed with \`${output.output.length}\` errors.`);
+        channel.send(`❗ Parsing attributes completed with \`${output.failure}\` errors.`);
+        totalErrors += output.failure;
         // parse teams
         channel.send(`🔄 Parsing teams. Please wait. This may take several minutes.`);
         output = await parseTeams();
-        channel.send(`❗ Parsing teams completed with \`${output.output.length}\` errors.`);
+        channel.send(`❗ Parsing teams completed with \`${output.failure}\` errors.`);
+        totalErrors += output.failure;
         /** No Parsing */
         // query info
         channel.send(`🔄 Querying info. Please wait. This may take several minutes.`);
         output = await queryInfo();
         channel.send(`❗ Querying info completed with \`${output.length}\` errors.`);
+        totalErrors += output.length;
         // query locations
         channel.send(`🔄 Querying locations. Please wait. This may take several minutes.`);
         output = await queryLocations();
         channel.send(`❗ Querying locations completed with \`${output.length}\` errors.`);
+        totalErrors += output.length;
         // query displays
         channel.send(`🔄 Querying displays. Please wait. This may take several minutes.`);
         output = await queryDisplays();
         channel.send(`❗ Querying displays completed with \`${output.length}\` errors.`);
+        totalErrors += output.length;
         /** Post Update */
         // cache values
         cacheRoleInfo();
@@ -393,6 +413,8 @@ module.exports = function() {
         cacheTeams();
         channel.send(`❗ Caching teams info.`);
         channel.send(`✅ Update completed.`);
+        if(totalErrors > 0) channel.send(`⛔ Total error count: ${totalErrors}`);
+        else channel.send(`✅ No errors!`);
     }
         
     /**
@@ -929,6 +951,7 @@ module.exports = function() {
         var output = [];
         var successCounter = 0;
         var failureCounter = 0;
+        var skippedCounter = 0;
         // iterate through all roles and parse them
         // due to async map we only get an array of promises back - we wait for all of them to resolve
         const promises = cacheName.map(async el => {
@@ -977,16 +1000,18 @@ module.exports = function() {
                 if(identity.length > 0) sql("UPDATE " + dbName + " SET identity = " + connection.escape(identity) + " WHERE name = " + connection.escape(el));
                 if(activation > 0 ) sql("UPDATE " + dbName + " SET activation = " + connection.escape(activation) + " WHERE name = " + connection.escape(el));
             } catch (err) {
-                console.log(err.stack);
+                //console.log(err.stack);
                 output.push(`**${toTitleCase(el)}:** ${err}`);
-                failureCounter++;
+                console.log(err);
+                if(!["Error: Unfinished role", "Error: No formalized description available"].includes("" + err)) failureCounter++;
+                else skippedCounter++
             }
         });
         
         // wait for all promises to resolve
         await Promise.all(promises);
         
-        return { output: output, success: successCounter, failure: failureCounter }; 
+        return { output: output, success: successCounter, failure: failureCounter, skipped: skippedCounter }; 
    }
    
     /**

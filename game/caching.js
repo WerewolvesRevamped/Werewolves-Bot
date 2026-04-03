@@ -20,7 +20,6 @@ module.exports = function() {
         // Cache SC Cats
         cachedSCs = result.map(el => el.id);
         scCatCount = cachedSCs.length;
-        console.log("SC CACHE", cachedSCs, scCatCount);
 	}
     
     /**

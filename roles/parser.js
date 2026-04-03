@@ -50,7 +50,7 @@ module.exports = function() {
         if(debugMode) console.log("-=- S T A R T -=-");
         
         if(inputLines[0] === "TBD" || inputLines[0] === "N/A") {
-            throw new Error(`Unfinished role.`);
+            throw new Error(`Unfinished role`);
         }
         
         // replace ":" within strings
