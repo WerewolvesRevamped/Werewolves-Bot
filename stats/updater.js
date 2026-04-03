@@ -18,6 +18,7 @@ module.exports = function() {
         if(stats.db_version < 3) await update_3();  
         if(stats.db_version < 4) await update_4();  
         if(stats.db_version < 5) await update_5();  
+        if(stats.db_version < 6) await update_6();  
         
         // set latest version
         sqlSetStat(statID.DB_VERSION, LATEST_DB_VERSION);
@@ -65,11 +66,20 @@ module.exports = function() {
     
     /**
     Update #5
-    adds 'opened' column to grouos
+    adds 'opened' column to groups
     **/
     async function update_5() {
         log("⤴️ Running DB Update #5");
         await sqlProm("ALTER TABLE `active_groups` ADD COLUMN `opened` int(11) NOT NULL DEFAULT 0 AFTER `activation`");
+    }
+    
+    /**
+    Update #6
+    Drops sc table
+    **/
+    async function update_6() {
+        log("⤴️ Running DB Update #6");
+        await sqlProm("DROP TABLE `sc`");
     }
     
 

@@ -197,7 +197,7 @@ module.exports = function() {
         items.sort((a, b) => a[3].localeCompare(b[3]));
         let itemsText = [];
         
-        let itemsByType = { sp: [], ic: [], dm: [], bot: [], bst: [], gua: [], sp: []};
+        let itemsByType = { sp: [], ic: [], dm: [], bot: [], bst: [], gua: [], sp: [], tro: [], cur: [] };
         for(let i = 0; i < items.length; i++) {
             let txt = `• ${items[i][2][1]} x${items[i][0]} (\`${items[i][1]}\`)`;
             switch(items[i][3]) {
@@ -209,6 +209,8 @@ module.exports = function() {
                 case "dm":
                 case "bot":
                 case "bst":
+                case "tro":
+                case "cur":
                     itemsByType[items[i][3]].push(txt);
                 break;
                 case "al":
@@ -221,9 +223,9 @@ module.exports = function() {
         
         let finalTxts = [];
         for(let typ in itemsByType) {
-            if(itemsByType[typ].length > 5) {
+            if(itemsByType[typ].length > 5 || (itemsByType[typ].length > 3 && ["tro", "cur"].includes(typ))) {
                 let typName = "Unknown";
-                let typNameMap = { sp: "Skinpacks", ic: "Icons", dm: "Death Messages", bot: "Bot Features", bst: "Boosters", gua: "Guarantors", sp: "Skinpacks" };
+                let typNameMap = { sp: "Skinpacks", ic: "Icons", dm: "Death Messages", bot: "Bot Features", bst: "Boosters", gua: "Guarantors", sp: "Skinpacks", tro: "Trophies", cur: "Curses" };
                 finalTxts.push(`• ${itemsByType[typ].length} ${typNameMap[typ]}`);
             } else {
                 itemsText.push(...itemsByType[typ]);

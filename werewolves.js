@@ -897,6 +897,13 @@ client.on("messageCreate", async message => {
         }
 		cmdGuarantors(message, args);
     break;
+    case "trophy":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
+		cmdTrophy(message, args);
+    break;
     case "market":
         if(!config.coins) {
             message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");

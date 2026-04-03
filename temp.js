@@ -91,6 +91,7 @@ module.exports = function() {
                 "status": ["st"],
                 "levelup": ["lvlup", "lu"],
                 "leaderboard": ["lb", "ranking", "top"],
+                "trophy": ["tro"],
         };
         
     this.parseAlias = function(alias) {
