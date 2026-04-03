@@ -619,6 +619,12 @@ module.exports = function() {
             doTrigger = false;
         }
         
+        // winners
+        let winners = { };
+        for(let i = 0; i < maxVotesData.length; i++) {
+            winners["winner" + (i+1)] = maxVotesData[i];
+        }
+        
         // on poll closed trigger
         if(doTrigger) {
             let otherVoters = maxVotesValidVoters;
@@ -627,18 +633,22 @@ module.exports = function() {
             switch(srcType) {
                 // default direct trigger execution
                 default:
-                    await trigger(pollData.src_ref, "On Poll Closed", { winner: maxVotesData[0], voters: maxVotesValidVoters, other_voters: otherVoters }); 
-                    await triggerPlayer(maxVotesData[0], "On Poll Win", { voters: maxVotesValidVoters, other_voters: otherVoters }); 
-                    await triggerPlayer(maxVotesData[0], "On Poll Win Complex", { poll_name: pollName, voters: maxVotesValidVoters, other_voters: otherVoters }); 
-                    await triggerPlayer(maxVotesData[0], "On Poll Win Complex", { poll_name: pollType, voters: maxVotesValidVoters, other_voters: otherVoters }); 
+                    await trigger(pollData.src_ref, "On Poll Closed", { ...winners, winner: maxVotesData[0], voters: maxVotesValidVoters, other_voters: otherVoters }); 
+                    for(let i = 0; i < maxVotesData.length; i++) {
+                        await triggerPlayer(maxVotesData[i], "On Poll Win", { voters: maxVotesValidVoters, other_voters: otherVoters }); 
+                        await triggerPlayer(maxVotesData[i], "On Poll Win Complex", { poll_name: pollName, voters: maxVotesValidVoters, other_voters: otherVoters }); 
+                        await triggerPlayer(maxVotesData[i], "On Poll Win Complex", { poll_name: pollType, voters: maxVotesValidVoters, other_voters: otherVoters }); 
+                    }
                 break;
                 // for group polls a random executor is chosen
                 case "group":
                     let executor = shuffleArray(maxVotesValidVoters)[0];
-                    await trigger(pollData.src_ref, "On Poll Closed", { winner: maxVotesData[0], executor: executor, voters: maxVotesValidVoters, other_voters: otherVoters }); 
-                    await triggerPlayer(maxVotesData[0], "On Poll Win", { voters: maxVotesValidVoters, other_voters: otherVoters }); 
-                    await triggerPlayer(maxVotesData[0], "On Poll Win Complex", { poll_name: pollName, voters: maxVotesValidVoters, other_voters: otherVoters }); 
-                    await triggerPlayer(maxVotesData[0], "On Poll Win Complex", { poll_name: pollType, voters: maxVotesValidVoters, other_voters: otherVoters }); 
+                    await trigger(pollData.src_ref, "On Poll Closed", { ...winners, winner: maxVotesData[0], executor: executor, voters: maxVotesValidVoters, other_voters: otherVoters }); 
+                    for(let i = 0; i < maxVotesData.length; i++) {
+                        await triggerPlayer(maxVotesData[i], "On Poll Win", { voters: maxVotesValidVoters, other_voters: otherVoters }); 
+                        await triggerPlayer(maxVotesData[i], "On Poll Win Complex", { poll_name: pollName, voters: maxVotesValidVoters, other_voters: otherVoters }); 
+                        await triggerPlayer(maxVotesData[i], "On Poll Win Complex", { poll_name: pollType, voters: maxVotesValidVoters, other_voters: otherVoters }); 
+                    }
                 break;
                 
             }
@@ -649,12 +659,13 @@ module.exports = function() {
             switch(srcType) {
                 // default direct trigger execution
                 default:
-                    await trigger(pollData.src_ref, "On Poll Skipped", { winner: maxVotesData[0], voters: maxVotesValidVoters, other_voters: otherVoters }); 
+                    console.log({ ...winners, winner: maxVotesData[0], voters: maxVotesValidVoters, other_voters: otherVoters });
+                    await trigger(pollData.src_ref, "On Poll Skipped", { ...winners, winner: maxVotesData[0], voters: maxVotesValidVoters, other_voters: otherVoters }); 
                 break;
                 // for group polls a random executor is chosen
                 case "group":
                     let executor = shuffleArray(maxVotesValidVoters)[0];
-                    await trigger(pollData.src_ref, "On Poll Skipped", { winner: maxVotesData[0], executor: executor, voters: maxVotesValidVoters, other_voters: otherVoters }); 
+                    await trigger(pollData.src_ref, "On Poll Skipped", { ...winners, winner: maxVotesData[0], executor: executor, voters: maxVotesValidVoters, other_voters: otherVoters }); 
                 break;
             }
         }

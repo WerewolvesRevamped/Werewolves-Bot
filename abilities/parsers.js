@@ -293,6 +293,26 @@ module.exports = function() {
                 } else {
                     return invalidSelector(selectorTarget);
                 }
+            case "@winner1":
+                if(additionalTriggerData.winner1) {
+                    return [ additionalTriggerData.winner1 ];
+                } else {
+                    if(additionalTriggerData.winner) {
+                        return [ ];
+                    } else {
+                        return invalidSelector(selectorTarget);
+                    }
+                }
+            case "@winner2":
+                if(additionalTriggerData.winner2) {
+                    return [ additionalTriggerData.winner2 ];
+                } else {
+                    if(additionalTriggerData.winner) {
+                        return [ ];
+                    } else {
+                        return invalidSelector(selectorTarget);
+                    }
+                }
             case "@actiontarget":
                 if(additionalTriggerData.action_target) {
                     let val = srcToValue(additionalTriggerData.action_target);
@@ -1474,6 +1494,28 @@ module.exports = function() {
                 } else {
                     abilityLog(`❗ **Error:** Invalid string selector target \`${selectorTarget}\`!`);
                     return [ ];
+                }
+            case "@winner1":
+                if(additionalTriggerData.winner1) {
+                    return [ additionalTriggerData.winner1 ];
+                } else {
+                    if(additionalTriggerData.winner) {
+                        return [ ];
+                    } else {
+                        abilityLog(`❗ **Error:** Invalid string selector target \`${selectorTarget}\`!`);
+                        return [ ];
+                    }
+                }
+            case "@winner2":
+                if(additionalTriggerData.winner2) {
+                    return [ additionalTriggerData.winner2 ];
+                } else {
+                    if(additionalTriggerData.winner) {
+                        return [ ];
+                    } else {
+                        abilityLog(`❗ **Error:** Invalid string selector target \`${selectorTarget}\`!`);
+                        return [ ];
+                    }
                 }
             default:
                 if (PROPERTY_ACCESS.test(selectorTarget)) { // property access
