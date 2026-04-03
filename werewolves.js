@@ -490,7 +490,7 @@ client.on("messageCreate", async message => {
 	break;
 	/* Update */ // Updates all github linked data
 	case "update":
-		if(checkGM(message)) cmdUpdate(message.channel);
+		if(checkGM(message)) cmdUpdate(message.channel, args);
 	break;
 	/* Role Info */ // Returns the info for a role set by the roles command (simplified)
 	case "info":

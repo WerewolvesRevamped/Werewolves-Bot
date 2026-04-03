@@ -319,9 +319,9 @@ module.exports = function() {
     Command: $update
     Updates all github linked data
     **/
-    this.cmdUpdate = async function(channel) {
-        if(stats.gamephase == gp.INGAME) {
-            channel.send("⛔ Command error. Cannot query or parse while ingame");
+    this.cmdUpdate = async function(channel, args) {
+        if(stats.gamephase == gp.INGAME && !(args[0] === "force" || args[0] === "f")) {
+            channel.send("⛔ Command error. Cannot query or parse while ingame. To ignore this warning specify 'force' as an argument.");
             return;
         }
         
@@ -781,7 +781,11 @@ module.exports = function() {
     queries all teams from github
     **/
     async function queryTeams() {
-        return await runQueryBoth(clearTeams, teamspathsPath, teamspathsPathSecondary, queryTeamsCallback, 5);
+        let gameData = await sqlProm("SELECT name,target,counter,active FROM teams");
+        let queryOutput = await runQueryBoth(clearTeams, teamspathsPath, teamspathsPathSecondary, queryTeamsCallback, 5);
+        let proms = gameData.map(async el => sqlPromEsc("UPDATE teams SET target=" + connection.escape(el.target) + ",counter=" + connection.escape(el.counter) +  ",active=" + connection.escape(el.active) +  " WHERE name=", el.name));
+        await Promise.all(proms);
+        return queryOutput;
     }
     
     /**
@@ -832,7 +836,11 @@ module.exports = function() {
     queries all polls from github
     **/
     async function queryPolls() {
-        return await runQuery(clearPolls, pollpathsPath, queryPollsCallback, 2);
+        let gameData = await sqlProm("SELECT name,target,counter FROM polls");
+        let queryOutput = await runQuery(clearPolls, pollpathsPath, queryPollsCallback, 2);
+        let proms = gameData.map(async el => sqlPromEsc("UPDATE polls SET target=" + connection.escape(el.target) + ",counter=" + connection.escape(el.counter) +  " WHERE name=", el.name));
+        await Promise.all(proms);
+        return queryOutput;
     }
     
     /**
@@ -889,7 +897,11 @@ module.exports = function() {
     queries all locations from github
     **/
     async function queryLocations() {
-        return await runQuery(clearLocations, locationpathsPath, queryLocationsCallback, 2);
+        let gameData = await sqlProm("SELECT name,channel_id FROM locations");
+        let queryOutput = await runQuery(clearLocations, locationpathsPath, queryLocationsCallback, 2);
+        let proms = gameData.map(async el => sqlPromEsc("UPDATE locations SET channel_id=" + connection.escape(el.channel_id) + " WHERE name=", el.name));
+        await Promise.all(proms);
+        return queryOutput;
     }
     
     /**
