@@ -14,16 +14,13 @@ module.exports = function() {
     Get Secret Channel Categories
     caches the ids of the secret channel categories
     **/
-	this.getSCCats = function() {
+	this.getSCCats = async function() {
 		// Get SC Cats
-		sql("SELECT id FROM sc_cats ORDER BY ai_id ASC", result => {
-			// Cache SC Cats
-			cachedSCs = result.map(el => el.id);
-            scCatCount = cachedSCs.length;
-		}, () => {
-			// Db error
-			log("CC > Database error. Could not cache sc cat list!");
-		});
+		let result = await sqlProm("SELECT id FROM sc_cats ORDER BY ai_id ASC");
+        // Cache SC Cats
+        cachedSCs = result.map(el => el.id);
+        scCatCount = cachedSCs.length;
+        console.log("SC CACHE", cachedSCs, scCatCount);
 	}
     
     /**

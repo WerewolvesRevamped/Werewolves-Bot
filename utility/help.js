@@ -211,7 +211,7 @@ module.exports = function() {
             ["coins reward", PERM.NO, "Rewards a player with coins.", "", "Special variant of $coins add that is only used by WWRess and WWRdle.", "coins reward mctsts 100", [], CMDSTATE.RDY],
         ["xp", PERM.AL, "Check your XP.", "", "Group of commands to check xp. See $help icon <subcommand>. Shows your own XP, when used without a subcommand.", "xp", ["@Ts has 100000 XP and is on Level 100"], CMDSTATE.RDY],
             ["xp get", PERM.AL, "Shows someone's XP.", "<Player>", "Shows the XP of somebody.", "xp get mctsts", ["@Ts has 100000 XP and is on Level 100"], CMDSTATE.RDY],
-            ["xp list", PERM.AL, "Shows everyone's XP.", "", "Shows the XP of everybody.", "xp list", [], CMDSTATE.RDY],
+            ["xp list", PERM.AL, "Shows everyone's XP.", "", "Shows the XP of everybody.", "xp list", [], CMDSTATE.RDY, ["leaderboard"]],
             ["xp list_actual", PERM.GM, "Shows everyone's XP.", "", "Shows the XP of everybody, but without modifying the display values.", "xp list_actual", [], CMDSTATE.RDY],
         ["levelup", PERM.GM, "Levels you up.", "<Level>", "Levels you up to a specified level.", "levelup 10", [], CMDSTATE.RDY],
         ["icon", PERM.AL, "Manages your role icon.", "", "Group of commands to manage your role icon. See $help icon <subcommand>", "", [], CMDSTATE.RDY],

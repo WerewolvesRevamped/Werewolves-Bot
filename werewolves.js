@@ -857,6 +857,17 @@ client.on("messageCreate", async message => {
         }
 		cmdXP(message, args);
     break;
+    case "leaderboard":
+        if(!config.coins) {
+            message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
+            return;
+        }
+        if((isParticipant(message.member) || isGhost(message.member)) && ![gp.SIGNUP, gp.POSTGAME, gp.ARCHIVED].includes(stats.gamephase)) {
+            message.channel.send(`⛔ You cannot use this command while ingame.`);
+            break;
+        }
+		cmdXPList(message.channel);
+    break;
     case "coins":
         if(!config.coins && message.author.id != "1047268746277949600" && message.author.id != "1055202099400540222") {
             message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");

@@ -166,32 +166,18 @@ module.exports = function() {
             scPerms.push(getPerms(member, ["history", "read"], []));
             scPerms.push(getPerms(stats.ghost, ["write"], ["read"]));
             
-            // get last sc cat
-            let category = await mainGuild.channels.fetch(cachedSCs[cachedSCs.length - 1]);
-            
             // Create SC channel
-            mainGuild.channels.create({ name: channelName, type: ChannelType.GuildText,  permissionOverwrites: scPerms })
-            .then(async sc => {
-                // Create a default connection with the creator id and index
-                connectionAdd(sc.id, `whisper:${member}-${index}`, "whisper-channel");
-                
-                // assign mentor permissions
-                let mentor = await getMentor(member); 
-                //console.log("WhisperCreate", member, mentor);
-                if(mentor) sc.permissionOverwrites.create(mentor, { ViewChannel: true, SendMessages: false });
-
-                // Move into sc category
-                sc.setParent(category,{ lockPermissions: false }).then(m => {
-                    // Success continue as usual
-                }).catch(async err => { 
-                    // Failure, Create a new SC Cat first
-                    logO(err); 
-                    await createNewSCCat(channel, sc);
-                });	
-                
-                // end of create channel callback
-                res(sc);
-            });
+            let newSC = await createSC(channelName, scPerms);
+            
+            // Create a default connection with the creator id and index
+            connectionAdd(newSC.id, `whisper:${member}-${index}`, "whisper-channel");
+            
+            // assign mentor permissions
+            let mentor = await getMentor(member); 
+            if(mentor) newSC.permissionOverwrites.create(mentor, { ViewChannel: true, SendMessages: false });
+            
+            // end of create channel callback
+            res(newSC);
         });
         
     }

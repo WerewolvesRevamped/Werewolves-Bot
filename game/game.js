@@ -194,6 +194,7 @@ module.exports = function() {
         pauseActionQueueChecker = true;
         // reset cached sc count
         scCatCount = 0;
+        if(debug) getSCCats();
 		// Reset Poll Count
 		sqlSetStat(13, 1, result => {
 			channel.send("✅ Successfully reset poll counter!");

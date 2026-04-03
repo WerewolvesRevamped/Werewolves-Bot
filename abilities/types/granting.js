@@ -245,38 +245,25 @@ module.exports = function() {
             scPerms.push(getPerms(member, ["history", "read"], []));
             scPerms.push(getPerms(stats.ghost, ["write"], ["read"]));
             
-            // get last sc cat
-            let category = await mainGuild.channels.fetch(cachedSCs[cachedSCs.length - 1]);
-            
             // Create SC channel
-            mainGuild.channels.create({ name: channelName, type: ChannelType.GuildText,  permissionOverwrites: scPerms })
-            .then(async sc => {
-                // Create a default connection with the role and creators name
-                connectionAdd(sc.id, `${role}:${src_ref}`);
-                // Send info message for each role
-                let infoEmbed = await getRoleEmbed(role, ["basics","details"], mainGuild);
-                sendEmbed(sc, infoEmbed, true);
-                
-                // assign mentor permissions
-                let mentor = await getMentor(member); 
-                //console.log("GrantCreate", member, mentor);
-                if(mentor) sc.permissionOverwrites.create(mentor, { ViewChannel: true, SendMessages: false });
+            let newSC = await createSC(channelName, scPerms);
 
-                // Move into sc category
-                sc.setParent(category,{ lockPermissions: false }).then(m => {
-                    // Success continue as usual
-                }).catch(async err => { 
-                    // Failure, Create a new SC Cat first
-                    logO(err); 
-                    await createNewSCCat(channel, sc);
-                });	
-                
-                let embed = basicEmbed(`<@${member}> was granted <#${sc.id}>.`, EMBED_GREEN);
-                sc.send(embed);
+            // Create a default connection with the role and creators name
+            connectionAdd(newSC.id, `${role}:${src_ref}`);
+            // Send info message for each role
+            let infoEmbed = await getRoleEmbed(role, ["basics","details"], mainGuild);
+            sendEmbed(newSC, infoEmbed, true);
+            
+            // assign mentor permissions
+            let mentor = await getMentor(member); 
+            //console.log("GrantCreate", member, mentor);
+            if(mentor) newSC.permissionOverwrites.create(mentor, { ViewChannel: true, SendMessages: false });
+            
+            let embed = basicEmbed(`<@${member}> was granted <#${newSC.id}>.`, EMBED_GREEN);
+            newSC.send(embed);
 
-                // end of create channel callback
-                res(sc.id);
-            });
+            // end of create channel callback
+            res(newSC.id);
         });
         
     }

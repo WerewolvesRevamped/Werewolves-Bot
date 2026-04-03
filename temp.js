@@ -90,6 +90,7 @@ module.exports = function() {
                 "guarantors": ["guarant", "gua", "guarantor"],
                 "status": ["st"],
                 "levelup": ["lvlup", "lu"],
+                "leaderboard": ["lb", "ranking", "top"],
         };
         
     this.parseAlias = function(alias) {

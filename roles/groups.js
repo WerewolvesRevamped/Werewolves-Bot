@@ -448,58 +448,45 @@ module.exports = function() {
             let mentor = await getMentor(firstMember); 
             if(mentor) scPerms.push(getPerms(mentor, ["history", "read"], ["write"]));
             
-            // get last sc cat
-            let category = await mainGuild.channels.fetch(cachedSCs[cachedSCs.length - 1]);
-            
             // Create SC channel
-            mainGuild.channels.create({ name: channelName, type: ChannelType.GuildText,  permissionOverwrites: scPerms })
-            .then(async sc => {
-                // Create a default connection with the groups name
-                connectionAdd(sc.id, group);
-                // Send info message for each role
-                let infoEmbed = await getGroupEmbed(group, ["basics","details"], mainGuild);
-                sendEmbed(sc, infoEmbed, true);
+            let newSC = await createSC(channelName, scPerms);
+            
+            // Create a default connection with the groups name
+            connectionAdd(newSC.id, group);
+            // Send info message for each role
+            let infoEmbed = await getGroupEmbed(group, ["basics","details"], mainGuild);
+            sendEmbed(newSC, infoEmbed, true);
+            
+            // announce new group
+            if(firstMember) {
+                let embed = basicEmbed(`<@${firstMember}> has created <#${newSC.id}>.`, EMBED_GREEN);
+                newSC.send(embed);
+            } else {
+                let embed = basicEmbed(`<#${newSC.id}> has been created.`, EMBED_GREEN);
+                newSC.send(embed);
+            }
+            
+            // get attribute data
+            let act = 0;
+            if(stats.haunting) { 
+                let grpData = await (new Promise(res => {
+                     sql("SELECT * FROM groups WHERE name = " + connection.escape(group), result => {
+                         res(result[0]);
+                     });
+                })); 
+                act = grpData.activation;
+            }
 
-                // Move into sc category
-                sc.setParent(category,{ lockPermissions: false }).then(m => {
-                    // Success continue as usual
-                }).catch(async err => { 
-                    // Failure, Create a new SC Cat first
-                    logO(err); 
-                    await createNewSCCat(channel, sc);
-                });	
-                
-                // announce new group
-                if(firstMember) {
-                    let embed = basicEmbed(`<@${firstMember}> has created <#${sc.id}>.`, EMBED_GREEN);
-                    sc.send(embed);
-                } else {
-                    let embed = basicEmbed(`<#${sc.id}> has been created.`, EMBED_GREEN);
-                    sc.send(embed);
-                }
-                
-                // get attribute data
-                let act = 0;
-                if(stats.haunting) { 
-                    let grpData = await (new Promise(res => {
-                         sql("SELECT * FROM groups WHERE name = " + connection.escape(group), result => {
-                             res(result[0]);
-                         });
-                    })); 
-                    act = grpData.activation;
-                }
-
-				let opened = 1;
-				if(!firstMember) opened = 0;
-                // save group in DB
-                await sqlProm("INSERT INTO active_groups (name, channel_id, activation, opened) VALUES (" + connection.escape(group) + "," + connection.escape(sc.id) + "," + connection.escape(act) + "," + connection.escape(opened) +  ")");
-                
-                // run group starting trigger
-                await triggerGroup(sc.id, "Starting");
-                
-                // end of create channel callback
-                res();
-            });
+            let opened = 1;
+            if(!firstMember) opened = 0;
+            // save group in DB
+            await sqlProm("INSERT INTO active_groups (name, channel_id, activation, opened) VALUES (" + connection.escape(group) + "," + connection.escape(newSC.id) + "," + connection.escape(act) + "," + connection.escape(opened) +  ")");
+            
+            // run group starting trigger
+            await triggerGroup(newSC.id, "Starting");
+            
+            // end of create channel callback
+            res();
         });
         
     }

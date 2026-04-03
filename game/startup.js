@@ -217,21 +217,20 @@ module.exports = function() {
     creates the personal secret channels for every player
     */
 	this.createSCs = async function(channel, debug) {
-		let firstCategory = await createNewSCCat(channel); // create a sc cat
-        createSCs_Start(channel, firstCategory, debug); // start creating scs
+		await createNewSCCat(channel); // create a sc cat
+        createSCs_Start(channel, debug); // start creating scs
 	}
     
 	/**
     Create Secret Channels - Start
     This loads all the role info for each player and then starts creating the SCs
     **/
-	function createSCs_Start(channel, category, debug) {
+	function createSCs_Start(channel, debug) {
         // IMPORTANT: changing this query requires also changing a call from "createOneSC" which mirrors this query
 		sql("SELECT id,role,mentor FROM players ORDER BY alignment,role ASC", async result => {
-            let nextCategory = category;
             // iterate through players
             for(let player in result) {
-                nextCategory = await createSCs_One(channel, category, result[player], debug); // create SCs for every player
+                await createSCs_One(channel, result[player], debug); // create SCs for every player
             }
             // finished
 			channel.send("✅ Finished creating INDSCs!");
@@ -241,15 +240,14 @@ module.exports = function() {
 	}
     
     this.createOneSC = async function(channel, pid, role) {
-        let lastCat = cachedSCs[cachedSCs.length - 1];
-       return await createSCs_One(channel, lastCat, { id: pid, role: role, mentor: null }, true);
+       return await createSCs_One(channel, { id: pid, role: role, mentor: null }, true);
     }
     
     /**
     Create Secret Channels - Create One
     Creates a single secret channel
     **/
-	 async function createSCs_One(channel, category, player, debug) {
+	 async function createSCs_One(channel, player, debug) {
         return new Promise(res => {
             sql("SELECT * FROM roles WHERE name=" + connection.escape(player.role), async result => {	
                 var rolesName = result[0].display_name;
@@ -304,44 +302,54 @@ module.exports = function() {
                 
                 if(channelName.length > 100 || channelName.length <= 0) channelName = "invalid";
 
-                // Create SC channel
-                channel.guild.channels.create({ name: channelName, type: ChannelType.GuildText,  permissionOverwrites: scPerms })
-                .then(async sc => {
-                    // Create a default connection with the player's ID
-                    cmdConnectionAdd(sc, ["", player.id], true);
-                    // Send info message for each role
-                    cmdInfo(sc, player.id, [ rolesNameBot ], true, false, false, modEmbedFields.length > 0 ? rolesName : false, modEmbedFields);
-                    
-                    // send card
-                    if (config.cards) {
-                        setTimeout(() => {
-                            cmdGetCard(sc, rolesNameBot);
-                        }, 5000);
-                    }
-
-                    // Move into sc category
-                    sc.setParent(category,{ lockPermissions: false }).then(m => {
-                        // Success continue as usual
-                        res(category);
-                    }).catch(async err => { 
-                        // Failure, Create a new SC Cat first
-                        logO(err); 
-                        sendError(channel, err, "Could not set category. Creating new SC category");
-                        let newCategory = await createNewSCCat(channel, sc);
-                        res(newCategory);
-                    });	
-                }).catch(err => { 
-                    // Couldn't create channel
-                    logO(err); 
-                    sendError(channel, err, "Could not create channel");
-                });
+                // create SC
+                let newSC = await createSC(channelName, scPerms);
+                cmdConnectionAdd(newSC, ["", player.id], true);
+                cmdInfo(newSC, player.id, [ rolesNameBot ], true, false, false, modEmbedFields.length > 0 ? rolesName : false, modEmbedFields);
                 
+                // send card
+                if(config.cards) {
+                    setTimeout(() => {
+                        cmdGetCard(newSC, rolesNameBot);
+                    }, 5000);
+                }
+                
+                // resolve promise
+                res();
             }, () => {
                 // Couldn't get role info
                 channel.send("⛔ Database error. Could not get role info!");
             });
         });
 	}
+    
+    /**
+    Create SC
+    Creates a new SC with a specific name and permissions and creates a new sc cat if applicable
+    **/
+    this.createSC = async function(channelName, scPerms) {
+        return new Promise(res => {
+            mainGuild.channels.create({ name: channelName, type: ChannelType.GuildText,  permissionOverwrites: scPerms })
+            .then(async sc => {
+                // Move into sc category
+                let lastCat = cachedSCs[cachedSCs.length - 1];
+                sc.setParent(lastCat, { lockPermissions: false }).then(m => {
+                    // Success continue as usual
+                    res(sc);
+                }).catch(async err => { 
+                    // Failure, Create a new SC Cat first
+                    logO(err); 
+                    //sendError(backupChannel, err, "Could not set category. Creating new SC category");
+                    let newCategory = await createNewSCCat(backupChannel, sc);
+                    res(sc);
+                });	
+            }).catch(err => { 
+                // Couldn't create channel
+                logO(err); 
+                sendError(backupChannel, err, "Could not create channel");
+            });
+        });
+    }
     
 
     /**
@@ -386,6 +394,7 @@ module.exports = function() {
 	 function createNewSCCat(channel, childChannel = false) {
          return new Promise(res => {
             // increment the SC count to determine the new sc name
+            console.log(scCatCount);
             scCatCount++;
             let scName = "🕵 " + toTitleCase(stats.game) + " Secret Channels";
             // only append a number for SC cats >1
@@ -393,17 +402,17 @@ module.exports = function() {
             // create a new sc cat
             channel.guild.channels.create({ name: scName, type: ChannelType.GuildCategory,  permissionOverwrites: getSCCatPerms(channel.guild) })
             .then(cc => {
-                sql("INSERT INTO sc_cats (id) VALUES (" + connection.escape(cc.id) + ")", result => {	
+                sql("INSERT INTO sc_cats (id) VALUES (" + connection.escape(cc.id) + ")", async result => {	
                     if(childChannel) { // sets the new category as a channel parent - for the first channel that failed to fit in the previous category
                         childChannel.setParent(cc, { lockPermissions: false }).catch(err => { 
                             logO(err); 
                             sendError(channel, err, "Could not assign parent to SC!");
                         });
                     }
+                    // cache the current sc categories
+                    await getSCCats();
                     // continue with a specified callback
                     res(cc);
-                    // cache the current sc categories
-                    getSCCats();
                 }, () => {
                     channel.send("⛔ Database error. Unable to save SC category!"); 
                 });
