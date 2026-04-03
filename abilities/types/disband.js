@@ -58,7 +58,7 @@ module.exports = function() {
             sql("SELECT * FROM active_groups WHERE disbanded=1 AND name=" + connection.escape(group) + " OR channel_id=" + connection.escape(id), async result => {
                 let groupChannel = await mainGuild.channels.fetch(result[0].channel_id);
                 // send reopen message
-                let embed = basicEmbed(`<#${groupChannel.id}> has been reopend.`, EMBED_GREEN);
+                let embed = basicEmbed(`<#${groupChannel.id}> has been reopened.`, EMBED_GREEN);
                 groupChannel.send(embed);
                 // reopen active group
                 await sqlPromEsc("UPDATE active_groups SET disbanded=0 WHERE ai_id=", result[0].ai_id);
