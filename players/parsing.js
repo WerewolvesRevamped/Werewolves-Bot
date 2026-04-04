@@ -101,7 +101,7 @@ module.exports = function() {
                 // close match found?
                 if(bestMatch.value <= ~~(nameExtracted.length/2)) { 
                     playerList.push({ val: bestMatch.value, name: bestMatch.name });
-                    return true;
+                    return false;
                 }   
             }
             return quoted ? false : true; // no (close) match found
