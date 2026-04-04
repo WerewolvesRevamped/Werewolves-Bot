@@ -550,6 +550,10 @@ module.exports = function() {
         const roleContents = await queryFile(path, name, baseurl); // get the role contents
         const roleDescs = splitRoleDescSections(roleContents); // split the role descriptions, into the different types of role description
         const roleName = getRoleDescName(roleContents); // grabs the role name inbetween the **'s in the first line
+        if(roleName === "No Name") {
+            console.log("No Name Role", path, name);
+            return null;
+        }
         const fullCategory = getFullCategory(roleContents); // grab the other part of the first line, which contains class, category and team
         var roleType = roleContents.match(/^.* \| .* \| (.*)\n/); // gets role type
         roleType = (roleType && roleType[1]) ? roleType[1].toLowerCase() : "default"; // if no role type is specified, set it to "Default"
