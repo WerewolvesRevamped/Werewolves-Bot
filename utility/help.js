@@ -173,7 +173,7 @@ module.exports = function() {
             ["players log3", PERM.GM, "Returns player info in a specific format for log.", "", "Lists all players with their role sorted by alive status. Can be used as a base for the final results message.", "", [], CMDSTATE.RDY],
             ["players votes", PERM.GM, "Returns the amount of votes each player has.", "", "Lists all players with and their votes if they are affected by vote manipulation.", "", [], CMDSTATE.UNK],
             ["players messages", PERM.GM, "Returns the amount of messages each player has sent.", "", "Lists all players and their public and private message count.", "", [], CMDSTATE.RDY, ["players msgs"]],
-            ["players messages2", PERM.GM, "Calculates inactivity based on phase input and message count.", "<Phase>", "Lists all alive players and their public and private message count.", "", [], CMDSTATE.RDY, ["players msgs2"]],
+            ["players messages2", PERM.GM, "Calculates inactivity based on phase input and message count.", "<Phase>", "Lists all alive players and their public and private message count and calculates their inactivity based on a <Phase> input.", "", [], CMDSTATE.RDY, ["players msgs2"]],
             // Role
         ["roll", PERM.AL, "Randomizes", "<Subcommand>", "Commands to randomize a list of players. $help roll <sub-command> for detailed help.\n\nIf used without a subcommand randomizes from the full player list.", "roll", ["️ Selected @McTsts (🛠)"], CMDSTATE.RDY],
             ["roll ghost", PERM.AL, "Randomizes a ghost.", "", "Randomizes from the full ghostly player list.", "roll ghost", ["️ Selected @McTsts (🛠)"], CMDSTATE.RDY, ["roll g"]],

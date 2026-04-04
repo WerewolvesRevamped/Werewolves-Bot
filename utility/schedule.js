@@ -161,12 +161,15 @@ module.exports = function() {
                             case "late":
                                 await setSubphase(SUBPHASE.LATE);
                                 await executeDelayedQueuedAction();
-                                break;
+                            break;
                             case "switch":
                                 await setSubphase(SUBPHASE.LOCKED);
                                 await sleep(60 * 1000);
                                 await cmdPhaseNext();
-                                break;
+                                
+                                let botSpamChannel = mainGuild.channels.cache.find(channel => channel.name === "bot-spam");
+                                cmdPlayersListMsgs2(botSpamChannel, [ "", getPhaseAsNumber() ]);
+                            break;
                         }
                     } catch (e) {
                         console.log(e)
