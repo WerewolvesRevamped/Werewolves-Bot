@@ -4,9 +4,43 @@
  * @param {any} value The value to set the option too
  * @param {BotStatData} stat The stat to update
  */
-function cmdOptionsSet (channel, value, stat) {
-    // Set value
-    if(value.match(/^(\d+\+?)+$/)) value = value.split("+").filter(el => el).reduce((a,b) => (+a)+(+b), 0)
+async function cmdOptionsSet (channel, value, stat) {
+    
+    // validate value
+    switch(stat.type) {
+        case "number":
+            // Set value
+            if(value.match(/^(\d+\+?)+$/)) value = value.split("+").filter(el => el).reduce((a,b) => (+a)+(+b), 0);
+            if(+value != value) {
+                channel.send("⛔ Syntax error. This stat must be specified as a number!");
+                return;
+            }
+        break;
+        case "roleID":
+            await channel.guild.roles.fetch();
+            const role = channel.guild.roles.cache.get(value.trim());
+            console.log(value, role);
+            console.log("ALL ROLE IDS:", channel.guild.roles.cache.map(r => r.id));
+            if(!role) {
+                channel.send("⛔ Syntax error. This stat must be specified as an id for a valid discord role!");
+                return;
+            }
+        break;
+        case "emojiID":
+            let emoji = client.emojis.cache.get(value.trim())
+            if(!emoji) {
+                channel.send("⛔ Syntax error. This stat must be specified as an id for a valid emoji!");
+                return;
+            }
+        break;
+        case "boolean":
+            if(value != "true" && value != "false") {
+                channel.send("⛔ Syntax error. This stat must be specified as a boolean!");
+                return;
+            }
+        break;
+    }
+    
     sqlSetStat(stat, value, result => {
         channel.send("✅ Successfully updated *" + stat.name + "* ("+stat.id+") to `" + value + "`!");
         loadStats();
