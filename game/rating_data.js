@@ -21,7 +21,10 @@ module.exports = function() {
         let eventData = await sqlProm("SELECT * FROM events");
         
         // empty game
-        let gameData = { players: [], teamResults: {}, gameStart: "", hosts: [], phases: 0 };
+        let gameData = { id: "", players: [], teamResults: {}, gameStart: "", hosts: [], phases: 0 };
+        
+        // set game name
+        gameData.id = stats.game;
         
         // get hosts
         let hosts = [];
@@ -53,7 +56,10 @@ module.exports = function() {
         let allPlayers = await sqlProm("SELECT * FROM players");
         for(let i = 0; i < allPlayers.length; i++) {
             if(!["player","substituted"].includes(allPlayers[i].type)) continue;
-            let playerData = { username: "", displayName: "", roles: [], messages: 0, publicIA: false, inactive: false };
+            let playerData = { id: "", username: "", displayName: "", roles: [], messages: 0, publicIA: false, inactive: false };
+            
+            // set id
+            playerData.id = allPlayers[i].id;
             
             // get username and displayname
             let member = mainGuild.members.cache.get(allPlayers[i].id);
