@@ -160,6 +160,9 @@ module.exports = function() {
             let roleData = await getRoleDataFromName(parsedRole);
             await triggerTeam(roleData.team, "On Join", { joiner: targets[i] }, true);
             
+            // create role change event
+            await createEvent(targets[i], "role", role, roleData.team);
+            
             // passive
             await triggerHandler("Passive");
             
@@ -204,6 +207,9 @@ module.exports = function() {
             
             // update player alignment
             await setPlayerAlignment(targets[i], alignment);
+            
+            // create alignment change event
+            await createEvent(targets[i], "alignment", alignment);
             
             // alignment change info embed
             await abilitySendProm(`player:${targets[i]}`, `Your alignment has changed to \`${toTitleCase(alignment)}\`!`, EMBED_PURPLE, true, false, img, "Alignment Change");

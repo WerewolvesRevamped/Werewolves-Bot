@@ -152,6 +152,8 @@ module.exports = function() {
         createLocations();
 		// Set Gamephase
 		cmdGamephaseSet(channel, ["set", gp.INGAME]);
+        // create game_start event
+        await createEvent("0", "game_start", + new Date(), "", "-1");
 		// Cache emojis
 		getEmojis();	
 		getCCs();
@@ -260,6 +262,9 @@ module.exports = function() {
                     roleData = idRole;
                 }
                 let disName = channel.guild.members.cache.get(player.id).displayName; // get the player's display name
+                
+                // create role event
+                await createEvent(player.id, "role", player.role, result[0].team, "-1");
                 
                 // check for modifiers
                 let modifiers = await sqlPromEsc("SELECT * FROM modifiers WHERE id=", player.id);

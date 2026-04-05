@@ -22,12 +22,15 @@ require("./host_information.js")();
 require("./modifiers.js")();
 require("./displays.js")();
 require("./transition.js")();
+require("./rating_data.js")();
 
 module.exports = function() {
     
 	
 	this.cmdEnd = function(channel) {
 		gameEnd();
+        // create game_outcome event
+        createEvent("0", "game_outcome", "end");
         channel.send("✅ Game has been ended.");
 	}
     
@@ -36,6 +39,8 @@ module.exports = function() {
         await triggerHandler("On End"); 
         // end game
 		gameEnd();
+        // create game_outcome event
+        await createEvent("0", "game_outcome", "tie");
         // set winners
         await sqlProm("UPDATE players SET final_result=1 WHERE alive=1 AND type='player'");
         // end message
@@ -180,6 +185,8 @@ module.exports = function() {
         choicesReset();
         // reset kill queue
         killqClear();
+        // clear rating events
+        clearEvents();
         // reset teams
         resetTeams();
         // reset displays

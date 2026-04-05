@@ -30,6 +30,8 @@ module.exports = function() {
         await triggerHandler("On End"); 
         // end game
         await gameEnd();
+        // create game_outcome event
+        await createEvent("0", "game_outcome", "win");
         // end message
         await endMessage();
         

@@ -176,6 +176,8 @@ module.exports = function() {
                 abilityLog(`❇️ **Team Victory:** Team ${activeTeams[i].display_name} has won.`);
                 actionLog(`👑 Team ${activeTeams[i].display_name} has won.`);
                 await bufferStorytime(`Team ${activeTeams[i].display_name} has won!`);
+                // create victory event
+                await createEvent("0", "victory", activeTeams[i].name);
                 // set all team members as winners
                 await sqlPromEsc("UPDATE players SET final_result=1 WHERE alignment=", activeTeams[i].name);
             }
@@ -186,6 +188,8 @@ module.exports = function() {
             await triggerHandler("On End"); 
             // end game
             await gameEnd();
+            // create game_outcome event
+            await createEvent("0", "game_outcome", "default");
             // end message
             await endMessage();
         }

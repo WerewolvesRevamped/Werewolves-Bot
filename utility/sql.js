@@ -99,6 +99,7 @@ module.exports = function() {
 		sqlQuery("CREATE TABLE IF NOT EXISTS `theme` ( `ai_id` int(11) NOT NULL AUTO_INCREMENT, `theme` text NOT NULL, `original` text NOT NULL, `new` text NOT NULL, PRIMARY KEY (`ai_id`))")
 		sqlQuery("CREATE TABLE IF NOT EXISTS `curses` ( `ai_id` int(11) NOT NULL AUTO_INCREMENT, `owner` text NOT NULL, `type` text NOT NULL, `target` text NOT NULL, `data` text NOT NULL, `time` text NOT NULL, PRIMARY KEY (`ai_id`))")
         sqlQuery("CREATE TABLE IF NOT EXISTS `reservations` ( `player` bigint(64) NOT NULL, `emoji` text NOT NULL, PRIMARY KEY (`player`))")
+        sqlQuery("CREATE TABLE IF NOT EXISTS `events` ( `ai_id` int(11) NOT NULL AUTO_INCREMENT,  `id` bigint(64) NOT NULL, `type` text NOT NULL, `data1` text NOT NULL, `data2` text NOT NULL,  `phase` int(11) NOT NULL, PRIMARY KEY (`ai_id`))")
 	}
 
 	/**
