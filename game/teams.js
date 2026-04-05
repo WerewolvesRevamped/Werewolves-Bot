@@ -142,6 +142,7 @@ module.exports = function() {
             await sqlPromEsc("UPDATE teams SET active=1 WHERE name=", toBeActivated[i].name);
             abilityLog(`❇️ **Team Created:** Team ${toBeActivated[i].display_name} was created.`);
             actionLog(`❇️ Team ${toBeActivated[i].display_name} was created.`);
+            await createEvent("0", "team", toBeActivated[i].name);
         }
         
         // teams that have lost

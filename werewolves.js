@@ -1005,6 +1005,9 @@ client.on("messageCreate", async message => {
     case "status":
         if(checkGM(message)) cmdStatus(message, args, argsX);
     break;
+    case "export":
+        if(checkGM(message)) cmdExport(message.channel);
+    break;
 	/* Invalid Command */
 	default:
 		message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
