@@ -54,6 +54,9 @@ client.on("clientReady", async () => {
 	await sqlSetup(); //ensure sql is loaded before anything else
 	// loadStats(); Loaded in sql setup
     
+    // create missing stats
+    await generateStats();
+    
     createActionQueueChecker();
     createScheduleChecker();
     createCurseProcessor();

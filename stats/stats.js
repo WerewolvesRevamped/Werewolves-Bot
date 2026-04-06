@@ -4,6 +4,7 @@ A store of all the available stats
 require("./loader.js")()
 require("./commands.js")()
 require("./updater.js")()
+require("./setup.js")()
 
 
 module.exports = function() {
@@ -18,12 +19,12 @@ module.exports = function() {
     this.availableStats = [
         {id: 1, name: "Gamephase", type: "number", cmd: "null", default: 0, property: "gamephase" },
         {id: 2, name: "CMD Prefix", type: "string", cmd: "prefix", default: "$", property: "prefix", desc: "The prefix the bot uses for commands" },
-        {id: 3, name: "Participant Role Id", type: "roleID", cmd: "participant", property: "participant", desc: "The id of the participant role", adminOnly: true},
-        {id: 4, name: "Game Master Role Id", type: "roleID", cmd: "gamemaster", property: "gamemaster", desc: "The id of the gamemaster role", adminOnly: true},
-        {id: 5, name: "Spectator Role Id", type: "roleID", cmd: "spectator", property: "spectator", desc: "The id of the spectator role", adminOnly: true},
-        {id: 6, name: "Signed-Up Role Id", type: "roleID", cmd: "signed_up", property: "signed_up", desc: "The id of the signed up role", adminOnly: true},
-        {id: 7, name: "Dead Participant Role Id", type: "roleID", cmd: "dead_participant", property: "dead_participant", desc: "The id of the dead participant role", adminOnly: true},
-        {id: 8, name: "Bot Role", type: "roleID", cmd: "bot", property: "bot", desc: "The id of the bot role", adminOnly: true},
+        {id: 3, name: "Participant Role Id", type: "roleID", cmd: "participant", property: "participant", desc: "The id of the participant role", adminOnly: true, autoGenerate: "Participant"},
+        {id: 4, name: "Game Master Role Id", type: "roleID", cmd: "gamemaster", property: "gamemaster", desc: "The id of the gamemaster role", adminOnly: true, autoGenerate: "Game Master"},
+        {id: 5, name: "Spectator Role Id", type: "roleID", cmd: "spectator", property: "spectator", desc: "The id of the spectator role", adminOnly: true, autoGenerate: "Spectator"},
+        {id: 6, name: "Signed-Up Role Id", type: "roleID", cmd: "signed_up", property: "signed_up", desc: "The id of the signed up role", adminOnly: true, autoGenerate: "Signed-up"},
+        {id: 7, name: "Dead Participant Role Id", type: "roleID", cmd: "dead_participant", property: "dead_participant", desc: "The id of the dead participant role", adminOnly: true, autoGenerate: "Dead Participant"},
+        {id: 8, name: "Bot Role", type: "roleID", cmd: "bot", property: "bot", desc: "The id of the bot role", adminOnly: true, autoGenerate: "Bot"},
         {id: 9, name: "CCs", type: "string" },
         {id: 10, name: "Last CC Cat", type: "string" },
         {id: 11, name: "Log Guild", type: "string", cmd: "log_guild", desc: "The id of the guild to use for logs" }, //Loaded manually not by automation
@@ -36,44 +37,44 @@ module.exports = function() {
         // {id: 18, name: "Guardian Role Id", type: "roleID", cmd: "guardian", property: "guardian" }, //DEPRECATED
         {id: 19, name: "Game Name", type: "string", cmd: "game", property: "game", desc: "The name of the game" },
         // {id: 20, name: "Reporter Channel", type: "string", desc: "" }, //DEPRECATED
-        {id: 21, name: "GM Ingame Role", type: "roleID", cmd: "gamemaster_ingame", property: "gamemaster_ingame", desc: "The id of the gamemaster ingame role", adminOnly: true},
-        {id: 22, name: "Admin Role", type: "roleID", cmd: "admin", property: "admin", desc: "The id of the admin role", adminOnly: true},
-        {id: 23, name: "Admin Ingame Role", type: "roleID", cmd: "admin_ingame", property: "admin_ingame", desc: "The id of the admin ingame role", adminOnly: true},
+        {id: 21, name: "GM Ingame Role", type: "roleID", cmd: "gamemaster_ingame", property: "gamemaster_ingame", desc: "The id of the gamemaster ingame role", adminOnly: true, autoGenerate: "GM Ingame"},
+        {id: 22, name: "Admin Role", type: "roleID", cmd: "admin", property: "admin", desc: "The id of the admin role", adminOnly: true, autoGenerate: "Administrator"},
+        {id: 23, name: "Admin Ingame Role", type: "roleID", cmd: "admin_ingame", property: "admin_ingame", desc: "The id of the admin ingame role", adminOnly: true, autoGenerate: "Admin Ingame"},
         {id: 24, name: "Yes Emoji ID", type: "emojiID", cmd: "yes_emoji", property: "yes_emoji", desc: "The id of the yes emoji" },
         {id: 25, name: "No Emoji ID", type: "emojiID", cmd: "no_emoji", property: "no_emoji", desc: "The id of the no emoji" },
-        {id: 26, name: "New Game Ping Role", type: "roleID", cmd: "new_game_ping", property: "new_game_ping", desc: "Role that gets pinged with certain commands" , adminOnly: true},
+        {id: 26, name: "New Game Ping Role", type: "roleID", cmd: "new_game_ping", property: "new_game_ping", desc: "Role that gets pinged with certain commands" , adminOnly: true, autoGenerate: "New Game Ping"},
         {id: 27, name: "Game Status VC", type: "string", cmd: "game_status", property: "game_status", desc: "A VC that shows the status of the game" },
         {id: 28, name: "CC Limit", type: "number", cmd: "cc_limit", property: "cc_limit", desc: "Maximum amount of ccs one person can create (<-10 for none)" },
         {id: 29, name: "Current Theme", type: "string", cmd: "theme", property: "theme", desc: "The current theme" },
         // {id: 30, name: "Mayor 2", cmd: "mayor2", property: "mayor2"}, //DEPRECATED
         // {id: 31, name: "Poll Mode", type: "number", cmd: "poll", default: 0, property: "poll", desc: "" }, //DEPRECATED
-        {id: 32, name: "Substitute Role", type: "roleID", cmd: "sub", property: "sub", desc: "Role for substitute players", adminOnly: true},
+        {id: 32, name: "Substitute Role", type: "roleID", cmd: "sub", property: "sub", desc: "Role for substitute players", adminOnly: true, autoGenerate: "Substitute"},
         {id: 33, name: "Link Ping", type: "string", cmd: "ping", property: "ping", desc: "Ping for gifs and deleted messages" },
-        {id: 34, name: "Host Role", type: "roleID", cmd: "host", property: "host", desc: "The id of the host role", adminOnly: true},
+        {id: 34, name: "Host Role", type: "roleID", cmd: "host", property: "host", desc: "The id of the host role", adminOnly: true, autoGenerate: "Host"},
         {id: 35, name: "Fancy Mode", type: "boolean", cmd: "fancy_mode", default: false, property: "fancy_mode", desc: "Changes info messages to fancy versions if set to true" },
         {id: 36, name: "Icon Version", type: "number", cmd: "icon", default: 0, property: "icon_version", desc: "The version to use for icon images" },
-        {id: 37, name: "Senior GM Role", type: "string", cmd: "senior_gamemaster", property: "senior_gamemaster", desc: "The id of the senior gm role", adminOnly: true},
-        {id: 38, name: "Senior GM Ingame Role", type: "string", cmd: "senior_gamemaster_ingame", property: "senior_gamemaster_ingame", desc: "The id of the senior gm ingame role", adminOnly: true},
+        {id: 37, name: "Senior GM Role", type: "string", cmd: "senior_gamemaster", property: "senior_gamemaster", desc: "The id of the senior gm role", adminOnly: true, autoGenerate: "Senior GM"},
+        {id: 38, name: "Senior GM Ingame Role", type: "string", cmd: "senior_gamemaster_ingame", property: "senior_gamemaster_ingame", desc: "The id of the senior gm ingame role", adminOnly: true, autoGenerate: "SGM Ingame"},
         {id: 39, name: "Role Filter", type: "number", cmd: "role_filter", default: 0, property: "role_filter", desc: "The role filter. See $help options role_filter" },
-        {id: 40, name: "Helper Role", type: "roleID", cmd: "helper", property: "helper", desc: "The id of the helper role", adminOnly: true},
-        {id: 41, name: "Helper Ingame Role", type: "roleID", cmd: "helper_ingame", property: "helper_ingame", desc: "The id of the helper ingame role", adminOnly: true},
+        {id: 40, name: "Helper Role", type: "roleID", cmd: "helper", property: "helper", desc: "The id of the helper role", adminOnly: true, autoGenerate: "Helper"},
+        {id: 41, name: "Helper Ingame Role", type: "roleID", cmd: "helper_ingame", property: "helper_ingame", desc: "The id of the helper ingame role", adminOnly: true, autoGenerate: "Helper Ingame"},
         // {id: 42, name: "Mayor Threshold", type: "number", cmd: "mayor_threshold", default: 15, property: "mayor_threshold"}, //DEPRECATED
         {id: 43, name: "Host Log", type: "string", cmd: "host_log", property: "host_log", desc: "Logs host pings. Disabled if false" },
         {id: 44, name: "Automation Level", type: "number", cmd: "automation_level", property: "automation_level", desc: "Level of automation" },
-        {id: 45, name: "Ghost Role", type: "roleID", cmd: "ghost", property: "ghost", desc: "Ghost role id", adminOnly: true},
+        {id: 45, name: "Ghost Role", type: "roleID", cmd: "ghost", property: "ghost", desc: "Ghost role id", adminOnly: true, autoGenerate: "Ghost"},
         {id: 46, name: "Haunting Mode", type: "boolean", cmd: "haunting", property: "haunting", desc: "true/false for if haunting is enabled", default: false},
         {id: 47, name: "Phase", type: "string", cmd: "phase", property: "phase", desc: "Current phase" },
         {id: 48, name: "Subphase", type: "number", cmd: "subphase", property: "subphase", desc: "Current subphase" },
         {id: 49, name: "Reward Log", type: "string", cmd: "reward_log", default: null, property: "reward_log", desc: "Channel id for reward log" },
-        {id: 50, name: "Mentor Role", type: "roleID", cmd: "mentor", property: "mentor", desc: "Role id for mentor", adminOnly: true},
-        {id: 51, name: "Signed-Up Sub Role", type: "roleID", cmd: "signedsub", property: "signedsub", desc: "Role id for signed-sub", adminOnly: true},
+        {id: 50, name: "Mentor Role", type: "roleID", cmd: "mentor", property: "mentor", desc: "Role id for mentor", adminOnly: true, autoGenerate: "Mentor"},
+        {id: 51, name: "Signed-Up Sub Role", type: "roleID", cmd: "signedsub", property: "signedsub", desc: "Role id for signed-sub", adminOnly: true, autoGenerate: "Signed-sub"},
         {id: 52, name: "Phase Automation Info", type: "special", cmd: "phaseautoinfo", desc: "Phase timing information for automation" },  //Loaded manually not by automation
         {id: 53, name: "D0 Time", type: "number", property: "d0_time" },
-        {id: 54, name: "Ghostly Mentor Role", type: "roleID", cmd: "ghost_mentor", property: "ghost_mentor", desc: "Role id for ghost mentor", adminOnly: true},
+        {id: 54, name: "Ghostly Mentor Role", type: "roleID", cmd: "ghost_mentor", property: "ghost_mentor", desc: "Role id for ghost mentor", adminOnly: true, autoGenerate: "Ghostly Mentor"},
         {id: 55, name: "DB Version", type: "number", cmd: "db_version", property: "db_version", desc: "Database version", default: 0 },
         {id: 56, name: "Forced Pack", type: "number", cmd: "forced_pack", property: "forced_pack", desc: "Skinpack that everyone uses. 0 to disable", default: 0 },
-        {id: 57, name: "Signed-Up Mentor Role", type: "roleID", cmd: "signedmentor", property: "signedmentor", desc: "Role id for signed-up mentor", adminOnly: true},
-        {id: 58, name: "Mentor Program Role", type: "roleID", cmd: "mentor_program", property: "mentor_program", desc: "Role id for mentor program", adminOnly: true},
+        {id: 57, name: "Signed-Up Mentor Role", type: "roleID", cmd: "signedmentor", property: "signedmentor", desc: "Role id for signed-up mentor", adminOnly: true, autoGenerate: "Signed-mentor"},
+        {id: 58, name: "Mentor Program Role", type: "roleID", cmd: "mentor_program", property: "mentor_program", desc: "Role id for mentor program", adminOnly: true, autoGenerate: "Mentor Program"},
     ]
 
     /**
