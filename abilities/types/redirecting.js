@@ -24,7 +24,7 @@ module.exports = function() {
             return { msg: "Redirecting failed! " + abilityError, success: false };
         }
         // select subtype
-        result = await redirecting(src_name, src_ref, ability.target, ability.source, ability.subtype, duration);
+        result = await redirecting(src_name, src_ref, ability.target, ability.source, ability.subtype, duration, additionalTriggerData);
         return result;
 
     }
@@ -33,7 +33,13 @@ module.exports = function() {
     Ability: Redirecting
     adds a redirection attribute
     **/
-    this.redirecting = async function(src_name, src_ref, target, source, type, duration) {
+    this.redirecting = async function(src_name, src_ref, target, source, type, duration, additionalTriggerData) {
+        // handle visit
+        if(additionalTriggerData.parameters.visitless !== true) {
+            let result = await visit(src_ref, target, type, source, "redirecting");
+            if(result) return visitReturn(result, "Redirecting failed!", "Redirecting succeeded!");
+        }
+        
         await createRedirectionAttribute(src_name, src_ref, srcToValue(src_ref), duration, target, source, type);
         abilityLog(`✅ <@${srcToValue(src_ref)}> now has a redirection for \`${type}\` to \`${target}\` affecting \`${source}\` for \`${getDurationName(duration)}\`.`);
         return { msg: "Redirecting succeeded!", success: true, target: `player:${target}` };

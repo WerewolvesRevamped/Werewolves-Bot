@@ -20,6 +20,14 @@ module.exports = function() {
         for(let i = 0; i < targets.value.length; i++) {
             switch(targets.type) {
                 case "player":
+                    // handle visit
+                    if(additionalTriggerData.parameters.visitless !== true) {
+                        let result = await visit(src_ref, targets[i], NO_VISIT_PARAM, NO_SND_VISIT_PARAM, "resurrecting");
+                        if(result) {
+                            if(targets.length === 1) return visitReturn(result, "Resurrecting failed!", "Resurrecting succeeded!");
+                            continue;
+                        }
+                    }
                     // Resurrect
                     await resurrectPlayer(targets.value[i]);
                     await clearRoleAttributes(targets.value[i]);

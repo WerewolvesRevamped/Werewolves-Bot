@@ -40,6 +40,12 @@ module.exports = function() {
         
         abilityLog(`🔁 ${srcRefToText(src_ref)} copied ${srcRefToText(targets.type + ":" + targets.value[0])}.`);
         
+        // handle visit
+        if(additionalTriggerData.parameters.visitless !== true) {
+            let result = await visit(src_ref, targets.value[0], NO_VISIT_PARAM, NO_SND_VISIT_PARAM, "copying");
+            if(result) return visitReturn(result, "Copying failed!", "Copying succeeded!");
+        }
+        
         // return
         return { msg: "Copying succeeded!", success: true };
     }
