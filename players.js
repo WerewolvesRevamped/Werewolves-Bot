@@ -17,8 +17,8 @@ module.exports = function() {
 	/* Handle players command */
 	this.cmdPlayers = function(message, args) {
 		// Check subcommands
-		if(!args[0] || (!args[1] && ["list","log","log2","log3","log4", "log5", "log6", "msgs","messages","votes","roles","rl","list_alive"].indexOf(args[0]) == -1)) { 
-			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `players [get|get_clean|set|resurrect|signup|list|msgs|msgs2|log|log2|log3|log4|log5|log6|votes|rl]`!"); 
+		if(!args[0] || (!args[1] && ["list","log","log2","log3","log4", "log5", "log6", "msgs","messages","votes","roles","rl","list_alive","mentor","signup_mentor","signup_unmentor"].indexOf(args[0]) == -1)) { 
+			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `players [get|get_clean|set|resurrect|signup|list|msgs|msgs2|log|log2|log3|log4|log5|log6|votes|rl|mentor|signup_mentor|signup_unmentor]`!"); 
 			return; 
 		}
 		//Find subcommand
@@ -30,6 +30,8 @@ module.exports = function() {
 			case "signup": cmdPlayersSignup(message.channel, args); break;
 			case "signsub": 
 			case "signup_sub": cmdPlayersSignupSubstitute(message.channel, args); break;
+			case "signup_mentor": cmdPlayersSignupMentor(message.channel, args); break;
+			case "signup_unmentor": cmdPlayersSignupUnmentor(message.channel, args); break;
 			case "sub": 
 			case "substitute": cmdPlayersSubstitute(message, args); break;
 			case "switch": cmdPlayersSwitch(message, args); break;
@@ -48,6 +50,7 @@ module.exports = function() {
 			case "msgs": cmdPlayersListMsgs(message.channel); break;
 			case "messages2": 
 			case "msgs2": cmdPlayersListMsgs2(message.channel, args); break;
+			case "mentor": cmdPlayersMentor(message.channel, args); break;
 			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
 		}
 	}
@@ -1060,6 +1063,30 @@ module.exports = function() {
 		}
 	}
 	
+	/* Mentor signups somebody else */
+	this.cmdPlayersSignupMentor = function(channel, args) {
+		var user = getUser(args[1]);
+		if(!user) { 
+			// Invalid user
+			channel.send("⛔ Syntax error. `" + args[1] + "` is not a valid player!"); 
+			return; 
+		} else {
+			cmdMentor(channel, channel.guild.members.cache.get(user));
+		}
+	}
+    
+	/* Mentor unsignups somebody else */
+	this.cmdPlayersSignupUnmentor = function(channel, args) {
+		var user = getUser(args[1]);
+		if(!user) { 
+			// Invalid user
+			channel.send("⛔ Syntax error. `" + args[1] + "` is not a valid player!"); 
+			return; 
+		} else {
+			cmdUnmentor(channel, channel.guild.members.cache.get(user));
+		}
+	}
+	
 	this.cmdSpectate = function(channel, member) {
 		if(isParticipant(member) || isMentor(member) || isSub(member) || isGhost(member)) {
 			channel.send("⛔ Command error. Can't make you a spectator while you're a participant."); 
@@ -1088,6 +1115,43 @@ module.exports = function() {
             }
         }
 	}
+    
+    /**
+    Signs up as a mentor
+    **/
+    this.cmdMentor = function(channel, member) {
+        if(stats.gamephase != gp.SIGNUP && stats.gamephase != gp.SETUP) { 
+			channel.send(`⛔ Signup error. Sign ups are not open, <@${member.id}>! Sign up will open up again soon.`); 
+			return; 
+		} else if(isSignedupMentor(member)) { 
+			channel.send("⛔ Sign up error. You are already signed up as a mentor."); 
+			return; 
+        } else if(!isMentorProgram(member)) { 
+			channel.send("⛔ Sign up error. You are not part of the mentor program."); 
+			return; 
+        }
+        
+        // add role
+        addRoleRecursive(member, channel, stats.signedmentor, "signed mentor");
+        channel.send(`✅ Successfully signed up as mentor, ${member.user}.`); 
+    }
+    
+    /**
+    Unsigns as mentor
+    **/
+    this.cmdUnmentor = function(channel, member) {
+        if(stats.gamephase != gp.SIGNUP && stats.gamephase != gp.SETUP) { 
+			channel.send(`⛔ Signup error. Sign ups are not open, <@${member.id}>! Sign up will open up again soon.`); 
+			return; 
+		} else if(!isSignedupMentor(member)) { 
+			channel.send("⛔ Sign up error. You can not sign out as a mentor while not signed up as a mentor."); 
+			return; 
+        }
+        
+        // remove role
+        removeRoleRecursive(member, channel, stats.signedmentor, "signed mentor");
+        channel.send(`✅ Successfully signed out as mentor, ${member.user}. You will no longer mentor for the next game!`); 
+    }
 	
 	/* Signup a player */
 	this.cmdSignup = function(channel, member, args, checkGamephase, signupMode = "signup") {

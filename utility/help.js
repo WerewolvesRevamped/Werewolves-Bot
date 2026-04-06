@@ -174,6 +174,9 @@ module.exports = function() {
             ["players votes", PERM.GM, "Returns the amount of votes each player has.", "", "Lists all players with and their votes if they are affected by vote manipulation.", "", [], CMDSTATE.UNK],
             ["players messages", PERM.GM, "Returns the amount of messages each player has sent.", "", "Lists all players and their public and private message count.", "", [], CMDSTATE.RDY, ["players msgs"]],
             ["players messages2", PERM.GM, "Calculates inactivity based on phase input and message count.", "<Phase>", "Lists all alive players and their public and private message count and calculates their inactivity based on a <Phase> input.", "", [], CMDSTATE.RDY, ["players msgs2"]],
+            ["players mentor", PERM.GM, "Sets a player as a mentor.", "<Mentee> <Mentor>", "Assigns a mentor to a mentee.", "mentor � 🛠", ["✅ Setting @mctsts as a mentor for @captainluffy!"], CMDSTATE.RDY],
+            ["players signup_mentor", PERM.GM, "Signs up a player as a mentor.", "<Mentor>", "Signs up a player as a mentor to a mentee.", "", [""], CMDSTATE.RDY],
+            ["players signup_unmentor", PERM.GM, "Signs out a player as a mentor.", "<Mentor>", "Signs out a player as a mentor to a mentee.", "", [""], CMDSTATE.RDY],
             // Role
         ["roll", PERM.AL, "Randomizes", "<Subcommand>", "Commands to randomize a list of players. $help roll <sub-command> for detailed help.\n\nIf used without a subcommand randomizes from the full player list.", "roll", ["️ Selected @McTsts (🛠)"], CMDSTATE.RDY],
             ["roll ghost", PERM.AL, "Randomizes a ghost.", "", "Randomizes from the full ghostly player list.", "roll ghost", ["️ Selected @McTsts (🛠)"], CMDSTATE.RDY, ["roll g"]],
@@ -269,7 +272,8 @@ module.exports = function() {
         ["j", PERM.AL, "Special variant of signup command.", "<Emoji>", "Behaves like $signup command. For players with a reserved emoji, they can leave out <Emoji> and it will fill it in automatically. If used by a promoted GM they are automatically demoted upon using this command.", "j", ["✅ @McTsts signed up with emoji 🛠!"], CMDSTATE.RDY],
         ["spectate", PERM.AL, "Makes you a spectator.", "", "Makes you a spectator, if you are not a participant and a game is running.", "spectate", ["✅ Attempting to make you a spectator, McTsts!"], CMDSTATE.RDY],
         ["substitute", PERM.AL, "Makes you a substitute player.", "<Emoji>", "Signs you up as a substitute for the next game with emoji <Emoji>, which has to be a valid emoji, that is not used by another player yet. If you have already signedup, signout before using this command.", "substitute 🛠", ["✅ @McTsts is a substitute with emoji 🛠!"], CMDSTATE.RDY],
-        ["mentor", PERM.GM, "Sets a player as a mentor.", "<Mentee> <Mentor>", "Assigns a mentor to a mentee.", "mentor � 🛠", ["✅ Setting @mctsts as a mentor for @captainluffy!"], CMDSTATE.RDY],
+        ["mentor", PERM.AL, "Signs up as a mentor.", "", "Signs you up as a mentor.", "mentor", ["✅ Successfully signed up as mentor, Ts."], CMDSTATE.RDY],
+        ["unmentor", PERM.AL, "Signs out as a mentor.", "", "Signs you out as a mentor.", "mentor", ["✅ Successfully signed out as mentor, Ts. You will no longer mentor for the next game!"], CMDSTATE.RDY],
         /** Stats Module **/
         // options
         ["options", PERM.GM, "Manages options.", "<Option Name> [New Value]", "Returns or sets (if <New Value> is set) the value of a bot option <Option Name>. A bot option can be a numeric id, or an option name.\n\nFor a list of all options run $help options_list", "options mayor", ["✅ mayor currently is set to 588125889611431946!"], CMDSTATE.RDY],

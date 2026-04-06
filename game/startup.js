@@ -174,6 +174,19 @@ module.exports = function() {
                 if(r) channel.send("✅ `" + subs[i].displayName + "` is now a substitute!");
             });
         }
+        // Assign roles to mentor
+        let mentors = channel.guild.roles.cache.get(stats.signedmentor).members.toJSON();
+        let actualMentors = await sqlProm("SELECT mentor FROM players");
+        actualMentors = actualMentors.map(el => el.mentor);
+        for(let i = 0; i < mentors.length; i++) {
+            if(actualMentors.includes(mentors[i].id)) {
+                switchRoles(mentors[i], channel, stats.signedmentor, stats.mentor, "signed mentor", "mentor").then(r => {
+                    if(r) channel.send("✅ `" + mentors[i].displayName + "` is now a mentor!");
+                });
+            } else {
+                removeRoleRecursive(mentors[i], channel, stats.signedmentor, "signed mentor");
+            }
+        }
         
         // Setup schedule
         if(stats.automation_level === autoLvl.FULL) {

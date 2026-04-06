@@ -72,6 +72,8 @@ module.exports = function() {
         {id: 54, name: "Ghostly Mentor Role", type: "roleID", cmd: "ghost_mentor", property: "ghost_mentor", desc: "Role id for ghost mentor", adminOnly: true},
         {id: 55, name: "DB Version", type: "number", cmd: "db_version", property: "db_version", desc: "Database version", default: 0 },
         {id: 56, name: "Forced Pack", type: "number", cmd: "forced_pack", property: "forced_pack", desc: "Skinpack that everyone uses. 0 to disable", default: 0 },
+        {id: 57, name: "Signed-Up Mentor Role", type: "roleID", cmd: "signedmentor", property: "signedmentor", desc: "Role id for signed-up mentor", adminOnly: true},
+        {id: 58, name: "Mentor Program Role", type: "roleID", cmd: "mentor_program", property: "mentor_program", desc: "Role id for mentor program", adminOnly: true},
     ]
 
     /**

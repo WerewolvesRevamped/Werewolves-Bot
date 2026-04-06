@@ -19,8 +19,6 @@ async function cmdOptionsSet (channel, value, stat) {
         case "roleID":
             await channel.guild.roles.fetch();
             const role = channel.guild.roles.cache.get(value.trim());
-            console.log(value, role);
-            console.log("ALL ROLE IDS:", channel.guild.roles.cache.map(r => r.id));
             if(!role) {
                 channel.send("⛔ Syntax error. This stat must be specified as an id for a valid discord role!");
                 return;

@@ -76,6 +76,18 @@ module.exports = function() {
 		return member.roles.cache.get(stats.mentor);
 	}
     
+	/* Check if a member is a signed up mentor */
+	this.isSignedupMentor = function(member) {
+        if(!member) return false;
+		return member.roles.cache.get(stats.signedmentor);
+	}
+    
+	/* Check if a member is in the mentor program */
+	this.isMentorProgram = function(member) {
+        if(!member) return false;
+		return member.roles.cache.get(stats.mentor_program);
+	}
+    
 	/* Check if a member is a ghost mentor */
 	this.isGhostMentor = function(member) {
         if(!member) return false;
