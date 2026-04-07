@@ -27,7 +27,7 @@ module.exports = function() {
     this.PROMPT_SPLIT = "․"; // this is a special marker character, not a normal .
     
     /**
-    Get Promp Message
+    Get Prompt Message
     returns a prompt message
     **/
     this.getPromptMessage = function(ability, promptOverwrite, type1 = "", type2 = "") {
@@ -169,6 +169,19 @@ module.exports = function() {
                 if(val.indexOf(":") >= 0) return val;
                 return srcRefToText(`${type}:${val}`);
         }
+    }
+    
+    this.applyPromptSubstitutions = async function(promptString, src_ref) {
+        if(promptString.includes("%t")) {
+            let target = await getTarget(src_ref);
+            let text = srcRefToText(target);
+            promptString = promptString.replace(/%t/g, text);
+        }
+        if(promptString.includes("%c")) {
+            let counter = await getCounter(src_ref);
+            promptString = promptString.replace(/%c/g, counter);
+        }
+        return promptString;
     }
     
     /** 

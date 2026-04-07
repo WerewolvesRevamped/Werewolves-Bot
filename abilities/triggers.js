@@ -835,6 +835,7 @@ module.exports = function() {
                     }
                     // send prompt
                     let promptMsg = getPromptMessage(trigger.abilities[0], promptOverwrite);
+                    promptMsg = await applyPromptSubstitutions(promptMsg, src_ref);
                     let refImg = await refToImg(src_name);
                     for(let i = 0; i < actionCount; i++) { // iterate for scaling
                         if(stats.automation_level < 2) continue;
@@ -860,6 +861,7 @@ module.exports = function() {
                 if(stats.automation_level < 2) break;
                 let type = toTitleCase(selectorGetType(prompts[0][1]));
                 let promptMsg = getPromptMessage(trigger.abilities[0], promptOverwrite, type);
+                promptMsg = await applyPromptSubstitutions(promptMsg, src_ref);
                 let refImg = await refToImg(src_name);
                 let message = await abilitySendProm(promptLoc, `${getAbilityEmoji(trigger.abilities[0].type)} ${promptMsg} ${scalingMessage}\nPlease submit your choice as a reply to this message.${origPromptLocText}`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt");
                 if(ptype[0] === "immediate") { // immediate prompt
@@ -878,6 +880,7 @@ module.exports = function() {
                 let type1 = toTitleCase(selectorGetType(prompts[0][1]));
                 let type2 = toTitleCase(selectorGetType(prompts[1][1]));
                 let promptMsg = getPromptMessage(trigger.abilities[0], promptOverwrite, type1, type2);
+                promptMsg = await applyPromptSubstitutions(promptMsg, src_ref);
                 let refImg = await refToImg(src_name);
                 let message = await abilitySendProm(promptLoc, `${getAbilityEmoji(trigger.abilities[0].type)} ${promptMsg} ${scalingMessage}\nPlease submit your choice as a reply to this message.${origPromptLocText}`, EMBED_GRAY, promptPing, promptInfoMsg, refImg, "Ability Prompt");
                 if(ptype[0] === "immediate") { // immediate prompt
