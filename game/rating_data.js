@@ -97,7 +97,7 @@ module.exports = function() {
                         
                         // set previous days dead
                         if(playerEvents[j].phase != -1) {
-                            playerData.roles.at(-1).daysDead = playerEvents[j].phase;
+                            playerData.roles.at(-1).daysDead = Math.ceil((finalPhase - playerEvents[j].phase) / 2);
                         }
                         
                         // add to player data
@@ -120,7 +120,7 @@ module.exports = function() {
             
             // set final days dead
             if(allPlayers[i].death_phase != -1) {
-                playerData.roles.at(-1).daysDead = allPlayers[i].death_phase;
+                playerData.roles.at(-1).daysDead = Math.ceil((finalPhase - allPlayers[i].death_phase) / 2);
             }
             
             // select modifiers for this player
