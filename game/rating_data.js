@@ -28,12 +28,13 @@ module.exports = function() {
         
         // get hosts
         let hosts = [];
-        mainGuild.roles.cache.get(stats.host).members.forEach(el => hosts.push(el.user.username));
+        mainGuild.roles.cache.get(stats.host).members.forEach(el => hosts.push(el.id));
         gameData.hosts = hosts;
         
         // get start date
         let startDate = eventData.filter(el => el.type === "game_start")[0].data1;
-        gameData.gameStart = startDate;
+        var date = new Date(+ startDate);
+        gameData.gameStart = (date.getYear() + 1900) + "-" + ((date.getMonth() + 1) + "").padStart(2, "0") + "-" + (date.getDate() + "").padStart(2, "0");
         
         // get final phase
         let finalPhase = getPhaseAsNumber();
@@ -64,7 +65,7 @@ module.exports = function() {
             // get username and displayname
             let member = mainGuild.members.cache.get(allPlayers[i].id);
             let username = member.user.username;
-            let displayName = member.displayName;
+            let displayName = member.user.displayName;
             playerData.username = username;
             playerData.displayName = displayName;
             
