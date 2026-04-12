@@ -182,6 +182,13 @@ module.exports = function() {
                     await clearRoleAttributes(playersFiltered[i]);
                 break;
             }
+            
+            // increment cc limit
+            if(["death"].includes(stats.cc_rule)) {
+                await new Promise(res => {
+                    sqlSetStat(statID.CC_LIMIT, stats.cc_limit + 1, () => res());
+                });
+            }
         }
         
         // banish players
