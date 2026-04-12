@@ -92,8 +92,8 @@ module.exports = function() {
         }
         
         // run triggers
-        let trData1 = { visitor: null, visit_parameter: visitParameter, second_visit_parameter: secondVisitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, this: targetPlayer, visit_id: visitId };
-        let trData2 = { action_target: `player:${targetPlayer}`, visit_parameter: visitParameter, second_visit_parameter: secondVisitParameter, visit_type: abilityType, visit_subtype: abilitySubtype, this: null, visit_id: visitId };
+        let trData1 = { visitor: null, visit_parameter: visitParameter, second_visit_parameter: secondVisitParameter, visit_type: abilityType, ability_subtype: abilitySubtype, this: targetPlayer, visit_id: visitId };
+        let trData2 = { action_target: `player:${targetPlayer}`, visit_parameter: visitParameter, second_visit_parameter: secondVisitParameter, visit_type: abilityType, ability_subtype: abilitySubtype, this: null, visit_id: visitId };
         if(targetIsPlayer) {
             if(sourceIsPlayer) {
                 trData1.visitor = sourcePlayer;
