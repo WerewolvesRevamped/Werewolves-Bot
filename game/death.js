@@ -188,6 +188,7 @@ module.exports = function() {
                 await new Promise(res => {
                     sqlSetStat(statID.CC_LIMIT, stats.cc_limit + 1, () => res());
                 });
+                await bufferStorytime(`CC Limit updated to ${stats.cc_limit + 1}`);
             }
         }
         

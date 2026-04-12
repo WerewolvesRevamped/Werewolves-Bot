@@ -1057,6 +1057,12 @@ module.exports = function() {
         if(newPhase) await setPhase(newPhase);
         await attributeCleanup();
         
+        // increment cc limit
+        if(["day","phase"].includes(stats.cc_rule)) {
+            sqlSetStat(statID.CC_LIMIT, stats.cc_limit + 1);
+            await bufferStorytime(`CC Limit updated to ${stats.cc_limit + 1}`);
+        }
+        
         // storytime
         if(stats.automation_level === 4) {
             let endNight = await sqlPromOne("SELECT * FROM schedule WHERE name='night-end'");
@@ -1112,11 +1118,6 @@ module.exports = function() {
         
         // pause queue checker during event
         pauseActionQueueChecker = false;
-        
-        // increment cc limit
-        if(["day","phase"].includes(stats.cc_rule)) {
-            sqlSetStat(statID.CC_LIMIT, stats.cc_limit + 1);
-        }
     }
     
     /**
@@ -1187,6 +1188,12 @@ module.exports = function() {
         if(newPhase) await setPhase(newPhase);
         await attributeCleanup();
         
+        // increment cc limit
+        if(["night","phase"].includes(stats.cc_rule)) {
+            sqlSetStat(statID.CC_LIMIT, stats.cc_limit + 1);
+            await bufferStorytime(`CC Limit updated to ${stats.cc_limit + 1}`);
+        }
+        
         // storytime
         if(stats.automation_level === 4) {
             let endDay = await sqlPromOne("SELECT * FROM schedule WHERE name='day-end'");
@@ -1242,11 +1249,6 @@ module.exports = function() {
         
         // pause queue checker during event
         pauseActionQueueChecker = false;
-        
-        // increment cc limit
-        if(["night","phase"].includes(stats.cc_rule)) {
-            sqlSetStat(statID.CC_LIMIT, stats.cc_limit + 1);
-        }
     }
     
 }
