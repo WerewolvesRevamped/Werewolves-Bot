@@ -69,12 +69,6 @@ module.exports = function() {
             playerData.username = username;
             playerData.displayName = displayName;
             
-            let messages = allPlayers[i].public_msgs + allPlayers[i].private_msgs;
-            playerData.messages = messages;
-            
-            if(messages < (finalPhase * 20)) playerData.inactive = true;
-            if(allPlayers[i].public_msgs < (Math.floor(finalPhase/2) * 15)) playerData.publicIA = true;
-            
             // find corresponding role and alignment events
             let playerEvents = eventData.filter(el => el.id === allPlayers[i].id);
             let roleCounter = 0;
@@ -122,6 +116,15 @@ module.exports = function() {
             // set final days dead
             if(allPlayers[i].death_phase != -1) {
                 playerData.roles.at(-1).daysDead = Math.ceil((finalPhase - allPlayers[i].death_phase) / 2);
+            }
+            
+            // determine inactivity
+            let messages = allPlayers[i].public_msgs + allPlayers[i].private_msgs;
+            playerData.messages = messages;
+            
+            if(allPlayers[i].death_phase > 1) {
+                if(messages < (finalPhase * 20)) playerData.inactive = true;
+                if(allPlayers[i].public_msgs < (Math.floor(finalPhase/2) * 15)) playerData.publicIA = true;
             }
             
             // select modifiers for this player
