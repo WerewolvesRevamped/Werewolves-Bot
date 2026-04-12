@@ -75,6 +75,7 @@ module.exports = function() {
         {id: 56, name: "Forced Pack", type: "number", cmd: "forced_pack", property: "forced_pack", desc: "Skinpack that everyone uses. 0 to disable", default: 0 },
         {id: 57, name: "Signed-Up Mentor Role", type: "roleID", cmd: "signedmentor", property: "signedmentor", desc: "Role id for signed-up mentor", adminOnly: true, autoGenerate: "Signed-mentor"},
         {id: 58, name: "Mentor Program Role", type: "roleID", cmd: "mentor_program", property: "mentor_program", desc: "Role id for mentor program", adminOnly: true, autoGenerate: "Mentor Program"},
+        {id: 59, name: "CC Rule", type: "string", cmd: "cc_rule", property: "cc_rule", desc: "Determines the rule to use for CC incrementing. See $help options cc_rule" },
     ]
 
     /**
@@ -122,6 +123,8 @@ module.exports = function() {
      * @enum {number}
      */
     this.statID = {
+        CC_LIMIT: 28,
+        
         PHASE: 47,
         SUBPHASE: 48,
         REWARD_LOG: 49,
@@ -130,7 +133,11 @@ module.exports = function() {
         PHASE_AUTO_INFO: 52,
         D0_TIME: 53,
         GHOST_MENTOR: 54,
-        DB_VERSION: 55
+        DB_VERSION: 55,
+        FORCED_PACK: 56,
+        SIGNEDUP_MENTOR: 57,
+        MENTOR_PROGRAM: 58,
+        CC_RULE: 59
     }
 
     /** Gets the name of a gamephase by id */

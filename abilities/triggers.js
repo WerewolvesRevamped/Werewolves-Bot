@@ -1112,6 +1112,11 @@ module.exports = function() {
         
         // pause queue checker during event
         pauseActionQueueChecker = false;
+        
+        // increment cc limit
+        if(["day","phase"].includes(stats.cc_rule)) {
+            sqlSetStat(statID.CC_LIMIT, stats.cc_limit + 1);
+        }
     }
     
     /**
@@ -1237,6 +1242,11 @@ module.exports = function() {
         
         // pause queue checker during event
         pauseActionQueueChecker = false;
+        
+        // increment cc limit
+        if(["night","phase"].includes(stats.cc_rule)) {
+            sqlSetStat(statID.CC_LIMIT, stats.cc_limit + 1);
+        }
     }
     
 }
