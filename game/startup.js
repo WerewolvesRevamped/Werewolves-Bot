@@ -20,6 +20,8 @@ module.exports = function() {
             if((+stats.phaseautoinfo.night) % 60 != 0) channel.send("ℹ️ Nights last `" +  stats.phaseautoinfo.night + "` minutes!"); 
             else channel.send("ℹ️ Nights last `" +  (stats.phaseautoinfo.night/60) + "` hours!"); 
         }
+        if(stats.cc_limit >= -10) channel.send(`ℹ️ CC Limit is \`${stats.cc_limit}\`!`); 
+        if(stats.cc_rule != "none") channel.send(`ℹ️ CC Rule is \`${stats.cc_rule}\`!`); 
         if(stats.haunting) channel.send("👻 Haunting is __enabled__!");
         if(!check) channel.send("⛔ The game is **not** ready to start.");
         else channel.send("✅ The game is ready to start.");

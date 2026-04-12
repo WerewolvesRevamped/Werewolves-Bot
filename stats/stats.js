@@ -75,7 +75,7 @@ module.exports = function() {
         {id: 56, name: "Forced Pack", type: "number", cmd: "forced_pack", property: "forced_pack", desc: "Skinpack that everyone uses. 0 to disable", default: 0 },
         {id: 57, name: "Signed-Up Mentor Role", type: "roleID", cmd: "signedmentor", property: "signedmentor", desc: "Role id for signed-up mentor", adminOnly: true, autoGenerate: "Signed-mentor"},
         {id: 58, name: "Mentor Program Role", type: "roleID", cmd: "mentor_program", property: "mentor_program", desc: "Role id for mentor program", adminOnly: true, autoGenerate: "Mentor Program"},
-        {id: 59, name: "CC Rule", type: "string", cmd: "cc_rule", property: "cc_rule", desc: "Determines the rule to use for CC incrementing. See $help options cc_rule" },
+        {id: 59, name: "CC Rule", type: "string", cmd: "cc_rule", property: "cc_rule", desc: "Determines the rule to use for CC incrementing. See $help options cc_rule", default: "none" },
     ]
 
     /**
