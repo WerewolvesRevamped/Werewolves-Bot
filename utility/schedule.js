@@ -206,6 +206,13 @@ module.exports = function() {
     }
     
     /**
+    Clears schedule
+    **/
+    this.clearScheduledEvents = function() {
+        sql("DELETE FROM schedule WHERE type='special'")
+    }
+    
+    /**
     Timestamp Input Parser
     parses a timestamp in HH:MM, N[smhd] and Unix Timestamp formats
     **/

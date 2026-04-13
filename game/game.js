@@ -78,7 +78,7 @@ module.exports = function() {
             addRoleRecursive(el, backupChannelId, stats.dead_participant, "dead participant");
 		});
         // clear schedule
-        clearSchedule();
+        clearScheduledEvents();
     }
 	
     
@@ -196,7 +196,7 @@ module.exports = function() {
         // reset modifiers
         if(!debug) resetModifiers();
         // reset schedule
-        clearSchedule();
+        clearScheduledEvents();
         // disable action queue checker 
         pauseActionQueueChecker = true;
         // reset cached sc count
