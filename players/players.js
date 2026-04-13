@@ -19,6 +19,7 @@ require("./parsing.js")();
 require("./curses.js")();
 require("./reservations.js")();
 require("./trophy.js")();
+require("./lists.js")();
 
 
 module.exports = function() {
