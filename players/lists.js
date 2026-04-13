@@ -15,7 +15,7 @@ module.exports = function() {
         // prepare conditions
         let conditionsFormatted = [];
         conditions.forEach(el => {
-            if(["alive","type","mentor"].includes(el[0]) && ["=","<>"].includes(el[1])) {
+            if(isPlayersArgs(el[0]) && ["=","<>"].includes(el[1])) {
                 conditionsFormatted.push(`${el[0]}${el[1]}${connection.escape(el[2])}`);
             }
         });
@@ -138,6 +138,27 @@ module.exports = function() {
         }
         // generate list
         generatePlayerList(channel, "Ghostly Players", [["alive", "=", 2], ["type", "=", "player"]], "$emoji - $name ($tag)");
+	}
+    
+    /**
+    Emoji List
+    **/
+	this.cmdEmojis = function(channel) {
+		channel.send("```\n" + emojiIDs.map(el =>  el.emoji + " " + el.id).join("\n") + "\n``` ```\n" + emojiIDs.map(el =>  el.emoji).join(" ") + "\n```");
+	}
+    
+	/**
+    Emoji List (Alive Players)
+    **/
+	this.cmdEmojisAlive = async function(channel) {
+		// Check gamephase
+		if(stats.gamephase < gp.INGAME) { 
+			channel.send("⛔ Command error. Can only list alive players in ingame phase."); 
+			return; 
+		}
+        let res = await sqlProm("SELECT id,emoji FROM players WHERE alive=1");
+        let top = res.map(el =>  el.emoji + " " + el.id).join("\n");
+		channel.send("```\n" + (top.length ? top : "-") + "\n``` ```\n" + (top.length ? res.map(el =>  el.emoji).join(" ") : "-") + "\n```");
 	}
     
 }

@@ -20,9 +20,22 @@ require("./curses.js")();
 require("./reservations.js")();
 require("./trophy.js")();
 require("./lists.js")();
+require("./caching.js")();
+require("./signup.js")();
+require("./substitute.js")();
+require("./roll.js")();
 
 
 module.exports = function() {
+    
+    /**
+    Is Player Arg
+    checks if a value is a valid argument on a player
+    **/
+	this.isPlayersArgs = function(arg) {
+		let allowedArgs = ["id", "emoji", "type", "role", "orig_role", "alignment", "alive", "ccs", "public_msgs", "private_msgs", "target", "counter", "final_result", "mentor"];
+		return allowedArgs.indexOf(arg) >= 0;
+	}
     
     /**
     Send Inactivity Warnings
