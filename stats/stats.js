@@ -78,6 +78,7 @@ module.exports = function() {
         {id: 59, name: "CC Rule", type: "string", cmd: "cc_rule", property: "cc_rule", desc: "Determines the rule to use for CC incrementing. See $help options cc_rule", default: "none" },
         {id: 60, name: "Total Activity Requirement", type: "number", cmd: "total_req", property: "total_req", desc: "Required number of messages per phase.", default: 20 },
         {id: 61, name: "Public Activity Requirement", type: "number", cmd: "public_req", property: "public_req", desc: "Required number of public messages per day.", default: 15 },
+        {id: 62, name: "Log List Character", type: "string", cmd: "log_list_char", property: "log_list_char", desc: "The character to use for lists in log.", default: "•" },
     ]
 
     /**
@@ -142,6 +143,7 @@ module.exports = function() {
         CC_RULE: 59,
         TOTAL_REQ: 60,
         PUBLIC_REQ: 61,
+        LOG_LIST_CHAR: 62,
     }
 
     /** Gets the name of a gamephase by id */

@@ -27,6 +27,142 @@ require("./roll.js")();
 
 
 module.exports = function() {
+    	
+	/**
+    Command: $players
+    Commands to manage players
+    **/
+	this.cmdPlayers = function(message, args) {
+		// Check subcommands
+		if(!args[0] || (!args[1] && ["list","log","log2","log3","log4", "log5", "log6", "msgs","messages","votes","roles","rl","list_alive","mentor","signup_mentor","signup_unmentor"].indexOf(args[0]) == -1)) { 
+			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `players [get|set|resurrect|signup|list|msgs|msgs2|log|log2|log3|log4|log5|log6|votes|rl|mentor|signup_mentor|signup_unmentor]`!"); 
+			return; 
+		}
+		//Find subcommand
+		switch(args[0]) {
+			case "get": cmdPlayersGet(message.channel, args, false); break;
+			case "set": cmdPlayersSet(message.channel, args); break;
+			case "resurrect": cmdPlayersResurrect(message.channel, args); break;
+			case "signup": cmdPlayersSignup(message.channel, args); break;
+			case "signsub": 
+			case "signup_sub": cmdPlayersSignupSubstitute(message.channel, args); break;
+			case "signup_mentor": cmdPlayersSignupMentor(message.channel, args); break;
+			case "signup_unmentor": cmdPlayersSignupUnmentor(message.channel, args); break;
+			case "sub": 
+			case "substitute": cmdPlayersSubstitute(message, args); break;
+			case "switch": cmdPlayersSwitch(message, args); break;
+			case "list": cmdConfirm(message, "players list"); break;
+			case "list_alive": cmdConfirm(message, "players list_alive"); break;
+            case "rl":
+			case "roles": cmdConfirm(message, "players roles"); break;
+			case "log": cmdConfirm(message, "players log"); break;
+			case "log2": cmdConfirm(message, "players log2"); break;
+			case "log3": cmdConfirm(message, "players log3"); break;
+			case "log4": cmdConfirm(message, "players log4"); break;
+			case "votes": cmdConfirm(message, "players votes"); break;
+			case "messages": 
+			case "msgs": cmdPlayersListMsgs(message.channel); break;
+			case "messages2": 
+			case "msgs2": cmdPlayersListMsgs2(message.channel, args); break;
+			case "mentor": cmdPlayersMentor(message.channel, args); break;
+			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
+		}
+	}
+    
+	/**
+    Command: $players get
+    Retrieves a player attribute
+    **/
+	this.cmdPlayersGet = function(channel, args) {
+		// Check arguments
+		if(!args[2]) { 
+			channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "players get <value name> <player>`!"); 
+			return; 
+		}
+		// Get user
+		var user = parseUser(args[2], channel);
+		if(!user) { 
+			// Invalid user
+			channel.send("⛔ Syntax error. `" + args[2] + "` is not a valid player!"); 
+			return; 
+		}
+        if(!isPlayersArgs(args[1])) { 
+			// Invalid parameter
+			channel.send("⛔ Syntax error. Invalid parameter `" + args[1] + "`!"); 
+			return; 
+		}
+        
+        // Get info
+        sql("SELECT " + args[1] + " FROM players WHERE id = " + connection.escape(user), result => {
+            let playerName = channel.guild.members.cache.get(user)?.displayName ?? "USER LEFT";
+            channel.send("✅ `" + playerName + "`'s " + args[1] + " is `" + result[0][args[1]] + "`!");
+        }, () => {
+            // Database error
+            channel.send("⛔ Database error. Could not get player information!");
+        });
+	}
+    
+    /**
+    Command: $players set
+    Sets a player attribute
+    **/
+	this.cmdPlayersSet = function(channel, args) {
+		// Check arguments
+		if(!args[2] || !args[3]) { 
+			channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "players set <value name> <player> <value>`!"); 
+			return; 
+		}
+		// Get user
+		var user = parseUser(args[2], channel);
+		if(!user) { 
+			// Invalid user
+			channel.send("⛔ Syntax error. `" + args[2] + "` is not a valid player!"); 
+			return; 
+		}
+        if(!isPlayersArgs(args[1])) { 
+			// Invalid parameter
+			channel.send("⛔ Syntax error. Invalid parameter `" + args[1] + "`!"); 
+			return; 
+		}
+        
+        // Update value
+		sql("UPDATE players SET " + args[1] + " = " + connection.escape(args[3]) + " WHERE id = " + connection.escape(user), result => {
+			let playerName = channel.guild.members.cache.get(user)?.displayName ?? "USER LEFT";
+			channel.send("✅ `" + playerName + "`'s " + args[1] + " value now is `" + args[3] + "`!");
+			updateGameStatus();
+			getCCs();
+			getPRoles();
+		}, () => {
+			channel.send("⛔ Database error. Could not update player information!");
+		});
+	}
+    
+	/**
+    Command: $players resurrect
+    Resurrects a player
+    **/
+	this.cmdPlayersResurrect = async function(channel, args) {
+		// Get user
+		var user = parseUser(args[1], channel);
+		if(!user) { 
+			// Invalid user
+			channel.send("⛔ Syntax error. `" + args[1] + "` is not a valid player!"); 
+			return; 
+		} else {
+			// Send resurrect message
+			let playerName = channel.guild.members.cache.get(user).displayName;
+			channel.send("✳️ Resurrecting " + playerName + "!");
+            // info
+			channel.send("ℹ️ Please consider the following things after resurrecting:\n• If applicable, reassign the discord roles for elected roles manually\n• Manually undo actions that occur on player deaths (e.g. delete reporter message)");
+            // Resurrect
+            await resurrectPlayer(user, true);
+            await clearRoleAttributes(user);
+            // reopen groups/teams
+            await updateActiveTeams();
+            await updateGroups();
+			channel.send("✅ Resurrected " + playerName + "!");
+		}
+	}
     
     /**
     Is Player Arg
