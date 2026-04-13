@@ -76,6 +76,8 @@ module.exports = function() {
         {id: 57, name: "Signed-Up Mentor Role", type: "roleID", cmd: "signedmentor", property: "signedmentor", desc: "Role id for signed-up mentor", adminOnly: true, autoGenerate: "Signed-mentor"},
         {id: 58, name: "Mentor Program Role", type: "roleID", cmd: "mentor_program", property: "mentor_program", desc: "Role id for mentor program", adminOnly: true, autoGenerate: "Mentor Program"},
         {id: 59, name: "CC Rule", type: "string", cmd: "cc_rule", property: "cc_rule", desc: "Determines the rule to use for CC incrementing. See $help options cc_rule", default: "none" },
+        {id: 60, name: "Total Activity Requirement", type: "number", cmd: "total_req", property: "total_req", desc: "Required number of messages per phase.", default: 20 },
+        {id: 61, name: "Public Activity Requirement", type: "number", cmd: "public_req", property: "public_req", desc: "Required number of public messages per day.", default: 15 },
     ]
 
     /**
@@ -137,7 +139,9 @@ module.exports = function() {
         FORCED_PACK: 56,
         SIGNEDUP_MENTOR: 57,
         MENTOR_PROGRAM: 58,
-        CC_RULE: 59
+        CC_RULE: 59,
+        TOTAL_REQ: 60,
+        PUBLIC_REQ: 61,
     }
 
     /** Gets the name of a gamephase by id */

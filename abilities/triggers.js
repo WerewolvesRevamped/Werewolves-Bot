@@ -1118,6 +1118,9 @@ module.exports = function() {
         
         // pause queue checker during event
         pauseActionQueueChecker = false;
+        
+        // activity warning
+        sendInactivityWarnings();
     }
     
     /**

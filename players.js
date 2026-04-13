@@ -426,8 +426,8 @@ module.exports = function() {
                 let prWarn = false;
                 let pubWarn = false;
                 let phases = args[1];
-                if((el.public_msgs+el.private_msgs) < (phases * 20)) prWarn = true;
-                if(el.public_msgs < (Math.floor(phases/2) * 15)) pubWarn = true;
+                if((el.public_msgs+el.private_msgs) < (phases * stats.total_req)) prWarn = true;
+                if(el.public_msgs < (Math.floor(phases/2) * stats.public_req)) pubWarn = true;
                 return `${el.emoji} - ${channel.guild.members.cache.get(el.id) ? channel.guild.members.cache.get(el.id): "<@" + el.id + ">"}; Total: ${el.public_msgs+el.private_msgs}${prWarn?' ❗':''}; Public: ${el.public_msgs}${pubWarn?' ❗':''}; Private: ${el.private_msgs}`;
             });
 			let playerList = [], counter = 0;

@@ -123,8 +123,8 @@ module.exports = function() {
             playerData.messages = messages;
             
             if(allPlayers[i].death_phase > 1) {
-                if(messages < (finalPhase * 20)) playerData.inactive = true;
-                if(allPlayers[i].public_msgs < (Math.floor(finalPhase/2) * 15)) playerData.publicIA = true;
+                if(messages < (finalPhase * stats.total_req)) playerData.inactive = true;
+                if(allPlayers[i].public_msgs < (Math.floor(finalPhase/2) * stats.public_req)) playerData.publicIA = true;
             }
             
             // select modifiers for this player
