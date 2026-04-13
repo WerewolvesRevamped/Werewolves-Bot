@@ -27,8 +27,6 @@ config = require("./config.json");
 /* V1 Modules */
 require("./ccs.js")();
 require("./whispers.js")();
-require("./theme.js")();
-require("./temp.js")();
 
 // WIP V2 Modules
 require("./game/game.js")();

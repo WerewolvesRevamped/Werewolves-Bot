@@ -2,10 +2,14 @@
 	Module for themes
 */
 module.exports = function() {
+    
 	/* Variables */
 	this.cachedTheme = [];
 	
-	/* Handle roles command */
+	/**
+    Command: $theme
+    Command to manage themes
+    **/
 	this.cmdTheme = function(message, args) {
 		// Check subcommand
 		if(!args[0]) { 
@@ -16,14 +20,16 @@ module.exports = function() {
 		switch(args[0]) {
 			// Role Subcommand
 			case "query": cmdThemeQuery(message.channel, args); break;
-			case "remove": cmdThemeRemove(message.channel, args); break;
 			case "list": cmdThemeList(message.channel, args); break;
 			case "select": cmdThemeSelect(message.channel, args); break;
 			default: message.channel.send("⛔ Syntax error. Invalid parameter `" + args[0] + "`!"); break;
 		}
 	}
 	
-	/* Lists all themes/themed words */
+	/**
+    Command: $theme list
+    Lists all themes/themed words 
+    */
 	this.cmdThemeList = function(channel, args) {
 		if(!args[1]) {
 			// Get all roles
@@ -72,7 +78,10 @@ module.exports = function() {
 	}
 	
 	
-	/* Sets a themed word */
+	/**
+    Command: $theme query
+    Queries a theme from a theme pack csv
+    **/
 	this.cmdThemeQuery = async function(channel, args) {
 		// Check arguments
 		if(!args[1]) { 
@@ -105,28 +114,18 @@ module.exports = function() {
         }
 	}
 
-	
-	/* Removes a theme word */
-	this.cmdThemeRemove = function(channel, args) {
-		// Check arguments
-		if(!args[1]) { 
-			channel.send("⛔ Syntax error. Not enough parameters!"); 
-			return; 
-		} 
-		// Delete info
-		sql("DELETE FROM theme WHERE theme = " + connection.escape(args[1]), result => {
-			channel.send("✅ Removed `" + toTitleCase(parseRole(args[1])) + "`!");
-		}, () => {
-			// Couldn't delete
-			channel.send("⛔ Database error. Could not remove role!");
-		});
-	}
-	
+	/**
+    Command: $theme select
+    Select Theme
+    **/
 	this.cmdThemeSelect = function(channel, args) {
 		cmdOptionsSet(channel, args[1], "29"); 
 	}
 	
-	// can apply a theme onto both strings and arrays
+	/**
+    Apply Theme
+    can apply a theme onto both strings and arrays
+    **/
 	this.applyTheme = function(text) {
 		if(text instanceof Array) {
 			return text.map(el => applyTheme(el));
@@ -136,6 +135,9 @@ module.exports = function() {
 		}
 	}
 	
+    /**
+    Caches the theme
+    **/
 	this.cacheTheme = function() {
 		sql("SELECT original,new FROM theme WHERE theme = " + connection.escape(stats.theme) + " ORDER BY theme ASC", result => {
 				cachedTheme = result;
