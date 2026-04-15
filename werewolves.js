@@ -30,8 +30,6 @@ require("./whispers.js")();
 
 // WIP V2 Modules
 require("./game/game.js")();
-require("./players.js")();
-require("./players/players.js")();
 
 // V2 Modules
 require("./paths.js")();
@@ -41,6 +39,7 @@ require("./roles/roles.js")();
 require("./abilities/abilities.js")();
 require("./attributes/attributes.js")();
 require("./shared/roles.js")();
+require("./players/players.js")();
 
 var botLoaded = false;
 
