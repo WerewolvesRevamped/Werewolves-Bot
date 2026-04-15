@@ -9,60 +9,6 @@
 
 
 module.exports = function() {
-
-    
-	/* Returns a comman separated role list */
-	this.cmdPlayersRoleList = function(channel) {
-		// Get a list of players
-		sql("SELECT role FROM players WHERE type='player'", result => {
-			let roleList = result.map(el => el.role);
-			channel.send("**Roles** | Total: " + result.length + "\n```" + roleList.join(",") + "```")
-            .catch(err => {
-					logO(err); 
-					sendError(channel, err, "Could not print role list");
-				});
-		}, () => {
-			// DB error
-			channel.send("⛔ Database error. Could not print role list!");
-		});
-	
-	}
-    
-	/* Lists all signedup players in final results format */
-	this.cmdPlayersLog3 = function(channel) {
-		// Get a list of players
-		sql("SELECT id,emoji,role,orig_role,alive,ccs,alignment,final_result FROM players WHERE type='player'", async result => {
-            // function to format a log3 list
-            const l3Format = el => {
-                let player = channel.guild.members.cache.get(el.id);
-                return `${stats.log_list_char} ${player ? player : "<@" + el.id + ">"} (${el.role != el.orig_role ? toTitleCase(el.orig_role) + ' → ' + toTitleCase(el.role) : toTitleCase(el.role)})`;
-            };
-            let winnerTeam = await sqlPromOne("SELECT display_name FROM teams WHERE active=1");
-            let msg = "```**Final Results**\n" + winnerTeam.display_name + " Victory\n\n";
-			let liveWinner = result.filter(el => (el.alive == 1 || el.alignment == "unaligned") && el.final_result == 1).map(l3Format);
-			let ghostlyWinners = result.filter(el => el.alive == 2 && el.alignment != "unaligned" && el.final_result == 1).map(l3Format);
-			let deadWinners = result.filter(el => el.alive == 0 && el.alignment != "unaligned" && el.final_result == 1).map(l3Format);
-			let liveLosers = result.filter(el => el.alive == 1 && el.final_result == 0).map(l3Format);
-			let ghostlyLosers = result.filter(el => el.alive == 2 && el.final_result == 0).map(l3Format);
-			let deadLosers = result.filter(el => el.alive == 0 && el.final_result == 0).map(l3Format);
-            if(liveWinner.length > 0) msg += "__Live Winners:__\n" + liveWinner.join("\n") + "\n\n";
-            if(ghostlyWinners.length > 0) msg += "__Ghostly Winners:__\n" + ghostlyWinners.join("\n") + "\n\n";
-            if(deadWinners.length > 0) msg += "__Dead Winners:__\n" + deadWinners.join("\n") + "\n\n";
-            if(liveLosers.length > 0) msg += "__Live Losers:__\n" + liveLosers.join("\n") + "\n\n";
-            if(ghostlyLosers.length > 0) msg += "__Ghostly Losers:__\n" + ghostlyLosers.join("\n") + "\n\n";
-            if(deadLosers.length > 0) msg += "__Dead Losers:__\n" + deadLosers.join("\n") + "\n\n";
-            
-			channel.send(msg + "```")
-            .catch(err => {
-					logO(err); 
-					sendError(channel, err, "Could not log players");
-				});
-		}, () => {
-			// DB error
-			channel.send("⛔ Database error. Could not log players!");
-		});
-	}
-    
 	
 	/* Signup a player */
 	this.cmdSignup = function(channel, member, args, checkGamephase, signupMode = "signup") {
