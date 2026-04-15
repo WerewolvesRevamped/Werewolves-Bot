@@ -35,7 +35,7 @@ module.exports = function() {
 	this.cmdPlayers = function(message, args) {
 		// Check subcommands
 		if(!args[0] || (!args[1] && ["list","log","log2","log3","log4", "log5", "log6", "msgs","messages","votes","roles","rl","list_alive","mentor","signup_mentor","signup_unmentor"].indexOf(args[0]) == -1)) { 
-			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `players [get|set|resurrect|signup|list|msgs|msgs2|log|log2|log3|log4|log5|log6|votes|rl|mentor|signup_mentor|signup_unmentor]`!"); 
+			message.channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `players [get|set|resurrect|signup|list|list_alive|msgs|msgs2|log|log2|log3|log4|log5|log6|votes|rl|mentor|signup_mentor|signup_unmentor]`!"); 
 			return; 
 		}
 		//Find subcommand

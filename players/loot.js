@@ -180,7 +180,7 @@ module.exports = function() {
                     case "std:recup": return `A ${stats.prefix}recycle upgrade! Recycling will now yield slightly more coins. Only your first five upgrades will increase the yield.`;
                     case "std:walup": return `A wallet upgrade! You may now carry an extra 50 coins. Only your first ten upgrades will increase the wallet size.`;
                     case "std:timeout5": return `The opportunity to get timed out for five minutes. Use this time wisely!`;
-                    case "std:1euro": return `1€ (cash only; to be redeemed in person). ${VOUCHER} Redeem by walking up to Ts and requesting it.`;
+                    case "std:1euro": return `1€ (cash only; to be redeemed in person). ${VOUCHER} Redeem by walking up to Ts and requesting it. [1 week cooldown]`;
                     case "std:cursed": return "You have been cursed!";
                     case "std:emoji": return `Provide a custom emoji that will be added to WWR. ${VOUCHER} You may need to be able to provide the original source of the emoji. If your suggestion is not accepted you are refunded with 100 coins.`;
                     case "std:sticker": return `Provide a custom sticker that will be added to WWR. ${VOUCHER} You may need to be able to provide the original source of the sticker. If your suggestion is not accepted you are refunded with 100 coins.`;

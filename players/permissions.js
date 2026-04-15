@@ -65,6 +65,11 @@ module.exports = function() {
 	}
 
 	/* Check if a member is a sub */
+	this.isSubIngame = function(member) {
+        if(!member) return false;
+		return member.roles.cache.get(stats.sub);
+	}
+    
 	this.isSub = function(member) {
         if(!member) return false;
 		return member.roles.cache.get(stats.sub) || member.roles.cache.get(stats.signedsub);

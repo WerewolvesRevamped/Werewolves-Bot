@@ -64,7 +64,7 @@ module.exports = function() {
     Signs up as a substitute player
     **/
 	this.cmdSubstitute = async function(channel, member, args) {
-		if(isParticipant(member) || isMentor(member) || isSub(member) || isGhost(member)) {
+		if(isParticipant(member) || isMentor(member) || isSubIngame(member) || isGhost(member)) {
 			channel.send("⛔ Command error. Can't make you a substitute player while you're a participant."); 
 			return;
 		}
