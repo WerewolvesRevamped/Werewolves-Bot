@@ -182,8 +182,11 @@ module.exports = function() {
     Makes a player a spectator
     **/
 	this.cmdSpectate = function(channel, member) {
-		if(isParticipant(member) || isMentor(member) || isSub(member) || isGhost(member)) {
+		if(isParticipant(member) || isMentor(member) || isSub(member) || isGhost(member) || isGhostMentor(member)) {
 			channel.send("⛔ Command error. Can't make you a spectator while you're a participant."); 
+			return;
+		} else if(isSignedUp(member) || isSignedupMentor(member)) {
+			channel.send("⛔ Command error. Can't make you a spectator while you're signedup."); 
 			return;
 		} else if(stats.gamephase < gp.SIGNUP) {
 			channel.send("⛔ Command error. Can't make you a spectator while there is no game."); 
