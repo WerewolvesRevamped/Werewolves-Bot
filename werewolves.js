@@ -25,7 +25,6 @@ config = require("./config.json");
 
 
 /* V1 Modules */
-require("./ccs.js")();
 require("./whispers.js")();
 
 // WIP V2 Modules

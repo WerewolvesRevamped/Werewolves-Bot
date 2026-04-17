@@ -391,6 +391,117 @@ module.exports = function() {
 	}
     
     /**
+    Command: $cc create
+    Creates a new cc
+    **/
+	this.cmdCCCreate = async function(channel, member, args, mode, callback, spam = false) {
+        // check limitations
+		if(!(isCC(channel) || isSC(channel) || isGameMaster(member, true) || isHelper(member))) {
+			channel.send("⛔ Command error. Can't use command outside a CC/SC!");
+			return;
+		}
+        if(!args[2] && spam == false) {
+			channel.send(cmdHelp(channel, member, ["cc", "create"]));
+			return;
+		}
+        if(!args[1]) {
+			channel.send(cmdHelp(channel, member, ["cc", spam ? "spam" : "create"]));
+			return;
+		}
+        if(!spam && !isGameMaster(member, true) && !isHelper(member) && stats.cc_limit >= -10 && ccs.find(el => el.id == member.id).ccs >= stats.cc_limit) {
+			channel.send("⛔ You have hit the CC limit of `" + stats.cc_limit + "` CCs!");
+			return;
+		}
+		// Get a list of users that need to be in the cc
+        args[1] = cleanCCName(args[1]);
+		players = parseUserList(args, 2, channel, member, isGhost(member) ? "ghost" : "participant");
+        //console.log(players);
+        if(!players || spam) players = [];
+		if(!spam && !isGameMaster(member, true) && !isHelper(member)) {
+			await sqlPromEsc("UPDATE players SET ccs = ccs + 1 WHERE id = ", member.id);
+            getCCs();
+		}
+        
+        
+        players = players.filter(el => el != member.id);
+		if(isParticipant(member) || isGhost(member) || ((isGameMaster(member, true) || isHelper(member)) && players.length > 0) || (isMentor(member) && spam)) {
+            
+            // get current cc count
+            let curCCCount = await new Promise(res => {
+                sqlGetStat(9,  result => res(result));
+            });
+            
+            let ccCatId = null;
+            
+            // create new category
+            if(curCCCount % 50 === 0) {
+                let ccCatNum = Math.round(curCCCount / 50) + 1;
+                let ccCatPerms = getCCCatPerms(channel.guild);
+                
+                // create cat
+                let newCCCat = await channel.guild.channels.create({ name: toTitleCase(stats.game) + " | CC " + ccCatNum, type: ChannelType.GuildCategory,  permissionOverwrites: ccCatPerms });
+                await sqlProm("INSERT INTO cc_cats (id) VALUES (" + connection.escape(newCCCat.id) + ")");
+                
+                // save the category id
+                await new Promise(res => {
+                    sqlSetStat(10, newCCCat.id, result => res());
+                });
+                getCCCats();
+                log(`CC > Created new CC category \`${newCCCat.name}\`!`);			
+                
+                // set cc cat
+                ccCatId = newCCCat.id;
+            } else { // use last cat
+                let lastCCCat = await new Promise(res => {
+                    sqlGetStat(10,  result => res(result));
+                });
+                ccCatId = lastCCCat;
+            }
+            
+            // get permissions
+            let ccPerms = getCCCatPerms(channel.guild);
+            if(isGhost(member)) ccPerms = getCCCatPermsGhostly(channel.guild);
+            if(!spam) ccPerms.push(getPerms(member.id, ["history", "read"], []));
+            else ccPerms.push(getPerms(member.id, ["read"], []));
+            if(spam) ccPerms.push(getPerms(stats.mentor, ["write"], ["read"]));
+            if(players.length > 0 && mode === 0) players.forEach(el => ccPerms.push(getPerms(el, ["read"], [])));
+            if(players.length > 0 && mode === 1) players.forEach(el => ccPerms.push(getPerms(el, ["read", "history"], [])));
+            
+            // mentor permissions
+            let mentor = await getMentor(member.id); 
+            if(mentor) ccPerms.push(getPerms(mentor, ["read"], ["write"]));
+            for(let i = 0; i < players.length; i++) {
+                let mentor = await getMentor(players[i]); 
+                if(mentor) ccPerms.push(getPerms(mentor, ["read"], ["write"]));
+            }
+            
+            // create channel
+            let ccName = (spam?"🤖-":"") + (isGhost(member)?"👻-":"") + args[1] + "";
+            channel.guild.channels.create({ name: ccName, type: ChannelType.GuildText,  permissionOverwrites: ccPerms, parent: ccCatId })
+            .then(async ct => {
+                // Put the channel into the correct category
+                await ct.setParent(ccCatId,{ lockPermissions: false })
+                await sqlProm("UPDATE stats SET value = value + 1 WHERE id = 9");
+                channel.send(`✅ Created ${ct}!`); 
+                cmdCCList(ct, spam ? 4 : mode);
+                getCCs();
+                callback();
+            })
+            .catch(async err => { 
+                // error handler
+                if(err?.rawError?.errors?.parent_id?._errors?.[0]?.code === "CHANNEL_PARENT_MAX_CHANNELS") {
+                    await sqlProm("UPDATE stats SET value = value + 1 WHERE id = 9");
+                    channel.send("⛔ Command error. Could not create new CCs! Re-trying."); 
+                    cmdCCCreate(channel, member, args, mode, callback, spam);
+                }
+                sendError(channel, err, "Could not create channel");
+                logO(err);
+            });
+        }
+            
+	}
+    
+    /**
     Cleans a cc name, removing disallowed emojis
     **/
     this.cleanCCName = function(name) {
