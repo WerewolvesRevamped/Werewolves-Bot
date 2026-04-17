@@ -23,10 +23,6 @@ const { exec } = require('node:child_process')
 
 config = require("./config.json");
 
-
-/* V1 Modules */
-require("./whispers.js")();
-
 // WIP V2 Modules
 require("./game/game.js")();
 

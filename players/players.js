@@ -181,7 +181,7 @@ module.exports = function() {
         const allPlayers = await sqlProm("SELECT * FROM players");
         
         const curPhase = getPhaseAsNumber();
-        if(curPhase < 1) return;
+        if(curPhase <= 1) return;
         
         for(let i = 0; i < allPlayers.length; i++) {
             const totalMessages = allPlayers[i].public_msgs + allPlayers[i].private_msgs;
