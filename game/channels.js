@@ -19,6 +19,43 @@ module.exports = function() {
     this.CC_PERMS_NONE = null;
     this.CC_PERMS_MEMBER_ROLE = { ViewChannel: false, SendMessages: true };
     this.CC_PERMS_MEMBER_NONE= { };
+    
+    
+	/**
+    Command: $cc
+    The CC command
+    **/
+	this.cmdCC = function(message, args, argsX) {
+		// Check subcommand
+		if(!args[0]) { 
+			message.channel.send(cmdHelp(message.channel, member, ["cc"]));
+			return; 
+		} else if(stats.gamephase != gp.INGAME && args[0] != "cleanup") { 
+			message.channel.send("⛔ Command error. Can only use CCs while a game is running."); 
+			return; 
+		}
+        
+		// Check Subcommand
+		switch(args[0]) {
+			case "create": cmdCCCreate(message.channel, message.member, args, 0, () => {}); break;
+			case "spam": cmdCCCreate(message.channel, message.member, args, 0, () => {}, true); break;
+			case "create_hidden": cmdCCCreate(message.channel, message.member, args, 1, () => {}); break;
+			case "add": cmdCCAdd(message.channel, message.member, args, 0); break;
+			case "remove": cmdCCRemove(message.channel, message.member, args, 0); break;
+			case "rename": cmdCCRename(message.channel, message.member, args, 0); break;
+			case "archive": cmdCCArchive(message.channel, message.member, 0); break;
+			case "promote": cmdCCPromote(message.channel, message.member, args, 0); break;
+			case "demote": cmdCCDemote(message.channel, message.member, args, 0); break;
+			case "leave": cmdCCLeave(message.channel, message.member); break;
+			case "list": cmdCCList(message.channel, 2); break;
+			case "owners": cmdCCList(message.channel, 3); break;
+			case "cleanup": if(checkGM(message)) cmdConfirm(message, "cc cleanup"); break;
+			case "ghostify": if(checkGM(message)) cmdCCGhostify(message.channel, message.member, 0); break;
+			case "create_multi": cmdCCCreateMulti(message.channel, message.member, argsX, 0); break;
+			case "create_multi_hidden": cmdCCCreateMulti(message.channel, message.member, argsX, 1); break;
+			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
+		}
+	}
 
 	/**
     Command: $cc add
@@ -303,6 +340,57 @@ module.exports = function() {
 	}
     
     /**
+    Command: $cc create_multi
+    Creates several ccs
+    **/
+	this.cmdCCCreateMulti = function(channel, member, args, type) {
+        let ccs = args.join(" ").split("~").splice(1).map(el => ("create " + el).split(" ")).splice(0, emojiIDs.length + 1);
+		createOneMultiCC(channel, member, ccs, type, 0);
+	}
+	
+	this.createOneMultiCC = function(channel, member, ccs, type, index) {
+		if(index >= ccs.length) {
+			channel.send("✅ Successfully created " + ccs.length + " CCs!");
+			return;
+		}
+		cmdCCCreate(channel, member, ccs[index], type, () => createOneMultiCC(channel, member, ccs, type, ++index));
+	}
+	
+	/**
+    Command: $cc cleanup
+    Deletes all ccs
+    **/
+	this.cmdCCCleanup = async function(channel) {
+        // get cc cats
+        let ccCats = await sqlProm("SELECT id FROM cc_cats");
+        
+        // iterate cats
+        for(let i = 0; i < ccCats.length; i++) {
+            if(!channel.guild.channels.cache.get(ccCats[i].id)) continue;
+            // get channels
+            let catChannels = channel.guild.channels.cache.get(ccCats[i].id).children.cache.toJSON();
+            // iterate channels and delete
+            for(let j = 0; j < catChannels.length; j++) {
+                await channel.guild.channels.cache.get(catChannels[j].id).delete();
+            }
+            // delete category
+            await channel.guild.channels.cache.get(ccCats[i].id).delete();
+            channel.send("✅ Successfully deleted a cc category!");
+        }
+        channel.send("✅ Successfully deleted ccs!");
+        // Reset CC Count
+        sqlSetStat(9, 0, result => {
+            channel.send("✅ Successfully reset cc counter!");
+        }, () => {
+            channel.send("⛔ Database error. Could not reset cc counter!");
+        });
+        // Reset CC Cat Database
+        await sqlProm("DELETE FROM cc_cats");
+        channel.send("✅ Successfully reset cc cat list!");
+        getCCCats();
+	}
+    
+    /**
     Cleans a cc name, removing disallowed emojis
     **/
     this.cleanCCName = function(name) {
@@ -311,6 +399,32 @@ module.exports = function() {
 		name = name.replace(/👻/,"ghost");
         return name;
     }
+    
+    /**
+    Command: $sc
+    Command to manages scs
+    **/
+	this.cmdSC = function(message, args) {
+		// Check subcommand
+		if(!args[0]) { 
+			message.channel.send(cmdHelp(channel, member, ["sc"]));
+			return; 
+		} else if(stats.gamephase != gp.INGAME && args[0] != "rename") { 
+			message.channel.send("⛔ Command error. Can only use SCs while a game is running."); 
+			return; 
+		}
+		// Check Subcommand
+		switch(args[0]) {
+			case "add": cmdSCAdd(message.channel, message.member, args, 1); break;
+			case "remove": cmdSCRemove(message.channel, message.member, args, 1); break;
+			case "rename": cmdCCRename(message.channel, message.member, args, 1, true); break;
+			case "list": cmdCCList(message.channel, 2, 1); break;
+			case "clear": cmdSCClear(message.channel); break;
+			case "clean": cmdSCClean(message.channel); break;
+			case "change": cmdSCChange(message.channel, args); break;
+			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
+		}
+	}
     
     /**
     Command: $sc add
@@ -500,6 +614,22 @@ module.exports = function() {
     */
 	this.isCC = function(channel) {
 		return !channel.parent ? true : cachedCCs.includes(channel.parentId);
+	}
+    
+	/**
+    CC (Category) Permissions
+    Returns default CC permissions
+    */
+	this.getCCCatPerms = function(guild) {
+		return [ getPerms(guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.participant, ["write"], ["read"]), getPerms(stats.sub, ["write"], ["read"]) ];
+	}
+    
+	/**
+    CC (Category) Permissions (Ghostly)
+    Returns default CC permissions  for ghostly ccs
+    */
+	this.getCCCatPermsGhostly = function(guild) {
+		return [ getPerms(guild.id, [], ["read"]), getPerms(stats.bot, ["manage", "read", "write"], []), getPerms(stats.gamemaster, ["manage", "read", "write"], []), getPerms(stats.helper, ["manage", "read", "write"], []), getPerms(stats.dead_participant, ["read"], ["write"]), getPerms(stats.ghost, ["write"], ["read"]), getPerms(stats.spectator, ["read"], ["write"]), getPerms(stats.participant, ["write"], ["read"]), getPerms(stats.sub, ["write"], ["read"]) ];
 	}
     
 }
