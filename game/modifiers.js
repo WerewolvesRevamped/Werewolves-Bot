@@ -28,31 +28,27 @@ module.exports = function() {
     Command: $modifiers list
     Lists all modifiers
     **/
-	this.cmdModifiersList = function(channel) {
+	this.cmdModifiersList = async function(channel) {
 		// Get all modifiers
-		sql("SELECT * FROM modifiers ORDER BY ai_id ASC", result => {
-			if(result.length > 0) {
-				// At least one modifier exists
-				channel.send("✳️ Sending a list of currently existing modifiers:");
-                
-                let resultByPlayer = {};
-                result.forEach(el => {
-                    if(!resultByPlayer[el.id]) resultByPlayer[el.id] = [];
-                    resultByPlayer[el.id].push(el);
-                });
-				// Send message
-				chunkArray(Object.entries(resultByPlayer).map(val => {
-                    let mods = val[1].map(el => `(${el.ai_id}) \`${toTitleCase(el.name)}\` ${getLUTEmoji(el.name, el.name)}`);
-                    return `<@${val[0]}> - ${mods.join(", ")}`;
-                }), 5).map(el => el.join("\n")).forEach(el => channel.send(el));
-			} else { 
-				// No modifier exist
-				channel.send("⛔ Database error. Could not find any modifiers!");
-			}
-		}, () => {
-			// DB error
-			channel.send("⛔ Database error. Couldn't look for modifiers list!");
-		});
+		let result = await sqlProm("SELECT * FROM modifiers ORDER BY ai_id ASC");
+        if(result.length <= 0) {
+            // No modifier exist
+            channel.send("⛔ Database error. Could not find any modifiers!");
+            return;
+        }
+        // At least one modifier exists
+        channel.send("✳️ Sending a list of currently existing modifiers:");
+        
+        let resultByPlayer = {};
+        result.forEach(el => {
+            if(!resultByPlayer[el.id]) resultByPlayer[el.id] = [];
+            resultByPlayer[el.id].push(el);
+        });
+        // Send message
+        chunkArray(Object.entries(resultByPlayer).map(val => {
+            let mods = val[1].map(el => `(${el.ai_id}) \`${toTitleCase(el.name)}\` ${getLUTEmoji(el.name, el.name)}`);
+            return `<@${val[0]}> - ${mods.join(", ")}`;
+        }), 5).map(el => el.join("\n")).forEach(el => channel.send(el));
 	}
     
     /**
@@ -76,12 +72,12 @@ module.exports = function() {
 			return; 
 		} 
         
-        sql("INSERT INTO modifiers (id, name) VALUES (" + connection.escape(user) + "," + connection.escape(args[2]) + ")", result => {
+        try {
+            await sqlProm("INSERT INTO modifiers (id, name) VALUES (" + connection.escape(user) + "," + connection.escape(args[2]) + ")");
             channel.send(`✅ Added modifier \`${args[2]}\` for <@${user}>.`);
-        }, () => {
+        } catch (err) {
 			channel.send("⛔ Database error. Couldn't register modifiers!");
-        });
-        
+        }
     }
     
     /**
@@ -100,19 +96,19 @@ module.exports = function() {
 			return; 
         }
         
-        sql("DELETE FROM modifiers WHERE ai_id=" + connection.escape(args[1]), result => {
+        try {
+            await sqlProm("DELETE FROM modifiers WHERE ai_id=", args[1]);
             channel.send(`✅ Deleted modifier \`${existing[0].name}\` for <@${existing[0].id}>.`);
-        }, () => {
+        } catch (err) {
 			channel.send("⛔ Database error. Couldn't delete modifiers!");
-        });
-        
+        }
     }
     
     /**
     Reset Modifiers
     **/
     this.resetModifiers = async function() {
-        sql("DELETE FROM modifiers");
+        return sqlProm("DELETE FROM modifiers");
     }
     
     /**

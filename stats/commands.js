@@ -176,21 +176,20 @@ module.exports = function () {
         allowImmediate = true;
     }
 
-    this.updateGameStatus = function() {
-        sql("SELECT alive FROM players WHERE type='player'", result => {
-            let gameStatus = mainGuild.channels.cache.get(stats.game_status);
-            switch(+stats.gamephase) {
-                case gp.NONE: gameStatus.setName("⛔ No Game"); break;
-                case gp.SIGNUP:
-                    if(result.length > 0) gameStatus.setName("📰 Signups Open (" + result.length + ")");
-                    else gameStatus.setName("📰 Signups Open");
-                    break;
-                case gp.SETUP: gameStatus.setName("📝 Game Setup (" + result.length + ")"); break;
-                case gp.INGAME: gameStatus.setName("🔁 In-Game (" + result.filter(el => el.alive==1).length + "/" + result.length + ")"); break;
-                case gp.POSTGAME: gameStatus.setName("✅ Game Concluded"); break;
-                case gp.ARCHIVED: gameStatus.setName("✅ Game Archived"); break;
-            }
-        });
+    this.updateGameStatus = async function() {
+        let players = await sqlProm("SELECT alive FROM players WHERE type='player'");
+        let gameStatus = mainGuild.channels.cache.get(stats.game_status);
+        switch(+stats.gamephase) {
+            case gp.NONE: gameStatus.setName("⛔ No Game"); break;
+            case gp.SIGNUP:
+                if(players.length > 0) gameStatus.setName("📰 Signups Open (" + players.length + ")");
+                else gameStatus.setName("📰 Signups Open");
+                break;
+            case gp.SETUP: gameStatus.setName("📝 Game Setup (" + players.length + ")"); break;
+            case gp.INGAME: gameStatus.setName("🔁 In-Game (" + players.filter(el => el.alive==1).length + "/" + players.length + ")"); break;
+            case gp.POSTGAME: gameStatus.setName("✅ Game Concluded"); break;
+            case gp.ARCHIVED: gameStatus.setName("✅ Game Archived"); break;
+        }
     }
 
 }

@@ -28,24 +28,18 @@ module.exports = function() {
     Command: $host_information list
     Lists all host information
     **/
-	this.cmdHostInformationList = function(channel) {
+	this.cmdHostInformationList = async function(channel) {
 		// Get all host information
-		sql("SELECT * FROM host_information ORDER BY ai_id ASC", result => {
-			if(result.length > 0) {
-				// At least one HI exists
-				channel.send("✳️ Sending a list of currently existing host information:");
-				// Send message
-				chunkArray(result.map(hi => {
-                    return `${hi.ai_id} - <@${hi.id}> \`${hi.name}\`: \`${hi.value}\``;
-                }), 20).map(el => el.join("\n")).forEach(el => channel.send(el));
-			} else { 
-				// No host info exist
-				channel.send("⛔ Database error. Could not find any host information!");
-			}
-		}, () => {
-			// DB error
-			channel.send("⛔ Database error. Couldn't look for host information list!");
-		});
+		let hi = await sqlProm("SELECT * FROM host_information ORDER BY ai_id ASC");
+        if(hi.length <= 0) {
+            channel.send("⛔ Database error. Could not find any host information!");
+        }
+        // At least one HI exists
+        channel.send("✳️ Sending a list of currently existing host information:");
+        // Send message
+        chunkArray(hi.map(hi => {
+            return `${hi.ai_id} - <@${hi.id}> \`${hi.name}\`: \`${hi.value}\``;
+        }), 20).map(el => el.join("\n")).forEach(el => channel.send(el));
 	}
     
     /**
@@ -72,12 +66,12 @@ module.exports = function() {
         let hi = argsX.join(" ");
         hi = hi.replace(/~/g,"\n")
         
-        sql("INSERT INTO host_information (id, name, value) VALUES (" + connection.escape(user) + "," + connection.escape(args[2]) + "," + connection.escape(hi) + ")", result => {
+        try {
+            await sqlProm("INSERT INTO host_information (id, name, value) VALUES (" + connection.escape(user) + "," + connection.escape(args[2]) + "," + connection.escape(hi) + ")");
             channel.send(`✅ Set host information \`${args[2]}\` for <@${user}> as \`${hi}\`.`);
-        }, () => {
-			channel.send("⛔ Database error. Couldn't register host information!");
-        });
-        
+        } catch (err) {
+            channel.send("⛔ Database error. Couldn't register host information!");
+        }  
     }
     
     /**
@@ -96,19 +90,19 @@ module.exports = function() {
 			return; 
         }
         
-        sql("DELETE FROM host_information WHERE ai_id=" + connection.escape(args[1]), result => {
+        try {
+            await sqlPromEsc("DELETE FROM host_information WHERE ai_id=", args[1]);
             channel.send(`✅ Deleted host information \`${existing[0].name}\` for <@${existing[0].id}>.`);
-        }, () => {
+        } catch (err) {
 			channel.send("⛔ Database error. Couldn't delete host information!");
-        });
-        
+        }
     }
     
     /**
     Reset Host Information
     **/
     this.resetHostInformation = async function() {
-        sql("DELETE FROM host_information");
+        return sqlProm("DELETE FROM host_information");
     }
     
     /**

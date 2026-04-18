@@ -39,30 +39,28 @@ module.exports = function() {
 			return; 
 		}
         // Get all groups values
-        sql("SELECT * FROM teams WHERE name = " + connection.escape(args[1]), async result => {
-            result = result[0];
-            // get the basic embed
-             var embed = await getBasicEmbed(channel.guild);
-             // set embed title
-            embed.author = { name: result.display_name };
-            
-            // get lut icon if applicable
-            let lutval = applyLUT(result.name);
-            if(!lutval) lutval = applyLUT(result.display_name);
-            if(lutval) { // set icon and name
-                //console.log(`${iconRepoBaseUrl}${lutval}`);
-                embed.thumbnail = { "url": `${iconRepoBaseUrl}${lutval}.png` };
-                embed.author.icon_url = `${iconRepoBaseUrl}${lutval}.png`;
-            } 
-            
-            // Add a field for every role value
-            for(attr in result) {
-                embed.fields.push({ "name": toTitleCase(attr), "value": (result[attr]+"").substr(0, 1000) + ((result[attr]+"").length > 1000 ? " **...**" : "") });
-            }
-            
-            // Send the embed
-            channel.send({ embeds: [ embed ] }); 
-        });
+        let result = await sqlPromOneEsc("SELECT * FROM teams WHERE name = ", args[1]);
+        // get the basic embed
+         var embed = await getBasicEmbed(channel.guild);
+         // set embed title
+        embed.author = { name: result.display_name };
+        
+        // get lut icon if applicable
+        let lutval = applyLUT(result.name);
+        if(!lutval) lutval = applyLUT(result.display_name);
+        if(lutval) { // set icon and name
+            //console.log(`${iconRepoBaseUrl}${lutval}`);
+            embed.thumbnail = { "url": `${iconRepoBaseUrl}${lutval}.png` };
+            embed.author.icon_url = `${iconRepoBaseUrl}${lutval}.png`;
+        } 
+        
+        // Add a field for every role value
+        for(attr in result) {
+            embed.fields.push({ "name": toTitleCase(attr), "value": (result[attr]+"").substr(0, 1000) + ((result[attr]+"").length > 1000 ? " **...**" : "") });
+        }
+        
+        // Send the embed
+        channel.send({ embeds: [ embed ] }); 
     }
     
     /**
@@ -70,25 +68,21 @@ module.exports = function() {
     Lists all teams
     **/
 	/* Lists all team names */
-	this.cmdTeamsList = function(channel) {
+	this.cmdTeamsList = async function(channel) {
 		// Get all teams
-		sql("SELECT * FROM teams ORDER BY ai_id ASC", result => {
-			if(result.length > 0) {
-				// At least one team exists
-				channel.send("✳️ Sending a list of currently existing teams:");
-				// Send message
-				chunkArray(result.map(team => {
-                    let emoji = getLUTEmoji(team.name, team.display_name);
-                    return `**${emoji} ${toTitleCase(team.display_name)}** (${team.win_condition})`;
-                }), 20).map(el => el.join("\n")).forEach(el => channel.send(el));
-			} else { 
-				// No teams exist
-				channel.send("⛔ Database error. Could not find any teams!");
-			}
-		}, () => {
-			// DB error
-			channel.send("⛔ Database error. Couldn't look for team list!");
-		});
+		let teams = await sqlProm("SELECT * FROM teams ORDER BY ai_id ASC");
+        if(teams.length <= 0) {
+            // No teams exist
+            channel.send("⛔ Database error. Could not find any teams!");
+            return;
+        }
+        // At least one team exists
+        channel.send("✳️ Sending a list of currently existing teams:");
+        // Send message
+        chunkArray(teams.map(team => {
+            let emoji = getLUTEmoji(team.name, team.display_name);
+            return `**${emoji} ${toTitleCase(team.display_name)}** (${team.win_condition})`;
+        }), 20).map(el => el.join("\n")).forEach(el => channel.send(el));
 	}
 
     

@@ -327,31 +327,27 @@ module.exports = function() {
 	}
 	
 	/* Prepare info for sheet */
-	this.cmdSheetPrepare = function(channel, seperator, mode) {
+	this.cmdSheetPrepare = async function(channel, seperator, mode) {
 		// Check gamephase
 		if(stats.gamephase >= gp.INGAME) { 
 			channel.send("⛔ Command error. Can't prepare an already started game."); 
 			return; 
 		}
 		// Get all players
-		sql("SELECT id,emoji FROM players WHERE type='player'", result => {
-			// Print all players
-			let playerList;
-			switch(mode) {
-				case 1:
-					playerList = result.map(el => "=SPLIT(\"" + channel.guild.members.cache.get(el.id).user.username + "," + el.id + "\"" + seperator + "\",\")").join("\n");
-					channel.send("**Copy this into a google sheet to have all names & ids**\n*Make sure to paste in with ctrl+shift+v\nColumns needed by `" + stats.prefix + "sheet import`: Name, Id, Nickname, Role*");
-				break;
-				case 2:
-					playerList = result.map(el => channel.guild.members.cache.get(el.id).user.username + "," + el.id + ",").join("\n");
-					channel.send("**Use this to have all names & ides**\n*Values needed by `" + stats.prefix + "sheet mimport`: Name,Id,Nickname,Role*");
-				break;
-			}
-			channel.send("```\n" + playerList + "\n```");
-		}, () => {
-			// db error
-			channel.send("⛔ Database error. Could not list signed up players!");
-		});
+		let players = await sqlProm("SELECT id,emoji FROM players WHERE type='player'");
+        // Print all players
+        let playerList;
+        switch(mode) {
+            case 1: // for Sheets
+                playerList = players.map(el => "=SPLIT(\"" + channel.guild.members.cache.get(el.id).user.username + "," + el.id + "\"" + seperator + "\",\")").join("\n");
+                channel.send("**Copy this into a google sheet to have all names & ids**\n*Make sure to paste in with ctrl+shift+v\nColumns needed by `" + stats.prefix + "sheet import`: Name, Id, Nickname, Role*");
+            break;
+            case 2: // for Mobile
+                playerList = players.map(el => channel.guild.members.cache.get(el.id).user.username + "," + el.id + ",").join("\n");
+                channel.send("**Use this to have all names & ides**\n*Values needed by `" + stats.prefix + "sheet mimport`: Name,Id,Nickname,Role*");
+            break;
+        }
+        channel.send("```\n" + playerList + "\n```");
 	}
 	
 	/* Import info from sheet */
@@ -392,22 +388,18 @@ module.exports = function() {
 	this.cmdSheetImportRole = async function(m, el) {
         // check valid role
         let parsedRole = parseRole(el[3]);
-		// Set Role
-		if(verifyRole(parsedRole)) {
-			// All roles are valid -> Set it
-            let roleData = await getRoleDataFromName(parsedRole);
-			sql("UPDATE players SET role = " + connection.escape(parsedRole) + ",orig_role = " + connection.escape(parsedRole) + ",alignment=" + connection.escape(roleData.team) + ",activation=" + connection.escape(roleData.all.activation) + " WHERE id = " + connection.escape(el[1]), result => {
-				m.edit(m.content + "\n	✅ Set role to `" + parsedRole + "`!").then(m => {
-				});
-			}, () => {
-				m.edit(m.content + "\n	⛔ Database error. Could not set role!").then(m => {
-				});
-			});
-		} else {
-			// Invalid roles
-			m.edit(m.content + "\n	⛔ Command error. Role `" + parsedRole + "` does not exist!").then(m => {
-			});
-		}
+		if(!verifyRole(parsedRole)) {
+			m.edit(m.content + "\n	⛔ Command error. Role `" + parsedRole + "` does not exist!");
+            return;
+        }
+        // Roles isvalid -> Set it
+        let roleData = await getRoleDataFromName(parsedRole);
+        try {
+            await sqlProm("UPDATE players SET role = " + connection.escape(parsedRole) + ",orig_role = " + connection.escape(parsedRole) + ",alignment=" + connection.escape(roleData.team) + ",activation=" + connection.escape(roleData.all.activation) + " WHERE id = " + connection.escape(el[1]));
+            m.edit(m.content + "\n	✅ Set role to `" + parsedRole + "`!");
+        } catch (err) {
+            m.edit(m.content + "\n	⛔ Database error. Could not set role!");
+        }
 	}
 	
 	/* Pings all players with the New Game Ping role */

@@ -30,50 +30,36 @@ module.exports = function() {
     Command: $theme list
     Lists all themes/themed words 
     */
-	this.cmdThemeList = function(channel, args) {
+	this.cmdThemeList = async function(channel, args) {
 		if(!args[1]) {
 			// Get all roles
-			sql("SELECT theme FROM theme ORDER BY theme ASC", result => {
-				if(result.length > 0) {
-					// At least one role exists  
-					channel.send("✅ Current Themes: `default`" + removeDuplicates(result.map(el => el.theme)).map(el => ", `" + el + "`").join(""));
-				} else { 
-					// No roles exist
-					channel.send("⛔ Database error. Could not find any themes other than `default`!");
-				}
-			}, () => {
-				// DB error
-				channel.send("⛔ Database error. Couldn't look for theme list!");
-			});
+			let result = await sqlProm("SELECT theme FROM theme ORDER BY theme ASC");
+            channel.send("✅ Current Themes: `default`" + removeDuplicates(result.map(el => el.theme)).map(el => ", `" + el + "`").join(""));
 		} else {
-			sql("SELECT original,new FROM theme WHERE theme = " + connection.escape(args[1]) + " ORDER BY theme ASC", result => {
-				if(result.length > 0) {
-					// At least one role exists
-                    result = result.map(el => "\n" + el.original + " => " + el.new);
-                    //console.log(result);
-                    // chunk messages
-                    let msg = "";
-                    let msgs = [];
-                    for(let i = 0; i < result.length; i++) {
-                        if((msg.length + result[i].length) < 1900) {
-                            msg = msg + result[i];
-                        } else {
-                            msgs.push(msg);
-                            msg = result[i];
-                        }
-                    }
-                    msgs.push(msg); // final message (<1900)
-                    // send messages
-					channel.send("✅ Theme: `" + args[1] + "`" + msgs[0]);
-                    for(let i = 1; i < msgs.length; i++) channel.send(msgs[i]);
-				} else { 
-					// No roles exist
-					channel.send("⛔ Database error. Could not find any entries for theme `" + args[1] + "`!");
-				}
-			}, () => {
-				// DB error
-				channel.send("⛔ Database error. Couldn't look for theme list!");
-			});
+			let result = await sqlProm("SELECT original,new FROM theme WHERE theme = " + connection.escape(args[1]) + " ORDER BY theme ASC");
+            if(result.length <= 0) {
+                // No roles exist
+                channel.send("⛔ Database error. Could not find any entries for theme `" + args[1] + "`!");
+                return;
+            }
+            // At least one role exists
+            result = result.map(el => "\n" + el.original + " => " + el.new);
+            //console.log(result);
+            // chunk messages
+            let msg = "";
+            let msgs = [];
+            for(let i = 0; i < result.length; i++) {
+                if((msg.length + result[i].length) < 1900) {
+                    msg = msg + result[i];
+                } else {
+                    msgs.push(msg);
+                    msg = result[i];
+                }
+            }
+            msgs.push(msg); // final message (<1900)
+            // send messages
+            channel.send("✅ Theme: `" + args[1] + "`" + msgs[0]);
+            for(let i = 1; i < msgs.length; i++) channel.send(msgs[i]);
 		}
 	}
 	

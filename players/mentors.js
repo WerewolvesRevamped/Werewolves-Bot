@@ -31,7 +31,7 @@ module.exports = function() {
 			return;
 		} else if(isSignedUp(memMentor) && isSignedupMentor(memMentor)) {
             // if signedup and mentor signedup, remove normal signup
-            sql("DELETE FROM players WHERE type='player' AND id=" + connection.escape(mentor));
+            sqlPromEsc("DELETE FROM players WHERE type='player' AND id=", mentor);
             removeRoleRecursive(memMentor, channel, stats.signed_up, "signed up");
 		} else if(stats.gamephase < gp.SIGNUP) {
 			channel.send("⛔ Command error. Can't assign mentors while there is no game."); 

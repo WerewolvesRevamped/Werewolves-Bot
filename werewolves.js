@@ -1065,11 +1065,8 @@ client.on("messageReactionAdd", async (reaction, user) => {
     let member = reaction.message.guild.members.cache.get(user.id);
 	// Handle confirmation messages
 	if(reaction.emoji.name === "✅" && isGameMaster(member)) {
-		sql("SELECT time,action FROM confirm_msg WHERE id = " + connection.escape(reaction.message.id), result => {
-			if(result.length > 0) confirmAction(result[0], reaction.message);
-		}, () => {
-			reaction.message.edit("⛔ Database error. Failed to handle confirmation message!");
-		});
+		let confirmMsg = await sqlPromOneEsc("SELECT time,action FROM confirm_msg WHERE id = ", reaction.message.id);
+        if(confirmMsg) confirmAction(confirmMsg, reaction.message);
 	// Handle reaction ingame
 	} else if(stats.gamephase == gp.INGAME) {
 		// Remove unallowed reactions

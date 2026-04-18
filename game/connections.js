@@ -148,13 +148,12 @@ module.exports = function() {
     **/
     this.connectionSend = function(conName, msg, disguise = false) {
         // get connected channels from DB
-        sql("SELECT channel_id FROM connected_channels WHERE id = " + connection.escape(conName), result => {
-            // iterate through all connected channels
-            for(let i = 0; i < result.length; i++) {
-                if(disguise) sendMessageDisguise(result[i].channel_id, msg, disguise); // has disguise
-                else sendMessage(result[i].channel_id, msg); // no disguise
-            }
-        });
+        let connections = sqlPromEsc("SELECT channel_id FROM connected_channels WHERE id = ", conName);
+        // iterate through all connected channels
+        for(let i = 0; i < connections.length; i++) {
+            if(disguise) sendMessageDisguise(connections[i].channel_id, msg, disguise); // has disguise
+            else sendMessage(connections[i].channel_id, msg); // no disguise
+        }
     }
     
     /**
