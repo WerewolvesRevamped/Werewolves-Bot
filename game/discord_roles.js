@@ -31,25 +31,22 @@ module.exports = function() {
     Lists all discord roles
     **/
 	/* Lists all groups names */
-	this.cmdDRList = function(channel) {
+	this.cmdDRList = async function(channel) {
 		// Get all groups
-		sql("SELECT * FROM discord_roles ORDER BY name ASC", result => {
-			if(result.length > 0) {
-				// At least one DR exists
-				channel.send("✳️ Sending a list of currently existing discord roles:");
-				// Send message
-				chunkArray(result.map(dr => {
-                    let emoji = getLUTEmoji(dr.name, toTitleCase(dr.name));
-                    return `**${emoji} ${toTitleCase(dr.name)}:** <@&${dr.id}>`;
-                }), 20).map(el => el.join("\n")).forEach(el => channel.send(el));
-			} else { 
-				// No groups exist
-				channel.send("⛔ Database error. Could not find any discord roles!");
-			}
-		}, () => {
-			// DB error
-			channel.send("⛔ Database error. Couldn't look for discord role list!");
-		});
+		let result = await sqlProm("SELECT * FROM discord_roles ORDER BY name ASC");
+        if(result.length <= 0) {
+            // No groups exist
+            channel.send("⛔ Database error. Could not find any discord roles!");
+            return;
+        }
+        
+        // At least one DR exists
+        channel.send("✳️ Sending a list of currently existing discord roles:");
+        // Send message
+        chunkArray(result.map(dr => {
+            let emoji = getLUTEmoji(dr.name, toTitleCase(dr.name));
+            return `**${emoji} ${toTitleCase(dr.name)}:** <@&${dr.id}>`;
+        }), 20).map(el => el.join("\n")).forEach(el => channel.send(el));
 	}
     
     /**
@@ -68,13 +65,9 @@ module.exports = function() {
 			return; 
         }
         
-        sql("INSERT INTO discord_roles (name, id) VALUES (" + connection.escape(args[1]) + "," + connection.escape(args[2]) + ")", result => {
-            channel.send(`✅ Registered <@&${args[2]}> as ${toTitleCase(args[1])}.`);
-            cacheDR();
-        }, () => {
-			channel.send("⛔ Database error. Couldn't register discord role!");
-        });
-        
+        let result = await sqlProm("INSERT INTO discord_roles (name, id) VALUES (" + connection.escape(args[1]) + "," + connection.escape(args[2]) + ")");
+        channel.send(`✅ Registered <@&${args[2]}> as ${toTitleCase(args[1])}.`);
+        cacheDR();
     }
     
     /**
@@ -93,13 +86,9 @@ module.exports = function() {
 			return; 
         }
         
-        sql("DELETE FROM discord_roles WHERE name=" + connection.escape(args[1]), result => {
-            channel.send(`✅ Deleted ${toTitleCase(args[1])} from DR.`);
-            cacheDR();
-        }, () => {
-			channel.send("⛔ Database error. Couldn't delete discord role!");
-        });
-        
+        let result = await sqlPromEsc("DELETE FROM discord_roles WHERE name=", args[1]);
+        channel.send(`✅ Deleted ${toTitleCase(args[1])} from DR.`);
+        cacheDR();      
     }
     
     /**

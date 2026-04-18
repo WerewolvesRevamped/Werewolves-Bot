@@ -201,11 +201,7 @@ module.exports = function() {
     **/
     this.initActionData = function(src_ref, ability) {
         if(!ability || !ability.id) return;
-        return new Promise(res => {
-            sql("INSERT INTO action_data (src_ref,ability_id,quantity,last_phase) VALUES (" + connection.escape(src_ref) + "," + connection.escape(ability.id) + ",0,-2)", result => {
-                 res();
-            });
-        });
+        return sqlProm("INSERT INTO action_data (src_ref,ability_id,quantity,last_phase) VALUES (" + connection.escape(src_ref) + "," + connection.escape(ability.id) + ",0,-2)");
     }
     
     /**
@@ -213,35 +209,25 @@ module.exports = function() {
     **/
     this.increaseActionQuantity = function(src_ref, ability) {
         if(!ability || !ability.id) return;
-        return new Promise(res => {
-            sql("UPDATE action_data SET quantity=quantity+1,last_phase=" + getPhaseAsNumber() + " WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=" + connection.escape(ability.id), result => {
-                 res();
-            });
-        });
+        return sqlProm("UPDATE action_data SET quantity=quantity+1,last_phase=" + getPhaseAsNumber() + " WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=" + connection.escape(ability.id));
     }    
         
     /**
     Get action quantity
     **/
-    this.getActionQuantity = function(src_ref, ability) {
+    this.getActionQuantity = async function(src_ref, ability) {
         if(!ability || !ability.id) return -1;
-        return new Promise(res => {
-            sql("SELECT * FROM action_data WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=" + connection.escape(ability.id), result => {
-                if(!result[0]) res(-1);
-                else res(result[0].quantity);
-            });
-        });
+        let result = await sqlProm("SELECT * FROM action_data WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=", ability.id);
+        if(!result[0]) return -1,
+        else return result[0].quantity;
     }
     
     /**
     Sets the last target
     **/
-    this.setLastTarget = function(src_ref, ability, lastTarget) {
-        return new Promise(res => {
-            sql("UPDATE action_data SET last_target=" + connection.escape(lastTarget) + ",last_phase=" + getPhaseAsNumber() + " WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=" + connection.escape(ability.id), result => {
-                 res();
-            });
-        });
+    this.setLastTarget = async function(src_ref, ability, lastTarget) {
+        let result = await sqlProm("UPDATE action_data SET last_target=" + connection.escape(lastTarget) + ",last_phase=" + getPhaseAsNumber() + " WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=" + connection.escape(ability.id));
+        return result;
     }   
     
     /**
@@ -257,24 +243,19 @@ module.exports = function() {
     /**
     Get last target
     **/
-    this.getLastTarget = function(src_ref, ability) {
-        return new Promise(res => {
-            sql("SELECT * FROM action_data WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=" + connection.escape(ability.id), result => {
-                if(!result[0]) res("");
-                else res(result[0].last_target);
-            });
-        });
+    this.getLastTarget = async function(src_ref, ability) {
+        let result = await sqlProm("SELECT * FROM action_data WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=" + connection.escape(ability.id));
+        if(!result[0]) return "";
+        else return result[0].last_target;
     }
       
     /**
     Get last used phase
     **/
-    this.getLastPhase = function(src_ref, ability) {
-        return new Promise(res => {
-            sql("SELECT * FROM action_data WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=" + connection.escape(ability.id), result => {
-                if(!result[0]) res(-10);
-                else res(+result[0].last_phase);
-            });
-        });
+    this.getLastPhase = async function(src_ref, ability) {
+        let result = await sqlProm("SELECT * FROM action_data WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=" + connection.escape(ability.id));
+        if(!result[0]) return -10;
+        else return +result[0].last_phase;
     }
+    
 }

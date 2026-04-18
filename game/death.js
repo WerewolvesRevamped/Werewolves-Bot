@@ -23,21 +23,17 @@ module.exports = function() {
 	}
 
 	/* Lists current killq */
-	this.cmdKillqList = function(channel) {
+	this.cmdKillqList = async function(channel) {
 		// Get killq
-		sql("SELECT killq.id, players.role, killq.type FROM killq INNER JOIN players ON killq.id = players.id", result => {
-			// Print killq
-			let playerList = result.map(el => {
-                let member = channel.guild.members.cache.get(el.id);
-                let rName = toTitleCase(el.role.split(",")[0]);
-                let rEmoji = getRoleEmoji(rName);
-                return idToEmoji(el.id) + " - " + member.displayName + "/" + member.user.username + " - " + (rEmoji ? `<:${rEmoji.name}:${rEmoji.id}> ` : "") + rName + (stats.haunting ? (el.type==="true kill"?" ☠️":" 👻") : "");
-            }).join("\n");
-			channel.send("**Kill Queue** | Total: " +  result.length + "\n" + playerList);
-		}, () => {
-			// Db error
-			channel.send("⛔ Database error. Could not list kill queue!");
-		});
+		let result = await sqlProm("SELECT killq.id, players.role, killq.type FROM killq INNER JOIN players ON killq.id = players.id");
+        // Print killq
+        let playerList = result.map(el => {
+            let member = channel.guild.members.cache.get(el.id);
+            let rName = toTitleCase(el.role.split(",")[0]);
+            let rEmoji = getRoleEmoji(rName);
+            return idToEmoji(el.id) + " - " + member.displayName + "/" + member.user.username + " - " + (rEmoji ? `<:${rEmoji.name}:${rEmoji.id}> ` : "") + rName + (stats.haunting ? (el.type==="true kill"?" ☠️":" 👻") : "");
+        }).join("\n");
+        channel.send("**Kill Queue** | Total: " +  result.length + "\n" + playerList);
 	}
 
 	/* Add an user to the killq */
@@ -76,13 +72,9 @@ module.exports = function() {
 			// Remove from killq
 			let playerList = players.map(el =>"`" + channel.guild.members.cache.get(el).displayName + "`").join(", ");
 			channel.send("✳ Removing " + players.length + " player" + (players.length != 1 ? "s" : "") + " (" + playerList + ") from the kill queue!");
-			players.forEach(el => {
-				sql("DELETE FROM killq WHERE id = " + connection.escape(el), result => {
-					channel.send("✅ Removed `" +  channel.guild.members.cache.get(el).displayName + "` from the kill queue!");
-				}, () => {
-					// DB error
-					channel.send("⛔ Database error. Could not remove " +  channel.guild.members.cache.get(el) + " from the kill queue!");
-				});	
+			players.forEach(async el => {
+				await sqlPromEsc("DELETE FROM killq WHERE id = ", el);
+                channel.send("✅ Removed `" +  channel.guild.members.cache.get(el).displayName + "` from the kill queue!");
 			});
 		}  else {
 			// No valid players

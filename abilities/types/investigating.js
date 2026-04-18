@@ -292,23 +292,16 @@ module.exports = function() {
     Returns a player's role's key fields
     **/
     this.getRoleDataFromPlayer = async function(player) {
-        return new Promise(res => {
-            sql("SELECT players.role,players.alignment,roles.class,roles.category,roles.team FROM players INNER JOIN roles ON roles.name=players.role WHERE players.id=" + connection.escape(player), async result => {
-                res(result[0]);
-            });
-        });
+        return await sqlPromOneEsc("SELECT players.role,players.alignment,roles.class,roles.category,roles.team FROM players INNER JOIN roles ON roles.name=players.role WHERE players.id=", player);
     }    
     
     /**
     Returns a role's key fields
     **/
     this.getRoleDataFromRole = async function(role) {
-        return new Promise(res => {
-            sql("SELECT name,class,category,team FROM roles WHERE name=" + connection.escape(role), async result => {
-                result[0].role = result[0].name; // alias the name field to have same format as getRoleDataFromPlayer
-                res(result[0]);
-            });
-        });
+        let result = await sqlPromOneEsc("SELECT name,class,category,team FROM roles WHERE name=", role);
+        result.role = result.name; // alias the name field to have same format as getRoleDataFromPlayer
+        return result;
     }    
     
 }

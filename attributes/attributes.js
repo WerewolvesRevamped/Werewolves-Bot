@@ -57,25 +57,21 @@ module.exports = function() {
 	/* Lists all attribute names */
 	this.cmdAttributesActive = function(channel) {
 		// Get all attributes
-		sql("SELECT * FROM active_attributes ORDER BY attr_type ASC", result => {
-			if(result.length > 0) {
-				// At least one attribute exists
-				channel.send("✳️ Sending a list of currently existing active attributes instances:\nAI ID: AttrType - Owner (Duration) [Values] {Source}");
-				// Send message
-				chunkArray(result.map(attribute => {
-                    const alive = attribute.alive === 0 ? " 💀" : (attribute.alive === 2 ? " 👻" : "");
-                    const ownerText = srcRefToText(`${attribute.owner_type}:${attribute.owner}`);
-                    const attrList = `${attribute.val1};${attribute.val2};${attribute.val3};${attribute.val4}`;
-                    return `\`${attribute.ai_id}\`: **${toTitleCase(attribute.attr_type)}** - ${ownerText} (~${toTitleCase(attribute.duration)}) [${attrList}] {${srcNameToText(attribute.src_name)} - ${srcRefToText(attribute.src_ref, null, false)}}${alive}`;
-                }), 10).map(el => el.join("\n")).forEach(el => channel.send(el));
-			} else { 
-				// No attributes exist
-				channel.send("⛔ Database error. Could not find any active attribute instances!");
-			}
-		}, () => {
-			// DB error
-			channel.send("⛔ Database error. Couldn't look for active attribute instance list!");
-		});
+		let result = await sqlProm("SELECT * FROM active_attributes ORDER BY attr_type ASC");
+        if(result.length <= 0) {
+            // No attributes exist
+            channel.send("⛔ Database error. Could not find any active attribute instances!");
+        } else {
+            // At least one attribute exists
+            channel.send("✳️ Sending a list of currently existing active attributes instances:\nAI ID: AttrType - Owner (Duration) [Values] {Source}");
+            // Send message
+            chunkArray(result.map(attribute => {
+                const alive = attribute.alive === 0 ? " 💀" : (attribute.alive === 2 ? " 👻" : "");
+                const ownerText = srcRefToText(`${attribute.owner_type}:${attribute.owner}`);
+                const attrList = `${attribute.val1};${attribute.val2};${attribute.val3};${attribute.val4}`;
+                return `\`${attribute.ai_id}\`: **${toTitleCase(attribute.attr_type)}** - ${ownerText} (~${toTitleCase(attribute.duration)}) [${attrList}] {${srcNameToText(attribute.src_name)} - ${srcRefToText(attribute.src_ref, null, false)}}${alive}`;
+            }), 10).map(el => el.join("\n")).forEach(el => channel.send(el));
+        }
 	}
    
     /**
@@ -129,7 +125,7 @@ module.exports = function() {
     Command: $attributes delete
     Deletes an active attribute instances
     **/
-	this.cmdAttributesDelete = function(channel, args) {
+	this.cmdAttributesDelete = async function(channel, args) {
 		if(!args[1]) {  
 			channel.send("⛔ Syntax error. Incorrect amount of parameters!"); 
 			return; 
@@ -139,20 +135,16 @@ module.exports = function() {
 		}
         
 		// Get all attributes
-		sql("DELETE FROM active_attributes WHERE ai_id=" + connection.escape(args[1]), result => {
-            channel.send("✅ Deleted active attribute instance.");
-            cacheActiveCustomAttributes();
-		}, () => {
-			// DB error
-			channel.send("⛔ Database error. Couldn't delete active attribute instance!");
-		});
+		await sqlPromEsc("DELETE FROM active_attributes WHERE ai_id=", args[1]);
+        channel.send("✅ Deleted active attribute instance.");
+        cacheActiveCustomAttributes();
 	}
     
     /**
     Command: $attributes edit
     Edits an active attribute instances
     **/
-	this.cmdAttributesEdit = function(channel, args) {
+	this.cmdAttributesEdit = async function(channel, args) {
 		if(!args[1] || !args[2] || !args[3]) {  
 			channel.send("⛔ Syntax error. Incorrect amount of parameters!"); 
 			return; 
@@ -165,20 +157,16 @@ module.exports = function() {
 		}
         
 		// Get all attributes
-		sql("UPDATE active_attributes SET " + args[2] + "=" + connection.escape(args[3]) + "WHERE ai_id=" + connection.escape(args[1]), result => {
-            channel.send("✅ Updated `" + args[2] + "` to `" + args[3] + "` for active attribute instance.");
-            cacheActiveCustomAttributes();
-		}, () => {
-			// DB error
-			channel.send("⛔ Database error. Couldn't edit active attribute instance!");
-		});
+		await sqlPromEsc("UPDATE active_attributes SET " + args[2] + "=" + connection.escape(args[3]) + "WHERE ai_id=", args[1]);
+        channel.send("✅ Updated `" + args[2] + "` to `" + args[3] + "` for active attribute instance.");
+        cacheActiveCustomAttributes();
 	}
     
     /**
     Command: $attributes view
     View an active attribute instances
     **/
-	this.cmdAttributesView = function(channel, args) {
+	this.cmdAttributesView = async function(channel, args) {
 		if(!args[1]) {  
 			channel.send("⛔ Syntax error. Incorrect amount of parameters!"); 
 			return; 
@@ -188,13 +176,9 @@ module.exports = function() {
 		}
         
 		// Get all attributes
-		sql("SELECT * FROM active_attributes WHERE ai_id=" + connection.escape(args[1]), result => {
-            channel.send("✅ Viewing attribute:\n" +  Object.entries(new Object(result[0])).map(el => el[0] + ": " + el[1]).join("\n"));
-            cacheActiveCustomAttributes();
-		}, () => {
-			// DB error
-			channel.send("⛔ Database error. Couldn't edit active attribute instance!");
-		});
+		let result = await sqlPromOneEsc("SELECT * FROM active_attributes WHERE ai_id=", args[1]);
+        channel.send("✅ Viewing attribute:\n" +  Object.entries(new Object(result[0])).map(el => el[0] + ": " + el[1]).join("\n"));
+        cacheActiveCustomAttributes();
 	}
     
     /**
@@ -453,11 +437,7 @@ module.exports = function() {
     **/
     this.getAttribute = function(id) {
         // get attribute
-        return new Promise(res => {
-             sql("SELECT * FROM active_attributes WHERE ai_id=" + connection.escape(id), result => {
-                 res(result[0]);
-             });
-        }); 
+        return sqlPromOneEsc("SELECT * FROM active_attributes WHERE ai_id=", id);
     }
     
     /** PUBLIC

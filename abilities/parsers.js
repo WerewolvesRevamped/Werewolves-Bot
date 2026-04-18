@@ -506,14 +506,11 @@ module.exports = function() {
     /**
     Get all living player ids
     **/
-    function getPlayersFromAliveness(op, val) {
+    async function getPlayersFromAliveness(op, val) {
         if(!op || op.length < 1 || op.length > 2 || !(["=","<",">","<=",">=","<>"].includes(op))) return [];
         if(val < 0 || val > 2) return [];
-        return new Promise(res => {
-            sql("SELECT id FROM players WHERE type='player' AND alive" + op + connection.escape(val), result => {
-                res(result.map(el => el.id));
-            })
-        });
+        let result = await sqlProm("SELECT id FROM players WHERE type='player' AND alive" + op + connection.escape(val));
+        return result.map(el => el.id);
     }
     
     /**
@@ -1281,11 +1278,8 @@ module.exports = function() {
     Get all player 
     **/
     function getAllGroupMembers(group) {
-        return new Promise(res => {
-            sql("SELECT owner FROM active_attributes WHERE attr_type='group_membership' AND val1=" + connection.escape(group), result => {
-                res(result.map(el => el.owner));
-            })
-        });
+        let result = await sqlPromEsc("SELECT owner FROM active_attributes WHERE attr_type='group_membership' AND val1=", group);
+        return result.map(el => el.owner);
     }
     
     /**

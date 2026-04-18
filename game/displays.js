@@ -39,30 +39,28 @@ module.exports = function() {
 			return; 
 		}
         // Get all groups values
-        sql("SELECT * FROM displays WHERE name = " + connection.escape(args[1]), async result => {
-            result = result[0];
-            // get the basic embed
-             var embed = await getBasicEmbed(channel.guild);
-             // set embed title
-            embed.author = { name: result.display_name };
-            
-            // get lut icon if applicable
-            let lutval = applyLUT(result.name);
-            if(!lutval) lutval = applyLUT(result.display_name);
-            if(lutval) { // set icon and name
-                //console.log(`${iconRepoBaseUrl}${lutval}`);
-                embed.thumbnail = { "url": `${iconRepoBaseUrl}${lutval}.png` };
-                embed.author.icon_url = `${iconRepoBaseUrl}${lutval}.png`;
-            } 
-            
-            // Add a field for every role value
-            for(attr in result) {
-                embed.fields.push({ "name": toTitleCase(attr), "value": (result[attr]+"").substr(0, 1000) + ((result[attr]+"").length > 1000 ? " **...**" : "") });
-            }
-            
-            // Send the embed
-            channel.send({ embeds: [ embed ] }); 
-        });
+        let result = await sqlPromOneEsc("SELECT * FROM displays WHERE name = ", args[1]);
+        // get the basic embed
+         var embed = await getBasicEmbed(channel.guild);
+         // set embed title
+        embed.author = { name: result.display_name };
+        
+        // get lut icon if applicable
+        let lutval = applyLUT(result.name);
+        if(!lutval) lutval = applyLUT(result.display_name);
+        if(lutval) { // set icon and name
+            //console.log(`${iconRepoBaseUrl}${lutval}`);
+            embed.thumbnail = { "url": `${iconRepoBaseUrl}${lutval}.png` };
+            embed.author.icon_url = `${iconRepoBaseUrl}${lutval}.png`;
+        } 
+        
+        // Add a field for every role value
+        for(attr in result) {
+            embed.fields.push({ "name": toTitleCase(attr), "value": (result[attr]+"").substr(0, 1000) + ((result[attr]+"").length > 1000 ? " **...**" : "") });
+        }
+        
+        // Send the embed
+        channel.send({ embeds: [ embed ] }); 
     }
     
     /**

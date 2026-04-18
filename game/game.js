@@ -151,7 +151,7 @@ module.exports = function() {
     }
     
 	/* Handles reset command */
-	this.cmdReset = function(channel, debug, restart = false) {
+	this.cmdReset = async function(channel, debug, restart = false) {
 		if(stats.gamephase != gp.ARCHIVED && stats.gamephase != gp.NONE && !debug) {
             channel.send("⛔ Command error. Can only reset game while in archived state!");
             return;
@@ -162,12 +162,9 @@ module.exports = function() {
         if(!debug) cmdConnectionReset(channel);
 		// Reset Player Database
         if(!debug) {
-            sql("DELETE FROM players", result => {
-                channel.send("✅ Successfully reset player list!");
-                getEmojis();
-            },() => {
-                channel.send("⛔ Database error. Could not reset player list!");
-            });
+            let result = await sqlProm("DELETE FROM players");
+            channel.send("✅ Successfully reset player list!");
+            getEmojis();
         } else {
             sql("UPDATE players SET alive=1,ccs=0,public_msgs=0,private_msgs=0,target=NULL,counter=0,final_result=0,death_phase=-1");
         }
