@@ -345,33 +345,27 @@ module.exports = function() {
     /**
     Get Player Channel
     **/
-    function abilitySendGetPlayerChannel(player_id) {
-        return new Promise(res => {
-            sql("SELECT channel_id FROM connected_channels WHERE id = " + connection.escape(player_id), result => {
-                if(!result[0]) {
-                    abilityLog(`❗ **Invalid Channel:** Cannot find player ${player_id} (<@${player_id}>).`);
-                    res(backupChannelId);
-                    return;
-                }
-                res(result[0].channel_id);
-            });
-        });      
+    async function abilitySendGetPlayerChannel(player_id) {
+        let result = await sqlPromOneEsc("SELECT channel_id FROM connected_channels WHERE id = ", player_id);
+        if(!result) {
+            abilityLog(`❗ **Invalid Channel:** Cannot find player ${player_id} (<@${player_id}>).`);
+            res(backupChannelId);
+            return;
+        }
+        res(result.channel_id);    
     }
     
     /**
     Get Location Channel
     **/
-    function abilitySendGetLocationChannel(loc_name) {
-        return new Promise(res => {
-            sql("SELECT channel_id FROM locations WHERE name = " + connection.escape(loc_name), result => {
-                if(!result[0]) {
-                    abilityLog(`❗ **Invalid Channel:** Cannot find location ${loc_name}.`);
-                    res(backupChannelId);
-                    return;
-                }
-                res(result[0].channel_id);
-            });
-        });      
+    async function abilitySendGetLocationChannel(loc_name) {
+        let result = await sqlPromOneEsc("SELECT channel_id FROM locations WHERE name = ", loc_name);
+        if(!result) {
+            abilityLog(`❗ **Invalid Channel:** Cannot find location ${loc_name}.`);
+            res(backupChannelId);
+            return;
+        }
+        res(result.channel_id);   
     }
    
     

@@ -189,11 +189,7 @@ module.exports = function() {
     creates a new prompt in the prompt table
     **/
     this.createPrompt = async function(mid, cid, src_ref, src_name, abilities, restrictions, additionalTriggerData, prompt_type, amount, forced, triggerName, type1, type2 = "none") {
-        await new Promise(res => {
-            sql("INSERT INTO prompts (message_id,channel_id,src_ref,src_name,abilities,type1,type2,prompt_type,restrictions,additional_trigger_data,amount,forced,trigger_name) VALUES (" + connection.escape(mid) + "," + connection.escape(cid) + "," + connection.escape(src_ref) + "," + connection.escape(src_name) + "," + connection.escape(JSON.stringify(abilities)) + "," + connection.escape(type1.toLowerCase()) + "," + connection.escape(type2.toLowerCase()) + "," + connection.escape(prompt_type) + "," + connection.escape(JSON.stringify(restrictions)) + "," + connection.escape(JSON.stringify(additionalTriggerData)) + "," + amount + "," + connection.escape(forced) + "," + connection.escape(triggerName) + ")", result => {
-                res();
-            });            
-        });
+        await sqlProm("INSERT INTO prompts (message_id,channel_id,src_ref,src_name,abilities,type1,type2,prompt_type,restrictions,additional_trigger_data,amount,forced,trigger_name) VALUES (" + connection.escape(mid) + "," + connection.escape(cid) + "," + connection.escape(src_ref) + "," + connection.escape(src_name) + "," + connection.escape(JSON.stringify(abilities)) + "," + connection.escape(type1.toLowerCase()) + "," + connection.escape(type2.toLowerCase()) + "," + connection.escape(prompt_type) + "," + connection.escape(JSON.stringify(restrictions)) + "," + connection.escape(JSON.stringify(additionalTriggerData)) + "," + amount + "," + connection.escape(forced) + "," + connection.escape(triggerName) + ")");
     }
     
     /**
@@ -324,11 +320,8 @@ module.exports = function() {
     retrieves a prompt
     **/
     async function getPrompt(id) {
-        return new Promise(res => {
-            sql("SELECT * FROM prompts WHERE message_id=" + connection.escape(id), result => {
-                res(result.length > 0 ? result[0] : false);
-            });
-        });
+        let result = await sqlPromOneEsc("SELECT * FROM prompts WHERE message_id=", id);
+        return result ?? false; 
     }
     
     /**
@@ -352,11 +345,8 @@ module.exports = function() {
     retrieves a prompt
     **/
     this.getAction = async function(id) {
-        return new Promise(res => {
-            sql("SELECT * FROM action_queue WHERE message_id=" + connection.escape(id), result => {
-                res(result.length > 0 ? result : false);
-            });
-        });
+        let result = await sqlPromEsc("SELECT * FROM action_queue WHERE message_id=", id);
+        return result.length > 0 ? result : false;
     }
         
     /**
@@ -466,11 +456,7 @@ module.exports = function() {
     creates an action in the action queue which will be executed at a specified time
     **/
     this.createAction = async function (mid, cid, src_ref, src_name, abilities, orig_ability, prompt_type, type1, type2, time, restrictions, additionalTriggerData, target, forced, triggerName) {
-        await new Promise(res => {
-            sql("INSERT INTO action_queue (message_id,channel_id,src_ref,src_name,abilities,orig_ability,type1,type2,execute_time, prompt_type, restrictions, target, additional_trigger_data, forced,trigger_name) VALUES (" + connection.escape(mid) + "," + connection.escape(cid) + "," + connection.escape(src_ref) + "," + connection.escape(src_name) + "," + connection.escape(JSON.stringify(abilities)) + "," + connection.escape(JSON.stringify(orig_ability)) + "," + connection.escape(type1) + "," + connection.escape(type2) + "," + connection.escape(time) + "," + connection.escape(prompt_type) + "," + connection.escape(JSON.stringify(restrictions)) + "," + connection.escape(target) + "," + connection.escape(JSON.stringify(additionalTriggerData)) + "," + connection.escape(forced) + "," + connection.escape(triggerName) + ")", result => {
-                res();
-            });            
-        });
+        await sqlProm("INSERT INTO action_queue (message_id,channel_id,src_ref,src_name,abilities,orig_ability,type1,type2,execute_time, prompt_type, restrictions, target, additional_trigger_data, forced,trigger_name) VALUES (" + connection.escape(mid) + "," + connection.escape(cid) + "," + connection.escape(src_ref) + "," + connection.escape(src_name) + "," + connection.escape(JSON.stringify(abilities)) + "," + connection.escape(JSON.stringify(orig_ability)) + "," + connection.escape(type1) + "," + connection.escape(type2) + "," + connection.escape(time) + "," + connection.escape(prompt_type) + "," + connection.escape(JSON.stringify(restrictions)) + "," + connection.escape(target) + "," + connection.escape(JSON.stringify(additionalTriggerData)) + "," + connection.escape(forced) + "," + connection.escape(triggerName) + ")");
     }
     
     /**
@@ -1130,19 +1116,16 @@ module.exports = function() {
     /**
     Prompt Message Confirm Automatic Execution
     **/
-    this.confirmAutoExecution = function(src_ref, message_id) {
-        return new Promise(res => {
-            sql("SELECT channel_id FROM connected_channels WHERE id = " + connection.escape(src_ref), result => {
-                for(let i = 0; i < result.length; i++) {
-                    let player_sc_id = result[i].channel_id;
-                    let player_sc = mainGuild.channels.cache.get(player_sc_id);
-                    let player_sc_msg = player_sc.messages.cache.get(message_id);
-                    let orig_text = player_sc_msg.embeds[0].description.split(".")[0];
-                    embed = basicEmbed(`${orig_text}. Ability executed.`, EMBED_GREEN);
-                    embed.components = [];
-                    player_sc_msg.edit(embed);
-                }
-            });
-        });      
+    this.confirmAutoExecution = async function(src_ref, message_id) {
+        let result = await sqlPromEsc("SELECT channel_id FROM connected_channels WHERE id = ", src_ref);
+        for(let i = 0; i < result.length; i++) {
+            let player_sc_id = result[i].channel_id;
+            let player_sc = mainGuild.channels.cache.get(player_sc_id);
+            let player_sc_msg = player_sc.messages.cache.get(message_id);
+            let orig_text = player_sc_msg.embeds[0].description.split(".")[0];
+            embed = basicEmbed(`${orig_text}. Ability executed.`, EMBED_GREEN);
+            embed.components = [];
+            player_sc_msg.edit(embed);
+        }   
     }
 }
