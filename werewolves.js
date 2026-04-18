@@ -270,7 +270,7 @@ client.on("messageCreate", async message => {
     xpProcessMessage(message);
     
 	/* Gif Check */
-	if(!message.author.bot && (isParticipant(message.member) || isGhost(message.member)) && message.content.search("http") >= 0 && stats.ping.length > 0 && stats.gamephase == gp.INGAME) {
+	if(!message.author.bot && (isParticipant(message.member) || isGhost(message.member)) && message.content.search("http") >= 0 && stats.ping.length > 0 && stats.gamephase == gp.INGAME && !isAdmin(message.member)) {
         urlHandle(message, !!message.member.roles.cache.get(stats.gamemaster_ingame));
 	}
     
