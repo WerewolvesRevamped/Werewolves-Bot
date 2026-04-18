@@ -43,30 +43,29 @@ module.exports = function() {
 			return; 
 		}
         // Get all groups values
-        sql("SELECT * FROM `groups` WHERE name = " + connection.escape(args[1]), async result => {
-            result = result[0];
-            // get the basic embed
-             var embed = await getBasicEmbed(channel.guild);
-             // set embed title
-            embed.author = { name: result.display_name };
-            
-            // get lut icon if applicable
-            let lutval = applyLUT(result.name);
-            if(!lutval) lutval = applyLUT(result.display_name);
-            if(lutval) { // set icon and name
-                //console.log(`${iconRepoBaseUrl}${lutval}`);
-                embed.thumbnail = { "url": `${iconRepoBaseUrl}${lutval}.png` };
-                embed.author.icon_url = `${iconRepoBaseUrl}${lutval}.png`;
-            } 
-            
-            // Add a field for every role value
-            for(attr in result) {
-                embed.fields.push({ "name": toTitleCase(attr), "value": (result[attr]+"").substr(0, 1000) + ((result[attr]+"").length > 1000 ? " **...**" : "") });
-            }
-            
-            // Send the embed
-            channel.send({ embeds: [ embed ] }); 
-        });
+        let result = await sqlPromOneEsc("SELECT * FROM `groups` WHERE name = " + args[1]);
+
+        // get the basic embed
+         var embed = await getBasicEmbed(channel.guild);
+         // set embed title
+        embed.author = { name: result.display_name };
+        
+        // get lut icon if applicable
+        let lutval = applyLUT(result.name);
+        if(!lutval) lutval = applyLUT(result.display_name);
+        if(lutval) { // set icon and name
+            //console.log(`${iconRepoBaseUrl}${lutval}`);
+            embed.thumbnail = { "url": `${iconRepoBaseUrl}${lutval}.png` };
+            embed.author.icon_url = `${iconRepoBaseUrl}${lutval}.png`;
+        } 
+        
+        // Add a field for every role value
+        for(attr in result) {
+            embed.fields.push({ "name": toTitleCase(attr), "value": (result[attr]+"").substr(0, 1000) + ((result[attr]+"").length > 1000 ? " **...**" : "") });
+        }
+        
+        // Send the embed
+        channel.send({ embeds: [ embed ] }); 
     }
     
     /**
@@ -74,25 +73,22 @@ module.exports = function() {
     Lists all groups
     **/
 	/* Lists all groups names */
-	this.cmdGroupsList = function(channel) {
+	this.cmdGroupsList = async function(channel) {
 		// Get all groups
-		sql("SELECT * FROM `groups` ORDER BY name ASC", result => {
-			if(result.length > 0) {
-				// At least one group exists
-				channel.send("✳️ Sending a list of currently existing groups:");
-				// Send message
-				chunkArray(result.map(group => {
-                    let emoji = getLUTEmoji(group.name, group.display_name);
-                    return `**${emoji} ${toTitleCase(group.display_name)}** (${toTitleCase(group.team)})`;
-                }), 20).map(el => el.join(", ")).forEach(el => channel.send(el));
-			} else { 
-				// No groups exist
-				channel.send("⛔ Database error. Could not find any groups!");
-			}
-		}, () => {
-			// DB error
-			channel.send("⛔ Database error. Couldn't look for group list!");
-		});
+		let groups = await sqlProm("SELECT * FROM `groups` ORDER BY name ASC");
+        if(groups.length <= 0) {
+            // No groups exist
+            channel.send("⛔ Database error. Could not find any groups!");
+            return;
+        }
+
+        // At least one group exists
+        channel.send("✳️ Sending a list of currently existing groups:");
+        // Send message
+        chunkArray(groups.map(group => {
+            let emoji = getLUTEmoji(group.name, group.display_name);
+            return `**${emoji} ${toTitleCase(group.display_name)}** (${toTitleCase(group.team)})`;
+        }), 20).map(el => el.join(", ")).forEach(el => channel.send(el));
 	}
     
     /**
@@ -100,32 +96,28 @@ module.exports = function() {
     Lists active group instances
     **/
 	/* Lists all groups names */
-	this.cmdGroupsActive = function(channel) {
+	this.cmdGroupsActive = async function(channel) {
 		// Get all groups
-		sql("SELECT * FROM active_groups ORDER BY name ASC", result => {
-			if(result.length > 0) {
-				// At least one role exists
-				channel.send("✳️ Sending a list of currently existing active group instances:");
-				// Send message
-				chunkArray(result.map(group => {
-                    return `\`${group.ai_id}\`: **${toTitleCase(group.name)}** (<#${group.channel_id}>)`;
-                }), 20).map(el => el.join(", ")).forEach(el => channel.send(el));
-			} else { 
-				// No groups exist
-				channel.send("⛔ Database error. Could not find any active group instances!");
-			}
-		}, () => {
+		let groups = await sqlProm("SELECT * FROM active_groups ORDER BY name ASC");
+        if(groups.length <= 0) {
 			// DB error
-			channel.send("⛔ Database error. Couldn't look for active group instance list!");
-		});
-	}
+            channel.send("⛔ Database error. Could not find any active group instances!");
+            return;
+        }
+        // At least one role exists
+        channel.send("✳️ Sending a list of currently existing active group instances:");
+        // Send message
+        chunkArray(result.map(group => {
+            return `\`${group.ai_id}\`: **${toTitleCase(group.name)}** (<#${group.channel_id}>)`;
+        }), 20).map(el => el.join(", ")).forEach(el => channel.send(el));
+    }
     
     /**
     Command: $groups delete
     Deletes an active group instances
     **/
 	/* Lists all groups names */
-	this.cmdGroupsDelete = function(channel, args) {
+	this.cmdGroupsDelete = async function(channel, args) {
 		if(!args[1]) {  
 			channel.send("⛔ Syntax error. Incorrect amount of parameters!"); 
 			return; 
@@ -135,12 +127,12 @@ module.exports = function() {
 		}
         
 		// Get all groups
-		sql("DELETE FROM active_groups WHERE ai_id=" + connection.escape(args[1]), result => {
+        try {
+            await sqlPromEsc("DELETE FROM active_groups WHERE ai_id=", args[1]);
             channel.send("✅ Deleted active group instance.");
-		}, () => {
-			// DB error
+        } catch (err) {
 			channel.send("⛔ Database error. Couldn't delete active group instance!");
-		});
+        }
 	}
     
     
@@ -213,29 +205,21 @@ module.exports = function() {
     **/
     this.groupsReset = function() {
 		// Reset active Group Database
-		sql("DELETE FROM active_groups");
+		return sqlProm("DELETE FROM active_groups");
     }
     
     /** PUBLIC
     Get group data
     **/
     this.groupGetData = function(groupName) {
-        return new Promise(res => {
-            sql("SELECT * FROM active_groups WHERE name=" + connection.escape(groupName), result => {
-                res(result[0]);
-            });
-        });
+        return sqlPromOneEsc("SELECT * FROM active_groups WHERE name=", groupName);
     }
     
     /** PUBLIC
     Get group data by id
     **/
     this.groupGetDataById = function(channelId) {
-        return new Promise(res => {
-            sql("SELECT * FROM active_groups WHERE channel_id=" + connection.escape(channelId), result => {
-                res(result[0]);
-            });
-        });
+        return sqlPromOneEsc("SELECT * FROM active_groups WHERE channel_id=", channelId);
     }
     
     /** PUBLIC
@@ -328,38 +312,32 @@ module.exports = function() {
     takes a target id and a group name
     **/
     this.groupsJoin = async function(target, group) {
-        return new Promise(res => {
-            sql("SELECT * FROM active_groups WHERE name=" + connection.escape(group), async result => {
-                if(result && result[0]) {
-					// open group if closed
-					if(result[0].opened == 0) {
-						await sqlPromEsc("UPDATE active_groups SET opened=1 WHERE name=", group);
-					}
-					
-                    // group exists, add target to group
-                    let groupChannel = await mainGuild.channels.fetch(result[0].channel_id);
-                    
-                    groupChannel.permissionOverwrites.create(target, { ViewChannel: true}).then(sc => {
-                        let embed = basicEmbed(`<@${target}> has joined <#${groupChannel.id}>.`, EMBED_GREEN);
-                        groupChannel.send(embed);
-                        res();
-                    }).catch(async err => { 
-                        logO(err); 
-                        let embed = basicEmbed(`Failed to add <@${target}> to <#${groupChannel.id}>.`, EMBED_RED);
-                        groupChannel.send(embed);
-                        res();
-                    });
-                    
-                    let mentor = await getMentor(target); 
-                    if(mentor) groupChannel.permissionOverwrites.create(mentor, { ViewChannel: true, SendMessages: false });
-                    
-                } else {
-                    // group doesnt exist, create it
-                    await groupsCreate(group, target); 
-                    res();
-                }
+        let groupData = await sqlPromOneEsc("SELECT * FROM active_groups WHERE name=", group);
+        if(groupData) {
+            // open group if closed
+            if(groupData.opened == 0) {
+                await sqlPromEsc("UPDATE active_groups SET opened=1 WHERE name=", group);
+            }
+            
+            // group exists, add target to group
+            let groupChannel = await mainGuild.channels.fetch(groupData.channel_id);
+            
+            groupChannel.permissionOverwrites.create(target, { ViewChannel: true}).then(sc => {
+                let embed = basicEmbed(`<@${target}> has joined <#${groupChannel.id}>.`, EMBED_GREEN);
+                groupChannel.send(embed);
+            }).catch(async err => { 
+                logO(err); 
+                let embed = basicEmbed(`Failed to add <@${target}> to <#${groupChannel.id}>.`, EMBED_RED);
+                groupChannel.send(embed);
             });
-        });
+            
+            let mentor = await getMentor(target); 
+            if(mentor) groupChannel.permissionOverwrites.create(mentor, { ViewChannel: true, SendMessages: false });
+            
+        } else {
+            // group doesnt exist, create it
+            await groupsCreate(group, target); 
+        }
     }
     
     /**
@@ -368,32 +346,26 @@ module.exports = function() {
     takes a target id and a group name
     **/
     this.groupsLeave = async function(target, group) {
-        return new Promise(res => {
-            sql("SELECT * FROM active_groups WHERE name=" + connection.escape(group), async result => {
-                if(result && result[0]) {
-                    // group exists, add target to group
-                    let groupChannel = await mainGuild.channels.fetch(result[0].channel_id);
-                    groupChannel.permissionOverwrites.cache.get(target).delete().then(sc => {
-                        let embed = basicEmbed(`<@${target}> has left <#${groupChannel.id}>.`, EMBED_RED);
-                        groupChannel.send(embed);
-                        res();
-                    }).catch(async err => { 
-                        // Failure, Create a new SC Cat first
-                        logO(err); 
-                        let embed = basicEmbed(`Failed to remove <@${target}> from <#${groupChannel.id}>.`, EMBED_RED);
-                        groupChannel.send(embed);
-                        res();
-                    });	
-                    
-                    let mentor = await getMentor(target); 
-                    if(mentor) groupChannel.permissionOverwrites.cache.get(mentor).delete();
-                } else {
-                    // group doesnt exist, create it
-                    await groupsCreate(group, target); 
-                    res();
-                }
-            });
-        });
+        let groupData = await sqlPromOneEsc("SELECT * FROM active_groups WHERE name=", group);
+        if(groupData) {
+            // group exists, add target to group
+            let groupChannel = await mainGuild.channels.fetch(groupData.channel_id);
+            groupChannel.permissionOverwrites.cache.get(target).delete().then(sc => {
+                let embed = basicEmbed(`<@${target}> has left <#${groupChannel.id}>.`, EMBED_RED);
+                groupChannel.send(embed);
+            }).catch(async err => { 
+                // Failure, Create a new SC Cat first
+                logO(err); 
+                let embed = basicEmbed(`Failed to remove <@${target}> from <#${groupChannel.id}>.`, EMBED_RED);
+                groupChannel.send(embed);
+            });	
+            
+            let mentor = await getMentor(target); 
+            if(mentor) groupChannel.permissionOverwrites.cache.get(mentor).delete();
+        } else {
+            // group doesnt exist, create it
+            await groupsCreate(group, target); 
+        }
     }
     
     /**
@@ -402,93 +374,80 @@ module.exports = function() {
     Replaces $name with the channel name link
     **/
     this.groupsSend = async function(group, message) {
-        return new Promise(res => {
-            sql("SELECT * FROM active_groups WHERE name=" + connection.escape(group), async result => {
-                if(result && result[0]) {
-                    // group exists, add target to group
-                    let groupChannel = await mainGuild.channels.fetch(result[0].channel_id);
-                    let msg = message.replace(`\$name`, `<#${groupChannel.id}>`);
-                    groupChannel.send(`${msg}`);
-                }
-            });
-        });
+        let groupData = await sqlPromOneEsc("SELECT * FROM active_groups WHERE name=", group);
+        if(groupData) {
+            // group exists, add target to group
+            let groupChannel = await mainGuild.channels.fetch(groupData.channel_id);
+            let msg = message.replace(`\$name`, `<#${groupChannel.id}>`);
+            groupChannel.send(`${msg}`);
+        }
     }
     
     /** Groups: Create
     creates a group, takes a group name and optional first member id
     **/
     this.groupsCreate = async function(group, firstMember = null) {
-        return new Promise(async res => {
-            // Determine channel name
-            let channelName = group.substr(0, 100);
-            channelName = applyTheme(channelName);
-            
-            // get base sc permissions
-            let scPerms = getSCCatPerms(mainGuild);
-            let groupIsGhostly = false;
-            
-            // if a first member is specified, grant them permissions to the channel
-            if(firstMember) {
-                scPerms.push(getPerms(firstMember, ["history", "read"], []));
-                
-                // if group creator is a ghost, the group is ghostly
-                let mem = mainGuild.members.cache.get(firstMember);
-                if(isGhost(mem)) groupIsGhostly = true;
-            }
-            
-            // ghost permissions based on creator
-            if(groupIsGhostly) {
-                // make ghosts able to talk
-                scPerms.push(getPerms(stats.ghost, ["write"], ["read"]));
-            } else {      
-                // make ghosts unable to talk
-                scPerms.push(getPerms(stats.ghost, [], ["write"]));
-            }
-            
-            let mentor = await getMentor(firstMember); 
-            if(mentor) scPerms.push(getPerms(mentor, ["history", "read"], ["write"]));
-            
-            // Create SC channel
-            let newSC = await createSC(channelName, scPerms);
-            
-            // Create a default connection with the groups name
-            connectionAdd(newSC.id, group);
-            // Send info message for each role
-            let infoEmbed = await getGroupEmbed(group, ["basics","details"], mainGuild);
-            sendEmbed(newSC, infoEmbed, true);
-            
-            // announce new group
-            if(firstMember) {
-                let embed = basicEmbed(`<@${firstMember}> has created <#${newSC.id}>.`, EMBED_GREEN);
-                newSC.send(embed);
-            } else {
-                let embed = basicEmbed(`<#${newSC.id}> has been created.`, EMBED_GREEN);
-                newSC.send(embed);
-            }
-            
-            // get attribute data
-            let act = 0;
-            if(stats.haunting) { 
-                let grpData = await (new Promise(res => {
-                     sql("SELECT * FROM groups WHERE name = " + connection.escape(group), result => {
-                         res(result[0]);
-                     });
-                })); 
-                act = grpData.activation;
-            }
-
-            let opened = 1;
-            if(!firstMember) opened = 0;
-            // save group in DB
-            await sqlProm("INSERT INTO active_groups (name, channel_id, activation, opened) VALUES (" + connection.escape(group) + "," + connection.escape(newSC.id) + "," + connection.escape(act) + "," + connection.escape(opened) +  ")");
-            
-            // run group starting trigger
-            await triggerGroup(newSC.id, "Starting");
-            
-            // end of create channel callback
-            res();
-        });
+        // Determine channel name
+        let channelName = group.substr(0, 100);
+        channelName = applyTheme(channelName);
         
+        // get base sc permissions
+        let scPerms = getSCCatPerms(mainGuild);
+        let groupIsGhostly = false;
+        
+        // if a first member is specified, grant them permissions to the channel
+        if(firstMember) {
+            scPerms.push(getPerms(firstMember, ["history", "read"], []));
+            
+            // if group creator is a ghost, the group is ghostly
+            let mem = mainGuild.members.cache.get(firstMember);
+            if(isGhost(mem)) groupIsGhostly = true;
+        }
+        
+        // ghost permissions based on creator
+        if(groupIsGhostly) {
+            // make ghosts able to talk
+            scPerms.push(getPerms(stats.ghost, ["write"], ["read"]));
+        } else {      
+            // make ghosts unable to talk
+            scPerms.push(getPerms(stats.ghost, [], ["write"]));
+        }
+        
+        let mentor = await getMentor(firstMember); 
+        if(mentor) scPerms.push(getPerms(mentor, ["history", "read"], ["write"]));
+        
+        // Create SC channel
+        let newSC = await createSC(channelName, scPerms);
+        
+        // Create a default connection with the groups name
+        connectionAdd(newSC.id, group);
+        // Send info message for each role
+        let infoEmbed = await getGroupEmbed(group, ["basics","details"], mainGuild);
+        sendEmbed(newSC, infoEmbed, true);
+        
+        // announce new group
+        if(firstMember) {
+            let embed = basicEmbed(`<@${firstMember}> has created <#${newSC.id}>.`, EMBED_GREEN);
+            newSC.send(embed);
+        } else {
+            let embed = basicEmbed(`<#${newSC.id}> has been created.`, EMBED_GREEN);
+            newSC.send(embed);
+        }
+        
+        // get attribute data
+        let act = 0;
+        if(stats.haunting) { 
+            let grpData = await sqlPromOneEsc("SELECT * FROM groups WHERE name = ", group);
+            act = grpData.activation;
+        }
+
+        let opened = 1;
+        if(!firstMember) opened = 0;
+        // save group in DB
+        await sqlProm("INSERT INTO active_groups (name, channel_id, activation, opened) VALUES (" + connection.escape(group) + "," + connection.escape(newSC.id) + "," + connection.escape(act) + "," + connection.escape(opened) +  ")");
+        
+        // run group starting trigger
+        await triggerGroup(newSC.id, "Starting"); 
     }
     
     

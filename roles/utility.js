@@ -89,11 +89,7 @@ module.exports = function() {
     this.getRoleDataFromName = async function(roleName, authorId = null) {
         let roleNameParsed = parseRole(roleName);
         if(verifyRole(roleNameParsed)) {
-            let roleData = await (new Promise(res => {
-                 sql("SELECT * FROM roles WHERE name = " + connection.escape(roleNameParsed), result => {
-                     res(result[0]);
-                 });
-            })); 
+            let roleData = await sqlPromOneEsc("SELECT * FROM roles WHERE name = ", roleNameParsed);
             return await getRoleData(roleData.display_name, roleData.class, roleData.category, roleData.team, authorId, roleData);
         } else {
             return null;

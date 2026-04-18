@@ -221,12 +221,9 @@ module.exports = function() {
     Set Counter Player
     set the counter for a player
     **/
-    function getPlayerCounter(player_id) {
-        return new Promise(res => {
-            sql("SELECT counter FROM players WHERE id=" + connection.escape(player_id), result => {
-                res(result[0].counter);
-            });	
-        });
+    async function getPlayerCounter(player_id) {
+        let result = await sqlPromOneEsc("SELECT counter FROM players WHERE id=", player_id);
+        return result.counter;
     }
     
     /** PRIVATE
@@ -241,12 +238,9 @@ module.exports = function() {
     Set Counter Group
     set the counter for a group
     **/
-    function getGroupCounter(channel_id) {
-        return new Promise(res => {
-            sql("SELECT counter FROM active_groups WHERE channel_id=" + connection.escape(channel_id), result => {
-                res(result[0].counter);
-            });	
-        });
+    async function getGroupCounter(channel_id) {
+        let result = await sqlPromOneEsc("SELECT counter FROM active_groups WHERE channel_id=", channel_id);
+        return result.counter;
     }
     
     /** PRIVATE
@@ -261,12 +255,9 @@ module.exports = function() {
     Set Counter Poll
     set the counter for a poll
     **/
-    function getPollCounter(name) {
-        return new Promise(res => {
-            sql("SELECT counter FROM polls WHERE name=" + connection.escape(name), result => {
-                res(result[0].counter);
-            });	
-        });
+    async function getPollCounter(name) {
+        let result = await sqlPromOneEsc("SELECT counter FROM polls WHERE name=", name);
+        return result.counter;
     }
     
     /** PRIVATE
@@ -281,12 +272,9 @@ module.exports = function() {
     Set Counter Attribute
     set the counter for an attribute
     **/
-    function getAttributeCounter(ai_id) {
-        return new Promise(res => {
-            sql("SELECT counter FROM active_attributes WHERE ai_id=" + connection.escape(ai_id), result => {
-                res(result[0].counter);
-            });	
-        });
+    async function getAttributeCounter(ai_id) {
+        let result = await sqlPromOneEsc("SELECT counter FROM active_attributes WHERE ai_id=", ai_id);
+        return result.counter;
     }
     
     /** PRIVATE

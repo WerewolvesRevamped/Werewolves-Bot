@@ -104,17 +104,9 @@ module.exports = function() {
 		message.channel.send("❗ Click the reaction in the next `20.0` seconds to confirm `" + cmd + "`!" + getWarning(action))
 		.then(m => {
             m.fetch();
-			m.react("✅").then(r => {
-				sql("DELETE FROM confirm_msg WHERE time < " + (getTime() - 900), result => {
-					sql("INSERT INTO confirm_msg (id, time, action) VALUES (" + connection.escape(m.id) + "," + connection.escape(getTime()) + "," + connection.escape(action) + ")", result => {
-					}, () => {
-						// Database error
-						m.edit("⛔ Database error. Failed to create confirmation message!");
-					});				
-				}, () => {
-					// Database error
-					m.edit("⛔ Database error. Failed to prepare confirmation message!");
-				});
+			m.react("✅").then(async r => {
+                await sqlProm("DELETE FROM confirm_msg WHERE time < " + (getTime() - 900));
+                await sqlProm("INSERT INTO confirm_msg (id, time, action) VALUES (" + connection.escape(m.id) + "," + connection.escape(getTime()) + "," + connection.escape(action) + ")");
 			})
 			.catch(err => { 
 				// Couldn't react

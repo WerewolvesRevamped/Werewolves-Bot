@@ -153,12 +153,9 @@ module.exports = function() {
     Set Target Player
     set the target for a player
     **/
-    function getPlayerTarget(player_id) {
-        return new Promise(res => {
-            sql("SELECT target FROM players WHERE id=" + connection.escape(player_id), result => {
-                res(result[0].target);
-            });	
-        });
+    async function getPlayerTarget(player_id) {
+        let result = await sqlPromOneEsc("SELECT target FROM players WHERE id=", player_id);
+        return result.target;
     }
     
     /** PRIVATE
@@ -173,12 +170,9 @@ module.exports = function() {
     Set Target Group
     set the target for a group
     **/
-    function getGroupTarget(channel_id) {
-        return new Promise(res => {
-            sql("SELECT target FROM active_groups WHERE channel_id=" + connection.escape(channel_id), result => {
-                res(result[0].target);
-            });	
-        });
+    async function getGroupTarget(channel_id) {
+        let result = await sqlPromOneEsc("SELECT target FROM active_groups WHERE channel_id=", channel_id);
+        return result.target;
     }
     
     /** PRIVATE
@@ -193,12 +187,9 @@ module.exports = function() {
     Set Target Poll
     set the target for a poll
     **/
-    function getPollTarget(name) {
-        return new Promise(res => {
-            sql("SELECT target FROM polls WHERE name=" + connection.escape(name), result => {
-                res(result[0].target);
-            });	
-        });
+    async function getPollTarget(name) {
+        let result = await sqlPromOneEsc("SELECT target FROM polls WHERE name=", name);
+        return result.target;
     }
     
     /** PRIVATE
@@ -213,12 +204,9 @@ module.exports = function() {
     Set Target Attribute
     set the target for an attribute
     **/
-    function getAttributeTarget(ai_id) {
-        return new Promise(res => {
-            sql("SELECT target FROM active_attributes WHERE ai_id=" + connection.escape(ai_id), result => {
-                res(result[0].target);
-            });	
-        });
+    async function getAttributeTarget(ai_id) {
+        let result = await sqlPromOneEsc("SELECT target FROM active_attributes WHERE ai_id=", name);
+        return result.target;
     }
     
     /** PRIVATE

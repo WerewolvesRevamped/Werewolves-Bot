@@ -33,6 +33,7 @@ module.exports = function() {
 		let hi = await sqlProm("SELECT * FROM host_information ORDER BY ai_id ASC");
         if(hi.length <= 0) {
             channel.send("⛔ Database error. Could not find any host information!");
+            return;
         }
         // At least one HI exists
         channel.send("✳️ Sending a list of currently existing host information:");
