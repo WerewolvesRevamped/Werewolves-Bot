@@ -55,7 +55,7 @@ module.exports = function() {
     Lists active group instances
     **/
 	/* Lists all attribute names */
-	this.cmdAttributesActive = function(channel) {
+	this.cmdAttributesActive = async function(channel) {
 		// Get all attributes
 		let result = await sqlProm("SELECT * FROM active_attributes ORDER BY attr_type ASC");
         if(result.length <= 0) {

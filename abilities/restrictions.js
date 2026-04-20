@@ -218,7 +218,7 @@ module.exports = function() {
     this.getActionQuantity = async function(src_ref, ability) {
         if(!ability || !ability.id) return -1;
         let result = await sqlProm("SELECT * FROM action_data WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=", ability.id);
-        if(!result[0]) return -1,
+        if(!result[0]) return -1;
         else return result[0].quantity;
     }
     

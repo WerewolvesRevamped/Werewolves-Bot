@@ -38,30 +38,28 @@ module.exports = function() {
 			return; 
 		}
         // Get all groups values
-        sql("SELECT * FROM locations WHERE name = " + connection.escape(args[1]), async result => {
-            result = result[0];
-            // get the basic embed
-             var embed = await getBasicEmbed(channel.guild);
-             // set embed title
-            embed.author = { name: result.display_name };
-            
-            // get lut icon if applicable
-            let lutval = applyLUT(result.name);
-            if(!lutval) lutval = applyLUT(result.display_name);
-            if(lutval) { // set icon and name
-                //console.log(`${iconRepoBaseUrl}${lutval}`);
-                embed.thumbnail = { "url": `${iconRepoBaseUrl}${lutval}.png` };
-                embed.author.icon_url = `${iconRepoBaseUrl}${lutval}.png`;
-            } 
-            
-            // Add a field for every role value
-            for(attr in result) {
-                embed.fields.push({ "name": toTitleCase(attr), "value": (result[attr]+"").substr(0, 1000) + ((result[attr]+"").length > 1000 ? " **...**" : "") });
-            }
-            
-            // Send the embed
-            channel.send({ embeds: [ embed ] }); 
-        });
+        let result = await sqlPromOneEsc("SELECT * FROM locations WHERE name = ", args[1]);
+        // get the basic embed
+         var embed = await getBasicEmbed(channel.guild);
+         // set embed title
+        embed.author = { name: result.display_name };
+        
+        // get lut icon if applicable
+        let lutval = applyLUT(result.name);
+        if(!lutval) lutval = applyLUT(result.display_name);
+        if(lutval) { // set icon and name
+            //console.log(`${iconRepoBaseUrl}${lutval}`);
+            embed.thumbnail = { "url": `${iconRepoBaseUrl}${lutval}.png` };
+            embed.author.icon_url = `${iconRepoBaseUrl}${lutval}.png`;
+        } 
+        
+        // Add a field for every role value
+        for(attr in result) {
+            embed.fields.push({ "name": toTitleCase(attr), "value": (result[attr]+"").substr(0, 1000) + ((result[attr]+"").length > 1000 ? " **...**" : "") });
+        }
+        
+        // Send the embed
+        channel.send({ embeds: [ embed ] }); 
     }
     
     /**
@@ -69,25 +67,21 @@ module.exports = function() {
     Lists all locations
     **/
 	/* Lists all location names */
-	this.cmdLocationsList = function(channel) {
+	this.cmdLocationsList = async function(channel) {
 		// Get all locations
-		sql("SELECT * FROM locations ORDER BY sort_index ASC", result => {
-			if(result.length > 0) {
-				// At least one location exists
-				channel.send("✳️ Sending a list of currently existing locations:");
-				// Send message
-				chunkArray(result.map(loc => {
-                    let emoji = getLUTEmoji(loc.name, loc.display_name);
-                    return `**${emoji} ${toTitleCase(loc.display_name)}** (${toTitleCase(loc.members.split(",").join(", "))} / ${toTitleCase(loc.viewers.split(",").join(", "))}) [${loc.sort_index}] ${loc.haunting==1?'👻':''}`;
-                }), 20).map(el => el.join("\n")).forEach(el => channel.send(el));
-			} else { 
-				// No locations exist
-				channel.send("⛔ Database error. Could not find any locations!");
-			}
-		}, () => {
-			// DB error
-			channel.send("⛔ Database error. Couldn't look for location list!");
-		});
+		let result = await sqlProm("SELECT * FROM locations ORDER BY sort_index ASC");
+        if(result.length <= 0) {
+            // No locations exist
+            channel.send("⛔ Database error. Could not find any locations!");
+            return;
+        }
+        // At least one location exists
+        channel.send("✳️ Sending a list of currently existing locations:");
+        // Send message
+        chunkArray(result.map(loc => {
+            let emoji = getLUTEmoji(loc.name, loc.display_name);
+            return `**${emoji} ${toTitleCase(loc.display_name)}** (${toTitleCase(loc.members.split(",").join(", "))} / ${toTitleCase(loc.viewers.split(",").join(", "))}) [${loc.sort_index}] ${loc.haunting==1?'👻':''}`;
+        }), 20).map(el => el.join("\n")).forEach(el => channel.send(el));
 	}
     
      /** Verify Location
@@ -123,12 +117,9 @@ module.exports = function() {
         if(loc_sc) loc_sc.send(embed);
     }
     
-    this.getLocationChannelByName = function(locationName) {
-        return new Promise(res => {
-            sql("SELECT channel_id FROM locations WHERE name = " + connection.escape(locationName), result => {
-                res(result[0].channel_id);
-            });
-        });
+    this.getLocationChannelByName = async function(locationName) {
+        let result = await sqlPromOneEsc("SELECT channel_id FROM locations WHERE name = ", locationName);
+        return result.channel_id;
     }
     
     /** Create public channels **/

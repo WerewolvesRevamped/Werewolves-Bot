@@ -68,25 +68,20 @@ module.exports = function() {
     Lists all displays
     **/
 	/* Lists all display names */
-	this.cmdDisplaysList = function(channel) {
+	this.cmdDisplaysList = async function(channel) {
 		// Get all displays
-		sql("SELECT * FROM displays", result => {
-			if(result.length > 0) {
-				// At least one display exists
-				channel.send("✳️ Sending a list of currently existing displays:");
-				// Send message
-				chunkArray(result.map(dis => {
-                    let emoji = getLUTEmoji(dis.name, dis.display_name);
-                    return `${emoji} **${toTitleCase(dis.display_name)}** (${dis.name})`;
-                }), 40).map(el => el.join(", ")).forEach(el => channel.send(el));
-			} else { 
-				// No displays exist
-				channel.send("⛔ Database error. Could not find any displays!");
-			}
-		}, () => {
-			// DB error
-			channel.send("⛔ Database error. Couldn't look for display list!");
-		});
+		let result = await sqlProm("SELECT * FROM displays");
+        if(result.length <= 0) {
+            channel.send("⛔ Database error. Could not find any displays!");
+            return;
+        }
+        // At least one display exists
+        channel.send("✳️ Sending a list of currently existing displays:");
+        // Send message
+        chunkArray(result.map(dis => {
+            let emoji = getLUTEmoji(dis.name, dis.display_name);
+            return `${emoji} **${toTitleCase(dis.display_name)}** (${dis.name})`;
+        }), 40).map(el => el.join(", ")).forEach(el => channel.send(el));
 	}
     
     /**
@@ -94,24 +89,20 @@ module.exports = function() {
     Lists all active displays
     **/
 	/* Lists all display names */
-	this.cmdDisplaysActive = function(channel) {
+	this.cmdDisplaysActive = async function(channel) {
 		// Get all displays
-		sql("SELECT * FROM active_displays", result => {
-			if(result.length > 0) {
-				// At least one display exists
-				channel.send("✳️ Sending a list of currently active displays:");
-				// Send message
-				chunkArray(result.map(dis => {
-                    return `\`${dis.ai_id}\`: **${dis.name}** - ${srcRefToText(dis.src_ref)} [${dis.val1};${dis.val2};${dis.val3};${dis.val4}] ( https://discord.com/channels/${mainGuild.id}/${dis.channel_id}/${dis.message_id} )`;
-                }), 20).map(el => el.join("\n")).forEach(el => channel.send(el));
-			} else { 
-				// No displays exist
-				channel.send("⛔ Database error. Could not find any displays!");
-			}
-		}, () => {
-			// DB error
-			channel.send("⛔ Database error. Couldn't look for display list!");
-		});
+		let result = await sqlProm("SELECT * FROM active_displays");
+        if(result.length <= 0) {
+            // No displays exist
+            channel.send("⛔ Database error. Could not find any displays!");
+            return;
+        }
+        // At least one display exists
+        channel.send("✳️ Sending a list of currently active displays:");
+        // Send message
+        chunkArray(result.map(dis => {
+            return `\`${dis.ai_id}\`: **${dis.name}** - ${srcRefToText(dis.src_ref)} [${dis.val1};${dis.val2};${dis.val3};${dis.val4}] ( https://discord.com/channels/${mainGuild.id}/${dis.channel_id}/${dis.message_id} )`;
+        }), 20).map(el => el.join("\n")).forEach(el => channel.send(el));
 	}
     
      /** Verify Display
@@ -136,38 +127,33 @@ module.exports = function() {
     Get Display Embed
     Returns a display embed for a display message
     */
-    this.getDisplayEmbed = function(displayName, values = [], authorId = null) {
-        return new Promise(res => {
-            sql("SELECT * FROM displays WHERE name = " + connection.escape(displayName), async result => {
-                result = result[0]; // there should always only be one role by a certain name
-                var embed = await getBasicEmbed(mainGuild);
-                
-                // description
-                let desc = await applyPackLUT(result?.contents ?? "No info found", authorId);
-                
-                //console.log(values);
-                for(let i = 0; i < values.length; i++) {
-                    let re = new RegExp(values[i][0].replace(/\$/g,"\\$"), "g");
-                    desc = desc.replace(re, "" + values[i][1]);
-                }
-                embed.description = applyETN(desc, mainGuild);
-               
-                // get icon if applicable
-                let lutval = applyLUT(displayName);
-                if(!lutval) lutval = applyLUT(result?.display_name ?? "Unknown");
-                if(lutval) { // set icon and name
-                    //console.log(`${iconRepoBaseUrl}${lutval}`);
-                    let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
-                    embed.thumbnail = { "url": `${iconBaseUrl(authorId)}${lutval}.png` };
-                    embed.author = { "icon_url": `${iconBaseUrl(authorId)}${lutval}.png`, "name": applyTheme(dp) };
-                } else { // just set title afterwards
-                    let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
-                    embed.title = applyET(dp);
-                }
-                // resolve promise, return embed
-                res(embed);
-            })
-        });
+    this.getDisplayEmbed = async function(displayName, values = [], authorId = null) {
+        let result = await sqlPromOneEsc("SELECT * FROM displays WHERE name = ", displayName);
+        var embed = await getBasicEmbed(mainGuild);
+        
+        // description
+        let desc = await applyPackLUT(result?.contents ?? "No info found", authorId);
+        
+        //console.log(values);
+        for(let i = 0; i < values.length; i++) {
+            let re = new RegExp(values[i][0].replace(/\$/g,"\\$"), "g");
+            desc = desc.replace(re, "" + values[i][1]);
+        }
+        embed.description = applyETN(desc, mainGuild);
+       
+        // get icon if applicable
+        let lutval = applyLUT(displayName);
+        if(!lutval) lutval = applyLUT(result?.display_name ?? "Unknown");
+        if(lutval) { // set icon and name
+            //console.log(`${iconRepoBaseUrl}${lutval}`);
+            let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
+            embed.thumbnail = { "url": `${iconBaseUrl(authorId)}${lutval}.png` };
+            embed.author = { "icon_url": `${iconBaseUrl(authorId)}${lutval}.png`, "name": applyTheme(dp) };
+        } else { // just set title afterwards
+            let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
+            embed.title = applyET(dp);
+        }
+        return embed;
     }
     
     /** PUBLIC

@@ -121,321 +121,291 @@ module.exports = function() {
     Get Info Embed
     Returns an info embed for an info message
     */
-    this.getInfoEmbed = function(infoName, guild, authorId = null) {
-        return new Promise(res => {
-            sql("SELECT * FROM info WHERE name = " + connection.escape(infoName), async result => {
-                result = result[0]; // there should always only be one role by a certain name
-                var embed = await getBasicEmbed(guild);
-                var contents = result.contents;
-                
-                // search for and replace queries
-                contents = await applyQuery(contents);
-                contents = contents.replace("\n\n\n","\n"); // remove extra newline for when a section is empty
-                
-                // split the contents by section headers
-                var desc = contents.split(/(?=__[\w\d _]+__)/).map(el => { // split by section and keep title via lookahead
-                    let matches = el.match(/^__([\w\d _]+)__\s*\n([\w\W]*)\n?$/); // extract section name and contents
-                    return matches ? [matches[1], matches[2]] : ["", el];
-                });
-
-                // split a single section into several fields if necessary
-                for(let d in desc) {
-                    let de = await applyPackLUT(desc[d][1], authorId);
-                    if(desc[d][0] || desc[0][1].length > 2000 || d > 0) {
-                        embed.fields.push(...handleFields(applyETN(de, guild), applyTheme(desc[d][0])));
-                    } else { // untitled field0 is description
-                        embed.description = applyETN(de, guild);
-                    }
-                }
-               
-                // get icon if applicable
-                let lutval = applyLUT(infoName);
-                if(!lutval) lutval = applyLUT(result.display_name);
-                if(lutval) { // set icon and name
-                    //console.log(`${iconRepoBaseUrl}${lutval}`);
-                    embed.thumbnail = { "url": `${iconBaseUrl(authorId)}${lutval}.png` };
-                    if(result.display_name.match(/\<\?[\w\d]*:[^>]{0,10}\>/)) { // emoji in title, use title
-                        let dp = await applyPackLUT(result.display_name, authorId);
-                        embed.title = applyET(dp);
-                    } else { // no emojis, use author title + icon
-                        let dp = await applyPackLUT(result.display_name, authorId);
-                        embed.author = { "icon_url": `${iconBaseUrl(authorId)}${lutval}.png`, "name": applyTheme(dp) };
-                    }
-                } else { // just set title afterwards
-                    let dp = await applyPackLUT(result.display_name, authorId);
-                    embed.title = applyET(dp);
-                }
-                
-                // url pack overwrite
-                if(isUrlPack(authorId, infoName)) {
-                    let url = iconBaseUrl(authorId, infoName);
-                    embed.thumbnail = { "url": url };
-                    if(embed?.author?.icon_url) embed.author.icon_url = url;
-                }
-                
-                // resolve promise, return embed
-                res(embed);
-            })
+    this.getInfoEmbed = async function(infoName, guild, authorId = null) {
+        let result = await sqlPromOneEsc("SELECT * FROM info WHERE name = ", infoName);
+        var embed = await getBasicEmbed(guild);
+        var contents = result.contents;
+        
+        // search for and replace queries
+        contents = await applyQuery(contents);
+        contents = contents.replace("\n\n\n","\n"); // remove extra newline for when a section is empty
+        
+        // split the contents by section headers
+        var desc = contents.split(/(?=__[\w\d _]+__)/).map(el => { // split by section and keep title via lookahead
+            let matches = el.match(/^__([\w\d _]+)__\s*\n([\w\W]*)\n?$/); // extract section name and contents
+            return matches ? [matches[1], matches[2]] : ["", el];
         });
+
+        // split a single section into several fields if necessary
+        for(let d in desc) {
+            let de = await applyPackLUT(desc[d][1], authorId);
+            if(desc[d][0] || desc[0][1].length > 2000 || d > 0) {
+                embed.fields.push(...handleFields(applyETN(de, guild), applyTheme(desc[d][0])));
+            } else { // untitled field0 is description
+                embed.description = applyETN(de, guild);
+            }
+        }
+       
+        // get icon if applicable
+        let lutval = applyLUT(infoName);
+        if(!lutval) lutval = applyLUT(result.display_name);
+        if(lutval) { // set icon and name
+            //console.log(`${iconRepoBaseUrl}${lutval}`);
+            embed.thumbnail = { "url": `${iconBaseUrl(authorId)}${lutval}.png` };
+            if(result.display_name.match(/\<\?[\w\d]*:[^>]{0,10}\>/)) { // emoji in title, use title
+                let dp = await applyPackLUT(result.display_name, authorId);
+                embed.title = applyET(dp);
+            } else { // no emojis, use author title + icon
+                let dp = await applyPackLUT(result.display_name, authorId);
+                embed.author = { "icon_url": `${iconBaseUrl(authorId)}${lutval}.png`, "name": applyTheme(dp) };
+            }
+        } else { // just set title afterwards
+            let dp = await applyPackLUT(result.display_name, authorId);
+            embed.title = applyET(dp);
+        }
+        
+        // url pack overwrite
+        if(isUrlPack(authorId, infoName)) {
+            let url = iconBaseUrl(authorId, infoName);
+            embed.thumbnail = { "url": url };
+            if(embed?.author?.icon_url) embed.author.icon_url = url;
+        }
+        
+        // resolve promise, return embed
+        return embed;
     }
     
     /**
     Get Group Embed
     Returns a group embed for a group message
     */
-    this.getGroupEmbed = function(groupName, sections, guild, authorId = null) {
-        return new Promise(res => {
-            sql("SELECT * FROM `groups` WHERE name = " + connection.escape(groupName), async result => {
-                result = result[0]; // there should always only be one role by a certain name
-                var embed = await getBasicEmbed(guild);
-                var members = result?.desc_members ?? "";
-                
-                // search for and replace queries
-                members = await applyQuery(members);
-                members = members.replace("\n\n\n","\n"); // remove extra newline for when a section is empty
-                
-                var desc = [];
-                if(sections.includes("basics") || sections.includes("simplified")) desc.push(["Basics", result?.desc_basics ?? "No info found"]);
-                if(sections.includes("details")) desc.push(["Members", members]);
-                if(sections.includes("formalized")) desc.push(["Formalized", formatFormalized(result?.desc_formalized ?? "No info found")]);
+    this.getGroupEmbed = async function(groupName, sections, guild, authorId = null) {
+        let result = await sqlPromOneEsc("SELECT * FROM `groups` WHERE name = ", groupName);
+        var embed = await getBasicEmbed(guild);
+        var members = result?.desc_members ?? "";
+        
+        // search for and replace queries
+        members = await applyQuery(members);
+        members = members.replace("\n\n\n","\n"); // remove extra newline for when a section is empty
+        
+        var desc = [];
+        if(sections.includes("basics") || sections.includes("simplified")) desc.push(["Basics", result?.desc_basics ?? "No info found"]);
+        if(sections.includes("details")) desc.push(["Members", members]);
+        if(sections.includes("formalized")) desc.push(["Formalized", formatFormalized(result?.desc_formalized ?? "No info found")]);
 
-                // split a single section into several fields if necessary
-                for(let d in desc) {
-                    let de = await applyPackLUT(desc[d][1], authorId);
-                    embed.fields.push(...handleFields(applyETN(de, guild), applyTheme(desc[d][0])));
-                }
-               
-                // get icon if applicable
-                let lutval = applyLUT(groupName);
-                if(!lutval) lutval = applyLUT(result?.display_name ?? "Unknown");
-                if(lutval) { // set icon and name
-                    //console.log(`${iconRepoBaseUrl}${lutval}`);
-                    let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
-                    embed.thumbnail = { "url": `${iconBaseUrl(authorId)}${lutval}.png` };
-                    embed.author = { "icon_url": `${iconBaseUrl(authorId)}${lutval}.png`, "name": applyTheme(dp) };
-                } else { // just set title afterwards
-                    let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
-                    embed.title = applyET(dp);
-                }
-                
-                // url pack overwrite
-                if(isUrlPack(authorId, groupName)) {
-                    let url = iconBaseUrl(authorId, groupName);
-                    embed.thumbnail = { "url": url };
-                    if(embed?.author?.icon_url) embed.author.icon_url = url;
-                }
-                
-                // resolve promise, return embed
-                res(embed);
-            })
-        });
+        // split a single section into several fields if necessary
+        for(let d in desc) {
+            let de = await applyPackLUT(desc[d][1], authorId);
+            embed.fields.push(...handleFields(applyETN(de, guild), applyTheme(desc[d][0])));
+        }
+       
+        // get icon if applicable
+        let lutval = applyLUT(groupName);
+        if(!lutval) lutval = applyLUT(result?.display_name ?? "Unknown");
+        if(lutval) { // set icon and name
+            //console.log(`${iconRepoBaseUrl}${lutval}`);
+            let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
+            embed.thumbnail = { "url": `${iconBaseUrl(authorId)}${lutval}.png` };
+            embed.author = { "icon_url": `${iconBaseUrl(authorId)}${lutval}.png`, "name": applyTheme(dp) };
+        } else { // just set title afterwards
+            let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
+            embed.title = applyET(dp);
+        }
+        
+        // url pack overwrite
+        if(isUrlPack(authorId, groupName)) {
+            let url = iconBaseUrl(authorId, groupName);
+            embed.thumbnail = { "url": url };
+            if(embed?.author?.icon_url) embed.author.icon_url = url;
+        }
+        
+        // resolve promise, return embed
+        return embed;
     }
     
     /**
     Get Attribute Embed
     Returns an attribute embed for an attribute message
     */
-    this.getAttributeEmbed = function(attrName, sections, authorId = null) {
-        return new Promise(res => {
-            sql("SELECT * FROM attributes WHERE name = " + connection.escape(attrName), async result => {
-                result = result[0]; // there should always only be one attribute by a certain name
-                var embed = await getBasicEmbed(mainGuild);
-                
-                var desc = [];
-                if(sections.includes("basics") || sections.includes("simplified") || sections.includes("details")) desc.push(["Basics", result?.desc_basics ?? "No info found"]);
-                if(sections.includes("formalized")) desc.push(["Formalized", formatFormalized(result?.desc_formalized ?? "No info found")]);
+    this.getAttributeEmbed = async function(attrName, sections, authorId = null) {
+        let result = await sqlPromOneEsc("SELECT * FROM attributes WHERE name = ", attrName);
+        var embed = await getBasicEmbed(mainGuild);
+        
+        var desc = [];
+        if(sections.includes("basics") || sections.includes("simplified") || sections.includes("details")) desc.push(["Basics", result?.desc_basics ?? "No info found"]);
+        if(sections.includes("formalized")) desc.push(["Formalized", formatFormalized(result?.desc_formalized ?? "No info found")]);
 
-                // split a single section into several fields if necessary
-                for(let d in desc) {
-                    let de = await applyPackLUT(desc[d][1], authorId);
-                    embed.fields.push(...handleFields(applyETN(de, mainGuild), applyTheme(desc[d][0])));
-                }
-               
-                // get icon if applicable
-                let lutval = applyLUT(attrName);
-                if(!lutval) lutval = applyLUT(result?.display_name ?? "Unknown");
-                if(lutval) { // set icon and name
-                    //console.log(`${iconRepoBaseUrl}${lutval}`);
-                    let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
-                    embed.thumbnail = { "url": `${iconBaseUrl(authorId)}${lutval}.png` };
-                    embed.author = { "icon_url": `${iconBaseUrl(authorId)}${lutval}.png`, "name": applyTheme(dp) };
-                } else { // just set title afterwards
-                    let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
-                    embed.title = applyET(dp);
-                }
-                
-                // url pack overwrite
-                if(isUrlPack(authorId, attrName)) {
-                    let url = iconBaseUrl(authorId, attrName);
-                    embed.thumbnail = { "url": url };
-                    if(embed?.author?.icon_url) embed.author.icon_url = url;
-                }
-                
-                // resolve promise, return embed
-                res(embed);
-            })
-        });
+        // split a single section into several fields if necessary
+        for(let d in desc) {
+            let de = await applyPackLUT(desc[d][1], authorId);
+            embed.fields.push(...handleFields(applyETN(de, mainGuild), applyTheme(desc[d][0])));
+        }
+       
+        // get icon if applicable
+        let lutval = applyLUT(attrName);
+        if(!lutval) lutval = applyLUT(result?.display_name ?? "Unknown");
+        if(lutval) { // set icon and name
+            //console.log(`${iconRepoBaseUrl}${lutval}`);
+            let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
+            embed.thumbnail = { "url": `${iconBaseUrl(authorId)}${lutval}.png` };
+            embed.author = { "icon_url": `${iconBaseUrl(authorId)}${lutval}.png`, "name": applyTheme(dp) };
+        } else { // just set title afterwards
+            let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
+            embed.title = applyET(dp);
+        }
+        
+        // url pack overwrite
+        if(isUrlPack(authorId, attrName)) {
+            let url = iconBaseUrl(authorId, attrName);
+            embed.thumbnail = { "url": url };
+            if(embed?.author?.icon_url) embed.author.icon_url = url;
+        }
+       return embed;
     }
     
     /**
     Get Team Embed
     Returns a team embed for a team message
     */
-    this.getTeamEmbed = function(teamName, sections, authorId = null) {
-        return new Promise(res => {
-            sql("SELECT * FROM teams WHERE teams.name=" + connection.escape(teamName), async result => {
-                result = result[0]; // there should always only be one attribute by a certain name
-                var embed = await getBasicEmbed(mainGuild);
-                
-                // create members list
-                var members = await applyQuery(`@Query;Team=${result.name},Type=default;$.Emoji $.Name@\n\n@Query;Team=${result.name},Type=limited;$.Emoji *$.Name*@\n\n@Query;Team=${result.name},Type=transformation;$.Emoji $.Name (T)@\n\n@Query;Team=${result.name},Type=haunted;$.Emoji $.Name (H)@`);
-                members = members.replace("\n\n\n","\n"); // remove extra newline for when a section is empty
-                
-                var desc = [];
-                if(sections.includes("basics") || sections.includes("simplified") || sections.includes("details")) desc.push(["Basics", result?.desc_basics ?? "No info found"]);
-                if(sections.includes("details")) desc.push(["Members", members ?? "No info found"]);
-                if(sections.includes("formalized")) desc.push(["Formalized", formatFormalized(result?.desc_formalized ?? "No info found")]);
+    this.getTeamEmbed = async function(teamName, sections, authorId = null) {
+        let result = await sqlPromOneEsc("SELECT * FROM teams WHERE teams.name=", teamName);
+        var embed = await getBasicEmbed(mainGuild);
+        
+        // create members list
+        var members = await applyQuery(`@Query;Team=${result.name},Type=default;$.Emoji $.Name@\n\n@Query;Team=${result.name},Type=limited;$.Emoji *$.Name*@\n\n@Query;Team=${result.name},Type=transformation;$.Emoji $.Name (T)@\n\n@Query;Team=${result.name},Type=haunted;$.Emoji $.Name (H)@`);
+        members = members.replace("\n\n\n","\n"); // remove extra newline for when a section is empty
+        
+        var desc = [];
+        if(sections.includes("basics") || sections.includes("simplified") || sections.includes("details")) desc.push(["Basics", result?.desc_basics ?? "No info found"]);
+        if(sections.includes("details")) desc.push(["Members", members ?? "No info found"]);
+        if(sections.includes("formalized")) desc.push(["Formalized", formatFormalized(result?.desc_formalized ?? "No info found")]);
 
-                // split a single section into several fields if necessary
-                for(let d in desc) {
-                    let de = await applyPackLUT(desc[d][1], authorId);
-                    embed.fields.push(...handleFields(applyETN(de, mainGuild), applyTheme(desc[d][0])));
-                }
-               
-                // get icon if applicable
-                let lutval = applyLUT(teamName);
-                if(!lutval) lutval = applyLUT(result?.display_name ?? "Unknown");
-                if(lutval) { // set icon and name
-                    //console.log(`${iconRepoBaseUrl}${lutval}`);
-                    let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
-                    embed.thumbnail = { "url": `${iconBaseUrl(authorId)}${lutval}.png` };
-                    embed.author = { "icon_url": `${iconBaseUrl(authorId)}${lutval}.png`, "name": applyTheme(dp) };
-                } else { // just set title afterwards
-                    let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
-                    embed.title = applyET(dp);
-                }
-                
-                // url pack overwrite
-                if(isUrlPack(authorId, teamName)) {
-                    let url = iconBaseUrl(authorId, teamName);
-                    embed.thumbnail = { "url": url };
-                    if(embed?.author?.icon_url) embed.author.icon_url = url;
-                }
-                
-                // resolve promise, return embed
-                res(embed);
-            })
-        });
+        // split a single section into several fields if necessary
+        for(let d in desc) {
+            let de = await applyPackLUT(desc[d][1], authorId);
+            embed.fields.push(...handleFields(applyETN(de, mainGuild), applyTheme(desc[d][0])));
+        }
+       
+        // get icon if applicable
+        let lutval = applyLUT(teamName);
+        if(!lutval) lutval = applyLUT(result?.display_name ?? "Unknown");
+        if(lutval) { // set icon and name
+            //console.log(`${iconRepoBaseUrl}${lutval}`);
+            let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
+            embed.thumbnail = { "url": `${iconBaseUrl(authorId)}${lutval}.png` };
+            embed.author = { "icon_url": `${iconBaseUrl(authorId)}${lutval}.png`, "name": applyTheme(dp) };
+        } else { // just set title afterwards
+            let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
+            embed.title = applyET(dp);
+        }
+        
+        // url pack overwrite
+        if(isUrlPack(authorId, teamName)) {
+            let url = iconBaseUrl(authorId, teamName);
+            embed.thumbnail = { "url": url };
+            if(embed?.author?.icon_url) embed.author.icon_url = url;
+        }
+        
+        // resolve promise, return embed
+        return embed;
     }
     
     /**
     Get Location Embed
     Returns a location embed for a group message
     */
-    this.getLocationEmbed = function(locationName, authorId = null) {
-        return new Promise(res => {
-            sql("SELECT * FROM locations WHERE name = " + connection.escape(locationName), async result => {
-                result = result[0]; // there should always only be one role by a certain name
-                var embed = await getBasicEmbed(mainGuild);
-                
-                // description
-                let desc = await applyPackLUT(result?.description ?? "No info found", authorId);
-                embed.description = desc;
-               
-                // get icon if applicable
-                let lutval = applyLUT(locationName);
-                if(!lutval) lutval = applyLUT(result?.display_name ?? "Unknown");
-                if(lutval) { // set icon and name
-                    //console.log(`${iconRepoBaseUrl}${lutval}`);
-                    let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
-                    embed.thumbnail = { "url": `${iconBaseUrl(authorId)}${lutval}.png` };
-                    embed.author = { "icon_url": `${iconBaseUrl(authorId)}${lutval}.png`, "name": applyTheme(dp) };
-                } else { // just set title afterwards
-                    let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
-                    embed.title = applyET(dp);
-                }
-                
-                // url pack overwrite
-                if(isUrlPack(authorId, locationName)) {
-                    let url = iconBaseUrl(authorId, locationName);
-                    embed.thumbnail = { "url": url };
-                    if(embed?.author?.icon_url) embed.author.icon_url = url;
-                }
-                
-                // resolve promise, return embed
-                res(embed);
-            })
-        });
+    this.getLocationEmbed = async function(locationName, authorId = null) {
+        let result = await sqlPromOneEsc("SELECT * FROM locations WHERE name = ", locationName);
+        var embed = await getBasicEmbed(mainGuild);
+        
+        // description
+        let desc = await applyPackLUT(result?.description ?? "No info found", authorId);
+        embed.description = desc;
+       
+        // get icon if applicable
+        let lutval = applyLUT(locationName);
+        if(!lutval) lutval = applyLUT(result?.display_name ?? "Unknown");
+        if(lutval) { // set icon and name
+            //console.log(`${iconRepoBaseUrl}${lutval}`);
+            let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
+            embed.thumbnail = { "url": `${iconBaseUrl(authorId)}${lutval}.png` };
+            embed.author = { "icon_url": `${iconBaseUrl(authorId)}${lutval}.png`, "name": applyTheme(dp) };
+        } else { // just set title afterwards
+            let dp = await applyPackLUT(result?.display_name ?? "Unknown", authorId);
+            embed.title = applyET(dp);
+        }
+        
+        // url pack overwrite
+        if(isUrlPack(authorId, locationName)) {
+            let url = iconBaseUrl(authorId, locationName);
+            embed.thumbnail = { "url": url };
+            if(embed?.author?.icon_url) embed.author.icon_url = url;
+        }
+        
+        // resolve promise, return embed
+        return embed;
     }
     
     /**
     Get Role Embed 
     Returns an info embed for a role 
     **/
-    this.getRoleEmbed = function(roleName, visibleSections, guild, authorId = null) {
-        return new Promise(res => {
-            sql("SELECT * FROM roles WHERE name = " + connection.escape(roleName), async result => {
-                result = result[0]; // there should always only be one role by a certain name
-                if(!result) return null; // no data found
- 
-                var embed = await getBasicRoleEmbed(result, guild, authorId);
-                
-                // Build role name for title
-                let fancyRoleName = `${result.display_name} [${toTitleCase(result.class)} ${toTitleCase(result.category)}]`; // Default: Name [Class Category]
-                if(result.class == "solo") fancyRoleName = `${result.display_name} [${toTitleCase(result.class)} ${toTitleCase(result.category)} - ${toTitleCase(result.team)} Team]`; // Solos: Name [Class Category - Team]
-                fancyRoleName = applyTheme(fancyRoleName); // apply theme replacement rules
-                fancyRoleName = await applyPackLUT(fancyRoleName, authorId);
-                embed.author.name = fancyRoleName;
+    this.getRoleEmbed = async function(roleName, visibleSections, guild, authorId = null) {
+        let result = await sqlPromOneEsc("SELECT * FROM roles WHERE name = ", roleName);
+        if(!result) return null; // no data found
 
-                // Role Type
-                const roleTypeData = getRoleTypeData(result.type); // display the role type
-                if(result.type != "default") embed.title = applyTheme(roleTypeData.name); // but dont display "Default"
-                
-                let replLUT = getPackReplLUT(AVAILABLE_PACKS[getPack(authorId) - 1]);
-                if(replLUT[roleName]) {
-                    result.desc_basics = replLUT[roleName].basics ?? result.desc_basics;
-                    result.desc_details = replLUT[roleName].details ?? result.desc_details;
-                    result.desc_simplified = replLUT[roleName].simplified ?? result.desc_simplified;
+        var embed = await getBasicRoleEmbed(result, guild, authorId);
+        
+        // Build role name for title
+        let fancyRoleName = `${result.display_name} [${toTitleCase(result.class)} ${toTitleCase(result.category)}]`; // Default: Name [Class Category]
+        if(result.class == "solo") fancyRoleName = `${result.display_name} [${toTitleCase(result.class)} ${toTitleCase(result.category)} - ${toTitleCase(result.team)} Team]`; // Solos: Name [Class Category - Team]
+        fancyRoleName = applyTheme(fancyRoleName); // apply theme replacement rules
+        fancyRoleName = await applyPackLUT(fancyRoleName, authorId);
+        embed.author.name = fancyRoleName;
+
+        // Role Type
+        const roleTypeData = getRoleTypeData(result.type); // display the role type
+        if(result.type != "default") embed.title = applyTheme(roleTypeData.name); // but dont display "Default"
+        
+        let replLUT = getPackReplLUT(AVAILABLE_PACKS[getPack(authorId) - 1]);
+        if(replLUT[roleName]) {
+            result.desc_basics = replLUT[roleName].basics ?? result.desc_basics;
+            result.desc_details = replLUT[roleName].details ?? result.desc_details;
+            result.desc_simplified = replLUT[roleName].simplified ?? result.desc_simplified;
+        }
+        
+        let isFormalized = false;
+        // add visible sections as sections
+        for(const sec in visibleSections) {
+            let sectionText = "";
+            // get the text from the result object
+            switch(visibleSections[sec]) {
+                case "basics": sectionText = result.desc_basics; break;
+                case "details": sectionText = result.desc_details; break;
+                case "simplified": sectionText = result.desc_simplified === "No description available." ? result.desc_basics : result.desc_simplified; break;
+                case "formalized": sectionText = formatFormalized(result.desc_formalized); isFormalized = true; break;
+                case "card": sectionText = result.desc_card; break;
+            }
+            // only add the section if it exists
+            if(sectionText) {
+                if(visibleSections.length == 1) {
+                    sectionText = await applyPackLUT(sectionText, authorId);
+                    embed.description = applyETN(sectionText, guild);
+                } else {
+                    sectionText = await applyPackLUT(sectionText, authorId);
+                    let title = await applyPackLUT(toTitleCase(applyTheme(visibleSections[sec])), authorId);
+                    embed.fields.push(...handleFields(applyETN(sectionText, guild), title, !isFormalized));
                 }
-                
-                let isFormalized = false;
-                // add visible sections as sections
-                for(const sec in visibleSections) {
-                    let sectionText = "";
-                    // get the text from the result object
-                    switch(visibleSections[sec]) {
-                        case "basics": sectionText = result.desc_basics; break;
-                        case "details": sectionText = result.desc_details; break;
-                        case "simplified": sectionText = result.desc_simplified === "No description available." ? result.desc_basics : result.desc_simplified; break;
-                        case "formalized": sectionText = formatFormalized(result.desc_formalized); isFormalized = true; break;
-                        case "card": sectionText = result.desc_card; break;
-                    }
-                    // only add the section if it exists
-                    if(sectionText) {
-                        if(visibleSections.length == 1) {
-                            sectionText = await applyPackLUT(sectionText, authorId);
-                            embed.description = applyETN(sectionText, guild);
-                        } else {
-                            sectionText = await applyPackLUT(sectionText, authorId);
-                            let title = await applyPackLUT(toTitleCase(applyTheme(visibleSections[sec])), authorId);
-                            embed.fields.push(...handleFields(applyETN(sectionText, guild), title, !isFormalized));
-                        }
-                    }
-                }
-                                
-                if(!((roleTypeData.id >= 0 && (stats.role_filter & (1 << roleTypeData.id))) || (roleTypeData.id == -1 && (stats.role_filter & (1 << 1)) && (stats.role_filter & (1 << 2))))) {
-                    embed.description = "**This role type is currently not in use.**";
-                    delete embed.fields;
-                }
-                
-                // resolve promise with the embed, returning the embed
-                res(embed);
-                
-            }, () => {
-                // DB error
-                console.log("⛔ Database error. Couldn't look for role information!");
-            });	
-        });
+            }
+        }
+                        
+        if(!((roleTypeData.id >= 0 && (stats.role_filter & (1 << roleTypeData.id))) || (roleTypeData.id == -1 && (stats.role_filter & (1 << 1)) && (stats.role_filter & (1 << 2))))) {
+            embed.description = "**This role type is currently not in use.**";
+            delete embed.fields;
+        }
+        
+        // resolve promise with the embed, returning the embed
+        return embed;
     }
     
     /**

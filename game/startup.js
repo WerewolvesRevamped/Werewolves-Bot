@@ -242,18 +242,15 @@ module.exports = function() {
     Create Secret Channels - Start
     This loads all the role info for each player and then starts creating the SCs
     **/
-	function createSCs_Start(channel, debug) {
+	async function createSCs_Start(channel, debug) {
         // IMPORTANT: changing this query requires also changing a call from "createOneSC" which mirrors this query
-		sql("SELECT id,role,mentor FROM players ORDER BY alignment,role ASC", async result => {
-            // iterate through players
-            for(let player in result) {
-                await createSCs_One(channel, result[player], debug); // create SCs for every player
-            }
-            // finished
-			channel.send("✅ Finished creating INDSCs!");
-		}, () => {
-			channel.send("⛔ Database error. Unable to get a list of player roles."); 
-		});
+		let result = await sqlProm("SELECT id,role,mentor FROM players ORDER BY alignment,role ASC");
+        // iterate through players
+        for(let player in result) {
+            await createSCs_One(channel, result[player], debug); // create SCs for every player
+        }
+        // finished
+        channel.send("✅ Finished creating INDSCs!");
 	}
     
     this.createOneSC = async function(channel, pid, role) {
@@ -265,82 +262,73 @@ module.exports = function() {
     Creates a single secret channel
     **/
 	 async function createSCs_One(channel, player, debug) {
-        return new Promise(res => {
-            sql("SELECT * FROM roles WHERE name=" + connection.escape(player.role), async result => {	
-                var rolesName = result[0].display_name;
-                var rolesNameBot = result[0].name;
-                var roleData = result[0];
-                if(result[0].identity) {
-                    let idRole = await sqlPromOneEsc("SELECT * FROM roles WHERE name=", result[0].identity);
-                    rolesName = idRole.display_name;
-                    rolesNameBot = idRole.name;
-                    roleData = idRole;
-                }
-                let disName = channel.guild.members.cache.get(player.id).displayName; // get the player's display name
-                
-                // create role event
-                await createEvent(player.id, "role", player.role, result[0].team, "-1");
-                
-                // check for modifiers
-                let modifiers = await sqlPromEsc("SELECT * FROM modifiers WHERE id=", player.id);
-                let modEmbedFields = [];
-                if(modifiers.length > 0) {
-                    let modDescs = [];
-                    for(let i = 0; i < modifiers.length; i++) {
-                        // get data
-                        let modData = await sqlPromOneEsc("SELECT * FROM attributes WHERE name=", modifiers[i].name);
-                        // format for channel/info
-                        rolesName = modData.display_name + " " + rolesName;
-                        let emoji = getLUTEmoji(modData.name, modData.display_name);
-                        modDescs.push([`Modifier - ${modData?.display_name ?? "??"}`, `${emoji} ${modData?.desc_basics ?? "No info found"}`]);
-                        // apply attribute
-                        await createModifierAttribute(`role:${result[0].name}`, `player:${player.id}`, player.id, "player", "permanent", modData.name);
-                        abilityLog(`✅ ${srcRefToText('player:' + player.id)} had ${modData.name} applied as a modifier.`);
-                    }
-                    // split a single section into several fields if necessary
-                    for(let d in modDescs) {
-                        let de = await applyPackLUT(modDescs[d][1], player.id);
-                        modEmbedFields.push(...handleFields(applyETN(de, mainGuild), applyTheme(modDescs[d][0])));
-                    }
-                }
-                
-                // Send Role DM (except if in debug mode)
-                if(!debug) await createSCs_sendDM(channel.guild, player.id, roleData, disName, false, modEmbedFields.length > 0 ?  rolesName : false)
-                    
-                // Create INDSC
-                channel.send("✅ Creating INDSC for `" + channel.guild.members.cache.get(player.id).displayName + "` (`" + rolesName + "`)!");
-                
-                // Create permissions
-                let scPerms = getSCCatPerms(channel.guild);
-                scPerms.push(getPerms(player.id, ["history", "read"], []));
-                if(player.mentor) scPerms.push(getPerms(player.mentor, ["history", "read", "write"], []));
-                scPerms.push(getPerms(stats.ghost, ["write"], ["read"]));
-                
-                // Determine channel name
-                let channelName = rolesName.substr(0, 100);
-                channelName = applyTheme(channelName);
-                
-                if(channelName.length > 100 || channelName.length <= 0) channelName = "invalid";
+         let result = await sqlPromEsc("SELECT * FROM roles WHERE name=", player.role);
+        var rolesName = result[0].display_name;
+        var rolesNameBot = result[0].name;
+        var roleData = result[0];
+        if(result[0].identity) {
+            let idRole = await sqlPromOneEsc("SELECT * FROM roles WHERE name=", result[0].identity);
+            rolesName = idRole.display_name;
+            rolesNameBot = idRole.name;
+            roleData = idRole;
+        }
+        let disName = channel.guild.members.cache.get(player.id).displayName; // get the player's display name
+        
+        // create role event
+        await createEvent(player.id, "role", player.role, result[0].team, "-1");
+        
+        // check for modifiers
+        let modifiers = await sqlPromEsc("SELECT * FROM modifiers WHERE id=", player.id);
+        let modEmbedFields = [];
+        if(modifiers.length > 0) {
+            let modDescs = [];
+            for(let i = 0; i < modifiers.length; i++) {
+                // get data
+                let modData = await sqlPromOneEsc("SELECT * FROM attributes WHERE name=", modifiers[i].name);
+                // format for channel/info
+                rolesName = modData.display_name + " " + rolesName;
+                let emoji = getLUTEmoji(modData.name, modData.display_name);
+                modDescs.push([`Modifier - ${modData?.display_name ?? "??"}`, `${emoji} ${modData?.desc_basics ?? "No info found"}`]);
+                // apply attribute
+                await createModifierAttribute(`role:${result[0].name}`, `player:${player.id}`, player.id, "player", "permanent", modData.name);
+                abilityLog(`✅ ${srcRefToText('player:' + player.id)} had ${modData.name} applied as a modifier.`);
+            }
+            // split a single section into several fields if necessary
+            for(let d in modDescs) {
+                let de = await applyPackLUT(modDescs[d][1], player.id);
+                modEmbedFields.push(...handleFields(applyETN(de, mainGuild), applyTheme(modDescs[d][0])));
+            }
+        }
+        
+        // Send Role DM (except if in debug mode)
+        if(!debug) await createSCs_sendDM(channel.guild, player.id, roleData, disName, false, modEmbedFields.length > 0 ?  rolesName : false)
+            
+        // Create INDSC
+        channel.send("✅ Creating INDSC for `" + channel.guild.members.cache.get(player.id).displayName + "` (`" + rolesName + "`)!");
+        
+        // Create permissions
+        let scPerms = getSCCatPerms(channel.guild);
+        scPerms.push(getPerms(player.id, ["history", "read"], []));
+        if(player.mentor) scPerms.push(getPerms(player.mentor, ["history", "read", "write"], []));
+        scPerms.push(getPerms(stats.ghost, ["write"], ["read"]));
+        
+        // Determine channel name
+        let channelName = rolesName.substr(0, 100);
+        channelName = applyTheme(channelName);
+        
+        if(channelName.length > 100 || channelName.length <= 0) channelName = "invalid";
 
-                // create SC
-                let newSC = await createSC(channelName, scPerms);
-                cmdConnectionAdd(newSC, ["", player.id], true);
-                cmdInfo(newSC, player.id, [ rolesNameBot ], true, false, false, modEmbedFields.length > 0 ? rolesName : false, modEmbedFields);
-                
-                // send card
-                if(config.cards) {
-                    setTimeout(() => {
-                        cmdGetCard(newSC, rolesNameBot);
-                    }, 5000);
-                }
-                
-                // resolve promise
-                res();
-            }, () => {
-                // Couldn't get role info
-                channel.send("⛔ Database error. Could not get role info!");
-            });
-        });
+        // create SC
+        let newSC = await createSC(channelName, scPerms);
+        cmdConnectionAdd(newSC, ["", player.id], true);
+        cmdInfo(newSC, player.id, [ rolesNameBot ], true, false, false, modEmbedFields.length > 0 ? rolesName : false, modEmbedFields);
+        
+        // send card
+        if(config.cards) {
+            setTimeout(() => {
+                cmdGetCard(newSC, rolesNameBot);
+            }, 5000);
+        }
 	}
     
     /**
@@ -418,36 +406,25 @@ module.exports = function() {
     Create New Secret Channel Category
     creates a new secret channel category and then continues running a callback
     **/
-	 function createNewSCCat(channel, childChannel = false) {
-         return new Promise(res => {
-            // increment the SC count to determine the new sc name
-            console.log(scCatCount);
-            scCatCount++;
-            let scName = "🕵 " + toTitleCase(stats.game) + " Secret Channels";
-            // only append a number for SC cats >1
-            if(scCatCount > 1) scName += " #" + scCatCount;
-            // create a new sc cat
-            channel.guild.channels.create({ name: scName, type: ChannelType.GuildCategory,  permissionOverwrites: getSCCatPerms(channel.guild) })
-            .then(cc => {
-                sql("INSERT INTO sc_cats (id) VALUES (" + connection.escape(cc.id) + ")", async result => {	
-                    if(childChannel) { // sets the new category as a channel parent - for the first channel that failed to fit in the previous category
-                        childChannel.setParent(cc, { lockPermissions: false }).catch(err => { 
-                            logO(err); 
-                            sendError(channel, err, "Could not assign parent to SC!");
-                        });
-                    }
-                    // cache the current sc categories
-                    await getSCCats();
-                    // continue with a specified callback
-                    res(cc);
-                }, () => {
-                    channel.send("⛔ Database error. Unable to save SC category!"); 
-                });
-            }).catch(err => { 
+	 async function createNewSCCat(channel, childChannel = false) {
+        // increment the SC count to determine the new sc name
+        console.log(scCatCount);
+        scCatCount++;
+        let scName = "🕵 " + toTitleCase(stats.game) + " Secret Channels";
+        // only append a number for SC cats >1
+        if(scCatCount > 1) scName += " #" + scCatCount;
+        // create a new sc cat
+        let cc = await channel.guild.channels.create({ name: scName, type: ChannelType.GuildCategory,  permissionOverwrites: getSCCatPerms(channel.guild) });
+        let result = await sqlProm("INSERT INTO sc_cats (id) VALUES (" + connection.escape(cc.id) + ")");
+        if(childChannel) { // sets the new category as a channel parent - for the first channel that failed to fit in the previous category
+            childChannel.setParent(cc, { lockPermissions: false }).catch(err => { 
                 logO(err); 
-                sendError(channel, err, "Could not create SC category");
+                sendError(channel, err, "Could not assign parent to SC!");
             });
-         });
+        }
+        // cache the current sc categories
+        await getSCCats();
+        return cc;
 	}
     	
 	/**

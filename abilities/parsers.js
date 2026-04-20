@@ -1277,7 +1277,7 @@ module.exports = function() {
     /**
     Get all player 
     **/
-    function getAllGroupMembers(group) {
+    async function getAllGroupMembers(group) {
         let result = await sqlPromEsc("SELECT owner FROM active_attributes WHERE attr_type='group_membership' AND val1=", group);
         return result.map(el => el.owner);
     }

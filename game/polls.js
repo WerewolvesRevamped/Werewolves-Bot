@@ -81,30 +81,28 @@ module.exports = function() {
 			return; 
 		}
         // Get all groups values
-        sql("SELECT * FROM polls WHERE name = " + connection.escape(args[1]), async result => {
-            result = result[0];
-            // get the basic embed
-             var embed = await getBasicEmbed(channel.guild);
-             // set embed title
-            embed.author = { name: result.display_name };
-            
-            // get lut icon if applicable
-            let lutval = applyLUT(result.name);
-            if(!lutval) lutval = applyLUT(result.display_name);
-            if(lutval) { // set icon and name
-                //console.log(`${iconRepoBaseUrl}${lutval}`);
-                embed.thumbnail = { "url": `${iconRepoBaseUrl}${lutval}.png` };
-                embed.author.icon_url = `${iconRepoBaseUrl}${lutval}.png`;
-            } 
-            
-            // Add a field for every role value
-            for(attr in result) {
-                embed.fields.push({ "name": toTitleCase(attr), "value": (result[attr]+"").substr(0, 1000) + ((result[attr]+"").length > 1000 ? " **...**" : "") });
-            }
-            
-            // Send the embed
-            channel.send({ embeds: [ embed ] }); 
-        });
+        let result = await sqlPromOneEsc("SELECT * FROM polls WHERE name = ", args[1]);
+        // get the basic embed
+         var embed = await getBasicEmbed(channel.guild);
+         // set embed title
+        embed.author = { name: result.display_name };
+        
+        // get lut icon if applicable
+        let lutval = applyLUT(result.name);
+        if(!lutval) lutval = applyLUT(result.display_name);
+        if(lutval) { // set icon and name
+            //console.log(`${iconRepoBaseUrl}${lutval}`);
+            embed.thumbnail = { "url": `${iconRepoBaseUrl}${lutval}.png` };
+            embed.author.icon_url = `${iconRepoBaseUrl}${lutval}.png`;
+        } 
+        
+        // Add a field for every role value
+        for(attr in result) {
+            embed.fields.push({ "name": toTitleCase(attr), "value": (result[attr]+"").substr(0, 1000) + ((result[attr]+"").length > 1000 ? " **...**" : "") });
+        }
+        
+        // Send the embed
+        channel.send({ embeds: [ embed ] }); 
     }
     
     /**
@@ -112,25 +110,21 @@ module.exports = function() {
     Lists all polls
     **/
 	/* Lists all poll names */
-	this.cmdPollsList = function(channel) {
+	this.cmdPollsList = async function(channel) {
 		// Get all polls
-		sql("SELECT * FROM polls ORDER BY ai_id ASC", result => {
-			if(result.length > 0) {
-				// At least one poll exists
-				channel.send("✳️ Sending a list of currently existing polls:");
-				// Send message
-				chunkArray(result.map(loc => {
-                    let emoji = getLUTEmoji(loc.name, loc.display_name);
-                    return `**${emoji} ${toTitleCase(loc.display_name)}** (${loc.options} / ${loc.voters}) [${loc.show_voters}]`;
-                }), 20).map(el => el.join("\n")).forEach(el => channel.send(el));
-			} else { 
-				// No polls exist
-				channel.send("⛔ Database error. Could not find any polls!");
-			}
-		}, () => {
-			// DB error
-			channel.send("⛔ Database error. Couldn't look for poll list!");
-		});
+		let result = await sqlProm("SELECT * FROM polls ORDER BY ai_id ASC");
+        if(result.length <= 0) {
+            // No polls exist
+            channel.send("⛔ Database error. Could not find any polls!");
+            return;
+        }
+        // At least one poll exists
+        channel.send("✳️ Sending a list of currently existing polls:");
+        // Send message
+        chunkArray(result.map(loc => {
+            let emoji = getLUTEmoji(loc.name, loc.display_name);
+            return `**${emoji} ${toTitleCase(loc.display_name)}** (${loc.options} / ${loc.voters}) [${loc.show_voters}]`;
+        }), 20).map(el => el.join("\n")).forEach(el => channel.send(el));
 	}
     
     /**
@@ -138,24 +132,20 @@ module.exports = function() {
     Lists active poll instances
     **/
 	/* Lists all polls names */
-	this.cmdPollsActive = function(channel) {
+	this.cmdPollsActive = async function(channel) {
 		// Get all polls
-		sql("SELECT * FROM active_polls ORDER BY ai_id ASC", result => {
-			if(result.length > 0) {
-				// At least one role exists
-				channel.send("✳️ Sending a list of currently existing active poll instances:");
-				// Send message
-				chunkArray(result.map(poll => {
-                    return `\`${poll.ai_id}\`: **${toTitleCase(poll.name)}** [${toTitleCase(poll.type)}] ( https://discord.com/channels/${mainGuild.id}/${poll.channel}/${poll.initial_message} )`;
-                }), 10).map(el => el.join("\n")).forEach(el => channel.send(el));
-			} else { 
-				// No polls exist
-				channel.send("⛔ Database error. Could not find any active poll instances!");
-			}
-		}, () => {
-			// DB error
-			channel.send("⛔ Database error. Couldn't look for active poll instance list!");
-		});
+		let result = await sqlProm("SELECT * FROM active_polls ORDER BY ai_id ASC");
+        if(result.length <= 0) {
+            // No polls exist
+            channel.send("⛔ Database error. Could not find any active poll instances!");
+            return;
+        }
+        // At least one role exists
+        channel.send("✳️ Sending a list of currently existing active poll instances:");
+        // Send message
+        chunkArray(result.map(poll => {
+            return `\`${poll.ai_id}\`: **${toTitleCase(poll.name)}** [${toTitleCase(poll.type)}] ( https://discord.com/channels/${mainGuild.id}/${poll.channel}/${poll.initial_message} )`;
+        }), 10).map(el => el.join("\n")).forEach(el => channel.send(el));
 	}
     
     /**
@@ -163,7 +153,7 @@ module.exports = function() {
     Deletes an active poll instances
     **/
 	/* Lists all polls names */
-	this.cmdPollsDelete = function(channel, args) {
+	this.cmdPollsDelete = async function(channel, args) {
 		if(!args[1]) {  
 			channel.send("⛔ Syntax error. Incorrect amount of parameters!"); 
 			return; 
@@ -173,12 +163,8 @@ module.exports = function() {
 		}
         
 		// Get all polls
-		sql("DELETE FROM active_polls WHERE ai_id=" + connection.escape(args[1]), result => {
-            channel.send("✅ Deleted active poll instance.");
-		}, () => {
-			// DB error
-			channel.send("⛔ Database error. Couldn't delete active poll instance!");
-		});
+		await sqlPromEsc("DELETE FROM active_polls WHERE ai_id=", args[1]);
+        channel.send("✅ Deleted active poll instance.");
 	}
     
     /**
@@ -234,11 +220,7 @@ module.exports = function() {
     Get poll data
     **/
     this.pollGetData = function(pollName) {
-        return new Promise(res => {
-            sql("SELECT * FROM polls WHERE name=" + connection.escape(pollName), result => {
-                res(result[0]);
-            });
-        });
+        return sqlPromOneEsc("SELECT * FROM polls WHERE name=", pollName);
     }
     
     /** PUBLIC
@@ -332,19 +314,14 @@ module.exports = function() {
     /** PUBLIC
     Closes a poll
     **/
-    this.closePolls = function() {
-        return new Promise(res => {
-            // get all polls
-            sql("SELECT * FROM active_polls", async result => {
-                // iterate through polls
-                for(let i = 0; i < result.length; i++) {
-                    await closePoll(result[i]);
-                }
-                // delete all polls
-                await pollsReset();
-                res();
-            });
-        });
+    this.closePolls = async function() {
+        let result = await sqlProm("SELECT * FROM active_polls");
+        // iterate through polls
+        for(let i = 0; i < result.length; i++) {
+            await closePoll(result[i]);
+        }
+        // delete all polls
+        await pollsReset();
     }
     
     async function getVoters(messages, channel) {

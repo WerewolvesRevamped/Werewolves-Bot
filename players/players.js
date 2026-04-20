@@ -73,7 +73,7 @@ module.exports = function() {
     Command: $players get
     Retrieves a player attribute
     **/
-	this.cmdPlayersGet = function(channel, args) {
+	this.cmdPlayersGet = async function(channel, args) {
 		// Check arguments
 		if(!args[2]) { 
 			channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "players get <value name> <player>`!"); 
@@ -93,20 +93,16 @@ module.exports = function() {
 		}
         
         // Get info
-        sql("SELECT " + args[1] + " FROM players WHERE id = " + connection.escape(user), result => {
-            let playerName = channel.guild.members.cache.get(user)?.displayName ?? "USER LEFT";
-            channel.send("✅ `" + playerName + "`'s " + args[1] + " is `" + result[0][args[1]] + "`!");
-        }, () => {
-            // Database error
-            channel.send("⛔ Database error. Could not get player information!");
-        });
+        let result = await sqlPromEsc("SELECT " + args[1] + " FROM players WHERE id = ", user);
+        let playerName = channel.guild.members.cache.get(user)?.displayName ?? "USER LEFT";
+        channel.send("✅ `" + playerName + "`'s " + args[1] + " is `" + result[0][args[1]] + "`!");
 	}
     
     /**
     Command: $players set
     Sets a player attribute
     **/
-	this.cmdPlayersSet = function(channel, args) {
+	this.cmdPlayersSet = async function(channel, args) {
 		// Check arguments
 		if(!args[2] || !args[3]) { 
 			channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `" + stats.prefix + "players set <value name> <player> <value>`!"); 
@@ -126,15 +122,12 @@ module.exports = function() {
 		}
         
         // Update value
-		sql("UPDATE players SET " + args[1] + " = " + connection.escape(args[3]) + " WHERE id = " + connection.escape(user), result => {
-			let playerName = channel.guild.members.cache.get(user)?.displayName ?? "USER LEFT";
-			channel.send("✅ `" + playerName + "`'s " + args[1] + " value now is `" + args[3] + "`!");
-			updateGameStatus();
-			getCCs();
-			getPRoles();
-		}, () => {
-			channel.send("⛔ Database error. Could not update player information!");
-		});
+		await sqlPromEsc("UPDATE players SET " + args[1] + " = " + connection.escape(args[3]) + " WHERE id = ", user);
+        let playerName = channel.guild.members.cache.get(user)?.displayName ?? "USER LEFT";
+        channel.send("✅ `" + playerName + "`'s " + args[1] + " value now is `" + args[3] + "`!");
+        updateGameStatus();
+        getCCs();
+        getPRoles();
 	}
     
 	/**

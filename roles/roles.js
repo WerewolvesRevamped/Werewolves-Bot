@@ -77,7 +77,7 @@ module.exports = function() {
     Command: $roles get
     Gets all role values
     **/
-    this.cmdRolesGet = function(channel, args) {
+    this.cmdRolesGet = async function(channel, args) {
 		// Check arguments
 		if(!args[1]) { 
 			channel.send("⛔ Syntax error. Not enough parameters!"); 
@@ -87,21 +87,19 @@ module.exports = function() {
 			return; 
 		}
         // Get all roles values
-        sql("SELECT * FROM roles WHERE name = " + connection.escape(args[1]), async result => {
-            result = result[0];
-            // get the basic embed
-             var embed = await getBasicRoleEmbed(result, channel.guild);
-             // set embed title
-            embed.author.name = result.display_name;
-            
-            // Add a field for every role value
-            for(attr in result) {
-                embed.fields.push({ "name": toTitleCase(attr), "value": (result[attr]+"").substr(0, 1000) + ((result[attr]+"").length > 1000 ? " **...**" : "") });
-            }
-            
-            // Send the embed
-            channel.send({ embeds: [ embed ] }); 
-        });
+        let result = await sqlPromOneEsc("SELECT * FROM roles WHERE name = ", args[1]);
+        // get the basic embed
+         var embed = await getBasicRoleEmbed(result, channel.guild);
+         // set embed title
+        embed.author.name = result.display_name;
+        
+        // Add a field for every role value
+        for(attr in result) {
+            embed.fields.push({ "name": toTitleCase(attr), "value": (result[attr]+"").substr(0, 1000) + ((result[attr]+"").length > 1000 ? " **...**" : "") });
+        }
+        
+        // Send the embed
+        channel.send({ embeds: [ embed ] }); 
     }
     
     /**
@@ -135,30 +133,28 @@ module.exports = function() {
 			return; 
 		}
         // Get all sets values
-        sql("SELECT * FROM sets WHERE name = " + connection.escape(args[1]), async result => {
-            result = result[0];
-            // get the basic embed
-             var embed = await getBasicEmbed(channel.guild);
-             // set embed title
-            embed.author = { name: result.display_name };
-            
-            // get lut icon if applicable
-            let lutval = applyLUT(result.name);
-            if(!lutval) lutval = applyLUT(result.display_name);
-            if(lutval) { // set icon and name
-                console.log(`${iconRepoBaseUrl}${lutval}`);
-                embed.thumbnail = { "url": `${iconRepoBaseUrl}${lutval}.png` };
-                embed.author.icon_url = `${iconRepoBaseUrl}${lutval}.png`;
-            } 
-           
-            // Add a field for every role value
-            for(attr in result) {
-                embed.fields.push({ "name": toTitleCase(attr), "value": (result[attr]+"").substr(0, 1000) + ((result[attr]+"").length > 1000 ? " **...**" : "") });
-            }
-            
-            // Send the embed
-            channel.send({ embeds: [ embed ] }); 
-        });
+        let result = await sqlPromOneEsc("SELECT * FROM sets WHERE name = ", args[1]);
+        // get the basic embed
+         var embed = await getBasicEmbed(channel.guild);
+         // set embed title
+        embed.author = { name: result.display_name };
+        
+        // get lut icon if applicable
+        let lutval = applyLUT(result.name);
+        if(!lutval) lutval = applyLUT(result.display_name);
+        if(lutval) { // set icon and name
+            console.log(`${iconRepoBaseUrl}${lutval}`);
+            embed.thumbnail = { "url": `${iconRepoBaseUrl}${lutval}.png` };
+            embed.author.icon_url = `${iconRepoBaseUrl}${lutval}.png`;
+        } 
+       
+        // Add a field for every role value
+        for(attr in result) {
+            embed.fields.push({ "name": toTitleCase(attr), "value": (result[attr]+"").substr(0, 1000) + ((result[attr]+"").length > 1000 ? " **...**" : "") });
+        }
+        
+        // Send the embed
+        channel.send({ embeds: [ embed ] }); 
     }
     
     /**
@@ -166,22 +162,18 @@ module.exports = function() {
     Lists all roles
     **/
 	/* Lists all roles names */
-	this.cmdRolesList = function(channel) {
+	this.cmdRolesList = async function(channel) {
 		// Get all roles
-		sql("SELECT * FROM roles ORDER BY name ASC", result => {
-			if(result.length > 0) {
-				// At least one role exists
-				channel.send("✳️ Sending a list of currently existing roles:");
-				// Send message
-				chunkArray(result.map(role => `**${getRoleEmoji(role.name) ?? "❓"} ${toTitleCase(role.display_name)}** (${toTitleCase(role.class)[0]}${toTitleCase(role.category)[0]})`), 30).map(el => el.join(", ")).forEach(el => channel.send(el));
-			} else { 
-				// No roles exist
-				channel.send("⛔ Database error. Could not find any roles!");
-			}
-		}, () => {
-			// DB error
-			channel.send("⛔ Database error. Couldn't look for role list!");
-		});
+		let result = await sqlProm("SELECT * FROM roles ORDER BY name ASC");
+        if(result.length <= 0) {
+            // No roles exist
+            channel.send("⛔ Database error. Could not find any roles!");  
+            return;
+        }
+        // At least one role exists
+        channel.send("✳️ Sending a list of currently existing roles:");
+        // Send message
+        chunkArray(result.map(role => `**${getRoleEmoji(role.name) ?? "❓"} ${toTitleCase(role.display_name)}** (${toTitleCase(role.class)[0]}${toTitleCase(role.category)[0]})`), 30).map(el => el.join(", ")).forEach(el => channel.send(el));
 	}
     
     /**
@@ -189,22 +181,18 @@ module.exports = function() {
     Lists all role names
     **/
 	/* Lists all roles names */
-	this.cmdRolesListNames = function(channel) {
+	this.cmdRolesListNames = async function(channel) {
 		// Get all roles
-		sql("SELECT * FROM roles ORDER BY name ASC", result => {
-			if(result.length > 0) {
-				// At least one role exists
-				channel.send("✳️ Sending a list of currently existing role names:");
-				// Send message
-				chunkArray(result.map(role => `${toTitleCase(role.display_name)}`), 180).map(el => el.join(",")).forEach(el => channel.send(el));
-			} else { 
-				// No roles exist
-				channel.send("⛔ Database error. Could not find any roles!");
-			}
-		}, () => {
-			// DB error
-			channel.send("⛔ Database error. Couldn't look for role list!");
-		});
+		let result = await sqlProm("SELECT * FROM roles ORDER BY name ASC");
+        if(result.length <= 0) {
+            // No roles exist
+            channel.send("⛔ Database error. Could not find any roles!");
+            return;
+        }
+        // At least one role exists
+        channel.send("✳️ Sending a list of currently existing role names:");
+        // Send message
+        chunkArray(result.map(role => `${toTitleCase(role.display_name)}`), 180).map(el => el.join(",")).forEach(el => channel.send(el));
 	}
     
     /**
@@ -212,25 +200,21 @@ module.exports = function() {
     Lists all sets
     **/
 	/* Lists all sets names */
-	this.cmdSetsList = function(channel) {
+	this.cmdSetsList = async function(channel) {
 		// Get all sets
-		sql("SELECT * FROM sets ORDER BY name ASC", result => {
-			if(result.length > 0) {
-				// At least one role exists
-				channel.send("✳️ Sending a list of currently existing sets:");
-				// Send message
-				chunkArray(result.map(set => {
-                    let emoji = getLUTEmoji(set.name, set.display_name);
-                    return `**${emoji} ${toTitleCase(set.display_name)}**`;
-                }), 20).map(el => el.join(", ")).forEach(el => channel.send(el));
-			} else { 
-				// No sets exist
-				channel.send("⛔ Database error. Could not find any sets!");
-			}
-		}, () => {
-			// DB error
-			channel.send("⛔ Database error. Couldn't look for set list!");
-		});
+		let result = await sqlProm("SELECT * FROM sets ORDER BY name ASC");
+        if(result.length <= 0) {
+            // No sets exist
+            channel.send("⛔ Database error. Could not find any sets!");
+            return;
+        }
+        // At least one role exists
+        channel.send("✳️ Sending a list of currently existing sets:");
+        // Send message
+        chunkArray(result.map(set => {
+            let emoji = getLUTEmoji(set.name, set.display_name);
+            return `**${emoji} ${toTitleCase(set.display_name)}**`;
+        }), 20).map(el => el.join(", ")).forEach(el => channel.send(el));
 	}
     
     /**
@@ -238,25 +222,21 @@ module.exports = function() {
     Lists all infos
     **/
 	/* Lists all sets names */
-	this.cmdInfomanageList = function(channel) {
+	this.cmdInfomanageList = async function(channel) {
 		// Get all sets
-		sql("SELECT * FROM info ORDER BY name ASC", result => {
-			if(result.length > 0) {
-				// At least one role exists
-				channel.send("✳️ Sending a list of currently existing infos:");
-				// Send message
-				chunkArray(result.map(info => {
-                    let emoji = getLUTEmoji(info.name, info.display_name);
-                    return `**${emoji} ${applyEmoji(info.display_name)}**`;
-                }), 20).map(el => el.join(", ")).forEach(el => channel.send(el));
-			} else { 
-				// No sets exist
-				channel.send("⛔ Database error. Could not find any infos!");
-			}
-		}, () => {
-			// DB error
-			channel.send("⛔ Database error. Couldn't look for info list!");
-		});
+		let result = await sqlProm("SELECT * FROM info ORDER BY name ASC");
+        if(result.length <= 0) {
+            // No sets exist
+            channel.send("⛔ Database error. Could not find any infos!");
+            return;
+        }
+        // At least one role exists
+        channel.send("✳️ Sending a list of currently existing infos:");
+        // Send message
+        chunkArray(result.map(info => {
+            let emoji = getLUTEmoji(info.name, info.display_name);
+            return `**${emoji} ${applyEmoji(info.display_name)}**`;
+        }), 20).map(el => el.join(", ")).forEach(el => channel.send(el));
 	}
     
     /**
