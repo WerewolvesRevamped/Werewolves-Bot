@@ -352,7 +352,7 @@ module.exports = function() {
             res(backupChannelId);
             return;
         }
-        res(result.channel_id);    
+        return result.channel_id;    
     }
     
     /**
@@ -365,7 +365,7 @@ module.exports = function() {
             res(backupChannelId);
             return;
         }
-        res(result.channel_id);   
+        return result.channel_id;   
     }
    
     

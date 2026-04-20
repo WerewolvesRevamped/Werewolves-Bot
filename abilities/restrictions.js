@@ -209,7 +209,7 @@ module.exports = function() {
     **/
     this.increaseActionQuantity = function(src_ref, ability) {
         if(!ability || !ability.id) return;
-        return sqlProm("UPDATE action_data SET quantity=quantity+1,last_phase=" + getPhaseAsNumber() + " WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=" + connection.escape(ability.id));
+        return sqlPromEsc("UPDATE action_data SET quantity=quantity+1,last_phase=" + getPhaseAsNumber() + " WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=", ability.id);
     }    
         
     /**
@@ -217,7 +217,7 @@ module.exports = function() {
     **/
     this.getActionQuantity = async function(src_ref, ability) {
         if(!ability || !ability.id) return -1;
-        let result = await sqlProm("SELECT * FROM action_data WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=", ability.id);
+        let result = await sqlPromEsc("SELECT * FROM action_data WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=", ability.id);
         if(!result[0]) return -1;
         else return result[0].quantity;
     }
@@ -226,7 +226,7 @@ module.exports = function() {
     Sets the last target
     **/
     this.setLastTarget = async function(src_ref, ability, lastTarget) {
-        let result = await sqlProm("UPDATE action_data SET last_target=" + connection.escape(lastTarget) + ",last_phase=" + getPhaseAsNumber() + " WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=" + connection.escape(ability.id));
+        let result = await sqlPromEsc("UPDATE action_data SET last_target=" + connection.escape(lastTarget) + ",last_phase=" + getPhaseAsNumber() + " WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=", ability.id);
         return result;
     }   
     
@@ -237,14 +237,14 @@ module.exports = function() {
         if(!ability || !ability.id) return;
         //console.log(src_ref, ability.id);
         //console.log(ability);
-        return sqlProm("UPDATE action_data SET last_target=NULL WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=" + connection.escape(ability.id));
+        return sqlPromEsc("UPDATE action_data SET last_target=NULL WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=", ability.id);
     }    
       
     /**
     Get last target
     **/
     this.getLastTarget = async function(src_ref, ability) {
-        let result = await sqlProm("SELECT * FROM action_data WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=" + connection.escape(ability.id));
+        let result = await sqlPromEsc("SELECT * FROM action_data WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=", ability.id);
         if(!result[0]) return "";
         else return result[0].last_target;
     }
@@ -253,7 +253,7 @@ module.exports = function() {
     Get last used phase
     **/
     this.getLastPhase = async function(src_ref, ability) {
-        let result = await sqlProm("SELECT * FROM action_data WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=" + connection.escape(ability.id));
+        let result = await sqlPromEsc("SELECT * FROM action_data WHERE src_ref= " + connection.escape(src_ref) + " AND ability_id=", ability.id);
         if(!result[0]) return -10;
         else return +result[0].last_phase;
     }
