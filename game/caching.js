@@ -27,7 +27,7 @@ module.exports = function() {
     Cache Public category
     */
 	this.getPublicCat = function() {
-		sqlGetStat(15, result => {
+		sqlGetStat(statID.PUBLIC_CATEGORY, result => {
 			cachedPublic = result;
 		}, () => {
 			log("Roles > ❗❗❗ Unable to cache Public Category!");

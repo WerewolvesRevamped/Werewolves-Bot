@@ -379,7 +379,7 @@ module.exports = function() {
         }
         channel.send("✅ Successfully deleted ccs!");
         // Reset CC Count
-        sqlSetStat(9, 0, result => {
+        sqlSetStat(statID.CCS, 0, result => {
             channel.send("✅ Successfully reset cc counter!");
         }, () => {
             channel.send("⛔ Database error. Could not reset cc counter!");
@@ -428,7 +428,7 @@ module.exports = function() {
             
             // get current cc count
             let curCCCount = await new Promise(res => {
-                sqlGetStat(9,  result => res(result));
+                sqlGetStat(statID.CCS,  result => res(result));
             });
             
             let ccCatId = null;
@@ -444,7 +444,7 @@ module.exports = function() {
                 
                 // save the category id
                 await new Promise(res => {
-                    sqlSetStat(10, newCCCat.id, result => res());
+                    sqlSetStat(statID.LAST_CC_CAT, newCCCat.id, result => res());
                 });
                 getCCCats();
                 log(`CC > Created new CC category \`${newCCCat.name}\`!`);			
@@ -453,7 +453,7 @@ module.exports = function() {
                 ccCatId = newCCCat.id;
             } else { // use last cat
                 let lastCCCat = await new Promise(res => {
-                    sqlGetStat(10,  result => res(result));
+                    sqlGetStat(statID.LAST_CC_CAT,  result => res(result));
                 });
                 ccCatId = lastCCCat;
             }

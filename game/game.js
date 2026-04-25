@@ -200,7 +200,7 @@ module.exports = function() {
         scCatCount = 0;
         if(debug) getSCCats();
 		// Reset Poll Count
-		sqlSetStat(13, 1, result => {
+		sqlSetStat(statID.POLL_COUNT, 1, result => {
 			channel.send("✅ Successfully reset poll counter!");
 		}, () => {
 			channel.send("⛔ Database error. Could not reset poll counter!");
@@ -225,7 +225,7 @@ module.exports = function() {
             // Cleanup channels
             cmdCCCleanup(channel);
             scCleanup(channel);
-            sqlGetStat(15, result => {
+            sqlGetStat(statID.PUBLIC_CATEGORY, result => {
                 cleanupCat(channel, result, "public");
             }, () => {
                 channel.send("⛔ Database error. Could not get public category!");

@@ -122,7 +122,7 @@ module.exports = function () {
             return;
         } else if(args[1] >= gp.MIN && args[1] <= gp.MAX) {
             // Saved verified gamephase
-            sqlSetStat(1, args[1], result => {
+            sqlSetStat(statID.GAMEPHASE, args[1], result => {
                 let phase = getPhaseName(args[1]);
                 channel.send("✅ Game Phase is now `" + phase + "` (" + args[1] + ")!");
                 loadStats();
@@ -140,7 +140,7 @@ module.exports = function () {
     /* Get gamephase */
     this.cmdGamephaseGet = function(channel) {
         // Get gamephase from db
-        sqlGetStat(1, result => {
+        sqlGetStat(statID.GAMEPHASE, result => {
             let phase = getPhaseName(result);
             channel.send("✅ Game Phase is `" + phase + "` (" + result + ")");
         }, () => {

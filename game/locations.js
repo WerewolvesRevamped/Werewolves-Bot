@@ -128,7 +128,7 @@ module.exports = function() {
 		const publicCat = await mainGuild.channels.create({ name: applyTheme("💬 " + toTitleCase(stats.game) + " Public Channels"), type: ChannelType.GuildCategory,  permissionOverwrites: getLocationPermissions() });
         
         // save public channel
-        sqlSetStat(15, publicCat.id);
+        sqlSetStat(statID.PUBLIC_CATEGORY, publicCat.id);
         cachedPublic = publicCat.id;
         
         // get all locations

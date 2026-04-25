@@ -42,8 +42,8 @@ module.exports = function() {
     this.loadStats = async function () {
         //Complex loaded stats
         // Get Log Channel & Guild - Done due to execution order
-        await getOption(11).then(r => r ? stats.log_guild = r : stats.log_guild = config.guild);
-        await getOption(12).then(r => r ? stats.log_channel = r : stats.log_channel = config.log);
+        await getOption(statID.LOG_GUILD).then(r => r ? stats.log_guild = r : stats.log_guild = config.guild);
+        await getOption(statID.LOG_CHANNEL).then(r => r ? stats.log_channel = r : stats.log_channel = config.log);
 
         // Phase Automation Info
         getOption(statID.PHASE_AUTO_INFO).then(result => {
