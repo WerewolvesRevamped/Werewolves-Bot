@@ -39,13 +39,13 @@ async function cmdOptionsSet (channel, value, stat) {
         break;
     }
     
-    sqlSetStat(stat, value, result => {
+    try {
+        await sqlSetStatProm(stat, value);
         channel.send("✅ Successfully updated *" + stat.name + "* ("+stat.id+") to `" + value + "`!");
         loadStats();
-    }, () => {
-        // Db error
+    } catch (err) {
         channel.send("⛔ Database error. Could not update `" + stat.name + "`!");
-    });
+    }
 }
 
 /**
@@ -115,22 +115,18 @@ module.exports = function () {
     }
 
     /* Set gamephase */
-    this.cmdGamephaseSet = function(channel, args) {
+    this.cmdGamephaseSet = async function(channel, args) {
         // Check arguments
         if(!args[1] && args[1] !== 0) {
             channel.send("⛔ Syntax error. Not enough parameters! Correct usage: `gamephase set <phase>`");
             return;
         } else if(args[1] >= gp.MIN && args[1] <= gp.MAX) {
             // Saved verified gamephase
-            sqlSetStat(statID.GAMEPHASE, args[1], result => {
-                let phase = getPhaseName(args[1]);
-                channel.send("✅ Game Phase is now `" + phase + "` (" + args[1] + ")!");
-                loadStats();
-                updateGameStatus();
-            }, () => {
-                // Database didn't update gamephase
-                channel.send("⛔ Database error. Game Phase could not be set to `" + args[1] + "`!");
-            });
+            await sqlSetStatProm(statID.GAMEPHASE, args[1]);
+            let phase = getPhaseName(args[1]);
+            channel.send("✅ Game Phase is now `" + phase + "` (" + args[1] + ")!");
+            loadStats();
+            updateGameStatus();
         } else {
             // Invalid gamephase value
             channel.send("⛔ Syntax error. Game Phase could not be set to `" + args[1] + "`!");

@@ -191,24 +191,12 @@ module.exports = function() {
     **/
     this.setPhase = async function(phase) {
         stats.phase = phase;
-        return new Promise(res => {
-            sqlSetStat(statID.PHASE, phase, () => {
-                res(true);
-            }, () => {
-                res(false);
-            }); 
-        }); 
+        await sqlSetStatProm(statID.PHASE, phase);
     }
     
     this.setSubphase = async function(subphase) {
         stats.subphase = subphase;
-        return new Promise(res => {
-            sqlSetStat(statID.SUBPHASE, subphase, () => {
-                res(true);
-            }, () => {
-                res(false);
-            }); 
-        }); 
+        await sqlSetStatProm(statID.SUBPHASE, subphase);
     }
     
     /**

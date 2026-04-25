@@ -379,11 +379,8 @@ module.exports = function() {
         }
         channel.send("✅ Successfully deleted ccs!");
         // Reset CC Count
-        sqlSetStat(statID.CCS, 0, result => {
-            channel.send("✅ Successfully reset cc counter!");
-        }, () => {
-            channel.send("⛔ Database error. Could not reset cc counter!");
-        });
+        await sqlSetStatProm(statID.CCS, 0);
+        channel.send("✅ Successfully reset cc counter!");
         // Reset CC Cat Database
         await sqlProm("DELETE FROM cc_cats");
         channel.send("✅ Successfully reset cc cat list!");
@@ -443,9 +440,7 @@ module.exports = function() {
                 await sqlProm("INSERT INTO cc_cats (id) VALUES (" + connection.escape(newCCCat.id) + ")");
                 
                 // save the category id
-                await new Promise(res => {
-                    sqlSetStat(statID.LAST_CC_CAT, newCCCat.id, result => res());
-                });
+                await sqlSetStatProm(statID.LAST_CC_CAT, newCCCat.id);
                 getCCCats();
                 log(`CC > Created new CC category \`${newCCCat.name}\`!`);			
                 

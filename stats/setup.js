@@ -19,7 +19,7 @@ module.exports = function() {
             switch(curStat.type) {
                 case "roleID":
                     const role = await mainGuild.roles.create({ name: curStat.autoGenerate, reason: "Auto Stat Generation" });
-                    sqlSetStat(curStat.id, role.id);
+                    await sqlSetStatProm(curStat.id, role.id);
                     console.log(`Auto generated ${curStat.name} as ${role.id}`);
                 break;
             }

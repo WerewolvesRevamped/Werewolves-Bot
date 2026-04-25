@@ -21,7 +21,7 @@ module.exports = function() {
         if(stats.db_version < 6) await update_6();  
         
         // set latest version
-        sqlSetStat(statID.DB_VERSION, LATEST_DB_VERSION);
+        await sqlSetStatProm(statID.DB_VERSION, LATEST_DB_VERSION);
     }
     
     /**

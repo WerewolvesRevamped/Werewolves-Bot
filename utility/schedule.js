@@ -275,13 +275,7 @@ module.exports = function() {
     **/
     this.saveD0Time = function(time) {
         stats.d0_time = + time; 
-        return new Promise(res => {
-            sqlSetStat(statID.D0_TIME, time, () => {
-                res(true);
-            }, () => {
-                res(false);
-            }); 
-        }); 
+        return sqlSetStatProm(statID.D0_TIME, time);
     }
     
 }

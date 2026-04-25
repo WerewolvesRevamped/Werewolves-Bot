@@ -176,11 +176,9 @@ module.exports = function() {
             }
             
             // increment cc limit
-            if(["death"].includes(stats.cc_rule)) {
-                await new Promise(res => {
-                    sqlSetStat(statID.CC_LIMIT, stats.cc_limit + 1, () => res());
-                });
-                await bufferStorytime(`CC Limit updated to ${stats.cc_limit + 1}`);
+            if(["death"].includes(stats.cc_rule)) {                    
+                await sqlSetStatProm(statID.CC_LIMIT, stats.cc_limit + 1);
+                await bufferStorytime(`CC Limit updated to ${stats.cc_limit}`);
             }
         }
         

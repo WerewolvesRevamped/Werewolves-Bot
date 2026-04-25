@@ -200,11 +200,7 @@ module.exports = function() {
         scCatCount = 0;
         if(debug) getSCCats();
 		// Reset Poll Count
-		sqlSetStat(statID.POLL_COUNT, 1, result => {
-			channel.send("✅ Successfully reset poll counter!");
-		}, () => {
-			channel.send("⛔ Database error. Could not reset poll counter!");
-		});
+		sqlSetStatProm(statID.POLL_COUNT, 1);
         // reset DRs
         let livingPlayers =  channel.guild.roles.cache.get(stats.participant).members.toJSON();
         livingPlayers.forEach(el => removeAllDR(el.id));
