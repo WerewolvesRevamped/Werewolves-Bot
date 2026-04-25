@@ -21,21 +21,20 @@ const doLog = false;
  * @param {any} [def] A default value if any
  * @returns {Promise<unknown>} The parameter or undefined
  */
-function getStat(id, name, def) {
-    return new Promise((resolve) => {
-        sqlGetStat(id,  result => {
-            if(doLog) log(`Stats > Cached ${name} as \`${result}\`!`)
-            resolve(result)
-        }, () => {
-            if (def !== undefined) {
-                log(`Stats > ⚠️ Unable to cache ${name}, defaulting to \`${def}\``)
-                resolve(def)
-            } else {
-                log(`Stats > ‼️ Unable to cache ${name}!`)
-                resolve(undefined)
-            }
-        });
-    })
+async function getStat(id, name, def) {
+    try {
+        let result = await sqlGetStatProm(id);
+        if(doLog) log(`Stats > Cached ${name} as \`${result}\`!`);
+        return result;
+    } catch (err) {
+        if (def !== undefined) {
+            log(`Stats > ⚠️ Unable to cache ${name}, defaulting to \`${def}\``);
+            return def;
+        } else {
+            log(`Stats > ‼️ Unable to cache ${name}!`);
+            return undefined;
+        }
+    }
 }
 
 module.exports = function() {

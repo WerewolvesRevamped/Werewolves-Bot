@@ -424,9 +424,7 @@ module.exports = function() {
 		if(isParticipant(member) || isGhost(member) || ((isGameMaster(member, true) || isHelper(member)) && players.length > 0) || (isMentor(member) && spam)) {
             
             // get current cc count
-            let curCCCount = await new Promise(res => {
-                sqlGetStat(statID.CCS,  result => res(result));
-            });
+            let curCCCount = await sqlGetStatProm(statID.CCS);
             
             let ccCatId = null;
             
@@ -447,9 +445,7 @@ module.exports = function() {
                 // set cc cat
                 ccCatId = newCCCat.id;
             } else { // use last cat
-                let lastCCCat = await new Promise(res => {
-                    sqlGetStat(statID.LAST_CC_CAT,  result => res(result));
-                });
+                let lastCCCat = await sqlGetStatProm(statID.LAST_CC_CAT);
                 ccCatId = lastCCCat;
             }
             

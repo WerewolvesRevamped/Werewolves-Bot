@@ -53,9 +53,10 @@ async function cmdOptionsSet (channel, value, stat) {
  * @param channel The channel the command was sent in
  * @param {BotStatData} stat The stat to fetch
  */
-function cmdOptionsGet (channel, stat) {
+async function cmdOptionsGet (channel, stat) {
     // Get value
-    sqlGetStat(stat.id, result => {
+    try {
+        let result = await sqlGetStatProm(stat.id);
         if(result.length > 0) {
             // Print value
             channel.send("✅ *" + stat.name + "* currently is set to `" + result + "`!");
@@ -64,10 +65,9 @@ function cmdOptionsGet (channel, stat) {
             // Value unset
             channel.send(`⛔ Database error. Could not get *${stat.name}* (${stat.id})!`);
         }
-    }, () => {
-        // Db error
+    } catch (err) {
         channel.send("⛔ Database error. Could not access stats!");
-    });
+    }
 }
 
 module.exports = function () {
@@ -134,15 +134,15 @@ module.exports = function () {
     }
 
     /* Get gamephase */
-    this.cmdGamephaseGet = function(channel) {
+    this.cmdGamephaseGet = async function(channel) {
         // Get gamephase from db
-        sqlGetStat(statID.GAMEPHASE, result => {
+        try {
+            let result = await sqlGetStatProm(statID.GAMEPHASE);
             let phase = getPhaseName(result);
             channel.send("✅ Game Phase is `" + phase + "` (" + result + ")");
-        }, () => {
-            // Couldn't get gamephase value
+        } catch (err) {
             channel.send("⛔ Database error. Could not find gamephase.");
-        });
+        }
     }
 
     var updateID = 0;

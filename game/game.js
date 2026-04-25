@@ -201,6 +201,7 @@ module.exports = function() {
         if(debug) getSCCats();
 		// Reset Poll Count
 		sqlSetStatProm(statID.POLL_COUNT, 1);
+        channel.send("✅ Successfully reset poll counter!");
         // reset DRs
         let livingPlayers =  channel.guild.roles.cache.get(stats.participant).members.toJSON();
         livingPlayers.forEach(el => removeAllDR(el.id));
@@ -221,11 +222,8 @@ module.exports = function() {
             // Cleanup channels
             cmdCCCleanup(channel);
             scCleanup(channel);
-            sqlGetStat(statID.PUBLIC_CATEGORY, result => {
-                cleanupCat(channel, result, "public");
-            }, () => {
-                channel.send("⛔ Database error. Could not get public category!");
-            });
+            let pubCat = await sqlGetStatProm(statID.PUBLIC_CATEGORY);
+            cleanupCat(channel, pubCat, "public");
             resetRoleNames(channel);
         } else {
             cmdGamephaseSet(channel, ["set", gp.INGAME]);

@@ -148,10 +148,9 @@ module.exports = function() {
 		const name = connection.escape(trueStat.name ? trueStat.name : "");
         try {
             await sqlProm(`INSERT INTO stats (id, value, name) VALUE (${trueStat.id},${valueEsc},${name}) ON DUPLICATE KEY UPDATE value=${valueEsc}`);
+            stats[trueStat.property] = value;
         } catch (err) {
             throw new Error(`Unable to update a stat with from ID ${stat}`)
-        } finally {
-            stats[trueStat.property] = value;
         }
 	}
 
@@ -164,6 +163,11 @@ module.exports = function() {
 	 */
 	this.sqlGetStat = function(id, resCallback, errCallback) {
 		sqlValue("SELECT value,name FROM stats WHERE id = " + connection.escape(id), resCallback, errCallback);
+	}
+    
+    this.sqlGetStatProm = async function(id) {
+		let result = await sqlProm("SELECT value FROM stats WHERE id = " + connection.escape(id));
+        return result[0].value;
 	}
 	
 	/**
