@@ -1059,8 +1059,9 @@ module.exports = function() {
         
         // increment cc limit
         if(["day","phase"].includes(stats.cc_rule)) {
-            sqlSetStat(statID.CC_LIMIT, stats.cc_limit + 1);
-            await bufferStorytime(`CC Limit updated to ${stats.cc_limit + 1}`);
+            console.log("Start Day CC Limit Increase",  stats.cc_limit);
+            await sqlSetStatProm(statID.CC_LIMIT, stats.cc_limit + 1);
+            await bufferStorytime(`CC Limit updated to ${stats.cc_limit}`);
         }
         
         // storytime
@@ -1193,8 +1194,8 @@ module.exports = function() {
         
         // increment cc limit
         if(["night","phase"].includes(stats.cc_rule)) {
-            sqlSetStat(statID.CC_LIMIT, stats.cc_limit + 1);
-            await bufferStorytime(`CC Limit updated to ${stats.cc_limit + 1}`);
+            await sqlSetStatProm(statID.CC_LIMIT, stats.cc_limit + 1);
+            await bufferStorytime(`CC Limit updated to ${stats.cc_limit}`);
         }
         
         // storytime

@@ -143,13 +143,15 @@ module.exports = function() {
 	this.sqlSetStatProm = async function(stat, value) {
 		const valueEsc = connection.escape(value);
 		/** @type BotStatData */
-		const trueStat= stat.id ? stat : getStatFromId(stat)
+		const trueStat = stat.id ? stat : getStatFromId(stat)
 		if (!trueStat) throw new Error(`Unable to find a stat with from ID ${stat}`)
 		const name = connection.escape(trueStat.name ? trueStat.name : "");
         try {
             await sqlProm(`INSERT INTO stats (id, value, name) VALUE (${trueStat.id},${valueEsc},${name}) ON DUPLICATE KEY UPDATE value=${valueEsc}`);
         } catch (err) {
             throw new Error(`Unable to update a stat with from ID ${stat}`)
+        } finally {
+            stats[trueStat.property] = value;
         }
 	}
 
