@@ -171,7 +171,7 @@ module.exports = function() {
     sends warnings to the scs of all players that are currently inactive
     */
     this.sendInactivityWarnings = async function() {
-        const allPlayers = await sqlProm("SELECT * FROM players WHERE type='player'");
+        const allPlayers = await sqlProm("SELECT * FROM players WHERE type='player' AND alive>=1");
         
         const curPhase = getPhaseAsNumber();
         if(curPhase <= 1) return;

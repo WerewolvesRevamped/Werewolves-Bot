@@ -155,6 +155,9 @@ module.exports = function() {
         await sqlProm(`UPDATE teams SET target=${newIdSrc} WHERE target=${oldIdSrc}`);
         await sqlProm(`UPDATE active_displays SET src_ref=${newIdSrc} WHERE src_ref=${oldIdSrc}`);
         
+        // update connect channels for whisper channels
+         await sqlProm(`UPDATE connected_channels SET id = REPLACE(id , ${oldId}, ${newId}) WHERE id LIKE (${connection.escape("%" + originalPlayer + "%")})`);
+        
         // update
         message.channel.send("✅ Updated basic columns in all tables!");
         
