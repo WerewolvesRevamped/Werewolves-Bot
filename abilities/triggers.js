@@ -521,6 +521,7 @@ module.exports = function() {
                     case "On Killed Complex":
                     case "On Banishment Complex":
                     case "On Banished Complex":
+                    case "On Changed Complex":
                         let selector = await parsePlayerSelector(param, src_ref, additionalTriggerData, INCLUDE_DEAD_PLAYERS);
                         if(selector.includes(additionalTriggerData.this)) {
                             await executeTrigger(src_ref, src_name, trigger, triggerName, additionalTriggerData, ghostly);

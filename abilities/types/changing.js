@@ -105,6 +105,10 @@ module.exports = function() {
             // save old role
             let oldRole = await sqlPromOneEsc("SELECT role FROM players WHERE id=",  targets[i]);
             
+            // run on changed triggers
+            await triggerPlayer(targets[i], "On Changed"); 
+            await triggerHandler("On Changed Complex", { this: targets[i] }); 
+            
             // update player role
             await setPlayerRole(targets[i], role);
             getPRoles();

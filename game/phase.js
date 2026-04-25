@@ -92,14 +92,9 @@ module.exports = function() {
             return;
         }
         // update phase
-        let result1 = await setPhase(phaseName);
-        let result2 = await setSubphase(SUBPHASE.MAIN);
-        // feedback
-        if(result1 && result2) {
-            channel.send(`✅ Updated phase to \`${toTitleCase(phaseName)}\`!`);
-        } else {
-            channel.send(`⛔ Command error.  Could not update phase.`);
-        }
+        await setPhase(phaseName);
+        await setSubphase(SUBPHASE.MAIN);
+        channel.send(`✅ Updated phase to \`${toTitleCase(phaseName)}\`!`);
     }
       
     /**
@@ -116,20 +111,12 @@ module.exports = function() {
             newPhaseName = "d" + phaseNum;
         }
         // update phase
-        let result = await setSubphase(SUBPHASE.MAIN);
+        await setSubphase(SUBPHASE.MAIN);
         // feedback
         if(channel) {
-            if(result) {
-                channel.send(`✅ Incrementing phase to \`${toTitleCase(newPhaseName)}\`!`);
-            } else {
-                channel.send(`⛔ Command error.  Could not increment phase.`);
-            }
+            channel.send(`✅ Incrementing phase to \`${toTitleCase(newPhaseName)}\`!`);
         } else {
-            if (result) {
-                log(`✅ Incrementing phase to \`${toTitleCase(newPhaseName)}\`!`)
-            } else {
-                log(`⛔ Command error.  Could not increment phase.`)
-            }
+            log(`✅ Incrementing phase to \`${toTitleCase(newPhaseName)}\`!`)
         }
         
         // trigger start phase events
@@ -145,13 +132,8 @@ module.exports = function() {
     Main subphase
     **/
     this.cmdPhaseMain = async function(channel) {
-        let result = await setSubphase(SUBPHASE.MAIN);
-        // feedback
-        if(result) {
-            channel.send(`✅ Set to main subphase!`);
-        } else {
-            channel.send(`⛔ Command error.  Could not update subphase.`);
-        }
+        await setSubphase(SUBPHASE.MAIN);
+        channel.send(`✅ Set to main subphase!`);
     }
     
     /**
@@ -160,15 +142,10 @@ module.exports = function() {
     **/
     this.cmdPhaseLate = async function(channel) {
         // switch phase
-        let result = await setSubphase(SUBPHASE.LATE);
+        await setSubphase(SUBPHASE.LATE);
         // execute delayed abilities
         await executeDelayedQueuedAction();
-        // feedback
-        if(result) {
-            channel.send(`✅ Set to late subphase!`);
-        } else {
-            channel.send(`⛔ Command error.  Could not update subphase.`);
-        }
+        channel.send(`✅ Set to late subphase!`);
     }
     
     /**
@@ -176,13 +153,8 @@ module.exports = function() {
     In a late phase abilities can no longer be scheduled.
     **/
     this.cmdPhaseLock = async function(channel) {
-        let result = await setSubphase(SUBPHASE.LOCKED);
-        // feedback
-        if(result) {
-            channel.send(`✅ Set to locked subphase!`);
-        } else {
-            channel.send(`⛔ Command error.  Could not update subphase.`);
-        }
+        await setSubphase(SUBPHASE.LOCKED);
+        channel.send(`✅ Set to locked subphase!`);
     }
 
     /**

@@ -26,7 +26,10 @@ require("./rating_data.js")();
 
 module.exports = function() {
     
-	
+	/**
+    Command: $end
+    Ends the game
+    **/
 	this.cmdEnd = function(channel) {
 		gameEnd();
         // create game_outcome event
@@ -34,6 +37,10 @@ module.exports = function() {
         channel.send("✅ Game has been ended.");
 	}
     
+    /**
+    Command: $tie
+    Ends the game in a tie
+    **/
 	this.cmdTie = async function(channel) {
         // final trigger
         await triggerHandler("On End"); 
@@ -49,6 +56,10 @@ module.exports = function() {
         channel.send("✅ Game has been ended in a tie.");
 	}
     
+    /**
+    Command: $reevaluate
+    Reevaluates the game state and win conditions
+    **/
 	this.cmdReevaluate = async function(channel) {
         // final trigger
         await updateActiveTeams()
@@ -81,7 +92,6 @@ module.exports = function() {
         clearScheduledEvents();
     }
 	
-    
     /** Handles the restart command */
     this.cmdRestart = async function(channel) {
         // hide old group channels
@@ -150,154 +160,51 @@ module.exports = function() {
         }
     }
     
-	/* Handles reset command */
-	this.cmdReset = async function(channel, debug, restart = false) {
-		if(stats.gamephase != gp.ARCHIVED && stats.gamephase != gp.NONE && !debug) {
-            channel.send("⛔ Command error. Can only reset game while in archived state!");
+
+    this.wroles_remove = function(channel, ids, names) {
+        wroles_remove2(channel, ids[0], names[0], () => {
+            if(ids.length > 1) wroles_remove(channel, ids.splice(1), names.splice(1));
+            else channel.send("✅ Finished removing roles!");
+        });
+    }
+
+    this.wroles_remove2 = function(channel, id, name, callback) {
+        // Remove spectator role
+        if(channel.guild.roles.cache.get(id)) wroles_removeOnce(channel, id, name, channel.guild.roles.cache.get(id).members.toJSON(), 0, callback);
+        else channel.send("Invalid role with id " + id + " and name " + name);
+    }
+
+    this.wroles_removeOnce = function(channel, id, name, members, index, callback) {
+        if(index >= members.length) {
+            callback();
+            if(members.length > 0) channel.send("✅ Removed `" + name + "` role from `" + members.length + "` players!");
             return;
         }
-		// Set Gamephase
-		cmdGamephaseSet(channel, ["set", gp.NONE]);
-		// Reset Connection
-        if(!debug) cmdConnectionReset(channel);
-		// Reset Player Database
-        if(!debug) {
-            let result = await sqlProm("DELETE FROM players");
-            channel.send("✅ Successfully reset player list!");
-            getEmojis();
-        } else {
-            sql("UPDATE players SET alive=1,ccs=0,public_msgs=0,private_msgs=0,target=NULL,counter=0,final_result=0,death_phase=-1");
-        }
-        // reset active groups
-        groupsReset();
-        // reset active attributes
-        attributesReset();
-        // reset active attributes
-        abilitiesReset();
-        // reset active polls
-        pollsReset();
-        // resets storytime
-        resetStorytime();
-        // resets choices
-        choicesReset();
-        // reset kill queue
-        killqClear();
-        // clear rating events
-        clearEvents();
-        // reset teams
-        resetTeams();
-        // reset displays
-        resetDisplays();
-        // reset host information
-        if(!debug) resetHostInformation();
-        // reset modifiers
-        if(!debug) resetModifiers();
-        // reset schedule
-        clearScheduledEvents();
-        // disable action queue checker 
-        pauseActionQueueChecker = true;
-        // reset cached sc count
-        scCatCount = 0;
-        if(debug) getSCCats();
-		// Reset Poll Count
-		sqlSetStatProm(statID.POLL_COUNT, 1);
-        channel.send("✅ Successfully reset poll counter!");
-        // reset DRs
-        let livingPlayers =  channel.guild.roles.cache.get(stats.participant).members.toJSON();
-        livingPlayers.forEach(el => removeAllDR(el.id));
-        if(!debug) {
-            // reset other roles
-            removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.participant).members.toJSON(), 0, "participant");
-            removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.dead_participant).members.toJSON(), 0, "dead participant");
-            removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.ghost).members.toJSON(), 0, "ghost");
-            removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.gamemaster).members.toJSON(), 0, "game master");
-            removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.spectator).members.toJSON(), 0, "spectator");
-            removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.sub).members.toJSON(), 0, "substitute");
-            removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.helper).members.toJSON(), 0, "helper");
-            removeNicknameOnce(channel, channel.guild.roles.cache.get(stats.mentor).members.toJSON(), 0, "mentor");
-            // Remove Roles & Nicknames
-            wroles_remove(channel, [stats.signed_up, stats.spectator, stats.sub, stats.participant, stats.dead_participant, stats.host, stats.ghost, stats.mentor, stats.signedmentor], ["signed up", "spectator", "substitute", "participant", "dead participant", "host", "ghost", "mentor", "signed up mentor"]);
-            // run role removal again for critical roles because sometimes it fails even though it says it succeeds
-            wroles_remove(channel, [stats.participant, stats.dead_participant, stats.ghost, stats.mentor], ["participant", "dead participant", "ghost", "mentor"]);
-            // Cleanup channels
-            cmdCCCleanup(channel);
-            scCleanup(channel);
-            let pubCat = await sqlGetStatProm(statID.PUBLIC_CATEGORY);
-            cleanupCat(channel, pubCat, "public");
-            resetRoleNames(channel);
-        } else {
-            cmdGamephaseSet(channel, ["set", gp.INGAME]);
-            pauseActionQueueChecker = false;
-            // reset to d0
-            setPhase("d0");
-            setSubphase(SUBPHASE.MAIN);
-            // Start game
-            if(!restart) {
-                setTimeout(function() {
-                    eventStarting();
-                }, 1000 * 5);     
-            } else {
-                setTimeout(function() {
-                    eventStarting(null, true);
-                }, 1000 * 60);  
-            }
-        }
-	}
-    
-    this.resetRoleNames = async function(channel) {
-        // rename roles correctly
-        let roles = [stats.signed_up, stats.spectator, stats.sub, stats.participant, stats.dead_participant, stats.host, stats.gamemaster, stats.ghost, stats.mentor, stats.ghost_mentor];
-        let names = ["Signed-up","Spectator", "Substitute","Participant","Dead Participant","Host", "Game Master", "Ghostly Participant", "Mentor", "Ghostly Mentor"];
-        for(let i = 0; i < roles.length; i++) {
-            await channel.guild.roles.cache.get(roles[i]).setName(names[i]);
-        }  
-        channel.send("✅ Reset role names!");
-    }
-	
-	this.wroles_remove = function(channel, ids, names) {
-		wroles_remove2(channel, ids[0], names[0], () => {
-			if(ids.length > 1) wroles_remove(channel, ids.splice(1), names.splice(1));
-			else channel.send("✅ Finished removing roles!");
-		});
-	}
-	
-	this.wroles_remove2 = function(channel, id, name, callback) {
-		// Remove spectator role
-		if(channel.guild.roles.cache.get(id)) wroles_removeOnce(channel, id, name, channel.guild.roles.cache.get(id).members.toJSON(), 0, callback);
-		else channel.send("Invalid role with id " + id + " and name " + name);
-	}
-	
-	this.wroles_removeOnce = function(channel, id, name, members, index, callback) {
-		if(index >= members.length) {
-			callback();
-			if(members.length > 0) channel.send("✅ Removed `" + name + "` role from `" + members.length + "` players!");
-			return;
-		}
-		removeRoleRecursive(members[index], channel, id, name).then(m => {
+        removeRoleRecursive(members[index], channel, id, name).then(m => {
             wroles_removeOnce(channel, id, name, members, ++index, callback);
-		}).catch(err => { 
-			// Missing permissions
-			logO(err); 
-			wroles_removeOnce(channel, id, name, members, index, callback);
-			sendError(channel, err, "Could not remove " + name + " role from " + members[index].displayName + "! Trying again");
-		});
-	}
-	
-	// Reset nicknames
-	this.removeNicknameOnce = function(channel, members, index, name) {
-		if(index >= members.length) {
-			if(members.length > 0) channel.send("✅ Reset nicknames of `" + members.length + "` " + name + (members.length>1?"s":"") + "!");
-			return;
-		}
-		members[index].setNickname("").then(m => {
-			removeNicknameOnce(channel, members, ++index, name);
-		}).catch(err => { 
-			// Missing permissions
-			logO(err); 
-			sendError(channel, err, "Could not reset nickname from " + members[index].displayName);
-			removeNicknameOnce(channel, members, ++index, name);
-		});
-	}
+        }).catch(err => { 
+            // Missing permissions
+            logO(err); 
+            wroles_removeOnce(channel, id, name, members, index, callback);
+            sendError(channel, err, "Could not remove " + name + " role from " + members[index].displayName + "! Trying again");
+        });
+    }
+
+    // Reset nicknames
+    this.removeNicknameOnce = function(channel, members, index, name) {
+        if(index >= members.length) {
+            if(members.length > 0) channel.send("✅ Reset nicknames of `" + members.length + "` " + name + (members.length>1?"s":"") + "!");
+            return;
+        }
+        members[index].setNickname("").then(m => {
+            removeNicknameOnce(channel, members, ++index, name);
+        }).catch(err => { 
+            // Missing permissions
+            logO(err); 
+            sendError(channel, err, "Could not reset nickname from " + members[index].displayName);
+            removeNicknameOnce(channel, members, ++index, name);
+        });
+    }
 	
 	/* Handle Sheet Command */
 	this.cmdSheet = function(message, args) {
@@ -415,7 +322,10 @@ module.exports = function() {
 		});
 	}
 	
-	/* Opens signups & Pings players */
+	/**
+    Command: $open
+    Opens signups, hosts the executor and runs a gameping
+    **/
 	this.cmdOpen = function(message) {
         cmdHost(message.channel, message.member);
         message.channel.send("**Signups are now open!**");
@@ -423,7 +333,10 @@ module.exports = function() {
 		cmdGamePing(message.channel, message.member);
 	}
     
-	/* Closes signups */
+	/**
+    Command: $close
+    Closes signups
+    **/
 	this.cmdClose = function(message) {
         message.channel.send("**Signups are now closed!**");
 		cmdGamephase(message, ["set", gp.SETUP]);
