@@ -18,7 +18,7 @@ module.exports = function() {
 
         if (phaseCount !== undefined) {
             try {
-                phaseCount = phaseCount + 0
+                phaseCount = Number(phaseCount)
             } catch {
                 message.channel.channel.send("‼️ Illegal argument, phase must be a number");
                 return
