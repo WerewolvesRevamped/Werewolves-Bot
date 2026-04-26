@@ -12,19 +12,36 @@ module.exports = function() {
         await sqlProm("DELETE FROM events");
     }
     
-    this.cmdExport = async function(channel) {
-        let output = await ratingDataExport();
-        channel.send(JSON.stringify(output));
+    this.cmdExport = async function(message, args) {
+        let gameId = args[0]
+        let phaseCount = args[1]
+
+        if (phaseCount !== undefined) {
+            try {
+                phaseCount = phaseCount + 0
+            } catch {
+                message.channel.channel.send("‼️ Illegal argument, phase must be a number");
+                return
+            }
+        }
+
+        let output = await ratingDataExport(gameId, phaseCount);
+        let uploaded = await uploadGameExport(output)
+        if (uploaded) {
+            message.channel.send(`✅ Uploaded pending game to ${config.rating.site}/admin/rating/pending/${output.id}`);
+        } else {
+            message.channel.send("‼️ Failed to upload game export to ratings site");
+        }
     }
     
-    this.ratingDataExport = async function() {
+    this.ratingDataExport = async function(id,phases) {
         let eventData = await sqlProm("SELECT * FROM events");
         
         // empty game
         let gameData = { id: "", players: [], teamResults: {}, gameStart: "", hosts: [], phases: 0 };
         
         // set game name
-        gameData.id = stats.game;
+        gameData.id = id ?? stats.game;
         
         // get hosts
         let hosts = [];
@@ -37,7 +54,7 @@ module.exports = function() {
         gameData.gameStart = (date.getYear() + 1900) + "-" + ((date.getMonth() + 1) + "").padStart(2, "0") + "-" + (date.getDate() + "").padStart(2, "0");
         
         // get final phase
-        let finalPhase = getPhaseAsNumber();
+        let finalPhase = phases ?? getPhaseAsNumber();
         gameData.phases = finalPhase;
         
         // get game outcome
@@ -141,4 +158,40 @@ module.exports = function() {
         return gameData;
     }
     
+}
+
+/**
+ * Uploads a game export to the WWR Ratings API
+ * @param {*} gameData 
+ * @returns {boolean} if it was scuessefull
+ */
+async function uploadGameExport(gameData) {
+    const token = config.rating.token
+    const endPoint = config.rating.api
+    const path = `${endPoint}/api/games/pending`
+    const content = JSON.stringify(gameData)
+
+    try {
+        const response = await fetch(path, {
+            method: "POST",
+            body: content,
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            }
+        })
+
+        //check it was a success
+        if (!response.ok) {
+            const error = await response.json()
+            console.log(`Failed to upload game export: ${response.status}`)
+            console.log(error)
+            return false
+        } else {
+            return true
+        }
+    } catch (e) {
+        console.log("An exception occurred during game upload: {}", e)
+    }
+    return false
 }

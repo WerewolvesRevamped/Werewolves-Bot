@@ -19,5 +19,10 @@
 		"password": "PASSWORD",
 		"database": "DB Name",
         "shared_database": "DB Name"
-	}
+	},
+    "rating": {
+        "api": "API URL",
+        "site": "SITE URL",
+        "token": "TOKEN"
+    }
 }
