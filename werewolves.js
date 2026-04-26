@@ -587,7 +587,10 @@ client.on("messageCreate", async message => {
 	break;
 	/* Reset */ // Resets a game
 	case "reset":
-		if(checkSafe(message)) cmdConfirm(message, "reset");
+		if(checkSafe(message)) {
+            if(["f","force"].includes(args[0])) cmdReset(message.channel, false, false, true);
+            else cmdConfirm(message, "reset");
+        }
 	break;
 	/* End */ // Ends a game
 	case "end":

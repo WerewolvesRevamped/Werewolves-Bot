@@ -40,8 +40,8 @@ module.exports = function() {
     Command: $reset
     Resets the game, deleting all channels and removing all roles
     **/
-    this.cmdReset = async function(channel, debug, restart = false) {
-        if(stats.gamephase != gp.ARCHIVED && stats.gamephase != gp.NONE && !debug) {
+    this.cmdReset = async function(channel, debug, restart = false, forced = false) {
+        if(stats.gamephase != gp.ARCHIVED && stats.gamephase != gp.NONE && !debug && !forced) {
             channel.send("⛔ Command error. Can only reset game while in archived state!");
             return;
         }
