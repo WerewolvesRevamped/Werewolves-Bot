@@ -128,18 +128,7 @@ module.exports = function() {
 	 * Sets a stat in the stat database by numeric id
 	 * @param {BotStatData | number} stat The stat to set of its id
 	 * @param {string} value The
-	 * @param resCallback
-	 * @param errCallback
 	 */
-	this.sqlSetStat = function(stat, value, resCallback = ()=>{}, errCallback = ()=>{}) {
-		const valueEsc = connection.escape(value);
-		/** @type BotStatData */
-		const trueStat= stat.id ? stat : getStatFromId(stat)
-		if (!trueStat) throw new Error(`Unable to find a stat with from ID ${stat}`)
-		const name = connection.escape(trueStat.name ? trueStat.name : "")
-		sql(`INSERT INTO stats (id, value, name) VALUE (${trueStat.id},${valueEsc},${name}) ON DUPLICATE KEY UPDATE value=${valueEsc}`, resCallback, errCallback);
-	}
-    
 	this.sqlSetStatProm = async function(stat, value) {
 		const valueEsc = connection.escape(value);
 		/** @type BotStatData */
@@ -158,13 +147,7 @@ module.exports = function() {
 	 * SQL Get Stat
 	 * Gets a stat from the stat database by numeric id
 	 * @param {number} id
-	 * @param {(string) => void} resCallback
-	 * @param {() => void} errCallback
 	 */
-	this.sqlGetStat = function(id, resCallback, errCallback) {
-		sqlValue("SELECT value,name FROM stats WHERE id = " + connection.escape(id), resCallback, errCallback);
-	}
-    
     this.sqlGetStatProm = async function(id) {
 		let result = await sqlProm("SELECT value FROM stats WHERE id = " + connection.escape(id));
         return result[0].value;
