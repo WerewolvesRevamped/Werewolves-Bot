@@ -8,12 +8,12 @@ module.exports = function() {
     **/
     this. cmdGuarantors = async function(message, args) {
         if(!args[0]) { 
-            cmdGuarantorsList(message.channel, message.author);
+            cmdGuarantorsList(message);
 			return; 
 		} 
 		// Check Subcommand
 		switch(args[0]) { 
-			case "list": cmdGuarantorsList(message.channel, message.author); break;
+			case "list": cmdGuarantorsList(message); break;
 			case "get": if(checkGM(message)) cmdGuarantorsGet(message.channel, args); break;
 			default: message.channel.send("⛔ Syntax error. Invalid subcommand `" + args[0] + "`!"); break;
 		}
@@ -22,14 +22,14 @@ module.exports = function() {
     /**
     Command: $guarantors list
     **/
-    this.cmdGuarantorsList = async function(channel, author, mode = false) {
-        let items = await sqlPromEsc("SELECT * FROM inventory WHERE player=", author.id);
+    this.cmdGuarantorsList = async function(message, mode = false) {
+        let items = await sqlPromEsc("SELECT * FROM inventory WHERE player=", message.author.id);
         items = items.filter(el => el.item.substr(0, 2) === "al" || el.item.substr(0, 3) === "cat" || el.item.substr(0, 2) === "rt").map(el => [el.count, el.item, ALL_LOOT.filter(el2 => el2[0].toLowerCase() === el.item)[0]]);
         
         // no boosters
         if(items.length === 0) {
             let embed = { title: "Guarantors", description: `You do not have any guarantors!`, color: 8984857 };
-            channel.send({ embeds: [ embed ] });
+            message.channel.send({ embeds: [ embed ] });
             return;
         }
 
@@ -39,7 +39,7 @@ module.exports = function() {
         let embed = { title: "Guarantors", description: !mode ? `Here is a list of guarantors available for you. You can use guarantors by running notifying Hosts during signup/game setup.` : `Here is a list of guarantors available for <@${author.id}>`, color: 8984857 };
         buildItemListEmbed(itemsTxt, embed);
         embed.thumbnail = { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` };
-        channel.send({ embeds: [ embed ] });
+        message.member.user.send({embeds: [ embed ]});
     }
     
     /**

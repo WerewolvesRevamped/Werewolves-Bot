@@ -223,7 +223,7 @@ module.exports = function() {
         
         let finalTxts = [];
         for(let typ in itemsByType) {
-            if(itemsByType[typ].length > 5 || (itemsByType[typ].length > 3 && ["tro", "cur"].includes(typ))) {
+            if(itemsByType[typ].length > 5 || (itemsByType[typ].length > 3 && ["tro", "cur"].includes(typ)) || (["gua"].includes(typ))) {
                 let typName = "Unknown";
                 let typNameMap = { sp: "Skinpacks", ic: "Icons", dm: "Death Messages", bot: "Bot Features", bst: "Boosters", gua: "Guarantors", sp: "Skinpacks", tro: "Trophies", cur: "Curses" };
                 finalTxts.push(`• ${itemsByType[typ].length} ${typNameMap[typ]}`);

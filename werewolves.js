@@ -893,10 +893,6 @@ client.on("messageCreate", async message => {
             message.channel.send("⛔ Syntax error. Unknown command `" + command + "`!");
             return;
         }
-        if((isSignedUp(message.member) || isParticipant(message.member) || isGhost(message.member)) && ![gp.SIGNUP, gp.POSTGAME, gp.ARCHIVED].includes(stats.gamephase)) {
-            message.channel.send(`⛔ You cannot use this command while signed up or ingame.`);
-            break;
-        }
 		cmdGuarantors(message, args);
     break;
     case "trophy":
