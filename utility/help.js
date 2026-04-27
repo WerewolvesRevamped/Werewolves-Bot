@@ -472,6 +472,8 @@ module.exports = function() {
         // status
         ["status", PERM.GM, "Manages statuses.", "<Subcommand>", "Group of commands to handle statuses. $help status <sub-command> for detailed help.", "", [], CMDSTATE.RDY],
             ["status role", PERM.GM, "Sets the status for a role.", "<Role> <Status>", "Updates the status of a role. When no status is set, looks up the current status instead.", "status role citizen tested", [], CMDSTATE.RDY],
+        //export
+        ["export", PERM.GM, "Exports the Game", "<game id> <phases>", "Exports the current game to the ratings site, game id and phases are options. These default to the current game's values", "export S15G6R", [], CMDSTATE.RDY]
     ];
     
     this.getCommandHelp = async function(cmd, member) {

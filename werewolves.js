@@ -1008,7 +1008,7 @@ client.on("messageCreate", async message => {
         if(checkGM(message)) cmdStatus(message, args, argsX);
     break;
     case "export":
-        if(checkGM(message)) cmdExport(message.channel);
+        if(checkGM(message)) cmdExport(message, args);
     break;
 	/* Invalid Command */
 	default:
