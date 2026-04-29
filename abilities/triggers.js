@@ -65,86 +65,58 @@ module.exports = function() {
     }
     
     this.triggerPlayerRole = async function(player_id, triggerName, additionalTriggerData = {}) {
-        return new Promise(res => {
-            // get all players
-            sql("SELECT role,id,alive FROM players WHERE type='player' AND id=" + connection.escape(player_id), async r => {
-                //trigger handler
-                if(!r[0]) {
-                    abilityLog(`❗ **Skipped Trigger:** Cannot find matching player for ${player_id}.`);
-                    res();
-                    return;
-                }
-                await triggerHandlerPlayer(r[0], triggerName, additionalTriggerData, r[0].alive == 2);
-                // resolve outer promise
-                res();
-            });
-        });
+        let r = await sqlPromEsc("SELECT players.role,players.id,players.alive,roles.parsed FROM players INNER JOIN roles ON roles.name = players.role WHERE players.type='player' AND players.id=", player_id);
+        //trigger handler
+        if(!r[0]) return abilityLog(`❗ **Skipped Trigger:** Cannot find matching player for ${player_id}.`);
+        if(!r[0].parsed) return abilityLog(`🔴 **Skipped Player:** <@${toTitleCase(r[0].id)}>. Invalid role \`${toTitleCase(r[0].role)}\`.`);
+        // parse the formalized desc into an object
+        let parsed = JSON.parse(r[0].parsed);
+        await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `player:${r[0].id}`, `role:${r[0].role}`, r[0].alive == 2);
     }
     
     this.triggerPlayerAttrRole = async function(player_id, triggerName, additionalTriggerData = {}) {
-        return new Promise(res => {
-            // get all players
-            sql("SELECT players.id,active_attributes.ai_id,active_attributes.val1 AS role,active_attributes.val2 AS channel_id,active_attributes.alive FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.attr_type='role' AND id=" + connection.escape(player_id), async r => {
-                // iterate through additional roles
-                for(let i = 0; i < r.length; i++) {
-                //trigger handler
-                    if(!r[i] || !r[i].role) {
-                        abilityLog(`❗ **Skipped Trigger:** Cannot find valid role for ${player_id} #${i}.`);
-                        res();
-                        return;
-                    }
-                    await triggerHandlerPlayerRoleAttribute(r[i], triggerName, additionalTriggerData, r[i].alive == 2);
-                    await useAttribute(r[i].ai_id);
-                }
-                // resolve outer promise
-                res();
-            });
-        });
+        let r = await sqlPromEsc("SELECT players.id,active_attributes.ai_id,active_attributes.val1 AS role,active_attributes.val2 AS channel_id,active_attributes.alive FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.attr_type='role' AND id=", player_id);
+        // iterate through additional roles
+        for(let i = 0; i < r.length; i++) {
+            //trigger handler
+            if(!r[i] || !r[i].role) {
+                abilityLog(`❗ **Skipped Trigger:** Cannot find valid role for ${player_id} #${i}.`);
+                continue;
+            }
+            await triggerHandlerPlayerRoleAttribute(r[i], triggerName, additionalTriggerData, r[i].alive == 2);
+            await useAttribute(r[i].ai_id);
+        }
     }
     
     this.triggerPlayerAttrCustom = async function(player_id, triggerName, additionalTriggerData = {}) {
-        return new Promise(res => {
-            // get all players
-            sql("SELECT active_attributes.ai_id FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND (active_attributes.attr_type='custom' OR active_attributes.attr_type='modifier') AND id=" + connection.escape(player_id), async r => {
-                // iterate through additional roles
-                for(let i = 0; i < r.length; i++) {
-                //trigger handler
-                    if(!r[i] || !r[i].ai_id) {
-                        abilityLog(`❗ **Skipped Trigger:** Cannot find valid active attribute for ${player_id} #${i}.`);
-                        res();
-                        return;
-                    }
-                    await triggerAttribute(r[i].ai_id, triggerName, additionalTriggerData);
-                    await useAttribute(r[i].ai_id);
-                }
-                // resolve outer promise
-                res();
-            });
-        });
+        let r = await sqlPromEsc("SELECT active_attributes.ai_id FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND (active_attributes.attr_type='custom' OR active_attributes.attr_type='modifier') AND id=", player_id);
+        // iterate through additional roles
+        for(let i = 0; i < r.length; i++) {
+            //trigger handler
+            if(!r[i] || !r[i].ai_id) {
+                abilityLog(`❗ **Skipped Trigger:** Cannot find valid active attribute for ${player_id} #${i}.`);
+                continue;
+            }
+            await triggerAttribute(r[i].ai_id, triggerName, additionalTriggerData);
+            await useAttribute(r[i].ai_id);
+        }
     }
     
     /**
     Trigger Player - Role Attribute
     **/
-    this.triggerPlayerRoleAttributeByAttr = function(ai_id, triggerName, additionalTriggerData = {}) {
-        return new Promise(res => {
-            // get all players
-            sql("SELECT players.id,active_attributes.ai_id,active_attributes.val1 AS role,active_attributes.val2 AS channel_id,active_attributes.alive FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.attr_type='role' AND active_attributes.ai_id=" + connection.escape(ai_id), async r => {
-                // iterate through additional roles
-                for(let i = 0; i < r.length; i++) {
-                //trigger handler
-                    if(!r[i] || !r[i].role) {
-                        abilityLog(`❗ **Skipped Trigger:** Cannot find valid role for ${player_id} #${i}.`);
-                        res();
-                        return;
-                    }
-                    await triggerHandlerPlayerRoleAttribute(r[i], triggerName, additionalTriggerData, r[i].alive == 2);
-                    await useAttribute(r[i].ai_id);
-                }
-                // resolve outer promise
-                res();
-            });
-        });
+    this.triggerPlayerRoleAttributeByAttr = async function(ai_id, triggerName, additionalTriggerData = {}) {
+        let r = await sqlPromEsc("SELECT players.id,active_attributes.ai_id,active_attributes.val1 AS role,active_attributes.val2 AS channel_id,active_attributes.alive FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.attr_type='role' AND active_attributes.ai_id=", ai_id);
+        // iterate through additional roles
+        for(let i = 0; i < r.length; i++) {
+            //trigger handler
+            if(!r[i] || !r[i].role) {
+                abilityLog(`❗ **Skipped Trigger:** Cannot find valid role for ${player_id} #${i}.`);
+                continue;
+            }
+            await triggerHandlerPlayerRoleAttribute(r[i], triggerName, additionalTriggerData, r[i].alive == 2);
+            await useAttribute(r[i].ai_id);
+        }
     }
 
     
@@ -152,96 +124,57 @@ module.exports = function() {
     Trigger Group
     triggers a trigger for a specified group
     **/
-    this.triggerGroup = function(channel_id, triggerName, additionalTriggerData = {}) {
-        return new Promise(res => {
-            // get all players
-            sql("SELECT name,channel_id,disbanded FROM active_groups WHERE channel_id=" + connection.escape(channel_id) + " OR name=" + connection.escape(channel_id), async r => {
-                //trigger handler
-                if(!r[0]) {
-                    abilityLog(`❗ **Skipped Trigger:** Cannot find matching group for ${channel_id}.`);
-                    res();
-                    return;
-                }
-                if(r[0].disbanded != 0) {
-                    abilityLog(`❗ **Skipped Trigger:** Group is disbanded.`);
-                    res();
-                    return;
-                }
-                await triggerHandlerGroup(r[0], triggerName, additionalTriggerData);
-                // resolve outer promise
-                res();
-            });
-        });
+    this.triggerGroup = async function(channel_id, triggerName, additionalTriggerData = {}) {
+        let r = await sqlPromEsc("SELECT groups.name,groups.parsed,active_groups.channel_id,active_groups.disbanded FROM active_groups INNER JOIN groups ON groups.name = active_groups.name WHERE active_groups.channel_id=" + connection.escape(channel_id) + " OR active_groups.name=", channel_id);
+        //trigger handler
+        if(!r[0]) return abilityLog(`❗ **Skipped Trigger:** Cannot find matching group for ${channel_id}.`);
+        if(r[0].disbanded != 0) return abilityLog(`❗ **Skipped Trigger:** Group is disbanded.`);
+        // parse the formalized desc into an object
+        if(!r[0].parsed) return abilityLog(`🔴 **Skipped Group:** <#${r[0].channel_id}>. Invalid group \`${toTitleCase(r[0].name)}\`.`);
+        let parsed = JSON.parse(r[0].parsed);
+        await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `group:${r[0].channel_id}`, `group:${r[0].name}`);
     }
     
      /**
     Trigger Team
     triggers a trigger for a specified team
     **/
-    this.triggerTeam = function(teamName, triggerName, additionalTriggerData = {}, allowInactive = true) {
-        return new Promise(res => {
-            // get all players
-            let active = "active=1 AND";
-            if(allowInactive) active = "";
-            sql("SELECT * FROM teams WHERE " + active + " name=" + connection.escape(teamName), async r => {
-                //trigger handler
-                if(!r[0]) {
-                    abilityLog(`❗ **Skipped Trigger:** Cannot find matching team for ${toTitleCase(teamName)}.`);
-                    res();
-                    return;
-                }
-                await triggerHandlerTeam(r[0], triggerName, additionalTriggerData);
-                // resolve outer promise
-                res();
-            });
-        });
+    this.triggerTeam = async function(teamName, triggerName, additionalTriggerData = {}, allowInactive = true) {
+        let active = "active=1 AND";
+        if(allowInactive) active = "";
+        let r = await sqlPromEsc("SELECT * FROM teams WHERE " + active + " name=", teamName);
+        //trigger handler
+        if(!r[0]) return abilityLog(`❗ **Skipped Trigger:** Cannot find matching team for ${toTitleCase(teamName)}.`);
+        // parse the formalized desc into an object
+        if(!r[0].parsed) return abilityLog(`🔴 **Skipped Team:** ${r[0].name}. Invalid team \`${r[0].display_name}\`.`);
+        let parsed = JSON.parse(r[0].parsed);
+        await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `team:${r[0].name}`, `team:${r[0].name}`);
     }
     
      /**
     Trigger Poll
     triggers a trigger for a specified poll
     **/
-    this.triggerPoll = function(poll_name, triggerName, additionalTriggerData = {}) {
-        return new Promise(res => {
-            // get all players
-            sql("SELECT name,parsed FROM polls WHERE name=" + connection.escape(poll_name), async r => {
-                //trigger handler
-                if(!r[0] || !r[0].parsed) {
-                    abilityLog(`❗ **Skipped Trigger:** Cannot find matching poll for ${poll_name}.`);
-                    res();
-                    return;
-                }
-                let parsed = JSON.parse(r[0].parsed);
-                await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `poll:${r[0].name}`, `poll:${r[0].name}`);
-                // resolve outer promise
-                res();
-            });
-        });
+    this.triggerPoll = async function(poll_name, triggerName, additionalTriggerData = {}) {
+        let r = await sqlPromEsc("SELECT name,parsed FROM polls WHERE name=", poll_name);
+        if(!r[0] || !r[0].parsed) return abilityLog(`❗ **Skipped Trigger:** Cannot find matching poll for ${poll_name}.`);
+        let parsed = JSON.parse(r[0].parsed);
+        await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `poll:${r[0].name}`, `poll:${r[0].name}`);
     }
     
      /**
     Trigger Attribute
     triggers a trigger for a specified attribute
     **/
-    this.triggerAttribute = function(attr_id, triggerName, additionalTriggerData = {}) {
-        return new Promise(res => {
-            // get all players
-            sql("SELECT active_attributes.ai_id,attributes.name,attributes.parsed,active_attributes.alive FROM attributes INNER JOIN active_attributes ON attributes.name = active_attributes.val1 WHERE active_attributes.ai_id=" + connection.escape(attr_id), async r => {
-                //trigger handler
-                if(!r[0] || !r[0].parsed) {
-                    abilityLog(`❗ **Skipped Trigger:** Cannot find matching attribute for ${attr_id}.`);
-                    res();
-                    return;
-                }
-                let parsed = JSON.parse(r[0].parsed);
-                let updatedAdditionalTriggerData = deepCopy(additionalTriggerData); // deep clone
-                updatedAdditionalTriggerData.attr_owner = getCustomAttributeOwner(r[0].ai_id);
-                updatedAdditionalTriggerData.attr_source = getCustomAttributeSource(r[0].ai_id);
-                await triggerHandlerParsedHandler(triggerName, updatedAdditionalTriggerData, parsed, `attribute:${r[0].ai_id}`, `attribute:${r[0].name}`, r[0].alive == 2);
-                // resolve outer promise
-                res();
-            });
-        });
+    this.triggerAttribute = async function(attr_id, triggerName, additionalTriggerData = {}) {
+        let r = await sqlPromEsc("SELECT active_attributes.ai_id,attributes.name,attributes.parsed,active_attributes.alive FROM attributes INNER JOIN active_attributes ON attributes.name = active_attributes.val1 WHERE active_attributes.ai_id=", attr_id);
+        //trigger handler
+        if(!r[0] || !r[0].parsed) return abilityLog(`❗ **Skipped Trigger:** Cannot find matching attribute for ${attr_id}.`);
+        let parsed = JSON.parse(r[0].parsed);
+        let updatedAdditionalTriggerData = deepCopy(additionalTriggerData); // deep clone
+        updatedAdditionalTriggerData.attr_owner = getCustomAttributeOwner(r[0].ai_id);
+        updatedAdditionalTriggerData.attr_source = getCustomAttributeSource(r[0].ai_id);
+        await triggerHandlerParsedHandler(triggerName, updatedAdditionalTriggerData, parsed, `attribute:${r[0].ai_id}`, `attribute:${r[0].name}`, r[0].alive == 2);
     }
     
     /**
@@ -261,152 +194,99 @@ module.exports = function() {
     Trigger Handler - Players
     handles a trigger triggering for ALL players
     **/
-    function triggerHandlerPlayers(triggerName, additionalTriggerData = {}) {
-        return new Promise(res => {
-            // get all players
-            sql("SELECT role,id,alive FROM players WHERE type='player' AND alive>=1", async r => {
-                // get their role's data
-                r = shuffleArray(r);
-                for(let pr of r) {
-                    await triggerHandlerPlayer(pr, triggerName, additionalTriggerData, pr.alive == 2);
-                }
-                // resolve outer promise
-                res();
-            });
-        });
+    async function triggerHandlerPlayers(triggerName, additionalTriggerData = {}) {
+        let r = await sqlProm("SELECT players.role,players.id,players.alive,roles.parsed FROM players INNER JOIN roles ON roles.name = players.role WHERE players.type='player' AND players.alive>=1");
+        // get their role's data
+        r = shuffleArray(r);
+        for(let pr of r) {
+            if(!pr) return abilityLog(`🔴 **Skipped Player:** <@${toTitleCase(pr.id)}>. Unknown role \`${toTitleCase(pr.role)}\`.`);
+            if(!pr.parsed) return abilityLog(`🔴 **Skipped Player:** <@${toTitleCase(pr.id)}>. Invalid role \`${toTitleCase(pr.role)}\`.`);
+            // parse the formalized desc into an object
+            let parsed = JSON.parse(pr.parsed);
+            await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `player:${pr.id}`, `role:${pr.role}`, pr.alive == 2);
+        }
     }
     
     /**
     Trigger Handler - Players (Role Attributes)
     handles a trigger triggering for ALL players' role attributes
     **/
-    function triggerHandlerPlayersRoleAttributes(triggerName, additionalTriggerData = {}) {
-        return new Promise(res => {
-            // get all players
-            sql("SELECT players.id,active_attributes.ai_id,active_attributes.val1 AS role,active_attributes.val2 AS channel_id,active_attributes.alive FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.alive>=1 AND active_attributes.attr_type='role'", async r => {
-                // get their role's data
-                r = shuffleArray(r);
-                for(let pr of r) {
-                    if(!pr || !pr.role) {
-                        abilityLog(`❗ **Skipped Trigger:** Cannot find valid role for ${pr.id} #${i}.`);
-                        res();
-                        return;
-                    }
-                    await triggerHandlerPlayerRoleAttribute(pr, triggerName, additionalTriggerData, pr.alive == 2);
-                    await useAttribute(pr.ai_id); 
-                }
-                // resolve outer promise
-                res();
-            });
-        });
+    async function triggerHandlerPlayersRoleAttributes(triggerName, additionalTriggerData = {}) {
+        let r = await sqlProm("SELECT players.id,active_attributes.ai_id,active_attributes.val1 AS role,active_attributes.val2 AS channel_id,active_attributes.alive FROM players INNER JOIN active_attributes ON players.id = active_attributes.owner WHERE players.type='player' AND active_attributes.alive>=1 AND active_attributes.attr_type='role'");
+        r = shuffleArray(r);
+        for(let pr of r) {
+            if(!pr || !pr.role) {
+                abilityLog(`❗ **Skipped Trigger:** Cannot find valid role for ${pr.id} #${i}.`);
+                continue;
+            }
+            await triggerHandlerPlayerRoleAttribute(pr, triggerName, additionalTriggerData, pr.alive == 2);
+            await useAttribute(pr.ai_id); 
+        }
     }
     
     /**
     Trigger Handler - Groups
     handles a trigger triggering for ALL groups
     **/
-    function triggerHandlerGroups(triggerName, additionalTriggerData = {}) {
-        return new Promise(res => {
-            // get all groups
-            sql("SELECT name,channel_id FROM active_groups WHERE disbanded=0", async r => {
-                // get their groups's data
-                r = shuffleArray(r);
-                for(let pr of r) {
-                    await triggerHandlerGroup(pr, triggerName, additionalTriggerData);
-                }
-                // resolve outer promise
-                res();
-            });
-        });
+    async function triggerHandlerGroups(triggerName, additionalTriggerData = {}) {
+        let r = await sqlProm("SELECT groups.name,groups.parsed,active_groups.channel_id FROM active_groups INNER JOIN groups ON groups.name = active_groups.name WHERE active_groups.disbanded=0");
+        // get their groups's data
+        r = shuffleArray(r);
+        for(let pr of r) {
+            if(!pr) return abilityLog(`🔴 **Skipped Group:** <#${pr.channel_id}>. Unknown group \`${toTitleCase(pr.name)}\`.`);
+            if(!pr.parsed) return abilityLog(`🔴 **Skipped Group:** <#${pr.channel_id}>. Invalid group \`${toTitleCase(pr.name)}\`.`);
+            // parse the formalized desc into an object
+            let parsed = JSON.parse(pr.parsed);
+            await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `group:${pr.channel_id}`, `group:${pr.name}`);
+        }
     }
     
     /**
     Trigger Handler - Teams
     handles a trigger triggering for ALL teams
     **/
-    function triggerHandlerTeams(triggerName, additionalTriggerData = {}) {
-        return new Promise(res => {
-            // get all teams
-            sql("SELECT * FROM teams WHERE active=1", async r => {
-                // get their team's data
-                r = shuffleArray(r);
-                for(let pr of r) {
-                    await triggerHandlerTeam(pr, triggerName, additionalTriggerData);
-                }
-                // resolve outer promise
-                res();
-            });
-        });
+    async function triggerHandlerTeams(triggerName, additionalTriggerData = {}) {
+        let r = await sqlProm("SELECT * FROM teams WHERE active=1");
+        // get their team's data
+        r = shuffleArray(r);
+        for(let pr of r) {
+            if(!pr.parsed) return abilityLog(`🔴 **Skipped Team:** ${pr.name}. Invalid team \`${pr.display_name}\`.`);
+            // parse the formalized desc into an object
+            let parsed = JSON.parse(pr.parsed);
+            await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `team:${pr.name}`, `team:${pr.name}`);
+        }
     }
     
     /**
     Trigger Handler - Polls
     handles a trigger triggering for ALL polls
     **/
-    function triggerHandlerPolls(triggerName, additionalTriggerData = {}) {
-        return new Promise(res => {
-            // get all players
-            sql("SELECT name,parsed FROM polls", async r => {
-                // no need for an extra layer for polls
-                for(let pr of r) {
-                    if(!pr.parsed) continue;
-                    let parsed = JSON.parse(pr.parsed);
-                    await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `poll:${pr.name}`, `poll:${pr.name}`);
-                }
-                // resolve outer promise
-                res();
-            });
-        });
+    async function triggerHandlerPolls(triggerName, additionalTriggerData = {}) {
+        let r = await sqlProm("SELECT name,parsed FROM polls");
+        // no need for an extra layer for polls
+        for(let pr of r) {
+            if(!pr.parsed) continue;
+            let parsed = JSON.parse(pr.parsed);
+            await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `poll:${pr.name}`, `poll:${pr.name}`);
+        }
     }
     
     /**
     Trigger Handler - Attributes
     handles a trigger triggering for ALL attributes
     **/
-    function triggerHandlerAttributes(triggerName, additionalTriggerData = {}) {
-        return new Promise(res => {
-            // get all players
-            sql("SELECT active_attributes.ai_id,attributes.name,attributes.parsed,active_attributes.alive FROM attributes INNER JOIN active_attributes ON attributes.name = active_attributes.val1 WHERE (active_attributes.attr_type='custom' OR active_attributes.attr_type='modifier') AND active_attributes.alive>=1", async r => {
-                // no need for an extra layer for attributes due to JOIN which I forgot about previously!
-                r = shuffleArray(r);
-                for(let pr of r) {
-                    if(!pr.parsed) continue;
-                    let parsed = JSON.parse(pr.parsed);
-                    let updatedAdditionalTriggerData = deepCopy(additionalTriggerData); // deep clone
-                    updatedAdditionalTriggerData.attr_owner = getCustomAttributeOwner(r[0].ai_id);
-                    updatedAdditionalTriggerData.attr_source = getCustomAttributeSource(r[0].ai_id);
-                    await triggerHandlerParsedHandler(triggerName, updatedAdditionalTriggerData, parsed, `attribute:${pr.ai_id}`, `attribute:${pr.name}`, pr.alive == 2);
-                }
-                // resolve outer promise
-                res();
-            });
-        });
-    }
-    
-    /**
-    Trigger Handler - Player
-    handles trigger triggering for a single player
-    **/
-    async function triggerHandlerPlayer(pr, triggerName, additionalTriggerData = {}, ghostly = false) {
-        return await new Promise(res => {
-            sql("SELECT * FROM roles WHERE name=" + connection.escape(pr.role), async result => {
-                if(!result[0]) {
-                    abilityLog(`🔴 **Skipped Player:** <@${toTitleCase(pr.id)}>. Unknown role \`${toTitleCase(pr.role)}\`.`);
-                    res();
-                    return;
-                }
-                // parse the formalized desc into an object
-                if(!result[0].parsed) {
-                    abilityLog(`🔴 **Skipped Player:** <@${toTitleCase(pr.id)}>. Invalid role \`${toTitleCase(pr.role)}\`.`);
-                    res();
-                    return;
-                }
-                let parsed = JSON.parse(result[0].parsed);
-                await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `player:${pr.id}`, `role:${pr.role}`, ghostly);
-                // resolve outer promise
-                res();
-            });            
-        });
+    async function triggerHandlerAttributes(triggerName, additionalTriggerData = {}) {
+        let r = await sqlProm("SELECT active_attributes.ai_id,attributes.name,attributes.parsed,active_attributes.alive FROM attributes INNER JOIN active_attributes ON attributes.name = active_attributes.val1 WHERE (active_attributes.attr_type='custom' OR active_attributes.attr_type='modifier') AND active_attributes.alive>=1");
+        // no need for an extra layer for attributes due to JOIN which I forgot about previously!
+        r = shuffleArray(r);
+        for(let pr of r) {
+            if(!pr.parsed) continue;
+            let parsed = JSON.parse(pr.parsed);
+            let updatedAdditionalTriggerData = deepCopy(additionalTriggerData); // deep clone
+            updatedAdditionalTriggerData.attr_owner = getCustomAttributeOwner(r[0].ai_id);
+            updatedAdditionalTriggerData.attr_source = getCustomAttributeSource(r[0].ai_id);
+            await triggerHandlerParsedHandler(triggerName, updatedAdditionalTriggerData, parsed, `attribute:${pr.ai_id}`, `attribute:${pr.name}`, pr.alive == 2);
+        }
     }
     
     /**
@@ -414,69 +294,12 @@ module.exports = function() {
     handles trigger triggering for a single player's role attribute
     **/
     async function triggerHandlerPlayerRoleAttribute(pr, triggerName, additionalTriggerData = {}, ghostly = false) {
-        return await new Promise(res => {
-            sql("SELECT * FROM roles WHERE name=" + connection.escape(pr.role), async result => {
-                if(!result[0]) {
-                    abilityLog(`🔴 **Skipped Player:** <@${toTitleCase(pr.id)}> (<#${pr.channel_id}>). Unknown role \`${toTitleCase(pr.role)}\`.`);
-                    res();
-                    return;
-                }
-                // parse the formalized desc into an object
-                if(!result[0].parsed) {
-                    abilityLog(`🔴 **Skipped Player:** <@${toTitleCase(pr.id)}> (<#${pr.channel_id}>). Invalid role \`${toTitleCase(pr.role)}\`.`);
-                    res();
-                    return;
-                }
-                let parsed = JSON.parse(result[0].parsed);
-                await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `player_attr:${pr.channel_id}`, `role:${pr.role}`, ghostly);
-                // resolve outer promise
-                res();
-            });            
-        });
-    }
-    
-    /**
-    Trigger Handler - Group
-    handles trigger triggering for a single group
-    **/
-    async function triggerHandlerGroup(pr, triggerName, additionalTriggerData = {}) {
-        return await new Promise(res => {
-            sql("SELECT * FROM `groups` WHERE name=" + connection.escape(pr.name), async result => {
-                if(!result[0]) {
-                    abilityLog(`🔴 **Skipped Group:** <#${pr.channel_id}>. Unknown group \`${toTitleCase(pr.name)}\`.`);
-                    res();
-                    return;
-                }
-                // parse the formalized desc into an object
-                if(!result[0].parsed) {
-                    abilityLog(`🔴 **Skipped Group:** <#${pr.channel_id}>. Invalid group \`${toTitleCase(pr.name)}\`.`);
-                    res();
-                    return;
-                }
-                let parsed = JSON.parse(result[0].parsed);
-                await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `group:${pr.channel_id}`, `group:${pr.name}`);
-                // resolve outer promise
-                res();
-            });            
-        });
-    }
-    
-    /**
-    Trigger Handler - Team
-    handles trigger triggering for a single team
-    **/
-    async function triggerHandlerTeam(pr, triggerName, additionalTriggerData = {}) {
-        return await new Promise(async res => {
-            // parse the formalized desc into an object
-            if(!pr.parsed) {
-                abilityLog(`🔴 **Skipped Team:** ${pr.name}. Invalid team \`${pr.display_name}\`.`);
-                res();
-                return;
-            }
-            let parsed = JSON.parse(pr.parsed);
-            await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `team:${pr.name}`, `team:${pr.name}`);
-            res();
-        });
+        let result = await sqlPromEsc("SELECT * FROM roles WHERE name=", pr.role);
+        if(!result[0]) return abilityLog(`🔴 **Skipped Player:** <@${toTitleCase(pr.id)}> (<#${pr.channel_id}>). Unknown role \`${toTitleCase(pr.role)}\`.`);
+        if(!result[0].parsed) return abilityLog(`🔴 **Skipped Player:** <@${toTitleCase(pr.id)}> (<#${pr.channel_id}>). Invalid role \`${toTitleCase(pr.role)}\`.`);
+        // parse the formalized desc into an object
+        let parsed = JSON.parse(result[0].parsed);
+        await triggerHandlerParsedHandler(triggerName, additionalTriggerData, parsed, `player_attr:${pr.channel_id}`, `role:${pr.role}`, ghostly);
     }
     
     /**
@@ -490,7 +313,7 @@ module.exports = function() {
         // grab the triggers
         let triggers = parsed.triggers;
         
-        // expand triggers by referenced role
+        // expand triggers by referenced rolea
         let include = triggers.filter(el => el.trigger.trim().toLowerCase().replace(/[^a-z]/g,"") === "include");
         for(let i = 0; i < include.length; i++) {
             let role = await parseRoleSelector(include[i].trigger_parameter, src_ref, additionalTriggerData);

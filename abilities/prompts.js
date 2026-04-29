@@ -81,7 +81,7 @@ module.exports = function() {
     async function getPromptMessageRestriction(restriction, src_ref, additionalTriggerData) {
         if(restriction.type === "condition") {
             // special handling
-            if(restriction.condition.type === "comparison" && (restriction.condition.first.toLowerCase().split("[")[0] === "@selection" && restriction.condition.second.toLowerCase().split("[")[0] === "@self") || (restriction.condition.first.toLowerCase().split("[")[0] === "@selection" && restriction.condition.second.toLowerCase().split("[")[0] === "@self") && restriction.subtype === "not_equal") {
+            if(restriction.condition.type === "comparison" && restriction.condition.subtype === "not_equal" && ((restriction.condition.first.toLowerCase().split("[")[0] === "@selection" && restriction.condition.second.toLowerCase().split("[")[0] === "@self") || (restriction.condition.first.toLowerCase().split("[")[0] === "@selection" && restriction.condition.second.toLowerCase().split("[")[0] === "@self"))) {
                 return getPromptMessage(restriction, "condition.not_self");
             }
             // normal handling

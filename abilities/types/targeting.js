@@ -205,7 +205,7 @@ module.exports = function() {
     set the target for an attribute
     **/
     async function getAttributeTarget(ai_id) {
-        let result = await sqlPromOneEsc("SELECT target FROM active_attributes WHERE ai_id=", name);
+        let result = await sqlPromOneEsc("SELECT target FROM active_attributes WHERE ai_id=", ai_id);
         return result.target;
     }
     
