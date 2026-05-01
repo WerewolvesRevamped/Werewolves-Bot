@@ -77,9 +77,9 @@ module.exports = function() {
                 let p = emojiToID(el);
                 if(p) {
                     playerList.push({ val: 0, name: p });
-                    return true;
-                } else {
                     return false;
+                } else {
+                    return true;
                 }
             }
             return !directMatch;

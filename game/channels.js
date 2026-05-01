@@ -485,7 +485,7 @@ module.exports = function() {
                     channel.send("⛔ Command error. Could not create new CCs! Re-trying."); 
                     cmdCCCreate(channel, member, args, mode, callback, spam);
                 }
-                sendError(channel, err, "Could not create channel");
+                //sendError(channel, err, "Could not create channel");
                 logO(err);
             });
         }
