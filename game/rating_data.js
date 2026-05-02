@@ -55,6 +55,7 @@ module.exports = function() {
         
         // get final phase
         let finalPhase = phases ?? getPhaseAsNumber();
+        let finalPhaseActivity = getPhaseAsNumber();
         gameData.phases = finalPhase;
         
         // get game outcome
@@ -140,8 +141,8 @@ module.exports = function() {
             playerData.messages = messages;
             
             if(allPlayers[i].death_phase > 1) {
-                if(messages < (finalPhase * stats.total_req)) playerData.inactive = true;
-                if(allPlayers[i].public_msgs < (Math.floor(finalPhase/2) * stats.public_req)) playerData.publicIA = true;
+                if(messages < (finalPhaseActivity * stats.total_req)) playerData.inactive = true;
+                if(allPlayers[i].public_msgs < (Math.floor(finalPhaseActivity/2) * stats.public_req)) playerData.publicIA = true;
             }
             
             // select modifiers for this player

@@ -223,7 +223,7 @@ module.exports = function() {
         
         let finalTxts = [];
         for(let typ in itemsByType) {
-            if(typ === "gua") {
+            if(typ === "gua" && itemsByType[typ].length > 0) {
                 let len = itemsByType[typ].length;
                 finalTxts.push(`• ${len} ${len > 1 ? 'Guarantors' : 'Guarantor'}`);
             } else if(itemsByType[typ].length > 5 || (itemsByType[typ].length > 3 && ["tro", "cur"].includes(typ))) {
