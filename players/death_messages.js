@@ -243,6 +243,13 @@ module.exports = function() {
                     let consolationPacks = [52, 84, 96, 26, 53, 54, 57, 40, 79, 100, 103];
                     createPackCurse(pid, pid, consolationPacks[Math.floor(Math.random() * consolationPacks.length)], 7 * 24 * 60);
                 break;
+                case 29:
+                    dmsgText = `I’m deeply saddened to share that %s has transitioned to their next chapter. They were a visionary leader whose impact on the werewolves community will be felt for years to come. Their legacy of excellence continues to inspire us all. :rocket:
+#Leadership #Legacy #InMemoriam`;
+                    for(let i = 0; i < livingIds.length; i++) {
+                        createPackCurse(pid, livingIds[i], 114, 24 * 60);
+                    }
+                break;
             }
         }
         dmsgText = dmsgText.replace(/%s/g, displayName);
