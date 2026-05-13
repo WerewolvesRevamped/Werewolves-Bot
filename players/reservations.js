@@ -31,7 +31,8 @@ module.exports = function() {
     Command: $reservation disable
     **/
     this.cmdReservationDisable = async function(message) {
-        sqlPromEsc("DELETE FROM reservations WHERE player=", message.author.id);
+        await sqlPromEsc("DELETE FROM reservations WHERE player=", message.author.id);
+        cacheReservations();
         let embed = { title: "Reservation", description: `<@${message.member.id}>, your reservation has been deleted.`, color: 16715021 };
         message.channel.send({ embeds: [ embed ] });
     }
@@ -51,6 +52,7 @@ module.exports = function() {
     this.idEmojis = [];
     this.cacheReservations = async function() {
         let reservations = await sqlProm("SELECT * FROM reservations");
+        idEmojis = [];
         idEmojis.push(...reservations.map(el => [el.player, el.emoji]));
         idEmojis.push(...SYSTEM_RESERVATIONS.map(el => ["", el]));
     }
@@ -80,7 +82,7 @@ module.exports = function() {
                     messageNew.edit("⛔ Reserved emoji. Couldn't reserve emoji as it is used by the bot.");
                     return;
                 }
-                sqlPromEsc("INSERT INTO reservations (player, emoji) VALUES (" + connection.escape(message.author.id) + "," + connection.escape(args[1]) + ") ON DUPLICATE KEY UPDATE emoji=", args[1]);
+                await sqlPromEsc("INSERT INTO reservations (player, emoji) VALUES (" + connection.escape(message.author.id) + "," + connection.escape(args[1]) + ") ON DUPLICATE KEY UPDATE emoji=", args[1]);
                 let embed = { title: "Reservation", description: `<@${message.member.id}>, your reservation has been updated to ${args[1]}.`, color: 5490704 };
                 messageNew.edit({ content: "", embeds: [ embed ] });
                 cacheReservations();
