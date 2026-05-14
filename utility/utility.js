@@ -269,6 +269,56 @@ module.exports = function() {
 
         return `${tens[t]}-${base[r]}`;
     }
+    
+    /**
+    Build Item list 
+    **/
+    this.buildItemListEmbed = function(items, embed = {}, itemsPerColumn = 15) {
+        // determine column amount
+        let columns = Math.floor(items.length / 10) + 1;
+
+        // split into even columns
+        const chunkSize = Math.ceil(items.length / columns);
+        const chunks = [];
+        for (let i = 0; i < columns; i++) {
+            chunks.push(items.slice(i * chunkSize, (i + 1) * chunkSize));
+        }
+       
+        // add to embed
+        if (columns === 1) {
+            embed.description += `\n\n${items.join("\n")}`;
+            return [ embed ];
+        } else {
+            if(!embed.fields) embed.fields = [];
+            let embedCopy = JSON.parse(JSON.stringify(embed));
+            let embeds = [ embedCopy ];
+            let curEmbedLength = embedCopy.description?.length ?? 0;
+            for(let i = 0; i < chunks.length; i++) {
+                let chunkText = chunks[i].join("\n") || "_ _";
+                if(curEmbedLength + chunkText.length + 100 < 6000) {
+                    curEmbedLength += chunkText.length;
+                    embeds[embeds.length - 1].fields.push({ name: "_ _", value: chunkText, inline: true });
+                } else {
+                    curEmbedLength = chunkText.length;
+                    embeds.push(JSON.parse(JSON.stringify(embed)));
+                    embeds[embeds.length - 1].fields.push({ name: "_ _", value: chunkText, inline: true });
+                }
+            }
+            return embeds;
+        }
+    }
+    
+    /**
+    Send Embed Item List
+    **/
+    this.sendItemListEmbed = async function(channel, items, embed = {}, itemsPerColumn = 15) {
+        let embeds = buildItemListEmbed(items, embed, itemsPerColumn);
+        for(let i = 0; i < embeds.length; i++) {
+            await channel.send({ embeds: [ embeds[i] ] });
+        }
+    }
+        
+        
 
 
 }

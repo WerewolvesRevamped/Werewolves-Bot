@@ -40,9 +40,8 @@ module.exports = function() {
         let itemsTxt = [];
         for(let i = 0; i < items.length; i++) itemsTxt.push(`• ${items[i][2][1]} ${items[i][0] > 1 ? 'x' + items[i][0] : ''} (${items[i][2][0]}) `);
         let embed = { title: "Bot Features", description: `Here is a list of bot features available for you, <@${message.member.id}>.`, color: 8984857 };
-        buildItemListEmbed(itemsTxt, embed);
         embed.thumbnail = { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` };
-        message.channel.send({ embeds: [ embed ] });
+        sendItemListEmbed(message.channel, itemsTxt, embed);
     }
     
 }

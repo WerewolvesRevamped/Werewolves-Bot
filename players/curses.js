@@ -38,10 +38,8 @@ module.exports = function() {
         let itemsTxt = [];
         for(let i = 0; i < items.length; i++) itemsTxt.push(`• ${items[i][2][1]} x${items[i][0]} (\`${toTitleCase(items[i][1])}\`)`);
         let embed = { title: "Curses", description: `Here is a list of curses available for you, <@${message.member.id}>. You can use curses by running \`${stats.prefix}curse use "<Curse Code>" "<Target Name>"\`, where you replace \`<Curse Code>\` with the code of the curse you want to use and \`<Target Name>\` with the name of the target for the curse.`, color: 8984857 };
-        buildItemListEmbed(itemsTxt, embed);
         embed.thumbnail = { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` };
-        message.channel.send({ embeds: [ embed ] });
-        
+        sendItemListEmbed(message.channel, itemsTxt, embed);
     }
     
     /**

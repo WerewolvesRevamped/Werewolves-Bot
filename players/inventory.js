@@ -249,27 +249,6 @@ module.exports = function() {
         channel.send({ embeds: [ embed ] });
     }
     
-    this.buildItemListEmbed = function(items, embed = {}, itemsPerColumn = 15) {
-        // determine column amount
-        let columns = Math.floor(items.length / 10) + 1;
-
-        // split into even columns
-        const chunkSize = Math.ceil(items.length / columns);
-        const chunks = [];
-        for (let i = 0; i < columns; i++) {
-            chunks.push(items.slice(i * chunkSize, (i + 1) * chunkSize));
-        }
-       
-        // add to embed
-        if (columns === 1) {
-            embed.description += `\n\n${items.join("\n")}`;
-        } else {
-            embed.fields = chunks.map(chunk => ({ name: "_ _", value: chunk.join("\n") || "_ _", inline: true }));
-        }
-
-        return embed;
-    }
-
     
     /**
     Command: $recycle

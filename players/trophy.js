@@ -36,10 +36,8 @@ module.exports = function() {
         let itemsTxt = [];
         for(let i = 0; i < items.length; i++) itemsTxt.push(`• ${items[i][2][1]} x${items[i][0]} (\`${toTitleCase(items[i][1])}\`)`);
         let embed = { title: "Trophies", description: `Here is a list of your trophies, <@${message.member.id}>.`, color: 8984857 };
-        buildItemListEmbed(itemsTxt, embed);
         embed.thumbnail = { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` };
-        message.channel.send({ embeds: [ embed ] });
-        
+        sendItemListEmbed(message.channel, itemsTxt, embed);
     }
 
 }
