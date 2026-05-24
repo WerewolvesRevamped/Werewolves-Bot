@@ -109,6 +109,13 @@ module.exports = function() {
         // update
         message.channel.send("✅ Updated basic player info!");
         
+        // copy events for subbed out player
+        let events = await sqlPromEsc("SELECT * FROM events WHERE id=", originalPlayer);
+        for(let i = 0; i < events.length; i++) {
+            await createEvent(newPlayer, events[i].type, events[i].data1, events[i].data2, events[i].phase);
+        }
+        message.channel.send("✅ Recreated events!");
+        
         // new player: add particpant role, remove sub role
         switchRoles(newPlayerMember, message.channel, stats.sub, stats.participant, "substitute", "participant");
         // remove mentor role

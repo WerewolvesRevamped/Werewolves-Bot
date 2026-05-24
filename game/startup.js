@@ -275,7 +275,7 @@ module.exports = function() {
         let disName = channel.guild.members.cache.get(player.id).displayName; // get the player's display name
         
         // create role event
-        await createEvent(player.id, "role", player.role, result[0].team, "-1");
+        if(player.role != "substitute") await createEvent(player.id, "role", player.role, result[0].team, "-1");
         
         // check for modifiers
         let modifiers = await sqlPromEsc("SELECT * FROM modifiers WHERE id=", player.id);
