@@ -511,21 +511,22 @@ module.exports = function() {
             // prepare action data
             let quantity = await getActionQuantity(curAction.src_ref, abilities[0]);
             if(quantity === -1) await initActionData(curAction.src_ref, abilities[0]);
-            // action log
-            let targetTxt = curAction.target;
-            let onTxt = " on ";
-            if(targetTxt.substr(0, 3) === "@id") targetTxt = "<@" + targetTxt.substr(4).split("[")[0] + ">";
-            switch(selectorGetType(targetTxt)) {
-                case "role":
-                    targetTxt = `**${toTitleCase(selectorGetTarget(targetTxt))}**`;
-                break;
-                case "unknown":
-                    if(targetTxt === "notarget") {
-                        onTxt = "";
-                        targetTxt = "";
-                    }
-                break;
-            }
+            
+            // target logging prep function
+            let targetToText = (txt) => {
+                let onTxt = " on ";
+                if(txt.substr(0, 3) === "@id") txt = "<@" + txt.substr(4).split("[")[0] + ">";
+                switch(selectorGetType(txt)) {
+                    case "role":
+                        return ` on **${toTitleCase(selectorGetTarget(txt))}**`;
+                    break;
+                    case "unknown":
+                        if(txt === "notarget") return "";
+                    break;
+                }
+                return ` on ${txt}`;
+            };
+            
             let abilityType = abilities[0].type;
             let abilityTypeText = srcRefToText('abilitytype:' + abilities[0].type);
             if(abilityType === "process_evaluate") {
@@ -533,7 +534,11 @@ module.exports = function() {
                 if(abilities[0].process?.sub_abilities && abilities[0].process.sub_abilities[0]) abilityTypeText += " " + srcRefToText('abilitytype:' + abilities[0].process.sub_abilities[0].ability.type);
                 if(abilities[0].evaluate?.sub_abilities && abilities[0].evaluate.sub_abilities[0]) abilityTypeText += " **⇒** " + srcRefToText('abilitytype:' + abilities[0].evaluate.sub_abilities[0].ability.type);
             }
-            actionLog(`✅ ${srcRefToText(curAction.src_ref)} (${srcNameToText(curAction.src_name)}) used a ${abilityTypeText} action${onTxt}${targetTxt}.`);
+            if(additionalTriggerData.secondaryselection) {
+                actionLog(`✅ ${srcRefToText(curAction.src_ref)} (${srcNameToText(curAction.src_name)}) used a ${abilityTypeText} action${targetToText(curAction.target)} and${targetToText(additionalTriggerData.secondaryselection)}.`);
+            } else {
+                actionLog(`✅ ${srcRefToText(curAction.src_ref)} (${srcNameToText(curAction.src_name)}) used a ${abilityTypeText} action${targetToText(curAction.target)}.`);
+            }
             // execute the ability
             let feedback = [];
             let doNotRecheckRestriction = false;
