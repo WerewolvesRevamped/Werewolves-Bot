@@ -206,9 +206,14 @@ client.on("messageCreate", async message => {
         return;
     }
     
-    if(!message.author.bot && message.reference && message.mentions.repliedUser === null && message.type === 0 && (isParticipant(message.member) || isGhost(message.member)) && !isSC(message.channel)) {
-		cmdWebhook(message.channel, message.member, ["**Forwarded Message**","\n*<@" + message.author.id + "> You're not allowed to forward messages during the game!*"]);
-        message.delete();
+    if(!message.author.bot && message.reference && message.mentions.repliedUser === null && message.type === 0 && (isParticipant(message.member) || isGhost(message.member))) {
+        if(!isSC(message.channel)) {
+            let log = client.guilds.cache.get(stats.log_guild).channels.cache.get(stats.log_channel);
+            cmdWebhook(log, message.member, ["**Forwarded Message**", "\n*Deleted a forwarded message by <@" + message.author.id + "> in <#" + message.channel.id + ">!*","\n", `https://discord.com/channels/${message.reference.guildId}/${message.reference.channelId}/${message.reference.messageId}`,"\n" + stats.ping ]);
+            cmdWebhook(message.channel, message.member, ["**Forwarded Message**","\n*<@" + message.author.id + "> You're not allowed to forward messages during the game!*"]);
+            message.delete();
+        }
+        return;
     }
     
     // Check if message is a prompt reply
