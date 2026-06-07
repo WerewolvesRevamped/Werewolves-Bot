@@ -309,7 +309,9 @@ module.exports = function() {
 	this.cmdPlayersListMsgs = async function(channel) {
         publicMessageAcc = 0;
         privateMessageAcc = 0;
-        await generatePlayerList(channel, "Players", [["type", "=", "player"]], null, null, el => {  
+        await generatePlayerList(channel, "Players", [["type", "=", "player"]], null, (a, b) => {
+            return (b.public_msgs + b.private_msgs) - (a.public_msgs + a.private_msgs);
+        }, el => {  
             let mem = channel.guild.members.cache.get(el.id);
             publicMessageAcc += el.public_msgs;
             privateMessageAcc += el.private_msgs;
@@ -325,9 +327,9 @@ module.exports = function() {
 	this.cmdPlayersListMsgs2 = async function(channel, args) {
         publicMessageAcc = 0;
         privateMessageAcc = 0;
-        await generatePlayerList(channel, "Players", [["type", "=", "player"], ["alive", ">=", "1"]], (a, b) => {
+        await generatePlayerList(channel, "Players", [["type", "=", "player"], ["alive", ">=", "1"]], null, (a, b) => {
             return (b.public_msgs + b.private_msgs) - (a.public_msgs + a.private_msgs);
-        }, null, el => {  
+        }, el => {  
             privateMessageAcc += el.private_msgs;
             publicMessageAcc += el.public_msgs;
             let prWarn = false;
