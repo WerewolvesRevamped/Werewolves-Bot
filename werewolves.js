@@ -201,6 +201,7 @@ client.on("messageCreate", async message => {
         return;
     }
     
+    
     if(!botLoaded && !message.author.bot) {
         //message.channel.send("🕐 Bot is loading. Please wait.");
         return;

@@ -82,10 +82,15 @@ module.exports = function() {
             
             // get username and displayname
             let member = mainGuild.members.cache.get(allPlayers[i].id);
-            let username = member.user.username;
-            let displayName = member.user.displayName;
-            playerData.username = username;
-            playerData.displayName = displayName;
+            if(member && member.user) {
+                let username = member.user.username;
+                let displayName = member.user.displayName;
+                playerData.username = username;
+                playerData.displayName = displayName;
+            } else {
+                playerData.username = "unknown";
+                playerData.displayName = "unknown";
+            }
             
             // find corresponding role and alignment events
             let playerEvents = eventData.filter(el => el.id === allPlayers[i].id);
@@ -120,6 +125,10 @@ module.exports = function() {
                         playerData.roles.at(-1).team = playerEvents[j].data1;
                     break;
                 }
+            }
+            
+            if(playerData.roles.length === 0) {
+                console.log(playerData);
             }
             
             // set final role result
