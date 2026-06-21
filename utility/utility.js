@@ -273,9 +273,9 @@ module.exports = function() {
     /**
     Build Item list 
     **/
-    this.buildItemListEmbed = function(items, embed = {}, itemsPerColumn = 15) {
+    this.buildItemListEmbed = function(items, embed = {}, itemsPerColumn = 10) {
         // determine column amount
-        let columns = Math.floor(items.length / 10) + 1;
+        let columns = Math.floor(items.length / itemsPerColumn) + 1;
 
         // split into even columns
         const chunkSize = Math.ceil(items.length / columns);
@@ -311,7 +311,7 @@ module.exports = function() {
     /**
     Send Embed Item List
     **/
-    this.sendItemListEmbed = async function(channel, items, embed = {}, itemsPerColumn = 15) {
+    this.sendItemListEmbed = async function(channel, items, embed = {}, itemsPerColumn = 10) {
         let embeds = buildItemListEmbed(items, embed, itemsPerColumn);
         for(let i = 0; i < embeds.length; i++) {
             await channel.send({ embeds: [ embeds[i] ] });

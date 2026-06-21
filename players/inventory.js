@@ -189,7 +189,7 @@ module.exports = function() {
     /**
     Command: $inventory see
     **/
-    this.cmdInventorySee = async function(channel, user, stash = false, returnEmbed = false) {
+    this.cmdInventorySee = async function(channel, user, stash = false, returnData = false) {
         let stashQ = "";
         if(stash !== null) stashQ = "stashed=" + (stash ? "1" : "0") + " AND ";
         let items = await sqlPromEsc("SELECT * FROM inventory WHERE " + stashQ + "player=", user);
@@ -242,11 +242,9 @@ module.exports = function() {
             embed = { title: "Inventory", description: `<@${user}>, your inventory is currently empty!`, color: 8984857 };
         } else {
             embed = { title: "Inventory", description: `<@${user}>, here is your current ${stash ? "stash" : "inventory"}:`, color: 8984857, thumbnail: { url: `${iconRepoBaseUrl}Offbrand/Inventory.png` } };
-            buildItemListEmbed(itemsText, embed);
         }
-        
-        if(returnEmbed) return embed;
-        channel.send({ embeds: [ embed ] });
+        if(returnData) return { list: itemsText, embed: embed };
+        sendItemListEmbed(channel, itemsText, embed);
     }
     
     
@@ -328,8 +326,8 @@ module.exports = function() {
         }
         
         if(args[0] === "list" || args[0] === "show") {
-            let embed = await cmdInventorySee(message.channel, message.member.id, true, true);
-            message.member.user.send({embeds: [ embed ]});
+            let ret = await cmdInventorySee(message.channel, message.member.id, true, true);
+            sendItemListEmbed(message.member.user, ret.list, ret.embed);
             return;
         }
         
