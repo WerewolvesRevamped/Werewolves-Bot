@@ -267,6 +267,7 @@ module.exports = function() {
                     case "bot:gay": return `Gay Rights 🏳️‍🌈`;
                     case "bot:now": return `Access to the ${stats.prefix}now command. For when you don't have a clock nearby and ${stats.prefix}time doesn't suit your needs!`;
                     case "bot:packprev": return `Access to the ${stats.prefix}packs preview command. Gives you a quick preview of different roles of your selected skinpack!`;
+                    case "bot:shrimp": return `Access to the ${stats.prefix}shrimp command. For all your shrimp needs!`;
                     default: return `An unknown bot reward: ${reward[1]}.`;
                 }
             case "unk":
