@@ -234,6 +234,16 @@ client.on("messageCreate", async message => {
         return; // dont do further steps for prompts
     }
     
+    if(Math.random() < 0.5 && (isCC(message.channel) || isPublic(message.channel)) && message.channel.name.substr(0,2) != "♻️" && !message.author.bot && message.content.indexOf(stats.prefix) !== 0) {
+        channelRename(message.channel, "♻️-" + message.channel.name, true);
+        let dirt = ["🤢 ","🤮","💩","🩲","🪳","🪰","🚬","🦠","🧫","🇺🇸 "];
+        message.channel.send(dirt[Math.floor(Math.random() * dirt.length)] + " This channel has gotten dirty.");
+    }
+    
+    if(message.channel.name.substr(0,2) === "♻️" && !message.author.bot && message.content.indexOf(stats.prefix) !== 0) {
+        let dirt = ["🤢 ","🤮","💩","🩲","🪳","🪰","🚬","🦠","🧫","🇺🇸 "];
+        message.channel.send(dirt[Math.floor(Math.random() * dirt.length)]);
+    }
     
     // skull reaction
     if(message.content.indexOf("💀") >= 0) {
@@ -410,6 +420,18 @@ client.on("messageCreate", async message => {
     break;
     case "apply": // execute - apply add
         if(checkGM(message)) cmdApply(message, args);
+    break;
+    case "clean":
+        if(message.member.roles.cache.some(r => r.name === 'Janitor')) {
+            if(message.channel.name.substr(0,2) === "♻️") {
+                message.channel.send("🧼 This channel has been cleaned");
+                channelRename(message.channel, message.channel.name.substr(3), true);
+            } else {
+                message.channel.send("⛔ This channel is not dirty.");
+            }
+        } else {
+            message.channel.send("⛔ You are not the Janitor.");
+        }
     break;
     case "whisper": // execute - whispering
         if(checkGM(message)) cmdWhisper(message, args);
