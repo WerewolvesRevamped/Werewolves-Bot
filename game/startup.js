@@ -385,7 +385,7 @@ module.exports = function() {
             
             let player = guild.members.cache.get(playerID);
             let noDMRole = guild.roles.cache.find(role => role.name == "No Bot DM");
-            if(player.roles.cache.get(noDMRole.id)) { // NO DM
+            if(noDMRole && player.roles.cache.get(noDMRole.id)) { // NO DM
                 res();
                 return;
             }
