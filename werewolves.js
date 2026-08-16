@@ -234,7 +234,7 @@ client.on("messageCreate", async message => {
         return; // dont do further steps for prompts
     }
     
-    if(Math.random() < 0.5 && (isCC(message.channel) || isPublic(message.channel)) && message.channel.name.substr(0,2) != "♻️" && !message.author.bot && message.content.indexOf(stats.prefix) !== 0) {
+    if(Math.random() < 0.0 && (isCC(message.channel) || isPublic(message.channel)) && message.channel.name.substr(0,2) != "♻️" && !message.author.bot && message.content.indexOf(stats.prefix) !== 0) {
         channelRename(message.channel, "♻️-" + message.channel.name, true);
         let dirt = ["🤢 ","🤮","💩","🩲","🪳","🪰","🚬","🦠","🧫","🇺🇸 "];
         message.channel.send(dirt[Math.floor(Math.random() * dirt.length)] + " This channel has gotten dirty.");
