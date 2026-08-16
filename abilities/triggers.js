@@ -888,13 +888,6 @@ module.exports = function() {
             await bufferStorytime(`CC Limit updated to ${stats.cc_limit}`);
         }
         
-        // storytime
-        if(stats.automation_level === 4) {
-            let endNight = await sqlPromOne("SELECT * FROM schedule WHERE name='night-end'");
-            if(endNight) await bufferStorytime(`\n*The night will end at <t:${(+endNight.timestamp) + 60}:R>.*`);
-        }
-        await postStorytime();
-        
         // log new night
         if(newPhase) actionLog(`**🌕 Night has started. [${newPhase}]**`);
         
@@ -911,6 +904,13 @@ module.exports = function() {
         
         // handle killq
         await killqKillall();
+        
+        // storytime
+        if(stats.automation_level === 4) {
+            let endNight = await sqlPromOne("SELECT * FROM schedule WHERE name='night-end'");
+            if(endNight) await bufferStorytime(`\n*The night will end at <t:${(+endNight.timestamp) + 60}:R>.*`);
+        }
+        await postStorytime();
         
         // passive
         await triggerHandler("Passive");
@@ -1022,13 +1022,6 @@ module.exports = function() {
             await bufferStorytime(`CC Limit updated to ${stats.cc_limit}`);
         }
         
-        // storytime
-        if(stats.automation_level === 4) {
-            let endDay = await sqlPromOne("SELECT * FROM schedule WHERE name='day-end'");
-            if(endDay) await bufferStorytime(`\n*The day will end at <t:${(+endDay.timestamp) + 60}:R>.*`);
-        }
-        await postStorytime();
-        
         // log new day
         if(newPhase) actionLog(`**☀️ Day has started. [${newPhase}]**`);
         
@@ -1045,6 +1038,13 @@ module.exports = function() {
         
         // handle killq
         await killqKillall();
+        
+        // storytime
+        if(stats.automation_level === 4) {
+            let endDay = await sqlPromOne("SELECT * FROM schedule WHERE name='day-end'");
+            if(endDay) await bufferStorytime(`\n*The day will end at <t:${(+endDay.timestamp) + 60}:R>.*`);
+        }
+        await postStorytime();
         
         // passive
         await triggerHandler("Passive");
