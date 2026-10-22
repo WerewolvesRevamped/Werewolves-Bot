@@ -48,9 +48,13 @@ module.exports = function() {
         }
         
         let messages = [];
-        messages.push(`**${name}** | Total: ${formattedPlayers.length}\n`);
+       
         
-        if(codeBlock) messages[0] += "```";
+        if(codeBlock) {
+             messages.push("```" + `**${name}** | Total: ${formattedPlayers.length}\n`);
+        } else {
+             messages.push(`**${name}** | Total: ${formattedPlayers.length}\n`);
+        }
         
         // split into several messages if necessary
         formattedPlayers.forEach(el => {
