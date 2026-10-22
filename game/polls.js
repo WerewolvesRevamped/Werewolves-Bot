@@ -620,6 +620,7 @@ module.exports = function() {
                 // for group polls a random executor is chosen
                 case "group":
                     let executor = shuffleArray(maxVotesValidVoters)[0];
+                    actionLog(`🗳️ **<@${executor}>** is the executor for ${toTitleCase(pollName)} (${pollType}).`);
                     await trigger(pollData.src_ref, "On Poll Closed", { ...winners, winner: maxVotesData[0], executor: executor, voters: maxVotesValidVoters, other_voters: otherVoters }); 
                     for(let i = 0; i < maxVotesData.length; i++) {
                         await triggerPlayer(maxVotesData[i], "On Poll Win", { voters: maxVotesValidVoters, other_voters: otherVoters }); 
