@@ -211,12 +211,12 @@ module.exports = function() {
                 case "bst":
                 case "tro":
                 case "cur":
-                    itemsByType[items[i][3]].push(txt);
+                    itemsByType[items[i][3]].push([txt, +items[i][0]]);
                 break;
                 case "al":
                 case "cat":
                 case "rt":
-                    itemsByType["gua"].push(txt);
+                    itemsByType["gua"].push([txt, +items[i][0]]);
                 break;
             }
         }
@@ -224,14 +224,15 @@ module.exports = function() {
         let finalTxts = [];
         for(let typ in itemsByType) {
             if(typ === "gua" && itemsByType[typ].length > 0) {
-                let len = itemsByType[typ].length;
+                let len = itemsByType[typ].reduce((acc,cur) => acc + cur[1], 0);
                 finalTxts.push(`• ${len} ${len > 1 ? 'Guarantors' : 'Guarantor'}`);
             } else if(itemsByType[typ].length > 5 || (itemsByType[typ].length > 3 && ["tro", "cur"].includes(typ))) {
                 let typName = "Unknown";
                 let typNameMap = { sp: "Skinpacks", ic: "Icons", dm: "Death Messages", bot: "Bot Features", bst: "Boosters", gua: "Guarantors", sp: "Skinpacks", tro: "Trophies", cur: "Curses" };
-                finalTxts.push(`• ${itemsByType[typ].length} ${typNameMap[typ]}`);
+                let len = itemsByType[typ].reduce((acc,cur) => acc + cur[1], 0);
+                finalTxts.push(`• ${len} ${typNameMap[typ]}`);
             } else {
-                itemsText.push(...itemsByType[typ]);
+                itemsText.push(...itemsByType[typ].map(el => el[0]));
             }
         }
         itemsText.push(...finalTxts);
