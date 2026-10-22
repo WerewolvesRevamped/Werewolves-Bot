@@ -54,6 +54,7 @@ module.exports = function() {
                 case "icon": name = `Icon Curse`; break;
                 case "rage": name = `Rage Curse`; break;
                 case "skul": name = `Skull Curse`; break;
+                case "clap": name = `Clap Curse`; break;
                 case "huhh": name = `Huh Curse`; break;
                 case "cost": name = `Cost Curse`; break;
             }
@@ -154,6 +155,19 @@ module.exports = function() {
                 embed = { title: "Curses", description: `<@${message.member.id}>, you have used your skull curse on <@${targetUser}>.`, color: 5490704 };
                 message.channel.send({ embeds: [ embed ] });
             } break;
+            case "clap": {
+                let ch = await checkCurse(targetUser, "clap");
+                if(ch) {
+                    embed = { title: "Curses", description: `<@${message.member.id}>, you cannot apply a clap curse to <@${targetUser}> as they already have an active clap curse.`, color: 16715021 };
+                    message.channel.send({ embeds: [ embed ] });
+                    return;
+                }
+                await inventoryModifyItem(message.author.id, code, -1);
+                createCurse(message.author.id, "clap", targetUser, "", 4 * 60);
+                curseLog(`<@${message.author.id}> cast a **CLAP** curse on <@${targetUser}>`);
+                embed = { title: "Curses", description: `<@${message.member.id}>, you have used your clap curse on <@${targetUser}>.`, color: 5490704 };
+                message.channel.send({ embeds: [ embed ] });
+            } break;
             case "huh": {
                 let ch = await checkCurse(targetUser, "huhh");
                 if(ch) {
@@ -220,6 +234,20 @@ module.exports = function() {
         let ch = await checkCurse(message.author.id, "skul");
         if(ch) {
             message.react("💀");
+        }
+    }
+    
+    /**
+    Clap Curse
+    **/
+    this.handleClapCurse = async function(message) {
+        if(Math.random() < 0.5) return;
+        let ch = await checkCurse(message.author.id, "clap");
+        if(ch) {
+            let rand = Math.random();
+            if(rand < 0.33) message.react("👏");
+            else if(rand < 0.66) message.reply("👏");
+            else message.channel.send("👏");
         }
     }
     

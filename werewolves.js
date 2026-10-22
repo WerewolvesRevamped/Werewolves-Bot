@@ -349,6 +349,8 @@ client.on("messageCreate", async message => {
         handleRageCurse(message);
         // skull curse [async]
         handleSkullCurse(message);
+        // clap curse [async]
+        handleClapCurse(message);
         // huh curse [async]
         handleHuhCurse(message);
         return;
