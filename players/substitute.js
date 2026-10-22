@@ -197,6 +197,10 @@ module.exports = function() {
 			message.channel.send("✅ Recached values!");
 		}, 30000);
         
+        // storytime
+        await bufferStorytime(`${idToEmoji(newPlayer)} <@${newPlayer}> has been substituted in for ${idToEmoji(originalPlayer)} <@${originalPlayer}>!`);
+        await postStorytimeImmediate();
+        
         // recache
 		setTimeout(function() {
 			message.channel.send("✅ Substitution complete!");
