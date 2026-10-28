@@ -154,6 +154,9 @@ module.exports = function() {
     }
     
     function getPromptMessageRestrictionConditionValue(selector) {
+        if(selector.type == "list") {
+            return selector.values.map(el => getPromptMessageRestrictionConditionValue(`${el}[${selector.value_type}]`)).join(", ");
+        }
         let val = selectorGetTarget(selector);
         let type = selectorGetType(selector);
         switch(val) {

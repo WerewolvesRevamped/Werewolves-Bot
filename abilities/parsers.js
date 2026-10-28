@@ -624,6 +624,9 @@ module.exports = function() {
                 case "role":
                     output.push(playerData.role);
                 break;
+                case "class":
+                    output.push(playerData.class);
+                break;
                 case "category":
                     output.push(playerData.category);
                 break;
@@ -2217,7 +2220,7 @@ module.exports = function() {
     /**
     Parse class
     **/
-    this.parseClass = function(class_name, self = null, additionalTriggerData = {}) {
+    this.parseClass = async function(class_name, self = null, additionalTriggerData = {}) {
         // get target
         let selectorTarget = selectorGetTarget(class_name);
         selectorTarget = selectorTarget.replace(/`/g, "");
@@ -2239,7 +2242,14 @@ module.exports = function() {
                 abilityLog(`❗ **Error:** Failed to cast result to class!`);
                 return [ ];
             default:      
-                return [ selectorTarget ];
+                if (PROPERTY_ACCESS.test(selectorTarget)) { // property access
+                    let contents = selectorTarget.match(PROPERTY_ACCESS); // get the selector
+                    let infType = await inferTypeRuntime(`@${contents[1]}`, self, additionalTriggerData);
+                    let result = await parseSelector(`@${contents[1]}[${infType}]`, self, additionalTriggerData); // parse the selector part
+                    return parsePropertyAccess(result, contents[2], infType);
+                }  else {
+                    return [ selectorTarget ];
+                }
         }
     }
     
